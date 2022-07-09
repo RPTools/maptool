@@ -57,7 +57,7 @@ public class AreaIsland implements AreaContainer {
 
   @Override
   public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
-    if (!meta.area.contains(point)) {
+    if (!meta.contains(point)) {
       // Point not contained within this island, so nothing to return.
       return null;
     }
@@ -83,7 +83,7 @@ public class AreaIsland implements AreaContainer {
   ////
   // AREA CONTAINER
   public Area getBounds() {
-    return meta.area;
+    return meta.getBounds();
   }
 
   @Override

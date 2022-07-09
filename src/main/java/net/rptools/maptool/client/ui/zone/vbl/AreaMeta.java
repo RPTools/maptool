@@ -19,8 +19,6 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
-import net.rptools.lib.GeometryUtil;
-import net.rptools.lib.GeometryUtil.PointNode;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -30,16 +28,22 @@ import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
-  Area area;
-  List<Coordinate> vertices = new ArrayList<>();
+  private Area area;
+  private List<Coordinate> vertices = new ArrayList<>();
 
   // Only used during construction
-  boolean isHole;
-  PointNode pointNodeList;
-  GeneralPath path;
-  PointNode lastPointNode;
+  private boolean isHole;
+  private GeneralPath path;
 
   public AreaMeta() {}
+
+  public boolean contains(Point2D point) {
+    return area.contains(point);
+  }
+
+  public Area getBounds() {
+    return new Area(area);
+  }
 
   /**
    * @param origin
@@ -95,15 +99,11 @@ public class AreaMeta {
     return segments;
   }
 
-  private static Coordinate toCoordinate(Point2D point2D) {
-    return new Coordinate(point2D.getX(), point2D.getY());
-  }
-
   public boolean isHole() {
     return isHole;
   }
 
-  public void addPoint(float x, float y) {
+  public void addPoint(double x, double y) {
     // Cut out redundant points
     // TODO: This works ... in concept, but in practice it can create holes that pop outside of
     // their parent bounds
@@ -115,75 +115,41 @@ public class AreaMeta {
     // skippedPoints++;
     // return;
     // }
-    PointNode pointNode = new PointNode(new Point2D.Double(x, y));
-
-    // Don't add if we haven't moved
-    if (lastPointNode != null && lastPointNode.point.equals(pointNode.point)) {
-      return;
+    final var vertex = new Coordinate(x, y);
+    if (!vertices.isEmpty()) {
+      final var lastVertex = vertices.get(vertices.size() - 1);
+      // Don't add if we haven't moved
+      if (lastVertex.equals(vertex)) {
+        return;
+      }
     }
+    vertices.add(vertex);
+
     if (path == null) {
       path = new GeneralPath();
       path.moveTo(x, y);
-
-      pointNodeList = pointNode;
     } else {
       path.lineTo(x, y);
-
-      lastPointNode.next = pointNode;
-      pointNode.previous = lastPointNode;
     }
-    lastPointNode = pointNode;
   }
 
   public void close() {
     area = new Area(path);
 
-    // Close the circle
-    lastPointNode.next = pointNodeList;
-    pointNodeList.previous = lastPointNode;
-    lastPointNode = null;
-
-    // For some odd reason, sometimes the first and last point are the same, which causes
-    // bugs in the way areas are calculated
-    if (pointNodeList.point.equals(pointNodeList.previous.point)) {
-      // Pull out the dupe node
-      PointNode trueLastPoint = pointNodeList.previous.previous;
-      trueLastPoint.next = pointNodeList;
-      pointNodeList.previous = trueLastPoint;
+    // Close the circle.
+    // For some odd reason, sometimes the first and last point are already the same, so don't add
+    // the point again in that case.
+    final var first = vertices.get(0);
+    final var last = vertices.get(vertices.size() - 1);
+    if (!first.equals(last)) {
+      vertices.add(first);
     }
-    computeIsHole();
-    computeVertices();
 
-    // Don't need point list anymore
-    pointNodeList = null;
+    isHole = Orientation.isCCW(vertices.toArray(Coordinate[]::new));
+
+    // Don't need this anymore
     path = null;
     // System.out.println("AreaMeta.skippedPoints: " + skippedPoints + " h:" + isHole + " f:" +
     // faceList.size());
-  }
-
-  private void computeIsHole() {
-    double angle = 0;
-
-    PointNode currNode = pointNodeList.next;
-
-    while (currNode != pointNodeList) {
-      double currAngle =
-          GeometryUtil.getAngleDelta(
-              GeometryUtil.getAngle(currNode.previous.point, currNode.point),
-              GeometryUtil.getAngle(currNode.point, currNode.next.point));
-
-      angle += currAngle;
-      currNode = currNode.next;
-    }
-    isHole = angle < 0;
-  }
-
-  private void computeVertices() {
-    PointNode node = pointNodeList;
-    vertices.add(toCoordinate(node.point));
-    do {
-      vertices.add(toCoordinate(node.next.point));
-      node = node.next;
-    } while (!node.point.equals(pointNodeList.point));
   }
 }
