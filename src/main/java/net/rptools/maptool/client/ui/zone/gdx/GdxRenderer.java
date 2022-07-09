@@ -197,6 +197,7 @@ public class GdxRenderer extends ApplicationAdapter
       animationMap.clear();
     }
 
+    dpiScale = getDpiScale();
     tokenAtlas = new TextureAtlas();
     manager = new com.badlogic.gdx.assets.AssetManager();
     loadAssets();
