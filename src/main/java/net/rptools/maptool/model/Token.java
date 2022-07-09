@@ -316,7 +316,7 @@ public class Token extends BaseModel implements Cloneable {
   // Jamz: modifies A* cost of other tokens
   private double terrainModifier = 0.0d;
   private TerrainModifierOperation terrainModifierOperation = TerrainModifierOperation.NONE;
-  private final Set<TerrainModifierOperation> terrainModifiersIgnored =
+  private Set<TerrainModifierOperation> terrainModifiersIgnored =
       new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
 
   private boolean isFlippedX;
@@ -2464,6 +2464,13 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (speechName == null) {
       speechName = "";
+    }
+    if (terrainModifiersIgnored == null) {
+      terrainModifiersIgnored =
+          new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
+    }
+    if (terrainModifierOperation == null) {
+      terrainModifierOperation = TerrainModifierOperation.NONE;
     }
 
     return this;
