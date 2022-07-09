@@ -65,7 +65,7 @@ public class AreaTree {
     List<AreaIsland> islandList = new ArrayList<AreaIsland>();
 
     // Break the big area into independent areas
-    float[] coords = new float[6];
+    double[] coords = new double[6];
     AreaMeta areaMeta = new AreaMeta();
     for (PathIterator iter = area.getPathIterator(null); !iter.isDone(); iter.next()) {
       int type = iter.currentSegment(coords);

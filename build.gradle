@@ -19,7 +19,7 @@ plugins {
     id "com.diffplug.spotless" version "5.14.3"
     id 'org.openjfx.javafxplugin' version '0.0.10'
     id 'org.beryx.runtime' version '1.12.7'
-    id "com.google.protobuf" version "0.8.17"
+    id "com.google.protobuf" version "0.8.19"
 }
 
 // Apply the java plugin to add support for Java
@@ -34,9 +34,6 @@ apply plugin: 'com.google.protobuf'
 defaultTasks 'clean', 'build'
 sourceCompatibility = 17
 targetCompatibility = 17
-def grpcVersion = '1.39.0'
-def protobufVersion = '3.20.0'
-def protocVersion = protobufVersion
 
 
 // Used by gradle assemble & run tasks
@@ -129,7 +126,7 @@ javafx {
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:${protocVersion}" }
+    protoc { artifact = "com.google.protobuf:protoc:3.20.0" }
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
@@ -401,7 +398,7 @@ dependencies {
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.7.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.2'
 
     // For mocking features during unit tests
@@ -427,8 +424,8 @@ dependencies {
         implementation 'dev.onvoid.webrtc:webrtc-java:0.5.0:linux-x86_64'
 
     // protobuf
-    implementation "io.grpc:grpc-protobuf:${grpcVersion}"
-    implementation "com.google.protobuf:protobuf-java-util:${protobufVersion}"
+    implementation "io.grpc:grpc-protobuf:1.47.0"
+    implementation "com.google.protobuf:protobuf-java-util:3.20.0"
 
     // Java Tuples
     implementation 'com.flipkart.utils:javatuples:3.0'
