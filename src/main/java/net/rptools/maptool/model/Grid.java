@@ -937,7 +937,11 @@ public abstract class Grid implements Cloneable {
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
-    grid.cellShape = Mapper.map(dto.getCellShape());
+    if (dto.hasCellShape()) {
+      grid.cellShape = Mapper.map(dto.getCellShape());
+    } else {
+      grid.cellShape = null;
+    }
     return grid;
   }
 
@@ -949,7 +953,9 @@ public abstract class Grid implements Cloneable {
     dto.setOffsetX(offsetX);
     dto.setOffsetX(offsetY);
     dto.setSize(size);
-    dto.setCellShape(Mapper.map(cellShape));
+    if (cellShape != null) {
+      dto.setCellShape(Mapper.map(cellShape));
+    }
     return dto.build();
   }
 
