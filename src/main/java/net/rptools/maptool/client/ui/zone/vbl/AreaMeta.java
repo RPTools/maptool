@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import org.locationtech.jts.algorithm.Orientation;
@@ -27,14 +28,22 @@ import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
-  Area area;
-  List<Coordinate> vertices = new ArrayList<>();
+  private Area area;
+  private List<Coordinate> vertices = new ArrayList<>();
 
   // Only used during construction
-  boolean isHole;
-  GeneralPath path;
+  private boolean isHole;
+  private GeneralPath path;
 
   public AreaMeta() {}
+
+  public boolean contains(Point2D point) {
+    return area.contains(point);
+  }
+
+  public Area getBounds() {
+    return new Area(area);
+  }
 
   /**
    * @param origin
