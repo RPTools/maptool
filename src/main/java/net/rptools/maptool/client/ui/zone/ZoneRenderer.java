@@ -1212,9 +1212,11 @@ public class ZoneRenderer extends JComponent
     if (Zone.Layer.BACKGROUND.isEnabled()) {
       List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
       // if (!drawables.isEmpty()) {
-      timer.start("drawableBackground");
-      if (!skipDrawing) renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
-      timer.stop("drawableBackground");
+      if (!skipDrawing) {
+        timer.start("drawableBackground");
+        renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+        timer.stop("drawableBackground");
+      }
       // }
       List<Token> background = zone.getBackgroundStamps(false);
       if (!background.isEmpty()) {
@@ -1227,14 +1229,19 @@ public class ZoneRenderer extends JComponent
       // Drawables on the object layer are always below the grid, and...
       List<DrawnElement> drawables = zone.getObjectDrawnElements();
       // if (!drawables.isEmpty()) {
-      timer.start("drawableObjects");
-      if (!skipDrawing) renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
-      timer.stop("drawableObjects");
+      if (!skipDrawing) {
+        timer.start("drawableObjects");
+        renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+        timer.stop("drawableObjects");
+      }
       // }
     }
-    timer.start("grid");
-    if (!skipDrawing) renderGrid(g2d, view);
-    timer.stop("grid");
+
+    if (!skipDrawing) {
+      timer.start("grid");
+      renderGrid(g2d, view);
+      timer.stop("grid");
+    }
 
     if (Zone.Layer.OBJECT.isEnabled()) {
       // ... Images on the object layer are always ABOVE the grid.
@@ -1246,13 +1253,18 @@ public class ZoneRenderer extends JComponent
       }
     }
     if (Zone.Layer.TOKEN.isEnabled()) {
-      timer.start("lights");
-      if (!skipDrawing) renderLights(g2d, view);
-      timer.stop("lights");
 
-      timer.start("auras");
-      if (!skipDrawing) renderAuras(g2d, view);
-      timer.stop("auras");
+      if (!skipDrawing) {
+        timer.start("lights");
+        renderLights(g2d, view);
+        timer.stop("lights");
+      }
+
+      if (!skipDrawing) {
+        timer.start("auras");
+        renderAuras(g2d, view);
+        timer.stop("auras");
+      }
     }
 
     /**
@@ -1279,17 +1291,21 @@ public class ZoneRenderer extends JComponent
     if (Zone.Layer.TOKEN.isEnabled()) {
       List<DrawnElement> drawables = zone.getDrawnElements();
       // if (!drawables.isEmpty()) {
-      timer.start("drawableTokens");
-      if (!skipDrawing) renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
-      timer.stop("drawableTokens");
+      if (!skipDrawing) {
+        timer.start("drawableTokens");
+        renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+        timer.stop("drawableTokens");
+      }
       // }
 
       if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
         drawables = zone.getGMDrawnElements();
         // if (!drawables.isEmpty()) {
-        timer.start("drawableGM");
-        if (!skipDrawing) renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
-        timer.stop("drawableGM");
+        if (!skipDrawing) {
+          timer.start("drawableGM");
+          renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+          timer.stop("drawableGM");
+        }
         // }
         List<Token> stamps = zone.getGMStamps(false);
         if (!stamps.isEmpty()) {
@@ -1304,9 +1320,12 @@ public class ZoneRenderer extends JComponent
         renderTokens(g2d, tokens, view);
         timer.stop("tokens");
       }
-      timer.start("unowned movement");
-      if (!skipDrawing) showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
-      timer.stop("unowned movement");
+
+      if (!skipDrawing) {
+        timer.start("unowned movement");
+        showBlockedMoves(g2d, view, getUnOwnedMovementSet(view));
+        timer.stop("unowned movement");
+      }
 
       // Moved below, after the renderFog() call...
       // timer.start("owned movement");
@@ -1364,9 +1383,11 @@ public class ZoneRenderer extends JComponent
         timer.stop("tokens - figures");
       }
 
-      timer.start("owned movement");
-      if (!skipDrawing) showBlockedMoves(g2d, view, getOwnedMovementSet(view));
-      timer.stop("owned movement");
+      if (!skipDrawing) {
+        timer.start("owned movement");
+        showBlockedMoves(g2d, view, getOwnedMovementSet(view));
+        timer.stop("owned movement");
+      }
 
       // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
       // of, the tokens
@@ -1374,19 +1395,21 @@ public class ZoneRenderer extends JComponent
       // So if one moving token is on top of another moving token, at least the textual identifiers
       // will be
       // visible.
-      timer.start("token name/labels");
-      if (!skipDrawing) renderRenderables(g2d);
-      timer.stop("token name/labels");
+      if (!skipDrawing) {
+        timer.start("token name/labels");
+        renderRenderables(g2d);
+        timer.stop("token name/labels");
+      }
     }
 
     // if (zone.visionType ...)
-    if (view.isGMView()) {
+    if (view.isGMView() && !skipDrawing) {
       timer.start("visionOverlayGM");
-      if (!skipDrawing) renderGMVisionOverlay(g2d, view);
+      renderGMVisionOverlay(g2d, view);
       timer.stop("visionOverlayGM");
-    } else {
+    } else if (!skipDrawing) {
       timer.start("visionOverlayPlayer");
-      if (!skipDrawing) renderPlayerVisionOverlay(g2d, view);
+      renderPlayerVisionOverlay(g2d, view);
       timer.stop("visionOverlayPlayer");
     }
 
@@ -3105,7 +3128,9 @@ public class ZoneRenderer extends JComponent
       }
       timer.stop("renderTokens:OnscreenCheck");
 
-      if (skipDrawing) continue;
+      if (skipDrawing) {
+        continue;
+      }
 
       // create a per token Graphics object - normally clipped, unless always visible
       Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);

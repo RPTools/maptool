@@ -165,6 +165,7 @@ public class GdxRenderer extends ApplicationAdapter
   private final Matrix4 tmpMatrix = new Matrix4();
   private final Area tmpArea = new Area();
   private final TiledDrawable tmpTile = new TiledDrawable();
+  private float dpiScale;
 
   public GdxRenderer() {
     var dispatcher = MapTool.getEventDispatcher();
@@ -307,7 +308,7 @@ public class GdxRenderer extends ApplicationAdapter
 
     textRenderer = new TextRenderer(atlas, batch, normalFont);
     ensureCorrectDistanceFont();
-
+    dpiScale = getDpiScale();
     ScreenUtils.clear(Color.BLACK);
     doRendering();
   }
@@ -341,7 +342,7 @@ public class GdxRenderer extends ApplicationAdapter
 
     var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
     mySmallFont.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
-    mySmallFont.fontParameters.size = (int) (12 * getDpiScale());
+    mySmallFont.fontParameters.size = (int) (12 * dpiScale);
     manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
   }
 
@@ -1014,7 +1015,6 @@ public class GdxRenderer extends ApplicationAdapter
 
         // Other details
         if (token == keyToken) {
-          var dpiScale = getDpiScale();
           var x = footprintBounds.x * dpiScale;
           var y = footprintBounds.y * dpiScale;
           var w = footprintBounds.width;
@@ -1741,7 +1741,6 @@ public class GdxRenderer extends ApplicationAdapter
         tmpWorldCoord.set(gdxTokenRectangle.x, gdxTokenRectangle.y, 0);
         cam.project(tmpWorldCoord);
 
-        var dpiScale = getDpiScale();
         tmpWorldCoord.x *= dpiScale;
         tmpWorldCoord.y *= dpiScale;
 
@@ -2017,8 +2016,6 @@ public class GdxRenderer extends ApplicationAdapter
 
     var width = bounds.width + leftMargin + rightMargin;
     var height = bounds.height + topMargin + bottomMargin;
-
-    var dpiScale = getDpiScale();
 
     // Draw Corners
 
@@ -3196,8 +3193,6 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void setScale(Scale scale) {
-    var dpiScale = getDpiScale();
-
     offsetX = (int) (scale.getOffsetX() * dpiScale * -1);
     offsetY = (int) (scale.getOffsetY() * dpiScale);
     zoom = (float) (1f / scale.getScale() / dpiScale);
