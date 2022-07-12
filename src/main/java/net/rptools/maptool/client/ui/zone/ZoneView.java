@@ -304,7 +304,9 @@ public class ZoneView implements ModelChangeListener {
       // If a light has no paint, it's a "bright light" that just reveal FoW but doesn't need to be
       // rendered.
       if (light.getPaint() != null || lightSource.getLumens() < 0) {
-        lightSet.add(new DrawableLight(lightSource.getType(), light.getPaint(), lightArea));
+        lightSet.add(
+            new DrawableLight(
+                lightSource.getType(), light.getPaint(), lightArea, lightSource.getLumens()));
       }
     }
     // FIXME There was a bug report of a ConcurrentModificationException regarding
@@ -541,7 +543,8 @@ public class ZoneView implements ModelChangeListener {
                   && !MapTool.getPlayer().isEffectiveGM()) {
                 continue;
               }
-              lightList.add(new DrawableLight(type, light.getPaint(), visibleArea));
+              lightList.add(
+                  new DrawableLight(type, light.getPaint(), visibleArea, lightSource.getLumens()));
             }
           }
         }
