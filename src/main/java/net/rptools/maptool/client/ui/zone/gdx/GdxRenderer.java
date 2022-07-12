@@ -274,12 +274,13 @@ public class GdxRenderer extends ApplicationAdapter
 
     cam.viewportWidth = width;
     cam.viewportHeight = height;
-    cam.near = 0.1f;
+
     cam.position.x = zoom * (width / 2f + offsetX);
     cam.position.y = zoom * (height / 2f * -1 + offsetY);
     cam.position.z =
         (zoom * height) / (2f * (float) Math.tan(Math.toRadians(cam.fieldOfView / 2f)));
-    cam.far = cam.position.z + 0.1f;
+    cam.far = 1.1f * cam.position.z;
+    cam.near = 0.1f * cam.position.z;
 
     cam.update();
 
