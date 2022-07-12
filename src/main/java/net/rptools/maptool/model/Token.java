@@ -249,7 +249,7 @@ public class Token extends BaseModel implements Cloneable {
   private double scaleX = 1;
   private double scaleY = 1;
 
-  private final Map<String, GUID> sizeMap = new HashMap<>();
+  private Map<String, GUID> sizeMap = new HashMap<>();
 
   private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
   // floating
@@ -2489,6 +2489,9 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (terrainModifierOperation == null) {
       terrainModifierOperation = TerrainModifierOperation.NONE;
+    }
+    if (sizeMap == null) {
+      sizeMap = new HashMap<>();
     }
 
     return this;
