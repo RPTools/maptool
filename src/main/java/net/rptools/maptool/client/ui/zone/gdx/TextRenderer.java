@@ -32,12 +32,16 @@ public class TextRenderer {
   private Batch batch;
   private BitmapFont font;
 
-  public TextRenderer(TextureAtlas atlas, Batch batch, BitmapFont font) {
+  private ScreenScaleProvider dpiScaleProvider;
+
+  public TextRenderer(
+      TextureAtlas atlas, Batch batch, BitmapFont font, ScreenScaleProvider screenScaleProvider) {
     this.font = font;
     this.batch = batch;
     blueLabel = atlas.createPatch("blueLabelbox");
     grayLabel = atlas.createPatch("grayLabelbox");
     darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
+    dpiScaleProvider = screenScaleProvider;
   }
 
   public BitmapFont getFont() {
@@ -77,14 +81,18 @@ public class TextRenderer {
       }
     }
 
-    final int BOX_PADDINGX = 10;
-    final int BOX_PADDINGY = 2;
+    var dpiScale = dpiScaleProvider.getDpiScale();
+    x *= dpiScale;
+    y *= dpiScale;
+
+    var BOX_PADDINGX = 10 * dpiScale;
+    var BOX_PADDINGY = 2 * dpiScale;
 
     if (text == null) text = "";
 
+    // the font size was already scaled. So don't scale it here.
     glyphLayout.setText(font, text);
     var strWidth = glyphLayout.width;
-
     var fontHeight = font.getLineHeight();
 
     var width = strWidth + BOX_PADDINGX * 2;

@@ -165,7 +165,7 @@ public class GdxRenderer extends ApplicationAdapter
   private final Matrix4 tmpMatrix = new Matrix4();
   private final Area tmpArea = new Area();
   private final TiledDrawable tmpTile = new TiledDrawable();
-  private float dpiScale;
+  private final ScreenScaleProvider dpiScaleProvider = new ScreenScaleProvider();
 
   public GdxRenderer() {
     var dispatcher = MapTool.getEventDispatcher();
@@ -197,7 +197,6 @@ public class GdxRenderer extends ApplicationAdapter
       animationMap.clear();
     }
 
-    dpiScale = getDpiScale();
     tokenAtlas = new TextureAtlas();
     manager = new com.badlogic.gdx.assets.AssetManager();
     loadAssets();
@@ -308,9 +307,9 @@ public class GdxRenderer extends ApplicationAdapter
 
     if (normalFont == null) normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
 
-    textRenderer = new TextRenderer(atlas, batch, normalFont);
+    textRenderer = new TextRenderer(atlas, batch, normalFont, dpiScaleProvider);
     ensureCorrectDistanceFont();
-    dpiScale = getDpiScale();
+    dpiScaleProvider.triggerUpdate(delta);
     ScreenUtils.clear(Color.BLACK);
     doRendering();
   }
@@ -344,7 +343,7 @@ public class GdxRenderer extends ApplicationAdapter
 
     var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
     mySmallFont.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
-    mySmallFont.fontParameters.size = (int) (12 * dpiScale);
+    mySmallFont.fontParameters.size = (int) (12 * dpiScaleProvider.getDpiScale());
     manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
   }
 
@@ -1017,8 +1016,8 @@ public class GdxRenderer extends ApplicationAdapter
 
         // Other details
         if (token == keyToken) {
-          var x = footprintBounds.x * dpiScale;
-          var y = footprintBounds.y * dpiScale;
+          var x = footprintBounds.x * dpiScaleProvider.getDpiScale();
+          var y = footprintBounds.y * dpiScaleProvider.getDpiScale();
           var w = footprintBounds.width;
           var h = footprintBounds.height;
 
@@ -1188,10 +1187,10 @@ public class GdxRenderer extends ApplicationAdapter
 
     // clear the bright areas
     timer.start("lights-4");
-    for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
-      drawer.setColor(Color.CLEAR);
-      areaRenderer.fillArea(brightArea);
-    }
+    // for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
+    //  drawer.setColor(Color.CLEAR);
+    //  areaRenderer.fillArea(brightArea);
+    // }
     timer.stop("lights-4");
     // createScreenShot("light");
     batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
@@ -1743,8 +1742,8 @@ public class GdxRenderer extends ApplicationAdapter
         tmpWorldCoord.set(gdxTokenRectangle.x, gdxTokenRectangle.y, 0);
         cam.project(tmpWorldCoord);
 
-        tmpWorldCoord.x *= dpiScale;
-        tmpWorldCoord.y *= dpiScale;
+        tmpWorldCoord.x *= dpiScaleProvider.getDpiScale();
+        tmpWorldCoord.y *= dpiScaleProvider.getDpiScale();
 
         gdxTokenRectangle.set(
             tmpWorldCoord.x,
@@ -3195,6 +3194,7 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void setScale(Scale scale) {
+    var dpiScale = dpiScaleProvider.getDpiScale();
     offsetX = (int) (scale.getOffsetX() * dpiScale * -1);
     offsetY = (int) (scale.getOffsetY() * dpiScale);
     zoom = (float) (1f / scale.getScale() / dpiScale);
