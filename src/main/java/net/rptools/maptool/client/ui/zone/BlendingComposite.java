@@ -30,11 +30,15 @@ import org.checkerframework.common.value.qual.IntRange;
  * other colored effects. http://www.java2s.com/Code/Java/2D-Graphics-GUI/BlendCompositeDemo.htm
  */
 class BlendingComposite implements Composite {
+  public enum Operation {
+    SCREEN,
+    MULTIPLY
+  }
 
-  public BlendingComposite() {}
+  private final Operation operation;
 
-  public static BlendingComposite getInstance() {
-    return new BlendingComposite();
+  public BlendingComposite(Operation operation) {
+    this.operation = operation;
   }
 
   private static boolean checkComponentsOrder(ColorModel cm) {
@@ -56,31 +60,15 @@ class BlendingComposite implements Composite {
       throw new RasterFormatException("Incompatible color models");
     }
 
-    return new BlendingContext();
+    return switch (operation) {
+      case MULTIPLY -> new MultiplyContext();
+      case SCREEN -> new ScreenContext();
+    };
   }
 
-  private static final class BlendingContext implements CompositeContext {
-
-    public BlendingContext() {}
-
-    /**
-     * Applies a <a href="https://en.wikipedia.org/wiki/Blend_modes#Screen">"screen" blend mode</a>
-     * to two color components.
-     *
-     * <p>This operation is basically fancy multiplication, so it is commutative and associative
-     * (i.e., it is order independent). A zero input (black) acts as an identity element, causing
-     * the result to simply be the other input. A maximum input (white) acts an absorbing element,
-     * causing the result to also be white. For all other inputs, the result is brighter than both
-     * of the inputs, though not as bright as would be with addition.
-     *
-     * @param src The first color component to blend.
-     * @param dst The second color component to blend.
-     * @return The screen blending of the inputs.
-     */
-    private @IntRange(from = 0, to = 255) int blendScreen(
-        @IntRange(from = 0, to = 255) int src, @IntRange(from = 0, to = 255) int dst) {
-      return 255 - (255 - src) * (255 - dst) / 255;
-    }
+  private abstract static class AbstractBlendingContext implements CompositeContext {
+    protected abstract @IntRange(from = 0, to = 255) int blend(
+        @IntRange(from = 0, to = 255) int src, @IntRange(from = 0, to = 255) int dst);
 
     @Override
     public void compose(Raster src, Raster dstIn, WritableRaster dstOut) {
@@ -110,10 +98,10 @@ class BlendingComposite implements Composite {
             dstPixels[x] = srcPixel;
           } else {
             dstPixels[x] =
-                (blendScreen((dstPixel >>> 24) & 0xFF, (srcPixel >>> 24) & 0xFF) << 24)
-                    | (blendScreen((dstPixel >>> 16) & 0xFF, (srcPixel >>> 16) & 0xFF) << 16)
-                    | (blendScreen((dstPixel >>> 8) & 0xFF, (srcPixel >>> 8) & 0xFF) << 8)
-                    | (blendScreen(dstPixel & 0xFF, srcPixel & 0xFF));
+                (blend((dstPixel >>> 24) & 0xFF, (srcPixel >>> 24) & 0xFF) << 24)
+                    | (blend((dstPixel >>> 16) & 0xFF, (srcPixel >>> 16) & 0xFF) << 16)
+                    | (blend((dstPixel >>> 8) & 0xFF, (srcPixel >>> 8) & 0xFF) << 8)
+                    | (blend(dstPixel & 0xFF, srcPixel & 0xFF));
           }
         }
 
@@ -123,5 +111,47 @@ class BlendingComposite implements Composite {
 
     @Override
     public void dispose() {}
+  }
+
+  private static final class MultiplyContext extends AbstractBlendingContext {
+
+    /**
+     * Applies a <a href="https://en.wikipedia.org/wiki/Blend_modes#Multiply">"multiply" blend
+     * mode</a> to two color components.
+     *
+     * <p>This operation is just multiplication, so it is commutative and associative (i.e., it is
+     * order independent). A maximum input (white) acts as an identity element, causing the result
+     * to simply be the other input. A zero input (black) acts an absorbing element, causing the
+     * result to also be black. For all other inputs, the result is darker than both of the inputs.
+     *
+     * @param src The first color component to blend.
+     * @param dst The second color component to blend.
+     * @return The multiply blending of the inputs.
+     */
+    protected @IntRange(from = 0, to = 255) int blend(
+        @IntRange(from = 0, to = 255) int src, @IntRange(from = 0, to = 255) int dst) {
+      return src * dst / 255;
+    }
+  }
+
+  private static final class ScreenContext extends AbstractBlendingContext {
+    /**
+     * Applies a <a href="https://en.wikipedia.org/wiki/Blend_modes#Screen">"screen" blend mode</a>
+     * to two color components.
+     *
+     * <p>This operation is basically fancy multiplication, so it is commutative and associative
+     * (i.e., it is order independent). A zero input (black) acts as an identity element, causing
+     * the result to simply be the other input. A maximum input (white) acts an absorbing element,
+     * causing the result to also be white. For all other inputs, the result is brighter than both
+     * of the inputs, though not as bright as would be with addition.
+     *
+     * @param src The first color component to blend.
+     * @param dst The second color component to blend.
+     * @return The screen blending of the inputs.
+     */
+    protected @IntRange(from = 0, to = 255) int blend(
+        @IntRange(from = 0, to = 255) int src, @IntRange(from = 0, to = 255) int dst) {
+      return 255 - (255 - src) * (255 - dst) / 255;
+    }
   }
 }

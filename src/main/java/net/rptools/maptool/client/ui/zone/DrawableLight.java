@@ -23,12 +23,14 @@ public class DrawableLight {
   private DrawablePaint paint;
   private Area area;
   private LightSource.Type type;
+  private int lumens;
 
-  public DrawableLight(LightSource.Type type, DrawablePaint paint, Area area) {
+  public DrawableLight(LightSource.Type type, DrawablePaint paint, Area area, int lumens) {
     super();
     this.paint = paint;
     this.area = area;
     this.type = type;
+    this.lumens = lumens;
   }
 
   public DrawablePaint getPaint() {
@@ -41,6 +43,10 @@ public class DrawableLight {
 
   public LightSource.Type getType() {
     return type;
+  }
+
+  public int getLumens() {
+    return lumens;
   }
 
   @Override
