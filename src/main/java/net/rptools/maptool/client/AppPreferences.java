@@ -81,6 +81,9 @@ public class AppPreferences {
   private static final String KEY_LIGHT_OVERLAY_OPACITY = "lightOverlayOpacity";
   private static final int DEFAULT_LIGHT_OVERLAY_OPACITY = 60;
 
+  private static final String KEY_DARKNESS_OVERLAY_OPACITY = "darknessOverlayOpacity";
+  private static final int DEFAULT_DARKNESS_OVERLAY_OPACITY = 200;
+
   private static final String KEY_FOG_OVERLAY_OPACITY = "fogOverlayOpacity";
   private static final int DEFAULT_FOG_OVERLAY_OPACITY = 100;
 
@@ -335,6 +338,15 @@ public class AppPreferences {
 
   public static int getLightOverlayOpacity() {
     int value = prefs.getInt(KEY_LIGHT_OVERLAY_OPACITY, DEFAULT_LIGHT_OVERLAY_OPACITY);
+    return range0to255(value);
+  }
+
+  public static void setDarknessOverlayOpacity(int size) {
+    prefs.putInt(KEY_DARKNESS_OVERLAY_OPACITY, range0to255(size));
+  }
+
+  public static int getDarknessOverlayOpacity() {
+    int value = prefs.getInt(KEY_DARKNESS_OVERLAY_OPACITY, DEFAULT_DARKNESS_OVERLAY_OPACITY);
     return range0to255(value);
   }
 
