@@ -620,19 +620,23 @@ public class TransferableHelper extends TransferHandler {
       for (Object working : assets) {
         if (working instanceof Asset asset) {
           if (asset.getType() == Type.MTLIB) {
-            try {
-              var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-              new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
-              SwingUtilities.invokeLater(
-                  () -> {
-                    MapTool.showInformation(
-                        I18N.getText("library.imported", addOnLibrary.getNamespace().join()));
-                  });
-            } catch (IOException e) {
-              SwingUtilities.invokeLater(
-                  () -> {
-                    MapTool.showError(I18N.getText("library.import.error", asset.getName()), e);
-                  });
+            if (MapTool.getPlayer().isGM()) {
+              try {
+                var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showInformation(
+                          I18N.getText("library.imported", addOnLibrary.getNamespace().join()));
+                    });
+              } catch (IOException e) {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showError(I18N.getText("library.import.error", asset.getName()), e);
+                    });
+              }
+            } else {
+              MapTool.showError(I18N.getText("library.import.error.notGM"));
             }
           } else {
             Token token = new Token(asset.getName(), asset.getMD5Key());
