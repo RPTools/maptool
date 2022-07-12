@@ -516,6 +516,19 @@ public class LookupTable {
     allowLookup = value;
   }
 
+  private Object readResolve() {
+    if (visible == null) {
+      visible = true;
+    }
+    if (pickOnce == null) {
+      pickOnce = false;
+    }
+    if (allowLookup == null) {
+      allowLookup = true;
+    }
+    return this;
+  }
+
   public static LookupTable fromDto(LookupTableDto dto) {
     var table = new LookupTable();
     table.name = dto.getName();

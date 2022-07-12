@@ -92,6 +92,7 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
   private final JSpinner lightOverlayOpacitySpinner;
+  private final JSpinner darknessOverlayOpacitySpinner;
   private final JSpinner fogOverlayOpacitySpinner;
   private final JCheckBox useHaloColorAsVisionOverlayCheckBox;
   private final JCheckBox autoRevealVisionOnGMMoveCheckBox;
@@ -269,6 +270,7 @@ public class PreferencesDialog extends JDialog {
     haloOverlayOpacitySpinner = panel.getSpinner("haloOverlayOpacitySpinner");
     auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
     lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
+    darknessOverlayOpacitySpinner = panel.getSpinner("darknessOverlayOpacitySpinner");
     fogOverlayOpacitySpinner = panel.getSpinner("fogOverlayOpacitySpinner");
     mapVisibilityWarning = panel.getCheckBox("mapVisibilityWarning");
 
@@ -634,6 +636,14 @@ public class PreferencesDialog extends JDialog {
             MapTool.getFrame().refresh();
           }
         });
+    darknessOverlayOpacitySpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setDarknessOverlayOpacity(value);
+            MapTool.getFrame().refresh();
+          }
+        });
     fogOverlayOpacitySpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
@@ -979,6 +989,8 @@ public class PreferencesDialog extends JDialog {
         new SpinnerNumberModel(AppPreferences.getAuraOverlayOpacity(), 0, 255, 1));
     lightOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getLightOverlayOpacity(), 0, 255, 1));
+    darknessOverlayOpacitySpinner.setModel(
+        new SpinnerNumberModel(AppPreferences.getDarknessOverlayOpacity(), 0, 255, 1));
     fogOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getFogOverlayOpacity(), 0, 255, 1));
 

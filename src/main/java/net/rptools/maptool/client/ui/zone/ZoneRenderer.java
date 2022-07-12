@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
@@ -1415,6 +1416,11 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
+  private enum LightOverlayClipStyle {
+    CLIP_TO_VISIBLE_AREA,
+    CLIP_TO_NOT_VISIBLE_AREA,
+  }
+
   /**
    * Cached set of lights arranged by lumens for some stability. TODO Token draw order would be
    * nice.
@@ -1435,15 +1441,31 @@ public class ZoneRenderer extends JComponent
       drawableLights = new ArrayList<>(zoneView.getDrawableLights(view));
       drawableLights.removeIf(light -> light.getType() != LightSource.Type.NORMAL);
     }
+    final var darknessLights =
+        drawableLights.stream().filter(light -> light.getLumens() < 0).toList();
+    final var nonDarknessLights =
+        drawableLights.stream().filter(light -> light.getLumens() >= 0).toList();
     timer.stop("lights-1");
 
     timer.start("lights-2");
     renderLightOverlay(
         g,
-        view,
-        drawableLights,
-        new Color(255, 255, 255, 150),
+        new BlendingComposite(BlendingComposite.Operation.SCREEN),
+        view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+        nonDarknessLights,
+        new Color(255, 255, 255, 255),
         AppPreferences.getLightOverlayOpacity() / 255.0f);
+    // Players should not be able to discern the nature of the darkness, so we always render it as
+    // black for them.
+    renderLightOverlay(
+        g,
+        view.isGMView()
+            ? new BlendingComposite(BlendingComposite.Operation.MULTIPLY)
+            : new SolidColorComposite(0xff000000),
+        view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_NOT_VISIBLE_AREA,
+        darknessLights,
+        new Color(0, 0, 0, 255),
+        view.isGMView() ? (AppPreferences.getDarknessOverlayOpacity() / 255.0f) : 1.0f);
     timer.stop("lights-2");
   }
 
@@ -1468,7 +1490,8 @@ public class ZoneRenderer extends JComponent
     timer.start("auras-2");
     renderLightOverlay(
         g,
-        view,
+        new BlendingComposite(BlendingComposite.Operation.SCREEN),
+        view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         drawableAuras,
         new Color(255, 255, 255, 150),
         AppPreferences.getAuraOverlayOpacity() / 255.0f);
@@ -1479,13 +1502,17 @@ public class ZoneRenderer extends JComponent
    * Combines a set of lights into an image that is then rendered into the zone.
    *
    * @param g The graphics object used to render the zone.
-   * @param view The player view.
+   * @param composite The composite used to blend lights together.
+   * @param clipStyle How to clip the overlay relative to the visible area. Set to null for no extra
+   *     clipping.
    * @param lights The lights that will be rendered and blended.
-   * @param defaultPaint A default paint for lights with a paint.
+   * @param defaultPaint A default paint for lights without a paint.
+   * @param overlayOpacity The opacity used when rendering the final overlay on top of the zone.
    */
   private void renderLightOverlay(
       Graphics2D g,
-      PlayerView view,
+      Composite composite,
+      @Nullable LightOverlayClipStyle clipStyle,
       List<DrawableLight> lights,
       Paint defaultPaint,
       float overlayOpacity) {
@@ -1498,11 +1525,15 @@ public class ZoneRenderer extends JComponent
             BufferedImage.TYPE_INT_ARGB);
     Graphics2D newG = lightOverlay.createGraphics();
 
-    if (!view.isGMView() && visibleScreenArea != null) {
+    if (clipStyle != null && visibleScreenArea != null) {
       Area clip = new Area(g.getClip());
-      clip.intersect(visibleScreenArea);
+      switch (clipStyle) {
+        case CLIP_TO_VISIBLE_AREA -> clip.intersect(visibleScreenArea);
+        case CLIP_TO_NOT_VISIBLE_AREA -> clip.subtract(visibleScreenArea);
+      }
       newG.setClip(clip);
     }
+
     timer.stop("light-overlay-1");
 
     timer.start("light-overlay-2");
@@ -1511,7 +1542,7 @@ public class ZoneRenderer extends JComponent
     af.scale(getScale(), getScale());
     newG.setTransform(af);
 
-    newG.setComposite(new BlendingComposite());
+    newG.setComposite(composite);
     timer.stop("light-overlay-2");
 
     // Draw lights onto the buffer image so the map doesn't affect how they blend
