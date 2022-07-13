@@ -2260,9 +2260,10 @@ public class Zone extends BaseModel {
               .collect(Collectors.toList()));
     }
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(
+    dto.addAllGmDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllObjectDrawables(
+        objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllBackgroundDrawables(
         backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
