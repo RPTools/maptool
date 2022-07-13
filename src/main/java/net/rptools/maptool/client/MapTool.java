@@ -949,7 +949,7 @@ public class MapTool {
 
   public static Campaign getCampaign() {
     if (campaign == null) {
-      campaign = new Campaign();
+      campaign = CampaignFactory.createBasicCampaign();
     }
     return campaign;
   }
