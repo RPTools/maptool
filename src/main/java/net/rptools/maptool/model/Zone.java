@@ -2110,6 +2110,10 @@ public class Zone extends BaseModel {
     if (aStarRounding == null) {
       aStarRounding = AStarRoundingOptions.NONE;
     }
+
+    if (tokenSelection == null) {
+      tokenSelection = TokenSelection.ALL;
+    }
     return this;
   }
 
