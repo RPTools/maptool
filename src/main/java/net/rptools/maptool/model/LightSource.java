@@ -225,6 +225,9 @@ public class LightSource implements Comparable<LightSource> {
     if (type == null) {
       type = Type.NORMAL;
     }
+    if (lightList == null) {
+      lightList = new LinkedList<>();
+    }
     return this;
   }
 
