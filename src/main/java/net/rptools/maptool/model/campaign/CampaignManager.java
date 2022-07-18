@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.campaign;
 
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
@@ -35,5 +36,6 @@ public class CampaignManager {
     JSScriptEngine.resetContexts();
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
+    UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();
   }
 }
