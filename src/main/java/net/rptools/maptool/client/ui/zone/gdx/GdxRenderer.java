@@ -3197,6 +3197,8 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void setScale(Scale scale) {
+    if (!initialized) return;
+
     var dpiScale = Gdx.graphics.getBackBufferScale();
     offsetX = (int) (scale.getOffsetX() * dpiScale * -1);
     offsetY = (int) (scale.getOffsetY() * dpiScale);
