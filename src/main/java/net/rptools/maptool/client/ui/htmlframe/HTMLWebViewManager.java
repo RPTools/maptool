@@ -90,6 +90,8 @@ public class HTMLWebViewManager {
     /** Name of the Bridge. */
     private static final String NAME = "MapTool";
 
+    private JSObject window;
+
     public MTXMLHttpRequest makeXMLHttpRequest(JSObject ctx, String href) {
       return new MTXMLHttpRequest(ctx, href);
     }
@@ -282,6 +284,7 @@ public class HTMLWebViewManager {
     if (JavaBridge.BRIDGE_VALUE.equals(event.getData())) {
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
+      bridge.window = window;
 
       for (String rsrc : INITIALIZATION_SCRIPTS) {
         try {
