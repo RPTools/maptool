@@ -140,7 +140,9 @@ public class AddOnLibraryImporter {
         throw new IOException(I18N.getText("library.error.addOn.noConfigFile", file.getPath()));
       }
       var builder = AddOnLibraryDto.newBuilder();
-      JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
+      JsonFormat.parser()
+          .ignoringUnknownFields()
+          .merge(new InputStreamReader(zip.getInputStream(entry)), builder);
 
       // MT MacroScript properties
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
@@ -148,6 +150,7 @@ public class AddOnLibraryImporter {
       ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILE);
       if (mtsPropsZipEntry != null) {
         JsonFormat.parser()
+            .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
       }
 
@@ -156,6 +159,7 @@ public class AddOnLibraryImporter {
       ZipEntry eventsZipEntry = zip.getEntry(EVENT_PROPERTY_FILE);
       if (eventsZipEntry != null) {
         JsonFormat.parser()
+            .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
       var addOnLib = builder.build();

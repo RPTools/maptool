@@ -240,10 +240,10 @@ public class Zone extends BaseModel {
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
   private TopologyTypeSet topologyTypes = null; // get default from AppPreferences
 
-  private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> drawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
   /** Map each token GUID to the corresponding token. */
@@ -1323,16 +1323,16 @@ public class Zone extends BaseModel {
     // items that are drawn first are at the "back"
     switch (drawnElement.getDrawable().getLayer()) {
       case OBJECT:
-        ((LinkedList<DrawnElement>) objectDrawables).addFirst(drawnElement);
+        objectDrawables.addFirst(drawnElement);
         break;
       case BACKGROUND:
-        ((LinkedList<DrawnElement>) backgroundDrawables).addFirst(drawnElement);
+        backgroundDrawables.addFirst(drawnElement);
         break;
       case GM:
-        ((LinkedList<DrawnElement>) gmDrawables).addFirst(drawnElement);
+        gmDrawables.addFirst(drawnElement);
         break;
       default:
-        ((LinkedList<DrawnElement>) drawables).addFirst(drawnElement);
+        drawables.addFirst(drawnElement);
     }
     fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
   }
@@ -2110,6 +2110,10 @@ public class Zone extends BaseModel {
     if (aStarRounding == null) {
       aStarRounding = AStarRoundingOptions.NONE;
     }
+
+    if (tokenSelection == null) {
+      tokenSelection = TokenSelection.ALL;
+    }
     return this;
   }
 
@@ -2189,19 +2193,19 @@ public class Zone extends BaseModel {
     zone.drawables =
         dto.getDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.gmDrawables =
         dto.getGmDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.objectDrawables =
         dto.getObjectDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.backgroundDrawables =
         dto.getBackgroundDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     dto.getLabelsList().stream()
         .map(d -> Label.fromDto(d))
         .forEach(l -> zone.labels.put(l.getId(), l));
@@ -2260,9 +2264,10 @@ public class Zone extends BaseModel {
               .collect(Collectors.toList()));
     }
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(
+    dto.addAllGmDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllObjectDrawables(
+        objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllBackgroundDrawables(
         backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
