@@ -1,6 +1,11 @@
 {
     "use strict";
+    let seen = [];
     let serializeToString = function(arg) {
+	if (arg in seen) {
+	    return "...";
+	}
+	seen.push(arg);
 	if (arg instanceof Array) {
 	    let toLog = [];
 	    for (let obj of arg) {
@@ -27,6 +32,7 @@
 	}
     };
     console.log = function(...args) {
+	seen.length = 0;
 	let toLog = [];
 	for (let arg of args) {
 	    toLog.push(serializeToString(arg));
