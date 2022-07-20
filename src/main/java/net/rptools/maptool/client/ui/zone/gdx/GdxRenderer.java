@@ -61,6 +61,7 @@ import net.rptools.maptool.client.ui.zone.DrawableLight;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Path;
@@ -151,6 +152,8 @@ public class GdxRenderer extends ApplicationAdapter
   private RadiusCellTemplateDrawer radiusCellTemplateDrawer;
   private ShapeDrawableDrawer shapeDrawableDrawer;
   private TextRenderer textRenderer;
+
+  private TextRenderer hudTextRenderer;
   private AreaRenderer areaRenderer;
 
   // temorary objects. Stored here to avoid garbage collection;
@@ -165,7 +168,6 @@ public class GdxRenderer extends ApplicationAdapter
   private final Matrix4 tmpMatrix = new Matrix4();
   private final Area tmpArea = new Area();
   private final TiledDrawable tmpTile = new TiledDrawable();
-  private final ScreenScaleProvider dpiScaleProvider = new ScreenScaleProvider();
 
   public GdxRenderer() {
     var dispatcher = MapTool.getEventDispatcher();
@@ -290,11 +292,6 @@ public class GdxRenderer extends ApplicationAdapter
     hudCam.update();
   }
 
-  private float getDpiScale() {
-    int resolution = java.awt.Toolkit.getDefaultToolkit().getScreenResolution();
-    return resolution / 96.0f;
-  }
-
   @Override
   public void render() {
     var delta = Gdx.graphics.getDeltaTime();
@@ -303,13 +300,17 @@ public class GdxRenderer extends ApplicationAdapter
     packer.updateTextureAtlas(
         tokenAtlas, Texture.TextureFilter.Linear, Texture.TextureFilter.Linear, false);
 
-    if (atlas == null) atlas = manager.get(ATLAS, TextureAtlas.class);
+    if (atlas == null) {
+      atlas = manager.get(ATLAS, TextureAtlas.class);
+    }
 
-    if (normalFont == null) normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
+    if (normalFont == null) {
+      normalFont = manager.get(FONT_NORMAL, BitmapFont.class);
+      textRenderer = new TextRenderer(atlas, batch, normalFont);
+      hudTextRenderer = new TextRenderer(atlas, batch, normalFont, false);
+    }
 
-    textRenderer = new TextRenderer(atlas, batch, normalFont, dpiScaleProvider);
     ensureCorrectDistanceFont();
-    dpiScaleProvider.triggerUpdate(delta);
     ScreenUtils.clear(Color.BLACK);
     doRendering();
   }
@@ -343,7 +344,7 @@ public class GdxRenderer extends ApplicationAdapter
 
     var mySmallFont = new FreetypeFontLoader.FreeTypeFontLoaderParameter();
     mySmallFont.fontFileName = "net/rptools/maptool/client/fonts/OpenSans-Regular.ttf";
-    mySmallFont.fontParameters.size = (int) (12 * dpiScaleProvider.getDpiScale());
+    mySmallFont.fontParameters.size = (int) (12 * Gdx.graphics.getBackBufferScale());
     manager.load(FONT_NORMAL, BitmapFont.class, mySmallFont);
   }
 
@@ -373,21 +374,23 @@ public class GdxRenderer extends ApplicationAdapter
     setProjectionMatrix(hudCam.combined);
 
     if (zoneRenderer.isLoading())
-      textRenderer.drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2f, height / 2f);
+      hudTextRenderer.drawBoxedString(zoneRenderer.getLoadingProgress(), width / 2f, height / 2f);
     else if (MapTool.getCampaign().isBeingSerialized())
-      textRenderer.drawBoxedString("    Please Wait    ", width / 2f, height / 2f);
+      hudTextRenderer.drawBoxedString("    Please Wait    ", width / 2f, height / 2f);
 
-    int noteVPos = 20;
+    float noteVPos = 20 * Gdx.graphics.getBackBufferScale();
     if (!zone.isVisible() && playerView.isGMView()) {
-      textRenderer.drawBoxedString("Map not visible to players", width / 2f, height - noteVPos);
-      noteVPos += 20;
+      hudTextRenderer.drawBoxedString(
+          I18N.getText("zone.map_not_visible"), width / 2f, height - noteVPos);
+      noteVPos += 20 * Gdx.graphics.getBackBufferScale();
     }
     if (AppState.isShowAsPlayer()) {
-      textRenderer.drawBoxedString("Player View", width / 2, height - noteVPos);
+      hudTextRenderer.drawBoxedString(
+          I18N.getText("zone.player_view"), width / 2, height - noteVPos);
     }
 
-    textRenderer.drawString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
-    textRenderer.drawString(String.valueOf(batch.renderCalls), width - 10, 10);
+    hudTextRenderer.drawString(String.valueOf(Gdx.graphics.getFramesPerSecond()), 10, 10);
+    hudTextRenderer.drawString(String.valueOf(batch.renderCalls), width - 10, 10);
 
     batch.end();
     collectTimerResults();
@@ -1016,8 +1019,8 @@ public class GdxRenderer extends ApplicationAdapter
 
         // Other details
         if (token == keyToken) {
-          var x = footprintBounds.x * dpiScaleProvider.getDpiScale();
-          var y = footprintBounds.y * dpiScaleProvider.getDpiScale();
+          var x = footprintBounds.x;
+          var y = footprintBounds.y;
           var w = footprintBounds.width;
           var h = footprintBounds.height;
 
@@ -1742,8 +1745,8 @@ public class GdxRenderer extends ApplicationAdapter
         tmpWorldCoord.set(gdxTokenRectangle.x, gdxTokenRectangle.y, 0);
         cam.project(tmpWorldCoord);
 
-        tmpWorldCoord.x *= dpiScaleProvider.getDpiScale();
-        tmpWorldCoord.y *= dpiScaleProvider.getDpiScale();
+        tmpWorldCoord.x *= Gdx.graphics.getBackBufferScale();
+        tmpWorldCoord.y *= Gdx.graphics.getBackBufferScale();
 
         gdxTokenRectangle.set(
             tmpWorldCoord.x,
@@ -3194,7 +3197,7 @@ public class GdxRenderer extends ApplicationAdapter
   }
 
   public void setScale(Scale scale) {
-    var dpiScale = dpiScaleProvider.getDpiScale();
+    var dpiScale = Gdx.graphics.getBackBufferScale();
     offsetX = (int) (scale.getOffsetX() * dpiScale * -1);
     offsetY = (int) (scale.getOffsetY() * dpiScale);
     zoom = (float) (1f / scale.getScale() / dpiScale);

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone.gdx;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.*;
 import javax.swing.*;
@@ -32,16 +33,23 @@ public class TextRenderer {
   private Batch batch;
   private BitmapFont font;
 
-  private ScreenScaleProvider dpiScaleProvider;
+  private boolean scaling = true;
 
-  public TextRenderer(
-      TextureAtlas atlas, Batch batch, BitmapFont font, ScreenScaleProvider screenScaleProvider) {
+  public TextRenderer(TextureAtlas atlas, Batch batch, BitmapFont font) {
     this.font = font;
     this.batch = batch;
     blueLabel = atlas.createPatch("blueLabelbox");
     grayLabel = atlas.createPatch("grayLabelbox");
     darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
-    dpiScaleProvider = screenScaleProvider;
+  }
+
+  public TextRenderer(TextureAtlas atlas, Batch batch, BitmapFont font, boolean scaling) {
+    this.font = font;
+    this.batch = batch;
+    blueLabel = atlas.createPatch("blueLabelbox");
+    grayLabel = atlas.createPatch("grayLabelbox");
+    darkGrayLabel = atlas.createPatch("darkGreyLabelbox");
+    this.scaling = scaling;
   }
 
   public BitmapFont getFont() {
@@ -81,7 +89,7 @@ public class TextRenderer {
       }
     }
 
-    var dpiScale = dpiScaleProvider.getDpiScale();
+    var dpiScale = scaling ? Gdx.graphics.getBackBufferScale() : 1.0f;
     x *= dpiScale;
     y *= dpiScale;
 

@@ -443,7 +443,7 @@ dependencies {
     implementation 'com.google.guava:guava:31.0.1-jre'
 
     // libgdx
-    implementation 'com.github.thelsing:libgdx-jogl-backend:1.11.2'
+    implementation 'com.github.thelsing:libgdx-jogl-backend:1.11.3'
     //maven local for development
     //implementation 'com.thelsing.gdx:gdx-backend-jogl:1.11.2'
 
