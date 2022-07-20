@@ -116,7 +116,7 @@ message FtpLocationDto {
 
 message CampaignPropertiesDto {
   map<string, TokenPropertyListDto> token_types = 1;
-  string default_sight_type = 2;
+  google.protobuf.StringValue default_sight_type = 2;
   repeated BooleanTokenOverlayDto token_states = 3;
   repeated BarTokenOverlayDto token_bars = 4;
   map<string, string> character_sheets = 5;

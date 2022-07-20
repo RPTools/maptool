@@ -1105,6 +1105,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (compareApplyToSelectedTokens == null) compareApplyToSelectedTokens = true;
     if (allowPlayerEdits == null)
       allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
+    if (macroUUID == null) macroUUID = getMacroUUID();
+    if (displayHotKey == null) displayHotKey = true;
     return this;
   }
 

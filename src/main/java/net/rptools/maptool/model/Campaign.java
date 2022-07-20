@@ -725,6 +725,10 @@ public class Campaign {
     return campaignExportDialog;
   }
 
+  public void initDefault() {
+    campaignProperties.initDefaultProperties();
+  }
+
   public static Campaign fromDto(CampaignDto dto) {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());
