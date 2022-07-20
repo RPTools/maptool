@@ -195,16 +195,13 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_ANCHOR =
       "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
 
-  /** JS that directs the console.log function to the Java bridge function "log". */
-  private static final String SCRIPT_REPLACE_LOG =
-      "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
-
   /** JS to initialize the Java bridge. Needs to be the first script of the page. */
   private static final String SCRIPT_BRIDGE =
       String.format(
           "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
 
   private static final String[] INITIALIZATION_SCRIPTS = {
+    "net/rptools/maptool/client/html5/javascript/Console.js",
     "net/rptools/maptool/client/html5/javascript/Replace_Submit.js",
     "net/rptools/maptool/client/html5/javascript/Mutation_Observer.js",
     "net/rptools/maptool/client/html5/javascript/XMLHttpRequest.js"
@@ -285,9 +282,6 @@ public class HTMLWebViewManager {
     if (JavaBridge.BRIDGE_VALUE.equals(event.getData())) {
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
-
-      // Redirect console.log to the JavaBridge
-      webEngine.executeScript(SCRIPT_REPLACE_LOG);
 
       for (String rsrc : INITIALIZATION_SCRIPTS) {
         try {
