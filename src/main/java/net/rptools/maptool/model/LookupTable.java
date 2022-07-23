@@ -519,6 +519,9 @@ public class LookupTable {
     if (allowLookup == null) {
       allowLookup = true;
     }
+    if (entryList == null) {
+      entryList = new ArrayList<>();
+    }
     return this;
   }
 
