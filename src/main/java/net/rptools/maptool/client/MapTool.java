@@ -1232,6 +1232,11 @@ public class MapTool {
     return conn;
   }
 
+  /** returns the current locale code. */
+  public static String getLocale() {
+    return I18N.getLocale();
+  }
+
   /** returns whether the player is using a personal server. */
   public static boolean isPersonalServer() {
     return server != null && server.getConfig().isPersonalServer();

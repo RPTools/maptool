@@ -56,6 +56,10 @@ public class I18N {
     BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
   }
 
+  public static String getLocale() {
+    return BUNDLE.getLocale().getLanguage();
+  }
+
   /**
    * Returns a <b>JMenu</b> object to represent the given <b>Action</b> key. The key is used to
    * locate the menu text in the properties file. The menu mnemonic is extracted as well and
