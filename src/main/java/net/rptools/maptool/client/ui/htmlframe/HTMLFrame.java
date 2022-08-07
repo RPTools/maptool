@@ -202,7 +202,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager(this, "frame5", this.name));
     } else {
       panel = new HTMLPanel(this, true);
     }
