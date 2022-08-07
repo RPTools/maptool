@@ -1233,8 +1233,8 @@ public class MapTool {
   }
 
   /** returns the current locale code. */
-  public static String getLocale() {
-    return I18N.getLocale();
+  public static String getLanguage() {
+    return Locale.getDefault(Locale.Category.DISPLAY).getLanguage();
   }
 
   /** returns whether the player is using a personal server. */
