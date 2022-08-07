@@ -8,6 +8,8 @@ Feature release using OpenJDK 17
 
 ## Enhancements & Features
 - [#3515][i3515] User language now availabe through `getInfo("client")` and `MapTool.clientInfo.getUserLanguage()` in JavaScript.
+- [#3506][i3506] Updated `MapTool.log()` to varargs.
+- [#3503][i3503] html5 javascript contexts now know their own identity and can get their user data.
 - [#3464][i3464] New functions to determine if client is hosting or not. Info also available through `getInfo("client")` now.
 - [#3459][i3459] Improvements to visibility calculation for large and complex geometry.
 - [#3453][i3453] Add-On libraries can now be loaded/updated by dragging and dropping `.mtlib` files on map.
@@ -66,6 +68,8 @@ Feature release using OpenJDK 17
 [i3515]: https://github.com/RPTools/maptool/issues/3515
 [i3514]: https://github.com/RPTools/maptool/issues/3514
 [i3510]: https://github.com/RPTools/maptool/issues/3510
+[i3506]: https://github.com/RPTools/maptool/issues/3506
+[i3503]: https://github.com/RPTools/maptool/issues/3503
 [i3498]: https://github.com/RPTools/maptool/issues/3498
 [i3489]: https://github.com/RPTools/maptool/issues/3489
 [i3488]: https://github.com/RPTools/maptool/issues/3488
