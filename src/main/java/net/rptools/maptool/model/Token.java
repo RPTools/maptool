@@ -2547,7 +2547,7 @@ public class Token extends BaseModel implements Cloneable {
         else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        stateValue = parameters.get(1);
+        stateValue = parameters.get(0);
         if (stateValue.hasBoolValue()) setAllStates(stateValue.getBoolValue());
         else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
