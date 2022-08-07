@@ -19,6 +19,7 @@ import java.awt.geom.GeneralPath;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.lib.GeometryUtil;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -104,18 +105,9 @@ public class AreaMeta {
   }
 
   public void addPoint(double x, double y) {
-    // Cut out redundant points
-    // TODO: This works ... in concept, but in practice it can create holes that pop outside of
-    // their parent bounds
-    // for really thin diagonal lines. At some point this could be moved to a post processing step,
-    // after the
-    // islands have been placed into their oceans. But that's an optimization for another day
-    // if (lastPointNode != null && GeometryUtil.getDistance(lastPointNode.point, new
-    // Point2D.Float(x, y)) < 1.5) {
-    // skippedPoints++;
-    // return;
-    // }
     final var vertex = new Coordinate(x, y);
+    GeometryUtil.getPrecisionModel().makePrecise(vertex);
+
     if (!vertices.isEmpty()) {
       final var lastVertex = vertices.get(vertices.size() - 1);
       // Don't add if we haven't moved
