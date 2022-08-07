@@ -7,6 +7,7 @@ Feature release using OpenJDK 17
 - Improvements to new Add-On functionality.
 
 ## Enhancements & Features
+- [#3515][i3515] User language now availabe through `getInfo("client")` and `MapTool.clientInfo.getUserLanguage()` in JavaScript.
 - [#3464][i3464] New functions to determine if client is hosting or not. Info also available through `getInfo("client")` now.
 - [#3459][i3459] Improvements to visibility calculation for large and complex geometry.
 - [#3453][i3453] Add-On libraries can now be loaded/updated by dragging and dropping `.mtlib` files on map.
@@ -19,6 +20,7 @@ Feature release using OpenJDK 17
 
 ## Bug Fixes
 - [#3521][i3521] Vision broken on maps where VBL points had very small differences in location. Fixed. 
+- [#3514][i3514] `setAllStates()` was throwing a `ArrayIndexOutOfBoundsException`. Fixed.
 - [#3510][i3510] `createTable()` function throwing exception. Fixed.
 - [#3498][i3498] Add-On libraries with undefined fields in the `library.json` would fail to load. Fixed.
 - [#3489][i3489] Using Arrange->Send to Back on Drawings would cause ClassCastException. Fixed.
@@ -60,9 +62,10 @@ Feature release using OpenJDK 17
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
 [i]: https://github.com/RPTools/maptool/issues/
-[i]: https://github.com/RPTools/maptool/issues/
-[i3510]: https://github.com/RPTools/maptool/issues/3510
 [i3521]: https://github.com/RPTools/maptool/issues/3521
+[i3515]: https://github.com/RPTools/maptool/issues/3515
+[i3514]: https://github.com/RPTools/maptool/issues/3514
+[i3510]: https://github.com/RPTools/maptool/issues/3510
 [i3498]: https://github.com/RPTools/maptool/issues/3498
 [i3489]: https://github.com/RPTools/maptool/issues/3489
 [i3488]: https://github.com/RPTools/maptool/issues/3488
