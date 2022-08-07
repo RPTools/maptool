@@ -18,7 +18,8 @@ import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.GridView;
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.event.*;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -150,16 +151,6 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             updateOpenMacroList(false);
             // FJE fix for macOS pinwheel
             SwingUtilities.invokeLater(() -> dispose());
-          }
-        });
-    addKeyListener(
-        new KeyAdapter() {
-          @Override
-          public void keyPressed(KeyEvent e) {
-            int keyCode = KeyStroke.getKeyStroke("ESC").getKeyCode();
-            if (e.getKeyCode() == keyCode) {
-              cancel();
-            }
           }
         });
   }
