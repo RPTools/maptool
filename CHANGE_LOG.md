@@ -7,6 +7,9 @@ Feature release using OpenJDK 17
 - Improvements to new Add-On functionality.
 
 ## Enhancements & Features
+- [#3515][i3515] User language now availabe through `getInfo("client")` and `MapTool.clientInfo.getUserLanguage()` in JavaScript.
+- [#3506][i3506] Updated `MapTool.log()` to varargs.
+- [#3503][i3503] html5 javascript contexts now know their own identity and can get their user data.
 - [#3464][i3464] New functions to determine if client is hosting or not. Info also available through `getInfo("client")` now.
 - [#3459][i3459] Improvements to visibility calculation for large and complex geometry.
 - [#3453][i3453] Add-On libraries can now be loaded/updated by dragging and dropping `.mtlib` files on map.
@@ -18,7 +21,14 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3521][i3521] Vision broken on maps where VBL points had very small differences in location. Fixed. 
+- [#3514][i3514] `setAllStates()` was throwing a `ArrayIndexOutOfBoundsException`. Fixed.
+- [#3510][i3510] `createTable()` function throwing exception. Fixed.
+- [#3498][i3498] Add-On libraries with undefined fields in the `library.json` would fail to load. Fixed.
+- [#3489][i3489] Using Arrange->Send to Back on Drawings would cause ClassCastException. Fixed.
+- [#3488][i3488] Drawings on Player clients rendered over Darkness sources. Fixed.
 - [#3481][i3481] Non-GMs should not be able to drag and drop add-on libs. Fixed.
+- [#3479][i3479] Darkness sources without color specified were not rendering on Player view. Fixed.
 - [#3477][i3477] MapTool won't start on Apple Silicon Macs. Fixed.
 - [#3466][i3466] VBL precision problem could cause vision to break on some maps. Fixed.
 - [#3462][i3462] `player.getName()` produces NPE if server not using player database. Fixed. 
@@ -54,7 +64,17 @@ Feature release using OpenJDK 17
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
 [i]: https://github.com/RPTools/maptool/issues/
+[i3521]: https://github.com/RPTools/maptool/issues/3521
+[i3515]: https://github.com/RPTools/maptool/issues/3515
+[i3514]: https://github.com/RPTools/maptool/issues/3514
+[i3510]: https://github.com/RPTools/maptool/issues/3510
+[i3506]: https://github.com/RPTools/maptool/issues/3506
+[i3503]: https://github.com/RPTools/maptool/issues/3503
+[i3498]: https://github.com/RPTools/maptool/issues/3498
+[i3489]: https://github.com/RPTools/maptool/issues/3489
+[i3488]: https://github.com/RPTools/maptool/issues/3488
 [i3481]: https://github.com/RPTools/maptool/issues/3481
+[i3479]: https://github.com/RPTools/maptool/issues/3479
 [i3477]: https://github.com/RPTools/maptool/issues/3477
 [i3466]: https://github.com/RPTools/maptool/issues/3466
 [i3464]: https://github.com/RPTools/maptool/issues/3464
