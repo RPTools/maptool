@@ -549,7 +549,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       String property = parameters.get(0).toString();
-      String value = parameters.get(1).toString();
+      Object value = parameters.get(1);
 
       String location;
       if (parameters.size() > 2) {
@@ -575,7 +575,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
                               "macro.function.tokenProperty.unknownLibToken",
                               functionName,
                               libName)));
-      library.getLibraryData().thenCompose(libData -> libData.setStringData(property, value));
+      library
+          .getLibraryData()
+          .thenCompose(
+              libData ->
+                  libData.setData(
+                      new MTScriptDataConversion().parseMTScriptString(property, value)));
       return "";
     }
 
