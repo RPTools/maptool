@@ -28,6 +28,17 @@ public class Path<T extends AbstractPoint> {
   private final List<T> cellList = new LinkedList<T>();
   private final List<T> waypointList = new LinkedList<T>();
 
+  protected Object readResolve() {
+    // If any AStarCellPoints could not be converted to CellPoint, we get `null`s in these lists.
+    // In such a case, the path is meaningless so we just clear it.
+    if (cellList.contains(null) || waypointList.contains(null)) {
+      cellList.clear();
+      waypointList.clear();
+    }
+
+    return this;
+  }
+
   public void addPathCell(T point) {
     cellList.add(point);
   }

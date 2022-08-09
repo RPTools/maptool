@@ -2477,13 +2477,8 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     // Check to make sure lastPath has valid data
-    if (lastPath != null) {
-      // The second condition seems like it shouldn't be possible, but at some point in the past it
-      // was possible for paths of AStarCellPoints to exist and these can persist in older tokens.
-      if (lastPath.getCellPath().size() == 0
-          || !(lastPath.getCellPath().get(0) instanceof AbstractPoint)) {
-        lastPath = null;
-      }
+    if (lastPath != null && lastPath.getCellPath().isEmpty()) {
+      lastPath = null;
     }
 
     return this;
