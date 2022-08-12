@@ -163,7 +163,7 @@ public class HTMLFrameFactory {
           frameValue,
           html);
     } else if (frameType == FrameType.OVERLAY) {
-      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html);
+      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html, frameValue);
     }
   }
 
