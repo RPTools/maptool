@@ -208,9 +208,8 @@ public class MapToolFrame extends DefaultDockableHolder
       new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
   private final FileFilter tableFilter =
       new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
-
   private final FileFilter dungeonDraftFilter =
-      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+      new MTMultiFileFilter(I18N.getText("file.ext.dungeondraft"), "dd2vtt", "df2vtt", "uvtt");
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -811,6 +810,51 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
+  /**
+   * File filter for multiple extensions.
+   */
+  private static class MTMultiFileFilter extends FileFilter {
+    private final String[] extensions;
+    private final String description;
+
+    MTMultiFileFilter(String desc, String... extens) {
+      super();
+      extensions = extens;
+      description = desc;
+    }
+
+    // Accept directories and files matching extension
+    @Override
+    public boolean accept(File f) {
+      if (f.isDirectory()) {
+        return true;
+      }
+      String fext = getExtension(f);
+      for (String ext : extensions) {
+        if (fext != null && fext.equals(ext)) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    @Override
+    public String getDescription() {
+      return description;
+    }
+
+    public String getExtension(File f) {
+      String ext = null;
+      String s = f.getName();
+      int i = s.lastIndexOf('.');
+
+      if (i > 0 && i < s.length() - 1) {
+        ext = s.substring(i + 1).toLowerCase();
+      }
+      return ext;
+    }
+  }
+
   public FileFilter getCmpgnFileFilter() {
     return campaignFilter;
   }
@@ -820,9 +864,9 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   /**
-   * Returns the {@link FileFilter} for dungeondraft VTT export files.
+   * Returns the {@link FileFilter} for Univerasl VTT export files.
    *
-   * @return the {@link FileFilter} for dungeondraft VTT export files.
+   * @return the {@link FileFilter} for Universal VTT export files.
    */
   public FileFilter getDungeonDraftFilter() {
     return dungeonDraftFilter;
