@@ -119,9 +119,9 @@ public class AreaMeta {
 
     if (path == null) {
       path = new GeneralPath();
-      path.moveTo(x, y);
+      path.moveTo(vertex.x, vertex.y);
     } else {
-      path.lineTo(x, y);
+      path.lineTo(vertex.x, vertex.y);
     }
   }
 
