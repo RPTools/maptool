@@ -1196,6 +1196,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     } else {
       List<TokenProperty> props =
           MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(type);
+      // If property type not found return an empty string or JSON array
       if (props != null) {
         for (TokenProperty tp : props) {
           namesList.add(tp.getName());
