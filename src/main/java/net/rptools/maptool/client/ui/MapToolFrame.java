@@ -770,9 +770,7 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  /**
-   * Accepts 1 or more file extensions
-   */
+  /** Accepts 1 or more file extensions */
   private static class MTFileFilter extends FileFilter {
     private final String[] extensions;
     private final String description;
@@ -783,9 +781,7 @@ public class MapToolFrame extends DefaultDockableHolder
       description = desc;
     }
 
-    /**
-     * Accept directories and files matching any of the provided extensions
-     */
+    /** Accept directories and files matching any of the provided extensions */
     @Override
     public boolean accept(File f) {
       if (f.isDirectory()) {
