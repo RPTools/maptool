@@ -198,18 +198,18 @@ public class MapToolFrame extends DefaultDockableHolder
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
-      new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
-  private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
+      new MTFileFilter(I18N.getText("file.ext.cmpgn"), "cmpgn");
+  private final FileFilter mapFilter = new MTFileFilter(I18N.getText("file.ext.rpmap"), "rpmap");
   private final FileFilter propertiesFilter =
-      new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
+      new MTFileFilter(I18N.getText("file.ext.mtprops"), "mtprops");
   private final FileFilter macroFilter =
-      new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
+      new MTFileFilter(I18N.getText("file.ext.mtmacro"), "mtmacro");
   private final FileFilter macroSetFilter =
-      new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
+      new MTFileFilter(I18N.getText("file.ext.mtmacset"), "mtmacset");
   private final FileFilter tableFilter =
-      new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
+      new MTFileFilter(I18N.getText("file.ext.mttable"), "mttable");
   private final FileFilter dungeonDraftFilter =
-      new MTMultiFileFilter(I18N.getText("file.ext.dungeondraft"), "dd2vtt", "df2vtt", "uvtt");
+      new MTFileFilter(I18N.getText("file.ext.dungeondraft"), "dd2vtt", "df2vtt", "uvtt");
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -770,60 +770,22 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  private static class MTFileFilter extends FileFilter {
-    private final String extension;
-    private final String description;
-
-    MTFileFilter(String exten, String desc) {
-      super();
-      extension = exten;
-      description = desc;
-    }
-
-    // Accept directories and files matching extension
-    @Override
-    public boolean accept(File f) {
-      if (f.isDirectory()) {
-        return true;
-      }
-      String ext = getExtension(f);
-      if (ext != null) {
-        return ext.equals(extension);
-      }
-      return false;
-    }
-
-    @Override
-    public String getDescription() {
-      return description;
-    }
-
-    public String getExtension(File f) {
-      String ext = null;
-      String s = f.getName();
-      int i = s.lastIndexOf('.');
-
-      if (i > 0 && i < s.length() - 1) {
-        ext = s.substring(i + 1).toLowerCase();
-      }
-      return ext;
-    }
-  }
-
   /**
-   * File filter for multiple extensions.
+   * Accepts 1 or more file extensions
    */
-  private static class MTMultiFileFilter extends FileFilter {
+  private static class MTFileFilter extends FileFilter {
     private final String[] extensions;
     private final String description;
 
-    MTMultiFileFilter(String desc, String... extens) {
+    MTFileFilter(String desc, String... extens) {
       super();
       extensions = extens;
       description = desc;
     }
 
-    // Accept directories and files matching extension
+    /**
+     * Accept directories and files matching any of the provided extensions
+     */
     @Override
     public boolean accept(File f) {
       if (f.isDirectory()) {
