@@ -2704,7 +2704,8 @@ public class Token extends BaseModel implements Cloneable {
         }
       case setImageAsset:
         setImageAsset(
-            parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
+            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
+            new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
