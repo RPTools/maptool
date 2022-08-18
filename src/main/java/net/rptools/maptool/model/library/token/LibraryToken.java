@@ -363,6 +363,11 @@ class LibraryToken implements Library {
     return CompletableFuture.completedFuture(Optional.empty());
   }
 
+  @Override
+  public void cleanup() {
+    // No cleanup needed
+  }
+
   /**
    * @param id the id of the token Lib:Token to get.
    * @return the Token for the library.
