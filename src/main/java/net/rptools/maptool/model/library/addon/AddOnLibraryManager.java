@@ -93,6 +93,7 @@ public class AddOnLibraryManager {
   public void deregisterLibrary(String namespace) {
     var removed = namespaceLibraryMap.remove(namespace.toLowerCase());
     if (removed != null) {
+      removed.cleanup();
       new MapToolEventBus()
           .getMainEventBus()
           .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
@@ -172,6 +173,9 @@ public class AddOnLibraryManager {
 
     if (libs.size() > 0) {
       new MapToolEventBus().getMainEventBus().post(new AddOnsRemovedEvent(libs));
+      for (var library : namespaceLibraryMap.values()) {
+        library.cleanup();
+      }
       namespaceLibraryMap.clear();
     }
   }
