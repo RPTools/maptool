@@ -25,7 +25,7 @@
 	    let toLog = []
 	    for (let key in arg) {
 		let tl = ""+serializeToString(key)+": "+serializeToString(arg[key]);
-		toLog.push(tl)
+		toLog.push(tl);
 	    }
 	    return "{ " + toLog.join(", ") + " }";
 	}
