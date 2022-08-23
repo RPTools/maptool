@@ -51,7 +51,7 @@
 	for (let r of REPLACEMENTS) {
 	    text = text.replace(r[0], r[1]);
 	}
-	MapTool.log(text);
+	MapTool.log('<pre>' + text + '</pre>');
 	
     };
 }
