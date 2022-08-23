@@ -1,9 +1,11 @@
 {
     "use strict";
     let REPLACEMENTS = [
-	['&', '&amp;'],
-	['<', '&lt;'],
-	['>', '&gt;']
+	[/&/g, '&#38;'],
+	[/\//g, '&#47;'],
+	[/</g, '&#60;'],
+	[/>/g, '&#62;'],
+	[/=/g, '&#62;'],
     ];
     let seen = [];
     let serializeToString = function(arg, topLevel) {
