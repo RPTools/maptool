@@ -6,7 +6,7 @@
 	['>', '&gt;']
     ];
     let seen = [];
-    let serializeToString = function(arg) {
+    let serializeToString = function(arg, topLevel) {
 	if (arg in seen && typeof arg == "object") {
 	    return "...";
 	}
@@ -29,7 +29,7 @@
 	    }
 	    return "{ " + toLog.join(", ") + " }";
 	}
-	if (typeof arg == "string") {
+	if (typeof arg == "string" && topLevel) {
 	    return arg;
 	}
 	try {
@@ -43,7 +43,7 @@
 	seen.length = 0;
 	let toLog = [];
 	for (let arg of args) {
-	    toLog.push(serializeToString(arg));
+	    toLog.push(serializeToString(arg, true));
 	}
 	let text = toLog.join(" ");
 	for (let r of REPLACEMENTS) {
