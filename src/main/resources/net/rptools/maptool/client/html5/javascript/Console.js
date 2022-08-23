@@ -29,6 +29,9 @@
 	    }
 	    return "{ " + toLog.join(", ") + " }";
 	}
+	if (typeof arg == "string") {
+	    return arg;
+	}
 	try {
 	    return JSON.stringify(arg);
 	}
