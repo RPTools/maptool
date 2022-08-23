@@ -1,5 +1,10 @@
 {
     "use strict";
+    let REPLACEMENTS = [
+	['&', '&amp;'],
+	['<', '&lt;'],
+	['>', '&gt;']
+    ];
     let seen = [];
     let serializeToString = function(arg) {
 	if (arg in seen && typeof arg == "object") {
@@ -37,7 +42,11 @@
 	for (let arg of args) {
 	    toLog.push(serializeToString(arg));
 	}
-	MapTool.log(toLog.join(" "));
+	let text = toLog.join(" ");
+	for (let r of REPLACEMENTS) {
+	    text = text.replace(r[0], r[1]);
+	}
+	MapTool.log(text);
 	
     };
 }
