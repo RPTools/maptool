@@ -2,7 +2,7 @@
     "use strict";
     let seen = [];
     let serializeToString = function(arg) {
-	if (arg in seen) {
+	if (arg in seen && typeof arg == "object") {
 	    return "...";
 	}
 	seen.push(arg);
