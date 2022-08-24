@@ -137,7 +137,7 @@ public class AreaMeta {
       vertices.add(first);
     }
 
-    isHole = Orientation.isCCW(vertices.toArray(Coordinate[]::new));
+    isHole = vertices.size() >= 4 && Orientation.isCCW(vertices.toArray(Coordinate[]::new));
 
     // Don't need this anymore
     path = null;
