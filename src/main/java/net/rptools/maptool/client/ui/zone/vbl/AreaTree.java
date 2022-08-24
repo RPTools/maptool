@@ -74,10 +74,12 @@ public class AreaTree {
           areaMeta.close();
 
           // Holes are oceans, solids are islands
-          if (areaMeta.isHole()) {
-            oceanList.add(new AreaOcean(areaMeta));
-          } else {
-            islandList.add(new AreaIsland(areaMeta));
+          if (!areaMeta.isEmpty()) {
+            if (areaMeta.isHole()) {
+              oceanList.add(new AreaOcean(areaMeta));
+            } else {
+              islandList.add(new AreaIsland(areaMeta));
+            }
           }
           break;
         case PathIterator.SEG_LINETO:
