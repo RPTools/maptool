@@ -46,6 +46,13 @@ public class AreaMeta {
     return new Area(area);
   }
 
+  /** @return true if this object does not have any edges. */
+  public boolean isEmpty() {
+    // Note: vertices is a closed loop, so we can only have edges if we have at least 3 points with
+    // which to form a line.
+    return vertices.size() < 3;
+  }
+
   /**
    * @param origin
    * @param faceAway If `true`, only return segments facing away from origin.
@@ -137,7 +144,7 @@ public class AreaMeta {
       vertices.add(first);
     }
 
-    isHole = Orientation.isCCW(vertices.toArray(Coordinate[]::new));
+    isHole = vertices.size() >= 4 && Orientation.isCCW(vertices.toArray(Coordinate[]::new));
 
     // Don't need this anymore
     path = null;
