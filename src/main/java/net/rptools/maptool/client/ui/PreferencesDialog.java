@@ -167,6 +167,8 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<String> jamLanguageOverrideComboBox;
   private final JLabel startupInfoLabel;
   private boolean jvmValuesChanged = false;
+
+  private boolean themeChanged = false;
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
@@ -933,6 +935,7 @@ public class PreferencesDialog extends JDialog {
   public void setVisible(boolean b) {
     if (b) {
       SwingUtil.centerOver(this, MapTool.getFrame());
+      themeChanged = false;
     }
     super.setVisible(b);
   }
@@ -1096,12 +1099,22 @@ public class PreferencesDialog extends JDialog {
     Arrays.stream(ThemeSupport.THEMES).map(ThemeDetails::name).forEach(listModel::addElement);
     themeList.setModel(listModel);
     themeList.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+    themeList.setSelectedValue(ThemeSupport.getTheme(), true);
     themeList.addListSelectionListener(
         e -> {
           if (!e.getValueIsAdjusting()) {
             String theme = themeList.getSelectedValue();
             if (theme != null) {
-              ThemeSupport.setTheme(theme);
+              if (!theme.equals(ThemeSupport.getTheme())) {
+                if (!themeChanged) {
+                  MapTool.showMessage(
+                      "PreferencesDialog.themeChangeWarning",
+                      "PreferencesDialog.themeChangeWarningTitle",
+                      JOptionPane.WARNING_MESSAGE);
+                }
+                ThemeSupport.setTheme(theme);
+                themeChanged = true;
+              }
             }
           }
         });

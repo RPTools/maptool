@@ -272,7 +272,7 @@ public class ThemeSupport {
             "Xcode Dark", com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class, null)
       };
 
-  private static final ThemeDetails currentThemeDetails = THEMES[0];
+  private static ThemeDetails currentThemeDetails = THEMES[0];
 
   private static IntelliJTheme.ThemeLaf currentLaf;
 
@@ -292,6 +292,7 @@ public class ThemeSupport {
       var laf = themeDetails.themeClass.getDeclaredConstructor().newInstance();
       UIManager.setLookAndFeel(themeDetails.themeClass.getDeclaredConstructor().newInstance());
       setLaf(laf);
+      currentThemeDetails = themeDetails;
     }
   }
 
