@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
@@ -44,6 +45,8 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
+import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
@@ -149,6 +152,9 @@ public class PreferencesDialog extends JDialog {
   private final JTextArea publicKeyTextArea;
   private final JButton regeneratePublicKey;
   private final JButton copyPublicKey;
+
+  // Themes
+  private final JList<String> themeList;
 
   // Startup
   private final JTextField jvmXmxTextField;
@@ -318,6 +324,8 @@ public class PreferencesDialog extends JDialog {
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
     copyPublicKey = (JButton) panel.getButton("copyKey");
+
+    themeList = (JList<String>) panel.getList("themeList");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -1082,6 +1090,20 @@ public class PreferencesDialog extends JDialog {
               () -> {
                 publicKeyTextArea.setText(cu.getEncodedPublicKeyText());
               });
+        });
+
+    var listModel = new DefaultListModel<String>();
+    Arrays.stream(ThemeSupport.THEMES).map(ThemeDetails::name).forEach(listModel::addElement);
+    themeList.setModel(listModel);
+    themeList.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
+    themeList.addListSelectionListener(
+        e -> {
+          if (!e.getValueIsAdjusting()) {
+            String theme = themeList.getSelectedValue();
+            if (theme != null) {
+              ThemeSupport.setTheme(theme);
+            }
+          }
         });
   }
 

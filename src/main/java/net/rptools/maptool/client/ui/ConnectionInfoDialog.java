@@ -53,7 +53,7 @@ public class ConnectionInfoDialog extends JDialog {
   public ConnectionInfoDialog(MapToolServer server) {
     super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    setSize(275, 200);
+    setSize(275, 275);
 
     FormPanel panel =
         new FormPanelI18N("net/rptools/maptool/client/ui/forms/connectionInfoDialog.xml");

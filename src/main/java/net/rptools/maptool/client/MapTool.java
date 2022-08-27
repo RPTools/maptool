@@ -71,6 +71,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
@@ -1688,7 +1689,6 @@ public class MapTool {
       // creating a frame, loading a splash screen, etc). So we do it here.
       System.setProperty("apple.laf.useScreenMenuBar", "true");
       System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
-      System.setProperty("apple.awt.brushMetalLook", "true");
     }
 
     // System properties
@@ -1728,10 +1728,12 @@ public class MapTool {
       // and mac
       if (AppUtil.MAC_OS_X) {
         UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        ThemeSupport.loadTheme();
+
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
-        loadTheme();
+        // loadTheme();
       }
       // If running on Windows based OS, CJK font is broken when using TinyLAF.
       // else if (WINDOWS) {
@@ -1739,8 +1741,8 @@ public class MapTool {
       // menuBar = new AppMenuBar();
       // }
       else {
-        UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-        loadTheme();
+        // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
+        ThemeSupport.loadTheme();
         menuBar = new AppMenuBar();
       }
 

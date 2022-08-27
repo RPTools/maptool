@@ -416,7 +416,7 @@ public class AppUtil {
    */
   public static Map<String, File> getUIThemeNames() {
     // Make sure there are themes installed
-    AppSetup.installDefaultUIThemes();
+    // TODO: CDW AppSetup.installDefaultUIThemes();
 
     Path themesDir = AppConstants.UI_THEMES_DIR.toPath();
 
