@@ -19,7 +19,6 @@ import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatab
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
-import de.muntjak.tinylookandfeel.Theme;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
@@ -1574,6 +1573,20 @@ public class MapTool {
     String versionImplementation = version;
     String versionOverride = version;
 
+    if (AppUtil.MAC_OS_X) {
+      // On OSX the menu bar at the top of the screen can be enabled at any time, but the
+      // title (ie. name of the application) has to be set before the GUI is initialized (by
+      // creating a frame, loading a splash screen, etc). So we do it here.
+      System.setProperty("apple.laf.useScreenMenuBar", "true");
+      String appName = "MapTool";
+      if (MapTool.isDevelopment()) {
+        appName += " (Development)";
+      }
+      System.setProperty("apple.awt.application.name", appName);
+      System.setProperty("apple.awt.application.appearance", "system");
+      System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
+    }
+
     if (MapTool.class.getPackage().getImplementationVersion() != null) {
       versionImplementation = MapTool.class.getPackage().getImplementationVersion().trim();
       log.info("getting MapTool version from manifest: " + versionImplementation);
@@ -1683,14 +1696,6 @@ public class MapTool {
       log.info("Current list of Macro Functions: " + logOutput);
     }
 
-    if (AppUtil.MAC_OS_X) {
-      // On OSX the menu bar at the top of the screen can be enabled at any time, but the
-      // title (ie. name of the application) has to be set before the GUI is initialized (by
-      // creating a frame, loading a splash screen, etc). So we do it here.
-      System.setProperty("apple.laf.useScreenMenuBar", "true");
-      System.setProperty("com.apple.mrj.application.apple.menu.about.name", "About MapTool...");
-    }
-
     // System properties
     System.setProperty("swing.aatext", "true");
 
@@ -1727,7 +1732,7 @@ public class MapTool {
       // That is, please don't move these lines around unless you test the result on windows
       // and mac
       if (AppUtil.MAC_OS_X) {
-        UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+        // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         ThemeSupport.loadTheme();
 
@@ -1797,36 +1802,5 @@ public class MapTool {
               });
         });
     // new Thread(new HeapSpy()).start();
-  }
-
-  private static void loadTheme()
-      throws ClassNotFoundException, InstantiationException, IllegalAccessException,
-          UnsupportedLookAndFeelException {
-    // After the TinyLAF library is initialized, look to see if there is a Default.theme
-    // in our AppHome directory and load it if there is. Unfortunately, changing the
-    // search path for the default theme requires subclassing TinyLAF and because
-    // we have both the original and a Mac version that gets cumbersome. (Really
-    // the Mac version should use the default and then install the keystroke differences
-    // but what we have works and I'm loathe to go playing with it at 1.3b87 -- yes, 87!)
-    File f2 = AppUtil.getThemeFile(AppUtil.getThemeName());
-    // File f = AppUtil.getAppHome("config");
-    // if (f.exists()) {
-    // File f2 = new File(f, "Default.theme");
-    if (f2 != null && f2.exists() && Theme.loadTheme(f2)) {
-      // re-install the Tiny Look and Feel
-      UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-
-      // Update the ComponentUIs for all Components. This
-      // needs to be invoked for all windows.
-      // SwingUtilities.updateComponentTreeUI(rootWindow);
-    } else {
-      showMessage(
-          "msg.error.cantLoadTheme",
-          "msg.error.cantLoadThemeTitle",
-          JOptionPane.WARNING_MESSAGE,
-          AppUtil.getThemeName());
-      AppUtil.setThemeName(AppConstants.DEFAULT_THEME_NAME);
-    }
-    // }
   }
 }

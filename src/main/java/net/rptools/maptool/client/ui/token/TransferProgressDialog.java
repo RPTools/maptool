@@ -89,7 +89,6 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
   }
 
   public void initTransferTable() {
-    // TODO: CDW getTransferTable().setBackground(Color.white);
     updateTransferTable();
   }
 

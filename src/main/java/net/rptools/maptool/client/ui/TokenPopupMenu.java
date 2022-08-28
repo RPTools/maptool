@@ -443,8 +443,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
             new JCheckBoxMenuItem(
                 standardColorActionConstructor.newInstance(
                     this, getRenderer(), selectedTokenSet, bgColor, displayName));
-        // TODO: CDW item.setBackground(bgColor);
-        // TODO: CDW item.setForeground(fgColor);
 
         if (bgColor.equals(selectedColor)) {
           item.setSelected(true);

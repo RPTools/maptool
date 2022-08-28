@@ -27,12 +27,22 @@ import java.util.Arrays;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.MapTool;
 
+/** Class used to implement Theme support for MapTool. */
 public class ThemeSupport {
 
+  /**
+   * Record that contains the details about a theme.
+   *
+   * @param name the name of the theme
+   * @param themeClass the class that implements the theme
+   * @param imagePath the path to an example image of the theme
+   */
   public record ThemeDetails(
       String name, Class<? extends IntelliJTheme.ThemeLaf> themeClass, String imagePath) {}
 
+  /** The list of themes that are available. */
   public static final ThemeDetails[] THEMES =
       new ThemeDetails[] {
         new ThemeDetails("Arc", com.formdev.flatlaf.intellijthemes.FlatArcIJTheme.class, null),
@@ -272,10 +282,21 @@ public class ThemeSupport {
             "Xcode Dark", com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class, null)
       };
 
+  /** The current theme being used. */
   private static ThemeDetails currentThemeDetails = THEMES[0];
 
+  /** The current look and feel in use. */
   private static IntelliJTheme.ThemeLaf currentLaf;
 
+  /**
+   * Loads the details of the theme to use.
+   *
+   * @throws NoSuchMethodException if there is an error finding the theme class.
+   * @throws InvocationTargetException if there is an error invoking the theme class.
+   * @throws InstantiationException if there is an error instantiating the theme class.
+   * @throws IllegalAccessException if there is an error accessing the theme class.
+   * @throws UnsupportedLookAndFeelException if the look and feel is not supported.
+   */
   public static void loadTheme()
       throws NoSuchMethodException, InvocationTargetException, InstantiationException,
           IllegalAccessException, UnsupportedLookAndFeelException {
@@ -296,10 +317,20 @@ public class ThemeSupport {
     }
   }
 
+  /**
+   * Sets the look and feel to use.
+   *
+   * @param laf the look and feel to use.
+   */
   private static void setLaf(ThemeLaf laf) {
     currentLaf = laf;
   }
 
+  /**
+   * Reads the theme from the settings file.
+   *
+   * @return the theme from the settings file.
+   */
   private static JsonObject readTheme() {
     try (InputStreamReader reader =
         new InputStreamReader(new FileInputStream(AppConstants.THEME_CONFIG_FILE))) {
@@ -309,22 +340,37 @@ public class ThemeSupport {
     }
   }
 
+  /**
+   * Writes the theme to the settings file.
+   *
+   * @param newTheme the theme to write.
+   */
   private static void writeTheme(ThemeDetails newTheme) {
     var json = toJSon(newTheme);
     try (FileWriter writer = new FileWriter(AppConstants.THEME_CONFIG_FILE)) {
       writer.write(json.toString());
     } catch (IOException e) {
-      // TODO: CDW
-      e.printStackTrace();
+      MapTool.showError("msg.error.cantSaveTheme", e);
     }
   }
 
+  /**
+   * Converts the theme details to a JSON object.
+   *
+   * @param theme the theme details to convert.
+   * @return the JSON object.
+   */
   private static JsonObject toJSon(ThemeDetails theme) {
     JsonObject json = new JsonObject();
     json.addProperty("theme", theme.name);
     return json;
   }
 
+  /**
+   * Sets the theme to use from the name.
+   *
+   * @param theme the name of the theme to use.
+   */
   public static void setTheme(String theme) {
     var newTheme =
         Arrays.stream(THEMES)
@@ -334,10 +380,20 @@ public class ThemeSupport {
     writeTheme(newTheme);
   }
 
+  /**
+   * Returns the current theme name.
+   *
+   * @return the current theme name.
+   */
   public static String getTheme() {
     return currentThemeDetails.name;
   }
 
+  /**
+   * Returns if the theme is a dark theme or not.
+   *
+   * @return if the theme is a dark theme or not.
+   */
   public static boolean isDark() {
     return currentLaf.isDark();
   }
