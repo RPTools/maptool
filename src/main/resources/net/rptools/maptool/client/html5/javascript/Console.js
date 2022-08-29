@@ -9,15 +9,19 @@
     ];
     let seen = [];
     let serializeToString = function(arg, topLevel) {
-	if (arg in seen && typeof arg == "object") {
-	    return "...";
+	if (typeof arg == "object") {
+	    if (seen.indexOf(arg) > -1) {
+		return "...";
+	    }
+	    seen.push(arg);
 	}
-	seen.push(arg);
+	
 	if (arg instanceof Array) {
 	    let toLog = [];
 	    for (let obj of arg) {
 		toLog.push(serializeToString(obj));
 	    }
+	    seen.pop();
 	    return '[ ' + toLog.join(', ') + ' ]';
 	}
 	if (arg instanceof Object) {
@@ -29,6 +33,7 @@
 		let tl = ""+serializeToString(key)+": "+serializeToString(arg[key]);
 		toLog.push(tl);
 	    }
+	    seen.pop();
 	    return "{ " + toLog.join(", ") + " }";
 	}
 	if (typeof arg == "string" && topLevel) {
