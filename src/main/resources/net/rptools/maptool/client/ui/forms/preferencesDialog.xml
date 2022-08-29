@@ -6343,7 +6343,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">367</at>
+                                   <at name="width">434</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave</at>
                                    <at name="fill">
@@ -6438,7 +6438,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">367</at>
+                                   <at name="width">434</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.save.reminder</at>
                                    <at name="fill">
@@ -6555,7 +6555,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">367</at>
+                                   <at name="width">434</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat</at>
                                    <at name="fill">
@@ -6650,7 +6650,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">367</at>
+                                   <at name="width">434</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat.filename</at>
                                    <at name="fill">
@@ -6765,7 +6765,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">367</at>
+                                   <at name="width">434</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.directory.sync</at>
                                    <at name="fill">
@@ -7293,7 +7293,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">449</at>
+                                        <at name="width">517</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.fillselection</at>
                                         <at name="fill">
@@ -7354,7 +7354,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">449</at>
+                                        <at name="width">517</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.cap</at>
                                         <at name="fill">
@@ -8327,7 +8327,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">369</at>
+                                        <at name="width">437</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.client.fitview</at>
                                         <at name="fill">
@@ -8388,7 +8388,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">369</at>
+                                        <at name="width">437</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.client.default.username</at>
                                         <at name="fill">
@@ -8583,7 +8583,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">449</at>
+                                        <at name="width">517</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.edit</at>
                                         <at name="fill">
@@ -8830,7 +8830,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">449</at>
+                                        <at name="width">517</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.permissions</at>
                                         <at name="fill">
@@ -9131,7 +9131,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">449</at>
+                                        <at name="width">517</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.upnp.timeout</at>
                                         <at name="fill">
@@ -9438,7 +9438,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.width</at>
                                    <at name="fill">
@@ -9567,7 +9567,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.opacity</at>
                                    <at name="fill">
@@ -9628,7 +9628,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.autoexpose</at>
                                    <at name="fill">
@@ -9744,7 +9744,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.aura.opacity</at>
                                    <at name="fill">
@@ -9805,7 +9805,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.light.opacity</at>
                                    <at name="fill">
@@ -9934,7 +9934,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.opacity</at>
                                    <at name="fill">
@@ -10029,7 +10029,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.color</at>
                                    <at name="fill">
@@ -10145,7 +10145,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.mapvisibilitywarning</at>
                                    <at name="fill">
@@ -10261,7 +10261,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">559</at>
+                                   <at name="width">626</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.darkness.opacity</at>
                                    <at name="fill">
@@ -11694,7 +11694,7 @@
                      </super>
                      <at name="id">embedded.100581004</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
-                     <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
+                     <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
                       <object classname="java.util.LinkedList">
                        <item >
@@ -11778,60 +11778,6 @@
                                </object>
                               </at>
                               <at name="height">794</at>
-                             </object>
-                            </at>
-                           </object>
-                          </at>
-                         </object>
-                        </at>
-                       </item>
-                       <item >
-                        <at name="value">
-                         <object classname="com.jeta.forms.store.memento.BeanMemento">
-                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
-                           <at name="cellconstraints">
-                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                             <at name="column">31</at>
-                             <at name="row">3</at>
-                             <at name="colspan">50</at>
-                             <at name="rowspan">50</at>
-                             <at name="halign">default</at>
-                             <at name="valign">default</at>
-                             <at name="insets" object="insets">0,0,0,0</at>
-                            </object>
-                           </at>
-                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-                          </super>
-                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-                          <at name="beanclass">com.jeta.forms.components.image.ImageComponent</at>
-                          <at name="beanproperties">
-                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-                            <at name="classname">com.jeta.forms.components.image.ImageComponent</at>
-                            <at name="properties">
-                             <object classname="com.jeta.forms.store.support.PropertyMap">
-                              <at name="border">
-                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
-                                <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                 <at name="name">border</at>
-                                </super>
-                                <at name="borders">
-                                 <object classname="java.util.LinkedList">
-                                  <item >
-                                   <at name="value">
-                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
-                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
-                                      <at name="name">border</at>
-                                     </super>
-                                    </object>
-                                   </at>
-                                  </item>
-                                 </object>
-                                </at>
-                               </object>
-                              </at>
-                              <at name="name">themeImage</at>
-                              <at name="width">796</at>
-                              <at name="height">796</at>
                              </object>
                             </at>
                            </object>
@@ -12123,6 +12069,66 @@
                          </object>
                         </at>
                        </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">31</at>
+                             <at name="row">3</at>
+                             <at name="colspan">65</at>
+                             <at name="rowspan">50</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="antiAliased">true</at>
+                              <at name="name">themeImage</at>
+                              <at name="width">1036</at>
+                              <at name="fill">
+                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                <at name="name">fill</at>
+                               </object>
+                              </at>
+                              <at name="height">796</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
                       </object>
                      </at>
                      <at name="properties">
@@ -12182,175 +12188,175 @@
                        <at name="rows">
                         <object classname="[Ljava.lang.Object;" size="57">
                          <at name="item" index="0">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="1">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="2">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="3">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="4">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="5">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="6">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="7">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="8">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="9">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="10">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="11">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="12">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="13">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="14">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="15">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="16">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="17">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="18">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="19">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="20">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="21">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="22">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="23">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="24">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="25">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="26">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="27">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="28">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="29">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="30">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="31">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="32">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="33">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="34">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="35">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="36">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="37">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="38">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="39">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="40">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="41">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="42">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="43">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="44">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="45">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="46">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="47">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="48">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="49">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="50">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="51">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="52">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="53">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="54">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="55">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="56">
-                          <object classname="[Ljava.lang.Object;" size="82"/>
+                          <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                         </object>
                        </at>
@@ -14009,7 +14015,7 @@
                                     </object>
                                    </at>
                                    <at name="name">startupInfoLabel</at>
-                                   <at name="width">938</at>
+                                   <at name="width">1073</at>
                                    <at name="text">startup.preferences.info</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -14245,7 +14251,7 @@
               </at>
              </object>
             </at>
-            <at name="width">1460</at>
+            <at name="width">1595</at>
             <at name="tabCount">7</at>
             <at name="height">1047</at>
            </object>
