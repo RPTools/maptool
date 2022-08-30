@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Insets;
 import java.awt.event.MouseAdapter;
@@ -67,7 +66,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initImagePanel() {
     imagePanel = new ImagePanel();
-    imagePanel.setBackground(Color.white);
     imagePanel.setModel(new LookupTableImagePanelModel(this));
     imagePanel.setSelectionMode(ImagePanel.SelectionMode.SINGLE);
     imagePanel.addMouseListener(

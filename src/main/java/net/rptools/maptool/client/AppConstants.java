@@ -83,4 +83,6 @@ public class AppConstants {
 
   public static final FilenameFilter CAMPAIGN_PROPERTIES_FILE_FILTER =
       (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+  public static final String THEME_CONFIG_FILE =
+      AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
 }

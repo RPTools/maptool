@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.Color;
 import java.awt.EventQueue;
 import java.io.File;
 import java.text.NumberFormat;
@@ -90,7 +89,6 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
   }
 
   public void initTransferTable() {
-    getTransferTable().setBackground(Color.white);
     updateTransferTable();
   }
 
