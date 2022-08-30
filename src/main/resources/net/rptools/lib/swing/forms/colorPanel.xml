@@ -24,7 +24,8 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">rplib\src\main\resources\net\rptools\lib\swing\forms\colorPanel.xml</at>
+   <at name="id">/Users/cwisniew/Development/rptools/maptool/src/main/resources/net/rptools/lib/swing/forms/colorPanel.xml</at>
+   <at name="path">resources/net/rptools/lib/swing/forms/colorPanel.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:8PX:NONE,CENTER:DEFAULT:NONE,CENTER:10PX:NONE,CENTER:DEFAULT:NONE,CENTER:6PX:NONE,CENTER:DEFAULT:NONE</at>
    <at name="colspecs">FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -46,7 +47,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.163054274</at>
+        <at name="id">embedded.1448712243</at>
         <at name="rowspecs">FILL:32PX:NONE</at>
         <at name="colspecs">FILL:32PX:NONE,FILL:DEFAULT:NONE,FILL:32PX:NONE</at>
         <at name="components">
@@ -218,7 +219,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1548976761</at>
+        <at name="id">embedded.326596367</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
@@ -843,7 +844,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.2144069144</at>
+        <at name="id">embedded.1419577388</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:25PX:NONE,FILL:25PX:NONE,FILL:25PX:NONE</at>
         <at name="components">
@@ -896,7 +897,7 @@
                  <at name="icon">
                   <object classname="com.jeta.forms.store.properties.IconProperty">
                    <at name="embedded">false</at>
-                   <at name="path">net\rptools\lib\image\icons\shape_handles.png</at>
+                   <at name="path">net/rptools/lib/image/icons/shape_handles.png</at>
                    <at name="description">shape_handles.png</at>
                    <at name="width">16</at>
                    <at name="height">16</at>
@@ -960,7 +961,7 @@
                  <at name="icon">
                   <object classname="com.jeta.forms.store.properties.IconProperty">
                    <at name="embedded">false</at>
-                   <at name="path">net\rptools\lib\image\icons\shape_handles.png</at>
+                   <at name="path">net/rptools/lib/image/icons/shape_handles.png</at>
                    <at name="description">shape_handles.png</at>
                    <at name="width">16</at>
                    <at name="height">16</at>
@@ -1024,7 +1025,7 @@
                  <at name="icon">
                   <object classname="com.jeta.forms.store.properties.IconProperty">
                    <at name="embedded">false</at>
-                   <at name="path">net\rptools\lib\image\icons\eraser.png</at>
+                   <at name="path">net/rptools/lib/image/icons/eraser.png</at>
                    <at name="description">eraser.png</at>
                    <at name="width">16</at>
                    <at name="height">16</at>
@@ -1058,7 +1059,7 @@
               </at>
              </object>
             </at>
-            <at name="name"></at>
+            <at name="name"/>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>
@@ -1140,79 +1141,11 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1785726373</at>
+        <at name="id">embedded.1408701679</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:4PX:GROW(1.0),CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:4PX:GROW(1.0),FILL:42PX:NONE</at>
         <at name="components">
          <object classname="java.util.LinkedList">
-          <item >
-           <at name="value">
-            <object classname="com.jeta.forms.store.memento.BeanMemento">
-             <super classname="com.jeta.forms.store.memento.ComponentMemento">
-              <at name="cellconstraints">
-               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                <at name="column">3</at>
-                <at name="row">1</at>
-                <at name="colspan">1</at>
-                <at name="rowspan">1</at>
-                <at name="halign">default</at>
-                <at name="valign">default</at>
-                <at name="insets" object="insets">0,0,0,0</at>
-               </object>
-              </at>
-              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-             </super>
-             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-             <at name="beanclass">javax.swing.JSpinner</at>
-             <at name="beanproperties">
-              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-               <at name="classname">javax.swing.JSpinner</at>
-               <at name="properties">
-                <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="name">penWidth</at>
-                 <at name="width">38</at>
-                 <at name="height">20</at>
-                </object>
-               </at>
-              </object>
-             </at>
-            </object>
-           </at>
-          </item>
-          <item >
-           <at name="value">
-            <object classname="com.jeta.forms.store.memento.BeanMemento">
-             <super classname="com.jeta.forms.store.memento.ComponentMemento">
-              <at name="cellconstraints">
-               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                <at name="column">3</at>
-                <at name="row">3</at>
-                <at name="colspan">1</at>
-                <at name="rowspan">1</at>
-                <at name="halign">default</at>
-                <at name="valign">default</at>
-                <at name="insets" object="insets">0,0,0,0</at>
-               </object>
-              </at>
-              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
-             </super>
-             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-             <at name="beanclass">javax.swing.JSpinner</at>
-             <at name="beanproperties">
-              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-               <at name="classname">javax.swing.JSpinner</at>
-               <at name="properties">
-                <object classname="com.jeta.forms.store.support.PropertyMap">
-                 <at name="name">opacity</at>
-                 <at name="width">38</at>
-                 <at name="height">20</at>
-                </object>
-               </at>
-              </object>
-             </at>
-            </object>
-           </at>
-          </item>
           <item >
            <at name="value">
             <object classname="com.jeta.forms.store.memento.BeanMemento">
@@ -1260,7 +1193,7 @@
                  <at name="icon">
                   <object classname="com.jeta.forms.store.properties.IconProperty">
                    <at name="embedded">false</at>
-                   <at name="path">net\rptools\lib\image\icons\paintbrush.png</at>
+                   <at name="path">net/rptools/lib/image/icons/paintbrush.png</at>
                    <at name="description">paintbrush.png</at>
                    <at name="width">16</at>
                    <at name="height">16</at>
@@ -1329,7 +1262,7 @@
                  <at name="icon">
                   <object classname="com.jeta.forms.store.properties.IconProperty">
                    <at name="embedded">false</at>
-                   <at name="path">net\rptools\lib\image\icons\contrast_high.png</at>
+                   <at name="path">net/rptools/lib/image/icons/contrast_high.png</at>
                    <at name="description">contrast_high.png</at>
                    <at name="width">16</at>
                    <at name="height">16</at>
@@ -1344,6 +1277,74 @@
                  </at>
                  <at name="toolTipText">ColorPicker.tooltip.opacity</at>
                  <at name="height">16</at>
+                </object>
+               </at>
+              </object>
+             </at>
+            </object>
+           </at>
+          </item>
+          <item >
+           <at name="value">
+            <object classname="com.jeta.forms.store.memento.BeanMemento">
+             <super classname="com.jeta.forms.store.memento.ComponentMemento">
+              <at name="cellconstraints">
+               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                <at name="column">2</at>
+                <at name="row">1</at>
+                <at name="colspan">2</at>
+                <at name="rowspan">1</at>
+                <at name="halign">default</at>
+                <at name="valign">default</at>
+                <at name="insets" object="insets">0,0,0,0</at>
+               </object>
+              </at>
+              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+             </super>
+             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+             <at name="beanclass">javax.swing.JSpinner</at>
+             <at name="beanproperties">
+              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+               <at name="classname">javax.swing.JSpinner</at>
+               <at name="properties">
+                <object classname="com.jeta.forms.store.support.PropertyMap">
+                 <at name="name">penWidth</at>
+                 <at name="width">56</at>
+                 <at name="height">21</at>
+                </object>
+               </at>
+              </object>
+             </at>
+            </object>
+           </at>
+          </item>
+          <item >
+           <at name="value">
+            <object classname="com.jeta.forms.store.memento.BeanMemento">
+             <super classname="com.jeta.forms.store.memento.ComponentMemento">
+              <at name="cellconstraints">
+               <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                <at name="column">2</at>
+                <at name="row">3</at>
+                <at name="colspan">2</at>
+                <at name="rowspan">1</at>
+                <at name="halign">default</at>
+                <at name="valign">default</at>
+                <at name="insets" object="insets">0,0,0,0</at>
+               </object>
+              </at>
+              <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+             </super>
+             <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+             <at name="beanclass">javax.swing.JSpinner</at>
+             <at name="beanproperties">
+              <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+               <at name="classname">javax.swing.JSpinner</at>
+               <at name="properties">
+                <object classname="com.jeta.forms.store.support.PropertyMap">
+                 <at name="name">opacity</at>
+                 <at name="width">56</at>
+                 <at name="height">21</at>
                 </object>
                </at>
               </object>
@@ -1368,7 +1369,7 @@
               </at>
              </object>
             </at>
-            <at name="name"></at>
+            <at name="name"/>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>
@@ -1456,7 +1457,7 @@
          </at>
         </object>
        </at>
-       <at name="name"></at>
+       <at name="name"/>
        <at name="fill">
         <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
          <at name="name">fill</at>

@@ -34,7 +34,7 @@ import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.plaf.metal.MetalSliderUI;
+import javax.swing.plaf.basic.BasicSliderUI;
 import net.rptools.lib.swing.ImagePanel;
 import net.rptools.lib.swing.ImagePanel.SelectionMode;
 import net.rptools.lib.swing.SelectionListener;
@@ -306,7 +306,7 @@ public class AssetPanel extends JComponent {
           I18N.getString("panel.Asset.ImageModel.slider.toolTip"));
 
       thumbnailPreviewSlider.setUI(
-          new MetalSliderUI() {
+          new BasicSliderUI() {
             @Override
             protected void scrollDueToClickInTrack(int direction) {
               int value = thumbnailPreviewSlider.getValue();
