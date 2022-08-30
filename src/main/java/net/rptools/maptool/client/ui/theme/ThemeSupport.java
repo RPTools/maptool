@@ -35,9 +35,7 @@ import net.rptools.maptool.client.MapTool;
 /** Class used to implement Theme support for MapTool. */
 public class ThemeSupport {
 
-  /**
-   * The path to the images detailing the theme.
-   */
+  /** The path to the images detailing the theme. */
   private static final String IMAGE_PATH = "/net/rptools/maptool/client/ui/themes/image/";
 
   /**
@@ -53,12 +51,15 @@ public class ThemeSupport {
   /** The list of themes that are available. */
   public static final ThemeDetails[] THEMES =
       new ThemeDetails[] {
-        new ThemeDetails("Arc", com.formdev.flatlaf.intellijthemes.FlatArcIJTheme.class,
-            "Arc.png"),
+        new ThemeDetails("Arc", com.formdev.flatlaf.intellijthemes.FlatArcIJTheme.class, "Arc.png"),
         new ThemeDetails(
-            "Arc - Orange", com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.class, "Arc-Orange.png"),
+            "Arc - Orange",
+            com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.class,
+            "Arc-Orange.png"),
         new ThemeDetails(
-            "Arc Dark", com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme.class, "Arc-Dark.png"),
+            "Arc Dark",
+            com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme.class,
+            "Arc-Dark.png"),
         new ThemeDetails(
             "Arc Dark (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkIJTheme.class,
@@ -92,13 +93,21 @@ public class ThemeSupport {
         new ThemeDetails(
             "Carbon", com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme.class, "Carbon.png"),
         new ThemeDetails(
-            "Cobalt 2", com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme.class, "Cobalt-2.png"),
+            "Cobalt 2",
+            com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme.class,
+            "Cobalt-2.png"),
         new ThemeDetails(
-            "Cyan Light", com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme.class, "Cyan-Light.png"),
+            "Cyan Light",
+            com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme.class,
+            "Cyan-Light.png"),
         new ThemeDetails(
-            "Dark Flat", com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme.class, "Dark-Flat.png"),
+            "Dark Flat",
+            com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme.class,
+            "Dark-Flat.png"),
         new ThemeDetails(
-            "Dark Purple", com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme.class, "Dark-Purple.png"),
+            "Dark Purple",
+            com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme.class,
+            "Dark-Purple.png"),
         new ThemeDetails(
             "Darcula", com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme.class, "Darcula.png"),
         new ThemeDetails(
@@ -142,7 +151,8 @@ public class ThemeSupport {
             "Gradianto Nature Green",
             com.formdev.flatlaf.intellijthemes.FlatGradiantoNatureGreenIJTheme.class,
             "Gradianto-Nature-Green.png"),
-        new ThemeDetails("Gray", com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme.class, "Gray.png"),
+        new ThemeDetails(
+            "Gray", com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme.class, "Gray.png"),
         new ThemeDetails(
             "Gruvbox Dark Hard",
             com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkHardIJTheme.class,
@@ -156,13 +166,17 @@ public class ThemeSupport {
             com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkSoftIJTheme.class,
             "Gruvbox-Dark-Soft.png"),
         new ThemeDetails(
-            "Hiberbee", com.formdev.flatlaf.intellijthemes.FlatHiberbeeDarkIJTheme.class, "Hiberbee.png"),
+            "Hiberbee",
+            com.formdev.flatlaf.intellijthemes.FlatHiberbeeDarkIJTheme.class,
+            "Hiberbee.png"),
         new ThemeDetails(
             "High Contrast",
             com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme.class,
             "High-Contrast.png"),
         new ThemeDetails(
-            "Light Flat", com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme.class, "Light-Flat.png"),
+            "Light Flat",
+            com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme.class,
+            "Light-Flat.png"),
         new ThemeDetails(
             "Light Owl (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlIJTheme.class,
@@ -226,7 +240,9 @@ public class ThemeSupport {
         new ThemeDetails(
             "Monocai", com.formdev.flatlaf.intellijthemes.FlatMonocaiIJTheme.class, "Monocai.png"),
         new ThemeDetails(
-            "Monokai Pro", com.formdev.flatlaf.intellijthemes.FlatMonokaiProIJTheme.class, "Monokai-Pro.png"),
+            "Monokai Pro",
+            com.formdev.flatlaf.intellijthemes.FlatMonokaiProIJTheme.class,
+            "Monokai-Pro.png"),
         new ThemeDetails(
             "Monokai Pro (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProIJTheme.class,
@@ -245,7 +261,8 @@ public class ThemeSupport {
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightContrastIJTheme
                 .class,
             "Moonlight-Contrast-Material.png"),
-        new ThemeDetails("Nord", com.formdev.flatlaf.intellijthemes.FlatNordIJTheme.class, "Nord.png"),
+        new ThemeDetails(
+            "Nord", com.formdev.flatlaf.intellijthemes.FlatNordIJTheme.class, "Nord.png"),
         new ThemeDetails(
             "Night Owl (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlIJTheme.class,
@@ -256,7 +273,9 @@ public class ThemeSupport {
                 .class,
             "Night-Owl-Contrast-Material.png"),
         new ThemeDetails(
-            "One Dark", com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme.class, "One-Dark.png"),
+            "One Dark",
+            com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme.class,
+            "One-Dark.png"),
         new ThemeDetails(
             "Solarized Dark",
             com.formdev.flatlaf.intellijthemes.FlatSolarizedDarkIJTheme.class,
@@ -284,11 +303,15 @@ public class ThemeSupport {
                 .class,
             "Solarized-Light-Contrast-Material.png"),
         new ThemeDetails(
-            "Spacegray", com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme.class, "Spacegray.png"),
+            "Spacegray",
+            com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme.class,
+            "Spacegray.png"),
         new ThemeDetails(
             "Vuesion", com.formdev.flatlaf.intellijthemes.FlatVuesionIJTheme.class, "Vuesion.png"),
         new ThemeDetails(
-            "Xcode Dark", com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class, "Xcode-Dark.png"),
+            "Xcode Dark",
+            com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class,
+            "Xcode-Dark.png"),
       };
 
   /** The current theme being used. */
@@ -409,6 +432,7 @@ public class ThemeSupport {
 
   /**
    * Returns an {@link ImageIcon} for an example of the current theme.
+   *
    * @param dimension the size of the image.
    * @return an {@link ImageIcon} for an example of the current theme.
    */
@@ -418,23 +442,28 @@ public class ThemeSupport {
 
   /**
    * Returns an {@link ImageIcon} for an example of the specified theme.
+   *
    * @param themeName the name of the theme to get the image for.
    * @param dimension the size of the image.
    * @return an {@link ImageIcon} for an example of the specified theme.
    */
   public static ImageIcon getExampleImageIcon(String themeName, Dimension dimension) {
-    ThemeDetails themeDetails = Arrays.stream(THEMES)
-        .filter(t -> t.name.equals(themeName))
-        .findFirst().orElse(null);
-    if (themeDetails == null || themeDetails.imagePath == null || themeDetails.imagePath.isEmpty()) {
+    ThemeDetails themeDetails =
+        Arrays.stream(THEMES).filter(t -> t.name.equals(themeName)).findFirst().orElse(null);
+    if (themeDetails == null
+        || themeDetails.imagePath == null
+        || themeDetails.imagePath.isEmpty()) {
       return new ImageIcon();
     } else {
-      var imageIcon =  new ImageIcon(
-          ThemeSupport.class.getResource(IMAGE_PATH + themeDetails.imagePath),
-          themeDetails.name);
+      var imageIcon =
+          new ImageIcon(
+              ThemeSupport.class.getResource(IMAGE_PATH + themeDetails.imagePath),
+              themeDetails.name);
       if (dimension != null && dimension.width > 0 && dimension.height > 0) {
-        imageIcon.setImage(imageIcon.getImage().getScaledInstance(dimension.width,
-            dimension.height, Image.SCALE_AREA_AVERAGING));
+        imageIcon.setImage(
+            imageIcon
+                .getImage()
+                .getScaledInstance(dimension.width, dimension.height, Image.SCALE_AREA_AVERAGING));
       }
       return imageIcon;
     }

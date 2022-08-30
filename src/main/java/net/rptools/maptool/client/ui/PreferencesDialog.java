@@ -155,7 +155,8 @@ public class PreferencesDialog extends JDialog {
 
   // Themes
   private final JList<String> themeList;
-  private final JLabel themeImageLabel;;
+  private final JLabel themeImageLabel;
+  ;
 
   // Startup
   private final JTextField jvmXmxTextField;
@@ -330,7 +331,6 @@ public class PreferencesDialog extends JDialog {
 
     themeList = (JList<String>) panel.getList("themeList");
     themeImageLabel = (JLabel) panel.getComponentByName("themeImage");
-
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -1099,7 +1099,10 @@ public class PreferencesDialog extends JDialog {
         });
 
     var listModel = new DefaultListModel<String>();
-    Arrays.stream(ThemeSupport.THEMES).map(ThemeDetails::name).sorted().forEach(listModel::addElement);
+    Arrays.stream(ThemeSupport.THEMES)
+        .map(ThemeDetails::name)
+        .sorted()
+        .forEach(listModel::addElement);
     themeList.setModel(listModel);
     themeList.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
     themeList.setSelectedValue(ThemeSupport.getTheme(), true);
@@ -1122,7 +1125,8 @@ public class PreferencesDialog extends JDialog {
                 ThemeSupport.setTheme(theme);
                 themeChanged = true;
               }
-              themeImageLabel.setIcon(ThemeSupport.getExampleImageIcon(theme, themeImageLabel.getSize()));
+              themeImageLabel.setIcon(
+                  ThemeSupport.getExampleImageIcon(theme, themeImageLabel.getSize()));
             }
           }
         });
