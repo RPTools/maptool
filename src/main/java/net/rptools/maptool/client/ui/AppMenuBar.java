@@ -23,7 +23,6 @@ import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
@@ -60,10 +59,6 @@ public class AppMenuBar extends JMenuBar {
     add(createViewMenu());
     add(createToolsMenu());
     add(createWindowMenu());
-    Map<String, File> themes = AppUtil.getUIThemeNames();
-    if (themes.size() > 0) {
-      add(createThemesMenu(themes));
-    }
     add(createHelpMenu());
     // shift to the right
     add(Box.createGlue());
@@ -481,26 +476,6 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
 
-    return menu;
-  }
-
-  private JMenu createThemesMenu(Map<String, File> themes) {
-    JMenu menu = I18N.createMenu("menu.themes");
-
-    for (Entry<String, File> theme : themes.entrySet()) {
-      menu.add(
-          new AbstractAction() {
-            {
-              putValue(Action.NAME, theme.getKey());
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              AppUtil.setThemeName(theme.getKey());
-              MapTool.showInformation(I18N.getText("msg.theme.needrestart"));
-            }
-          });
-    }
     return menu;
   }
 

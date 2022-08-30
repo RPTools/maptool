@@ -121,8 +121,6 @@ public class MacroButton extends JButton implements MouseListener {
   }
 
   public void setColor(String colorKey) {
-    // If the key doesn't correspond to one of our colors, then use the default
-    // FJE Why??
     if ("default".equals(colorKey)) {
       setBackground(null);
     } else {
@@ -142,13 +140,16 @@ public class MacroButton extends JButton implements MouseListener {
 
     String div = "<div style='font-size: " + properties.getFontSize() + "; text-align: center'>";
     String formatButtonLabel =
-        "<p style='color: "
-            + properties.getFontColorAsHtml()
-            + "; "
-            + getMinWidth()
-            + getMaxWidth()
-            + "'>"
-            + buttonLabel;
+        switch (properties.getFontColorKey()) {
+          case "", "default" -> "<p " + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
+          default -> "<p style='color: "
+              + properties.getFontColorAsHtml()
+              + "; "
+              + getMinWidth()
+              + getMaxWidth()
+              + "'>"
+              + buttonLabel;
+        };
 
     // if there is no hotkey (HOTKEY[0]) then no need to add hint
     String hotKey = properties.getHotKey();

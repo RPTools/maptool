@@ -35,6 +35,7 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
@@ -268,7 +269,7 @@ public abstract class AbstractButtonGroup extends JPanel
           }
         }
 
-        g.setColor(Color.BLACK);
+        g.setColor(UIManager.getColor("TitledBorder.titleColor"));
         g.drawString(label, strx + 3, (20 - stringHeight) / 2 + stringHeight - 2);
       }
     }
