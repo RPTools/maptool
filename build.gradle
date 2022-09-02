@@ -147,7 +147,8 @@ run {
                                  "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
                                  "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
                                  "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
+                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
 
@@ -199,7 +200,8 @@ runtime {
                    "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
                    "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
                    "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED"]
+                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -361,6 +363,12 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.19'
     implementation 'yasb:yasb:0.2-21012007'
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
+    implementation 'com.formdev:flatlaf:2.4'
+    implementation 'com.formdev:flatlaf-intellij-themes:2.4'
+    implementation 'com.formdev:flatlaf-extras:2.4'
+    implementation 'com.formdev:svgSalamander:1.1.3'
+    implementation 'com.formdev:flatlaf-jide-oss:2.4'
+
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
     implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 

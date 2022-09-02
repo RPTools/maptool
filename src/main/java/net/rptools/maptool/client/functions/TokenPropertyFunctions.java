@@ -1176,10 +1176,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @throws ParserException
    */
   private String getAllPropertyNames(String type, String delim) throws ParserException {
+    ArrayList<String> namesList = new ArrayList<String>();
     if (type == null || type.length() == 0 || type.equals("*")) {
       Map<String, List<TokenProperty>> pmap =
           MapTool.getCampaign().getCampaignProperties().getTokenTypeMap();
-      ArrayList<String> namesList = new ArrayList<String>();
 
       for (Entry<String, List<TokenProperty>> entry : pmap.entrySet()) {
         for (TokenProperty tp : entry.getValue()) {
@@ -1196,14 +1196,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
     } else {
       List<TokenProperty> props =
           MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(type);
-      if (props == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.tokenProperty.unknownPropType", "getAllPropertyNames", type));
-      }
-      ArrayList<String> namesList = new ArrayList<String>();
-      for (TokenProperty tp : props) {
-        namesList.add(tp.getName());
+      // If property type not found return an empty string or JSON array
+      if (props != null) {
+        for (TokenProperty tp : props) {
+          namesList.add(tp.getName());
+        }
       }
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();

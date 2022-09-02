@@ -1718,9 +1718,19 @@ public class Token extends BaseModel implements Cloneable {
    * @return The original value of the state, if any.
    */
   public Object setState(String aState, Object aValue) {
+    // the GUI sends null to mean remove a state/bar
     if (aValue == null) {
       return state.remove(aState);
     }
+    // setBarVisible sends a boolean to show/hide a bar
+    if (aValue instanceof Boolean) {
+      if ((Boolean) aValue) {
+        return state.put(aState, 1.0);
+      } else {
+        return state.remove(aState);
+      }
+    }
+    // Either enable a state or set the value of a bar
     return state.put(aState, aValue);
   }
 
@@ -2704,7 +2714,8 @@ public class Token extends BaseModel implements Cloneable {
         }
       case setImageAsset:
         setImageAsset(
-            parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
+            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
+            new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
