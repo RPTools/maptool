@@ -11,6 +11,7 @@ Feature release using OpenJDK 17
 - [#3542][i3542] `setTokenImage()` was throwing Null Pointer Exception. Fixed.
 - [#3540][i3540] UVTT import now supports file extensions used by other map creation tools (`.df2vtt` and `.uvtt`).
 - [#3515][i3515] User language now availabe through `getInfo("client")` and `MapTool.clientInfo.getUserLanguage()` in JavaScript.
+- [#3519][i3519] Improved lighting performance.
 - [#3506][i3506] Updated `MapTool.log()` to varargs.
 - [#3503][i3503] html5 javascript contexts now know their own identity and can get their user data.
 - [#3464][i3464] New functions to determine if client is hosting or not. Info also available through `getInfo("client")` now.
@@ -92,6 +93,7 @@ Feature release using OpenJDK 17
 [i3534]: https://github.com/RPTools/maptool/issues/3534
 [i3530]: https://github.com/RPTools/maptool/issues/3530
 [i3521]: https://github.com/RPTools/maptool/issues/3521
+[i3519]: https://github.com/RPTools/maptool/issues/3519
 [i3515]: https://github.com/RPTools/maptool/issues/3515
 [i3514]: https://github.com/RPTools/maptool/issues/3514
 [i3510]: https://github.com/RPTools/maptool/issues/3510
