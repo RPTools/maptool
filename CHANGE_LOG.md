@@ -26,6 +26,7 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3574][i3574] Properties section of Edit Token dialog throwing exceptions. Fixed.
 - [#3571][i3571] Some sections of Token/Map Preferences not visible with new theme engine. Fixed.
 - [#3561][i3561] Some VBL triggers error regarding orientation. Fixed.
 - [#3558][i3558] `setBarVisible()` throwing NPE. Fixed.
@@ -81,6 +82,14 @@ Feature release using OpenJDK 17
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
 [i]: https://github.com/RPTools/maptool/issues/
+[i3574]: https://github.com/RPTools/maptool/issues/3574
+[i3571]: https://github.com/RPTools/maptool/issues/3571
+[i3567]: https://github.com/RPTools/maptool/issues/3567
+[i3561]: https://github.com/RPTools/maptool/issues/3561
+[i3558]: https://github.com/RPTools/maptool/issues/3558
+[i3542]: https://github.com/RPTools/maptool/issues/3542
+[i3540]: https://github.com/RPTools/maptool/issues/3540
+[i3534]: https://github.com/RPTools/maptool/issues/3534
 [i3530]: https://github.com/RPTools/maptool/issues/3530
 [i3521]: https://github.com/RPTools/maptool/issues/3521
 [i3515]: https://github.com/RPTools/maptool/issues/3515
@@ -88,6 +97,7 @@ Feature release using OpenJDK 17
 [i3510]: https://github.com/RPTools/maptool/issues/3510
 [i3506]: https://github.com/RPTools/maptool/issues/3506
 [i3503]: https://github.com/RPTools/maptool/issues/3503
+[i3500]: https://github.com/RPTools/maptool/issues/3500
 [i3498]: https://github.com/RPTools/maptool/issues/3498
 [i3489]: https://github.com/RPTools/maptool/issues/3489
 [i3488]: https://github.com/RPTools/maptool/issues/3488
@@ -105,12 +115,16 @@ Feature release using OpenJDK 17
 [i3434]: https://github.com/RPTools/maptool/issues/3434
 [i3425]: https://github.com/RPTools/maptool/issues/3425
 [i3398]: https://github.com/RPTools/maptool/issues/3398
+[i3387]: https://github.com/RPTools/maptool/issues/3387
 [i3360]: https://github.com/RPTools/maptool/issues/3360
 [i3359]: https://github.com/RPTools/maptool/issues/3359
+[i3356]: https://github.com/RPTools/maptool/issues/3356
 [i3350]: https://github.com/RPTools/maptool/issues/3350
 [i3346]: https://github.com/RPTools/maptool/issues/3346
 [i3342]: https://github.com/RPTools/maptool/issues/3342
+[i3334]: https://github.com/RPTools/maptool/issues/3334
 [i3331]: https://github.com/RPTools/maptool/issues/3331
+[i3322]: https://github.com/RPTools/maptool/issues/3322
 [i3320]: https://github.com/RPTools/maptool/issues/3320
 [i3311]: https://github.com/RPTools/maptool/issues/3311
 [i3298]: https://github.com/RPTools/maptool/issues/3298
@@ -123,6 +137,7 @@ Feature release using OpenJDK 17
 [i3231]: https://github.com/RPTools/maptool/issues/3231
 [i3218]: https://github.com/RPTools/maptool/issues/3218
 [i3146]: https://github.com/RPTools/maptool/issues/3146
+[i3102]: https://github.com/RPTools/maptool/issues/3102
 [i3101]: https://github.com/RPTools/maptool/issues/3101
 [i3052]: https://github.com/RPTools/maptool/issues/3052
 [i2764]: https://github.com/RPTools/maptool/issues/2764
@@ -130,4 +145,6 @@ Feature release using OpenJDK 17
 [i2730]: https://github.com/RPTools/maptool/issues/2730
 [i2348]: https://github.com/RPTools/maptool/issues/2348
 [i2094]: https://github.com/RPTools/maptool/issues/2094
+[i1931]: https://github.com/RPTools/maptool/issues/1931
+[i1904]: https://github.com/RPTools/maptool/issues/1904
 [i1550]: https://github.com/RPTools/maptool/issues/1550
