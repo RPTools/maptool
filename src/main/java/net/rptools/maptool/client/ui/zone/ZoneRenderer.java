@@ -841,15 +841,16 @@ public class ZoneRenderer extends JComponent
     Graphics2D g2d = (Graphics2D) g;
 
     timer.start("paintComponent:allocateBuffer");
-    final var bounds = g2d.getClipBounds();
-    tempBufferPool.setWidth(bounds.width);
-    tempBufferPool.setHeight(bounds.height);
+    tempBufferPool.setWidth(getSize().width);
+    tempBufferPool.setHeight(getSize().height);
     tempBufferPool.setConfiguration(g2d.getDeviceConfiguration());
     timer.stop("paintComponent:allocateBuffer");
 
     try (final var bufferHandle = tempBufferPool.acquire()) {
       final var buffer = bufferHandle.get();
       final var bufferG2d = buffer.createGraphics();
+      // Keep the clip so we don't render more than we have to.
+      bufferG2d.setClip(g2d.getClip());
 
       timer.start("paintComponent:createView");
       PlayerView pl = getPlayerView();
