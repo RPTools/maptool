@@ -5,7 +5,7 @@
 	[/\//g, '&#47;'],
 	[/</g, '&#60;'],
 	[/>/g, '&#62;'],
-	[/=/g, '&#62;'],
+	[/=/g, '&#61;'],
     ];
     let seen = [];
     let serializeToString = function(arg, topLevel) {
