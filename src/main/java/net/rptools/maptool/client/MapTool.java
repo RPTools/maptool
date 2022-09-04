@@ -1343,6 +1343,12 @@ public class MapTool {
 
           defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
           defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
+
+
+          defaults.put("DockableFrame.inactiveTitleBackground", UIManager.getColor("InternalFrame.inactiveTitleBackground"));
+          defaults.put("DockableFrame.inactiveTitleForeground", UIManager.getColor("InternalFrame.inactiveTitleForeground"));
+          defaults.put("DockableFrame.activeTitleBackground", UIManager.getColor("InternalFrame.activeTitleBackground"));
+          defaults.put("DockableFrame.activeTitleForeground", UIManager.getColor("InternalFrame.activeTitleForeground"));
         };
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
   }
