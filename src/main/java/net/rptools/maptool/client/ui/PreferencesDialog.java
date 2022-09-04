@@ -156,7 +156,8 @@ public class PreferencesDialog extends JDialog {
   // Themes
   private final JList<String> themeList;
   private final JLabel themeImageLabel;
-  ;
+
+  private final JLabel themeNameLabel;
 
   // Startup
   private final JTextField jvmXmxTextField;
@@ -331,6 +332,7 @@ public class PreferencesDialog extends JDialog {
 
     themeList = (JList<String>) panel.getList("themeList");
     themeImageLabel = (JLabel) panel.getComponentByName("themeImage");
+    themeNameLabel = (JLabel) panel.getComponentByName("currentThemeName");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
     jvmXmxTextField.setToolTipText(I18N.getText("prefs.jvm.xmx.tooltip"));
@@ -1105,7 +1107,7 @@ public class PreferencesDialog extends JDialog {
         .forEach(listModel::addElement);
     themeList.setModel(listModel);
     themeList.setSelectionMode(DefaultListSelectionModel.SINGLE_SELECTION);
-    themeList.setSelectedValue(ThemeSupport.getTheme(), true);
+    themeList.setSelectedValue(ThemeSupport.getThemeName(), true);
     SwingUtilities.invokeLater(
         () -> {
           themeImageLabel.setIcon(ThemeSupport.getExampleImageIcon(themeImageLabel.getSize()));
@@ -1115,7 +1117,7 @@ public class PreferencesDialog extends JDialog {
           if (!e.getValueIsAdjusting()) {
             String theme = themeList.getSelectedValue();
             if (theme != null) {
-              if (!theme.equals(ThemeSupport.getTheme())) {
+              if (!theme.equals(ThemeSupport.getThemeName())) {
                 if (!themeChanged) {
                   MapTool.showMessage(
                       "PreferencesDialog.themeChangeWarning",
@@ -1130,6 +1132,7 @@ public class PreferencesDialog extends JDialog {
             }
           }
         });
+    themeNameLabel.setText(ThemeSupport.getThemeName());
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */

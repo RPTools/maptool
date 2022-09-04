@@ -18,6 +18,7 @@ import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.IntelliJTheme.ThemeLaf;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.jidesoft.plaf.LookAndFeelFactory;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.io.FileInputStream;
@@ -27,6 +28,7 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import javax.swing.ImageIcon;
+import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
@@ -344,6 +346,8 @@ public class ThemeSupport {
     if (themeDetails != null) {
       var laf = themeDetails.themeClass.getDeclaredConstructor().newInstance();
       UIManager.setLookAndFeel(themeDetails.themeClass.getDeclaredConstructor().newInstance());
+      LookAndFeelFactory.installJideExtension();
+      UIDefaults defaults = UIManager.getLookAndFeelDefaults();
       setLaf(laf);
       currentThemeDetails = themeDetails;
     }
@@ -417,8 +421,16 @@ public class ThemeSupport {
    *
    * @return the current theme name.
    */
-  public static String getTheme() {
+  public static String getThemeName() {
     return currentThemeDetails.name;
+  }
+
+  /**
+   * Returns the current theme information.
+   * @return the current theme information.
+   */
+  public static ThemeDetails getCurrentThemeDetails() {
+    return currentThemeDetails;
   }
 
   /**
