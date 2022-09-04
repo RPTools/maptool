@@ -34,6 +34,7 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
+import javax.swing.UIManager;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -122,7 +123,7 @@ public class MacroButton extends JButton implements MouseListener {
 
   public void setColor(String colorKey) {
     if ("default".equals(colorKey)) {
-      setBackground(null);
+      updateUI(); // Reset to Theme default
     } else {
       setBackground(MapToolUtil.getColor(colorKey));
     }
@@ -144,7 +145,7 @@ public class MacroButton extends JButton implements MouseListener {
           case "", "default" -> "<p " + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
           default -> "<p style='color: "
               + properties.getFontColorAsHtml()
-              + "; "
+              + " "
               + getMinWidth()
               + getMaxWidth()
               + "'>"
