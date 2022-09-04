@@ -6367,7 +6367,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">486</at>
+                                   <at name="width">489</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave</at>
                                    <at name="fill">
@@ -6462,7 +6462,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">486</at>
+                                   <at name="width">489</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.save.reminder</at>
                                    <at name="fill">
@@ -6579,7 +6579,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">486</at>
+                                   <at name="width">489</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat</at>
                                    <at name="fill">
@@ -6674,7 +6674,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">486</at>
+                                   <at name="width">489</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.autosave.chat.filename</at>
                                    <at name="fill">
@@ -6789,7 +6789,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">486</at>
+                                   <at name="width">489</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.directory.sync</at>
                                    <at name="fill">
@@ -7317,7 +7317,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">569</at>
+                                        <at name="width">571</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.fillselection</at>
                                         <at name="fill">
@@ -7378,7 +7378,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">569</at>
+                                        <at name="width">571</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.performance.cap</at>
                                         <at name="fill">
@@ -8351,7 +8351,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">489</at>
+                                        <at name="width">491</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.client.fitview</at>
                                         <at name="fill">
@@ -8412,7 +8412,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">489</at>
+                                        <at name="width">491</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.client.default.username</at>
                                         <at name="fill">
@@ -8607,7 +8607,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">569</at>
+                                        <at name="width">571</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.edit</at>
                                         <at name="fill">
@@ -8854,7 +8854,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">569</at>
+                                        <at name="width">571</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.macros.permissions</at>
                                         <at name="fill">
@@ -9155,7 +9155,7 @@
                                           </at>
                                          </object>
                                         </at>
-                                        <at name="width">569</at>
+                                        <at name="width">571</at>
                                         <at name="name"/>
                                         <at name="text">Preferences.label.upnp.timeout</at>
                                         <at name="fill">
@@ -9462,7 +9462,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.width</at>
                                    <at name="fill">
@@ -9591,7 +9591,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.opacity</at>
                                    <at name="fill">
@@ -9652,7 +9652,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.autoexpose</at>
                                    <at name="fill">
@@ -9768,7 +9768,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.aura.opacity</at>
                                    <at name="fill">
@@ -9829,7 +9829,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.light.opacity</at>
                                    <at name="fill">
@@ -9958,7 +9958,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.opacity</at>
                                    <at name="fill">
@@ -10053,7 +10053,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.halo.color</at>
                                    <at name="fill">
@@ -10169,7 +10169,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.fog.mapvisibilitywarning</at>
                                    <at name="fill">
@@ -10285,7 +10285,7 @@
                                      </at>
                                     </object>
                                    </at>
-                                   <at name="width">678</at>
+                                   <at name="width">681</at>
                                    <at name="name"/>
                                    <at name="text">Preferences.label.darkness.opacity</at>
                                    <at name="fill">
@@ -11280,7 +11280,7 @@
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
                      <at name="id">embedded.587514275</at>
-                     <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
+                     <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
                       <object classname="java.util.LinkedList">
@@ -11331,7 +11331,7 @@
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">themeList</at>
-                              <at name="width">498</at>
+                              <at name="width">503</at>
                               <at name="items">
                                <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                 <at name="name">items</at>
@@ -11434,12 +11434,131 @@
                        </item>
                        <item >
                         <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">2</at>
+                             <at name="row">1</at>
+                             <at name="colspan">1</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="name"></at>
+                              <at name="width">116</at>
+                              <at name="text">Label.currentTheme</at>
+                              <at name="fill">
+                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                <at name="name">fill</at>
+                               </object>
+                              </at>
+                              <at name="height">15</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
+                         <object classname="com.jeta.forms.store.memento.BeanMemento">
+                          <super classname="com.jeta.forms.store.memento.ComponentMemento">
+                           <at name="cellconstraints">
+                            <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
+                             <at name="column">4</at>
+                             <at name="row">1</at>
+                             <at name="colspan">10</at>
+                             <at name="rowspan">1</at>
+                             <at name="halign">default</at>
+                             <at name="valign">default</at>
+                             <at name="insets" object="insets">0,0,0,0</at>
+                            </object>
+                           </at>
+                           <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
+                          </super>
+                          <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
+                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanproperties">
+                           <object classname="com.jeta.forms.store.memento.PropertiesMemento">
+                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="properties">
+                             <object classname="com.jeta.forms.store.support.PropertyMap">
+                              <at name="border">
+                               <object classname="com.jeta.forms.store.properties.CompoundBorderProperty">
+                                <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                 <at name="name">border</at>
+                                </super>
+                                <at name="borders">
+                                 <object classname="java.util.LinkedList">
+                                  <item >
+                                   <at name="value">
+                                    <object classname="com.jeta.forms.store.properties.DefaultBorderProperty">
+                                     <super classname="com.jeta.forms.store.properties.BorderProperty">
+                                      <at name="name">border</at>
+                                     </super>
+                                    </object>
+                                   </at>
+                                  </item>
+                                 </object>
+                                </at>
+                               </object>
+                              </at>
+                              <at name="name">currentThemeName</at>
+                              <at name="width">156</at>
+                              <at name="fill">
+                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                                <at name="name">fill</at>
+                               </object>
+                              </at>
+                              <at name="height">12</at>
+                             </object>
+                            </at>
+                           </object>
+                          </at>
+                         </object>
+                        </at>
+                       </item>
+                       <item >
+                        <at name="value">
                          <object classname="com.jeta.forms.store.memento.FormMemento">
                           <super classname="com.jeta.forms.store.memento.ComponentMemento">
                            <at name="cellconstraints">
                             <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                              <at name="column">2</at>
-                             <at name="row">54</at>
+                             <at name="row">56</at>
                              <at name="colspan">25</at>
                              <at name="rowspan">1</at>
                              <at name="halign">default</at>
@@ -11512,7 +11631,7 @@
                                     </object>
                                    </at>
                                    <at name="name">macroEditorThemeCombo</at>
-                                   <at name="width">336</at>
+                                   <at name="width">341</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -11645,7 +11764,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="name"/>
+                              <at name="name"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -11723,8 +11842,8 @@
                            <at name="cellconstraints">
                             <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
                              <at name="column">2</at>
-                             <at name="row">1</at>
-                             <at name="colspan">1</at>
+                             <at name="row">54</at>
+                             <at name="colspan">23</at>
                              <at name="rowspan">1</at>
                              <at name="halign">default</at>
                              <at name="valign">default</at>
@@ -11761,8 +11880,8 @@
                                </object>
                               </at>
                               <at name="name"></at>
-                              <at name="width">116</at>
-                              <at name="text">Label.currentTheme</at>
+                              <at name="width">468</at>
+                              <at name="text">Label.useThemeForChat</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -11782,9 +11901,9 @@
                           <super classname="com.jeta.forms.store.memento.ComponentMemento">
                            <at name="cellconstraints">
                             <object classname="com.jeta.forms.store.memento.CellConstraintsMemento">
-                             <at name="column">4</at>
-                             <at name="row">1</at>
-                             <at name="colspan">10</at>
+                             <at name="column">26</at>
+                             <at name="row">54</at>
+                             <at name="colspan">1</at>
                              <at name="rowspan">1</at>
                              <at name="halign">default</at>
                              <at name="valign">default</at>
@@ -11794,10 +11913,10 @@
                            <at name="componentclass">com.jeta.forms.gui.form.StandardComponent</at>
                           </super>
                           <at name="jetabeanclass">com.jeta.forms.gui.beans.JETABean</at>
-                          <at name="beanclass">com.jeta.forms.components.label.JETALabel</at>
+                          <at name="beanclass">javax.swing.JCheckBox</at>
                           <at name="beanproperties">
                            <object classname="com.jeta.forms.store.memento.PropertiesMemento">
-                            <at name="classname">com.jeta.forms.components.label.JETALabel</at>
+                            <at name="classname">javax.swing.JCheckBox</at>
                             <at name="properties">
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="border">
@@ -11820,14 +11939,9 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="name">currentThemeName</at>
-                              <at name="width">156</at>
-                              <at name="fill">
-                               <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
-                                <at name="name">fill</at>
-                               </object>
-                              </at>
-                              <at name="height">12</at>
+                              <at name="name">useThemeForChat</at>
+                              <at name="width">17</at>
+                              <at name="height">17</at>
                              </object>
                             </at>
                            </object>
@@ -11892,7 +12006,7 @@
                      <at name="cellpainters">
                       <object classname="com.jeta.forms.store.support.Matrix">
                        <at name="rows">
-                        <object classname="[Ljava.lang.Object;" size="57">
+                        <object classname="[Ljava.lang.Object;" size="59">
                          <at name="item" index="0">
                           <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
@@ -12062,6 +12176,12 @@
                           <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                          <at name="item" index="56">
+                          <object classname="[Ljava.lang.Object;" size="98"/>
+                         </at>
+                         <at name="item" index="57">
+                          <object classname="[Ljava.lang.Object;" size="98"/>
+                         </at>
+                         <at name="item" index="58">
                           <object classname="[Ljava.lang.Object;" size="98"/>
                          </at>
                         </object>
@@ -14161,14 +14281,14 @@
                                     </object>
                                    </at>
                                    <at name="name">startupInfoLabel</at>
-                                   <at name="width">1177</at>
+                                   <at name="width">1182</at>
                                    <at name="text">startup.preferences.info</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
                                     </object>
                                    </at>
-                                   <at name="height">902</at>
+                                   <at name="height">939</at>
                                   </object>
                                  </at>
                                 </object>
@@ -14397,9 +14517,9 @@
               </at>
              </object>
             </at>
-            <at name="width">1699</at>
+            <at name="width">1704</at>
             <at name="tabCount">7</at>
-            <at name="height">1050</at>
+            <at name="height">1087</at>
            </object>
           </at>
          </object>

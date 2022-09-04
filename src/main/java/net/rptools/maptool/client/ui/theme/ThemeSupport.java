@@ -41,6 +41,25 @@ public class ThemeSupport {
   private static final String IMAGE_PATH = "/net/rptools/maptool/client/ui/themes/image/";
 
   /**
+   * Should the the chat window use the themes colors.
+   * @return true if the chat window should use the themes colors.
+   */
+  public static boolean shouldUseThemeColorsForChat() {
+    return useThemeColorsForChat;
+  }
+
+  /**
+   * Should the the chat window use the themes colors.
+   * @param useThemeColorsForChat true if the chat window should use the themes colors.
+   */
+  public static void setUseThemeColorsForChat(boolean useThemeColorsForChat) {
+    if (ThemeSupport.useThemeColorsForChat != useThemeColorsForChat) {
+      ThemeSupport.useThemeColorsForChat = useThemeColorsForChat;
+      writeTheme();
+    }
+  }
+
+  /**
    * Record that contains the details about a theme.
    *
    * @param name the name of the theme
@@ -319,8 +338,14 @@ public class ThemeSupport {
   /** The current theme being used. */
   private static ThemeDetails currentThemeDetails = THEMES[0];
 
+  /** The theme that will be applied after restart. */
+  private static ThemeDetails pendingThemeDetails = currentThemeDetails;
+
   /** The current look and feel in use. */
   private static IntelliJTheme.ThemeLaf currentLaf;
+
+  /** Should the chat window use the colors from the theme. */
+  private static boolean useThemeColorsForChat = false;
 
   /**
    * Loads the details of the theme to use.
@@ -337,6 +362,9 @@ public class ThemeSupport {
     JsonObject theme = readTheme();
 
     String themeName = theme.getAsJsonPrimitive("theme").getAsString();
+    if (theme.has("useThemeColorsForChat")) {
+      useThemeColorsForChat = theme.getAsJsonPrimitive("useThemeColorsForChat").getAsBoolean();
+    }
 
     ThemeDetails themeDetails =
         Arrays.stream(THEMES)
@@ -347,9 +375,9 @@ public class ThemeSupport {
       var laf = themeDetails.themeClass.getDeclaredConstructor().newInstance();
       UIManager.setLookAndFeel(themeDetails.themeClass.getDeclaredConstructor().newInstance());
       LookAndFeelFactory.installJideExtension();
-      UIDefaults defaults = UIManager.getLookAndFeelDefaults();
       setLaf(laf);
       currentThemeDetails = themeDetails;
+      pendingThemeDetails = themeDetails;
     }
   }
 
@@ -378,11 +406,10 @@ public class ThemeSupport {
 
   /**
    * Writes the theme to the settings file.
-   *
-   * @param newTheme the theme to write.
    */
-  private static void writeTheme(ThemeDetails newTheme) {
-    var json = toJSon(newTheme);
+  private static void writeTheme() {
+    var json = toJSon(pendingThemeDetails);
+    json.addProperty("useThemeColorsForChat", useThemeColorsForChat);
     try (FileWriter writer = new FileWriter(AppConstants.THEME_CONFIG_FILE)) {
       writer.write(json.toString());
     } catch (IOException e) {
@@ -408,12 +435,14 @@ public class ThemeSupport {
    * @param theme the name of the theme to use.
    */
   public static void setTheme(String theme) {
-    var newTheme =
+    pendingThemeDetails =
         Arrays.stream(THEMES)
             .filter(t -> t.name.equals(theme))
             .findFirst()
             .orElse(currentThemeDetails);
-    writeTheme(newTheme);
+    if (pendingThemeDetails != currentThemeDetails) {
+      writeTheme();
+    }
   }
 
   /**
@@ -479,5 +508,21 @@ public class ThemeSupport {
       }
       return imageIcon;
     }
+  }
+
+  /**
+   * Returns if there is a a new theme that will be applied after the restart.
+   * @return if there is a a new theme that will be applied after the restart.
+   */
+  public static boolean needsRestartForNewTheme() {
+    return pendingThemeDetails != currentThemeDetails;
+  }
+
+  /**
+   * Returns what the theme will be after a restart of MapTool.
+   * @return what the theme will be after a restart of MapTool.
+   */
+  public static String getThemeAfterRestart() {
+    return pendingThemeDetails.name;
   }
 }
