@@ -240,6 +240,12 @@ public class PreferencesDialog extends JDialog {
             dispose();
           }
           MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
+          if (ThemeSupport.needsRestartForNewTheme()) {
+            MapTool.showMessage(
+                "PreferencesDialog.themeChangeWarning",
+                "PreferencesDialog.themeChangeWarningTitle",
+                JOptionPane.WARNING_MESSAGE);
+          }
         });
 
     tabbedPane = panel.getTabbedPane("TabPane");
@@ -1118,20 +1124,9 @@ public class PreferencesDialog extends JDialog {
         e -> {
           if (!e.getValueIsAdjusting()) {
             String theme = themeList.getSelectedValue();
-            if (theme != null) {
-              if (!theme.equals(ThemeSupport.getThemeName())) {
-                if (!themeChanged) {
-                  MapTool.showMessage(
-                      "PreferencesDialog.themeChangeWarning",
-                      "PreferencesDialog.themeChangeWarningTitle",
-                      JOptionPane.WARNING_MESSAGE);
-                }
-                ThemeSupport.setTheme(theme);
-                themeChanged = true;
-              }
-              themeImageLabel.setIcon(
-                  ThemeSupport.getExampleImageIcon(theme, themeImageLabel.getSize()));
-            }
+            ThemeSupport.setTheme(theme);
+            themeImageLabel.setIcon(
+                ThemeSupport.getExampleImageIcon(theme, themeImageLabel.getSize()));
           }
         });
     themeNameLabel.setText(ThemeSupport.getThemeName());

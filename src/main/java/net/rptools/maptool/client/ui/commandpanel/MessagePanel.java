@@ -41,6 +41,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.util.MessageUtil;
 
@@ -64,6 +65,9 @@ public class MessagePanel extends JPanel {
     textPane = new JEditorPane();
     textPane.setEditable(false);
     textPane.setEditorKit(new MessagePanelEditorKit());
+    if (ThemeSupport.shouldUseThemeColorsForChat()) {
+      textPane.setUI(new javax.swing.plaf.basic.BasicEditorPaneUI());
+    }
     textPane.addComponentListener(
         new ComponentListener() {
           public void componentHidden(ComponentEvent e) {}

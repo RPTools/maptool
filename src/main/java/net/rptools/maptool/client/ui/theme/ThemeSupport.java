@@ -19,6 +19,7 @@ import com.formdev.flatlaf.IntelliJTheme.ThemeLaf;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
+import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.io.FileInputStream;
@@ -35,6 +36,28 @@ import net.rptools.maptool.client.MapTool;
 
 /** Class used to implement Theme support for MapTool. */
 public class ThemeSupport {
+
+  public enum ThemeColor {
+    YELLOW("ColorPalette.yellow"),
+    ORANGE("ColorPalette.orange"),
+    GREEN("ColorPalette.green"),
+    WHITE("ColorPalette.white"),
+    RED("ColorPalette.red"),
+    GRAY("ColorPalette.gray"),
+    BLUE("ColorPalette.blue"),
+    PURPLE("ColorPalette.purple");
+
+    private final String propertyName;
+
+    ThemeColor(String propertyName) {
+      this.propertyName = propertyName;
+    }
+    ;
+
+    String getPropertyName() {
+      return propertyName;
+    }
+  }
 
   /** The path to the images detailing the theme. */
   private static final String IMAGE_PATH = "/net/rptools/maptool/client/ui/themes/image/";
@@ -348,6 +371,8 @@ public class ThemeSupport {
   /** Should the chat window use the colors from the theme. */
   private static boolean useThemeColorsForChat = false;
 
+  private static boolean startupUseThemeColorsForChat = false;
+
   /**
    * Loads the details of the theme to use.
    *
@@ -365,6 +390,7 @@ public class ThemeSupport {
     String themeName = theme.getAsJsonPrimitive("theme").getAsString();
     if (theme.has("useThemeColorsForChat")) {
       useThemeColorsForChat = theme.getAsJsonPrimitive("useThemeColorsForChat").getAsBoolean();
+      startupUseThemeColorsForChat = useThemeColorsForChat;
     }
 
     ThemeDetails themeDetails =
@@ -439,9 +465,7 @@ public class ThemeSupport {
             .filter(t -> t.name.equals(theme))
             .findFirst()
             .orElse(currentThemeDetails);
-    if (pendingThemeDetails != currentThemeDetails) {
-      writeTheme();
-    }
+    writeTheme();
   }
 
   /**
@@ -516,7 +540,8 @@ public class ThemeSupport {
    * @return if there is a a new theme that will be applied after the restart.
    */
   public static boolean needsRestartForNewTheme() {
-    return pendingThemeDetails != currentThemeDetails;
+    return useThemeColorsForChat != startupUseThemeColorsForChat
+        || !pendingThemeDetails.equals(currentThemeDetails);
   }
 
   /**
@@ -526,5 +551,15 @@ public class ThemeSupport {
    */
   public static String getThemeAfterRestart() {
     return pendingThemeDetails.name;
+  }
+
+  /**
+   * Returns one of the named theme colors.
+   *
+   * @param themeColor the color to return.
+   * @return the color.
+   */
+  public static Color getThemeColor(ThemeColor themeColor) {
+    return UIManager.getColor(themeColor.getPropertyName());
   }
 }
