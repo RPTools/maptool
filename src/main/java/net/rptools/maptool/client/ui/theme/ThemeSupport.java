@@ -28,7 +28,6 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import javax.swing.ImageIcon;
-import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
@@ -42,6 +41,7 @@ public class ThemeSupport {
 
   /**
    * Should the the chat window use the themes colors.
+   *
    * @return true if the chat window should use the themes colors.
    */
   public static boolean shouldUseThemeColorsForChat() {
@@ -50,6 +50,7 @@ public class ThemeSupport {
 
   /**
    * Should the the chat window use the themes colors.
+   *
    * @param useThemeColorsForChat true if the chat window should use the themes colors.
    */
   public static void setUseThemeColorsForChat(boolean useThemeColorsForChat) {
@@ -404,9 +405,7 @@ public class ThemeSupport {
     }
   }
 
-  /**
-   * Writes the theme to the settings file.
-   */
+  /** Writes the theme to the settings file. */
   private static void writeTheme() {
     var json = toJSon(pendingThemeDetails);
     json.addProperty("useThemeColorsForChat", useThemeColorsForChat);
@@ -456,6 +455,7 @@ public class ThemeSupport {
 
   /**
    * Returns the current theme information.
+   *
    * @return the current theme information.
    */
   public static ThemeDetails getCurrentThemeDetails() {
@@ -512,6 +512,7 @@ public class ThemeSupport {
 
   /**
    * Returns if there is a a new theme that will be applied after the restart.
+   *
    * @return if there is a a new theme that will be applied after the restart.
    */
   public static boolean needsRestartForNewTheme() {
@@ -520,6 +521,7 @@ public class ThemeSupport {
 
   /**
    * Returns what the theme will be after a restart of MapTool.
+   *
    * @return what the theme will be after a restart of MapTool.
    */
   public static String getThemeAfterRestart() {

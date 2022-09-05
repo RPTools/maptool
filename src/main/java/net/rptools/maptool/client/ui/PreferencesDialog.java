@@ -1136,7 +1136,10 @@ public class PreferencesDialog extends JDialog {
         });
     themeNameLabel.setText(ThemeSupport.getThemeName());
     useThemeForChat.setSelected(ThemeSupport.shouldUseThemeColorsForChat());
-    useThemeForChat.addActionListener(l -> { ThemeSupport.setUseThemeColorsForChat(useThemeForChat.isSelected()); });
+    useThemeForChat.addActionListener(
+        l -> {
+          ThemeSupport.setUseThemeColorsForChat(useThemeForChat.isSelected());
+        });
   }
 
   /** Utility method to create and set the selected item for LocalizedComboItem combo box models. */
