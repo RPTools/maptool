@@ -91,272 +91,346 @@ public class ThemeSupport {
    * @param imagePath the path to an example image of the theme
    */
   public record ThemeDetails(
-      String name, Class<? extends IntelliJTheme.ThemeLaf> themeClass, String imagePath) {}
+      String name,
+      Class<? extends IntelliJTheme.ThemeLaf> themeClass,
+      String imagePath,
+      boolean dark) {}
 
   /** The list of themes that are available. */
   public static final ThemeDetails[] THEMES =
       new ThemeDetails[] {
-        new ThemeDetails("Arc", com.formdev.flatlaf.intellijthemes.FlatArcIJTheme.class, "Arc.png"),
+        new ThemeDetails(
+            "Arc", com.formdev.flatlaf.intellijthemes.FlatArcIJTheme.class, "Arc.png", false),
         new ThemeDetails(
             "Arc - Orange",
             com.formdev.flatlaf.intellijthemes.FlatArcOrangeIJTheme.class,
-            "Arc-Orange.png"),
+            "Arc-Orange.png",
+            false),
         new ThemeDetails(
             "Arc Dark",
             com.formdev.flatlaf.intellijthemes.FlatArcDarkIJTheme.class,
-            "Arc-Dark.png"),
+            "Arc-Dark.png",
+            true),
         new ThemeDetails(
             "Arc Dark (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkIJTheme.class,
-            "Arc-Dark-Material.png"),
+            "Arc-Dark-Material.png",
+            true),
         new ThemeDetails(
             "Arc Dark Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatArcDarkContrastIJTheme.class,
-            "Arc-Dark-Contrast-Material.png"),
+            "Arc-Dark-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "Arc Dark - Orange",
             com.formdev.flatlaf.intellijthemes.FlatArcDarkOrangeIJTheme.class,
-            "Arc-Dark-Orange.png"),
+            "Arc-Dark-Orange.png",
+            true),
         new ThemeDetails(
             "Atom One Dark (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkIJTheme.class,
-            "Atom-One-Dark-Material.png"),
+            "Atom-One-Dark-Material.png",
+            true),
         new ThemeDetails(
             "Atom One Dark Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneDarkContrastIJTheme
                 .class,
-            "Atom-One-Dark-Contrast-Material.png"),
+            "Atom-One-Dark-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "Atom One Light (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightIJTheme.class,
-            "Atom-One-Light-Material.png"),
+            "Atom-One-Light-Material.png",
+            false),
         new ThemeDetails(
             "Atom One Light Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatAtomOneLightContrastIJTheme
                 .class,
-            "Atom-One-Light-Contrast-Material.png"),
+            "Atom-One-Light-Contrast-Material.png",
+            false),
         new ThemeDetails(
-            "Carbon", com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme.class, "Carbon.png"),
+            "Carbon",
+            com.formdev.flatlaf.intellijthemes.FlatCarbonIJTheme.class,
+            "Carbon.png",
+            true),
         new ThemeDetails(
             "Cobalt 2",
             com.formdev.flatlaf.intellijthemes.FlatCobalt2IJTheme.class,
-            "Cobalt-2.png"),
+            "Cobalt-2.png",
+            true),
         new ThemeDetails(
             "Cyan Light",
             com.formdev.flatlaf.intellijthemes.FlatCyanLightIJTheme.class,
-            "Cyan-Light.png"),
+            "Cyan-Light.png",
+            false),
         new ThemeDetails(
             "Dark Flat",
             com.formdev.flatlaf.intellijthemes.FlatDarkFlatIJTheme.class,
-            "Dark-Flat.png"),
+            "Dark-Flat.png",
+            true),
         new ThemeDetails(
             "Dark Purple",
             com.formdev.flatlaf.intellijthemes.FlatDarkPurpleIJTheme.class,
-            "Dark-Purple.png"),
+            "Dark-Purple.png",
+            true),
         new ThemeDetails(
-            "Darcula", com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme.class, "Darcula.png"),
+            "Darcula",
+            com.formdev.flatlaf.intellijthemes.FlatDraculaIJTheme.class,
+            "Darcula.png",
+            true),
         new ThemeDetails(
             "Darcula (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaIJTheme.class,
-            "Darcula-Material.png"),
+            "Darcula-Material.png",
+            true),
         new ThemeDetails(
             "Darcula Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatDraculaContrastIJTheme.class,
-            "Darcula-Contrast-Material.png"),
+            "Darcula-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "GitHub (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubIJTheme.class,
-            "GitHub-Material.png"),
+            "GitHub-Material.png",
+            false),
         new ThemeDetails(
             "GitHub Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubContrastIJTheme.class,
-            "GitHub-Contrast-Material.png"),
+            "GitHub-Contrast-Material.png",
+            false),
         new ThemeDetails(
             "GitHub Dark (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkIJTheme.class,
-            "GitHub-Dark-Material.png"),
+            "GitHub-Dark-Material.png",
+            true),
         new ThemeDetails(
             "GitHub Dark Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatGitHubDarkContrastIJTheme
                 .class,
-            "GitHub-Dark-Contrast-Material.png"),
+            "GitHub-Dark-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "Gradianto Dark Fuchsia",
             com.formdev.flatlaf.intellijthemes.FlatGradiantoDarkFuchsiaIJTheme.class,
-            "Gradianto-Dark-Fuchsia.png"),
+            "Gradianto-Dark-Fuchsia.png",
+            true),
         new ThemeDetails(
             "Gradianto Deep Ocean",
             com.formdev.flatlaf.intellijthemes.FlatGradiantoDeepOceanIJTheme.class,
-            "Gradianto-Deep-Ocean.png"),
+            "Gradianto-Deep-Ocean.png",
+            true),
         new ThemeDetails(
             "Gradianto Midnight Blue",
             com.formdev.flatlaf.intellijthemes.FlatGradiantoMidnightBlueIJTheme.class,
-            "Gradianto-Midnight-Blue.png"),
+            "Gradianto-Midnight-Blue.png",
+            true),
         new ThemeDetails(
             "Gradianto Nature Green",
             com.formdev.flatlaf.intellijthemes.FlatGradiantoNatureGreenIJTheme.class,
-            "Gradianto-Nature-Green.png"),
+            "Gradianto-Nature-Green.png",
+            true),
         new ThemeDetails(
-            "Gray", com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme.class, "Gray.png"),
+            "Gray", com.formdev.flatlaf.intellijthemes.FlatGrayIJTheme.class, "Gray.png", false),
         new ThemeDetails(
             "Gruvbox Dark Hard",
             com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkHardIJTheme.class,
-            "Gruvbox-Dark-Hard.png"),
+            "Gruvbox-Dark-Hard.png",
+            true),
         new ThemeDetails(
             "Gruvbox Dark Medium",
             com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkMediumIJTheme.class,
-            "Gruvbox-Dark-Medium.png"),
+            "Gruvbox-Dark-Medium.png",
+            true),
         new ThemeDetails(
             "Gruvbox Dark Soft",
             com.formdev.flatlaf.intellijthemes.FlatGruvboxDarkSoftIJTheme.class,
-            "Gruvbox-Dark-Soft.png"),
+            "Gruvbox-Dark-Soft.png",
+            true),
         new ThemeDetails(
             "Hiberbee",
             com.formdev.flatlaf.intellijthemes.FlatHiberbeeDarkIJTheme.class,
-            "Hiberbee.png"),
+            "Hiberbee.png",
+            true),
         new ThemeDetails(
             "High Contrast",
             com.formdev.flatlaf.intellijthemes.FlatHighContrastIJTheme.class,
-            "High-Contrast.png"),
+            "High-Contrast.png",
+            true),
         new ThemeDetails(
             "Light Flat",
             com.formdev.flatlaf.intellijthemes.FlatLightFlatIJTheme.class,
-            "Light-Flat.png"),
+            "Light-Flat.png",
+            false),
         new ThemeDetails(
             "Light Owl (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlIJTheme.class,
-            "Light-Owl-Material.png"),
+            "Light-Owl-Material.png",
+            false),
         new ThemeDetails(
             "Light Owl Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatLightOwlContrastIJTheme
                 .class,
-            "Light-Owl-Contrast-Material.png"),
+            "Light-Owl-Contrast-Material.png",
+            false),
         new ThemeDetails(
             "Material Design Dark",
             com.formdev.flatlaf.intellijthemes.FlatMaterialDesignDarkIJTheme.class,
-            "Material-Design-Dark.png"),
+            "Material-Design-Dark.png",
+            true),
         new ThemeDetails(
             "Material Darker",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerIJTheme.class,
-            "Material-Darker.png"),
+            "Material-Darker.png",
+            true),
         new ThemeDetails(
             "Material Darker Contrast",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDarkerContrastIJTheme
                 .class,
-            "Material-Darker-Contrast.png"),
+            "Material-Darker-Contrast.png",
+            true),
         new ThemeDetails(
             "Material Deep Ocean",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialDeepOceanIJTheme
                 .class,
-            "Material-Deep-Ocean.png"),
+            "Material-Deep-Ocean.png",
+            true),
         new ThemeDetails(
             "Material Deep Ocean Contrast",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite
                 .FlatMaterialDeepOceanContrastIJTheme.class,
-            "Material-Deep-Ocean-Contrast.png"),
+            "Material-Deep-Ocean-Contrast.png",
+            true),
         new ThemeDetails(
             "Material Lighter",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme.class,
-            "Material-Lighter.png"),
+            "Material-Lighter.png",
+            false),
         new ThemeDetails(
             "Material Lighter Contrast",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite
                 .FlatMaterialLighterContrastIJTheme.class,
-            "Material-Lighter-Contrast.png"),
+            "Material-Lighter-Contrast.png",
+            false),
         new ThemeDetails(
             "Material Oceanic",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialOceanicIJTheme.class,
-            "Material-Oceanic.png"),
+            "Material-Oceanic.png",
+            true),
         new ThemeDetails(
             "Material Oceanic Contrast",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite
                 .FlatMaterialOceanicContrastIJTheme.class,
-            "Material-Oceanic-Contrast.png"),
+            "Material-Oceanic-Contrast.png",
+            true),
         new ThemeDetails(
             "Material Palenight",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialPalenightIJTheme
                 .class,
-            "Material-Palenight.png"),
+            "Material-Palenight.png",
+            true),
         new ThemeDetails(
             "Material Palenight Contrast",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite
                 .FlatMaterialPalenightContrastIJTheme.class,
-            "Material-Palenight-Contrast.png"),
+            "Material-Palenight-Contrast.png",
+            true),
         new ThemeDetails(
-            "Monocai", com.formdev.flatlaf.intellijthemes.FlatMonocaiIJTheme.class, "Monocai.png"),
+            "Monocai",
+            com.formdev.flatlaf.intellijthemes.FlatMonocaiIJTheme.class,
+            "Monocai.png",
+            true),
         new ThemeDetails(
             "Monokai Pro",
             com.formdev.flatlaf.intellijthemes.FlatMonokaiProIJTheme.class,
-            "Monokai-Pro.png"),
+            "Monokai-Pro.png",
+            true),
         new ThemeDetails(
             "Monokai Pro (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProIJTheme.class,
-            "Monokai-Pro-Material.png"),
+            "Monokai-Pro-Material.png",
+            true),
         new ThemeDetails(
             "Monokai Pro Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMonokaiProContrastIJTheme
                 .class,
-            "Monokai-Pro-Contrast-Material.png"),
+            "Monokai-Pro-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "Moonlight (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightIJTheme.class,
-            "Moonlight-Material.png"),
+            "Moonlight-Material.png",
+            true),
         new ThemeDetails(
             "Moonlight Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMoonlightContrastIJTheme
                 .class,
-            "Moonlight-Contrast-Material.png"),
+            "Moonlight-Contrast-Material.png",
+            true),
         new ThemeDetails(
-            "Nord", com.formdev.flatlaf.intellijthemes.FlatNordIJTheme.class, "Nord.png"),
+            "Nord", com.formdev.flatlaf.intellijthemes.FlatNordIJTheme.class, "Nord.png", true),
         new ThemeDetails(
             "Night Owl (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlIJTheme.class,
-            "Night-Owl-Material.png"),
+            "Night-Owl-Material.png",
+            true),
         new ThemeDetails(
             "Night Owl Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatNightOwlContrastIJTheme
                 .class,
-            "Night-Owl-Contrast-Material.png"),
+            "Night-Owl-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "One Dark",
             com.formdev.flatlaf.intellijthemes.FlatOneDarkIJTheme.class,
-            "One-Dark.png"),
+            "One-Dark.png",
+            true),
         new ThemeDetails(
             "Solarized Dark",
             com.formdev.flatlaf.intellijthemes.FlatSolarizedDarkIJTheme.class,
-            "Solarized-Dark.png"),
+            "Solarized-Dark.png",
+            true),
         new ThemeDetails(
             "Solarized Dark (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkIJTheme.class,
-            "Solarized-Dark-Material.png"),
+            "Solarized-Dark-Material.png",
+            true),
         new ThemeDetails(
             "Solarized Dark Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedDarkContrastIJTheme
                 .class,
-            "Solarized-Dark-Contrast-Material.png"),
+            "Solarized-Dark-Contrast-Material.png",
+            true),
         new ThemeDetails(
             "Solarized Light",
             com.formdev.flatlaf.intellijthemes.FlatSolarizedLightIJTheme.class,
-            "Solarized-Light.png"),
+            "Solarized-Light.png",
+            false),
         new ThemeDetails(
             "Solarized Light (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightIJTheme.class,
-            "Solarized-Light-Material.png"),
+            "Solarized-Light-Material.png",
+            false),
         new ThemeDetails(
             "Solarized Light Contrast (Material)",
             com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatSolarizedLightContrastIJTheme
                 .class,
-            "Solarized-Light-Contrast-Material.png"),
+            "Solarized-Light-Contrast-Material.png",
+            false),
         new ThemeDetails(
             "Spacegray",
             com.formdev.flatlaf.intellijthemes.FlatSpacegrayIJTheme.class,
-            "Spacegray.png"),
+            "Spacegray.png",
+            true),
         new ThemeDetails(
-            "Vuesion", com.formdev.flatlaf.intellijthemes.FlatVuesionIJTheme.class, "Vuesion.png"),
+            "Vuesion",
+            com.formdev.flatlaf.intellijthemes.FlatVuesionIJTheme.class,
+            "Vuesion.png",
+            true),
         new ThemeDetails(
             "Xcode Dark",
             com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class,
-            "Xcode-Dark.png"),
+            "Xcode-Dark.png",
+            true),
       };
 
   /** The current theme being used. */
