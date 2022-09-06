@@ -836,26 +836,47 @@ public class ZoneRenderer extends JComponent
     timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
     timer.clear();
     timer.setThreshold(10);
+    timer.start("paintComponent");
 
     Graphics2D g2d = (Graphics2D) g;
 
-    timer.start("paintComponent:createView");
-    PlayerView pl = getPlayerView();
-    timer.stop("paintComponent:createView");
+    timer.start("paintComponent:allocateBuffer");
+    tempBufferPool.setWidth(getSize().width);
+    tempBufferPool.setHeight(getSize().height);
+    tempBufferPool.setConfiguration(g2d.getDeviceConfiguration());
+    timer.stop("paintComponent:allocateBuffer");
 
-    renderZone(g2d, pl);
-    int noteVPos = 20;
-    if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
+    try (final var bufferHandle = tempBufferPool.acquire()) {
+      final var buffer = bufferHandle.get();
+      final var bufferG2d = buffer.createGraphics();
+      // Keep the clip so we don't render more than we have to.
+      bufferG2d.setClip(g2d.getClip());
 
-    if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
-      GraphicsUtil.drawBoxedString(
-          g2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
-      noteVPos += 20;
+      timer.start("paintComponent:createView");
+      PlayerView pl = getPlayerView();
+      timer.stop("paintComponent:createView");
+
+      renderZone(bufferG2d, pl);
+      int noteVPos = 20;
+      if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
+
+      if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
+        GraphicsUtil.drawBoxedString(
+            bufferG2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
+        noteVPos += 20;
+      }
+      if (AppState.isShowAsPlayer()) {
+        GraphicsUtil.drawBoxedString(
+            bufferG2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
+      }
+
+      timer.start("paintComponent:renderBuffer");
+      bufferG2d.dispose();
+      g2d.drawImage(buffer, null, 0, 0);
+      timer.stop("paintComponent:renderBuffer");
     }
-    if (AppState.isShowAsPlayer()) {
-      GraphicsUtil.drawBoxedString(
-          g2d, I18N.getText("zone.player_view"), getSize().width / 2, noteVPos);
-    }
+
+    timer.stop("paintComponent");
     if (timer.isEnabled()) {
       String results = timer.toString();
       MapTool.getProfilingNoteFrame().addText(results);
@@ -1422,6 +1443,14 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
+   * Cache of images for rendering overlays.
+   *
+   * <p>Size is set to two: one for the buffer to draw the entire zone, and one for drawing each
+   * overlay in turn.
+   */
+  private final BufferedImagePool tempBufferPool = new BufferedImagePool(2);
+
+  /**
    * Cached set of lights arranged by lumens for some stability. TODO Token draw order would be
    * nice.
    */
@@ -1436,18 +1465,22 @@ public class ZoneRenderer extends JComponent
    */
   private void renderLights(Graphics2D g, PlayerView view) {
     // Collect and organize lights
-    timer.start("lights-1");
+    timer.start("renderLights:getLights");
     if (drawableLights == null) {
+      timer.start("renderLights:populateCache");
       drawableLights = new ArrayList<>(zoneView.getDrawableLights(view));
       drawableLights.removeIf(light -> light.getType() != LightSource.Type.NORMAL);
+      timer.stop("renderLights:populateCache");
     }
+    timer.start("renderLights:filterLights");
     final var darknessLights =
         drawableLights.stream().filter(light -> light.getLumens() < 0).toList();
     final var nonDarknessLights =
         drawableLights.stream().filter(light -> light.getLumens() >= 0).toList();
-    timer.stop("lights-1");
+    timer.stop("renderLights:filterLights");
+    timer.stop("renderLights:getLights");
 
-    timer.start("lights-2");
+    timer.start("renderLights:renderLightOverlay");
     renderLightOverlay(
         g,
         new BlendingComposite(BlendingComposite.Operation.SCREEN),
@@ -1455,8 +1488,10 @@ public class ZoneRenderer extends JComponent
         nonDarknessLights,
         new Color(255, 255, 255, 255),
         AppPreferences.getLightOverlayOpacity() / 255.0f);
+    timer.stop("renderLights:renderLightOverlay");
     // Players should not be able to discern the nature of the darkness, so we always render it as
     // black for them.
+    timer.start("renderLights:renderDarknessOverlay");
     renderLightOverlay(
         g,
         view.isGMView()
@@ -1466,7 +1501,7 @@ public class ZoneRenderer extends JComponent
         darknessLights,
         new Color(0, 0, 0, 255),
         view.isGMView() ? (AppPreferences.getDarknessOverlayOpacity() / 255.0f) : 1.0f);
-    timer.stop("lights-2");
+    timer.stop("renderLights:renderDarknessOverlay");
   }
 
   /** Holds the auras from lightSourceMap after they have been combined. */
@@ -1481,13 +1516,13 @@ public class ZoneRenderer extends JComponent
    */
   private void renderAuras(Graphics2D g, PlayerView view) {
     // Setup
-    timer.start("auras-1");
+    timer.start("renderAuras:getAuras");
     if (drawableAuras == null) {
       drawableAuras = new ArrayList<>(zoneView.getLights(LightSource.Type.AURA));
     }
-    timer.stop("auras-1");
+    timer.stop("renderAuras:getAuras");
 
-    timer.start("auras-2");
+    timer.start("renderAuras:renderAuraOverlay");
     renderLightOverlay(
         g,
         new BlendingComposite(BlendingComposite.Operation.SCREEN),
@@ -1495,7 +1530,7 @@ public class ZoneRenderer extends JComponent
         drawableAuras,
         new Color(255, 255, 255, 150),
         AppPreferences.getAuraOverlayOpacity() / 255.0f);
-    timer.stop("auras-2");
+    timer.stop("renderAuras:renderAuraOverlay");
   }
 
   /**
@@ -1516,53 +1551,58 @@ public class ZoneRenderer extends JComponent
       List<DrawableLight> lights,
       Paint defaultPaint,
       float overlayOpacity) {
+    if (lights.isEmpty()) {
+      // No points spending resources accomplishing nothing.
+      return;
+    }
+
     // Set up a buffer image for lights to be drawn onto before the map
-    timer.start("light-overlay-1");
-    BufferedImage lightOverlay =
-        new BufferedImage(
-            g.getClip().getBounds().width,
-            g.getClip().getBounds().height,
-            BufferedImage.TYPE_INT_ARGB);
-    Graphics2D newG = lightOverlay.createGraphics();
+    timer.start("renderLightOverlay:allocateBuffer");
+    try (final var bufferHandle = tempBufferPool.acquire()) {
+      BufferedImage lightOverlay = bufferHandle.get();
+      timer.stop("renderLightOverlay:allocateBuffer");
 
-    if (clipStyle != null && visibleScreenArea != null) {
-      Area clip = new Area(g.getClip());
-      switch (clipStyle) {
-        case CLIP_TO_VISIBLE_AREA -> clip.intersect(visibleScreenArea);
-        case CLIP_TO_NOT_VISIBLE_AREA -> clip.subtract(visibleScreenArea);
+      Graphics2D newG = lightOverlay.createGraphics();
+      SwingUtil.useAntiAliasing(newG);
+
+      if (clipStyle != null && visibleScreenArea != null) {
+        timer.start("renderLightOverlay:setClip");
+        Area clip = new Area(g.getClip());
+        switch (clipStyle) {
+          case CLIP_TO_VISIBLE_AREA -> clip.intersect(visibleScreenArea);
+          case CLIP_TO_NOT_VISIBLE_AREA -> clip.subtract(visibleScreenArea);
+        }
+        newG.setClip(clip);
+        timer.stop("renderLightOverlay:setClip");
       }
-      newG.setClip(clip);
+
+      timer.start("renderLightOverlay:setTransform");
+      AffineTransform af = new AffineTransform();
+      af.translate(getViewOffsetX(), getViewOffsetY());
+      af.scale(getScale(), getScale());
+      newG.setTransform(af);
+      timer.stop("renderLightOverlay:setTransform");
+
+      newG.setComposite(composite);
+
+      // Draw lights onto the buffer image so the map doesn't affect how they blend
+      timer.start("renderLightOverlay:drawLights");
+      for (var light : lights) {
+        var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
+        newG.setPaint(paint);
+        newG.fill(light.getArea());
+      }
+      timer.stop("renderLightOverlay:drawLights");
+      newG.dispose();
+
+      // Draw the buffer image with all the lights onto the map
+      timer.start("renderLightOverlay:drawBuffer");
+      Composite previousComposite = g.getComposite();
+      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, overlayOpacity));
+      g.drawImage(lightOverlay, null, 0, 0);
+      g.setComposite(previousComposite);
+      timer.stop("renderLightOverlay:drawBuffer");
     }
-
-    timer.stop("light-overlay-1");
-
-    timer.start("light-overlay-2");
-    AffineTransform af = new AffineTransform();
-    af.translate(getViewOffsetX(), getViewOffsetY());
-    af.scale(getScale(), getScale());
-    newG.setTransform(af);
-
-    newG.setComposite(composite);
-    timer.stop("light-overlay-2");
-
-    // Draw lights onto the buffer image so the map doesn't affect how they blend
-    timer.start("light-overlay-3");
-    for (var light : lights) {
-      var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
-      newG.setPaint(paint);
-      newG.fill(light.getArea());
-    }
-    timer.stop("light-overlay-3");
-
-    // Draw the buffer image with all the lights onto the map
-    timer.start("light-overlay-4");
-    Composite previousComposite = g.getComposite();
-    g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, overlayOpacity));
-    g.drawImage(lightOverlay, null, 0, 0);
-    g.setComposite(previousComposite);
-    timer.stop("light-overlay-4");
-
-    newG.dispose();
   }
 
   /**
