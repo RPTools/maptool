@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.theme;
 
+import com.formdev.flatlaf.FlatIconColors;
 import com.formdev.flatlaf.IntelliJTheme;
 import com.formdev.flatlaf.IntelliJTheme.ThemeLaf;
 import com.google.gson.JsonObject;
@@ -33,24 +34,67 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.events.MapToolEventBus;
 
 /** Class used to implement Theme support for MapTool. */
 public class ThemeSupport {
 
   public enum ThemeColor {
-    YELLOW("ColorPalette.yellow"),
-    ORANGE("ColorPalette.orange"),
-    GREEN("ColorPalette.green"),
-    WHITE("ColorPalette.white"),
-    RED("ColorPalette.red"),
-    GRAY("ColorPalette.gray"),
-    BLUE("ColorPalette.blue"),
-    PURPLE("ColorPalette.purple");
+    RED(
+        "ColorPalette.red",
+        Color.decode("#DB5860"),
+        Color.decode("#C75450"),
+        FlatIconColors.ACTIONS_RED,
+        FlatIconColors.ACTIONS_RED_DARK),
+    YELLOW(
+        "ColorPalette.yellow",
+        Color.decode("#EDA200"),
+        Color.decode("#F0A732"),
+        FlatIconColors.ACTIONS_YELLOW,
+        FlatIconColors.ACTIONS_YELLOW_DARK),
+    GREEN(
+        "ColorPalette.green",
+        Color.decode("#59A869"),
+        Color.decode("#499C54"),
+        FlatIconColors.ACTIONS_GREEN,
+        FlatIconColors.ACTIONS_GREEN_DARK),
+    BLUE(
+        "ColorPalette.blue",
+        Color.decode("#389FD6"),
+        Color.decode("#3592C4"),
+        FlatIconColors.ACTIONS_BLUE,
+        FlatIconColors.ACTIONS_BLUE_DARK),
+    GREY(
+        "ColorPalette.gray",
+        Color.decode("#6E6E6E"),
+        Color.decode("#AFB1B3"),
+        FlatIconColors.ACTIONS_GREY,
+        FlatIconColors.ACTIONS_GREY_DARK),
+    PURPLE(
+        "ColorPalette.purple",
+        Color.decode("#B99BF8"),
+        Color.decode("#B99BF8"),
+        FlatIconColors.OBJECTS_PURPLE,
+        FlatIconColors.OBJECTS_PURPLE);
 
     private final String propertyName;
+    private final Color defaultLightColor;
+    private final Color defaultDarkColor;
 
-    ThemeColor(String propertyName) {
+    private final FlatIconColors lightIconColor;
+    private final FlatIconColors darkIconColor;
+
+    ThemeColor(
+        String propertyName,
+        Color defaultLightColor,
+        Color defaultDarkColor,
+        FlatIconColors lightIconColor,
+        FlatIconColors darkIconColor) {
       this.propertyName = propertyName;
+      this.defaultLightColor = defaultLightColor;
+      this.defaultDarkColor = defaultDarkColor;
+      this.lightIconColor = lightIconColor;
+      this.darkIconColor = darkIconColor;
     }
     ;
 
@@ -480,6 +524,8 @@ public class ThemeSupport {
       currentThemeDetails = themeDetails;
       pendingThemeDetails = themeDetails;
     }
+
+    new MapToolEventBus().getMainEventBus().post(new ThemeLoadedEvent(currentThemeDetails));
   }
 
   /**
@@ -634,6 +680,26 @@ public class ThemeSupport {
    * @return the color.
    */
   public static Color getThemeColor(ThemeColor themeColor) {
-    return UIManager.getColor(themeColor.getPropertyName());
+    Color color = null;
+    if (currentThemeDetails.dark()) {
+      color = UIManager.getColor(themeColor.darkIconColor.key);
+    }
+
+    if (color == null) {
+      color = UIManager.getColor(themeColor.lightIconColor.key);
+    }
+
+    if (color == null) {
+      if (currentThemeDetails.dark()) {
+        color = themeColor.defaultDarkColor;
+      } else {
+        color = themeColor.defaultLightColor;
+      }
+    }
+    return color;
+  }
+
+  public static String getThemeColorHexString(ThemeColor themeColor) {
+    return String.format("#%06x", getThemeColor(themeColor).getRGB() & 0x00FFFFFF);
   }
 }

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.commandpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.GridLayout;
@@ -30,6 +31,7 @@ import java.util.regex.Pattern;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.text.BadLocationException;
@@ -41,7 +43,9 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.swing.MessagePanelEditorKit;
+import net.rptools.maptool.client.ui.theme.ThemeLoadedEvent;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.util.MessageUtil;
 
@@ -137,6 +141,7 @@ public class MessagePanel extends JPanel {
   }
 
   public void refreshRenderer() {
+    new MapToolEventBus().getMainEventBus().register(this);
     // Create the style
     StyleSheet style = document.getStyleSheet();
     style.addRule(
@@ -145,8 +150,14 @@ public class MessagePanel extends JPanel {
     style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
         AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
-    style.addRule(MessageUtil.getMessageCss());
+    var css = MessageUtil.getMessageCss();
+    style.addRule(css);
     repaint();
+  }
+
+  @Subscribe
+  public void handleThemeLoadedEvent(ThemeLoadedEvent event) {
+    SwingUtilities.invokeLater(this::refreshRenderer);
   }
 
   public void setTrustedMacroPrefixColors(Color foreground, Color background) {

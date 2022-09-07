@@ -18,6 +18,8 @@ import java.awt.Color;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
+import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeColor;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -35,15 +37,40 @@ public class MessageUtil {
   static final String CSS_WHISPER = ".whisper { color: blue }";
 
   public static String getMessageCss() {
-    return CSS_EMIT
-        + CSS_AVASMG_TD
-        + CSS_AVAMSG_AVATAR
-        + CSS_AVAMSG_MESSAGE
-        + CSS_EMOTE_MESSAGE
-        + CSS_SAY_PREFIX
-        + CSS_SELF
-        + CSS_SYSTEM
-        + CSS_WHISPER;
+    if (ThemeSupport.shouldUseThemeColorsForChat()) {
+      var gray = ThemeSupport.getThemeColorHexString(ThemeColor.GREY);
+      var purple = ThemeSupport.getThemeColorHexString(ThemeColor.PURPLE);
+      var blue = ThemeSupport.getThemeColorHexString(ThemeColor.BLUE);
+      return ".emit { font-weight: bold; font-style: italic }"
+          .concat(".ava-msg td { padding: 0px }")
+          .concat(".ava-msg .avatar { width: 40px; text-align: center }")
+          .concat(".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px ")
+          .concat(gray)
+          .concat("}")
+          .concat(".emote .message { border-left-color: ")
+          .concat(purple)
+          .concat(" }")
+          .concat(".say .prefix, .say .trusted-prefix { font-weight: bold }")
+          .concat(".self { font-style: italic }")
+          .concat(".system { color: ")
+          .concat(blue)
+          .concat("; font-style: italic }")
+          .concat(".whisper { color: ")
+          .concat(blue)
+          .concat(" }");
+    } else {
+      return """
+          .emit { font-weight: bold; font-style: italic }
+          .ava-msg td { padding: 0px }
+          .ava-msg .avatar { width: 40px; text-align: center }
+          .ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }
+          .emote .message { border-left-color: #7AC07A }
+          .say .prefix, .say .trusted-prefix { font-weight: bold }
+          .self { font-style: italic }
+          .system { color: blue; font-style: italic }
+          .whisper { color: blue }
+          """;
+    }
   }
 
   public static String getFormattedEmit(String msg) {
