@@ -13026,6 +13026,7 @@
                                    <at name="name">jvmXmxTextField</at>
                                    <at name="width">76</at>
                                    <at name="selectionEnd">2</at>
+                                   <at name="foreground" object="color">51,51,51</at>
                                    <at name="text">4G</at>
                                    <at name="toolTipText">Preferences.label.language.tooltip</at>
                                    <at name="height">21</at>
@@ -13087,6 +13088,7 @@
                                    <at name="name">jvmXmsTextField</at>
                                    <at name="width">76</at>
                                    <at name="selectionEnd">2</at>
+                                   <at name="foreground" object="color">51,51,51</at>
                                    <at name="text">4G</at>
                                    <at name="toolTipText">Oracle recommends setting the minimum heap size (-Xms) equal to the maximum heap size (-Xmx) to minimize garbage collections.</at>
                                    <at name="height">21</at>
@@ -13970,6 +13972,7 @@
                                    </at>
                                    <at name="name">jvmLanguageOverideComboBox</at>
                                    <at name="width">76</at>
+                                   <at name="foreground" object="color">51,51,51</at>
                                    <at name="items">
                                     <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                      <at name="name">items</at>
@@ -14246,6 +14249,7 @@
                                    <at name="name">dataDirTextField</at>
                                    <at name="width">156</at>
                                    <at name="selectionEnd">14</at>
+                                   <at name="foreground" object="color">51,51,51</at>
                                    <at name="text">.maptool-nerps</at>
                                    <at name="toolTipText">Preferences.label.options.directory.tooltip</at>
                                    <at name="height">21</at>
