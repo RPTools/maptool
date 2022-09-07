@@ -145,7 +145,9 @@ public class MessagePanel extends JPanel {
     // Create the style
     StyleSheet style = document.getStyleSheet();
     style.addRule(
-        "body { font-family: sans-serif; font-size: " + AppPreferences.getFontSize() + "pt}");
+        "body { color: black; font-family: sans-serif; font-size: "
+            + AppPreferences.getFontSize()
+            + "pt}");
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
