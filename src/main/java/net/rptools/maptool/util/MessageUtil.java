@@ -25,16 +25,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 
 public class MessageUtil {
-  static final String CSS_EMIT = ".emit { font-weight: bold; font-style: italic }";
-  static final String CSS_AVASMG_TD = ".ava-msg td { padding: 0px }";
-  static final String CSS_AVAMSG_AVATAR = ".ava-msg .avatar { width: 40px; text-align: center }";
-  static final String CSS_AVAMSG_MESSAGE =
-      ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
-  static final String CSS_EMOTE_MESSAGE = ".emote .message { border-left-color: #7AC07A }";
-  static final String CSS_SAY_PREFIX = ".say .prefix, .say .trusted-prefix { font-weight: bold }";
-  static final String CSS_SELF = ".self { font-style: italic }";
-  static final String CSS_SYSTEM = ".system { color: blue; font-style: italic }";
-  static final String CSS_WHISPER = ".whisper { color: blue }";
 
   public static String getMessageCss() {
     if (ThemeSupport.shouldUseThemeColorsForChat()) {
@@ -186,11 +176,23 @@ public class MessageUtil {
     return sb.toString();
   }
 
-  private static String applyChatColor(String str) {
+  public static String getChatColorHex() {
+    if (MapTool.getFrame() == null || MapTool.getFrame().getCommandPanel() == null) {
+      return "";
+    }
+
     Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
     if (color == null) {
+      return "";
+    }
+    return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
+  }
+
+  private static String applyChatColor(String str) {
+    var color = getChatColorHex();
+    if (color.isEmpty()) {
       return str;
     }
-    return String.format("<span style='color:#%06X'>%s</span>", (color.getRGB() & 0xFFFFFF), str);
+    return String.format("<span style='color:" + color + "'>%s</span>", str);
   }
 }

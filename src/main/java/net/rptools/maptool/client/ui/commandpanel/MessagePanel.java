@@ -141,13 +141,22 @@ public class MessagePanel extends JPanel {
   }
 
   public void refreshRenderer() {
+    // We dont want to do this before the main frame has been created
+    if (MapTool.getFrame() == null) {
+      SwingUtilities.invokeLater(this::refreshRenderer);
+      return;
+    }
     new MapToolEventBus().getMainEventBus().register(this);
     // Create the style
     StyleSheet style = document.getStyleSheet();
-    style.addRule(
-        "body { color: black; font-family: sans-serif; font-size: "
+    var mainCss =
+        "body {color: "
+            + MessageUtil.getChatColorHex()
+            + " ; font-family: sans-serif; font-size: "
             + AppPreferences.getFontSize()
-            + "pt}");
+            + "pt}";
+
+    style.addRule(mainCss);
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
