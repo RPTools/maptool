@@ -2114,6 +2114,14 @@ public class Zone extends BaseModel {
     if (tokenSelection == null) {
       tokenSelection = TokenSelection.ALL;
     }
+
+    // Classes that extend Abstract template have a zone id so we need to make sure to update it
+    for (DrawnElement de : drawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(id);
+      }
+    }
+
     return this;
   }
 
@@ -2243,6 +2251,12 @@ public class Zone extends BaseModel {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
+    // Classes that extend Abstract template have a zone id so we need to make sure to update it
+    for (DrawnElement de : zone.drawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(zone.id);
+      }
+    }
     return zone;
   }
 
