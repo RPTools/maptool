@@ -26,6 +26,7 @@ import com.jidesoft.grid.NavigableModel;
 import com.jidesoft.grid.Property;
 import com.jidesoft.grid.PropertyPane;
 import com.jidesoft.grid.PropertyTable;
+import com.jidesoft.plaf.basic.BasicExComboBoxUI;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
@@ -1812,6 +1813,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       MTMultilineStringExComboBox localMultilineStringExComboBox =
           new MTMultilineStringExComboBox();
       localMultilineStringExComboBox.setEditable(true);
+      localMultilineStringExComboBox.setUI(new BasicExComboBoxUI());
       return localMultilineStringExComboBox;
     }
   }

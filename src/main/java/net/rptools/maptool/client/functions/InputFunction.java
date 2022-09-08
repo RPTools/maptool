@@ -482,7 +482,6 @@ public class InputFunction extends AbstractFunction {
         // For HTML values we use a HTMLPane.
         HTMLPane htmlp = new HTMLPane();
         htmlp.setText("<html>" + m.group(1) + ":</html>");
-        htmlp.setBackground(Color.decode("0xECE9D8"));
         l = htmlp;
       } else {
         l = new JLabel(vs.prompt + ":");
