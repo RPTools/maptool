@@ -122,7 +122,7 @@ public class MacroButton extends JButton implements MouseListener {
 
   public void setColor(String colorKey) {
     if ("default".equals(colorKey)) {
-      setBackground(null);
+      updateUI(); // Reset to Theme default
     } else {
       setBackground(MapToolUtil.getColor(colorKey));
     }
@@ -144,7 +144,7 @@ public class MacroButton extends JButton implements MouseListener {
           case "", "default" -> "<p " + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
           default -> "<p style='color: "
               + properties.getFontColorAsHtml()
-              + "; "
+              + " "
               + getMinWidth()
               + getMaxWidth()
               + "'>"
