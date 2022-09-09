@@ -508,7 +508,6 @@ public class CommandPanel extends JPanel
     constraints.gridy = 0;
 
     panel.add(getTextColorWell(), constraints);
-    getTextColorWell().setColor(UIManager.getColor("EditorPane.foreground"));
 
     // constraints.gridy++;
     // panel.add(Box.createVerticalStrut(2), constraints);
