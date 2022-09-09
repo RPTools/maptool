@@ -15,6 +15,7 @@
 package net.rptools.maptool.util;
 
 import java.awt.Color;
+import javax.swing.UIManager;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -34,7 +35,9 @@ public class MessageUtil {
       return ".emit { font-weight: bold; font-style: italic }"
           .concat(".ava-msg td { padding: 0px }")
           .concat(".ava-msg .avatar { width: 40px; text-align: center }")
-          .concat(".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px ")
+          .concat(
+              ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px "
+                  + "solid ")
           .concat(gray)
           .concat("}")
           .concat(".emote .message { border-left-color: ")
@@ -185,6 +188,11 @@ public class MessageUtil {
     if (color == null) {
       return "";
     }
+    return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
+  }
+
+  public static String getDefaultForegroundHex() {
+    var color = UIManager.getColor("Panel.foreground");
     return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
   }
 

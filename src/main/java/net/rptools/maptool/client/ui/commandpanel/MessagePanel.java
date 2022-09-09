@@ -149,9 +149,13 @@ public class MessagePanel extends JPanel {
     new MapToolEventBus().getMainEventBus().register(this);
     // Create the style
     StyleSheet style = document.getStyleSheet();
+    var defColor =
+        ThemeSupport.shouldUseThemeColorsForChat()
+            ? MessageUtil.getDefaultForegroundHex()
+            : "black";
     var mainCss =
         "body {color: "
-            + MessageUtil.getChatColorHex()
+            + defColor
             + " ; font-family: sans-serif; font-size: "
             + AppPreferences.getFontSize()
             + "pt}";
