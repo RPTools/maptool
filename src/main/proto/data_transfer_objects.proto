@@ -44,6 +44,7 @@ message CampaignDto {
   int32 gm_macro_button_last_index = 8;
   repeated MacroButtonPropertiesDto macro_button_properties = 9;
   repeated ZoneDto zones = 10;
+  repeated MacroButtonPropertiesDto gm_macro_button_properties = 11;
 }
 
 message LookupTableDto {
