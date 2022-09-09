@@ -250,7 +250,15 @@ public class RadiusCellTemplate extends AbstractTemplate {
    */
   private void adjustShape() {
     if (getZoneId() == null) return;
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    Zone zone;
+    if (MapTool.isHostingServer()) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    } else {
+      zone = MapTool.getCampaign().getZone(getZoneId());
+    }
+    if (zone == null) return;
+
+    int gridSize = zone.getGrid().getSize();
     Rectangle r = (Rectangle) vertexRenderer.getShape();
     r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
     r = (Rectangle) renderer.getShape();
