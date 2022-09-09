@@ -2,6 +2,7 @@
 Feature release using OpenJDK 17
 
 ## Highlights
+- New theme support using [Flatlaf](https://www.formdev.com/flatlaf/) library. Access through Preferences. 
 - The different VBL types and MBL can now be added to tokens via the Edit Token dialog and a number of macro functions for manipulating VBL/MBL have been added as well.
 - More optimizations for lighting and vision.
 - Improvements to new Add-On functionality.
@@ -11,14 +12,13 @@ Feature release using OpenJDK 17
 - [#3542][i3542] `setTokenImage()` was throwing Null Pointer Exception. Fixed.
 - [#3540][i3540] UVTT import now supports file extensions used by other map creation tools (`.df2vtt` and `.uvtt`).
 - [#3515][i3515] User language now availabe through `getInfo("client")` and `MapTool.clientInfo.getUserLanguage()` in JavaScript.
-- [#3519][i3519] Improved lighting performance.
+- [#3519][i3519] Improved light rendering performance.
 - [#3506][i3506] Updated `MapTool.log()` to varargs.
 - [#3503][i3503] html5 javascript contexts now know their own identity and can get their user data.
 - [#3464][i3464] New functions to determine if client is hosting or not. Info also available through `getInfo("client")` now.
 - [#3459][i3459] Improvements to visibility calculation for large and complex geometry.
 - [#3453][i3453] Add-On libraries can now be loaded/updated by dragging and dropping `.mtlib` files on map.
 - [#3360][i3360] Handshake cipher change to AES/CBC/PKCS5Padding for improved security.
-- [#3356][i3356] `player.getConnectedPlayers()` returns empty array when server started. Fixed.
 - [#3346][i3346] Darkness (i.e. lights with negative lumens) now affect vision on maps set to Day or Off.
 - [#3322][i3322] Numbers stored in Add-On library properties as strings. Fixed.
 - [#3342][i3342] Improved performance on maps with many lights.
@@ -27,6 +27,14 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3605][i3605] Various fixes for theming of chat window.
+- [#3603][i3603] GM panel macros disappearing on serer start. Fixed.
+- [#3594][i3594] Maps with radius templates cause NPE when server is started. Fixed.
+- [#3589][i3589] Poor contrast for text in chat and non-Webview HTML displays. Fixed.
+- [#3588][i3588] Contrast improved for inactive title bars under new theming.
+- [#3587][i3587] Select Xcode Dark theme would produce NPE. Fixed.
+- [#3583][i3583] Visual artifacts when dragging dockable windows over map area. Fixed.
+- [#3582][i3582] Title bar and frame border color were not changing color with theme. Fixed.
 - [#3574][i3574] Properties section of Edit Token dialog throwing exceptions. Fixed.
 - [#3571][i3571] Some sections of Token/Map Preferences not visible with new theme engine. Fixed.
 - [#3561][i3561] Some VBL triggers error regarding orientation. Fixed.
@@ -53,6 +61,7 @@ Feature release using OpenJDK 17
 - [#3425][i3425] Importing macros with bad asset IDs for macro icon could hang up MapTool. Fixed.
 - [#3387][i3387] `getAllPropertyNames()` now returns empty string/JSON arry if type invalid.
 - [#3359][i3359] Player clients unable to connect to a server that had an Add-On loaded without loading the same Add-On locally. Fixed.
+- [#3356][i3356] `player.getConnectedPlayers()` returns empty array when server started. Fixed.
 - [#3350][i3350] Passing insufficient parameters to some VBL functions returned a translation key instead of the error message. Fixed.
 - [#3334][i3334] Fixed an issue with creating user defined functions in add-on library onInit function.
 - [#3320][i3320] Starting a server with WebRTC enabled could randomly fail with an NPE. Fixed.
@@ -82,7 +91,14 @@ Feature release using OpenJDK 17
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
-[i]: https://github.com/RPTools/maptool/issues/
+[i3605]: https://github.com/RPTools/maptool/issues/3605
+[i3603]: https://github.com/RPTools/maptool/issues/3603
+[i3594]: https://github.com/RPTools/maptool/issues/3594
+[i3589]: https://github.com/RPTools/maptool/issues/3589
+[i3588]: https://github.com/RPTools/maptool/issues/3588
+[i3587]: https://github.com/RPTools/maptool/issues/3587
+[i3583]: https://github.com/RPTools/maptool/issues/3583
+[i3582]: https://github.com/RPTools/maptool/issues/3582
 [i3574]: https://github.com/RPTools/maptool/issues/3574
 [i3571]: https://github.com/RPTools/maptool/issues/3571
 [i3567]: https://github.com/RPTools/maptool/issues/3567
