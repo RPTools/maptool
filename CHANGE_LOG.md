@@ -27,6 +27,8 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3605][i3605] Various fixes for theming of chat window.
+- [#3603][i3603] GM panel macros disappearing on serer start. Fixed.
 - [#3594][i3594] Maps with radius templates cause NPE when server is started. Fixed.
 - [#3589][i3589] Poor contrast for text in chat and non-Webview HTML displays. Fixed.
 - [#3588][i3588] Contrast improved for inactive title bars under new theming.
@@ -89,7 +91,8 @@ Feature release using OpenJDK 17
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
-[i]: https://github.com/RPTools/maptool/issues/
+[i3605]: https://github.com/RPTools/maptool/issues/3605
+[i3603]: https://github.com/RPTools/maptool/issues/3603
 [i3594]: https://github.com/RPTools/maptool/issues/3594
 [i3589]: https://github.com/RPTools/maptool/issues/3589
 [i3588]: https://github.com/RPTools/maptool/issues/3588
