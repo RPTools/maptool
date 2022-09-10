@@ -141,10 +141,10 @@ public class MacroButton extends JButton implements MouseListener {
     String div = "<div style='font-size: " + properties.getFontSize() + "; text-align: center'>";
     String formatButtonLabel =
         switch (properties.getFontColorKey()) {
-          case "", "default" -> "<p " + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
+          case "", "default" -> "<p style='" + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
           default -> "<p style='color: "
               + properties.getFontColorAsHtml()
-              + " "
+              + "; "
               + getMinWidth()
               + getMaxWidth()
               + "'>"
