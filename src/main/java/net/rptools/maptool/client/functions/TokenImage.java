@@ -286,15 +286,13 @@ public class TokenImage extends AbstractFunction {
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {
-    MD5Key md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_PORTRAIT);
-    MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setPortraitImage, md5key.toString());
+    var md5key = "".equals(assetName) ? "" : getMD5Key(assetName, SET_PORTRAIT).toString();
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPortraitImage, md5key);
   }
 
   private static void setHandout(Token token, String assetName) throws ParserException {
-    MD5Key md5key = "".equals(assetName) ? null : getMD5Key(assetName, SET_HANDOUT);
-    MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setCharsheetImage, md5key.toString());
+    var md5key = "".equals(assetName) ? "" : getMD5Key(assetName, SET_HANDOUT).toString();
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setCharsheetImage, md5key);
   }
 
   private static Token findImageToken(final String name, String functionName) {
