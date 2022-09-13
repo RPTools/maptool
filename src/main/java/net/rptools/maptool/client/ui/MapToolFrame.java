@@ -1953,8 +1953,10 @@ public class MapToolFrame extends DefaultDockableHolder
      */
     try {
       List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
-      Collection<String> namesToSave = getDockingManager().getAllFrames();
-      namesToSave.removeAll(mtFrameNames);
+      List<String> namesToSave =
+          getDockingManager().getAllFrames().stream()
+              .filter(frame -> !mtFrameNames.contains(frame))
+              .toList();
 
       Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
       Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);
