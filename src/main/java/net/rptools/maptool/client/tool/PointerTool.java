@@ -110,6 +110,8 @@ public class PointerTool extends DefaultTool {
 
   private String currentPointerName;
 
+  private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
+
   public PointerTool() {
     try {
       setIcon(
@@ -220,6 +222,13 @@ public class PointerTool extends DefaultTool {
     return "tool.pointer.tooltip";
   }
 
+  public void startTokenDrag(Token keyToken, Set<GUID> selectedTokens) {
+    savedTokenSelectionSet.push(new HashSet<>(renderer.getSelectedTokenSet()));
+    renderer.clearSelectedTokens();
+    renderer.selectTokens(selectedTokens);
+    startTokenDrag(keyToken);
+  }
+
   public void startTokenDrag(Token keyToken) {
     tokenBeingDragged = keyToken;
 
@@ -256,6 +265,10 @@ public class PointerTool extends DefaultTool {
     dragOffsetY = 0;
 
     exposeFoW(null);
+    if (!savedTokenSelectionSet.isEmpty()) {
+      renderer.clearSelectedTokens();
+      renderer.selectTokens(savedTokenSelectionSet.pop());
+    }
   }
 
   /**
