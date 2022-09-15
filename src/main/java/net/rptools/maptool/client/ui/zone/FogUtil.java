@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppUtil;
@@ -90,25 +91,47 @@ public class FogUtil {
             shapeReader.read(new ReverseShapePathIterator(vision.getPathIterator(null))));
 
     final Point origin = new Point(x, y);
-    final var accumulator = new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
-    if (!accumulator.addWallBlocking(topology)
-        || !accumulator.addHillBlocking(hillVbl)
-        || !accumulator.addPitBlocking(pitVbl)) {
-      // Vision has been completely blocked by topology.
-      return null;
+
+    /*
+     * Find the visible area for each topology type independently.
+     *
+     * In principle, we could also combine all the vision blocking segments for all topology types
+     * and run the sweep algorithm once. But this is subject to some pathological cases that JTS
+     * cannot handle. These cases do not exist within a single type of topology, but can arise when
+     * we combine them.
+     */
+    List<Geometry> visibleAreas = new ArrayList<>();
+    final List<Function<VisionBlockingAccumulator, Boolean>> topologyConsumers = new ArrayList<>();
+    topologyConsumers.add(acc -> acc.addWallBlocking(topology));
+    topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
+    topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
+    for (final var consumer : topologyConsumers) {
+      final var accumulator =
+          new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
+      final var isVisionCompletelyBlocked = consumer.apply(accumulator);
+      if (!isVisionCompletelyBlocked) {
+        // Vision has been completely blocked by this topology. Short circuit.
+        return null;
+      }
+
+      final var visibleArea =
+          calculateVisibleArea(
+              new Coordinate(origin.getX(), origin.getY()),
+              accumulator.getVisionBlockingSegments(),
+              visionGeometry);
+      if (visibleArea != null) {
+        visibleAreas.add(visibleArea);
+      }
     }
 
-    final var visibleArea =
-        calculateVisibleArea(
-            new Coordinate(origin.getX(), origin.getY()),
-            accumulator.getVisionBlockingSegments(),
-            visionGeometry);
-
-    if (visibleArea != null) {
-      // Convert back to AWT area to modify vision.
+    // We have to intersect all the results in order to find the true remaining visible area.
+    if (!visibleAreas.isEmpty()) {
+      // We intersect in AWT space because JTS can be really finicky about intersection precision.
       var shapeWriter = new ShapeWriter();
-      var area = new Area(shapeWriter.toShape(visibleArea));
-      vision.intersect(area);
+      for (final var visibleArea : visibleAreas) {
+        var area = new Area(shapeWriter.toShape(visibleArea));
+        vision.intersect(area);
+      }
     }
 
     // For simplicity, this catches some of the edge cases
