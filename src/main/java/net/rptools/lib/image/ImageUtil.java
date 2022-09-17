@@ -14,13 +14,14 @@
  */
 package net.rptools.lib.image;
 
+import com.twelvemonkeys.image.ResampleOp;
+import com.vladsch.flexmark.util.misc.ImageUtils;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -38,6 +39,7 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import net.rptools.maptool.client.AppPreferences;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -156,8 +158,7 @@ public class ImageUtil {
     Graphics2D g = null;
     try {
       g = compImg.createGraphics();
-      g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
+      AppPreferences.getRenderQuality().setRenderingHints(g);
       g.drawImage(img, 0, 0, width, height, null);
     } finally {
       if (g != null) {
@@ -436,7 +437,13 @@ public class ImageUtil {
 
   public static Image resizeImage(Image image, int w, int h) {
     // Default to 30x30 w/h not passed
-    return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+    // TODO: CDW return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
+    ResampleOp resampleOp = new ResampleOp(w, h);
+    if (image instanceof BufferedImage) {
+      return resampleOp.filter((BufferedImage) image, null);
+    } else {
+      return resampleOp.filter(ImageUtils.toBufferedImage(image), null);
+    }
   }
 
   public static ImageIcon scaleImage(ImageIcon icon, int w, int h) {
@@ -465,12 +472,7 @@ public class ImageUtil {
    * @return The scaled BufferedImage
    */
   public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
-    BufferedImage scaled = new BufferedImage(width, height, image.getType());
-    Graphics2D g = scaled.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g.drawImage(image, 0, 0, width, height, null);
-    g.dispose();
-
-    return scaled;
+    ResampleOp resampleOp = new ResampleOp(width, height, ResampleOp.FILTER_LANCZOS);
+    return resampleOp.filter(image, null);
   }
 }
