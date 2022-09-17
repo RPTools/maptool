@@ -35,6 +35,7 @@ import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -162,8 +163,7 @@ public class AssetViewerDialog extends JDialog {
       SwingUtil.constrainTo(imgSize, size.width, size.height);
 
       Object oldHint = g2d.getRenderingHint(RenderingHints.KEY_RENDERING);
-      g2d.setRenderingHint(
-          RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+      AppPreferences.getRenderQuality().setShrinkRenderingHints(g2d);
       g.drawImage(image, 0, 0, imgSize.width, imgSize.height, this);
       g2d.setRenderingHint(RenderingHints.KEY_RENDERING, oldHint);
 

@@ -41,6 +41,7 @@ import javax.swing.event.DocumentListener;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
@@ -136,6 +137,8 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox fitGMView;
   private final JCheckBox fillSelectionCheckBox;
   private final JTextField frameRateCapTextField;
+
+  private final JComboBox<LocalizedComboItem> renderPerformanceComboBox;
   private final JTextField defaultUsername;
 
   // private final JCheckBox initEnableServerSyncCheckBox;
@@ -210,6 +213,11 @@ public class PreferencesDialog extends JDialog {
     WalkerMetric.NO_DIAGONALS
   };
 
+  private static final LocalizedComboItem[] renderPerformanceComboItems = {
+    new LocalizedComboItem(RenderQuality.LOW.name(), "Preferences.combo.render.low"),
+    new LocalizedComboItem(RenderQuality.MEDIUM.name(), "Preferences.combo.render.medium"),
+    new LocalizedComboItem(RenderQuality.HIGH.name(), "Preferences.combo.render.high")
+  };
   private static final LocalizedComboItem[] themeFilterComboItems = {
     new LocalizedComboItem("All", "Preferences.combo.themes.filter.all"),
     new LocalizedComboItem("Dark", "Preferences.combo.themes.filter.dark"),
@@ -291,6 +299,8 @@ public class PreferencesDialog extends JDialog {
     saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
     fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
     frameRateCapTextField = panel.getTextField("frameRateCapTextField");
+    renderPerformanceComboBox = panel.getComboBox("renderPerformanceComboBox");
+
     defaultUsername = panel.getTextField("defaultUsername");
     // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
@@ -541,6 +551,15 @@ public class PreferencesDialog extends JDialog {
                 return StringUtil.parseInteger(value);
               }
             });
+
+    renderPerformanceComboBox.setModel(
+        getLocalizedModel(renderPerformanceComboItems, AppPreferences.getRenderQuality().name()));
+    renderPerformanceComboBox.addItemListener(
+        e -> {
+          AppPreferences.setRenderQuality(
+              RenderQuality.valueOf(
+                  ((LocalizedComboItem) renderPerformanceComboBox.getSelectedItem()).getValue()));
+        });
 
     defaultUsername.addFocusListener(
         new FocusAdapter() {
