@@ -27,6 +27,10 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3626][i3626] Certain arrangements of topology could cause infinite loop of error dialogs. Fixed.
+- [#3624][i3624] Context menu "Move" option not working from Map Explorer. Fixed.
+- [#3613][i3613] Various theme adjustments.
+- [#3611][i3611] setTokenPortrait() and setTokenHandout() throwing exceptions when passed empty string. Fixed.
 - [#3605][i3605] Various fixes for theming of chat window.
 - [#3603][i3603] GM panel macros disappearing on serer start. Fixed.
 - [#3594][i3594] Maps with radius templates cause NPE when server is started. Fixed.
@@ -42,6 +46,7 @@ Feature release using OpenJDK 17
 - [#3534][i3534] Tokens with multi-image bars producing ArrayIndexOurOfboundsExceptions. Fixed.
 - [#3530][i3530] Tokens with LastPath data saved were producing a ClassCastException when loaded. Fixed.
 - [#3521][i3521] Vision broken on maps where VBL points had very small differences in location. Fixed. 
+- [#3522][i3522] Numbers in Add-On libraries were being stored as strings. Fixed.
 - [#3514][i3514] `setAllStates()` was throwing a `ArrayIndexOutOfBoundsException`. Fixed.
 - [#3510][i3510] `createTable()` function throwing exception. Fixed.
 - [#3500][i3500] JavaFX 17 causing crashes to desktop on Mac M1 hardware. Updated to JavaFX 18.
@@ -73,6 +78,7 @@ Feature release using OpenJDK 17
 - [#3234][i3234] Edit Token dialog was hanging on to VBL generated for previously edited tokens and adding that to others. Fixed.
 - [#3231][i3231] Javascript UDFs receive JSON arguments as empty arguments. Fixed.
 - [#3218][i3218] MapTool hangs when launched from (uber)jar. Fixed.
+- [#3215][i3215] Restore layout would restore empty frames from previously loaded campaign. Fixed.
 - [#3146][i3146] Code was trying to load "default.xml" for the macro editor theme but file was "Default.xml" which would fail on case-sensitive filesystems. Fixed.
 - [#3102][i3102] Javascript `Token.setProperty()` cannot take numerical value. Fixed.
 - [#3101][i3101] Map grid color was not preserved over server start. Fixed.
@@ -91,6 +97,10 @@ Feature release using OpenJDK 17
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
+[i3626]: https://github.com/RPTools/maptool/issues/3626
+[i3624]: https://github.com/RPTools/maptool/issues/3624
+[i3613]: https://github.com/RPTools/maptool/issues/3613
+[i3611]: https://github.com/RPTools/maptool/issues/3611
 [i3605]: https://github.com/RPTools/maptool/issues/3605
 [i3603]: https://github.com/RPTools/maptool/issues/3603
 [i3594]: https://github.com/RPTools/maptool/issues/3594
@@ -108,6 +118,7 @@ Feature release using OpenJDK 17
 [i3540]: https://github.com/RPTools/maptool/issues/3540
 [i3534]: https://github.com/RPTools/maptool/issues/3534
 [i3530]: https://github.com/RPTools/maptool/issues/3530
+[i3522]: https://github.com/RPTools/maptool/issues/3522
 [i3521]: https://github.com/RPTools/maptool/issues/3521
 [i3519]: https://github.com/RPTools/maptool/issues/3519
 [i3515]: https://github.com/RPTools/maptool/issues/3515
@@ -154,6 +165,7 @@ Feature release using OpenJDK 17
 [i3234]: https://github.com/RPTools/maptool/issues/3234
 [i3231]: https://github.com/RPTools/maptool/issues/3231
 [i3218]: https://github.com/RPTools/maptool/issues/3218
+[i3215]: https://github.com/RPTools/maptool/issues/3215
 [i3146]: https://github.com/RPTools/maptool/issues/3146
 [i3102]: https://github.com/RPTools/maptool/issues/3102
 [i3101]: https://github.com/RPTools/maptool/issues/3101
