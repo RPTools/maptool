@@ -20,17 +20,20 @@ Feature release using OpenJDK 17
 - [#3453][i3453] Add-On libraries can now be loaded/updated by dragging and dropping `.mtlib` files on map.
 - [#3360][i3360] Handshake cipher change to AES/CBC/PKCS5Padding for improved security.
 - [#3346][i3346] Darkness (i.e. lights with negative lumens) now affect vision on maps set to Day or Off.
-- [#3322][i3322] Numbers stored in Add-On library properties as strings. Fixed.
 - [#3342][i3342] Improved performance on maps with many lights.
+- [#3322][i3322] Numbers stored in Add-On library properties as strings. Fixed.
 - [#3254][i3254] Moved from Hessian serialization to Protobuf for enhanced security and improved interoperability.
 - [#3052][i3052] Tokens can now have Hill & Pit VBL. Settable via macro or VBL tab.
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3633][i3633] Sight/Light entries with bad syntax were producing an NPE. Fixed.
+- [#3631][i3631] Tooltips missing for Lock Player Movement and Lock Player Token Editor on Start Server dialog. Fixed.
 - [#3626][i3626] Certain arrangements of topology could cause infinite loop of error dialogs. Fixed.
 - [#3624][i3624] Context menu "Move" option not working from Map Explorer. Fixed.
 - [#3613][i3613] Various theme adjustments.
 - [#3611][i3611] setTokenPortrait() and setTokenHandout() throwing exceptions when passed empty string. Fixed.
+- [#3609][i3609] Newly added Add-Ons were not being saved in campaign. Fixed.
 - [#3605][i3605] Various fixes for theming of chat window.
 - [#3603][i3603] GM panel macros disappearing on serer start. Fixed.
 - [#3594][i3594] Maps with radius templates cause NPE when server is started. Fixed.
@@ -97,10 +100,13 @@ Feature release using OpenJDK 17
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
+[i3633]: https://github.com/RPTools/maptool/issues/3633
+[i3631]: https://github.com/RPTools/maptool/issues/3631
 [i3626]: https://github.com/RPTools/maptool/issues/3626
 [i3624]: https://github.com/RPTools/maptool/issues/3624
 [i3613]: https://github.com/RPTools/maptool/issues/3613
 [i3611]: https://github.com/RPTools/maptool/issues/3611
+[i3609]: https://github.com/RPTools/maptool/issues/3609
 [i3605]: https://github.com/RPTools/maptool/issues/3605
 [i3603]: https://github.com/RPTools/maptool/issues/3603
 [i3594]: https://github.com/RPTools/maptool/issues/3594
