@@ -1961,8 +1961,7 @@ public class PointerTool extends DefaultTool {
                         AppStyle.panelTexture.getWidth(),
                         AppStyle.panelTexture.getHeight())));
             statsG.fill(bounds);
-            statsG.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);

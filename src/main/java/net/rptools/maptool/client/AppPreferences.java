@@ -15,6 +15,8 @@
 package net.rptools.maptool.client;
 
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,6 +36,8 @@ public class AppPreferences {
 
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
   private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+
+  private static RenderQuality renderQuality;
 
   private static final String KEY_ASSET_ROOTS = "assetRoots";
   private static final String KEY_SAVE_DIR = "saveDir";
@@ -491,6 +495,71 @@ public class AppPreferences {
 
   private static final String KEY_ALLOW_EXTERNAL_MACRO_ACCESS = "allowExternalMacroAccess";
   private static final boolean DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS = false;
+
+  private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
+
+  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.HIGH;
+
+  public enum RenderQuality {
+    LOW,
+    MEDIUM,
+    HIGH;
+
+    public void setRenderingHints(Graphics2D g) {
+      switch (this) {
+        case LOW -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION,
+              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+        }
+        case MEDIUM -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
+        }
+        case HIGH -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        }
+      }
+    }
+
+    public void setShrinkRenderingHints(Graphics2D d) {
+      switch (this) {
+        case LOW -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION,
+              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+        }
+        case MEDIUM -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
+        }
+        case HIGH -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        }
+      }
+    }
+  }
+
+  public static void setRenderQuality(RenderQuality quality) {
+    prefs.put(KEY_RENDER_QUALITY, quality.name());
+    renderQuality = quality;
+  }
+
+  public static RenderQuality getRenderQuality() {
+    if (renderQuality == null) {
+      renderQuality =
+          RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, DEFAULT_RENDER_QUALITY.name()));
+    }
+    return renderQuality;
+  }
 
   public static void setTypingNotificationDuration(int ms) {
     prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);

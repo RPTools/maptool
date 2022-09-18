@@ -892,8 +892,7 @@ public class CommandPanel extends JPanel
       Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
       SwingUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
 
-      ((Graphics2D) g)
-          .setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+      AppPreferences.getRenderQuality().setShrinkRenderingHints((Graphics2D) g);
       g.drawImage(
           image,
           (size.width - imgSize.width) / 2,

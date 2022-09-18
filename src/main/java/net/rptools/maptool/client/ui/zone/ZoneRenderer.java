@@ -2055,6 +2055,7 @@ public class ZoneRenderer extends JComponent
     }
     if (drawBackground) {
       Graphics2D bbg = backbuffer.createGraphics();
+      AppPreferences.getRenderQuality().setRenderingHints(bbg);
 
       // Background texture
       Paint paint =
@@ -2934,6 +2935,10 @@ public class ZoneRenderer extends JComponent
   protected void renderTokens(
       Graphics2D g, List<Token> tokenList, PlayerView view, boolean figuresOnly) {
     Graphics2D clippedG = g;
+    clippedG.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    clippedG.setRenderingHint(
+        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+
     boolean isGMView = view.isGMView(); // speed things up
 
     timer.start("createClip");
