@@ -203,7 +203,7 @@ public class CampaignPropertiesDialog extends JDialog {
       status = Status.OK;
       setVisible(false);
     } catch (IllegalArgumentException iae) {
-      MapTool.showError(iae.getMessage(), iae);
+      MapTool.showError(iae.getMessage());
     }
   }
 
@@ -574,7 +574,8 @@ public class CampaignPropertiesDialog extends JDialog {
       // Show the user a list of errors so they can (attempt to) correct all of them at once
       MapTool.showFeedback(errlog.toArray());
       errlog.clear();
-      throw new IllegalArgumentException(); // Don't save sights...
+      throw new IllegalArgumentException(
+          "msg.error.mtprops.sight.definition"); // Don't save sights...
     }
     campaign.setSightTypes(sightList);
   }
@@ -778,7 +779,8 @@ public class CampaignPropertiesDialog extends JDialog {
     if (!errlog.isEmpty()) {
       MapTool.showFeedback(errlog.toArray());
       errlog.clear();
-      throw new IllegalArgumentException(); // Don't save lights...
+      throw new IllegalArgumentException(
+          "msg.error.mtprops.light.definition"); // Don't save lights...
     }
     return lightMap;
   }
