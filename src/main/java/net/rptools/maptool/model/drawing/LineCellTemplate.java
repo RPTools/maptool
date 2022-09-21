@@ -333,7 +333,7 @@ public class LineCellTemplate extends AbstractTemplate {
    * @return Returns the current value of quadrant.
    */
   public Quadrant getQuadrant() {
-    if (quadrant != null)  {
+    if (quadrant != null) {
       return Quadrant.valueOf(quadrant);
     }
     return null;
@@ -503,7 +503,6 @@ public class LineCellTemplate extends AbstractTemplate {
     if (getPathVertex() != null) {
       dto.setPathVertex(getPathVertex().toDto());
     }
-
 
     if (getName() != null) {
       dto.setName(StringValue.of(getName()));
