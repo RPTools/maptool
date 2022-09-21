@@ -2296,7 +2296,11 @@ public class Zone extends BaseModel {
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);
     dto.setTopology(Mapper.map(topology));
-    dto.setFogPaint(fogPaint.toDto());
+    if (fogPaint == null) { // Account for old campaigns without fog paint
+      dto.setFogPaint(DEFAULT_FOG.toDto());
+    } else {
+      dto.setFogPaint(fogPaint.toDto());
+    }
     dto.setHillVbl(Mapper.map(hillVbl));
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));
