@@ -2935,9 +2935,6 @@ public class ZoneRenderer extends JComponent
   protected void renderTokens(
       Graphics2D g, List<Token> tokenList, PlayerView view, boolean figuresOnly) {
     Graphics2D clippedG = g;
-    clippedG.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    clippedG.setRenderingHint(
-        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
 
     boolean isGMView = view.isGMView(); // speed things up
 
@@ -2951,6 +2948,7 @@ public class ZoneRenderer extends JComponent
       Area visibleArea = new Area(g.getClipBounds());
       visibleArea.intersect(visibleScreenArea);
       clippedG.setClip(new GeneralPath(visibleArea));
+      AppPreferences.getRenderQuality().setRenderingHints(clippedG);
     }
     timer.stop("createClip");
 
@@ -3147,11 +3145,13 @@ public class ZoneRenderer extends JComponent
 
       // create a per token Graphics object - normally clipped, unless always visible
       Area tokenCellArea = zone.getGrid().getTokenCellArea(tokenBounds);
-      Graphics2D tokenG =
-          (Graphics2D)
-              (isTokenInNeedOfClipping(token, tokenCellArea, isGMView)
-                  ? clippedG.create()
-                  : g.create());
+      Graphics2D tokenG;
+      if (isTokenInNeedOfClipping(token, tokenCellArea, isGMView)) {
+        tokenG = (Graphics2D) clippedG.create();
+      } else {
+        tokenG = (Graphics2D) g.create();
+        AppPreferences.getRenderQuality().setRenderingHints(tokenG);
+      }
 
       // Previous path
       timer.start("renderTokens:ShowPath");
