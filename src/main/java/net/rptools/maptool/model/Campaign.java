@@ -773,10 +773,13 @@ public class Campaign {
             .map(MacroButtonProperties::toDto)
             .collect(Collectors.toList()));
     dto.addAllZones(zones.values().stream().map(Zone::toDto).collect(Collectors.toList()));
-    dto.addAllGmMacroButtonProperties(
-        gmMacroButtonProperties.stream()
-            .map(MacroButtonProperties::toDto)
-            .collect(Collectors.toList()));
+    // gmMacroButtonProperties is null if you are loading an old campaign file < 1.5.6
+    if (gmMacroButtonProperties != null) {
+      dto.addAllGmMacroButtonProperties(
+          gmMacroButtonProperties.stream()
+              .map(MacroButtonProperties::toDto)
+              .collect(Collectors.toList()));
+    }
     return dto.build();
   }
 }
