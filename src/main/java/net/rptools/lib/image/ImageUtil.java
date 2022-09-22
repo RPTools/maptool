@@ -437,8 +437,8 @@ public class ImageUtil {
 
   public static Image resizeImage(Image image, int w, int h) {
     // Default to 30x30 w/h not passed
-    // TODO: CDW return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-    ResampleOp resampleOp = new ResampleOp(w, h);
+    ResampleOp resampleOp =
+        new ResampleOp(w, h, AppPreferences.getRenderQuality().getResampleOpFilter());
     if (image instanceof BufferedImage) {
       return resampleOp.filter((BufferedImage) image, null);
     } else {
@@ -472,7 +472,8 @@ public class ImageUtil {
    * @return The scaled BufferedImage
    */
   public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
-    ResampleOp resampleOp = new ResampleOp(width, height, ResampleOp.FILTER_LANCZOS);
+    ResampleOp resampleOp =
+        new ResampleOp(width, height, AppPreferences.getRenderQuality().getResampleOpFilter());
     return resampleOp.filter(image, null);
   }
 }

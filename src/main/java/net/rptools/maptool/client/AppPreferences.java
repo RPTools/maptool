@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import com.twelvemonkeys.image.ResampleOp;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
@@ -498,7 +499,7 @@ public class AppPreferences {
 
   private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
 
-  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.HIGH;
+  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.MEDIUM;
 
   public enum RenderQuality {
     LOW,
@@ -545,6 +546,14 @@ public class AppPreferences {
           d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         }
       }
+    }
+
+    public int getResampleOpFilter() {
+      return switch (this) {
+        case LOW -> ResampleOp.FILTER_POINT;
+        case MEDIUM -> ResampleOp.FILTER_TRIANGLE;
+        case HIGH -> ResampleOp.FILTER_QUADRATIC;
+      };
     }
   }
 
