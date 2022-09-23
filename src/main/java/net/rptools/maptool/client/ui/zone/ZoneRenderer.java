@@ -1483,24 +1483,25 @@ public class ZoneRenderer extends JComponent
     timer.start("renderLights:renderLightOverlay");
     renderLightOverlay(
         g,
-        new BlendingComposite(BlendingComposite.Operation.SCREEN),
+        AlphaComposite.SrcOver.derive(AppPreferences.getLightOverlayOpacity() / 255.0f),
         view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         nonDarknessLights,
         new Color(255, 255, 255, 255),
-        AppPreferences.getLightOverlayOpacity() / 255.0f);
+        1.0f);
     timer.stop("renderLights:renderLightOverlay");
+
     // Players should not be able to discern the nature of the darkness, so we always render it as
     // black for them.
     timer.start("renderLights:renderDarknessOverlay");
     renderLightOverlay(
         g,
         view.isGMView()
-            ? new BlendingComposite(BlendingComposite.Operation.MULTIPLY)
+            ? AlphaComposite.SrcOver.derive(AppPreferences.getDarknessOverlayOpacity() / 255.0f)
             : new SolidColorComposite(0xff000000),
         view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_NOT_VISIBLE_AREA,
         darknessLights,
         new Color(0, 0, 0, 255),
-        view.isGMView() ? (AppPreferences.getDarknessOverlayOpacity() / 255.0f) : 1.0f);
+        1.0f);
     timer.stop("renderLights:renderDarknessOverlay");
   }
 
@@ -1525,11 +1526,11 @@ public class ZoneRenderer extends JComponent
     timer.start("renderAuras:renderAuraOverlay");
     renderLightOverlay(
         g,
-        new BlendingComposite(BlendingComposite.Operation.SCREEN),
+        AlphaComposite.SrcOver.derive(AppPreferences.getAuraOverlayOpacity() / 255.0f),
         view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         drawableAuras,
         new Color(255, 255, 255, 150),
-        AppPreferences.getAuraOverlayOpacity() / 255.0f);
+        1.0f);
     timer.stop("renderAuras:renderAuraOverlay");
   }
 
