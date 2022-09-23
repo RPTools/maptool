@@ -1356,7 +1356,9 @@ public class MapTool {
               "DockableFrame.activeTitleForeground",
               UIManager.getColor("InternalFrame.activeTitleForeground"));
           defaults.put("DockableFrame.background", UIManager.getColor("Panel.background"));
-          defaults.put("DockableFrame.border", BorderFactory.createEmptyBorder());
+          defaults.put(
+              "DockableFrame.border",
+              BorderFactory.createLineBorder(UIManager.getColor("Panel.background")));
           defaults.put("DockableFrameTitlePane.showIcon", true);
         };
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
