@@ -1138,7 +1138,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             return text != null && text.length() > 100 ? text.substring(0, 100) + " ..." : text;
           }
         };
-    propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need Java5 solution
+    propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need
+    //  Java5 solution
     propertyTable.setName("propertiesTable");
 
     // wrap button and functionality

@@ -499,27 +499,28 @@ public class AppPreferences {
 
   private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
 
-  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.MEDIUM;
+  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.LOW_SCALING;
 
   public enum RenderQuality {
-    LOW,
-    MEDIUM,
-    HIGH;
+    LOW_SCALING,
+    PIXEL_ART_SCALING,
+    MEDIUM_SCALING,
+    HIGH_SCALING;
 
     public void setRenderingHints(Graphics2D g) {
       switch (this) {
-        case LOW -> {
+        case LOW_SCALING, PIXEL_ART_SCALING -> {
           g.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION,
               RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
           g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
         }
-        case MEDIUM -> {
+        case MEDIUM_SCALING -> {
           g.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
           g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
         }
-        case HIGH -> {
+        case HIGH_SCALING -> {
           g.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
           g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -529,18 +530,18 @@ public class AppPreferences {
 
     public void setShrinkRenderingHints(Graphics2D d) {
       switch (this) {
-        case LOW -> {
+        case LOW_SCALING, PIXEL_ART_SCALING -> {
           d.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION,
               RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
           d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
         }
-        case MEDIUM -> {
+        case MEDIUM_SCALING -> {
           d.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
           d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
         }
-        case HIGH -> {
+        case HIGH_SCALING -> {
           d.setRenderingHint(
               RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
           d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
@@ -550,9 +551,9 @@ public class AppPreferences {
 
     public int getResampleOpFilter() {
       return switch (this) {
-        case LOW -> ResampleOp.FILTER_POINT;
-        case MEDIUM -> ResampleOp.FILTER_TRIANGLE;
-        case HIGH -> ResampleOp.FILTER_QUADRATIC;
+        case LOW_SCALING, PIXEL_ART_SCALING -> ResampleOp.FILTER_POINT;
+        case MEDIUM_SCALING -> ResampleOp.FILTER_TRIANGLE;
+        case HIGH_SCALING -> ResampleOp.FILTER_QUADRATIC;
       };
     }
   }
@@ -564,8 +565,12 @@ public class AppPreferences {
 
   public static RenderQuality getRenderQuality() {
     if (renderQuality == null) {
-      renderQuality =
-          RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, DEFAULT_RENDER_QUALITY.name()));
+      try {
+        renderQuality =
+            RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, DEFAULT_RENDER_QUALITY.name()));
+      } catch (Exception e) {
+        renderQuality = DEFAULT_RENDER_QUALITY;
+      }
     }
     return renderQuality;
   }
