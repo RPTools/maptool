@@ -214,9 +214,11 @@ public class PreferencesDialog extends JDialog {
   };
 
   private static final LocalizedComboItem[] renderPerformanceComboItems = {
-    new LocalizedComboItem(RenderQuality.LOW.name(), "Preferences.combo.render.low"),
-    new LocalizedComboItem(RenderQuality.MEDIUM.name(), "Preferences.combo.render.medium"),
-    new LocalizedComboItem(RenderQuality.HIGH.name(), "Preferences.combo.render.high")
+    new LocalizedComboItem(RenderQuality.LOW_SCALING.name(), "Preferences.combo.render.low"),
+    new LocalizedComboItem(
+        RenderQuality.PIXEL_ART_SCALING.name(), "Preferences.combo.render.pixel"),
+    new LocalizedComboItem(RenderQuality.MEDIUM_SCALING.name(), "Preferences.combo.render.medium"),
+    new LocalizedComboItem(RenderQuality.HIGH_SCALING.name(), "Preferences.combo.render.high")
   };
   private static final LocalizedComboItem[] themeFilterComboItems = {
     new LocalizedComboItem("All", "Preferences.combo.themes.filter.all"),
