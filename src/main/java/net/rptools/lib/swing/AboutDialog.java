@@ -129,7 +129,6 @@ public class AboutDialog extends JDialog {
       logoLabel.setText("");
       centerPanel = new JPanel();
       centerPanel.setLayout(new BorderLayout());
-      centerPanel.setBackground(java.awt.Color.white);
       JScrollPane jsp = new JScrollPane(getCreditPanel());
       float fontSizePts = getCreditPanel().getFont().getSize2D();
       jsp.getVerticalScrollBar().setUnitIncrement((int) (fontSizePts * 1.3)); // size + 30%
@@ -151,7 +150,6 @@ public class AboutDialog extends JDialog {
       gridLayout.setRows(1);
       creditPanel = new JPanel();
       creditPanel.setLayout(gridLayout);
-      creditPanel.setBackground(java.awt.Color.white);
       creditPanel.add(getCreditEditorPane(), null);
     }
     return creditPanel;

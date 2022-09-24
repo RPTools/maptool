@@ -23,6 +23,7 @@ import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
@@ -63,7 +64,15 @@ public class BlastTemplate extends ConeTemplate {
    */
   private void adjustRectangle() {
     if (getZoneId() == null) return;
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    Zone zone;
+    if (MapTool.isHostingServer()) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    } else {
+      zone = MapTool.getCampaign().getZone(getZoneId());
+    }
+    if (zone == null) return;
+
+    int gridSize = zone.getGrid().getSize();
     int size = getRadius() * gridSize;
 
     Rectangle r = (Rectangle) renderer.getShape();

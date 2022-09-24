@@ -1736,9 +1736,19 @@ public class Token extends BaseModel implements Cloneable {
    * @return The original value of the state, if any.
    */
   public Object setState(String aState, Object aValue) {
+    // the GUI sends null to mean remove a state/bar
     if (aValue == null) {
       return state.remove(aState);
     }
+    // setBarVisible sends a boolean to show/hide a bar
+    if (aValue instanceof Boolean) {
+      if ((Boolean) aValue) {
+        return state.put(aState, aValue);
+      } else {
+        return state.remove(aState);
+      }
+    }
+    // Either enable a state or set the value of a bar
     return state.put(aState, aValue);
   }
 
@@ -2495,13 +2505,8 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     // Check to make sure lastPath has valid data
-    if (lastPath != null) {
-      // The second condition seems like it shouldn't be possible, but at some point in the past it
-      // was possible for paths of AStarCellPoints to exist and these can persist in older tokens.
-      if (lastPath.getCellPath().size() == 0
-          || !(lastPath.getCellPath().get(0) instanceof AbstractPoint)) {
-        lastPath = null;
-      }
+    if (lastPath != null && lastPath.getCellPath().isEmpty()) {
+      lastPath = null;
     }
 
     return this;
@@ -2565,7 +2570,7 @@ public class Token extends BaseModel implements Cloneable {
         else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        stateValue = parameters.get(1);
+        stateValue = parameters.get(0);
         if (stateValue.hasBoolValue()) setAllStates(stateValue.getBoolValue());
         else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
@@ -2727,14 +2732,23 @@ public class Token extends BaseModel implements Cloneable {
         }
       case setImageAsset:
         setImageAsset(
-            parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
+            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
+            new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
-        setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setPortraitImage(null);
+        }
         break;
       case setCharsheetImage:
-        setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setCharsheetImage(null);
+        }
         break;
       case setLayout:
         setSizeScale(parameters.get(0).getDoubleValue());
@@ -3017,12 +3031,11 @@ public class Token extends BaseModel implements Cloneable {
     }
     state.forEach(
         (key, state) -> {
-          if (Boolean.class.equals(state.getClass())) {
-            var value = (boolean) state;
-            dto.putState(key, TokenDto.State.newBuilder().setBoolValue(value).build());
-          } else if (BigDecimal.class.equals(state.getClass())) {
-            var value = ((BigDecimal) state).doubleValue();
-            dto.putState(key, TokenDto.State.newBuilder().setDoubleValue(value).build());
+          if (state instanceof Boolean bstate) {
+            dto.putState(key, TokenDto.State.newBuilder().setBoolValue(bstate).build());
+          } else if (state instanceof Number nstate) {
+            dto.putState(
+                key, TokenDto.State.newBuilder().setDoubleValue(nstate.doubleValue()).build());
           } else {
             log.warn("unknown state type:" + state.getClass());
           }

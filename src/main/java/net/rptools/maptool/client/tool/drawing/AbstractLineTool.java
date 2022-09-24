@@ -22,6 +22,7 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.SwingUtilities;
+import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -128,6 +129,9 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
   @Override
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (line != null) {
+      // For the line currently being drawn we are more concerned with speed of prettiness
+      var og = (Graphics2D) g.create();
+      RenderQuality.LOW_SCALING.setRenderingHints(og);
       Pen pen = getPen();
       pen.setForegroundMode(Pen.MODE_SOLID);
 
@@ -136,7 +140,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
         pen.setEraser(false);
         pen.setPaint(new DrawableColorPaint(Color.white));
       }
-      paintTransformed(g, renderer, line, pen);
+      paintTransformed(og, renderer, line, pen);
 
       List<Point> pointList = line.getPoints();
       if (!drawMeasurementDisabled && pointList.size() > 1 && drawMeasurement()) {
@@ -149,8 +153,9 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
 
         // ep.y -= 15;
 
-        ToolHelper.drawMeasurement(renderer, g, sp, ep);
+        ToolHelper.drawMeasurement(renderer, og, sp, ep);
       }
+      og.dispose();
     }
   }
 

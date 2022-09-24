@@ -14,16 +14,12 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.jidesoft.docking.DockingManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
@@ -60,10 +56,6 @@ public class AppMenuBar extends JMenuBar {
     add(createViewMenu());
     add(createToolsMenu());
     add(createWindowMenu());
-    Map<String, File> themes = AppUtil.getUIThemeNames();
-    if (themes.size() > 0) {
-      add(createThemesMenu(themes));
-    }
     add(createHelpMenu());
     // shift to the right
     add(Box.createGlue());
@@ -464,7 +456,19 @@ public class AppMenuBar extends JMenuBar {
           }
 
           public void actionPerformed(ActionEvent e) {
-            MapTool.getFrame().getDockingManager().resetToDefault();
+            DockingManager dm = MapTool.getFrame().getDockingManager();
+            dm.resetToDefault();
+
+            /* Issue #2485
+             * Calling resetToDefault() will expose all macro created frames and placeholders,
+             * so they need to hidden after
+             */
+            List<String> mtFrameNames =
+                Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+            dm.getAllFrames().stream()
+                .filter(f -> !mtFrameNames.contains(f))
+                .forEach(dm::hideFrame);
+            /* /Issue #2485 */
           }
         });
 
@@ -481,26 +485,6 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
 
-    return menu;
-  }
-
-  private JMenu createThemesMenu(Map<String, File> themes) {
-    JMenu menu = I18N.createMenu("menu.themes");
-
-    for (Entry<String, File> theme : themes.entrySet()) {
-      menu.add(
-          new AbstractAction() {
-            {
-              putValue(Action.NAME, theme.getKey());
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              AppUtil.setThemeName(theme.getKey());
-              MapTool.showInformation(I18N.getText("msg.theme.needrestart"));
-            }
-          });
-    }
     return menu;
   }
 

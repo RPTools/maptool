@@ -67,17 +67,19 @@ public class AreaTree {
     // Break the big area into independent areas
     double[] coords = new double[6];
     AreaMeta areaMeta = new AreaMeta();
-    for (PathIterator iter = area.getPathIterator(null); !iter.isDone(); iter.next()) {
+    for (PathIterator iter = area.getPathIterator(null, 1e-2); !iter.isDone(); iter.next()) {
       int type = iter.currentSegment(coords);
       switch (type) {
         case PathIterator.SEG_CLOSE:
           areaMeta.close();
 
           // Holes are oceans, solids are islands
-          if (areaMeta.isHole()) {
-            oceanList.add(new AreaOcean(areaMeta));
-          } else {
-            islandList.add(new AreaIsland(areaMeta));
+          if (!areaMeta.isEmpty()) {
+            if (areaMeta.isHole()) {
+              oceanList.add(new AreaOcean(areaMeta));
+            } else {
+              islandList.add(new AreaIsland(areaMeta));
+            }
           }
           break;
         case PathIterator.SEG_LINETO:

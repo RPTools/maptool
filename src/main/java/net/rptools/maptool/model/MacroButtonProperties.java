@@ -172,7 +172,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setAutoExecute(true);
     setIncludeLabel(false);
     setApplyToTokens(false);
-    setFontColorKey("");
+    setFontColorKey("default");
     setFontSize("");
     setMinWidth("");
     setMaxWidth("");
@@ -712,7 +712,11 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public void setFontColorKey(String fontColorKey) {
-    if (MapToolUtil.getColor(fontColorKey) != null) this.fontColorKey = fontColorKey;
+    this.fontColorKey =
+        switch (fontColorKey) {
+          case "", "default" -> "default";
+          default -> MapToolUtil.getColor(fontColorKey) != null ? fontColorKey : "default";
+        };
   }
 
   public String getFontSize() {

@@ -939,10 +939,13 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
+      if (selectedTokenSet.isEmpty()) {
+        selectedTokenSet.addAll(renderer.getSelectedTokenSet());
+      }
       if (tool instanceof PointerTool) {
-        ((PointerTool) tool).startTokenDrag(tokenUnderMouse);
+        ((PointerTool) tool).startTokenDrag(tokenUnderMouse, selectedTokenSet);
       } else if (tool instanceof StampTool) {
-        ((StampTool) tool).startTokenDrag(tokenUnderMouse);
+        ((StampTool) tool).startTokenDrag(tokenUnderMouse, selectedTokenSet);
       }
     }
   }

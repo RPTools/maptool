@@ -26,6 +26,7 @@ import com.jidesoft.grid.NavigableModel;
 import com.jidesoft.grid.Property;
 import com.jidesoft.grid.PropertyPane;
 import com.jidesoft.grid.PropertyTable;
+import com.jidesoft.plaf.basic.BasicExComboBoxUI;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import com.jidesoft.swing.DefaultSelectable;
 import com.jidesoft.swing.Selectable;
@@ -45,6 +46,9 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -89,6 +93,8 @@ import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
@@ -110,6 +116,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
+import org.fife.ui.rsyntaxtextarea.Theme;
 import org.fife.ui.rtextarea.RTextScrollPane;
 import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
@@ -1131,7 +1138,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             return text != null && text.length() > 100 ? text.substring(0, 100) + " ..." : text;
           }
         };
-    propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need Java5 solution
+    propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need
+    //  Java5 solution
     propertyTable.setName("propertiesTable");
 
     // wrap button and functionality
@@ -1491,6 +1499,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     xmlStatblockRSyntaxTextArea.setLineWrap(true);
     xmlStatblockRSyntaxTextArea.setWrapStyleWord(true);
     xmlStatblockRSyntaxTextArea.setTabSize(2);
+    // Set the color style via Theme
+    try {
+      File themeFile =
+          new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+      Theme theme = Theme.load(new FileInputStream(themeFile));
+      theme.apply(xmlStatblockRSyntaxTextArea);
+
+      xmlStatblockRSyntaxTextArea.revalidate();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     RTextScrollPane xmlStatblockRTextScrollPane = new RTextScrollPane(xmlStatblockRSyntaxTextArea);
     xmlStatblockRTextScrollPane.setLineNumbersEnabled(false);
@@ -1502,6 +1521,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     textStatblockRSyntaxTextArea.setLineWrap(true);
     textStatblockRSyntaxTextArea.setWrapStyleWord(true);
     textStatblockRSyntaxTextArea.setTabSize(2);
+    // Set the color style via Theme
+    try {
+      File themeFile =
+          new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+      Theme theme = Theme.load(new FileInputStream(themeFile));
+      theme.apply(textStatblockRSyntaxTextArea);
+
+      textStatblockRSyntaxTextArea.revalidate();
+    } catch (IOException e) {
+      e.printStackTrace();
+    }
 
     RTextScrollPane textStatblockRTextScrollPane =
         new RTextScrollPane(textStatblockRSyntaxTextArea);
@@ -1784,6 +1814,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       MTMultilineStringExComboBox localMultilineStringExComboBox =
           new MTMultilineStringExComboBox();
       localMultilineStringExComboBox.setEditable(true);
+      localMultilineStringExComboBox.setUI(new BasicExComboBoxUI());
       return localMultilineStringExComboBox;
     }
   }
@@ -1799,6 +1830,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     public MTMultilineStringPopupPanel(String paramString) {
       this.setResizable(true);
+      // Set the color style via Theme
+      try {
+        File themeFile =
+            new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+        Theme theme = Theme.load(new FileInputStream(themeFile));
+        theme.apply(j);
+
+        j.revalidate();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
       JScrollPane localJScrollPane = new RTextScrollPane(j);
       localJScrollPane.setVerticalScrollBarPolicy(22);
       localJScrollPane.setAutoscrolls(true);
@@ -1855,6 +1897,18 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     WordWrapCellRenderer() {
       setLineWrap(false);
       setWrapStyleWord(true);
+
+      // Set the color style via Theme
+      try {
+        File themeFile =
+            new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+        Theme theme = Theme.load(new FileInputStream(themeFile));
+        theme.apply(this);
+
+        revalidate();
+      } catch (IOException e) {
+        e.printStackTrace();
+      }
     }
 
     public Component getTableCellRendererComponent(

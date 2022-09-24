@@ -621,11 +621,17 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   @Override
   public void updateTokenProperty(Token token, Token.Update update, String value1, String value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setStringValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setStringValue(value2).build());
+    var value1Dto = TokenPropertyValueDto.newBuilder();
+    if (value1 != null) {
+      value1Dto.setStringValue(value1);
+    }
+
+    var value2Dto = TokenPropertyValueDto.newBuilder();
+    if (value2 != null) {
+      value2Dto.setStringValue(value2);
+    }
+
+    updateTokenProperty(token, update, value1Dto.build(), value2Dto.build());
   }
 
   @Override

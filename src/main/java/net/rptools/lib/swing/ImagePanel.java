@@ -24,6 +24,7 @@ import java.util.List;
 import java.util.Map.Entry;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
+import net.rptools.maptool.client.AppPreferences;
 
 @SuppressWarnings("serial")
 public class ImagePanel extends JComponent
@@ -233,11 +234,9 @@ public class ImagePanel extends JComponent
           Dimension dim = constrainSize(image, gridSize);
           var savedRenderingHints = g.getRenderingHints();
           if (dim.width < image.getWidth(null) || dim.height < image.getHeight(null)) {
-            g.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
           } else if (dim.width > image.getWidth(null) || dim.height > image.getHeight(null)) {
-            g.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+            AppPreferences.getRenderQuality().setRenderingHints(g);
           }
           g.drawImage(
               image,

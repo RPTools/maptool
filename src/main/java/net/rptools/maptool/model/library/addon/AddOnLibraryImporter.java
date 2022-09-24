@@ -212,7 +212,8 @@ public class AddOnLibraryImporter {
    * @param asset the {@link Asset} to add.
    */
   private void addAsset(Asset asset) {
-    if (!AssetManager.hasAsset(asset)) {
+    if (!AssetManager.hasAsset(asset)
+        || AssetManager.getAsset(asset.getMD5Key()).getData().length == 0) {
       AssetManager.putAsset(asset);
     }
   }

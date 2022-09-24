@@ -23,6 +23,8 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import javax.swing.Action;
@@ -82,6 +84,8 @@ import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 
 public class MacroButtonDialog extends JDialog implements SearchListener {
+
+  public static final String DEFAULT_COLOR_NAME = "default";
 
   private static final long serialVersionUID = 8228617911117087993L;
   private final FormPanel panel;
@@ -223,20 +227,32 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   private void installColorCombo() {
     JComboBox<String> combo = getColorComboBox();
     var colorNamesSet = MapToolUtil.getColorNames();
-    var colorNamesArray = new String[colorNamesSet.size()];
-    colorNamesSet.toArray(colorNamesArray);
-    combo.setModel(new DefaultComboBoxModel<String>(colorNamesArray));
-    combo.insertItemAt("default", 0);
-    combo.setSelectedItem("default");
-    combo.setRenderer(new ColorComboBoxRenderer());
+    var colorNamesArrayList = new ArrayList<String>();
+    colorNamesArrayList.add(DEFAULT_COLOR_NAME);
+    colorNamesArrayList.addAll(colorNamesSet);
+    String[] colorNamesArray = colorNamesArrayList.toArray(new String[0]);
+    combo.setModel(new DefaultComboBoxModel<>(colorNamesArray));
+    combo.setSelectedItem(DEFAULT_COLOR_NAME);
+    combo.setRenderer(
+        new ColorComboBoxRenderer(
+            DEFAULT_COLOR_NAME,
+            UIManager.getColor("Button" + ".background"),
+            UIManager.getColor("Button.foreground")));
   }
 
   private void installFontColorCombo() {
     JComboBox<String> combo = getFontColorComboBox();
-    combo.setModel(new DefaultComboBoxModel<String>(MacroButtonProperties.getFontColors()));
-    // combo.insertItemAt("default", 0);
-    combo.setSelectedItem("black");
-    combo.setRenderer(new ColorComboBoxRenderer());
+    var colorNamesArrayList = new ArrayList<String>();
+    colorNamesArrayList.add(DEFAULT_COLOR_NAME);
+    colorNamesArrayList.addAll(Arrays.asList(MacroButtonProperties.getFontColors()));
+    var colorNamesArray = colorNamesArrayList.toArray(new String[0]);
+    combo.setModel(new DefaultComboBoxModel<>(colorNamesArray));
+    combo.setSelectedItem(DEFAULT_COLOR_NAME);
+    combo.setRenderer(
+        new ColorComboBoxRenderer(
+            DEFAULT_COLOR_NAME,
+            UIManager.getColor("Button" + ".foreground"),
+            UIManager.getColor("Button.background")));
   }
 
   private void installFontSizeCombo() {

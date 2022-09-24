@@ -147,7 +147,7 @@ public class AppStyle {
       addButton = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/add_sm.png");
 
       lookupTableDefaultImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/document.jpg");
+          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/document.png");
 
       resourceLibraryImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/book_open.png");

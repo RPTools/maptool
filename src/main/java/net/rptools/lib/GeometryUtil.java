@@ -15,8 +15,11 @@
 package net.rptools.lib;
 
 import java.awt.geom.Point2D;
+import org.locationtech.jts.geom.PrecisionModel;
 
 public class GeometryUtil {
+  private static final PrecisionModel precisionModel = new PrecisionModel(1_000_000.0);
+
   public static double getAngle(Point2D origin, Point2D target) {
     double angle =
         Math.toDegrees(
@@ -38,5 +41,9 @@ public class GeometryUtil {
       targetAngle += 360;
     }
     return targetAngle;
+  }
+
+  public static PrecisionModel getPrecisionModel() {
+    return precisionModel;
   }
 }

@@ -37,10 +37,12 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.Stack;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.ImageIcon;
@@ -80,6 +82,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private boolean isResizingToken;
   private boolean isResizingRotatedToken;
   private Rectangle selectionBoundBox;
+
+  private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
 
   // The position with greater than integer accuracy of a rotated stamp that is being resized.
   private Point2D.Double preciseStampZonePoint;
@@ -165,6 +169,13 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     return "tool.stamp.tooltip";
   }
 
+  public void startTokenDrag(Token keyToken, Set<GUID> selectedTokens) {
+    savedTokenSelectionSet.push(new HashSet<>(renderer.getSelectedTokenSet()));
+    renderer.clearSelectedTokens();
+    renderer.selectTokens(selectedTokens);
+    startTokenDrag(keyToken);
+  }
+
   public void startTokenDrag(Token keyToken) {
     tokenBeingDragged = keyToken;
 
@@ -193,6 +204,11 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
     dragOffsetX = 0;
     dragOffsetY = 0;
+
+    if (!savedTokenSelectionSet.isEmpty()) {
+      renderer.clearSelectedTokens();
+      renderer.selectTokens(savedTokenSelectionSet.pop());
+    }
   }
 
   /**

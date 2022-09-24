@@ -3269,29 +3269,6 @@ public class AppActions {
         @Override
         protected void executeAction() {
           new AddOnLibrariesDialog().show();
-          // TODO: CDW
-          /*JFileChooser chooser = new MapPreviewFileChooser();
-          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
-          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
-
-          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-            File libFile = chooser.getSelectedFile();
-            try {
-              var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
-              var libraryManager = new LibraryManager();
-              String namespace = addOnLibrary.getNamespace().get();
-              if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
-                if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {
-                  return;
-                }
-                libraryManager.deregisterAddOnLibrary(namespace);
-              }
-              libraryManager.reregisterAddOnLibrary(addOnLibrary);
-            } catch (IOException | InterruptedException | ExecutionException ioException) {
-              MapTool.showError("library.import.ioError", ioException);
-            }
-          }*/
         }
       };
 
