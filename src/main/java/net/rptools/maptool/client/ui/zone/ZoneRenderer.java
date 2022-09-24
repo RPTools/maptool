@@ -882,7 +882,9 @@ public class ZoneRenderer extends JComponent
       int noteVPos = 20;
       if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
 
-      if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView()) && !skipDrawing) {
+      if (!AppPreferences.getMapVisibilityWarning()
+          && (!zone.isVisible() && pl.isGMView())
+          && !skipDrawing) {
         GraphicsUtil.drawBoxedString(
             bufferG2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
         noteVPos += 20;
