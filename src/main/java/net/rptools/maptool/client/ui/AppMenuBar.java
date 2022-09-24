@@ -14,15 +14,12 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.jidesoft.docking.DockingManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
@@ -459,7 +456,19 @@ public class AppMenuBar extends JMenuBar {
           }
 
           public void actionPerformed(ActionEvent e) {
-            MapTool.getFrame().getDockingManager().resetToDefault();
+            DockingManager dm = MapTool.getFrame().getDockingManager();
+            dm.resetToDefault();
+
+            /* Issue #2485
+             * Calling resetToDefault() will expose all macro created frames and placeholders,
+             * so they need to hidden after
+             */
+            List<String> mtFrameNames =
+                Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+            dm.getAllFrames().stream()
+                .filter(f -> !mtFrameNames.contains(f))
+                .forEach(dm::hideFrame);
+            /* /Issue #2485 */
           }
         });
 

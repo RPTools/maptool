@@ -139,11 +139,15 @@ public interface Drawable {
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
-        drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+        if (!dto.getQuadrant().isEmpty()) {
+          drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+        }
         drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
         var pathVertex = dto.getPathVertex();
         drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
-        if (dto.hasName()) drawable.setName(dto.getName().getValue());
+        if (dto.hasName()) {
+          drawable.setName(dto.getName().getValue());
+        }
         drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
         return drawable;
       }

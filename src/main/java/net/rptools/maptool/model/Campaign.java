@@ -743,10 +743,13 @@ public class Campaign {
     campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
     campaign.macroButtonProperties =
         dto.getMacroButtonPropertiesList().stream()
-            .map(p -> MacroButtonProperties.fromDto(p))
+            .map(MacroButtonProperties::fromDto)
             .collect(Collectors.toList());
-    var zoneList =
-        dto.getZonesList().stream().map(z -> Zone.fromDto(z)).collect(Collectors.toList());
+    campaign.gmMacroButtonProperties =
+        dto.getGmMacroButtonPropertiesList().stream()
+            .map(MacroButtonProperties::fromDto)
+            .collect(Collectors.toList());
+    var zoneList = dto.getZonesList().stream().map(Zone::fromDto).toList();
     zoneList.forEach(z -> campaign.zones.put(z.getId(), z));
     return campaign;
   }
@@ -766,8 +769,17 @@ public class Campaign {
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
     dto.addAllMacroButtonProperties(
-        macroButtonProperties.stream().map(p -> p.toDto()).collect(Collectors.toList()));
-    dto.addAllZones(zones.values().stream().map(z -> z.toDto()).collect(Collectors.toList()));
+        macroButtonProperties.stream()
+            .map(MacroButtonProperties::toDto)
+            .collect(Collectors.toList()));
+    dto.addAllZones(zones.values().stream().map(Zone::toDto).collect(Collectors.toList()));
+    // gmMacroButtonProperties is null if you are loading an old campaign file < 1.5.6
+    if (gmMacroButtonProperties != null) {
+      dto.addAllGmMacroButtonProperties(
+          gmMacroButtonProperties.stream()
+              .map(MacroButtonProperties::toDto)
+              .collect(Collectors.toList()));
+    }
     return dto.build();
   }
 }

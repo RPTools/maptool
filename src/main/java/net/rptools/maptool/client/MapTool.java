@@ -24,7 +24,6 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -1343,6 +1342,22 @@ public class MapTool {
 
           defaults.put("OptionPane.buttonAreaBorder", BorderFactory.createEmptyBorder(6, 6, 6, 6));
           defaults.put("OptionPane.buttonOrientation", SwingConstants.RIGHT);
+
+          defaults.put(
+              "DockableFrame.inactiveTitleBackground",
+              UIManager.getColor("InternalFrame.inactiveTitleBackground"));
+          defaults.put(
+              "DockableFrame.inactiveTitleForeground",
+              UIManager.getColor("InternalFrame.inactiveTitleForeground"));
+          defaults.put(
+              "DockableFrame.activeTitleBackground",
+              UIManager.getColor("InternalFrame.activeTitleBackground"));
+          defaults.put(
+              "DockableFrame.activeTitleForeground",
+              UIManager.getColor("InternalFrame.activeTitleForeground"));
+          defaults.put("DockableFrame.background", UIManager.getColor("Panel.background"));
+          defaults.put("DockableFrame.border", BorderFactory.createEmptyBorder());
+          defaults.put("DockableFrameTitlePane.showIcon", true);
         };
     uiDefaultsCustomizer.customize(UIManager.getDefaults());
   }
@@ -1701,6 +1716,12 @@ public class MapTool {
 
     final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
 
+    try {
+      ThemeSupport.loadTheme();
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
+
     // Protocol handlers
     // cp:// is registered by the RPTURLStreamHandlerFactory constructor (why?)
     RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
@@ -1734,31 +1755,16 @@ public class MapTool {
       if (AppUtil.MAC_OS_X) {
         // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
         // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-        ThemeSupport.loadTheme();
 
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
-        // loadTheme();
-      }
-      // If running on Windows based OS, CJK font is broken when using TinyLAF.
-      // else if (WINDOWS) {
-      // UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
-      // menuBar = new AppMenuBar();
-      // }
-      else {
+      } else {
         // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-        ThemeSupport.loadTheme();
         menuBar = new AppMenuBar();
       }
 
       com.jidesoft.utils.Lm.verifyLicense(
           "Trevor Croft", "rptools", "5MfIVe:WXJBDrToeLWPhMv3kI2s3VFo");
-      LookAndFeelFactory.addUIDefaultsCustomizer(
-          defaults -> {
-            // Remove red border around menus
-            defaults.put("PopupMenu.foreground", Color.lightGray);
-          });
-      LookAndFeelFactory.installJideExtension(LookAndFeelFactory.XERTO_STYLE);
 
       configureJide();
     } catch (Exception e) {

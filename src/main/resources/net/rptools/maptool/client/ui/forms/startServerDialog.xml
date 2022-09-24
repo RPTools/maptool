@@ -1550,7 +1550,7 @@
                  <at name="name">@lockTokenEditOnStartup</at>
                  <at name="width">645</at>
                  <at name="text">action.toggleTokenEditorLock</at>
-                 <at name="toolTipText">action.toggleTokenEditorLock.tooltip</at>
+                 <at name="toolTipText">action.toggleTokenEditorLock.description</at>
                  <at name="height">16</at>
                 </object>
                </at>
@@ -1607,7 +1607,7 @@
                  <at name="name">@lockPlayerMovementOnStartup</at>
                  <at name="width">645</at>
                  <at name="text">action.toggleMovementLock</at>
-                 <at name="toolTipText">action.toggleMovementLock.tooltip</at>
+                 <at name="toolTipText">action.toggleMovementLock.description</at>
                  <at name="height">16</at>
                 </object>
                </at>
