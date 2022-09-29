@@ -1800,11 +1800,7 @@ public class ZoneRenderer extends JComponent
       if (cacheNotValid) {
         newImage = true;
         timer.start("renderFog-allocateBufferedImage");
-        fogBuffer =
-            new BufferedImage(
-                size.width,
-                size.height,
-                view.isGMView() ? Transparency.TRANSLUCENT : Transparency.BITMASK);
+        fogBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB_PRE);
         timer.stop("renderFog-allocateBufferedImage");
       }
       Graphics2D buffG = fogBuffer.createGraphics();
