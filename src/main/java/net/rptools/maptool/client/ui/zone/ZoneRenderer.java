@@ -1945,7 +1945,7 @@ public class ZoneRenderer extends JComponent
         buffG.fill(visibleArea);
         buffG.setClip(oldClip);
       } else {
-        buffG.setColor(new Color(0, 0, 0, 80));
+        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
         buffG.fill(softFog);
       }
     } else {
