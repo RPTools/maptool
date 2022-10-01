@@ -1725,7 +1725,7 @@ public class Token extends BaseModel implements Cloneable {
     // setBarVisible sends a boolean to show/hide a bar
     if (aValue instanceof Boolean) {
       if ((Boolean) aValue) {
-        return state.put(aState, 1.0);
+        return state.put(aState, aValue);
       } else {
         return state.remove(aState);
       }
