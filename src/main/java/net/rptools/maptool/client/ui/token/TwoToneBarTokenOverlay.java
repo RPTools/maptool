@@ -120,6 +120,7 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
   public BarTokenOverlayDto toDto() {
     var dto = getDto();
     dto.setBgColor(bgColor.getRGB());
+    setSideDto(dto);
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_TONE).build();
   }
 }

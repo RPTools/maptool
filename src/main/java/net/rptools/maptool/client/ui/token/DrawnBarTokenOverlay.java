@@ -134,6 +134,7 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     dto.setCommon(getCommonDto());
     dto.setThickness(thickness);
     dto.setColor(barColor.getRGB());
+    setSideDto(dto);
     return dto;
   }
 
