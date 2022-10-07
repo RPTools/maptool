@@ -154,14 +154,15 @@ public class GridTool extends DefaultTool {
 
   private void copyGridToControlPanel() {
     Zone zone = renderer.getZone();
-
     Grid grid = zone.getGrid();
 
     updateSecondDimension(grid, true);
-    gridSizeSpinner.setValue(grid.getSize());
     gridOffsetXTextField.setText(Integer.toString(grid.getOffsetX()));
     gridOffsetYTextField.setText(Integer.toString(grid.getOffsetY()));
     colorWell.setColor(new Color(zone.getGridColor()));
+    // Setting the size must be done last as it triggers a ChangeEvent
+    // which causes copyControlPanelToGrid() to be called.
+    gridSizeSpinner.setValue(grid.getSize());
 
     resetZoomSlider();
   }
@@ -190,10 +191,10 @@ public class GridTool extends DefaultTool {
     Grid grid = zone.getGrid();
 
     updateSecondDimension(grid, false);
-    grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
     updateSecondDimension(grid, true);
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
+    grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
 
     renderer.repaint();
   }
