@@ -213,7 +213,8 @@ public class Token extends BaseModel implements Cloneable {
     flipX,
     flipY,
     flipIso,
-    setSpeechName
+    setSpeechName,
+    removeFacing
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2610,6 +2611,9 @@ public class Token extends BaseModel implements Cloneable {
           lightChanged = true;
         }
         setFacing(parameters.get(0).getIntValue());
+        break;
+      case removeFacing:
+        setFacing(null);
         break;
       case clearAllOwners:
         clearAllOwners();
