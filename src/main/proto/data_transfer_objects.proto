@@ -632,6 +632,7 @@ enum TokenUpdateDto {
     flipY = 52;
     flipIso = 53;
     setSpeechName = 54;
+    removeFacing = 55;
 }
 
 message AssetTransferHeaderDto {
