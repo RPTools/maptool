@@ -951,7 +951,7 @@ public abstract class Grid implements Cloneable {
     var dto = GridDto.newBuilder();
     fillDto(dto);
     dto.setOffsetX(offsetX);
-    dto.setOffsetX(offsetY);
+    dto.setOffsetY(offsetY);
     dto.setSize(size);
     if (cellShape != null) {
       dto.setCellShape(Mapper.map(cellShape));
