@@ -675,7 +675,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("removeTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, (Integer) null);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeFacing);
       return "";
     }
 
