@@ -1800,11 +1800,7 @@ public class ZoneRenderer extends JComponent
       if (cacheNotValid) {
         newImage = true;
         timer.start("renderFog-allocateBufferedImage");
-        fogBuffer =
-            new BufferedImage(
-                size.width,
-                size.height,
-                view.isGMView() ? Transparency.TRANSLUCENT : Transparency.BITMASK);
+        fogBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB_PRE);
         timer.stop("renderFog-allocateBufferedImage");
       }
       Graphics2D buffG = fogBuffer.createGraphics();
@@ -1880,14 +1876,14 @@ public class ZoneRenderer extends JComponent
           // combined = zone.getExposedArea(view);
           buffG.fill(combined);
           renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, combined);
+          renderFogOutline(buffG, view, visibleArea);
         } else {
           // 'combined' already includes the area encompassed by 'tempArea', so just
           // use 'combined' instead in this block of code?
           tempArea.add(combined);
           buffG.fill(tempArea);
           renderFogArea(buffG, view, tempArea, visibleArea);
-          renderFogOutline(buffG, view, tempArea);
+          renderFogOutline(buffG, view, visibleArea);
         }
       } else {
         // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
@@ -1898,7 +1894,7 @@ public class ZoneRenderer extends JComponent
           }
           buffG.fill(combined);
           renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, combined);
+          renderFogOutline(buffG, view, visibleArea);
         } else {
           Area myCombined = new Area();
           List<Token> myToks = zone.getTokens();
@@ -1914,7 +1910,7 @@ public class ZoneRenderer extends JComponent
           }
           buffG.fill(myCombined);
           renderFogArea(buffG, view, myCombined, visibleArea);
-          renderFogOutline(buffG, view, myCombined);
+          renderFogOutline(buffG, view, visibleArea);
         }
       }
       // renderFogArea(buffG, view, combined, visibleArea);
@@ -1949,7 +1945,7 @@ public class ZoneRenderer extends JComponent
         buffG.fill(visibleArea);
         buffG.setClip(oldClip);
       } else {
-        buffG.setColor(new Color(0, 0, 0, 80));
+        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
         buffG.fill(softFog);
       }
     } else {
@@ -1958,23 +1954,21 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area softFog) {
-    // if (false && AppPreferences.getUseSoftFogEdges()) {
-    // float alpha = view.isGMView() ? AppPreferences.getFogOverlayOpacity() / 255.0f : 1f;
-    // GraphicsUtil.renderSoftClipping(buffG, softFog, (int) (zone.getGrid().getSize() * getScale()
-    // * .25), alpha);
-    // } else
-    {
-      if (visibleScreenArea != null) {
-        // buffG.setClip(softFog);
-        buffG.setTransform(new AffineTransform());
-        buffG.setComposite(AlphaComposite.Src);
-        buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        buffG.setStroke(new BasicStroke(1));
-        buffG.setColor(Color.BLACK);
-        buffG.draw(visibleScreenArea);
-        // buffG.setClip(oldClip);
-      }
+  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area visibleArea) {
+    // If there is no visible area, there is no outline that needs rendering.
+    if (zoneView.isUsingVision() && visibleArea != null && !visibleArea.isEmpty()) {
+      // Transform the area (not G2D) because we want the drawn line to remain thin.
+      AffineTransform af = new AffineTransform();
+      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
+      af.scale(getScale(), getScale());
+      visibleArea = visibleArea.createTransformedArea(af);
+
+      buffG.setTransform(new AffineTransform());
+      buffG.setComposite(AlphaComposite.Src);
+      buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      buffG.setStroke(new BasicStroke(1));
+      buffG.setColor(Color.BLACK);
+      buffG.draw(visibleArea);
     }
   }
 

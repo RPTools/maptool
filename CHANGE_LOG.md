@@ -27,6 +27,16 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3669][i3669] Token Bars were resetting to Top side after server start. Fixed.
+- [#3662][i3662] Edit Token dialog was too tall for lower resolution screens. Fixed.
+- [#3660][i3660] Image Scaling Quality now defaults to Low (Fastest) setting.
+- [#3658][i3658] Docked windows set to auto-hide could not be resized. Fixed.
+- [#3656][i3656] Fixes for image scaling performance.
+- [#3653][i3653] More fixes for older campaign compatibility.
+- [#3652][i3652] Image scaling on all layers now respect preferences choice to improve performance.
+- [#3651][i3651] For performance reasons additive blending for lights/sights removed.
+- [#3647][i3647] Fixes for loading campaigns created in prior versions.
+- [#3642][i3642] Macro function `getState()` would always return 0. Fixed.
 - [#3633][i3633] Sight/Light entries with bad syntax were producing an NPE. Fixed.
 - [#3631][i3631] Tooltips missing for Lock Player Movement and Lock Player Token Editor on Start Server dialog. Fixed.
 - [#3626][i3626] Certain arrangements of topology could cause infinite loop of error dialogs. Fixed.
@@ -94,12 +104,24 @@ Feature release using OpenJDK 17
 - [#1550][i1550] Overlapping colored lights not producing the correct result. Fixed.
 
 ## Other Changes
+- [#3654][i3654] Added logging for initiative null pointer.
 - [#3398][i3398] ImageIO libs updated to 3.8.2.
 - [#3331][i3331] Update WebRTC lib to 0.5.0, update Java-WebSocket lib to 1.5.2.
 - [#3286][i3286] Builds updated to OpenJDK 17.
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
+[i3669]: https://github.com/RPTools/maptool/issues/3669
+[i3662]: https://github.com/RPTools/maptool/issues/3662
+[i3660]: https://github.com/RPTools/maptool/issues/3660
+[i3658]: https://github.com/RPTools/maptool/issues/3658
+[i3656]: https://github.com/RPTools/maptool/issues/3656
+[i3654]: https://github.com/RPTools/maptool/pull/3654
+[i3653]: https://github.com/RPTools/maptool/issues/3653
+[i3652]: https://github.com/RPTools/maptool/issues/3652
+[i3651]: https://github.com/RPTools/maptool/issues/3651
+[i3647]: https://github.com/RPTools/maptool/issues/3647
+[i3642]: https://github.com/RPTools/maptool/issues/3642
 [i3633]: https://github.com/RPTools/maptool/issues/3633
 [i3631]: https://github.com/RPTools/maptool/issues/3631
 [i3626]: https://github.com/RPTools/maptool/issues/3626
