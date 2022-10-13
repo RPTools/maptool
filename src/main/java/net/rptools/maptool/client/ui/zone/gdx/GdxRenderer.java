@@ -32,6 +32,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.jogamp.opengl.GL;
 import java.awt.*;
 import java.awt.Shape;
 import java.awt.geom.*;
@@ -40,6 +41,7 @@ import java.io.FileNotFoundException;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
+import javax.annotation.Nullable;
 import javax.swing.*;
 import net.rptools.lib.AppEvent;
 import net.rptools.lib.AppEventListener;
@@ -415,8 +417,9 @@ public class GdxRenderer extends ApplicationAdapter
 
   public void invalidateCurrentViewCache() {
     flushFog = true;
-
-    updateVisibleArea();
+    drawableLights = null;
+    drawableAuras = null;
+    visibleScreenArea = null;
     lastView = null;
 
     var zoneView = zoneRenderer.getZoneView();
@@ -436,7 +439,11 @@ public class GdxRenderer extends ApplicationAdapter
 
     // Calculations
     timer.start("calcs-1");
-    updateVisibleArea();
+    timer.start("ZoneRenderer-getVisibleArea");
+    if (visibleScreenArea == null) {
+      visibleScreenArea = zoneRenderer.getZoneView().getVisibleArea(zoneRenderer.getPlayerView());
+    }
+    timer.stop("ZoneRenderer-getVisibleArea");
 
     timer.stop("calcs-1");
     timer.start("calcs-2");
@@ -615,14 +622,6 @@ public class GdxRenderer extends ApplicationAdapter
       renderPlayerVisionOverlay(view);
       timer.stop("visionOverlayPlayer");
     }
-  }
-
-  private void updateVisibleArea() {
-    //    if (zoneRenderer.getZoneView().isUsingVision()) {
-    timer.start("ZoneRenderer-getVisibleArea");
-    visibleScreenArea = zoneRenderer.getZoneView().getVisibleArea(zoneRenderer.getPlayerView());
-    timer.stop("ZoneRenderer-getVisibleArea");
-    //    }
   }
 
   private void renderPlayerVisionOverlay(PlayerView view) {
@@ -1130,6 +1129,9 @@ public class GdxRenderer extends ApplicationAdapter
     image.draw(batch);
   }
 
+  /** Holds the auras from lightSourceMap after they have been combined. */
+  private List<DrawableLight> drawableAuras;
+
   private void renderAuras(PlayerView view) {
     var alpha = AppPreferences.getAuraOverlayOpacity() / 255.0f;
 
@@ -1151,26 +1153,93 @@ public class GdxRenderer extends ApplicationAdapter
     timer.stop("auras-4");
   }
 
-  private void renderLights(PlayerView view) {
-    if (zone.getVisionType() != Zone.VisionType.NIGHT) return;
+  /**
+   * Cached set of lights arranged by lumens for some stability. TODO Token draw order would be
+   * nice.
+   */
+  private List<DrawableLight> drawableLights = null;
 
+  private void renderLights(PlayerView view) {
+
+    // Collect and organize lights
+    timer.start("renderLights:getLights");
+    if (drawableLights == null) {
+      timer.start("renderLights:populateCache");
+      drawableLights = new ArrayList<>(zoneRenderer.getZoneView().getDrawableLights(view));
+      drawableLights.removeIf(light -> light.getType() != LightSource.Type.NORMAL);
+      timer.stop("renderLights:populateCache");
+    }
+    timer.start("renderLights:filterLights");
+    final var darknessLights =
+        drawableLights.stream().filter(light -> light.getLumens() < 0).toList();
+    final var nonDarknessLights =
+        drawableLights.stream().filter(light -> light.getLumens() >= 0).toList();
+    timer.stop("renderLights:filterLights");
+    timer.stop("renderLights:getLights");
+
+    timer.start("renderLights:renderLightOverlay");
+    renderLightOverlay(
+        GL.GL_ALPHA,
+        GL.GL_ONE_MINUS_SRC_ALPHA,
+        new Color(1.0f, 1.0f, 1.0f, AppPreferences.getLightOverlayOpacity() / 255.0f),
+        view.isGMView() ? null : ZoneRenderer.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+        nonDarknessLights,
+        new java.awt.Color(255, 255, 255, 255),
+        1.0f);
+    timer.stop("renderLights:renderLightOverlay");
+
+    // Players should not be able to discern the nature of the darkness, so we always render it as
+    // black for them.
+    timer.start("renderLights:renderDarknessOverlay");
+    renderLightOverlay(
+        GL.GL_ALPHA,
+        GL.GL_ONE_MINUS_SRC_ALPHA,
+        view.isGMView()
+            ? new Color(1.0f, 1.0f, 1.0f, AppPreferences.getLightOverlayOpacity() / 255.0f)
+            : Color.BLACK,
+        view.isGMView() ? null : ZoneRenderer.LightOverlayClipStyle.CLIP_TO_NOT_VISIBLE_AREA,
+        darknessLights,
+        new java.awt.Color(0, 0, 0, 255),
+        1.0f);
+    timer.stop("renderLights:renderDarknessOverlay");
+  }
+
+  /**
+   * Combines a set of lights into an image that is then rendered into the zone.
+   *
+   * @param clipStyle How to clip the overlay relative to the visible area. Set to null for no extra
+   *     clipping.
+   * @param lights The lights that will be rendered and blended.
+   * @param defaultPaint A default paint for lights without a paint.
+   * @param overlayOpacity The opacity used when rendering the final overlay on top of the zone.
+   */
+  private void renderLightOverlay(
+      int blendSrcFunc,
+      int blendDstFunc,
+      Color tintColor,
+      @Nullable ZoneRenderer.LightOverlayClipStyle clipStyle,
+      List<DrawableLight> lights,
+      Paint defaultPaint,
+      float overlayOpacity) {
+    if (lights.isEmpty()) {
+      // No points spending resources accomplishing nothing.
+      return;
+    }
+
+    // Set up a buffer image for lights to be drawn onto before the map
+    timer.start("renderLightOverlay:allocateBuffer");
     backBuffer.begin();
     ScreenUtils.clear(Color.CLEAR);
     setProjectionMatrix(cam.combined);
-    batch.setBlendFunction(GL20.GL_ONE, GL20.GL_NONE);
+    batch.setBlendFunction(blendSrcFunc, blendDstFunc);
     drawer.update();
 
-    timer.start("lights-2");
-    var alpha = AppPreferences.getLightOverlayOpacity() / 255.0f;
-    timer.stop("lights-2");
-
-    timer.start("lights-3");
-    for (DrawableLight light : zoneRenderer.getZoneView().getDrawableLights(view)) {
-      var drawablePaint = light.getPaint();
-
-      if (light.getType() != LightSource.Type.NORMAL || drawablePaint == null) continue;
-
-      var paint = drawablePaint.getPaint();
+    timer.stop("renderLightOverlay:allocateBuffer");
+    drawer.setColor(tintColor);
+    // Draw lights onto the buffer image so the map doesn't affect how they blend
+    timer.start("renderLightOverlay:drawLights");
+    for (var light : lights) {
+      var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
 
       if (paint instanceof DrawableColorPaint) {
         var colorPaint = (DrawableColorPaint) paint;
@@ -1182,28 +1251,31 @@ public class GdxRenderer extends ApplicationAdapter
         System.out.println("unexpected color type");
         continue;
       }
-      tmpColor.a = alpha;
       drawer.setColor(tmpColor);
-      areaRenderer.fillArea(light.getArea());
+      var areaToPaint = (Area) light.getArea().clone();
+      if (clipStyle != null && visibleScreenArea != null) {
+        switch (clipStyle) {
+          case CLIP_TO_VISIBLE_AREA -> areaToPaint.intersect(visibleScreenArea);
+          case CLIP_TO_NOT_VISIBLE_AREA -> areaToPaint.subtract(visibleScreenArea);
+        }
+      }
+      areaRenderer.fillArea(areaToPaint);
     }
-    timer.stop("lights-3");
+    drawer.setColor(1.0f, 1.0f, 1.0f, 1.0f);
+    timer.stop("renderLightOverlay:drawLights");
 
-    // clear the bright areas
-    timer.start("lights-4");
-    // for (Area brightArea : zoneRenderer.getZoneView().getBrightLights(view)) {
-    //  drawer.setColor(Color.CLEAR);
-    //  areaRenderer.fillArea(brightArea);
-    // }
-    timer.stop("lights-4");
-    // createScreenShot("light");
+    // Draw the buffer image with all the lights onto the map
+    timer.start("renderLightOverlay:drawBuffer");
     batch.setBlendFunction(GL20.GL_SRC_ALPHA, GL20.GL_ONE_MINUS_SRC_ALPHA);
     backBuffer.end();
 
     setProjectionMatrix(hudCam.combined);
+    batch.setColor(1.0f, 1.0f, 1.0f, overlayOpacity);
     batch.draw(
         backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, width, height, false, true);
-
+    batch.setColor(1.0f, 1.0f, 1.0f, 1.0f);
     setProjectionMatrix(cam.combined);
+    timer.stop("renderLightOverlay:drawBuffer");
   }
 
   private void renderGrid(PlayerView view) {
@@ -3057,7 +3129,6 @@ public class GdxRenderer extends ApplicationAdapter
     if (newZone == null || !initialized) return;
 
     zoneRenderer = MapTool.getFrame().getZoneRenderer(newZone);
-    updateVisibleArea();
 
     for (var assetId : newZone.getAllAssetIds()) {
       AssetManager.getAssetAsynchronously(assetId, this);
@@ -3212,7 +3283,7 @@ public class GdxRenderer extends ApplicationAdapter
     if (!initialized) return;
 
     flushFog = true;
-    updateVisibleArea();
+    visibleScreenArea = null;
   }
 
   @Override

@@ -1489,7 +1489,7 @@ public class ZoneRenderer extends JComponent
     return timer;
   }
 
-  private enum LightOverlayClipStyle {
+  public enum LightOverlayClipStyle {
     CLIP_TO_VISIBLE_AREA,
     CLIP_TO_NOT_VISIBLE_AREA,
   }
