@@ -171,7 +171,7 @@ public class I18N {
    */
   public static String getText(String key) {
     if (key == null || key.isBlank()) {
-      //No benefit to doing a lookup
+      // No benefit to doing a lookup
       return key;
     }
 
