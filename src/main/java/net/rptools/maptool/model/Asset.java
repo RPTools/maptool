@@ -16,6 +16,7 @@ package net.rptools.maptool.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.protobuf.ByteString;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import java.awt.image.BufferedImage;
@@ -791,22 +792,29 @@ public final class Asset {
   }
 
   public static Asset fromDto(AssetDto dto) {
+    var dtoData = dto.getData().toByteArray();
     var asset =
         new Asset(
             new MD5Key(dto.getMd5Key()),
             dto.getName(),
+            dtoData,
             dto.getExtension(),
             Asset.Type.valueOf(dto.getType().name()),
-            false);
+            dtoData.length == 0);
     return asset;
   }
 
   public AssetDto toDto() {
-    return AssetDto.newBuilder()
-        .setMd5Key(getMD5Key().toString())
-        .setName(getName())
-        .setExtension(getExtension())
-        .setType(AssetDtoType.valueOf(getType().name()))
-        .build();
+    var builder =
+        AssetDto.newBuilder()
+            .setMd5Key(getMD5Key().toString())
+            .setName(getName())
+            .setExtension(getExtension())
+            .setType(AssetDtoType.valueOf(getType().name()));
+
+    if (getData() != null) {
+      builder.setData(ByteString.copyFrom(data));
+    }
+    return builder.build();
   }
 }

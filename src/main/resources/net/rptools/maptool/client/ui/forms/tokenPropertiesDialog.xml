@@ -747,7 +747,7 @@
                               </at>
                               <at name="name">propertiesTable</at>
                               <at name="width">1161</at>
-                              <at name="text">EditTokenDialog.table.properties</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -3514,7 +3514,7 @@
                               </at>
                               <at name="name">ownershipList</at>
                               <at name="width">1161</at>
-                              <at name="text">EditTokenDialog.label.Ownership</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -7087,7 +7087,7 @@
                                                 </at>
                                                 <at name="name">xmlStatblockRTextScrollPane</at>
                                                 <at name="width">1110</at>
-                                                <at name="text">EditTokenDialog.label.hero.statBlockRTextScroll.xml</at>
+                                                <at name="text"></at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -7445,7 +7445,7 @@
                                                 </at>
                                                 <at name="name">textStatblockRTextScrollPane</at>
                                                 <at name="width">1110</at>
-                                                <at name="text">EditTokenDialog.label.hero.statBlockRTextScroll.text</at>
+                                                <at name="text"></at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -8070,7 +8070,7 @@
                               </at>
                               <at name="name">summaryText</at>
                               <at name="width">850</at>
-                              <at name="text">EditTokenDialog.valueNotSet.hero.summary</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8131,7 +8131,7 @@
                               <at name="autoscrolls">true</at>
                               <at name="name">portfolioLocation</at>
                               <at name="width">95</at>
-                              <at name="text">EditTokenDialog.valueNotSet.hero.portfolio</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8251,7 +8251,7 @@
                               </at>
                               <at name="name">lastModified</at>
                               <at name="width">70</at>
-                              <at name="text">EditTokenDialog.valueNotSet.hero.last</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
