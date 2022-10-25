@@ -701,7 +701,7 @@ public class MapTool {
     ChatAutoSave.changeTimeout(AppPreferences.getChatAutosaveTime());
 
     // TODO: make this more formal when we switch to mina
-    // new ServerHeartBeatThread().start();
+    new ServerHeartBeatThread().start();
   }
 
   public static NoteFrame getProfilingNoteFrame() {
