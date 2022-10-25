@@ -2665,7 +2665,8 @@ public class Token extends BaseModel implements Cloneable {
         setY(parameters.get(1).getIntValue());
         break;
       case setHaloColor:
-        setHaloColor(parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
+        setHaloColor(
+            parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
         break;
       case setLabel:
         setLabel(parameters.get(0).getStringValue());

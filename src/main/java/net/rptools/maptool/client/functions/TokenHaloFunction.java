@@ -98,7 +98,7 @@ public class TokenHaloFunction extends AbstractFunction {
     }
     var cmd = MapTool.serverCommand();
 
-    if(haloColor != null) {
+    if (haloColor != null) {
       cmd.updateTokenProperty(token, Token.Update.setHaloColor, haloColor.getRGB());
     } else {
       cmd.updateTokenProperty(token, Token.Update.setHaloColor);
