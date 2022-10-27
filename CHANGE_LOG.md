@@ -129,7 +129,7 @@ Bug Fix Release using OpenJDK 17
 [i]: https://github.com/RPTools/maptool/issues/
 [i3723]: https://github.com/RPTools/maptool/issues/3723
 [i3720]: https://github.com/RPTools/maptool/issues/3720
-[i3719]: https://github.com/RPTools/maptool/issues/19
+[i3719]: https://github.com/RPTools/maptool/issues/3719
 [i3703]: https://github.com/RPTools/maptool/issues/3703
 [i3702]: https://github.com/RPTools/maptool/issues/3702
 [i3701]: https://github.com/RPTools/maptool/issues/3701
