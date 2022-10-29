@@ -162,15 +162,37 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private void init() {
-    RTCIceServer iceServer = new RTCIceServer();
-    iceServer.urls.add("stun:stun.l.google.com:19302");
-    iceServer.urls.add("stun:stun1.l.google.com:19302");
-    iceServer.urls.add("stun:stun2.l.google.com:19302");
-    iceServer.urls.add("stun:stun3.l.google.com:19302");
-    iceServer.urls.add("stun:stun4.l.google.com:19302");
-
     rtcConfig = new RTCConfiguration();
-    rtcConfig.iceServers.add(iceServer);
+
+    var googleStun = new RTCIceServer();
+    googleStun.urls.add("stun:stun.l.google.com:19302");
+    googleStun.urls.add("stun:stun1.l.google.com:19302");
+    googleStun.urls.add("stun:stun2.l.google.com:19302");
+    googleStun.urls.add("stun:stun3.l.google.com:19302");
+    googleStun.urls.add("stun:stun4.l.google.com:19302");
+    rtcConfig.iceServers.add(googleStun);
+
+    var openRelayStun = new RTCIceServer();
+    openRelayStun.urls.add("stun:openrelay.metered.ca:80");
+    rtcConfig.iceServers.add(openRelayStun);
+
+    var openRelayTurn = new RTCIceServer();
+    openRelayTurn.urls.add("turn:openrelay.metered.ca:80");
+    openRelayTurn.username = "openrelayproject";
+    openRelayTurn.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn);
+
+    var openRelayTurn2 = new RTCIceServer();
+    openRelayTurn2.urls.add("turn:openrelay.metered.ca:443");
+    openRelayTurn2.username = "openrelayproject";
+    openRelayTurn2.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn2);
+
+    var openRelayTurn3 = new RTCIceServer();
+    openRelayTurn3.urls.add("turn:openrelay.metered.ca:443?transport=tcp");
+    openRelayTurn3.username = "openrelayproject";
+    openRelayTurn3.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn3);
   }
 
   @Override
