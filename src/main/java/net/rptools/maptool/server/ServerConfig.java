@@ -49,6 +49,7 @@ public class ServerConfig {
   private String serverName;
   private String hostName;
   private final boolean useEasyConnect;
+  private final boolean useWebRTC;
 
   public static String getPersonalServerGMPassword() {
     return personalServerGMPassword;
@@ -62,6 +63,7 @@ public class ServerConfig {
     playerPassword = getPersonalServerPlayerPassword();
     gmPassword = getPersonalServerGMPassword();
     useEasyConnect = false;
+    useWebRTC = false;
   }
 
   public ServerConfig(
@@ -71,7 +73,7 @@ public class ServerConfig {
       int port,
       String serverName,
       String hostName) {
-    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false);
+    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false, false);
   }
 
   public ServerConfig(
@@ -81,7 +83,8 @@ public class ServerConfig {
       int port,
       String serverName,
       String hostName,
-      boolean useEasyConnect) {
+      boolean useEasyConnect,
+      boolean useWebRTC) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
@@ -89,6 +92,7 @@ public class ServerConfig {
     this.serverName = serverName;
     this.hostName = hostName;
     this.useEasyConnect = useEasyConnect;
+    this.useWebRTC = useWebRTC;
   }
 
   public String getHostPlayerId() {
@@ -141,6 +145,10 @@ public class ServerConfig {
 
   public boolean getUseEasyConnect() {
     return useEasyConnect;
+  }
+
+  public boolean getUseWebRTC() {
+    return useWebRTC;
   }
 
   private static Random r = new Random();

@@ -70,6 +70,7 @@ public class MapToolRegistry {
   public static class SeverConnectionDetails {
     public String address;
     public int port;
+    public boolean webrtc;
   }
 
   public enum RegisterResponse {
@@ -93,6 +94,7 @@ public class MapToolRegistry {
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
+      details.webrtc = json.getAsJsonPrimitive("webrtc").getAsBoolean();
 
       return details;
 
@@ -121,11 +123,12 @@ public class MapToolRegistry {
     }
   }
 
-  public RegisterResponse registerInstance(String id, int port) {
+  public RegisterResponse registerInstance(String id, int port, boolean webrtc) {
     JsonObject body = new JsonObject();
     body.addProperty("name", id);
     body.addProperty("port", port);
     body.addProperty("address", getAddress());
+    body.addProperty("webrtc", webrtc);
     if (MapTool.isDevelopment()) {
       body.addProperty("version", "Dev");
     } else {
