@@ -2426,7 +2426,8 @@ public class AppActions {
                           "",
                           dialog.getPort(),
                           prefs.getServerName(),
-                          dialog.getServer());
+                          dialog.getServer(),
+                          dialog.getUseWebRTC());
 
                   String password =
                       prefs.getUsePublicKey()

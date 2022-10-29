@@ -81,6 +81,10 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return connectionDetails.address;
   }
 
+  public boolean getUseWebRTC() {
+    return connectionDetails.webrtc;
+  }
+
   public void showDialog() {
     dialog =
         new GenericDialog(

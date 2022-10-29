@@ -94,7 +94,7 @@ public class MapToolRegistry {
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
-      details.webrtc = json.getAsJsonPrimitive("webrtc").getAsBoolean();
+      details.webrtc = json.getAsJsonPrimitive("webrtc").getAsInt() > 0; // .getAsBoolean();
 
       return details;
 

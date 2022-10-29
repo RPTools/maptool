@@ -72,8 +72,9 @@ public class ServerConfig {
       String playerPassword,
       int port,
       String serverName,
-      String hostName) {
-    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false, false);
+      String hostName,
+      boolean useWebRTC) {
+    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false, useWebRTC);
   }
 
   public ServerConfig(
