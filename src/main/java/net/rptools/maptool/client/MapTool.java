@@ -52,7 +52,6 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
-import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
@@ -73,6 +72,7 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -88,6 +88,7 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -131,17 +132,6 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public enum ZoneEvent {
-    Added,
-    Removed,
-    Activated,
-    Deactivated
-  }
-
-  public enum PreferencesEvent {
-    Changed
-  }
-
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
   // TODO: Add preferences option as well as add auto-purge after x days preferences
@@ -174,7 +164,6 @@ public class MapTool {
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
-  private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
 
@@ -589,15 +578,6 @@ public class MapTool {
     return autoSaveManager;
   }
 
-  public static EventDispatcher getEventDispatcher() {
-    return eventDispatcher;
-  }
-
-  private static void registerEvents() {
-    getEventDispatcher().registerEvents(ZoneEvent.values());
-    getEventDispatcher().registerEvents(PreferencesEvent.values());
-  }
-
   /**
    * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
    *
@@ -659,9 +639,6 @@ public class MapTool {
     FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
     // We'll manage our own images
     ImageIO.setUseCache(false);
-
-    eventDispatcher = new EventDispatcher();
-    registerEvents();
 
     try {
       SoundManager.configure(SOUND_PROPERTIES);
@@ -982,7 +959,7 @@ public class MapTool {
           && (getPlayer().isGM() || zone.isVisible())) {
         currRenderer = renderer;
       }
-      eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
+      new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1159,7 +1136,7 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
+    new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
 
     // Show the new zone
     if (changeZone) {
