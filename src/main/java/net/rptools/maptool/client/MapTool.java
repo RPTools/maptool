@@ -58,6 +58,10 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.events.ChatMessageAdded;
+import net.rptools.maptool.client.events.PlayerConnected;
+import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.client.events.ServerStopped;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -78,7 +82,6 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -145,8 +148,7 @@ public class MapTool {
 
   private static Campaign campaign;
 
-  private static ObservableList<Player> playerList;
-  private static ObservableList<TextMessage> messageList;
+  private static List<Player> playerList;
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
@@ -651,9 +653,7 @@ public class MapTool {
     assetTransferManager = new AssetTransferManager();
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-    playerList = new ObservableList<Player>();
-    messageList =
-        new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+    playerList = new ArrayList<>();
 
     handler = new ClientMessageHandler();
 
@@ -744,6 +744,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
+      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
       new Players().playerSignedIn(player);
 
       // LATER: Make this non-anonymous
@@ -757,20 +758,13 @@ public class MapTool {
     }
   }
 
-  public Player getPlayer(String name) {
-    for (int i = 0; i < playerList.size(); i++) {
-      if (playerList.get(i).getName().equals(name)) {
-        return playerList.get(i);
-      }
-    }
-    return null;
-  }
-
   public static void removePlayer(Player player) {
     if (player == null) {
       return;
     }
     playerList.remove(player);
+    new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
+
     new Players().playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
@@ -778,10 +772,6 @@ public class MapTool {
           MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
       addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
     }
-  }
-
-  public static ObservableList<TextMessage> getMessageList() {
-    return messageList;
   }
 
   /**
@@ -816,7 +806,8 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    messageList.add(message);
+
+    new MapToolEventBus().getMainEventBus().post(new ChatMessageAdded(message));
   }
 
   /**
@@ -1072,7 +1063,7 @@ public class MapTool {
     getFrame().getConnectionPanel().stopHosting();
   }
 
-  public static ObservableList<Player> getPlayerList() {
+  public static List<Player> getPlayerList() {
     return playerList;
   }
 
@@ -1254,7 +1245,10 @@ public class MapTool {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
     }
+
+    new MapToolEventBus().getMainEventBus().post(new ServerStopped());
     playerList.clear();
+
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);

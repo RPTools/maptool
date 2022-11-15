@@ -21,7 +21,6 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.MessageUtil;
@@ -45,7 +44,7 @@ public class WhisperMacro extends AbstractMacro {
         (macro.startsWith("\"")) ? macro.indexOf(" ", playerName.length() + 2) : macro.indexOf(" ");
 
     String message = processText(macro.substring(indexSpace + 1));
-    ObservableList<Player> playerList = MapTool.getPlayerList();
+    List<Player> playerList = MapTool.getPlayerList();
     List<String> players = new ArrayList<String>();
     for (int count = 0; count < playerList.size(); count++) {
       Player p = playerList.get(count);

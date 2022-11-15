@@ -28,6 +28,7 @@ import javax.swing.plaf.basic.BasicToggleButtonUI;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
@@ -43,7 +44,7 @@ import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel implements Observer, ModelChangeListener {
+public class CommandPanel extends JPanel implements ModelChangeListener {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -297,6 +298,12 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
     if (messagePanel != null) {
       messagePanel.refreshRenderer();
     }
+  }
+
+  @Subscribe
+  void onChatMessageAdded(ChatMessageAdded event) {
+    addMessage(event.message());
+    System.out.printf("Added message %s%n", event.message());
   }
 
   /**
@@ -801,7 +808,7 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
     return messagePanel;
   }
 
-  public void addMessage(TextMessage message) {
+  private void addMessage(TextMessage message) {
     messagePanel.addMessage(message);
   }
 
@@ -910,27 +917,6 @@ public class CommandPanel extends JPanel implements Observer, ModelChangeListene
       int y = 2;
       g.drawImage(cancelButton, x, y, this);
       cancelBounds = new Rectangle(x, y, cancelButton.getWidth(), cancelButton.getHeight());
-    }
-  }
-
-  ////
-  // OBSERVER
-  public void update(Observable o, Object arg) {
-    ObservableList<TextMessage> textList = MapTool.getMessageList();
-    ObservableList.Event event = (ObservableList.Event) arg;
-    switch (event) {
-      case append:
-        addMessage(textList.get(textList.size() - 1));
-        break;
-      case add:
-      case remove:
-        // resetMessagePanel();
-        break;
-      case clear:
-        clearMessagePanel();
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown event: " + event);
     }
   }
 
