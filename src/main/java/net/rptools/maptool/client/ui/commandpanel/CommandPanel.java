@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.commandpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -24,24 +25,25 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.PreferencesChanged;
+import net.rptools.maptool.client.events.ZoneActivated;
+import net.rptools.maptool.client.events.ZoneDeactivated;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Event;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel
-    implements Observer, AppEventListener, ModelChangeListener {
+public class CommandPanel extends JPanel implements Observer, ModelChangeListener {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -81,7 +83,7 @@ public class CommandPanel extends JPanel
     initializeSmilies();
     addFocusHotKey();
 
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public ChatProcessor getChatProcessor() {
@@ -272,15 +274,29 @@ public class CommandPanel extends JPanel
     return null;
   }
 
-  @Override
-  public void handleAppEvent(AppEvent event) {
-    Zone oldZone = (Zone) event.getOldValue();
-    Zone newZone = (Zone) event.getNewValue();
+  @Subscribe
+  void onZoneDeactivated(ZoneDeactivated event) {
+    event.zone().removeModelChangeListener(this);
+  }
 
-    if (oldZone != null) {
-      oldZone.removeModelChangeListener(this);
+  @Subscribe
+  void onZoneActivated(ZoneActivated event) {
+    event.zone().addModelChangeListener(this);
+  }
+
+  @Subscribe
+  void onPreferencesChanged(PreferencesChanged event) {
+    // Resize on demand
+    if (commandTextArea != null) {
+      commandTextArea.setFont(
+          commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+      doLayout();
     }
-    newZone.addModelChangeListener(this);
+
+    // Update whenever the preferences change
+    if (messagePanel != null) {
+      messagePanel.refreshRenderer();
+    }
   }
 
   /**
@@ -590,16 +606,6 @@ public class CommandPanel extends JPanel
       inputs.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
           AppActions.NEWLINE_COMMAND_ID);
-
-      // Resize on demand
-      MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              event -> {
-                commandTextArea.setFont(
-                    commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
-                doLayout();
-              });
     }
     return commandTextArea;
   }
@@ -791,9 +797,6 @@ public class CommandPanel extends JPanel
   private MessagePanel getMessagePanel() {
     if (messagePanel == null) {
       messagePanel = new MessagePanel();
-      // Update whenever the preferences change
-      MapTool.getEventDispatcher()
-          .addListener(MapTool.PreferencesEvent.Changed, event -> messagePanel.refreshRenderer());
     }
     return messagePanel;
   }

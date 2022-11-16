@@ -44,11 +44,13 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
@@ -282,7 +284,7 @@ public class PreferencesDialog extends JDialog {
             setVisible(false);
             dispose();
           }
-          MapTool.getEventDispatcher().fireEvent(MapTool.PreferencesEvent.Changed);
+          new MapToolEventBus().getMainEventBus().post(new PreferencesChanged());
           if (ThemeSupport.needsRestartForNewTheme()) {
             MapTool.showMessage(
                 "PreferencesDialog.themeChangeWarning",

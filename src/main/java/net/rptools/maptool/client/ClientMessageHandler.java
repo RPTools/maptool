@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -59,6 +60,7 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
@@ -729,8 +731,7 @@ public class ClientMessageHandler implements MessageHandler {
           if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
             MapTool.getFrame().setCurrentZoneRenderer(renderer);
           }
-          MapTool.getEventDispatcher()
-              .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+          new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
         });
   }
 
