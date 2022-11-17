@@ -12,9 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.tokens;
+package net.rptools.maptool.model.zones;
 
-import java.util.Set;
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.DrawnElement;
 
-/** Event fired when a token is added to a map. */
-public record TokensAddedEvent(Set<TokenInfo> info) {}
+public record DrawableAdded(Zone zone, DrawnElement drawnElement) {}

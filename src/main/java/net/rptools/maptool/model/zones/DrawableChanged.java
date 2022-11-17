@@ -12,8 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.zones;
 
-public interface ModelChangeListener {
-  public void modelChanged(ModelChangeEvent event);
-}
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.drawing.DrawnElement;
+
+public record DrawableChanged(Zone zone, DrawnElement drawnElement) {}

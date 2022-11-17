@@ -91,7 +91,10 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -951,6 +954,8 @@ public class MapTool {
         currRenderer = renderer;
       }
       new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+      // Now we have fire off adding the tokens in the zone
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1111,6 +1116,10 @@ public class MapTool {
     MapTool.serverCommand().removeZone(zone.getId());
     MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zone.getId()));
     MapTool.getCampaign().removeZone(zone.getId());
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   public static void addZone(Zone zone) {
@@ -1128,6 +1137,8 @@ public class MapTool {
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
     new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
 
     // Show the new zone
     if (changeZone) {

@@ -20,10 +20,9 @@ import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
@@ -193,28 +192,33 @@ public class HTMLFrameFactory {
     MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
   }
 
-  public static class Listener implements ModelChangeListener {
+  public static class Listener {
+    private Zone currentZone;
+
     public Listener() {
       new MapToolEventBus().getMainEventBus().register(this);
-      MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(this);
-    }
-
-    public void modelChanged(ModelChangeEvent event) {
-      if (event.eventType == Event.TOKEN_CHANGED) {
-        for (Token token : event.getTokensAsList()) {
-          tokenChanged(token);
-        }
-      }
+      currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     }
 
     @Subscribe
     void onZoneDeactivated(ZoneDeactivated event) {
-      event.zone().removeModelChangeListener(this);
+      currentZone = null;
     }
 
     @Subscribe
     void onZoneActivated(ZoneActivated event) {
-      event.zone().addModelChangeListener(this);
+      currentZone = event.zone();
+    }
+
+    @Subscribe
+    private void onTokensChanged(TokensChanged event) {
+      if (event.zone() != currentZone) {
+        return;
+      }
+
+      for (Token token : event.tokens()) {
+        tokenChanged(token);
+      }
     }
   }
 

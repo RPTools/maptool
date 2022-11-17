@@ -98,7 +98,6 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -447,9 +446,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     else registerForMacOSXEvents();
 
     new MapToolEventBus().getMainEventBus().register(this);
-
-    // Add the Event Dispatcher to EventBus bridging classes
-    new MapToolEventBus().getMainEventBus().register(TokenEventBusBridge.getInstance());
 
     restorePreferences();
     updateKeyStrokes();
