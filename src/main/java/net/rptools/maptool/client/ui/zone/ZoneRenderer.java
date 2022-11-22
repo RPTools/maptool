@@ -133,12 +133,6 @@ public class ZoneRenderer extends JComponent
   private Zone.Layer activeLayer;
   private String loadingProgress;
   private boolean isLoaded;
-  private BufferedImage fogBuffer;
-  /**
-   * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
-   * needs to be flushed in the case of switching views
-   */
-  private boolean flushFog = true;
 
   /** In screen space */
   private Area exposedFogArea;
@@ -309,7 +303,6 @@ public class ZoneRenderer extends JComponent
         evt -> {
           if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
             tokenLocationCache.clear();
-            flushFog = true;
           }
           if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
             // flushFog = true;
@@ -674,7 +667,6 @@ public class ZoneRenderer extends JComponent
     // This could also be smarter
     tokenStackMap = null;
 
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
 
@@ -700,7 +692,6 @@ public class ZoneRenderer extends JComponent
     flushDrawableRenderer();
     flipImageMap.clear();
     flipIsoImageMap.clear();
-    fogBuffer = null;
     drawableLights = null;
     drawableAuras = null;
     zoneView.flushFog();
@@ -718,7 +709,6 @@ public class ZoneRenderer extends JComponent
 
   /** Set flushFog to true, visibleScreenArea to null, and repaints */
   public void flushFog() {
-    flushFog = true;
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
   }
@@ -1077,11 +1067,9 @@ public class ZoneRenderer extends JComponent
 
   /**
    * This method clears {@link #drawableAuras}, {@link #drawableLights}, {@link #visibleScreenArea},
-   * and {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog}
-   * flag so that fog will be recalculated.
+   * and {@link #lastView}. It also flushes the {@link #zoneView}.
    */
   public void invalidateCurrentViewCache() {
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
     visibleScreenArea = null;
@@ -1745,78 +1733,23 @@ public class ZoneRenderer extends JComponent
     timer.stop("labels-1");
   }
 
-  // Private cache variables just for renderFog() and no one else. :)
-  Integer fogX = null;
-  Integer fogY = null;
-
   private void renderFog(Graphics2D g, PlayerView view) {
     Dimension size = getSize();
     Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
 
-    // Optimization for panning
-    if (!flushFog
-        && fogX != null
-        && fogY != null
-        && (fogX != getViewOffsetX() || fogY != getViewOffsetY())) {
-      // This optimization does not seem to keep the alpha channel correctly, and sometimes leaves
-      // lines on some graphics boards, we'll leave it out for now
-      // if (Math.abs(fogX - getViewOffsetX()) < size.width && Math.abs(fogY - getViewOffsetY()) <
-      // size.height) {
-      // int deltaX = getViewOffsetX() - fogX;
-      // int deltaY = getViewOffsetY() - fogY;
-      //
-      // Graphics2D buffG = fogBuffer.createGraphics();
-      //
-      // buffG.setComposite(AlphaComposite.Src);
-      // buffG.copyArea(0, 0, size.width, size.height, deltaX, deltaY);
-      // buffG.dispose();
-      //
-      // fogClip = new Area();
-      // if (deltaX < 0) {
-      // fogClip.add(new Area(new Rectangle(size.width+deltaX, 0, -deltaX, size.height)));
-      // } else if (deltaX > 0){
-      // fogClip.add(new Area(new Rectangle(0, 0, deltaX, size.height)));
-      // }
-      //
-      // if (deltaY < 0) {
-      // fogClip.add(new Area(new Rectangle(0, size.height + deltaY, size.width, -deltaY)));
-      // } else if (deltaY > 0) {
-      // fogClip.add(new Area(new Rectangle(0, 0, size.width, deltaY)));
-      // }
-      // }
-      flushFog = true;
-    }
-    boolean cacheNotValid =
-        (fogBuffer == null
-            || fogBuffer.getWidth() != size.width
-            || fogBuffer.getHeight() != size.height);
-    timer.start("renderFog");
-    if (flushFog || cacheNotValid) {
-      fogX = getViewOffsetX();
-      fogY = getViewOffsetY();
+    timer.start("renderFog-allocateBufferedImage");
+    try (final var entry = tempBufferPool.acquire()) {
+      final var buffer = entry.get();
+      timer.stop("renderFog-allocateBufferedImage");
 
-      boolean newImage = false;
-      if (cacheNotValid) {
-        newImage = true;
-        timer.start("renderFog-allocateBufferedImage");
-        fogBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB_PRE);
-        timer.stop("renderFog-allocateBufferedImage");
-      }
-      Graphics2D buffG = fogBuffer.createGraphics();
+      timer.start("renderFog");
+      final var fogX = getViewOffsetX();
+      final var fogY = getViewOffsetY();
+
+      Graphics2D buffG = buffer.createGraphics();
       buffG.setClip(fogClip);
       SwingUtil.useAntiAliasing(buffG);
 
-      // XXX Is this even needed? Immediately below is another call to fillRect() with the same
-      // dimensions!
-      if (!newImage) {
-        timer.start("renderFog-clearOldImage");
-        // Composite oldComposite = buffG.getComposite();
-        buffG.setComposite(AlphaComposite.Clear);
-        // buffG.fillRect(0, 0, size.width, size.height); // Jamz: Removed as it's called again
-        // below
-        // buffG.setComposite(oldComposite);
-        timer.stop("renderFog-clearOldImage");
-      }
       timer.start("renderFog-fill");
       // Fill
       double scale = getScale();
@@ -1860,10 +1793,10 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderFogArea");
 
       buffG.dispose();
-      flushFog = false;
+      timer.stop("renderFog");
+
+      g.drawImage(buffer, 0, 0, this);
     }
-    timer.stop("renderFog");
-    g.drawImage(fogBuffer, 0, 0, this);
   }
 
   private void renderFogArea(
@@ -4760,7 +4693,6 @@ public class ZoneRenderer extends JComponent
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
-        flushFog = true;
         zoneView.flushFog();
       }
       if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
