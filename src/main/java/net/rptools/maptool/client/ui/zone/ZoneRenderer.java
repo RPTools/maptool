@@ -654,7 +654,7 @@ public class ZoneRenderer extends JComponent
   /**
    * Remove the token from: tokenLocationCache, flipImageMap, opacityImageMap, replacementImageMap,
    * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, drawableLights, drawableAuras to
-   * null. Flush the fog. Flush the token from the zoneView.
+   * null. Flush the token from the zoneView.
    *
    * @param token the token to flush
    */
@@ -703,6 +703,7 @@ public class ZoneRenderer extends JComponent
     fogBuffer = null;
     drawableLights = null;
     drawableAuras = null;
+    zoneView.flushFog();
 
     isLoaded = false;
   }
@@ -1849,29 +1850,7 @@ public class ZoneRenderer extends JComponent
         msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
       }
       timer.start(msg);
-      Area combined;
-      boolean combinedView =
-              !zoneView.isUsingVision()
-                      || MapTool.isPersonalServer()
-                      || !MapTool.getServerPolicy().isUseIndividualFOW()
-                      || view.isGMView();
-      if (view.isUsingTokenView() || combinedView) {
-        combined = zone.getExposedArea(view);
-      } else {
-        // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
-        // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
-        // have sight (so weren't included in the PlayerView), but could still have previously
-        // exposed areas.
-        combined = new Area();
-        for (Token tok : zone.getTokens()) {
-          if (!AppUtil.playerOwns(tok)) {
-            continue;
-          }
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          Area exposedArea = meta.getExposedAreaHistory();
-          combined.add(new Area(exposedArea));
-        }
-      }
+      Area combined = zoneView.getExposedArea(view);
       timer.stop(msg);
 
       timer.start("renderFogArea");
@@ -4782,6 +4761,7 @@ public class ZoneRenderer extends JComponent
       }
       if (evt == Zone.Event.FOG_CHANGED) {
         flushFog = true;
+        zoneView.flushFog();
       }
       if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
         DrawnElement de = (DrawnElement) event.getArg();
