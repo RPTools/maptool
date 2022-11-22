@@ -1748,10 +1748,9 @@ public class ZoneRenderer extends JComponent
   Integer fogX = null;
   Integer fogY = null;
 
-  private Area renderFog(Graphics2D g, PlayerView view) {
+  private void renderFog(Graphics2D g, PlayerView view) {
     Dimension size = getSize();
     Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
-    Area combined = null;
 
     // Optimization for panning
     if (!flushFog
@@ -1850,53 +1849,42 @@ public class ZoneRenderer extends JComponent
         msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
       }
       timer.start(msg);
-      combined = zone.getExposedArea(view);
-      timer.stop(msg);
-
-      timer.start("renderFogArea");
-      Area exposedArea = null;
+      Area combined;
       boolean combinedView =
-          !zoneView.isUsingVision()
-              || MapTool.isPersonalServer()
-              || !MapTool.getServerPolicy().isUseIndividualFOW()
-              || view.isGMView();
-
+              !zoneView.isUsingVision()
+                      || MapTool.isPersonalServer()
+                      || !MapTool.getServerPolicy().isUseIndividualFOW()
+                      || view.isGMView();
       if (view.isUsingTokenView() || combinedView) {
-        buffG.fill(combined);
-        renderFogArea(buffG, view, combined, visibleArea);
-        renderFogOutline(buffG, view, visibleArea);
+        combined = zone.getExposedArea(view);
       } else {
-        // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
-        // exposed area's to build the soft FOW.
-        Area myCombined = new Area();
-        List<Token> myToks = zone.getTokens();
-        for (Token tok : myToks) {
-          if (!AppUtil.playerOwns(
-              tok)) { // Only here if !isGMview() so should the tokens already be in
-            // PlayerView.getTokens()?
+        // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
+        // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
+        // have sight (so weren't included in the PlayerView), but could still have previously
+        // exposed areas.
+        combined = new Area();
+        for (Token tok : zone.getTokens()) {
+          if (!AppUtil.playerOwns(tok)) {
             continue;
           }
           ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          exposedArea = meta.getExposedAreaHistory();
-          myCombined.add(new Area(exposedArea));
+          Area exposedArea = meta.getExposedAreaHistory();
+          combined.add(new Area(exposedArea));
         }
-        buffG.fill(myCombined);
-        renderFogArea(buffG, view, myCombined, visibleArea);
-        renderFogOutline(buffG, view, visibleArea);
       }
-      // renderFogArea(buffG, view, combined, visibleArea);
-      timer.stop("renderFogArea");
+      timer.stop(msg);
 
-      // timer.start("renderFogOutline");
-      // renderFogOutline(buffG, view, combined);
-      // timer.stop("renderFogOutline");
+      timer.start("renderFogArea");
+      buffG.fill(combined);
+      renderFogArea(buffG, view, combined, visibleArea);
+      renderFogOutline(buffG, view, visibleArea);
+      timer.stop("renderFogArea");
 
       buffG.dispose();
       flushFog = false;
     }
     timer.stop("renderFog");
     g.drawImage(fogBuffer, 0, 0, this);
-    return combined;
   }
 
   private void renderFogArea(
