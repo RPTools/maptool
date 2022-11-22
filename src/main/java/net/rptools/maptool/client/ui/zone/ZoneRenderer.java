@@ -1855,61 +1855,34 @@ public class ZoneRenderer extends JComponent
 
       timer.start("renderFogArea");
       Area exposedArea = null;
-      Area tempArea = new Area();
       boolean combinedView =
           !zoneView.isUsingVision()
               || MapTool.isPersonalServer()
               || !MapTool.getServerPolicy().isUseIndividualFOW()
               || view.isGMView();
 
-      if (view.isUsingTokenView()) {
-        // if there are tokens selected combine the areas, then, if individual FOW is enabled
-        // we pass the combined exposed area to build the soft FOW and visible area.
-        for (Token tok : view.getTokens()) {
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          exposedArea = meta.getExposedAreaHistory();
-          tempArea.add(new Area(exposedArea));
-        }
-        if (combinedView) {
-          // combined = zone.getExposedArea(view);
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        } else {
-          // 'combined' already includes the area encompassed by 'tempArea', so just
-          // use 'combined' instead in this block of code?
-          tempArea.add(combined);
-          buffG.fill(tempArea);
-          renderFogArea(buffG, view, tempArea, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        }
+      if (view.isUsingTokenView() || combinedView) {
+        buffG.fill(combined);
+        renderFogArea(buffG, view, combined, visibleArea);
+        renderFogOutline(buffG, view, visibleArea);
       } else {
         // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
         // exposed area's to build the soft FOW.
-        if (combinedView) {
-          if (combined.isEmpty()) {
-            combined = zone.getExposedArea();
+        Area myCombined = new Area();
+        List<Token> myToks = zone.getTokens();
+        for (Token tok : myToks) {
+          if (!AppUtil.playerOwns(
+              tok)) { // Only here if !isGMview() so should the tokens already be in
+            // PlayerView.getTokens()?
+            continue;
           }
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        } else {
-          Area myCombined = new Area();
-          List<Token> myToks = zone.getTokens();
-          for (Token tok : myToks) {
-            if (!AppUtil.playerOwns(
-                tok)) { // Only here if !isGMview() so should the tokens already be in
-              // PlayerView.getTokens()?
-              continue;
-            }
-            ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-            exposedArea = meta.getExposedAreaHistory();
-            myCombined.add(new Area(exposedArea));
-          }
-          buffG.fill(myCombined);
-          renderFogArea(buffG, view, myCombined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
+          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+          exposedArea = meta.getExposedAreaHistory();
+          myCombined.add(new Area(exposedArea));
         }
+        buffG.fill(myCombined);
+        renderFogArea(buffG, view, myCombined, visibleArea);
+        renderFogOutline(buffG, view, visibleArea);
       }
       // renderFogArea(buffG, view, combined, visibleArea);
       timer.stop("renderFogArea");
