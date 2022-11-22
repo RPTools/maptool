@@ -588,7 +588,7 @@ public class ZoneView implements ModelChangeListener {
         lightSet.addAll(set);
       }
     }
-    if (view != null && view.getTokens() != null) {
+    if (view != null && view.isUsingTokenView()) {
       // Get the personal drawable lights of the tokens of the player view
       for (Token token : view.getTokens()) {
         Set<DrawableLight> lights = personalDrawableLightCache.get(token.getId());

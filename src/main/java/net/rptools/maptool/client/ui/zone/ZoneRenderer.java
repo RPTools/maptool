@@ -1616,9 +1616,8 @@ public class ZoneRenderer extends JComponent
       Area clip = new Area(new Rectangle(getSize().width, getSize().height));
 
       Area viewArea = new Area(exposedFogArea);
-      List<Token> tokens = view.getTokens();
-      if (tokens != null && !tokens.isEmpty()) {
-        for (Token tok : tokens) {
+      if (view.isUsingTokenView()) {
+        for (Token tok : view.getTokens()) {
           ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
           viewArea.add(exposedMeta.getExposedAreaHistory());
         }
@@ -1848,8 +1847,7 @@ public class ZoneRenderer extends JComponent
 
       String msg = null;
       if (timer.isEnabled()) {
-        List<Token> list = view.getTokens();
-        msg = "renderFog-combined(" + (list == null ? 0 : list.size()) + ")";
+        msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
       }
       timer.start(msg);
       combined = zone.getExposedArea(view);
@@ -1864,7 +1862,7 @@ public class ZoneRenderer extends JComponent
               || !MapTool.getServerPolicy().isUseIndividualFOW()
               || view.isGMView();
 
-      if (view.getTokens() != null) {
+      if (view.isUsingTokenView()) {
         // if there are tokens selected combine the areas, then, if individual FOW is enabled
         // we pass the combined exposed area to build the soft FOW and visible area.
         for (Token tok : view.getTokens()) {
