@@ -21,7 +21,6 @@ import java.util.Iterator;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -46,7 +45,7 @@ public class PlayerNameFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getPlayerName")) {
       return MapTool.getPlayer().getName();
     } else if ("getAllPlayerNames".equalsIgnoreCase(functionName)) {
-      ObservableList<Player> players = MapTool.getPlayerList();
+      List<Player> players = MapTool.getPlayerList();
       String[] playerArray = new String[players.size()];
       Iterator<Player> iter = players.iterator();
 

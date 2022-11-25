@@ -24,12 +24,15 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
@@ -395,7 +398,12 @@ public class ServerMessageHandler implements MessageHandler {
 
   private void handle(RemoveZoneMsg msg) {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var zone = server.getCampaign().getZone(zoneGUID);
     server.getCampaign().removeZone(zoneGUID);
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   private void handle(RemoveTopologyMsg msg) {
@@ -433,7 +441,12 @@ public class ServerMessageHandler implements MessageHandler {
   }
 
   private void handle(PutZoneMsg msg) {
-    server.getCampaign().putZone(Zone.fromDto(msg.getZone()));
+    final var zone = Zone.fromDto(msg.getZone());
+    server.getCampaign().putZone(zone);
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   private void handle(PutLabelMsg msg) {

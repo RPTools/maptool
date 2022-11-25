@@ -12,8 +12,6 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.tokens;
+package net.rptools.maptool.model.zones;
 
-import java.util.Set;
-
-public record TokensRemovedEvent(Set<TokenInfo> info) {}
+public record GridChanged() {}
