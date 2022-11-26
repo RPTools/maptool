@@ -200,7 +200,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   private void sendMessage(HandshakeMsg message) {
     var msgType = message.getMessageTypeCase();
-    log.info(connection.getId() + " :send: " + msgType);
+    log.info("Server sent to " + connection.getId() + ": " + msgType);
     connection.sendMessage(message.toByteArray());
   }
 
@@ -210,7 +210,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      log.info(id + " :got: " + msgType);
+      log.info("from " + id + " got: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();

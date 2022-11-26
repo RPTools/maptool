@@ -27,12 +27,12 @@
     </Appenders>
     <Loggers>
         <Logger name="MapToolConsole" level="INFO" additivity="false">
-            <AppenderRef ref="jtextarea-log"/>
+            <AppenderRef ref="jtextarea-log" level="debug"/>
         </Logger>
         <Root level="INFO">
-            <AppenderRef ref="Console"/>
-            <AppenderRef ref="LogFile" level="WARN"/>
-            <AppenderRef ref="jtextarea-log"/>
+            <AppenderRef ref="Console" level="DEBUG"/>
+            <AppenderRef ref="LogFile"/>
+            <AppenderRef ref="jtextarea-log" level="debug"/>
         </Root>
     </Loggers>
 </Configuration>
