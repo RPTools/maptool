@@ -105,13 +105,6 @@ public abstract class AbstractConnection implements Connection {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
-    /*  try {
-      IOUtils.copy(ios, baos);
-    } finally {
-      ios.close();
-    }
-    return ByteBuffer.wrap(baos.toByteArray());*/
   }
 
   protected List<byte[]> getOutQueue(Object channel) {
