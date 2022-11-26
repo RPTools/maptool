@@ -28,7 +28,6 @@ import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
-import net.rptools.maptool.client.events.ZoneDeactivated;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
@@ -36,13 +35,10 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 
 @SuppressWarnings("serial")
-public abstract class AbstractMacroPanel extends JPanel
-    implements Scrollable, MouseListener, ModelChangeListener {
+public abstract class AbstractMacroPanel extends JPanel implements Scrollable, MouseListener {
   private String panelClass = "";
   private GUID tokenId = null;
 
@@ -188,19 +184,8 @@ public abstract class AbstractMacroPanel extends JPanel
 
   public void mouseExited(MouseEvent event) {}
 
-  // currently only used for Impersonate/Selection panels to refresh when the token is removed or a
-  // macro changes
-  @Override
-  public void modelChanged(ModelChangeEvent event) {}
-
-  @Subscribe
-  void onZoneDeactivated(ZoneDeactivated event) {
-    event.zone().removeModelChangeListener(this);
-  }
-
   @Subscribe
   void onZoneActivated(ZoneActivated event) {
-    event.zone().addModelChangeListener(this);
     reset();
   }
 

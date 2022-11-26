@@ -18,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -33,9 +34,10 @@ import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
-import net.rptools.maptool.model.tokens.TokensAddedEvent;
-import net.rptools.maptool.model.tokens.TokensChangedEvent;
-import net.rptools.maptool.model.tokens.TokensRemovedEvent;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 
 /** Class that represents Lib:Token libraries. */
@@ -84,39 +86,45 @@ public class LibraryTokenManager {
 
   private class TokenEventListener {
     @Subscribe
-    public void tokensAdded(TokensAddedEvent event) {
+    public void tokensAdded(TokensAdded event) {
       SwingUtilities.invokeLater(
           () -> {
             addTokens(
-                event.info().stream()
-                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
-                    .map(t -> new LibraryToken(t.token()))
+                event.tokens().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(LibraryToken::new)
                     .toList());
           });
     }
 
     @Subscribe
-    public void tokenRemoved(TokensRemovedEvent event) {
+    public void tokensRemoved(TokensRemoved event) {
       SwingUtilities.invokeLater(
           () -> {
             removeTokens(
-                event.info().stream()
-                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
-                    .map(t -> LibraryToken.namespaceForName(t.name()))
+                event.tokens().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(t -> LibraryToken.namespaceForName(t.getName()))
                     .toList());
           });
     }
 
     @Subscribe
-    public void tokenChanged(TokensChangedEvent event) {
+    public void tokensChanged(TokensChanged event) {
       SwingUtilities.invokeLater(
           () -> {
             changeTokens(
-                event.info().stream()
-                    .filter(t -> t.name().toLowerCase().startsWith("lib:"))
-                    .map(t -> new LibraryToken(t.token()))
+                event.tokens().stream()
+                    .filter(t -> t.getName().toLowerCase().startsWith("lib:"))
+                    .map(LibraryToken::new)
                     .toList());
           });
+    }
+
+    @Subscribe
+    public void tokenEdited(TokenEdited event) {
+      // Treat the same as a change.
+      tokensChanged(new TokensChanged(event.zone(), Collections.singletonList(event.token())));
     }
   }
 

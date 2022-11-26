@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.ui.connections;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.BorderLayout;
 import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JMenuItem;
 import javax.swing.JPanel;
@@ -29,8 +31,10 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import net.rptools.lib.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.PlayerListModel;
+import net.rptools.maptool.client.events.PlayerConnected;
+import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.client.events.ServerStopped;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
@@ -52,6 +56,8 @@ import net.rptools.maptool.model.player.PlayerAwaitingApproval;
 public class ClientConnectionPanel extends JPanel {
   /** List of connected players. */
   private final JList<Player> list = new JList<>();
+
+  private final DefaultListModel<Player> listModel;
   /** List of players awaiting approval. */
   private final List<PlayerAwaitingApproval> awaitingApprovalList;
   /**
@@ -71,7 +77,9 @@ public class ClientConnectionPanel extends JPanel {
     setLayout(new BorderLayout());
     tabbedPane = new JTabbedPane();
     add(tabbedPane, BorderLayout.CENTER);
-    list.setModel(new PlayerListModel(MapTool.getPlayerList()));
+
+    listModel = new DefaultListModel<>();
+    list.setModel(listModel);
     list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
     list.addMouseListener(createPopupListener());
@@ -93,6 +101,23 @@ public class ClientConnectionPanel extends JPanel {
     tabbedPane.add(
         I18N.getString("connections.tab.pending"), new JScrollPane(awaitingApprovalTable));
     tabbedPane.setEnabledAt(1, false);
+
+    new MapToolEventBus().getMainEventBus().register(this);
+  }
+
+  @Subscribe
+  private void onPlayerConnected(PlayerConnected event) {
+    listModel.addElement(event.player());
+  }
+
+  @Subscribe
+  private void onPlayerDisconnected(PlayerDisconnected event) {
+    listModel.removeElement(event.player());
+  }
+
+  @Subscribe
+  private void onServerStopped(ServerStopped event) {
+    listModel.clear();
   }
 
   /**

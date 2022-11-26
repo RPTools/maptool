@@ -14,10 +14,12 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.*;
 import net.rptools.maptool.client.AppStyle;
@@ -29,9 +31,11 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.tokens.TokenMacroChanged;
+import net.rptools.maptool.model.tokens.TokenPanelChanged;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensRemoved;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
@@ -149,17 +153,30 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     }
   }
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Event.TOKEN_MACRO_CHANGED
-        || event.eventType == Event.TOKEN_REMOVED
-        || event.eventType == Event.TOKEN_PANEL_CHANGED
-        || event.eventType == Event.TOKEN_EDITED) {
-      // Only resets if the impersonated token is among those changed/deleted
-      if (isImpersonatedAmongList(event.getTokensAsList())) {
-        reset();
-      }
+  @Subscribe
+  private void onTokenMacroChanged(TokenMacroChanged event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokenPanelChanged(TokenPanelChanged event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    resetIfAnyImpersonated(event.tokens());
+  }
+
+  @Subscribe
+  private void onTokensEdited(TokenEdited event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  private void resetIfAnyImpersonated(List<Token> tokens) {
+    // Only resets if the impersonated token is among those changed/deleted
+    if (isImpersonatedAmongList(tokens)) {
+      reset();
     }
   }
 
