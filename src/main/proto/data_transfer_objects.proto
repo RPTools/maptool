@@ -466,6 +466,7 @@ message AssetDto {
   string name = 2;
   string extension = 3;
   AssetDtoType type = 4;
+  bytes data = 5;
 }
 
 message LabelDto {
@@ -632,6 +633,7 @@ enum TokenUpdateDto {
     flipY = 52;
     flipIso = 53;
     setSpeechName = 54;
+    removeFacing = 55;
 }
 
 message AssetTransferHeaderDto {

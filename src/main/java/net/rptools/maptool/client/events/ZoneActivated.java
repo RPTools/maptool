@@ -12,35 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib;
+package net.rptools.maptool.client.events;
 
-public class AppEvent {
+import net.rptools.maptool.model.Zone;
 
-  private Enum<?> id;
-  private Object source;
-  private Object oldValue;
-  private Object newValue;
-
-  public AppEvent(Enum<?> id, Object source, Object oldValue, Object newValue) {
-    this.id = id;
-    this.source = source;
-    this.oldValue = oldValue;
-    this.newValue = newValue;
-  }
-
-  public Enum<?> getId() {
-    return id;
-  }
-
-  public Object getSource() {
-    return source;
-  }
-
-  public Object getOldValue() {
-    return oldValue;
-  }
-
-  public Object getNewValue() {
-    return newValue;
-  }
-}
+public record ZoneActivated(Zone zone) {}

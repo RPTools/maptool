@@ -1,13 +1,19 @@
-# MapTool 1.12.0
-Feature release using OpenJDK 17
+# MapTool 1.12.2
+Bug Fix Release using OpenJDK 17
 
-## Highlights
-- New theme support using [Flatlaf](https://www.formdev.com/flatlaf/) library. Access through Preferences. 
-- The different VBL types and MBL can now be added to tokens via the Edit Token dialog and a number of macro functions for manipulating VBL/MBL have been added as well.
-- More optimizations for lighting and vision.
-- Improvements to new Add-On functionality.
+## Changes since 1.12.1
+- [#3723][i3723] Checkbox to use theme for chatbox colors move to top of theme preferences tab. 
+- [#3720][i3720] Corrected issue with players randomly disconnecting.
+- [#3719][i3719] Macro function `setHalo("None")` was throwing NPE. Fixed.
+- [#3703][i3703] Grid offsets were reset on loaded maps.
+- [#3702][i3702] Grid offsets were changing on server start. Fixed.
+- [#3701][i3701] Fixed issue with dropped assets showing as red Xs.
+- [#3700][i3700] Macro function `removeTokenFacing()` was throwing NPE. Fixed.
+- [#3689][i3689] Soft FoW opacity was ignored when no sight was present. Fixed.
+- [#3688][i3688] Soft FoW was rendered even when Sight is off. Fixed.
 
 ## Enhancements & Features
+- [#3723][i3723] Checkbox to use theme for chatbox colors move to top of theme preferences tab.
 - [#3567][i3567] New theme support using [FlatLaf](https://www.formdev.com/flatlaf/).
 - [#3542][i3542] `setTokenImage()` was throwing Null Pointer Exception. Fixed.
 - [#3540][i3540] UVTT import now supports file extensions used by other map creation tools (`.df2vtt` and `.uvtt`).
@@ -27,6 +33,24 @@ Feature release using OpenJDK 17
 - [#2730][i2730] Tokens can now have MBL. Settable via macro or VBL tab.
 
 ## Bug Fixes
+- [#3720][i3720] Corrected issue with players randomly disconnecting.
+- [#3719][i3719] Macro function `setHalo("None")` was throwing NPE. Fixed.
+- [#3703][i3703] Grid offsets were reset on loaded maps.
+- [#3702][i3702] Grid offsets were changing on server start. Fixed.
+- [#3701][i3701] Fixed issue with dropped assets showing as red Xs.
+- [#3700][i3700] Macro function `removeTokenFacing()` was throwing NPE. Fixed.
+- [#3689][i3689] Soft FoW opacity was ignored when no sight was present. Fixed.
+- [#3688][i3688] Sight/FoW outline is rendered even when Sight is off. Fixed.
+- [#3669][i3669] Token Bars were resetting to Top side after server start. Fixed.
+- [#3662][i3662] Edit Token dialog was too tall for lower resolution screens. Fixed.
+- [#3660][i3660] Image Scaling Quality now defaults to Low (Fastest) setting.
+- [#3658][i3658] Docked windows set to auto-hide could not be resized. Fixed.
+- [#3656][i3656] Fixes for image scaling performance.
+- [#3653][i3653] More fixes for older campaign compatibility.
+- [#3652][i3652] Image scaling on all layers now respect preferences choice to improve performance.
+- [#3651][i3651] For performance reasons additive blending for lights/sights removed.
+- [#3647][i3647] Fixes for loading campaigns created in prior versions.
+- [#3642][i3642] Macro function `getState()` would always return 0. Fixed.
 - [#3633][i3633] Sight/Light entries with bad syntax were producing an NPE. Fixed.
 - [#3631][i3631] Tooltips missing for Lock Player Movement and Lock Player Token Editor on Start Server dialog. Fixed.
 - [#3626][i3626] Certain arrangements of topology could cause infinite loop of error dialogs. Fixed.
@@ -55,6 +79,7 @@ Feature release using OpenJDK 17
 - [#3500][i3500] JavaFX 17 causing crashes to desktop on Mac M1 hardware. Updated to JavaFX 18.
 - [#3498][i3498] Add-On libraries with undefined fields in the `library.json` would fail to load. Fixed.
 - [#3489][i3489] Using Arrange->Send to Back on Drawings would cause ClassCastException. Fixed.
+- [#3487][i3487] Default lights were being re-added to campaign after being removed. Fixed.
 - [#3488][i3488] Drawings on Player clients rendered over Darkness sources. Fixed.
 - [#3481][i3481] Non-GMs should not be able to drag and drop add-on libs. Fixed.
 - [#3479][i3479] Darkness sources without color specified were not rendering on Player view. Fixed.
@@ -94,12 +119,34 @@ Feature release using OpenJDK 17
 - [#1550][i1550] Overlapping colored lights not producing the correct result. Fixed.
 
 ## Other Changes
+- [#3654][i3654] Added logging for initiative null pointer.
 - [#3398][i3398] ImageIO libs updated to 3.8.2.
 - [#3331][i3331] Update WebRTC lib to 0.5.0, update Java-WebSocket lib to 1.5.2.
 - [#3286][i3286] Builds updated to OpenJDK 17.
 
 [Change Log for 1.11.5](https://github.com/RPTools/maptool/blob/1.11.5/CHANGE_LOG.md)
 
+[i]: https://github.com/RPTools/maptool/issues/
+[i3723]: https://github.com/RPTools/maptool/issues/3723
+[i3720]: https://github.com/RPTools/maptool/issues/3720
+[i3719]: https://github.com/RPTools/maptool/issues/3719
+[i3703]: https://github.com/RPTools/maptool/issues/3703
+[i3702]: https://github.com/RPTools/maptool/issues/3702
+[i3701]: https://github.com/RPTools/maptool/issues/3701
+[i3700]: https://github.com/RPTools/maptool/issues/3700
+[i3689]: https://github.com/RPTools/maptool/issues/3689
+[i3688]: https://github.com/RPTools/maptool/issues/3688
+[i3669]: https://github.com/RPTools/maptool/issues/3669
+[i3662]: https://github.com/RPTools/maptool/issues/3662
+[i3660]: https://github.com/RPTools/maptool/issues/3660
+[i3658]: https://github.com/RPTools/maptool/issues/3658
+[i3656]: https://github.com/RPTools/maptool/issues/3656
+[i3654]: https://github.com/RPTools/maptool/pull/3654
+[i3653]: https://github.com/RPTools/maptool/issues/3653
+[i3652]: https://github.com/RPTools/maptool/issues/3652
+[i3651]: https://github.com/RPTools/maptool/issues/3651
+[i3647]: https://github.com/RPTools/maptool/issues/3647
+[i3642]: https://github.com/RPTools/maptool/issues/3642
 [i3633]: https://github.com/RPTools/maptool/issues/3633
 [i3631]: https://github.com/RPTools/maptool/issues/3631
 [i3626]: https://github.com/RPTools/maptool/issues/3626
@@ -136,6 +183,7 @@ Feature release using OpenJDK 17
 [i3498]: https://github.com/RPTools/maptool/issues/3498
 [i3489]: https://github.com/RPTools/maptool/issues/3489
 [i3488]: https://github.com/RPTools/maptool/issues/3488
+[i3487]: https://github.com/RPTools/maptool/issues/3487
 [i3481]: https://github.com/RPTools/maptool/issues/3481
 [i3479]: https://github.com/RPTools/maptool/issues/3479
 [i3477]: https://github.com/RPTools/maptool/issues/3477

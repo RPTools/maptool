@@ -134,12 +134,6 @@ public class ZoneRenderer extends JComponent
   private Zone.Layer activeLayer;
   private String loadingProgress;
   private boolean isLoaded;
-  private BufferedImage fogBuffer;
-  /**
-   * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
-   * needs to be flushed in the case of switching views
-   */
-  private boolean flushFog = true;
 
   /** In screen space */
   private Area exposedFogArea;
@@ -320,7 +314,6 @@ public class ZoneRenderer extends JComponent
         evt -> {
           if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
             tokenLocationCache.clear();
-            flushFog = true;
           }
           if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
             // flushFog = true;
@@ -665,7 +658,7 @@ public class ZoneRenderer extends JComponent
   /**
    * Remove the token from: tokenLocationCache, flipImageMap, opacityImageMap, replacementImageMap,
    * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, drawableLights, drawableAuras to
-   * null. Flush the fog. Flush the token from the zoneView.
+   * null. Flush the token from the zoneView.
    *
    * @param token the token to flush
    */
@@ -685,7 +678,6 @@ public class ZoneRenderer extends JComponent
     // This could also be smarter
     tokenStackMap = null;
 
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
 
@@ -712,9 +704,9 @@ public class ZoneRenderer extends JComponent
     flushDrawableRenderer();
     flipImageMap.clear();
     flipIsoImageMap.clear();
-    fogBuffer = null;
     drawableLights = null;
     drawableAuras = null;
+    zoneView.flushFog();
 
     isLoaded = false;
   }
@@ -729,7 +721,6 @@ public class ZoneRenderer extends JComponent
 
   /** Set flushFog to true, visibleScreenArea to null, and repaints */
   public void flushFog() {
-    flushFog = true;
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
     GdxRenderer.getInstance().flushFog();
@@ -1100,11 +1091,9 @@ public class ZoneRenderer extends JComponent
 
   /**
    * This method clears {@link #drawableAuras}, {@link #drawableLights}, {@link #visibleScreenArea},
-   * and {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog}
-   * flag so that fog will be recalculated.
+   * and {@link #lastView}. It also flushes the {@link #zoneView}.
    */
   public void invalidateCurrentViewCache() {
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
     visibleScreenArea = null;
@@ -1668,9 +1657,8 @@ public class ZoneRenderer extends JComponent
       Area clip = new Area(new Rectangle(getSize().width, getSize().height));
 
       Area viewArea = new Area(exposedFogArea);
-      List<Token> tokens = view.getTokens();
-      if (tokens != null && !tokens.isEmpty()) {
-        for (Token tok : tokens) {
+      if (view.isUsingTokenView()) {
+        for (Token tok : view.getTokens()) {
           ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
           viewArea.add(exposedMeta.getExposedAreaHistory());
         }
@@ -1797,83 +1785,23 @@ public class ZoneRenderer extends JComponent
     timer.stop("labels-1");
   }
 
-  // Private cache variables just for renderFog() and no one else. :)
-  Integer fogX = null;
-  Integer fogY = null;
-
-  private Area renderFog(Graphics2D g, PlayerView view) {
+  private void renderFog(Graphics2D g, PlayerView view) {
     Dimension size = getSize();
     Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
-    Area combined = null;
 
-    // Optimization for panning
-    if (!flushFog
-        && fogX != null
-        && fogY != null
-        && (fogX != getViewOffsetX() || fogY != getViewOffsetY())) {
-      // This optimization does not seem to keep the alpha channel correctly, and sometimes leaves
-      // lines on some graphics boards, we'll leave it out for now
-      // if (Math.abs(fogX - getViewOffsetX()) < size.width && Math.abs(fogY - getViewOffsetY()) <
-      // size.height) {
-      // int deltaX = getViewOffsetX() - fogX;
-      // int deltaY = getViewOffsetY() - fogY;
-      //
-      // Graphics2D buffG = fogBuffer.createGraphics();
-      //
-      // buffG.setComposite(AlphaComposite.Src);
-      // buffG.copyArea(0, 0, size.width, size.height, deltaX, deltaY);
-      // buffG.dispose();
-      //
-      // fogClip = new Area();
-      // if (deltaX < 0) {
-      // fogClip.add(new Area(new Rectangle(size.width+deltaX, 0, -deltaX, size.height)));
-      // } else if (deltaX > 0){
-      // fogClip.add(new Area(new Rectangle(0, 0, deltaX, size.height)));
-      // }
-      //
-      // if (deltaY < 0) {
-      // fogClip.add(new Area(new Rectangle(0, size.height + deltaY, size.width, -deltaY)));
-      // } else if (deltaY > 0) {
-      // fogClip.add(new Area(new Rectangle(0, 0, size.width, deltaY)));
-      // }
-      // }
-      flushFog = true;
-    }
-    boolean cacheNotValid =
-        (fogBuffer == null
-            || fogBuffer.getWidth() != size.width
-            || fogBuffer.getHeight() != size.height);
-    timer.start("renderFog");
-    if (flushFog || cacheNotValid) {
-      fogX = getViewOffsetX();
-      fogY = getViewOffsetY();
+    timer.start("renderFog-allocateBufferedImage");
+    try (final var entry = tempBufferPool.acquire()) {
+      final var buffer = entry.get();
+      timer.stop("renderFog-allocateBufferedImage");
 
-      boolean newImage = false;
-      if (cacheNotValid) {
-        newImage = true;
-        timer.start("renderFog-allocateBufferedImage");
-        fogBuffer =
-            new BufferedImage(
-                size.width,
-                size.height,
-                view.isGMView() ? Transparency.TRANSLUCENT : Transparency.BITMASK);
-        timer.stop("renderFog-allocateBufferedImage");
-      }
-      Graphics2D buffG = fogBuffer.createGraphics();
+      timer.start("renderFog");
+      final var fogX = getViewOffsetX();
+      final var fogY = getViewOffsetY();
+
+      Graphics2D buffG = buffer.createGraphics();
       buffG.setClip(fogClip);
       SwingUtil.useAntiAliasing(buffG);
 
-      // XXX Is this even needed? Immediately below is another call to fillRect() with the same
-      // dimensions!
-      if (!newImage) {
-        timer.start("renderFog-clearOldImage");
-        // Composite oldComposite = buffG.getComposite();
-        buffG.setComposite(AlphaComposite.Clear);
-        // buffG.fillRect(0, 0, size.width, size.height); // Jamz: Removed as it's called again
-        // below
-        // buffG.setComposite(oldComposite);
-        timer.stop("renderFog-clearOldImage");
-      }
       timer.start("renderFog-fill");
       // Fill
       double scale = getScale();
@@ -1904,84 +1832,23 @@ public class ZoneRenderer extends JComponent
 
       String msg = null;
       if (timer.isEnabled()) {
-        List<Token> list = view.getTokens();
-        msg = "renderFog-combined(" + (list == null ? 0 : list.size()) + ")";
+        msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
       }
       timer.start(msg);
-      combined = zone.getExposedArea(view);
+      Area combined = zoneView.getExposedArea(view);
       timer.stop(msg);
 
       timer.start("renderFogArea");
-      Area exposedArea = null;
-      Area tempArea = new Area();
-      boolean combinedView =
-          !zoneView.isUsingVision()
-              || MapTool.isPersonalServer()
-              || !MapTool.getServerPolicy().isUseIndividualFOW()
-              || view.isGMView();
-
-      if (view.getTokens() != null) {
-        // if there are tokens selected combine the areas, then, if individual FOW is enabled
-        // we pass the combined exposed area to build the soft FOW and visible area.
-        for (Token tok : view.getTokens()) {
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          exposedArea = meta.getExposedAreaHistory();
-          tempArea.add(new Area(exposedArea));
-        }
-        if (combinedView) {
-          // combined = zone.getExposedArea(view);
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, combined);
-        } else {
-          // 'combined' already includes the area encompassed by 'tempArea', so just
-          // use 'combined' instead in this block of code?
-          tempArea.add(combined);
-          buffG.fill(tempArea);
-          renderFogArea(buffG, view, tempArea, visibleArea);
-          renderFogOutline(buffG, view, tempArea);
-        }
-      } else {
-        // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
-        // exposed area's to build the soft FOW.
-        if (combinedView) {
-          if (combined.isEmpty()) {
-            combined = zone.getExposedArea();
-          }
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, combined);
-        } else {
-          Area myCombined = new Area();
-          List<Token> myToks = zone.getTokens();
-          for (Token tok : myToks) {
-            if (!AppUtil.playerOwns(
-                tok)) { // Only here if !isGMview() so should the tokens already be in
-              // PlayerView.getTokens()?
-              continue;
-            }
-            ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-            exposedArea = meta.getExposedAreaHistory();
-            myCombined.add(new Area(exposedArea));
-          }
-          buffG.fill(myCombined);
-          renderFogArea(buffG, view, myCombined, visibleArea);
-          renderFogOutline(buffG, view, myCombined);
-        }
-      }
-      // renderFogArea(buffG, view, combined, visibleArea);
+      buffG.fill(combined);
+      renderFogArea(buffG, view, combined, visibleArea);
+      renderFogOutline(buffG, view, visibleArea);
       timer.stop("renderFogArea");
 
-      // timer.start("renderFogOutline");
-      // renderFogOutline(buffG, view, combined);
-      // timer.stop("renderFogOutline");
-
       buffG.dispose();
-      flushFog = false;
+      timer.stop("renderFog");
+
+      g.drawImage(buffer, 0, 0, this);
     }
-    timer.stop("renderFog");
-    g.drawImage(fogBuffer, 0, 0, this);
-    return combined;
   }
 
   private void renderFogArea(
@@ -2001,7 +1868,7 @@ public class ZoneRenderer extends JComponent
         buffG.fill(visibleArea);
         buffG.setClip(oldClip);
       } else {
-        buffG.setColor(new Color(0, 0, 0, 80));
+        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
         buffG.fill(softFog);
       }
     } else {
@@ -2010,23 +1877,21 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area softFog) {
-    // if (false && AppPreferences.getUseSoftFogEdges()) {
-    // float alpha = view.isGMView() ? AppPreferences.getFogOverlayOpacity() / 255.0f : 1f;
-    // GraphicsUtil.renderSoftClipping(buffG, softFog, (int) (zone.getGrid().getSize() * getScale()
-    // * .25), alpha);
-    // } else
-    {
-      if (visibleScreenArea != null) {
-        // buffG.setClip(softFog);
-        buffG.setTransform(new AffineTransform());
-        buffG.setComposite(AlphaComposite.Src);
-        buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        buffG.setStroke(new BasicStroke(1));
-        buffG.setColor(Color.BLACK);
-        buffG.draw(visibleScreenArea);
-        // buffG.setClip(oldClip);
-      }
+  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area visibleArea) {
+    // If there is no visible area, there is no outline that needs rendering.
+    if (zoneView.isUsingVision() && visibleArea != null && !visibleArea.isEmpty()) {
+      // Transform the area (not G2D) because we want the drawn line to remain thin.
+      AffineTransform af = new AffineTransform();
+      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
+      af.scale(getScale(), getScale());
+      visibleArea = visibleArea.createTransformedArea(af);
+
+      buffG.setTransform(new AffineTransform());
+      buffG.setComposite(AlphaComposite.Src);
+      buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+      buffG.setStroke(new BasicStroke(1));
+      buffG.setColor(Color.BLACK);
+      buffG.draw(visibleArea);
     }
   }
 
@@ -4897,7 +4762,7 @@ public class ZoneRenderer extends JComponent
         }
       }
       if (evt == Zone.Event.FOG_CHANGED) {
-        flushFog = true;
+        zoneView.flushFog();
       }
       if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
         DrawnElement de = (DrawnElement) event.getArg();

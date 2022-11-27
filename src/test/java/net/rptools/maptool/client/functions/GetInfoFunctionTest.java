@@ -22,9 +22,15 @@ import java.util.List;
 import net.rptools.maptool.util.SysInfoProvider;
 import net.rptools.parser.ParserException;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 
 public class GetInfoFunctionTest {
+  @AfterAll
+  static void tearDown() {
+    getInfoFunction function = getInfoFunction.getInstance();
+    function.resetSysInfoProvider();
+  }
 
   @Test
   public void debugInfo() throws ParserException {

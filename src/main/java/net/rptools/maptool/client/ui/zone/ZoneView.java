@@ -47,6 +47,8 @@ public class ZoneView implements ModelChangeListener {
   private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
   /** Map each token to their map between sightType and set of lights. */
   private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache = new HashMap<>();
+  /** Map the PlayerView to its exposed area. */
+  private final Map<PlayerView, Area> exposedAreaMap = new HashMap<>();
   /** Map the PlayerView to its visible area. */
   private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
   /** Map each token to their personal drawable lights. */
@@ -68,6 +70,39 @@ public class ZoneView implements ModelChangeListener {
     this.zone = zone;
     findLightSources();
     zone.addModelChangeListener(this);
+  }
+
+  public Area getExposedArea(PlayerView view) {
+    Area exposed = exposedAreaMap.get(view);
+
+    if (exposed == null) {
+      boolean combinedView =
+          !isUsingVision()
+              || MapTool.isPersonalServer()
+              || !MapTool.getServerPolicy().isUseIndividualFOW()
+              || view.isGMView();
+
+      if (view.isUsingTokenView() || combinedView) {
+        exposed = zone.getExposedArea(view);
+      } else {
+        // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
+        // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
+        // have sight (so weren't included in the PlayerView), but could still have previously
+        // exposed areas.
+        exposed = new Area();
+        for (Token tok : zone.getTokens()) {
+          if (!AppUtil.playerOwns(tok)) {
+            continue;
+          }
+          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+          Area exposedArea = meta.getExposedAreaHistory();
+          exposed.add(new Area(exposedArea));
+        }
+      }
+
+      exposedAreaMap.put(view, exposed);
+    }
+    return exposed;
   }
 
   /**
@@ -588,7 +623,7 @@ public class ZoneView implements ModelChangeListener {
         lightSet.addAll(set);
       }
     }
-    if (view != null && view.getTokens() != null) {
+    if (view != null && view.isUsingTokenView()) {
       // Get the personal drawable lights of the tokens of the player view
       for (Token token : view.getTokens()) {
         Set<DrawableLight> lights = personalDrawableLightCache.get(token.getId());
@@ -608,9 +643,14 @@ public class ZoneView implements ModelChangeListener {
     tokenVisibleAreaCache.clear();
     tokenVisionCache.clear();
     lightSourceCache.clear();
+    exposedAreaMap.clear();
     visibleAreaMap.clear();
     drawableLightCache.clear();
     personalDrawableLightCache.clear();
+  }
+
+  public void flushFog() {
+    exposedAreaMap.clear();
   }
 
   /**
@@ -632,8 +672,10 @@ public class ZoneView implements ModelChangeListener {
     if (hadLightSource || token.hasLightSources()) {
       // Have to recalculate all token vision
       tokenVisionCache.clear();
+      exposedAreaMap.clear();
       visibleAreaMap.clear();
     } else if (token.getHasSight()) {
+      exposedAreaMap.clear();
       visibleAreaMap.clear();
     }
   }
@@ -739,6 +781,7 @@ public class ZoneView implements ModelChangeListener {
         lightSourceCache.clear();
         drawableLightCache.clear();
         personalDrawableLightCache.clear();
+        exposedAreaMap.clear();
         visibleAreaMap.clear();
         topologyAreas.clear();
         topologyTrees.clear();
@@ -781,7 +824,10 @@ public class ZoneView implements ModelChangeListener {
       hasSight |= token.getHasSight();
     }
 
-    if (hasSight) visibleAreaMap.clear();
+    if (hasSight) {
+      exposedAreaMap.clear();
+      visibleAreaMap.clear();
+    }
 
     return hasTopology;
   }

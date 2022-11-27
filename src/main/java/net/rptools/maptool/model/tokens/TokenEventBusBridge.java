@@ -14,21 +14,21 @@
  */
 package net.rptools.maptool.model.tokens;
 
+import com.google.common.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapTool.ZoneEvent;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.ZoneAdded;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 
 /**
  * This class listens to the legacy token addition events and forwards them to the main MapTool
@@ -36,30 +36,31 @@ import net.rptools.maptool.model.Zone.Event;
  *
  * @see MapToolEventBus#getMainEventBus()
  */
-public class TokenEventBusBridge implements AppEventListener {
+public class TokenEventBusBridge {
   private final TokenModelChangeListener modelChangeListener = new TokenModelChangeListener();
 
-  @Override
-  public void handleAppEvent(AppEvent appEvent) {
-    if (appEvent.getId().equals(MapTool.ZoneEvent.Added)
-        && appEvent.getNewValue() instanceof Zone zone) {
-      addTokenChangeListener(zone);
-      // Now we have fire off adding the tokens in the zone
-      var tokens =
-          zone.getTokens().stream()
-              .map(token -> new TokenInfo(token.getName(), token.getId(), token))
-              .collect(Collectors.toSet());
-      new MapToolEventBus().getMainEventBus().post(new TokensAddedEvent(tokens));
-    } else if (appEvent.getId().equals(ZoneEvent.Removed)
-        && appEvent.getOldValue() instanceof Zone zone) {
-      removeTokenChangeListener(zone);
-      // Now we have fire off removing tokens that are in the zone
-      var tokens =
-          zone.getTokens().stream()
-              .map(token -> new TokenInfo(token.getName(), token.getId(), token))
-              .collect(Collectors.toSet());
-      new MapToolEventBus().getMainEventBus().post(new TokensRemovedEvent(tokens));
-    }
+  @Subscribe
+  void onZoneAdded(ZoneAdded event) {
+    final var zone = event.zone();
+    addTokenChangeListener(zone);
+    // Now we have fire off adding the tokens in the zone
+    var tokens =
+        zone.getTokens().stream()
+            .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+            .collect(Collectors.toSet());
+    new MapToolEventBus().getMainEventBus().post(new TokensAddedEvent(tokens));
+  }
+
+  @Subscribe
+  void onZoneRemoved(ZoneRemoved event) {
+    final var zone = event.zone();
+    removeTokenChangeListener(zone);
+    // Now we have fire off removing tokens that are in the zone
+    var tokens =
+        zone.getTokens().stream()
+            .map(token -> new TokenInfo(token.getName(), token.getId(), token))
+            .collect(Collectors.toSet());
+    new MapToolEventBus().getMainEventBus().post(new TokensRemovedEvent(tokens));
   }
 
   private static class TokenModelChangeListener implements ModelChangeListener {
