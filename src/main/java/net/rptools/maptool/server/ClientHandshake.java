@@ -142,7 +142,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   private void sendMessage(HandshakeMsg message) {
     var msgType = message.getMessageTypeCase();
-    log.info(connection.getId() + " :send: " + msgType);
+    log.info(connection.getId() + " sent: " + msgType);
     connection.sendMessage(message.toByteArray());
   }
 
@@ -152,7 +152,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      log.info(id + " :got: " + msgType);
+      log.info(id + " got: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();

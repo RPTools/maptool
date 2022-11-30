@@ -88,7 +88,7 @@ public class ClientMessageHandler implements MessageHandler {
     try {
       var msg = Message.parseFrom(message);
       var msgType = msg.getMessageTypeCase();
-      log.info(id + ": p got: " + msgType);
+      log.info(id + " got: " + msgType);
 
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> handle(msg.getAddTopologyMsg());
@@ -160,7 +160,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_TOKEN_MOVE_MSG -> handle(msg.getUpdateTokenMoveMsg());
         default -> log.warn(msgType + "not handled.");
       }
-
+      log.info(id + " handled: " + msgType);
     } catch (Exception e) {
       log.error(e);
     }
