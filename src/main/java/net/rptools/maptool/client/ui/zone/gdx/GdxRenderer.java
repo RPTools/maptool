@@ -32,6 +32,7 @@ import com.badlogic.gdx.utils.GdxRuntimeException;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.google.common.eventbus.Subscribe;
 import com.jogamp.opengl.GL;
 import java.awt.*;
 import java.awt.Shape;
@@ -43,8 +44,6 @@ import java.util.*;
 import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.*;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.gdx.GifDecoder;
@@ -52,6 +51,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.swing.ImageBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
 import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
 import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
@@ -63,6 +63,7 @@ import net.rptools.maptool.client.ui.zone.DrawableLight;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
@@ -85,7 +86,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
  * <p>
  */
 public class GdxRenderer extends ApplicationAdapter
-    implements AppEventListener, ModelChangeListener, AssetAvailableListener {
+    implements AssetAvailableListener {
 
   private static final Logger log = LogManager.getLogger(GdxRenderer.class);
 
@@ -172,10 +173,7 @@ public class GdxRenderer extends ApplicationAdapter
   private final TiledDrawable tmpTile = new TiledDrawable();
 
   public GdxRenderer() {
-    var dispatcher = MapTool.getEventDispatcher();
-    if (dispatcher != null) {
-      dispatcher.addListener(this, MapTool.ZoneEvent.Activated);
-    }
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public static GdxRenderer getInstance() {
@@ -3191,11 +3189,8 @@ public class GdxRenderer extends ApplicationAdapter
     return null;
   }
 
-  @Override
-  public void handleAppEvent(AppEvent event) {
-    System.out.println("AppEvent:" + event.getId());
-
-    if (event.getId() != MapTool.ZoneEvent.Activated) return;
+  @Subscribe
+  void onZoneActivated(ZoneActivated event) {
 
     var oldZone = zone;
     // first disable rendering during intitialisation;
@@ -3203,11 +3198,11 @@ public class GdxRenderer extends ApplicationAdapter
 
     if (oldZone != null) {
       disposeZoneResources();
-      oldZone.removeModelChangeListener(this);
+   //   oldZone.removeModelChangeListener(this);
     }
 
-    var newZone = (Zone) event.getNewValue();
-    newZone.addModelChangeListener(this);
+    var newZone = event.zone();
+   // newZone.addModelChangeListener(this);
     initializeZoneResources(newZone);
     // just in case we are running before create was called and hence initializeZoneResources does
     // nothing
@@ -3215,9 +3210,10 @@ public class GdxRenderer extends ApplicationAdapter
     renderZone = true;
   }
 
+  /*
   @Override
   public void modelChanged(ModelChangeEvent event) {
-    /*
+
         Object evt = event.getEvent();
         System.out.println("ModelChangend: " + evt);
         if (!(evt instanceof Zone.Event)) return;
@@ -3264,9 +3260,9 @@ public class GdxRenderer extends ApplicationAdapter
           // for now quick and dirty
           disposeZoneResources();
           initializeZoneResources(currentZone);
-    */
-  }
 
+  }
+*/
   public void setScale(Scale scale) {
     if (!initialized) {
       return;
