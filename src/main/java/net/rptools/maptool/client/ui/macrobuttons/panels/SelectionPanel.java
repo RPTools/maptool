@@ -20,11 +20,11 @@ import java.util.*;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -217,7 +217,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     // reset the tab icon
     MapTool.getFrame()
         .getFrame(MTFrame.SELECTION)
-        .setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
+        .setFrameIcon(IconMap.getIcon(IconMap.Icons.WINDOW_SELECTED_TOKEN, MapToolFrame.ICON_W_H));
     super.clear();
   }
 

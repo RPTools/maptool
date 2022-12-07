@@ -76,6 +76,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -618,40 +619,49 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return frameMap.get(frame);
   }
 
+  public static final int ICON_W_H = 16;
+
   private void initializeFrames() {
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
-            MTFrame.CONNECTIONS, connectionPanel, new ImageIcon(AppStyle.connectionsImage)));
+            MTFrame.CONNECTIONS,
+            connectionPanel,
+            IconMap.getIcon(IconMap.Icons.WINDOW_CONNECTIONS, ICON_W_H)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(
             MTFrame.TOKEN_TREE,
             new JScrollPane(createTokenTreePanel()),
-            new ImageIcon(AppStyle.mapExplorerImage)));
+            IconMap.getIcon(IconMap.Icons.WINDOW_MAP_EXPLORER, ICON_W_H)));
     frameMap.put(
         MTFrame.IMAGE_EXPLORER,
         createDockingFrame(
-            MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+            MTFrame.IMAGE_EXPLORER,
+            assetPanel,
+            IconMap.getIcon(IconMap.Icons.WINDOW_LIBRARY, ICON_W_H)));
     frameMap.put(
         MTFrame.DRAW_TREE,
         createDockingFrame(
             MTFrame.DRAW_TREE,
             new JScrollPane(createDrawTreePanel()),
-            new ImageIcon(AppStyle.mapExplorerImage)));
+            IconMap.getIcon(IconMap.Icons.WINDOW_DRAW_EXPLORER, ICON_W_H)));
     frameMap.put(
         MTFrame.CHAT,
-        createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
+        createDockingFrame(
+            MTFrame.CHAT, commandPanel, IconMap.getIcon(IconMap.Icons.WINDOW_CHAT, ICON_W_H)));
     frameMap.put(
         MTFrame.LOOKUP_TABLES,
         createDockingFrame(
             MTFrame.LOOKUP_TABLES,
             getLookupTablePanel(),
-            new ImageIcon(AppStyle.tablesPanelImage)));
+            IconMap.getIcon(IconMap.Icons.WINDOW_TABLES, ICON_W_H)));
     frameMap.put(
         MTFrame.INITIATIVE,
         createDockingFrame(
-            MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+            MTFrame.INITIATIVE,
+            initiativePanel,
+            IconMap.getIcon(IconMap.Icons.WINDOW_INITIATIVE, ICON_W_H)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -664,20 +674,30 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
     frameMap.put(
         MTFrame.GLOBAL,
-        createDockingFrame(MTFrame.GLOBAL, global, new ImageIcon(AppStyle.globalPanelImage)));
+        createDockingFrame(
+            MTFrame.GLOBAL, global, IconMap.getIcon(IconMap.Icons.WINDOW_GLOBAL_MACROS, ICON_W_H)));
     frameMap.put(
         MTFrame.CAMPAIGN,
-        createDockingFrame(MTFrame.CAMPAIGN, campaign, new ImageIcon(AppStyle.campaignPanelImage)));
+        createDockingFrame(
+            MTFrame.CAMPAIGN,
+            campaign,
+            IconMap.getIcon(IconMap.Icons.WINDOW_CAMPAIGN_MACROS, ICON_W_H)));
     frameMap.put(
-        MTFrame.GM, createDockingFrame(MTFrame.GM, gm, new ImageIcon(AppStyle.campaignPanelImage)));
+        MTFrame.GM,
+        createDockingFrame(
+            MTFrame.GM, gm, IconMap.getIcon(IconMap.Icons.WINDOW_GM_MACROS, ICON_W_H)));
     frameMap.put(
         MTFrame.SELECTION,
         createDockingFrame(
-            MTFrame.SELECTION, selection, new ImageIcon(AppStyle.selectionPanelImage)));
+            MTFrame.SELECTION,
+            selection,
+            IconMap.getIcon(IconMap.Icons.WINDOW_SELECTED_TOKEN, ICON_W_H)));
     frameMap.put(
         MTFrame.IMPERSONATED,
         createDockingFrame(
-            MTFrame.IMPERSONATED, impersonate, new ImageIcon(AppStyle.impersonatePanelImage)));
+            MTFrame.IMPERSONATED,
+            impersonate,
+            IconMap.getIcon(IconMap.Icons.WINDOW_IMPERSONATED_MACROS, ICON_W_H)));
   }
 
   private JScrollPane scrollPaneFactory(JPanel panel) {
@@ -1723,18 +1743,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
     fullScreenToolPanel.add(fullsZoneButton);
 
-    JButton initiativeButton = null;
-    try {
-      initiativeButton =
-          new JButton(
-              new ImageIcon(
-                  ImageUtil.getImage(
-                      "net/rptools/maptool/client/image/arrow_menu.png",
-                      ToolbarPanel.ICON_W_H,
-                      ToolbarPanel.ICON_W_H)));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    JButton initiativeButton =
+        new JButton(IconMap.getIcon(IconMap.Icons.WINDOW_INITIATIVE, ToolbarPanel.ICON_W_H));
 
     initiativeButton.addActionListener(
         (e) -> {

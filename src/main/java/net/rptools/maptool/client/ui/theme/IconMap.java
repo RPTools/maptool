@@ -17,7 +17,9 @@ package net.rptools.maptool.client.ui.theme;
 import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
+import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
+import org.javatuples.Triplet;
 
 public class IconMap {
   public enum Icons {
@@ -95,6 +97,19 @@ public class IconMap {
     TOOLBAR_TOKENSELECTION_NPC_ON,
     TOOLBAR_TOKENSELECTION_NPC_OFF,
     TOOLBAR_ZONE,
+    WINDOW_CAMPAIGN_MACROS,
+    WINDOW_CHAT,
+    WINDOW_CONNECTIONS,
+    WINDOW_DRAW_EXPLORER,
+    WINDOW_GLOBAL_MACROS,
+    WINDOW_GM_MACROS,
+    WINDOW_IMPERSONATED_MACROS,
+    WINDOW_INITIATIVE,
+    WINDOW_LIBRARY,
+    WINDOW_MAP_EXPLORER,
+    WINDOW_SELECTED_TOKEN,
+    WINDOW_TABLES,
+    WINDOW_HTML,
   }
 
   private static final HashMap<Icons, String> classicIcons =
@@ -280,6 +295,19 @@ public class IconMap {
               Icons.TOOLBAR_TOKENSELECTION_NPC_OFF,
               "net/rptools/maptool/client/image/tool/select-npc-blue-off.png");
           put(Icons.TOOLBAR_ZONE, "net/rptools/maptool/client/image/tool/btn-world.png");
+          put(Icons.WINDOW_CONNECTIONS, "net/rptools/maptool/client/image/computer.png");
+          put(Icons.WINDOW_MAP_EXPLORER, "net/rptools/maptool/client/image/eye.png");
+          put(Icons.WINDOW_DRAW_EXPLORER, "net/rptools/maptool/client/image/eye.png");
+          put(Icons.WINDOW_LIBRARY, "net/rptools/maptool/client/image/book_open.png");
+          put(Icons.WINDOW_CHAT, "net/rptools/maptool/client/image/application.png");
+          put(Icons.WINDOW_TABLES, "net/rptools/maptool/client/image/layers.png");
+          put(Icons.WINDOW_INITIATIVE, "net/rptools/maptool/client/image/initiativePanel.png");
+          put(Icons.WINDOW_GLOBAL_MACROS, "net/rptools/maptool/client/image/global_panel.png");
+          put(Icons.WINDOW_CAMPAIGN_MACROS, "net/rptools/maptool/client/image/campaign_panel.png");
+          put(Icons.WINDOW_GM_MACROS, "net/rptools/maptool/client/image/campaign_panel.png");
+          put(Icons.WINDOW_SELECTED_TOKEN, "net/rptools/maptool/client/image/cursor.png");
+          put(Icons.WINDOW_IMPERSONATED_MACROS, "net/rptools/maptool/client/image/impersonate.png");
+          put(Icons.WINDOW_HTML, "net/rptools/maptool/client/image/application.png");
         }
       };
 
@@ -508,6 +536,42 @@ public class IconMap {
           put(
               Icons.TOOLBAR_ZONE,
               "net/rptools/maptool/client/image/icons/rod_takehara/ribbon/Select Map.svg");
+          put(
+              Icons.WINDOW_CONNECTIONS,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Connections.svg");
+          put(
+              Icons.WINDOW_MAP_EXPLORER,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Map Explorer.svg");
+          put(
+              Icons.WINDOW_DRAW_EXPLORER,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Draw Explorer.svg");
+          put(
+              Icons.WINDOW_LIBRARY,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Library.svg");
+          put(
+              Icons.WINDOW_CHAT,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Chat.svg");
+          put(
+              Icons.WINDOW_TABLES,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Tables.svg");
+          put(
+              Icons.WINDOW_INITIATIVE,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Initiative.svg");
+          put(
+              Icons.WINDOW_GLOBAL_MACROS,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Global Macros.svg");
+          put(
+              Icons.WINDOW_CAMPAIGN_MACROS,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Campaign Macros.svg");
+          put(
+              Icons.WINDOW_GM_MACROS,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/GM Macros.svg");
+          put(
+              Icons.WINDOW_SELECTED_TOKEN,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Selected Token Macros.svg");
+          put(
+              Icons.WINDOW_IMPERSONATED_MACROS,
+              "net/rptools/maptool/client/image/icons/rod_takehara/windows/Impersonated Macros.svg");
         }
       };
 
@@ -516,11 +580,13 @@ public class IconMap {
 
   private static String selectedIconSet = ROD_TAKEHARA;
 
-  public static Image getIcon(Icons icon, int widthAndHeight) {
+  private static HashMap<Triplet<String, Integer, Integer>, ImageIcon> iconCache = new HashMap<>();
+
+  public static ImageIcon getIcon(Icons icon, int widthAndHeight) {
     return getIcon(icon, widthAndHeight, widthAndHeight);
   }
 
-  public static Image getIcon(Icons icon, int width, int height) {
+  public static ImageIcon getIcon(Icons icon, int width, int height) {
     try {
       var iconPath = "net/rptools/maptool/client/image/unknown.png";
       if (selectedIconSet.equals(ROD_TAKEHARA) && rodIcons.containsKey(icon)) {
@@ -529,7 +595,13 @@ public class IconMap {
         iconPath = classicIcons.get(icon);
       }
 
-      return ImageUtil.getImage(iconPath).getScaledInstance(width, height, Image.SCALE_SMOOTH);
+      var key = Triplet.with(iconPath, width, height);
+      if (iconCache.containsKey(key)) return iconCache.get(key);
+
+      var image = ImageUtil.getImage(iconPath).getScaledInstance(width, height, Image.SCALE_SMOOTH);
+      var imageIcon = new ImageIcon(image);
+      iconCache.put(key, imageIcon);
+      return imageIcon;
     } catch (IOException e) {
       throw new RuntimeException(e);
     }

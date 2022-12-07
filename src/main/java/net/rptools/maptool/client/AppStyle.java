@@ -85,17 +85,6 @@ public class AppStyle {
   public static BufferedImage squaresTexture;
   public static BufferedImage lookupTableDefaultImage;
 
-  public static BufferedImage resourceLibraryImage;
-  public static BufferedImage mapExplorerImage;
-  public static BufferedImage connectionsImage;
-  public static BufferedImage chatPanelImage;
-  public static BufferedImage globalPanelImage;
-  public static BufferedImage campaignPanelImage;
-  public static BufferedImage selectionPanelImage;
-  public static BufferedImage impersonatePanelImage;
-  public static BufferedImage tablesPanelImage;
-  public static BufferedImage initiativePanelImage;
-
   public static BufferedImage resize;
 
   public static BufferedImage arrowOut;
@@ -148,27 +137,6 @@ public class AppStyle {
 
       lookupTableDefaultImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/document.png");
-
-      resourceLibraryImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/book_open.png");
-      mapExplorerImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/eye.png");
-      connectionsImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/computer.png");
-      chatPanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/application.png");
-      globalPanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/global_panel.png");
-      campaignPanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/campaign_panel.png");
-      selectionPanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/cursor.png");
-      impersonatePanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/impersonate.png");
-      tablesPanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/layers.png");
-      initiativePanelImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/initiativePanel.png");
-
       resize = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/resize.png");
 
       arrowOut = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_out.png");

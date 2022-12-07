@@ -48,10 +48,14 @@ public class ActivityMonitorPanel extends JComponent implements ActivityListener
   private static Dimension prefSize;
 
   static {
-    transmitOn = IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_ON, StatusPanel.ICON_W_H);
-    transmitOff = IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_OFF, StatusPanel.ICON_W_H);
-    receiveOn = IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_ON, StatusPanel.ICON_W_H);
-    receiveOff = IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_OFF, StatusPanel.ICON_W_H);
+    transmitOn =
+        IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_ON, StatusPanel.ICON_W_H).getImage();
+    transmitOff =
+        IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_OFF, StatusPanel.ICON_W_H).getImage();
+    receiveOn =
+        IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_ON, StatusPanel.ICON_W_H).getImage();
+    receiveOff =
+        IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_OFF, StatusPanel.ICON_W_H).getImage();
 
     int width =
         Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null))

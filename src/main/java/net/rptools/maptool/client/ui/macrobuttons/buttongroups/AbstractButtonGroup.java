@@ -38,11 +38,12 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -265,7 +266,10 @@ public abstract class AbstractButtonGroup extends JPanel
               new Rectangle(10, 2, image.getWidth(null) + stringWidth, image.getHeight(null));
           // display impersonated image if impersonated
           if (getToken() != null && getToken().isBeingImpersonated()) {
-            g.drawImage(AppStyle.impersonatePanelImage, (int) imageBounds.getMaxX() + 5, 4, null);
+            var impersonatedImage =
+                IconMap.getIcon(IconMap.Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H)
+                    .getImage();
+            g.drawImage(impersonatedImage, (int) imageBounds.getMaxX() + 5, 4, null);
           }
         }
 

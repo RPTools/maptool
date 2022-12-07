@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui;
 
 import java.awt.GridLayout;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import net.rptools.maptool.client.swing.StatusPanel;
@@ -38,14 +37,9 @@ public class ConnectionStatusPanel extends JPanel {
 
   static {
     disconnectedIcon =
-        new ImageIcon(
-            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_DISCONNECTED, StatusPanel.ICON_W_H));
-    connectedIcon =
-        new ImageIcon(
-            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_CONNECTED, StatusPanel.ICON_W_H));
-    serverIcon =
-        new ImageIcon(
-            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_RUNNING, StatusPanel.ICON_W_H));
+        IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_DISCONNECTED, StatusPanel.ICON_W_H);
+    connectedIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_CONNECTED, StatusPanel.ICON_W_H);
+    serverIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_RUNNING, StatusPanel.ICON_W_H);
   }
 
   public ConnectionStatusPanel() {

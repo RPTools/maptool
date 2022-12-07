@@ -18,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -36,8 +35,7 @@ public class AssetCacheStatusBar extends JLabel {
   private static Icon assetCacheIcon;
 
   static {
-    assetCacheIcon =
-        new ImageIcon(IconMap.getIcon(IconMap.Icons.STATUSBAR_ASSET_CACHE, StatusPanel.ICON_W_H));
+    assetCacheIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_ASSET_CACHE, StatusPanel.ICON_W_H);
   }
 
   public AssetCacheStatusBar() {

@@ -18,7 +18,6 @@ import java.awt.event.MouseAdapter;
 import java.io.File;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.ui.theme.IconMap;
@@ -34,8 +33,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static Icon diskSpaceIcon;
 
   static {
-    diskSpaceIcon =
-        new ImageIcon(IconMap.getIcon(IconMap.Icons.STATUSBAR_FREE_SPACE, StatusPanel.ICON_W_H));
+    diskSpaceIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_FREE_SPACE, StatusPanel.ICON_W_H);
   }
 
   public AppHomeDiskSpaceStatusBar() {

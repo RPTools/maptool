@@ -17,7 +17,6 @@ package net.rptools.maptool.client.swing;
 import java.util.EnumMap;
 import java.util.Map;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
@@ -87,8 +86,8 @@ public class TopologyModeSelectionPanel extends JToolBar {
       Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();
 
-    button.setIcon(new ImageIcon(IconMap.getIcon(offIcon, ToolbarPanel.ICON_W_H)));
-    button.setSelectedIcon(new ImageIcon(IconMap.getIcon(icon, ToolbarPanel.ICON_W_H)));
+    button.setIcon(IconMap.getIcon(offIcon, ToolbarPanel.ICON_W_H));
+    button.setSelectedIcon(IconMap.getIcon(icon, ToolbarPanel.ICON_W_H));
 
     button.setToolTipText(I18N.getText(toolTipKey));
     button.setSelected(initiallySelectedTypes.contains(type));
