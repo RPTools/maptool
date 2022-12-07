@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -25,12 +26,17 @@ import java.util.Map.Entry;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.TopologyChanged;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Responsible for calculating lights and vision. */
-public class ZoneView implements ModelChangeListener {
+public class ZoneView {
   private static final Logger log = LogManager.getLogger(ZoneView.class);
 
   /** The zone of the ZoneView. */
@@ -47,6 +53,8 @@ public class ZoneView implements ModelChangeListener {
   private final Map<LightSource.Type, Set<GUID>> lightSourceMap = new HashMap<>();
   /** Map each token to their map between sightType and set of lights. */
   private final Map<GUID, Map<String, Set<DrawableLight>>> drawableLightCache = new HashMap<>();
+  /** Map the PlayerView to its exposed area. */
+  private final Map<PlayerView, Area> exposedAreaMap = new HashMap<>();
   /** Map the PlayerView to its visible area. */
   private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
   /** Map each token to their personal drawable lights. */
@@ -67,7 +75,41 @@ public class ZoneView implements ModelChangeListener {
   public ZoneView(Zone zone) {
     this.zone = zone;
     findLightSources();
-    zone.addModelChangeListener(this);
+
+    new MapToolEventBus().getMainEventBus().register(this);
+  }
+
+  public Area getExposedArea(PlayerView view) {
+    Area exposed = exposedAreaMap.get(view);
+
+    if (exposed == null) {
+      boolean combinedView =
+          !isUsingVision()
+              || MapTool.isPersonalServer()
+              || !MapTool.getServerPolicy().isUseIndividualFOW()
+              || view.isGMView();
+
+      if (view.isUsingTokenView() || combinedView) {
+        exposed = zone.getExposedArea(view);
+      } else {
+        // Not a token-specific view, but we are using Individual FoW. So we build up all the owned
+        // tokens' exposed areas to build the soft FoW. Note that not all owned tokens may still
+        // have sight (so weren't included in the PlayerView), but could still have previously
+        // exposed areas.
+        exposed = new Area();
+        for (Token tok : zone.getTokens()) {
+          if (!AppUtil.playerOwns(tok)) {
+            continue;
+          }
+          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
+          Area exposedArea = meta.getExposedAreaHistory();
+          exposed.add(new Area(exposedArea));
+        }
+      }
+
+      exposedAreaMap.put(view, exposed);
+    }
+    return exposed;
   }
 
   /**
@@ -588,7 +630,7 @@ public class ZoneView implements ModelChangeListener {
         lightSet.addAll(set);
       }
     }
-    if (view != null && view.getTokens() != null) {
+    if (view != null && view.isUsingTokenView()) {
       // Get the personal drawable lights of the tokens of the player view
       for (Token token : view.getTokens()) {
         Set<DrawableLight> lights = personalDrawableLightCache.get(token.getId());
@@ -608,9 +650,14 @@ public class ZoneView implements ModelChangeListener {
     tokenVisibleAreaCache.clear();
     tokenVisionCache.clear();
     lightSourceCache.clear();
+    exposedAreaMap.clear();
     visibleAreaMap.clear();
     drawableLightCache.clear();
     personalDrawableLightCache.clear();
+  }
+
+  public void flushFog() {
+    exposedAreaMap.clear();
   }
 
   /**
@@ -632,8 +679,10 @@ public class ZoneView implements ModelChangeListener {
     if (hadLightSource || token.hasLightSources()) {
       // Have to recalculate all token vision
       tokenVisionCache.clear();
+      exposedAreaMap.clear();
       visibleAreaMap.clear();
     } else if (token.getHasSight()) {
+      exposedAreaMap.clear();
       visibleAreaMap.clear();
     }
   }
@@ -691,61 +740,96 @@ public class ZoneView implements ModelChangeListener {
     // "ms");
   }
 
-  /**
-   * MODEL CHANGE LISTENER for events TOKEN_CHANGED, TOKEN_REMOVED, TOKEN_ADDED.
-   *
-   * @param event the event.
-   */
-  public void modelChanged(ModelChangeEvent event) {
-    Object evt = event.getEvent();
-    if (event.getModel() instanceof Zone) {
-      boolean tokenChangedTopology = false;
+  @Subscribe
+  private void onTopologyChanged(TopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
 
-      if (evt == Zone.Event.TOKEN_CHANGED || evt == Zone.Event.TOKEN_REMOVED) {
-        for (Token token : event.getTokensAsList()) {
-          if (token.hasAnyTopology()) tokenChangedTopology = true;
-          flush(token);
+    flush();
+    topologyAreas.clear();
+    topologyTrees.clear();
+  }
+
+  private boolean flushExistingTokens(List<Token> tokens) {
+    boolean tokenChangedTopology = false;
+    for (Token token : tokens) {
+      if (token.hasAnyTopology()) tokenChangedTopology = true;
+      flush(token);
+    }
+    // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
+    // cleared on another token, changes aren't pushed to client?
+    // tokenVisionCache.clear();
+    return tokenChangedTopology;
+  }
+
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
+
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
+    }
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    boolean tokenChangedTopology = flushExistingTokens(event.tokens());
+
+    for (Token token : event.tokens()) {
+      if (token.hasAnyTopology()) tokenChangedTopology = true;
+      for (AttachedLightSource als : token.getLightSources()) {
+        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+        if (lightSource == null) {
+          continue;
         }
-        // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
-        // cleared on another token, changes aren't pushed to client?
-        // tokenVisionCache.clear();
-      }
-
-      if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
-        tokenChangedTopology = processTokenAddChangeEvent(event.getTokensAsList());
-      }
-
-      if (evt == Zone.Event.TOKEN_REMOVED) {
-        for (Token token : event.getTokensAsList()) {
-          if (token.hasAnyTopology()) tokenChangedTopology = true;
-          for (AttachedLightSource als : token.getLightSources()) {
-            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-            if (lightSource == null) {
-              continue;
-            }
-            Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-            if (lightSet != null) {
-              lightSet.remove(token.getId());
-            }
-          }
+        Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
+        if (lightSet != null) {
+          lightSet.remove(token.getId());
         }
       }
+    }
 
-      // Moved this event to the bottom so we can check the other events
-      // since if a token that has topology is added/removed/edited (rotated/moved/etc)
-      // it should also trip a Topology change
-      if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedTopology) {
-        tokenVisionCache.clear();
-        lightSourceCache.clear();
-        drawableLightCache.clear();
-        personalDrawableLightCache.clear();
-        visibleAreaMap.clear();
-        topologyAreas.clear();
-        topologyTrees.clear();
-        tokenVisibleAreaCache.clear();
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
+    }
+  }
 
-        // topologyAreaData = null; // Jamz: This isn't used, probably never completed code.
-      }
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    flushExistingTokens(event.tokens());
+
+    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
+
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
     }
   }
 
@@ -781,7 +865,10 @@ public class ZoneView implements ModelChangeListener {
       hasSight |= token.getHasSight();
     }
 
-    if (hasSight) visibleAreaMap.clear();
+    if (hasSight) {
+      exposedAreaMap.clear();
+      visibleAreaMap.clear();
+    }
 
     return hasTopology;
   }

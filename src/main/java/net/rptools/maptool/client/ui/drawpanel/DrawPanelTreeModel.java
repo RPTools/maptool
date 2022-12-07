@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,15 +28,16 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
+import net.rptools.maptool.model.zones.DrawableAdded;
+import net.rptools.maptool.model.zones.DrawableRemoved;
 
-public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
+public class DrawPanelTreeModel implements TreeModel {
 
   private static final String root = "Views";
   private Zone zone;
@@ -71,10 +73,22 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
   public DrawPanelTreeModel(JTree tree) {
     this.tree = tree;
     update();
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
-  @Override
-  public void modelChanged(ModelChangeEvent event) {
+  @Subscribe
+  private void onDrawableAdded(DrawableAdded event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    update();
+  }
+
+  @Subscribe
+  private void onDrawableRemoved(DrawableRemoved event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
     update();
   }
 
@@ -167,15 +181,8 @@ public class DrawPanelTreeModel implements TreeModel, ModelChangeListener {
 
   // Called by zone change event
   public void setZone(Zone zone) {
-    if (zone != null) {
-      zone.removeModelChangeListener(this);
-    }
     this.zone = zone;
     update();
-
-    if (zone != null) {
-      zone.addModelChangeListener(this);
-    }
   }
 
   public void update() {

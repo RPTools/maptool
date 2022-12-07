@@ -69,7 +69,7 @@ import org.apache.logging.log4j.Logger;
  */
 
 // Lee: made tokens cloneable
-public class Token extends BaseModel implements Cloneable {
+public class Token implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
@@ -2414,9 +2414,7 @@ public class Token extends BaseModel implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
-  @Override
   protected Object readResolve() {
-    super.readResolve();
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.

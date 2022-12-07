@@ -445,6 +445,9 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
 
     implementation 'com.google.guava:guava:31.0.1-jre'
+
+    implementation 'org.apache.commons:commons-compress:1.22'
+    implementation 'org.tukaani:xz:1.9'
 }
 
 

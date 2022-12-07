@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.server;
 
+import static net.rptools.maptool.server.proto.Message.MessageTypeCase.HEARTBEAT_MSG;
+
 import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -24,12 +26,15 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.log4j.Logger;
@@ -58,7 +63,16 @@ public class ServerMessageHandler implements MessageHandler {
     try {
       var msg = Message.parseFrom(message);
       var msgType = msg.getMessageTypeCase();
-      log.info(id + " :got: " + msgType);
+
+      // we don't do anything with heartbeats they are only there to avoid routers dropping the
+      // connection.
+      // So just ignore then.
+      if (msgType == HEARTBEAT_MSG) {
+        log.debug("from " + id + " got: " + msgType);
+        return;
+      }
+
+      log.info("from " + id + " got: " + msgType);
 
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> {
@@ -237,6 +251,7 @@ public class ServerMessageHandler implements MessageHandler {
         }
         default -> log.warn(msgType + "not handled.");
       }
+      log.info("from " + id + " handled: " + msgType);
     } catch (Exception e) {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));
@@ -395,7 +410,12 @@ public class ServerMessageHandler implements MessageHandler {
 
   private void handle(RemoveZoneMsg msg) {
     var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+    var zone = server.getCampaign().getZone(zoneGUID);
     server.getCampaign().removeZone(zoneGUID);
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   private void handle(RemoveTopologyMsg msg) {
@@ -433,7 +453,12 @@ public class ServerMessageHandler implements MessageHandler {
   }
 
   private void handle(PutZoneMsg msg) {
-    server.getCampaign().putZone(Zone.fromDto(msg.getZone()));
+    final var zone = Zone.fromDto(msg.getZone());
+    server.getCampaign().putZone(zone);
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   private void handle(PutLabelMsg msg) {
@@ -547,11 +572,11 @@ public class ServerMessageHandler implements MessageHandler {
   }
 
   private void sendToClients(String excludedId, Message message) {
-    server.getConnection().broadcastMessage(new String[] {excludedId}, message.toByteArray());
+    server.getConnection().broadcastMessage(new String[] {excludedId}, message);
   }
 
   private void sendToAllClients(Message message) {
-    server.getConnection().broadcastMessage(message.toByteArray());
+    server.getConnection().broadcastMessage(message);
   }
 
   private void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet) {

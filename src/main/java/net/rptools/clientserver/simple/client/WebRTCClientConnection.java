@@ -489,7 +489,7 @@ public class WebRTCClientConnection extends AbstractConnection
     }
 
     var message = readMessage(channelBuffer.data);
-    if (message != null) dispatchMessage(id, message);
+    if (message != null) dispatchCompressedMessage(id, message);
   }
 
   private void fireDisconnectAsync() {
