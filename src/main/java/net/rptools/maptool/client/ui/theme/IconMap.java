@@ -23,6 +23,12 @@ import org.javatuples.Triplet;
 
 public class IconMap {
   public enum Icons {
+    ACTION_NEW,
+    ACTION_EDIT,
+    ACTION_DELETE,
+    ACTION_COPY,
+    ACTION_IMPORT,
+    ACTION_EXPORT,
     STATUSBAR_SERVER_CONNECTED,
     STATUSBAR_SERVER_DISCONNECTED,
     STATUSBAR_SERVER_RUNNING,
@@ -115,6 +121,12 @@ public class IconMap {
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
+          put(Icons.ACTION_NEW, "net/rptools/maptool/client/image/add.png");
+          put(Icons.ACTION_EDIT, "net/rptools/maptool/client/image/pencil.png");
+          put(Icons.ACTION_DELETE, "net/rptools/maptool/client/image/delete.png");
+          put(Icons.ACTION_COPY, "net/rptools/maptool/client/image/page_copy.png");
+          //    put(Icons.ACTION_IMPORT, "");
+          //    put(Icons.ACTION_EXPORT, "");
           put(
               Icons.STATUSBAR_SERVER_DISCONNECTED,
               "net/rptools/maptool/client/image/computer_off.png");
@@ -314,6 +326,22 @@ public class IconMap {
   private static final HashMap<Icons, String> rodIcons =
       new HashMap<>() {
         {
+          put(Icons.ACTION_NEW, "net/rptools/maptool/client/image/icons/rod_takehara/edit/New.svg");
+          put(
+              Icons.ACTION_EDIT,
+              "net/rptools/maptool/client/image/icons/rod_takehara/edit/Edit.svg");
+          put(
+              Icons.ACTION_DELETE,
+              "net/rptools/maptool/client/image/icons/rod_takehara/edit/Delete.svg");
+          put(
+              Icons.ACTION_COPY,
+              "net/rptools/maptool/client/image/icons/rod_takehara/edit/Duplicate.svg");
+          put(
+              Icons.ACTION_IMPORT,
+              "net/rptools/maptool/client/image/icons/rod_takehara/edit/Import.svg");
+          put(
+              Icons.ACTION_EXPORT,
+              "net/rptools/maptool/client/image/icons/rod_takehara/edit/Export.svg");
           put(
               Icons.STATUSBAR_SERVER_DISCONNECTED,
               "net/rptools/maptool/client/image/icons/rod_takehara/bottom/Server Status - Disconected.svg");
@@ -572,6 +600,7 @@ public class IconMap {
           put(
               Icons.WINDOW_IMPERSONATED_MACROS,
               "net/rptools/maptool/client/image/icons/rod_takehara/windows/Impersonated Macros.svg");
+          // put(Icons.WINDOW_HTML, "");
         }
       };
 
@@ -588,12 +617,14 @@ public class IconMap {
 
   public static ImageIcon getIcon(Icons icon, int width, int height) {
     try {
-      var iconPath = "net/rptools/maptool/client/image/unknown.png";
+      String iconPath = null;
       if (selectedIconSet.equals(ROD_TAKEHARA) && rodIcons.containsKey(icon)) {
         iconPath = rodIcons.get(icon);
       } else if (classicIcons.containsKey(icon)) {
         iconPath = classicIcons.get(icon);
       }
+
+      if (iconPath == null) return null;
 
       var key = Triplet.with(iconPath, width, height);
       if (iconCache.containsKey(key)) return iconCache.get(key);
