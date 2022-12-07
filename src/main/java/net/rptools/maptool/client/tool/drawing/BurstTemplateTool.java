@@ -46,23 +46,7 @@ public class BurstTemplateTool extends RadiusTemplateTool {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** Set the icon for the base tool. */
-  public BurstTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-burst.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      MapTool.showError("Cannot read image 'temp-blue-burst.png'", ioe);
-    } // endtry
-  }
+  public BurstTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool methods

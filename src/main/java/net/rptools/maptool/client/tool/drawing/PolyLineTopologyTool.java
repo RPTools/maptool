@@ -31,19 +31,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class PolyLineTopologyTool extends PolygonTopologyTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolyLineTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-free.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolyLineTopologyTool() {}
 
   @Override
   public String getTooltip() {

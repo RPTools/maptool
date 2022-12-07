@@ -34,23 +34,7 @@ public class BlastTemplateTool extends BurstTemplateTool {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** Set the icon for the base tool. */
-  public BlastTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-square.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
-  }
+  public BlastTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool methods

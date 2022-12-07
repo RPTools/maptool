@@ -90,23 +90,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
-  public RadiusTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-radius.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue-vertex-radius.png'", ioe);
-    } // endtry
-  }
+  public RadiusTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods

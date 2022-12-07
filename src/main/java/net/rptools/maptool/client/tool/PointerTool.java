@@ -113,13 +113,6 @@ public class PointerTool extends DefaultTool {
   private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
 
   public PointerTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/pointer-blue.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
     htmlRenderer.setBackground(new Color(0, 0, 0, 200));
     htmlRenderer.setForeground(Color.black);
     htmlRenderer.setOpaque(false);

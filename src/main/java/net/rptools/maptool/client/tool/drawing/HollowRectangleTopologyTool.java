@@ -35,19 +35,7 @@ public class HollowRectangleTopologyTool extends AbstractDrawingTool
 
   protected Rectangle rectangle;
 
-  public HollowRectangleTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-hrect.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public HollowRectangleTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

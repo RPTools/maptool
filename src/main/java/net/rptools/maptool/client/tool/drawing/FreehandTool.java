@@ -26,17 +26,6 @@ public class FreehandTool extends AbstractLineTool implements MouseMotionListene
   private static final long serialVersionUID = 3904963036442998837L;
 
   public FreehandTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-freehndlines.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
     // Don't ever show measurement drawing with freehand tool
     drawMeasurementDisabled = true;
   }

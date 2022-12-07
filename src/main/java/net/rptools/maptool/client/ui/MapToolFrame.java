@@ -1723,12 +1723,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
     fullScreenToolPanel.add(fullsZoneButton);
 
-    var initiativeButton =
-        new JButton(
-            new ImageIcon(
-                getClass()
-                    .getClassLoader()
-                    .getResource("net/rptools/maptool/client/image/arrow_menu.png")));
+    JButton initiativeButton = null;
+    try {
+      initiativeButton = new JButton(
+          new ImageIcon( ImageUtil.getImage("net/rptools/maptool/client/image/arrow_menu.png", ToolbarPanel.ICON_W_H, ToolbarPanel.ICON_W_H)));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
 
     initiativeButton.addActionListener(
         (e) -> {

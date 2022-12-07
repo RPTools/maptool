@@ -34,19 +34,7 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
   protected Shape diamond;
   protected ZonePoint originPoint;
 
-  public DiamondTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-diamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public DiamondTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

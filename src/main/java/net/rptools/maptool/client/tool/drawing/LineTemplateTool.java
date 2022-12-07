@@ -58,22 +58,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
   public LineTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
     AppState.addPropertyChangeListener(AppState.USE_DOUBLE_WIDE_PROP_NAME, this);
   }
 

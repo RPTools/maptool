@@ -36,19 +36,7 @@ public class DiamondTool extends AbstractDrawingTool implements MouseMotionListe
   protected Shape diamond;
   protected ZonePoint originPoint;
 
-  public DiamondTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-diamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public DiamondTool() {}
 
   @Override
   public String getInstructions() {

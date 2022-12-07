@@ -88,23 +88,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
-  public RadiusCellTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-cell-radius.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      MapTool.showError("Can't find image resource 'temp-blue-cell-radius.png'", ioe);
-    } // endtry
-  }
+  public RadiusCellTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods

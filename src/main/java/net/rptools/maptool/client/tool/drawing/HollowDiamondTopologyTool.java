@@ -33,19 +33,7 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
   protected Shape diamond;
   protected ZonePoint originPoint;
 
-  public HollowDiamondTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-hdiamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public HollowDiamondTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

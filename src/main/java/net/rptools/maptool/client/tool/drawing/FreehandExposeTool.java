@@ -34,19 +34,7 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 public class FreehandExposeTool extends FreehandTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public FreehandExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-free.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public FreehandExposeTool() {}
 
   @Override
   public String getTooltip() {

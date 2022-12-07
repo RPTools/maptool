@@ -36,19 +36,7 @@ public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotio
 
   protected Cross cross;
 
-  public CrossTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-cross.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public CrossTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

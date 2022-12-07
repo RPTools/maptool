@@ -35,19 +35,7 @@ public class OvalTopologyTool extends AbstractDrawingTool implements MouseMotion
   protected Oval oval;
   private ZonePoint originPoint;
 
-  public OvalTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-oval.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public OvalTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

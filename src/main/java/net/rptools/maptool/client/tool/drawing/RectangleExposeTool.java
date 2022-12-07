@@ -31,19 +31,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class RectangleExposeTool extends RectangleTool {
   private static final long serialVersionUID = 2072551559910263728L;
 
-  public RectangleExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-rect.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public RectangleExposeTool() {}
 
   @Override
   public boolean isAvailable() {

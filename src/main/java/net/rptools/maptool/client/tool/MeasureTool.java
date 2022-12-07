@@ -53,14 +53,11 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   private static Cursor measureCursor;
   private static javafx.scene.Cursor measureCursorFX;
 
-  private static final String PATH_RULER_IMG =
-      "net/rptools/maptool/client/image/tool/ruler-blue.png";
   private static final String PATH_MEASURE_IMG =
       "net/rptools/maptool/client/image/cursor-tape-measure.png";
 
   public MeasureTool() {
     try {
-      setIcon(new ImageIcon(ImageUtil.getImage(PATH_RULER_IMG)));
       measureCursor =
           Toolkit.getDefaultToolkit()
               .createCustomCursor(

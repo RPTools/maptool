@@ -38,19 +38,7 @@ public class RectangleTool extends AbstractDrawingTool implements MouseMotionLis
   protected Rectangle rectangle;
   protected ZonePoint originPoint;
 
-  public RectangleTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-box.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public RectangleTool() {}
 
   @Override
   public String getInstructions() {

@@ -40,19 +40,7 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
 
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolygonTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-poly.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolygonTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

@@ -25,17 +25,6 @@ import net.rptools.maptool.client.MapTool;
 public class AI_UseVblTool extends DefaultTool {
 
   public AI_UseVblTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/ignore-vbl-on-move.png")));
-      setSelectedIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/use-vbl-on-move.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
     // Server policy is not available yet but that's ok, we have it saved as a preference which
     // is OK at this stage of initialization.
     setSelected(AppPreferences.getVblBlocksMove());

@@ -30,19 +30,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class DiamondExposeTool extends DiamondTool {
   private static final long serialVersionUID = 2577704127916955192L;
 
-  public DiamondExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-diamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public DiamondExposeTool() {}
 
   @Override
   public boolean isAvailable() {

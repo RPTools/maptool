@@ -57,13 +57,9 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
   private static Layer selectedLayer = Layer.TOKEN;
 
   public DeleteDrawingTool() {
-    try {
-      setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/delete.png")));
-      new MapToolEventBus().getMainEventBus().register(this);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    new MapToolEventBus().getMainEventBus().register(this);
   }
+
 
   @Override
   protected void installKeystrokes(Map<KeyStroke, Action> actionMap) {

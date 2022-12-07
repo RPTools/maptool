@@ -27,19 +27,7 @@ public class LineTool extends AbstractLineTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
   private Point tempPoint;
 
-  public LineTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-strtlines.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public LineTool() {}
 
   @Override
   public String getTooltip() {

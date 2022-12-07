@@ -39,19 +39,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
   protected Rectangle oval;
   private ZonePoint originPoint;
 
-  public OvalTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-circle.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public OvalTool() {}
 
   @Override
   public String getTooltip() {

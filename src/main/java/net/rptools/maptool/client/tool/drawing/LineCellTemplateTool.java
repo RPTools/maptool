@@ -53,23 +53,7 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
-  public LineCellTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
-  }
+  public LineCellTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool Methods

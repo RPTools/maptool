@@ -34,19 +34,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class PolygonExposeTool extends PolygonTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolygonExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-poly.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolygonExposeTool() {}
 
   @Override
   public boolean isAvailable() {

@@ -53,14 +53,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   private boolean isDragging;
   private boolean selectedNewLabel;
 
-  public TextTool() {
-    try {
-      setIcon(
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/text-blue.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public TextTool() {}
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {

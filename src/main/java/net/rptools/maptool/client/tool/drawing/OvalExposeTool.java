@@ -32,19 +32,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class OvalExposeTool extends OvalTool {
   private static final long serialVersionUID = -9023090752132286356L;
 
-  public OvalExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-oval.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public OvalExposeTool() {}
 
   @Override
   public boolean isAvailable() {
