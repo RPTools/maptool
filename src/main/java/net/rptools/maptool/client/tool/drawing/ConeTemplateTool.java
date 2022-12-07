@@ -15,11 +15,6 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;

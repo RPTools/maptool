@@ -16,14 +16,13 @@ package net.rptools.maptool.client.swing;
 
 import java.awt.event.MouseAdapter;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import org.apache.logging.log4j.LogManager;
@@ -37,12 +36,8 @@ public class AssetCacheStatusBar extends JLabel {
   private static Icon assetCacheIcon;
 
   static {
-    try {
-      assetCacheIcon =
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/asset-status.png"));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    assetCacheIcon =
+        new ImageIcon(IconMap.getIcon(IconMap.Icons.STATUSBAR_ASSET_CACHE, StatusPanel.ICON_W_H));
   }
 
   public AssetCacheStatusBar() {

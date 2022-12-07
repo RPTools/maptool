@@ -26,6 +26,8 @@ public class StatusPanel extends JPanel {
 
   private JLabel statusLabel;
 
+  public static final int ICON_W_H = 16;
+
   public StatusPanel() {
 
     statusLabel = new JLabel();

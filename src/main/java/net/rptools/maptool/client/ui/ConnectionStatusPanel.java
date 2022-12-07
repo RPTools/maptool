@@ -15,12 +15,12 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.GridLayout;
-import java.io.IOException;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.swing.StatusPanel;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.language.I18N;
 
 public class ConnectionStatusPanel extends JPanel {
@@ -37,22 +37,15 @@ public class ConnectionStatusPanel extends JPanel {
   private final JLabel iconLabel = new JLabel();
 
   static {
-    try {
-      disconnectedIcon =
-          new ImageIcon(
-              ImageUtil.getImage(
-                  "net/rptools/maptool/client/image/computer_off.png")); // $NON-NLS-1$
-      connectedIcon =
-          new ImageIcon(
-              ImageUtil.getImage(
-                  "net/rptools/maptool/client/image/computer_on.png")); // $NON-NLS-1$
-      serverIcon =
-          new ImageIcon(
-              ImageUtil.getImage(
-                  "net/rptools/maptool/client/image/computer_server.png")); // $NON-NLS-1$
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    disconnectedIcon =
+        new ImageIcon(
+            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_DISCONNECTED, StatusPanel.ICON_W_H));
+    connectedIcon =
+        new ImageIcon(
+            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_CONNECTED, StatusPanel.ICON_W_H));
+    serverIcon =
+        new ImageIcon(
+            IconMap.getIcon(IconMap.Icons.STATUSBAR_SERVER_RUNNING, StatusPanel.ICON_W_H));
   }
 
   public ConnectionStatusPanel() {

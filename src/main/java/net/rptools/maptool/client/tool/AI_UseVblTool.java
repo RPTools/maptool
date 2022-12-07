@@ -15,9 +15,6 @@
 package net.rptools.maptool.client.tool;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import javax.swing.ImageIcon;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 

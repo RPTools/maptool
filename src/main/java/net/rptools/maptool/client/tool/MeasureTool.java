@@ -29,7 +29,6 @@ import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;

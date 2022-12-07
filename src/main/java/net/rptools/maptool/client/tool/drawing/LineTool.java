@@ -17,9 +17,6 @@ package net.rptools.maptool.client.tool.drawing;
 import java.awt.Point;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 
 /** Tool for drawing freehand lines. */

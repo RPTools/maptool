@@ -50,40 +50,41 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
     modeButtons = new EnumMap<>(Zone.TopologyType.class);
 
-      var initiallySelectedTypes = AppPreferences.getTopologyTypes();
-      createAndAddModeButton(
-          Zone.TopologyType.WALL_VBL,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
-          "tools.topology_mode_selection.vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.HILL_VBL,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
-          "tools.topology_mode_selection.hill_vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.PIT_VBL,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
-          "tools.topology_mode_selection.pit_vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.MBL,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
-          IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
-          "tools.topology_mode_selection.mbl.tooltip",
-          initiallySelectedTypes);
+    var initiallySelectedTypes = AppPreferences.getTopologyTypes();
+    createAndAddModeButton(
+        Zone.TopologyType.WALL_VBL,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
+        "tools.topology_mode_selection.vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.HILL_VBL,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
+        "tools.topology_mode_selection.hill_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.PIT_VBL,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
+        "tools.topology_mode_selection.pit_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.MBL,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
+        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
+        "tools.topology_mode_selection.mbl.tooltip",
+        initiallySelectedTypes);
 
     this.add(Box.createHorizontalStrut(5));
   }
 
   private void createAndAddModeButton(
-          Zone.TopologyType type,
-          final IconMap.Icons icon, final IconMap.Icons offIcon,
-          String toolTipKey,
-          Zone.TopologyTypeSet initiallySelectedTypes) {
+      Zone.TopologyType type,
+      final IconMap.Icons icon,
+      final IconMap.Icons offIcon,
+      String toolTipKey,
+      Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();
 
     button.setIcon(new ImageIcon(IconMap.getIcon(offIcon, ToolbarPanel.ICON_W_H)));
