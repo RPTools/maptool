@@ -28,6 +28,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -129,8 +130,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     removeAll();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
-        .setFrameIcon(
-            IconMap.getIcon(IconMap.Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H));
+        .setFrameIcon(IconMap.getIcon(Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H));
     MapTool.getFrame()
         .setFrameTitle(
             MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));

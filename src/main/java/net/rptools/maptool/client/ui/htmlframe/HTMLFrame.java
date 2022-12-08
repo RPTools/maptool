@@ -30,6 +30,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -218,7 +219,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param isHTML5 whether the frame is HTML5 (JavaFx)
    */
   private HTMLFrame(String name, int width, int height, boolean isHTML5) {
-    super(name, IconMap.getIcon(IconMap.Icons.WINDOW_HTML, MapToolFrame.ICON_W_H));
+    super(name, IconMap.getIcon(Icons.WINDOW_HTML, MapToolFrame.ICON_W_H));
     this.name = name;
     this.isHTML5 = isHTML5;
     width = width < 100 ? 400 : width;

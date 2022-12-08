@@ -44,6 +44,7 @@ import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -267,8 +268,7 @@ public abstract class AbstractButtonGroup extends JPanel
           // display impersonated image if impersonated
           if (getToken() != null && getToken().isBeingImpersonated()) {
             var impersonatedImage =
-                IconMap.getIcon(IconMap.Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H)
-                    .getImage();
+                IconMap.getIcon(Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H).getImage();
             g.drawImage(impersonatedImage, (int) imageBounds.getMaxX() + 5, 4, null);
           }
         }

@@ -22,6 +22,7 @@ import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +35,7 @@ public class ImageCacheStatusBar extends JLabel {
   private static Icon imageCacheIcon;
 
   static {
-    imageCacheIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_IMAGE_CACHE, StatusPanel.ICON_W_H);
+    imageCacheIcon = IconMap.getIcon(Icons.STATUSBAR_IMAGE_CACHE, StatusPanel.ICON_W_H);
   }
 
   public ImageCacheStatusBar() {

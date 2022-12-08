@@ -23,6 +23,7 @@ import net.rptools.maptool.client.swing.Animatable;
 import net.rptools.maptool.client.swing.AnimationManager;
 import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 
 /** @author trevor */
@@ -48,14 +49,10 @@ public class ActivityMonitorPanel extends JComponent implements ActivityListener
   private static Dimension prefSize;
 
   static {
-    transmitOn =
-        IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_ON, StatusPanel.ICON_W_H).getImage();
-    transmitOff =
-        IconMap.getIcon(IconMap.Icons.STATUSBAR_TRANSMIT_OFF, StatusPanel.ICON_W_H).getImage();
-    receiveOn =
-        IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_ON, StatusPanel.ICON_W_H).getImage();
-    receiveOff =
-        IconMap.getIcon(IconMap.Icons.STATUSBAR_RECEIVE_OFF, StatusPanel.ICON_W_H).getImage();
+    transmitOn = IconMap.getIcon(Icons.STATUSBAR_TRANSMIT_ON, StatusPanel.ICON_W_H).getImage();
+    transmitOff = IconMap.getIcon(Icons.STATUSBAR_TRANSMIT_OFF, StatusPanel.ICON_W_H).getImage();
+    receiveOn = IconMap.getIcon(Icons.STATUSBAR_RECEIVE_ON, StatusPanel.ICON_W_H).getImage();
+    receiveOff = IconMap.getIcon(Icons.STATUSBAR_RECEIVE_OFF, StatusPanel.ICON_W_H).getImage();
 
     int width =
         Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null))

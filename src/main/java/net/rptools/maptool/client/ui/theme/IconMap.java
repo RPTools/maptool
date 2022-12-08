@@ -22,102 +22,6 @@ import net.rptools.lib.image.ImageUtil;
 import org.javatuples.Triplet;
 
 public class IconMap {
-  public enum Icons {
-    ACTION_NEW,
-    ACTION_EDIT,
-    ACTION_DELETE,
-    ACTION_COPY,
-    ACTION_IMPORT,
-    ACTION_EXPORT,
-    STATUSBAR_SERVER_CONNECTED,
-    STATUSBAR_SERVER_DISCONNECTED,
-    STATUSBAR_SERVER_RUNNING,
-    STATUSBAR_TRANSMIT_ON,
-    STATUSBAR_TRANSMIT_OFF,
-    STATUSBAR_RECEIVE_ON,
-    STATUSBAR_RECEIVE_OFF,
-    STATUSBAR_ASSET_CACHE,
-    STATUSBAR_FREE_SPACE,
-    STATUSBAR_IMAGE_CACHE,
-    TOOLBAR_POINTERTOOL_ON,
-    TOOLBAR_POINTERTOOL_OFF,
-    TOOLBAR_POINTERTOOL_POINTER,
-    TOOLBAR_POINTERTOOL_MEASURE,
-    TOOLBAR_POINTERTOOL_AI_ON,
-    TOOLBAR_POINTERTOOL_AI_OFF,
-    TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON,
-    TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF,
-    TOOLBAR_DRAW_ON,
-    TOOLBAR_DRAW_OFF,
-    TOOLBAR_DRAW_DELETE,
-    TOOLBAR_DRAW_FREEHAND,
-    TOOLBAR_DRAW_LINE,
-    TOOLBAR_DRAW_BOX,
-    TOOLBAR_DRAW_OVAL,
-    TOOLBAR_DRAW_TEXT,
-    TOOLBAR_DRAW_DIAMOND,
-    TOOLBAR_TEMPLATE_ON,
-    TOOLBAR_TEMPLATE_OFF,
-    TOOLBAR_TEMPLATE_RADIUS,
-    TOOLBAR_TEMPLATE_RADIUS_CELL,
-    TOOLBAR_TEMPLATE_CONE,
-    TOOLBAR_TEMPLATE_LINE,
-    TOOLBAR_TEMPLATE_LINE_CELL,
-    TOOLBAR_TEMPLATE_BURST,
-    TOOLBAR_TEMPLATE_BLAST,
-    TOOLBAR_TEMPLATE_WALL,
-    TOOLBAR_FOG_ON,
-    TOOLBAR_FOG_OFF,
-    TOOLBAR_FOG_EXPOSE_BOX,
-    TOOLBAR_FOG_EXPOSE_OVAL,
-    TOOLBAR_FOG_EXPOSE_POLYGON,
-    TOOLBAR_FOG_EXPOSE_FREEHAND,
-    TOOLBAR_FOG_EXPOSE_DIAMOND,
-    TOOLBAR_TOPOLOGY_ON,
-    TOOLBAR_TOPOLOGY_OFF,
-    TOOLBAR_TOPOLOGY_BOX,
-    TOOLBAR_TOPOLOGY_BOX_HOLLOW,
-    TOOLBAR_TOPOLOGY_OVAL,
-    TOOLBAR_TOPOLOGY_OVAL_HOLLOW,
-    TOOLBAR_TOPOLOGY_POLYGON,
-    TOOLBAR_TOPOLOGY_POLYLINE,
-    TOOLBAR_TOPOLOGY_CROSS,
-    TOOLBAR_TOPOLOGY_DIAMOND,
-    TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW,
-    TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
-    TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
-    TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
-    TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
-    TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
-    TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
-    TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
-    TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
-    TOOLBAR_VOLUME_ON,
-    TOOLBAR_VOLUME_OFF,
-    TOOLBAR_TOKENSELECTION_ME_ON,
-    TOOLBAR_TOKENSELECTION_ME_OFF,
-    TOOLBAR_TOKENSELECTION_ALL_ON,
-    TOOLBAR_TOKENSELECTION_ALL_OFF,
-    TOOLBAR_TOKENSELECTION_PC_ON,
-    TOOLBAR_TOKENSELECTION_PC_OFF,
-    TOOLBAR_TOKENSELECTION_NPC_ON,
-    TOOLBAR_TOKENSELECTION_NPC_OFF,
-    TOOLBAR_ZONE,
-    WINDOW_CAMPAIGN_MACROS,
-    WINDOW_CHAT,
-    WINDOW_CONNECTIONS,
-    WINDOW_DRAW_EXPLORER,
-    WINDOW_GLOBAL_MACROS,
-    WINDOW_GM_MACROS,
-    WINDOW_IMPERSONATED_MACROS,
-    WINDOW_INITIATIVE,
-    WINDOW_LIBRARY,
-    WINDOW_MAP_EXPLORER,
-    WINDOW_SELECTED_TOKEN,
-    WINDOW_TABLES,
-    WINDOW_HTML,
-  }
-
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
@@ -127,6 +31,19 @@ public class IconMap {
           put(Icons.ACTION_COPY, "net/rptools/maptool/client/image/page_copy.png");
           //    put(Icons.ACTION_IMPORT, "");
           //    put(Icons.ACTION_EXPORT, "");
+          put(Icons.ACTION_SETTINGS, "net/rptools/maptool/client/image/arrow_menu.png");
+          put(Icons.ACTION_NEXT, "net/rptools/maptool/client/image/arrow_right.png");
+          put(Icons.ACTION_PREVIOUS, "net/rptools/maptool/client/image/arrow_left.png");
+          put(Icons.ACTION_RESET, "net/rptools/maptool/client/image/arrow_rotate_clockwise.png");
+          put(Icons.ACTION_PAUSE, "net/rptools/maptool/client/image/arrow_hold.png");
+          put(Icons.MENU_DOCUMENTATION, "net/rptools/maptool/client/image/book_open.png");
+          put(Icons.MENU_FORUMS, "net/rptools/maptool/client/image/marker.png");
+          put(Icons.MENU_FRAMEWORKS, "net/rptools/maptool/client/image/minilogo.png");
+          put(Icons.MENU_SCRIPTING, "net/rptools/maptool/client/image/pencil.png");
+          put(Icons.MENU_NETWORK_SETUP, "net/rptools/maptool/client/image/download.png");
+          put(Icons.MENU_SHOW_GRIDS, "net/rptools/maptool/client/image/grid.gif");
+          put(Icons.MENU_SHOW_TOKEN_NAMES, "net/rptools/maptool/client/image/names.png");
+          put(Icons.MENU_TUTORIALS, "net/rptools/maptool/client/image/tutorial.jpg");
           put(
               Icons.STATUSBAR_SERVER_DISCONNECTED,
               "net/rptools/maptool/client/image/computer_off.png");
@@ -342,6 +259,19 @@ public class IconMap {
           put(
               Icons.ACTION_EXPORT,
               "net/rptools/maptool/client/image/icons/rod_takehara/edit/Export.svg");
+          put(Icons.ACTION_SETTINGS, "net/rptools/maptool/client/image/icons/rod_takehara/initiative/Initiative Settings.svg");
+          put(Icons.ACTION_NEXT, "net/rptools/maptool/client/image/icons/rod_takehara/initiative/Next Initiative.svg");
+          put(Icons.ACTION_PREVIOUS, "net/rptools/maptool/client/image/icons/rod_takehara/initiative/Previous Initiative.svg");
+          put(Icons.ACTION_RESET, "net/rptools/maptool/client/image/icons/rod_takehara/initiative/Reset Round.svg");
+          put(Icons.ACTION_PAUSE, "net/rptools/maptool/client/image/icons/rod_takehara/initiative/Toggle Hold Initiative.svg");
+          put(Icons.MENU_DOCUMENTATION, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Documentation.svg");
+          put(Icons.MENU_FORUMS, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Forums.svg");
+          put(Icons.MENU_FRAMEWORKS, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Frameworks.svg");
+          put(Icons.MENU_SCRIPTING, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Macro Scripting.svg");
+          put(Icons.MENU_NETWORK_SETUP, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Network Setup.svg");
+          put(Icons.MENU_SHOW_GRIDS, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Show Grids.svg");
+          put(Icons.MENU_SHOW_TOKEN_NAMES, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Show Token Names.svg");
+          put(Icons.MENU_TUTORIALS, "net/rptools/maptool/client/image/icons/rod_takehara/menu/Tutorials.svg");
           put(
               Icons.STATUSBAR_SERVER_DISCONNECTED,
               "net/rptools/maptool/client/image/icons/rod_takehara/bottom/Server Status - Disconected.svg");
@@ -614,6 +544,17 @@ public class IconMap {
   public static ImageIcon getIcon(Icons icon, int widthAndHeight) {
     return getIcon(icon, widthAndHeight, widthAndHeight);
   }
+
+  public static ImageIcon getSmallIcon(Icons icon) {
+    return getIcon(icon, smallIconSize);
+  }
+
+  public static ImageIcon getBigIcon(Icons icon) {
+    return getIcon(icon, bigIconSize);
+  }
+
+  public static int smallIconSize = 16;
+  public static int bigIconSize = 32;
 
   public static ImageIcon getIcon(Icons icon, int width, int height) {
     try {

@@ -25,6 +25,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.ToolbarPanel;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -52,26 +53,26 @@ public class TopologyModeSelectionPanel extends JToolBar {
     var initiallySelectedTypes = AppPreferences.getTopologyTypes();
     createAndAddModeButton(
         Zone.TopologyType.WALL_VBL,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
         "tools.topology_mode_selection.vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.HILL_VBL,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
         "tools.topology_mode_selection.hill_vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.PIT_VBL,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
         "tools.topology_mode_selection.pit_vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.MBL,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
-        IconMap.Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
         "tools.topology_mode_selection.mbl.tooltip",
         initiallySelectedTypes);
 
@@ -80,8 +81,8 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
   private void createAndAddModeButton(
       Zone.TopologyType type,
-      final IconMap.Icons icon,
-      final IconMap.Icons offIcon,
+      final Icons icon,
+      final Icons offIcon,
       String toolTipKey,
       Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();

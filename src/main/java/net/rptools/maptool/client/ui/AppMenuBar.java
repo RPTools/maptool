@@ -35,6 +35,8 @@ import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -378,10 +380,14 @@ public class AppMenuBar extends JMenuBar {
       Arrays.sort(helpArray);
       for (String key : helpArray) {
         OpenUrlAction temp = new AppActions.OpenUrlAction(key);
-        /*
-         * TODO This could be more efficient by using ImageManager or AssetManager, but I'm not sure those facilities have been initialized by the time this code is executed so this is safer.
-         * :-/
-         */
+        switch(key) {
+          case "action.helpurl.01" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_DOCUMENTATION));
+          case "action.helpurl.02" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_TUTORIALS));
+          case "action.helpurl.03" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_FORUMS));
+          case "action.helpurl.04" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_NETWORK_SETUP));
+          case "action.helpurl.05" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SCRIPTING));
+          case "action.helpurl.06" -> temp.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_FRAMEWORKS));
+        }
         menu.add(new JMenuItem(temp));
       }
       menu.addSeparator();

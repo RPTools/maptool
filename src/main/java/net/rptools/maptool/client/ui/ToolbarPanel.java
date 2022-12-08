@@ -33,6 +33,7 @@ import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.TextTool;
 import net.rptools.maptool.client.tool.drawing.*;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -77,29 +78,29 @@ public class ToolbarPanel extends JToolBar {
     add(pointerGroupButton);
     drawButton =
         createButton(
-            IconMap.Icons.TOOLBAR_DRAW_ON,
-            IconMap.Icons.TOOLBAR_DRAW_OFF,
+            Icons.TOOLBAR_DRAW_ON,
+            Icons.TOOLBAR_DRAW_OFF,
             createDrawPanel(),
             I18N.getText("tools.drawing.tooltip"));
     add(drawButton);
     templateButton =
         createButton(
-            IconMap.Icons.TOOLBAR_TEMPLATE_ON,
-            IconMap.Icons.TOOLBAR_TEMPLATE_OFF,
+            Icons.TOOLBAR_TEMPLATE_ON,
+            Icons.TOOLBAR_TEMPLATE_OFF,
             createTemplatePanel(),
             I18N.getText("tools.template.tooltip"));
     add(templateButton);
     fogButton =
         createButton(
-            IconMap.Icons.TOOLBAR_FOG_ON,
-            IconMap.Icons.TOOLBAR_FOG_OFF,
+            Icons.TOOLBAR_FOG_ON,
+            Icons.TOOLBAR_FOG_OFF,
             createFogPanel(),
             I18N.getText("tools.fog.tooltip"));
     add(fogButton);
     topologyButton =
         createButton(
-            IconMap.Icons.TOOLBAR_TOPOLOGY_ON,
-            IconMap.Icons.TOOLBAR_TOPOLOGY_OFF,
+            Icons.TOOLBAR_TOPOLOGY_ON,
+            Icons.TOOLBAR_TOPOLOGY_OFF,
             createTopologyPanel(),
             I18N.getText("tools.topo.tooltip"));
     add(topologyButton);
@@ -116,8 +117,8 @@ public class ToolbarPanel extends JToolBar {
     // the Volume icon
     add(
         createMuteButton(
-            IconMap.Icons.TOOLBAR_VOLUME_OFF,
-            IconMap.Icons.TOOLBAR_VOLUME_ON,
+            Icons.TOOLBAR_VOLUME_OFF,
+            Icons.TOOLBAR_VOLUME_ON,
             I18N.getText("tools.mute.tooltip"),
             I18N.getText("tools.unmute.tooltip")));
 
@@ -146,28 +147,28 @@ public class ToolbarPanel extends JToolBar {
     // Default selected button created with reference to set selection true
     final JToggleButton tokenSelectionButtonAll =
         createTokenSelectionButton(
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_ALL_ON,
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_ALL_OFF,
+            Icons.TOOLBAR_TOKENSELECTION_ALL_ON,
+            Icons.TOOLBAR_TOKENSELECTION_ALL_OFF,
             I18N.getText("tools.token.fow.all.tooltip"),
             TokenSelection.ALL);
 
     add(
         createTokenSelectionButton(
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_ME_ON,
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_ME_OFF,
+            Icons.TOOLBAR_TOKENSELECTION_ME_ON,
+            Icons.TOOLBAR_TOKENSELECTION_ME_OFF,
             I18N.getText("tools.token.fow.gm.tooltip"),
             TokenSelection.GM));
     add(tokenSelectionButtonAll);
     add(
         createTokenSelectionButton(
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_PC_ON,
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_PC_OFF,
+            Icons.TOOLBAR_TOKENSELECTION_PC_ON,
+            Icons.TOOLBAR_TOKENSELECTION_PC_OFF,
             I18N.getText("tools.token.fow.pc.tooltip"),
             TokenSelection.PC));
     add(
         createTokenSelectionButton(
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_NPC_ON,
-            IconMap.Icons.TOOLBAR_TOKENSELECTION_NPC_OFF,
+            Icons.TOOLBAR_TOKENSELECTION_NPC_ON,
+            Icons.TOOLBAR_TOKENSELECTION_NPC_OFF,
             I18N.getText("tools.token.fow.npc.tooltip"),
             TokenSelection.NPC));
 
@@ -237,21 +238,20 @@ public class ToolbarPanel extends JToolBar {
     final OptionPanel pointerGroupOptionPanel = createPointerPanel();
     final JToggleButton pointerGroupButton =
         createButton(
-            IconMap.Icons.TOOLBAR_POINTERTOOL_ON,
-            IconMap.Icons.TOOLBAR_POINTERTOOL_OFF,
+            Icons.TOOLBAR_POINTERTOOL_ON,
+            Icons.TOOLBAR_POINTERTOOL_OFF,
             pointerGroupOptionPanel,
             I18N.getText("tools.interaction.tooltip"));
 
     final SidePanel aiPanel = new SidePanel();
 
     var aiTool = aiPanel.add(AI_Tool.class);
-    aiTool.setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_AI_OFF, ICON_W_H));
-    aiTool.setSelectedIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_AI_ON, ICON_W_H));
+    aiTool.setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_AI_OFF, ICON_W_H));
+    aiTool.setSelectedIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_AI_ON, ICON_W_H));
 
     var vblTool = aiPanel.add(AI_UseVblTool.class);
-    vblTool.setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF, ICON_W_H));
-    vblTool.setSelectedIcon(
-        IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON, ICON_W_H));
+    vblTool.setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF, ICON_W_H));
+    vblTool.setSelectedIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON, ICON_W_H));
 
     pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
     pointerGroupOptionPanel.add(aiPanel);
@@ -264,8 +264,7 @@ public class ToolbarPanel extends JToolBar {
   public JButton createZoneSelectionButton() {
     String title = I18N.getText("tools.zoneselector.tooltip");
 
-    final JButton button =
-        new JButton(title, IconMap.getIcon(IconMap.Icons.TOOLBAR_ZONE, ICON_W_H));
+    final JButton button = new JButton(title, IconMap.getIcon(Icons.TOOLBAR_ZONE, ICON_W_H));
     button.setToolTipText(title);
 
     SwingUtil.makePopupMenuButton(button, ZoneSelectionPopup::new, true);
@@ -276,10 +275,10 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(PointerTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_POINTER, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_POINTER, ICON_W_H));
     panel
         .add(MeasureTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_POINTERTOOL_MEASURE, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_MEASURE, ICON_W_H));
     return panel;
   }
 
@@ -287,19 +286,13 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(DeleteDrawingTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_DELETE, ICON_W_H));
-    panel
-        .add(FreehandTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_FREEHAND, ICON_W_H));
-    panel.add(LineTool.class).setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_LINE, ICON_W_H));
-    panel
-        .add(RectangleTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_BOX, ICON_W_H));
-    panel.add(OvalTool.class).setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_OVAL, ICON_W_H));
-    panel.add(TextTool.class).setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_TEXT, ICON_W_H));
-    panel
-        .add(DiamondTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_DRAW_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_DELETE, ICON_W_H));
+    panel.add(FreehandTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_FREEHAND, ICON_W_H));
+    panel.add(LineTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_LINE, ICON_W_H));
+    panel.add(RectangleTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_BOX, ICON_W_H));
+    panel.add(OvalTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_OVAL, ICON_W_H));
+    panel.add(TextTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_TEXT, ICON_W_H));
+    panel.add(DiamondTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_DIAMOND, ICON_W_H));
     return panel;
   }
 
@@ -307,28 +300,28 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(RadiusTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_RADIUS, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_RADIUS, ICON_W_H));
     panel
         .add(RadiusCellTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, ICON_W_H));
     panel
         .add(ConeTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_CONE, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_CONE, ICON_W_H));
     panel
         .add(LineTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_LINE, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_LINE, ICON_W_H));
     panel
         .add(LineCellTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_LINE_CELL, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_LINE_CELL, ICON_W_H));
     panel
         .add(BurstTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_BURST, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_BURST, ICON_W_H));
     panel
         .add(BlastTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_BLAST, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_BLAST, ICON_W_H));
     panel
         .add(WallTemplateTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TEMPLATE_WALL, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_WALL, ICON_W_H));
     return panel;
   }
 
@@ -354,19 +347,19 @@ public class ToolbarPanel extends JToolBar {
         };
     panel
         .add(RectangleExposeTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_FOG_EXPOSE_BOX, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX, ICON_W_H));
     panel
         .add(OvalExposeTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_FOG_EXPOSE_OVAL, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL, ICON_W_H));
     panel
         .add(PolygonExposeTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_FOG_EXPOSE_POLYGON, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON, ICON_W_H));
     panel
         .add(FreehandExposeTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_FOG_EXPOSE_FREEHAND, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND, ICON_W_H));
     panel
         .add(DiamondExposeTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ICON_W_H));
     return panel;
   }
 
@@ -374,31 +367,31 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(RectangleTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_BOX, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_BOX, ICON_W_H));
     panel
         .add(HollowRectangleTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, ICON_W_H));
     panel
         .add(OvalTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_OVAL, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_OVAL, ICON_W_H));
     panel
         .add(HollowOvalTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW, ICON_W_H));
     panel
         .add(PolygonTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_POLYGON, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_POLYGON, ICON_W_H));
     panel
         .add(PolyLineTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_POLYLINE, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_POLYLINE, ICON_W_H));
     panel
         .add(CrossTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_CROSS, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_CROSS, ICON_W_H));
     panel
         .add(DiamondTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND, ICON_W_H));
     panel
         .add(HollowDiamondTopologyTool.class)
-        .setIcon(IconMap.getIcon(IconMap.Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW, ICON_W_H));
 
     // Add with space to separate mode button group from shape button group.
     panel.add(Box.createHorizontalStrut(10));
@@ -410,10 +403,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private JToggleButton createButton(
-      final IconMap.Icons icon,
-      final IconMap.Icons offIcon,
-      final OptionPanel panel,
-      String tooltip) {
+          final Icons icon, final Icons offIcon, final OptionPanel panel, String tooltip) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
 
@@ -437,10 +427,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private JToggleButton createMuteButton(
-      final IconMap.Icons icon,
-      final IconMap.Icons offIcon,
-      String mutetooltip,
-      String unmutetooltip) {
+      final Icons icon, final Icons offIcon, String mutetooltip, String unmutetooltip) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(mutetooltip);
     button.addActionListener(
@@ -464,10 +451,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private JToggleButton createTokenSelectionButton(
-      final IconMap.Icons icon,
-      final IconMap.Icons offIcon,
-      String tooltip,
-      TokenSelection tokenSelection) {
+      final Icons icon, final Icons offIcon, String tooltip, TokenSelection tokenSelection) {
     final JToggleButton button = new JToggleButton();
     button.setToolTipText(tooltip);
     button.addActionListener(

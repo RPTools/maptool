@@ -20,6 +20,8 @@ import java.awt.event.MouseEvent;
 import javax.swing.*;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
@@ -75,7 +77,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addRevertToPreviousButton() {
-    ImageIcon i1 = new ImageIcon(AppStyle.arrowRotateClockwise);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_RESET);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -92,7 +94,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectNextButton() {
-    ImageIcon i1 = new ImageIcon(AppStyle.arrowRight);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_NEXT);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -109,7 +111,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectPreviousButton() {
-    ImageIcon i1 = new ImageIcon(AppStyle.arrowLeft);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_PREVIOUS);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {

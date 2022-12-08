@@ -21,6 +21,7 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +34,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static Icon diskSpaceIcon;
 
   static {
-    diskSpaceIcon = IconMap.getIcon(IconMap.Icons.STATUSBAR_FREE_SPACE, StatusPanel.ICON_W_H);
+    diskSpaceIcon = IconMap.getIcon(Icons.STATUSBAR_FREE_SPACE, StatusPanel.ICON_W_H);
   }
 
   public AppHomeDiskSpaceStatusBar() {
