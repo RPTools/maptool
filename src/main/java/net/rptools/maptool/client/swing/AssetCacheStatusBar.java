@@ -36,7 +36,7 @@ public class AssetCacheStatusBar extends JLabel {
   private static Icon assetCacheIcon;
 
   static {
-    assetCacheIcon = IconMap.getIcon(Icons.STATUSBAR_ASSET_CACHE, StatusPanel.ICON_W_H);
+    assetCacheIcon = IconMap.getSmallIcon(Icons.STATUSBAR_ASSET_CACHE);
   }
 
   public AssetCacheStatusBar() {

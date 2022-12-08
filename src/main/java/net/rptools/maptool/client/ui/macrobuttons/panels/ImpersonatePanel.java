@@ -130,7 +130,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     removeAll();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
-        .setFrameIcon(IconMap.getIcon(Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H));
+        .setFrameIcon(IconMap.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
     MapTool.getFrame()
         .setFrameTitle(
             MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));

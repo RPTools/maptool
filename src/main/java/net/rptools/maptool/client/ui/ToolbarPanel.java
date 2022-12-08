@@ -58,8 +58,6 @@ public class ToolbarPanel extends JToolBar {
   private final Toolbox toolbox;
   private final JButton mapselect;
 
-  public static final int ICON_W_H = 32;
-
   public ToolbarPanel(Toolbox tbox) {
     setRollover(true);
 
@@ -246,12 +244,12 @@ public class ToolbarPanel extends JToolBar {
     final SidePanel aiPanel = new SidePanel();
 
     var aiTool = aiPanel.add(AI_Tool.class);
-    aiTool.setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_AI_OFF, ICON_W_H));
-    aiTool.setSelectedIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_AI_ON, ICON_W_H));
+    aiTool.setIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_AI_OFF));
+    aiTool.setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_AI_ON));
 
     var vblTool = aiPanel.add(AI_UseVblTool.class);
-    vblTool.setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF, ICON_W_H));
-    vblTool.setSelectedIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON, ICON_W_H));
+    vblTool.setIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF));
+    vblTool.setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON));
 
     pointerGroupOptionPanel.add(Box.createHorizontalStrut(5));
     pointerGroupOptionPanel.add(aiPanel);
@@ -264,7 +262,7 @@ public class ToolbarPanel extends JToolBar {
   public JButton createZoneSelectionButton() {
     String title = I18N.getText("tools.zoneselector.tooltip");
 
-    final JButton button = new JButton(title, IconMap.getIcon(Icons.TOOLBAR_ZONE, ICON_W_H));
+    final JButton button = new JButton(title, IconMap.getBigIcon(Icons.TOOLBAR_ZONE));
     button.setToolTipText(title);
 
     SwingUtil.makePopupMenuButton(button, ZoneSelectionPopup::new, true);
@@ -275,10 +273,10 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(PointerTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_POINTER, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_POINTER));
     panel
         .add(MeasureTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_POINTERTOOL_MEASURE, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_POINTERTOOL_MEASURE));
     return panel;
   }
 
@@ -286,13 +284,13 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(DeleteDrawingTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_DELETE, ICON_W_H));
-    panel.add(FreehandTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_FREEHAND, ICON_W_H));
-    panel.add(LineTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_LINE, ICON_W_H));
-    panel.add(RectangleTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_BOX, ICON_W_H));
-    panel.add(OvalTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_OVAL, ICON_W_H));
-    panel.add(TextTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_TEXT, ICON_W_H));
-    panel.add(DiamondTool.class).setIcon(IconMap.getIcon(Icons.TOOLBAR_DRAW_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_DELETE));
+    panel.add(FreehandTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
+    panel.add(LineTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
+    panel.add(RectangleTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
+    panel.add(OvalTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
+    panel.add(TextTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
+    panel.add(DiamondTool.class).setIcon(IconMap.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
     return panel;
   }
 
@@ -300,28 +298,28 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(RadiusTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_RADIUS, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_RADIUS));
     panel
         .add(RadiusCellTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL));
     panel
         .add(ConeTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_CONE, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_CONE));
     panel
         .add(LineTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_LINE, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_LINE));
     panel
         .add(LineCellTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_LINE_CELL, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_LINE_CELL));
     panel
         .add(BurstTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_BURST, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_BURST));
     panel
         .add(BlastTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_BLAST, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_BLAST));
     panel
         .add(WallTemplateTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TEMPLATE_WALL, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TEMPLATE_WALL));
     return panel;
   }
 
@@ -347,19 +345,19 @@ public class ToolbarPanel extends JToolBar {
         };
     panel
         .add(RectangleExposeTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX));
     panel
         .add(OvalExposeTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL));
     panel
         .add(PolygonExposeTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON));
     panel
         .add(FreehandExposeTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND));
     panel
         .add(DiamondExposeTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND));
     return panel;
   }
 
@@ -367,31 +365,31 @@ public class ToolbarPanel extends JToolBar {
     OptionPanel panel = new OptionPanel();
     panel
         .add(RectangleTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_BOX, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX));
     panel
         .add(HollowRectangleTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW));
     panel
         .add(OvalTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_OVAL, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL));
     panel
         .add(HollowOvalTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW));
     panel
         .add(PolygonTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_POLYGON, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYGON));
     panel
         .add(PolyLineTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_POLYLINE, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYLINE));
     panel
         .add(CrossTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_CROSS, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_CROSS));
     panel
         .add(DiamondTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND));
     panel
         .add(HollowDiamondTopologyTool.class)
-        .setIcon(IconMap.getIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW, ICON_W_H));
+        .setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW));
 
     // Add with space to separate mode button group from shape button group.
     panel.add(Box.createHorizontalStrut(10));
@@ -417,8 +415,8 @@ public class ToolbarPanel extends JToolBar {
           }
         });
 
-    button.setIcon(IconMap.getIcon(offIcon, ICON_W_H));
-    button.setSelectedIcon(IconMap.getIcon(icon, ICON_W_H));
+    button.setIcon(IconMap.getBigIcon(offIcon));
+    button.setSelectedIcon(IconMap.getBigIcon(icon));
 
     optionPanel.add(panel, tooltip);
     buttonGroup.add(button);
@@ -440,8 +438,8 @@ public class ToolbarPanel extends JToolBar {
           }
         });
 
-    button.setIcon(IconMap.getIcon(offIcon, ICON_W_H));
-    button.setSelectedIcon(IconMap.getIcon(icon, ICON_W_H));
+    button.setIcon(IconMap.getBigIcon(offIcon));
+    button.setSelectedIcon(IconMap.getBigIcon(icon));
 
     if (MediaPlayerAdapter.getGlobalMute()) {
       button.doClick();
@@ -465,8 +463,8 @@ public class ToolbarPanel extends JToolBar {
             }
           }
         });
-    button.setIcon(IconMap.getIcon(offIcon, ICON_W_H));
-    button.setSelectedIcon(IconMap.getIcon(icon, ICON_W_H));
+    button.setIcon(IconMap.getBigIcon(offIcon));
+    button.setSelectedIcon(IconMap.getBigIcon(icon));
     tokenSelectionbuttonGroup.add(button);
     return button;
   }

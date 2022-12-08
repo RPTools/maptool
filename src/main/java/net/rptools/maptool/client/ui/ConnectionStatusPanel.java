@@ -37,9 +37,9 @@ public class ConnectionStatusPanel extends JPanel {
   private final JLabel iconLabel = new JLabel();
 
   static {
-    disconnectedIcon = IconMap.getIcon(Icons.STATUSBAR_SERVER_DISCONNECTED, StatusPanel.ICON_W_H);
-    connectedIcon = IconMap.getIcon(Icons.STATUSBAR_SERVER_CONNECTED, StatusPanel.ICON_W_H);
-    serverIcon = IconMap.getIcon(Icons.STATUSBAR_SERVER_RUNNING, StatusPanel.ICON_W_H);
+    disconnectedIcon = IconMap.getSmallIcon(Icons.STATUSBAR_SERVER_DISCONNECTED);
+    connectedIcon = IconMap.getSmallIcon(Icons.STATUSBAR_SERVER_CONNECTED);
+    serverIcon = IconMap.getSmallIcon(Icons.STATUSBAR_SERVER_RUNNING);
   }
 
   public ConnectionStatusPanel() {

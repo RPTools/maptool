@@ -268,7 +268,7 @@ public abstract class AbstractButtonGroup extends JPanel
           // display impersonated image if impersonated
           if (getToken() != null && getToken().isBeingImpersonated()) {
             var impersonatedImage =
-                IconMap.getIcon(Icons.WINDOW_IMPERSONATED_MACROS, MapToolFrame.ICON_W_H).getImage();
+                IconMap.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS).getImage();
             g.drawImage(impersonatedImage, (int) imageBounds.getMaxX() + 5, 4, null);
           }
         }

@@ -218,7 +218,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     // reset the tab icon
     MapTool.getFrame()
         .getFrame(MTFrame.SELECTION)
-        .setFrameIcon(IconMap.getIcon(Icons.WINDOW_SELECTED_TOKEN, MapToolFrame.ICON_W_H));
+        .setFrameIcon(IconMap.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN));
     super.clear();
   }
 

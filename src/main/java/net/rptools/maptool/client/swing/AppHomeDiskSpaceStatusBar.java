@@ -34,7 +34,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static Icon diskSpaceIcon;
 
   static {
-    diskSpaceIcon = IconMap.getIcon(Icons.STATUSBAR_FREE_SPACE, StatusPanel.ICON_W_H);
+    diskSpaceIcon = IconMap.getSmallIcon(Icons.STATUSBAR_FREE_SPACE);
   }
 
   public AppHomeDiskSpaceStatusBar() {

@@ -620,47 +620,45 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return frameMap.get(frame);
   }
 
-  public static final int ICON_W_H = 16;
-
   private void initializeFrames() {
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
             MTFrame.CONNECTIONS,
             connectionPanel,
-            IconMap.getIcon(Icons.WINDOW_CONNECTIONS, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_CONNECTIONS)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(
             MTFrame.TOKEN_TREE,
             new JScrollPane(createTokenTreePanel()),
-            IconMap.getIcon(Icons.WINDOW_MAP_EXPLORER, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_MAP_EXPLORER)));
     frameMap.put(
         MTFrame.IMAGE_EXPLORER,
         createDockingFrame(
-            MTFrame.IMAGE_EXPLORER, assetPanel, IconMap.getIcon(Icons.WINDOW_LIBRARY, ICON_W_H)));
+            MTFrame.IMAGE_EXPLORER, assetPanel, IconMap.getSmallIcon(Icons.WINDOW_LIBRARY)));
     frameMap.put(
         MTFrame.DRAW_TREE,
         createDockingFrame(
             MTFrame.DRAW_TREE,
             new JScrollPane(createDrawTreePanel()),
-            IconMap.getIcon(Icons.WINDOW_DRAW_EXPLORER, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_DRAW_EXPLORER)));
     frameMap.put(
         MTFrame.CHAT,
         createDockingFrame(
-            MTFrame.CHAT, commandPanel, IconMap.getIcon(Icons.WINDOW_CHAT, ICON_W_H)));
+            MTFrame.CHAT, commandPanel, IconMap.getSmallIcon(Icons.WINDOW_CHAT)));
     frameMap.put(
         MTFrame.LOOKUP_TABLES,
         createDockingFrame(
             MTFrame.LOOKUP_TABLES,
             getLookupTablePanel(),
-            IconMap.getIcon(Icons.WINDOW_TABLES, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_TABLES)));
     frameMap.put(
         MTFrame.INITIATIVE,
         createDockingFrame(
             MTFrame.INITIATIVE,
             initiativePanel,
-            IconMap.getIcon(Icons.WINDOW_INITIATIVE, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_INITIATIVE)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -674,24 +672,24 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     frameMap.put(
         MTFrame.GLOBAL,
         createDockingFrame(
-            MTFrame.GLOBAL, global, IconMap.getIcon(Icons.WINDOW_GLOBAL_MACROS, ICON_W_H)));
+            MTFrame.GLOBAL, global, IconMap.getSmallIcon(Icons.WINDOW_GLOBAL_MACROS)));
     frameMap.put(
         MTFrame.CAMPAIGN,
         createDockingFrame(
-            MTFrame.CAMPAIGN, campaign, IconMap.getIcon(Icons.WINDOW_CAMPAIGN_MACROS, ICON_W_H)));
+            MTFrame.CAMPAIGN, campaign, IconMap.getSmallIcon(Icons.WINDOW_CAMPAIGN_MACROS)));
     frameMap.put(
         MTFrame.GM,
-        createDockingFrame(MTFrame.GM, gm, IconMap.getIcon(Icons.WINDOW_GM_MACROS, ICON_W_H)));
+        createDockingFrame(MTFrame.GM, gm, IconMap.getSmallIcon(Icons.WINDOW_GM_MACROS)));
     frameMap.put(
         MTFrame.SELECTION,
         createDockingFrame(
-            MTFrame.SELECTION, selection, IconMap.getIcon(Icons.WINDOW_SELECTED_TOKEN, ICON_W_H)));
+            MTFrame.SELECTION, selection, IconMap.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN)));
     frameMap.put(
         MTFrame.IMPERSONATED,
         createDockingFrame(
             MTFrame.IMPERSONATED,
             impersonate,
-            IconMap.getIcon(Icons.WINDOW_IMPERSONATED_MACROS, ICON_W_H)));
+            IconMap.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS)));
   }
 
   private JScrollPane scrollPaneFactory(JPanel panel) {
@@ -1738,7 +1736,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     fullScreenToolPanel.add(fullsZoneButton);
 
     JButton initiativeButton =
-        new JButton(IconMap.getIcon(Icons.WINDOW_INITIATIVE, ToolbarPanel.ICON_W_H));
+        new JButton(IconMap.getBigIcon(Icons.WINDOW_INITIATIVE));
 
     initiativeButton.addActionListener(
         (e) -> {

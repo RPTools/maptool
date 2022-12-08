@@ -87,8 +87,8 @@ public class TopologyModeSelectionPanel extends JToolBar {
       Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();
 
-    button.setIcon(IconMap.getIcon(offIcon, ToolbarPanel.ICON_W_H));
-    button.setSelectedIcon(IconMap.getIcon(icon, ToolbarPanel.ICON_W_H));
+    button.setIcon(IconMap.getBigIcon(offIcon));
+    button.setSelectedIcon(IconMap.getBigIcon(icon));
 
     button.setToolTipText(I18N.getText(toolTipKey));
     button.setSelected(initiallySelectedTypes.contains(type));

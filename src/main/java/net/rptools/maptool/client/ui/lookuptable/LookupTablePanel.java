@@ -44,8 +44,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private JDialog editorDialog;
   private EditLookupTablePanel editorPanel;
 
-  private static final int ICON_W_H = 16;
-
   public LookupTablePanel() {
     super("net/rptools/maptool/client/ui/forms/lookupTablePanel.xml");
     panelInit();
@@ -142,7 +140,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initDuplicateButton() {
     getDuplicateButton().setMargin(new Insets(0, 0, 0, 0));
-    getDuplicateButton().setIcon(IconMap.getIcon(Icons.ACTION_COPY, ICON_W_H));
+    getDuplicateButton().setIcon(IconMap.getSmallIcon(Icons.ACTION_COPY));
     getDuplicateButton()
         .addActionListener(
             e -> {
@@ -166,7 +164,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initEditTableButton() {
     getEditButton().setMargin(new Insets(0, 0, 0, 0));
-    getEditButton().setIcon(IconMap.getIcon(Icons.ACTION_EDIT, ICON_W_H));
+    getEditButton().setIcon(IconMap.getSmallIcon(Icons.ACTION_EDIT));
     getEditButton()
         .addActionListener(
             e -> {
@@ -185,7 +183,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initNewTableButton() {
     getNewButton().setMargin(new Insets(0, 0, 0, 0));
-    getNewButton().setIcon(IconMap.getIcon(Icons.ACTION_NEW, ICON_W_H));
+    getNewButton().setIcon(IconMap.getSmallIcon(Icons.ACTION_NEW));
     getNewButton()
         .addActionListener(
             e -> {
@@ -201,7 +199,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initDeleteTableButton() {
     getDeleteButton().setMargin(new Insets(0, 0, 0, 0));
-    getDeleteButton().setIcon(IconMap.getIcon(Icons.ACTION_DELETE, ICON_W_H));
+    getDeleteButton().setIcon(IconMap.getSmallIcon(Icons.ACTION_DELETE));
     getDeleteButton()
         .addActionListener(
             e -> {
@@ -224,7 +222,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initImportButton() {
     getImportButton().setMargin(new Insets(0, 0, 0, 0));
-    var icon = IconMap.getIcon(Icons.ACTION_IMPORT, ICON_W_H);
+    var icon = IconMap.getSmallIcon(Icons.ACTION_IMPORT);
     if (icon != null) {
       getImportButton().setIcon(icon);
       getImportButton().setToolTipText(getImportButton().getText());
@@ -268,7 +266,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
 
   public void initExportButton() {
     getExportButton().setMargin(new Insets(0, 0, 0, 0));
-    var icon = IconMap.getIcon(Icons.ACTION_EXPORT, ICON_W_H);
+    var icon = IconMap.getSmallIcon(Icons.ACTION_EXPORT);
     if (icon != null) {
       getExportButton().setIcon(icon);
       getExportButton().setToolTipText(getExportButton().getText());

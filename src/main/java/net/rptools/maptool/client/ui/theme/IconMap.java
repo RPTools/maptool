@@ -18,6 +18,8 @@ import java.awt.*;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.*;
+
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import net.rptools.lib.image.ImageUtil;
 import org.javatuples.Triplet;
 
@@ -541,7 +543,7 @@ public class IconMap {
 
   private static HashMap<Triplet<String, Integer, Integer>, ImageIcon> iconCache = new HashMap<>();
 
-  public static ImageIcon getIcon(Icons icon, int widthAndHeight) {
+  private static ImageIcon getIcon(Icons icon, int widthAndHeight) {
     return getIcon(icon, widthAndHeight, widthAndHeight);
   }
 
@@ -556,7 +558,7 @@ public class IconMap {
   public static int smallIconSize = 16;
   public static int bigIconSize = 32;
 
-  public static ImageIcon getIcon(Icons icon, int width, int height) {
+  private static ImageIcon getIcon(Icons icon, int width, int height) {
     try {
       String iconPath = null;
       if (selectedIconSet.equals(ROD_TAKEHARA) && rodIcons.containsKey(icon)) {
@@ -570,8 +572,14 @@ public class IconMap {
       var key = Triplet.with(iconPath, width, height);
       if (iconCache.containsKey(key)) return iconCache.get(key);
 
-      var image = ImageUtil.getImage(iconPath).getScaledInstance(width, height, Image.SCALE_SMOOTH);
-      var imageIcon = new ImageIcon(image);
+      ImageIcon imageIcon = null;
+   // svg files can change colors depending on theme, but they probably need to prepared properly
+   //   if(iconPath.endsWith(".svg")) {
+   //     imageIcon = new FlatSVGIcon(iconPath, width, height);
+   //   } else {
+        var image = ImageUtil.getImage(iconPath).getScaledInstance(width, height, Image.SCALE_SMOOTH);
+        imageIcon = new ImageIcon(image);
+   //   }
       iconCache.put(key, imageIcon);
       return imageIcon;
     } catch (IOException e) {

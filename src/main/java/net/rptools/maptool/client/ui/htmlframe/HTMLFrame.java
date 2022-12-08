@@ -219,7 +219,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param isHTML5 whether the frame is HTML5 (JavaFx)
    */
   private HTMLFrame(String name, int width, int height, boolean isHTML5) {
-    super(name, IconMap.getIcon(Icons.WINDOW_HTML, MapToolFrame.ICON_W_H));
+    super(name, IconMap.getSmallIcon(Icons.WINDOW_HTML));
     this.name = name;
     this.isHTML5 = isHTML5;
     width = width < 100 ? 400 : width;
