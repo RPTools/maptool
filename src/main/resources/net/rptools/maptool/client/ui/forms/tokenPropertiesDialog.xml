@@ -75,8 +75,8 @@
              </object>
             </at>
             <at name="name">tokenImage</at>
-            <at name="width">40</at>
-            <at name="text">Image</at>
+            <at name="width">35</at>
+            <at name="text">Label.image</at>
             <at name="fill">
              <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
               <at name="name">fill</at>
@@ -765,7 +765,7 @@
                                </object>
                               </at>
                               <at name="name">propertiesTable</at>
-                              <at name="width">1162</at>
+                              <at name="width">1161</at>
                               <at name="text">propertiesTable</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -1728,8 +1728,8 @@
                              <object classname="com.jeta.forms.store.support.PropertyMap">
                               <at name="name">alphaSensitivitySpinner</at>
                               <at name="width">60</at>
-                              <at name="toolTipText">Adjust the sensitivity to the color match that will be used to generate VBL, values 0-255 with 0 being an exact color match.</at>
-                              <at name="height">23</at>
+                              <at name="toolTipText">EditTokenDialog.label.vbl.sensitivity.tooltip</at>
+                              <at name="height">21</at>
                              </object>
                             </at>
                            </object>
@@ -2478,8 +2478,8 @@
                                     </object>
                                    </at>
                                    <at name="name">vblPreview</at>
-                                   <at name="width">776</at>
-                                   <at name="text">VBL Preview</at>
+                                   <at name="width">787</at>
+                                   <at name="text">EditTokenDialog.button.vbl.preview</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -3487,8 +3487,8 @@
                                </object>
                               </at>
                               <at name="name">ownershipList</at>
-                              <at name="width">1162</at>
-                              <at name="text">ownerShipLabel</at>
+                              <at name="width">1161</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -4824,7 +4824,7 @@
                                         <at name="value">
                                          <object classname="com.jeta.forms.store.properties.ListItemProperty">
                                           <at name="name">listitem</at>
-                                          <at name="label">MULTIPLY</at>
+                                          <at name="label">Token.TerrainModifierOperation.MULTIPLY</at>
                                           <at name="icon">
                                            <object classname="com.jeta.forms.store.properties.IconProperty">
                                             <at name="embedded">false</at>
@@ -5073,8 +5073,8 @@
                                     </object>
                                    </at>
                                    <at name="name">tokenOpacityValueLabel</at>
-                                   <at name="width">36</at>
-                                   <at name="text">100%</at>
+                                   <at name="width">32</at>
+                                   <at name="text">EditTokenDialog.label.opacity.100</at>
                                    <at name="fill">
                                     <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                      <at name="name">fill</at>
@@ -5507,8 +5507,8 @@
                                          </object>
                                         </at>
                                         <at name="name">charsheet</at>
-                                        <at name="width">63</at>
-                                        <at name="text">Charsheet</at>
+                                        <at name="width">58</at>
+                                        <at name="text">EditTokenDialog.border.title.charsheet</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
@@ -5692,8 +5692,8 @@
                                          </object>
                                         </at>
                                         <at name="name">tokenLayout</at>
-                                        <at name="width">41</at>
-                                        <at name="text">Layout</at>
+                                        <at name="width">37</at>
+                                        <at name="text">EditTokenDialog.border.title.layout</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
@@ -5877,8 +5877,8 @@
                                          </object>
                                         </at>
                                         <at name="name">portrait</at>
-                                        <at name="width">46</at>
-                                        <at name="text">Portrait</at>
+                                        <at name="width">42</at>
+                                        <at name="text">EditTokenDialog.border.title.portrait</at>
                                         <at name="fill">
                                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                           <at name="name">fill</at>
@@ -6612,7 +6612,7 @@
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.TabProperty">
                                      <at name="name">tab</at>
-                                     <at name="title">HTML</at>
+                                     <at name="title">EditTokenDialog.tab.hero.html</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -6813,7 +6813,7 @@
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.TabProperty">
                                      <at name="name">tab</at>
-                                     <at name="title">XML</at>
+                                     <at name="title">EditTokenDialog.tab.hero.xml</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -6887,8 +6887,8 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">expressionLabel</at>
-                                                <at name="width">75</at>
-                                                <at name="text">Expression: </at>
+                                                <at name="width">71</at>
+                                                <at name="text">EditTokenDialog.label.hero.statBlockSearch</at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -6947,9 +6947,9 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">xmlStatblockSearchTextField</at>
-                                                <at name="width">959</at>
-                                                <at name="toolTipText">Enter raw text, a regular expression or an xPath expresstion to search the statblock for.</at>
-                                                <at name="height">23</at>
+                                                <at name="width">965</at>
+                                                <at name="toolTipText">EditTokenDialog.label.hero.statBlockSearch.tooltip</at>
+                                                <at name="height">21</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7003,10 +7003,10 @@
                                                 </at>
                                                 <at name="actionCommand">Find</at>
                                                 <at name="name">xmlStatblockSearchButton</at>
-                                                <at name="width">59</at>
-                                                <at name="text">Find</at>
-                                                <at name="toolTipText">Search the statblock using the expression provided.</at>
-                                                <at name="height">25</at>
+                                                <at name="width">56</at>
+                                                <at name="text">EditTokenDialog.action.hero.statBlockRTextScroll</at>
+                                                <at name="toolTipText">EditTokenDialog.button.hero.statBlockSearch.tooltip</at>
+                                                <at name="height">23</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7059,8 +7059,8 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">xmlStatblockRTextScrollPane</at>
-                                                <at name="width">1111</at>
-                                                <at name="text">xmlStatblockRTextScrollPane</at>
+                                                <at name="width">1110</at>
+                                                <at name="text"></at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -7171,7 +7171,7 @@
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.TabProperty">
                                      <at name="name">tab</at>
-                                     <at name="title">TEXT</at>
+                                     <at name="title">EditTokenDialog.tab.hero.text</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -7246,10 +7246,10 @@
                                                 </at>
                                                 <at name="actionCommand">Find</at>
                                                 <at name="name">textStatblockSearchButton</at>
-                                                <at name="width">59</at>
-                                                <at name="text">Find</at>
-                                                <at name="toolTipText">Search the statblock using the expression provided.</at>
-                                                <at name="height">25</at>
+                                                <at name="width">56</at>
+                                                <at name="text">EditTokenDialog.action.hero.statBlockRTextScroll</at>
+                                                <at name="toolTipText">EditTokenDialog.button.hero.statBlockSearch.tooltip</at>
+                                                <at name="height">23</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7302,8 +7302,8 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">expressionLabel</at>
-                                                <at name="width">75</at>
-                                                <at name="text">Expression: </at>
+                                                <at name="width">71</at>
+                                                <at name="text">EditTokenDialog.label.hero.statBlockSearch</at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -7362,9 +7362,9 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">textStatblockSearchTextField</at>
-                                                <at name="width">959</at>
-                                                <at name="toolTipText">Enter raw text, a regular expression or an xPath expresstion to search the statblock for.</at>
-                                                <at name="height">23</at>
+                                                <at name="width">965</at>
+                                                <at name="toolTipText">EditTokenDialog.label.hero.statBlockSearch.tooltip</at>
+                                                <at name="height">21</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7417,8 +7417,8 @@
                                                  </object>
                                                 </at>
                                                 <at name="name">textStatblockRTextScrollPane</at>
-                                                <at name="width">1111</at>
-                                                <at name="text">textStatblockRTextScrollPane</at>
+                                                <at name="width">1110</at>
+                                                <at name="text"></at>
                                                 <at name="fill">
                                                  <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                                   <at name="name">fill</at>
@@ -7529,7 +7529,7 @@
                                    <at name="value">
                                     <object classname="com.jeta.forms.store.properties.TabProperty">
                                      <at name="name">tab</at>
-                                     <at name="title">Images</at>
+                                     <at name="title">EditTokenDialog.tab.hero.images</at>
                                      <at name="icon">
                                       <object classname="com.jeta.forms.store.properties.IconProperty">
                                        <at name="embedded">false</at>
@@ -7604,9 +7604,9 @@
                                                 </at>
                                                 <at name="actionCommand">Set as Token Handout</at>
                                                 <at name="name">setAsHandoutButton</at>
-                                                <at name="width">169</at>
-                                                <at name="text">Set as Token Handout</at>
-                                                <at name="height">25</at>
+                                                <at name="width">159</at>
+                                                <at name="text">EditTokenDialog.button.hero.setAsTokenHandout</at>
+                                                <at name="height">23</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7748,9 +7748,9 @@
                                                 </at>
                                                 <at name="actionCommand">Set as Token Image</at>
                                                 <at name="name">setAsImageButton</at>
-                                                <at name="width">169</at>
-                                                <at name="text">Set as Token Image</at>
-                                                <at name="height">25</at>
+                                                <at name="width">159</at>
+                                                <at name="text">EditTokenDialog.button.hero.setAsTokenImage</at>
+                                                <at name="height">23</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7804,9 +7804,9 @@
                                                 </at>
                                                 <at name="actionCommand">Set as Token Portrait</at>
                                                 <at name="name">setAsPortraitButton</at>
-                                                <at name="width">169</at>
-                                                <at name="text">Set as Token Portrait</at>
-                                                <at name="height">25</at>
+                                                <at name="width">159</at>
+                                                <at name="text">EditTokenDialog.button.hero.setAsTokenPortrait</at>
+                                                <at name="height">23</at>
                                                </object>
                                               </at>
                                              </object>
@@ -7982,8 +7982,8 @@
                                </object>
                               </at>
                               <at name="name">portfolioLabel</at>
-                              <at name="width">225</at>
-                              <at name="text">EditTokenDialog.label.hero.portfolio </at>
+                              <at name="width">212</at>
+                              <at name="text">EditTokenDialog.label.hero.portfolio</at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8042,8 +8042,8 @@
                                </object>
                               </at>
                               <at name="name">summaryText</at>
-                              <at name="width">851</at>
-                              <at name="text">summaryText</at>
+                              <at name="width">850</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8103,8 +8103,8 @@
                               </at>
                               <at name="autoscrolls">true</at>
                               <at name="name">portfolioLocation</at>
-                              <at name="width">103</at>
-                              <at name="text">portfolioLocation</at>
+                              <at name="width">95</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8223,8 +8223,8 @@
                                </object>
                               </at>
                               <at name="name">lastModified</at>
-                              <at name="width">74</at>
-                              <at name="text">lastModified</at>
+                              <at name="width">70</at>
+                              <at name="text"></at>
                               <at name="fill">
                                <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                                 <at name="name">fill</at>
@@ -8284,8 +8284,8 @@
                               </at>
                               <at name="actionCommand">Is Ally?</at>
                               <at name="name">isAllyCheckBox</at>
-                              <at name="width">50</at>
-                              <at name="text">Ally?</at>
+                              <at name="width">46</at>
+                              <at name="text">EditTokenDialog.label.hero.isAlly</at>
                               <at name="enabled">false</at>
                               <at name="height">19</at>
                              </object>
@@ -8342,10 +8342,9 @@
                               <at name="alignmentY">0.0</at>
                               <at name="iconTextGap">2</at>
                               <at name="name">refreshDataButton</at>
-                              <at name="width">32</at>
-                              <at name="toolTipText">&lt;html&gt;Refresh data from Hero Lab&lt;br/&gt;
-                               &lt;b&gt;&lt;i&gt;No changes detected.&lt;/i&gt;&lt;/b&gt;&lt;/html&gt;</at>
-                              <at name="height">40</at>
+                              <at name="width">64</at>
+                              <at name="toolTipText">EditTokenDialog.button.hero.refresh.tooltip.off</at>
+                              <at name="height">36</at>
                              </object>
                             </at>
                            </object>
