@@ -34,93 +34,43 @@ public class AppStyle {
 
   public static Font labelFont = Font.decode("serif-NORMAL-12");
 
-  public static BufferedImage tokenInvisible;
-  public static BufferedImage notVisible;
-
-  public static BufferedImage cellWaypointImage;
-  public static BufferedImage validMoveImage;
-  public static BufferedImage blockMoveImage;
-
-  public static BufferedImage stackImage;
-
-  public static BufferedImage markerImage;
-
   public static Color selectionBoxOutline = Color.black;
   public static Color selectionBoxFill = Color.blue;
-
   public static Color resizeBoxOutline = Color.red;
   public static Color resizeBoxFill = Color.yellow;
-
-  public static BufferedImage chatImage;
-  public static BufferedImage chatScrollImage;
-  public static BufferedImage chatScrollLockImage;
-  public static BufferedImage chatNotifyImage;
-
-  public static BufferedImage showTypingNotification;
-  public static BufferedImage hideTypingNotification;
-
   public static Color topologyColor = new Color(0, 0, 255, 128);
   public static Color topologyAddColor = new Color(255, 0, 0, 128);
   public static Color topologyRemoveColor = new Color(255, 255, 255, 128);
-
   public static Color hillVblColor = new Color(0, 255, 255, 128);
   public static Color pitVblColor = new Color(104, 255, 0, 128);
-
   public static Color topologyTerrainColor = new Color(255, 0, 255, 128);
-
   public static Color tokenTopologyColor = new Color(255, 255, 0, 128);
-
   public static Color tokenHillVblColor = new Color(255, 136, 0, 128);
-
   public static Color tokenPitVblColor = new Color(255, 0, 0, 128);
-
   public static Color tokenMblColor = new Color(255, 128, 255, 128);
-
-  public static BufferedImage boundedBackgroundTile;
-
+  public static BufferedImage notVisible;
+  public static BufferedImage cellWaypointImage;
+  public static BufferedImage blockMoveImage;
+  public static BufferedImage stackImage;
+  public static BufferedImage chatImage;
   public static BufferedImage cancelButton;
   public static BufferedImage addButton;
-
   public static BufferedImage panelTexture;
   public static BufferedImage squaresTexture;
   public static BufferedImage lookupTableDefaultImage;
-
   public static BufferedImage resize;
-
-  public static BufferedImage arrowOut;
-  public static BufferedImage arrowIn;
   public static BufferedImage lightSourceIcon;
 
   static {
     try {
       // Set defaults
-      tokenInvisible =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/icon_invisible.png");
       notVisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/notvisible.png");
       cellWaypointImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
-      validMoveImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/valid-move-arrow.png");
       blockMoveImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/block_move.png");
       stackImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/stack.png");
-      markerImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/marker.png");
       chatImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chat-blue.png");
-      chatScrollImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/comments.png");
-      chatScrollLockImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/comments_delete.png");
-      chatNotifyImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chat-red.png");
-
-      // Typing notification icons added by Rumble
-      showTypingNotification =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chatNotifyOn.png");
-      hideTypingNotification =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chatNotifyOff.png");
-
-      boundedBackgroundTile =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/Black.png");
       panelTexture =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/panelTexture.jpg");
       squaresTexture =
@@ -132,9 +82,6 @@ public class AppStyle {
       lookupTableDefaultImage =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/document.png");
       resize = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/resize.png");
-
-      arrowOut = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_out.png");
-      arrowIn = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow_in_red.png");
       lightSourceIcon =
           ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");
     } catch (IOException ioe) {

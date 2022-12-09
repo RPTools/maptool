@@ -63,7 +63,6 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
@@ -1719,9 +1718,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          putValue(
-                Action.SMALL_ICON,
-                    IconMap.getSmallIcon(Icons.MENU_SHOW_GRIDS));
+          putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SHOW_GRIDS));
         }
 
         @Override
@@ -1915,9 +1912,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          putValue(
-                Action.SMALL_ICON,
-                IconMap.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
+          putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
         }
 
         @Override

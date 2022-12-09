@@ -18,7 +18,6 @@ import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
@@ -40,7 +39,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectAllButton() {
-    ImageIcon i = new ImageIcon(AppStyle.arrowOut);
+    ImageIcon i = IconMap.getSmallIcon(Icons.ACTION_SELECT_ALL_TOKENS);
     JButton label = new JButton(i);
     label.addMouseListener(
         new MouseAdapter() {
@@ -59,7 +58,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addDeselectAllButton() {
-    ImageIcon i3 = new ImageIcon(AppStyle.arrowIn);
+    ImageIcon i3 = IconMap.getSmallIcon(Icons.ACTION_SELECT_NO_TOKENS);
     JButton label3 = new JButton(i3);
     label3.addMouseListener(
         new MouseAdapter() {
@@ -77,7 +76,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addRevertToPreviousButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_RESET);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_RESET_TOKEN_SELECTION);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -94,7 +93,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectNextButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_NEXT);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_NEXT_TOKEN);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -111,7 +110,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectPreviousButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_PREVIOUS);
+    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_PREVIOUS_TOKEN);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {

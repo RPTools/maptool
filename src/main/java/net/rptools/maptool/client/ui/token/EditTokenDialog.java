@@ -100,6 +100,8 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
@@ -129,16 +131,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   private static final Logger log = LogManager.getLogger();
   private static final long serialVersionUID = 1295729281890170792L;
-  private static final ImageIcon REFRESH_ICON_ON =
-      new ImageIcon(
-          EditTokenDialog.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/refresh_arrows_small.png"));
+  private static final ImageIcon REFRESH_ICON_ON = IconMap.getBigIcon(Icons.EDIT_TOKEN_REFRESH_ON);
   private static final ImageIcon REFRESH_ICON_OFF =
-      new ImageIcon(
-          EditTokenDialog.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/refresh_off_arrows_small.png"));
+      IconMap.getBigIcon(Icons.EDIT_TOKEN_REFRESH_OFF);
   // private CharSheetController controller;
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
@@ -374,12 +369,24 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     getWallVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.WALL_VBL));
+    getWallVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
+    getWallVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
+
     getHillVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.HILL_VBL));
+    getHillVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
+    getHillVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
+
     getPitVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.PIT_VBL));
+    getPitVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
+    getPitVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
+
     getMblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.MBL));
+    getMblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
+    getMblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
+
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
     setLibTokenPaneEnabled(token.isLibToken());
@@ -405,6 +412,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       }
 
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), true);
+      tabbedPane.setIconAt(
+          tabbedPane.indexOfTab(heroLabTitle), IconMap.getSmallIcon(Icons.EDIT_TOKEN_HEROLAB));
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
@@ -1213,6 +1222,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JList) getComponent("heroLabImagesList");
   }
 
+  public void initIcons() {
+    var test = getComponent("heroLabImagesList");
+  }
+
   public void initTokenTopologyPanel() {
     TokenTopologyPanel topologyPanel = new TokenTopologyPanel(this);
     topologyPanel.setPreferredSize(new Dimension(300, 200));
@@ -1392,6 +1405,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 getTokenTopologyPanel()
                     .setTopologyColorPick(getTopologyIgnoreColorWell().getColor()));
 
+    getTopologyColorPickerToggleButton().setIcon(IconMap.getBigIcon(Icons.EDIT_TOKEN_COLOR_PICKER));
     getTopologyColorPickerToggleButton()
         .addActionListener(
             e -> {

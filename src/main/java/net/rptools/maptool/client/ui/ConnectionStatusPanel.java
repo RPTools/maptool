@@ -18,7 +18,6 @@ import java.awt.GridLayout;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;

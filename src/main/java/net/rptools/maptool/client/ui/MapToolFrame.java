@@ -624,9 +624,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
-            MTFrame.CONNECTIONS,
-            connectionPanel,
-            IconMap.getSmallIcon(Icons.WINDOW_CONNECTIONS)));
+            MTFrame.CONNECTIONS, connectionPanel, IconMap.getSmallIcon(Icons.WINDOW_CONNECTIONS)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(
@@ -645,8 +643,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
             IconMap.getSmallIcon(Icons.WINDOW_DRAW_EXPLORER)));
     frameMap.put(
         MTFrame.CHAT,
-        createDockingFrame(
-            MTFrame.CHAT, commandPanel, IconMap.getSmallIcon(Icons.WINDOW_CHAT)));
+        createDockingFrame(MTFrame.CHAT, commandPanel, IconMap.getSmallIcon(Icons.WINDOW_CHAT)));
     frameMap.put(
         MTFrame.LOOKUP_TABLES,
         createDockingFrame(
@@ -656,9 +653,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     frameMap.put(
         MTFrame.INITIATIVE,
         createDockingFrame(
-            MTFrame.INITIATIVE,
-            initiativePanel,
-            IconMap.getSmallIcon(Icons.WINDOW_INITIATIVE)));
+            MTFrame.INITIATIVE, initiativePanel, IconMap.getSmallIcon(Icons.WINDOW_INITIATIVE)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -1735,8 +1730,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
     fullScreenToolPanel.add(fullsZoneButton);
 
-    JButton initiativeButton =
-        new JButton(IconMap.getBigIcon(Icons.WINDOW_INITIATIVE));
+    JButton initiativeButton = new JButton(IconMap.getBigIcon(Icons.WINDOW_INITIATIVE));
 
     initiativeButton.addActionListener(
         (e) -> {

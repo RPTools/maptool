@@ -39,7 +39,6 @@ import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
 import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;

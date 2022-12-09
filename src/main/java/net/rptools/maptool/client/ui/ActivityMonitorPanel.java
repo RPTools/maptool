@@ -21,7 +21,6 @@ import javax.swing.JComponent;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.maptool.client.swing.Animatable;
 import net.rptools.maptool.client.swing.AnimationManager;
-import net.rptools.maptool.client.swing.StatusPanel;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
