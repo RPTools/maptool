@@ -51,7 +51,7 @@ import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;

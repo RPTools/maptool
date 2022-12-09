@@ -33,7 +33,7 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
-import net.rptools.lib.swing.ColorPicker;
+import net.rptools.maptool.client.swing.ColorPicker;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.ui.AssetPaint;

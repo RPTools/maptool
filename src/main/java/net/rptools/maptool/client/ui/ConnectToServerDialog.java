@@ -38,7 +38,7 @@ import javax.swing.event.DocumentListener;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;

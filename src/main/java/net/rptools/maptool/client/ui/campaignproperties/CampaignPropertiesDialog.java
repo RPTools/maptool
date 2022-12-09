@@ -35,7 +35,7 @@ import java.util.Map.Entry;
 import java.util.TreeMap;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.FormPanelI18N;

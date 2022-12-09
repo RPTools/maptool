@@ -19,7 +19,7 @@ import java.awt.Font;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.ImageBorder;
+import net.rptools.maptool.client.swing.ImageBorder;
 
 /** @author trevor */
 public class AppStyle {

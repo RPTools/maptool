@@ -38,7 +38,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableHelper;

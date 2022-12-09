@@ -37,9 +37,12 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.GeometryUtil;
-import net.rptools.lib.swing.ImageLabel;
+import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 
 /** */
@@ -49,11 +52,11 @@ public class GraphicsUtil {
 
   // TODO: Make this configurable
   public static final ImageLabel GREY_LABEL =
-      new ImageLabel("net/rptools/maptool/client/image/grayLabelbox.png", 4, 4);
+      new ImageLabel(IconMap.getImage(Images.BOX_GRAY), 4, 4);
   public static final ImageLabel BLUE_LABEL =
-      new ImageLabel("net/rptools/maptool/client/image/blueLabelbox.png", 4, 4);
+      new ImageLabel(IconMap.getImage(Images.BOX_BLUE), 4, 4);
   public static final ImageLabel DARK_GREY_LABEL =
-      new ImageLabel("net/rptools/maptool/client/image/darkGreyLabelbox.png", 4, 4);
+      new ImageLabel(IconMap.getImage(Images.BOX_DARK_GRAY), 4, 4);
 
   /**
    * A multiline text wrapping popup.

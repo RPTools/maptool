@@ -28,7 +28,7 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;

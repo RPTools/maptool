@@ -22,7 +22,7 @@ import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;

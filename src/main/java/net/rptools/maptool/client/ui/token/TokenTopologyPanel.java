@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;

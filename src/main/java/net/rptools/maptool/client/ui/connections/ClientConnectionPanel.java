@@ -29,7 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
-import net.rptools.lib.swing.PopupListener;
+import net.rptools.maptool.client.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;

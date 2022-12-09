@@ -17,7 +17,7 @@ package net.rptools.maptool.client;
 import java.io.File;
 import java.io.FilenameFilter;
 import javax.imageio.ImageIO;
-import net.rptools.lib.swing.ImageBorder;
+import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.model.Token;
 import net.tsc.servicediscovery.ServiceGroup;
 

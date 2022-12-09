@@ -34,7 +34,7 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;

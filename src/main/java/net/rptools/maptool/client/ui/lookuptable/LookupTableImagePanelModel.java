@@ -23,7 +23,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import net.rptools.lib.swing.ImagePanelModel;
+import net.rptools.maptool.client.swing.ImagePanelModel;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.LookupTable;

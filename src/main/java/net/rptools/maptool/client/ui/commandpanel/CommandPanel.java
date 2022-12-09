@@ -26,7 +26,7 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PreferencesChanged;

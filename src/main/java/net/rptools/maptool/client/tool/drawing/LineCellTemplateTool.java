@@ -19,7 +19,7 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;

@@ -21,7 +21,7 @@ import javax.swing.JTree;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.tree.TreeSelectionModel;
-import net.rptools.lib.swing.PopupListener;
+import net.rptools.maptool.client.swing.PopupListener;
 import net.rptools.maptool.client.AppActions;
 
 /** */

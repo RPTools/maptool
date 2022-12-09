@@ -30,7 +30,7 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.Set;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;

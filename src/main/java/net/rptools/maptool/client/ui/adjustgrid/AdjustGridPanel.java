@@ -31,7 +31,7 @@ import java.beans.PropertyChangeSupport;
 import javax.swing.AbstractAction;
 import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.ui.Scale;
 

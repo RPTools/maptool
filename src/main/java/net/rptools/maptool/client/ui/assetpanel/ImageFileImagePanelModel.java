@@ -41,7 +41,7 @@ import javax.swing.SwingWorker;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
-import net.rptools.lib.swing.ImagePanelModel;
+import net.rptools.maptool.client.swing.ImagePanelModel;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;

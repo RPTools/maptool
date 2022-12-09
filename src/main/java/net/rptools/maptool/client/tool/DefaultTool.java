@@ -20,7 +20,7 @@ import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;

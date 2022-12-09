@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.util;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.io.IOException;
@@ -25,6 +26,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
@@ -58,14 +62,10 @@ public class ImageManager {
    * The unknown image, a "?" is used for all situations where the image will eventually appear e.g.
    * asset download, and image loading.
    */
-  private static final String UNKNOWN_IMAGE_PNG = "net/rptools/maptool/client/image/unknown.png";
-
   /** The buffered "?" image to display while transferring the image. */
   public static BufferedImage TRANSFERING_IMAGE;
 
   /** The broken image, a "X" is used for all situations where the asset or image was invalid. */
-  private static final String BROKEN_IMAGE_PNG = "net/rptools/maptool/client/image/broken.png";
-
   public static BufferedImage BROKEN_IMAGE;
 
   /** Small and large thread pools for background processing of asset raw image data. */
@@ -83,19 +83,8 @@ public class ImageManager {
       new ConcurrentHashMap<MD5Key, Set<ImageObserver>>();
 
   static {
-    try {
-      TRANSFERING_IMAGE = ImageUtil.getCompatibleImage(UNKNOWN_IMAGE_PNG);
-    } catch (IOException ioe) {
-      log.error("static for 'unknown.png':  not resolved; IOException", ioe);
-      TRANSFERING_IMAGE = ImageUtil.createCompatibleImage(10, 10, 0);
-    }
-
-    try {
-      BROKEN_IMAGE = ImageUtil.getCompatibleImage(BROKEN_IMAGE_PNG);
-    } catch (IOException ioe) {
-      log.error("static for 'broken.png':  not resolved; IOException", ioe);
-      BROKEN_IMAGE = ImageUtil.createCompatibleImage(10, 10, 0);
-    }
+    TRANSFERING_IMAGE = IconMap.getImage(Images.UNKNOWN);
+    BROKEN_IMAGE = IconMap.getImage(Images.BROKEN);
   }
 
   /**

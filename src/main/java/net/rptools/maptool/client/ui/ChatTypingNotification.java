@@ -23,7 +23,7 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.util.Set;
 import javax.swing.JPanel;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;

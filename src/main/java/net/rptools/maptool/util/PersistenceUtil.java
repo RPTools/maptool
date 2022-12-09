@@ -42,7 +42,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;

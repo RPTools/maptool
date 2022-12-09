@@ -18,7 +18,7 @@ import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;

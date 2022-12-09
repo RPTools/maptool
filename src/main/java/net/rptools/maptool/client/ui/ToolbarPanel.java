@@ -18,7 +18,7 @@ import java.awt.*;
 import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicToolBarUI;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.TopologyModeSelectionPanel;

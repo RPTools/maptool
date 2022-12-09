@@ -35,7 +35,7 @@ public class ImageUtilTest {
     img = bufferedImage.getScaledInstance(10, 10, Image.SCALE_FAST);
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.BITMASK);
 
-    bufferedImage = ImageUtil.getCompatibleImage("net/rptools/lib/image/icons/cross.png");
+    bufferedImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/cross.png");
     img = bufferedImage.getScaledInstance(10, 10, Image.SCALE_FAST);
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.TRANSLUCENT);
   }
@@ -48,7 +48,7 @@ public class ImageUtilTest {
     img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/circleToken.png");
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.BITMASK);
 
-    img = ImageUtil.getCompatibleImage("net/rptools/lib/image/icons/cross.png");
+    img = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/cross.png");
     assertEquals(ImageUtil.pickBestTransparency(img), Transparency.TRANSLUCENT);
   }
 

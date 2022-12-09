@@ -57,7 +57,7 @@ import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;

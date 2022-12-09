@@ -31,7 +31,7 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.AppMenuBar;

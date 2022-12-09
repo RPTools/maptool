@@ -41,7 +41,7 @@ import javax.swing.JToggleButton;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.ui.zone.PlayerView;

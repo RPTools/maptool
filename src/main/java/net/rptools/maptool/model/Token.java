@@ -44,7 +44,7 @@ import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;

@@ -22,7 +22,7 @@ import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
