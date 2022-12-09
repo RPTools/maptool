@@ -52,13 +52,16 @@ import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
-import net.rptools.lib.EventDispatcher;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.events.ChatMessageAdded;
+import net.rptools.maptool.client.events.PlayerConnected;
+import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.client.events.ServerStopped;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -73,12 +76,12 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -88,6 +91,10 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneAdded;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -131,17 +138,6 @@ public class MapTool {
 
   private static String clientId = AppUtil.readClientId();
 
-  public enum ZoneEvent {
-    Added,
-    Removed,
-    Activated,
-    Deactivated
-  }
-
-  public enum PreferencesEvent {
-    Changed
-  }
-
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
   // TODO: Add preferences option as well as add auto-purge after x days preferences
@@ -155,8 +151,7 @@ public class MapTool {
 
   private static Campaign campaign;
 
-  private static ObservableList<Player> playerList;
-  private static ObservableList<TextMessage> messageList;
+  private static List<Player> playerList;
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
@@ -174,7 +169,6 @@ public class MapTool {
   private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
-  private static EventDispatcher eventDispatcher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
 
@@ -589,15 +583,6 @@ public class MapTool {
     return autoSaveManager;
   }
 
-  public static EventDispatcher getEventDispatcher() {
-    return eventDispatcher;
-  }
-
-  private static void registerEvents() {
-    getEventDispatcher().registerEvents(ZoneEvent.values());
-    getEventDispatcher().registerEvents(PreferencesEvent.values());
-  }
-
   /**
    * This was added to make it easier to set a breakpoint and locate when the frame was initialized.
    *
@@ -660,9 +645,6 @@ public class MapTool {
     // We'll manage our own images
     ImageIO.setUseCache(false);
 
-    eventDispatcher = new EventDispatcher();
-    registerEvents();
-
     try {
       SoundManager.configure(SOUND_PROPERTIES);
       SoundManager.registerSoundEvent(
@@ -674,9 +656,7 @@ public class MapTool {
     assetTransferManager = new AssetTransferManager();
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-    playerList = new ObservableList<Player>();
-    messageList =
-        new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+    playerList = new ArrayList<>();
 
     handler = new ClientMessageHandler();
 
@@ -701,7 +681,7 @@ public class MapTool {
     ChatAutoSave.changeTimeout(AppPreferences.getChatAutosaveTime());
 
     // TODO: make this more formal when we switch to mina
-    // new ServerHeartBeatThread().start();
+    new ServerHeartBeatThread().start();
   }
 
   public static NoteFrame getProfilingNoteFrame() {
@@ -767,6 +747,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
+      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
       new Players().playerSignedIn(player);
 
       // LATER: Make this non-anonymous
@@ -780,20 +761,13 @@ public class MapTool {
     }
   }
 
-  public Player getPlayer(String name) {
-    for (int i = 0; i < playerList.size(); i++) {
-      if (playerList.get(i).getName().equals(name)) {
-        return playerList.get(i);
-      }
-    }
-    return null;
-  }
-
   public static void removePlayer(Player player) {
     if (player == null) {
       return;
     }
     playerList.remove(player);
+    new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
+
     new Players().playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
@@ -801,10 +775,6 @@ public class MapTool {
           MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
       addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
     }
-  }
-
-  public static ObservableList<TextMessage> getMessageList() {
-    return messageList;
   }
 
   /**
@@ -839,7 +809,8 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    messageList.add(message);
+
+    new MapToolEventBus().getMainEventBus().post(new ChatMessageAdded(message));
   }
 
   /**
@@ -982,7 +953,9 @@ public class MapTool {
           && (getPlayer().isGM() || zone.isVisible())) {
         currRenderer = renderer;
       }
-      eventDispatcher.fireEvent(ZoneEvent.Added, campaign, null, zone);
+      new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+      // Now we have fire off adding the tokens in the zone
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1095,7 +1068,7 @@ public class MapTool {
     getFrame().getConnectionPanel().stopHosting();
   }
 
-  public static ObservableList<Player> getPlayerList() {
+  public static List<Player> getPlayerList() {
     return playerList;
   }
 
@@ -1143,6 +1116,10 @@ public class MapTool {
     MapTool.serverCommand().removeZone(zone.getId());
     MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zone.getId()));
     MapTool.getCampaign().removeZone(zone.getId());
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   public static void addZone(Zone zone) {
@@ -1159,7 +1136,9 @@ public class MapTool {
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
-    eventDispatcher.fireEvent(ZoneEvent.Added, getCampaign(), null, zone);
+    new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
 
     // Show the new zone
     if (changeZone) {
@@ -1277,7 +1256,10 @@ public class MapTool {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
     }
+
+    new MapToolEventBus().getMainEventBus().post(new ServerStopped());
     playerList.clear();
+
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);

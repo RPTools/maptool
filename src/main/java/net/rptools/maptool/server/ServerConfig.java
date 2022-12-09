@@ -121,6 +121,7 @@ public class ServerConfig {
 
   public static ServerConfig createPersonalServerConfig() {
     ServerConfig config = new ServerConfig();
+    config.serverName = "Personal server";
     config.hostName = "localhost";
     config.personalServer = true;
     config.port = findOpenPort(PORT_RANGE_START, PORT_RANGE_END);

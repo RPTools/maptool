@@ -159,8 +159,12 @@ public class Pen {
     pen.thickness = dto.getThickness();
     pen.opacity = dto.getOpacity();
     pen.squareCap = dto.getSquareCap();
-    pen.paint = DrawablePaint.fromDto(dto.getForegroundColor());
-    pen.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundColor());
+    if (dto.hasForegroundColor()) {
+      pen.paint = DrawablePaint.fromDto(dto.getForegroundColor());
+    }
+    if (dto.hasBackgroundColor()) {
+      pen.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundColor());
+    }
     return pen;
   }
 

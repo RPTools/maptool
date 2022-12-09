@@ -132,27 +132,41 @@ public class MapToolServerConnection
     connection.addMessageHandler(handler);
   }
 
-  public void broadcastMessage(byte[] message) {
-    connection.broadcastMessage(message);
-  }
-
-  public void broadcastMessage(String[] exclude, byte[] message) {
-    connection.broadcastMessage(exclude, message);
-  }
-
   public void sendMessage(String id, Message message) {
+    log.info(
+        server.getConfig().getServerName()
+            + " sent to "
+            + id
+            + ": "
+            + message.getMessageTypeCase());
     connection.sendMessage(id, message.toByteArray());
   }
 
   public void sendMessage(String id, Object channel, Message message) {
+    log.info(
+        server.getConfig().getServerName()
+            + " sent to "
+            + id
+            + ":"
+            + message.getMessageTypeCase()
+            + " ("
+            + channel.toString()
+            + ")");
     connection.sendMessage(id, channel, message.toByteArray());
   }
 
   public void broadcastMessage(Message message) {
+    log.info(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
     connection.broadcastMessage(message.toByteArray());
   }
 
   public void broadcastMessage(String[] exclude, Message message) {
+    log.info(
+        server.getConfig().getServerName()
+            + " broadcast: "
+            + message.getMessageTypeCase()
+            + " except to "
+            + String.join(",", exclude));
     connection.broadcastMessage(exclude, message.toByteArray());
   }
 

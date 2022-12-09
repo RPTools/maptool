@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.dnd.DropTargetDragEvent;
@@ -56,6 +57,7 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
@@ -65,6 +67,13 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zones.DrawableAdded;
+import net.rptools.maptool.model.zones.DrawableRemoved;
+import net.rptools.maptool.model.zones.FogChanged;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.TopologyChanged;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -133,12 +142,6 @@ public class ZoneRenderer extends JComponent
   private Zone.Layer activeLayer;
   private String loadingProgress;
   private boolean isLoaded;
-  private BufferedImage fogBuffer;
-  /**
-   * I don't like this, at all, but it'll work for now, basically keep track of when the fog cache
-   * needs to be flushed in the case of switching views
-   */
-  private boolean flushFog = true;
 
   /** In screen space */
   private Area exposedFogArea;
@@ -181,7 +184,6 @@ public class ZoneRenderer extends JComponent
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
-    zone.addModelChangeListener(new ZoneModelChangeListener());
 
     // The interval, in milliseconds, during which calls to repaint() will be debounced.
     int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
@@ -226,6 +228,7 @@ public class ZoneRenderer extends JComponent
         });
     // fps.start();
 
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public void setAutoResizeStamp(boolean value) {
@@ -309,7 +312,6 @@ public class ZoneRenderer extends JComponent
         evt -> {
           if (Scale.PROPERTY_SCALE.equals(evt.getPropertyName())) {
             tokenLocationCache.clear();
-            flushFog = true;
           }
           if (Scale.PROPERTY_OFFSET.equals(evt.getPropertyName())) {
             // flushFog = true;
@@ -654,7 +656,7 @@ public class ZoneRenderer extends JComponent
   /**
    * Remove the token from: tokenLocationCache, flipImageMap, opacityImageMap, replacementImageMap,
    * labelRenderingCache. Set the visibleScreenArea, tokenStackMap, drawableLights, drawableAuras to
-   * null. Flush the fog. Flush the token from the zoneView.
+   * null. Flush the token from the zoneView.
    *
    * @param token the token to flush
    */
@@ -674,7 +676,6 @@ public class ZoneRenderer extends JComponent
     // This could also be smarter
     tokenStackMap = null;
 
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
 
@@ -700,9 +701,9 @@ public class ZoneRenderer extends JComponent
     flushDrawableRenderer();
     flipImageMap.clear();
     flipIsoImageMap.clear();
-    fogBuffer = null;
     drawableLights = null;
     drawableAuras = null;
+    zoneView.flushFog();
 
     isLoaded = false;
   }
@@ -717,7 +718,6 @@ public class ZoneRenderer extends JComponent
 
   /** Set flushFog to true, visibleScreenArea to null, and repaints */
   public void flushFog() {
-    flushFog = true;
     visibleScreenArea = null;
     repaintDebouncer.dispatch();
   }
@@ -1076,11 +1076,9 @@ public class ZoneRenderer extends JComponent
 
   /**
    * This method clears {@link #drawableAuras}, {@link #drawableLights}, {@link #visibleScreenArea},
-   * and {@link #lastView}. It also flushes the {@link #zoneView} and sets the {@link #flushFog}
-   * flag so that fog will be recalculated.
+   * and {@link #lastView}. It also flushes the {@link #zoneView}.
    */
   public void invalidateCurrentViewCache() {
-    flushFog = true;
     drawableLights = null;
     drawableAuras = null;
     visibleScreenArea = null;
@@ -1616,9 +1614,8 @@ public class ZoneRenderer extends JComponent
       Area clip = new Area(new Rectangle(getSize().width, getSize().height));
 
       Area viewArea = new Area(exposedFogArea);
-      List<Token> tokens = view.getTokens();
-      if (tokens != null && !tokens.isEmpty()) {
-        for (Token tok : tokens) {
+      if (view.isUsingTokenView()) {
+        for (Token tok : view.getTokens()) {
           ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
           viewArea.add(exposedMeta.getExposedAreaHistory());
         }
@@ -1745,79 +1742,23 @@ public class ZoneRenderer extends JComponent
     timer.stop("labels-1");
   }
 
-  // Private cache variables just for renderFog() and no one else. :)
-  Integer fogX = null;
-  Integer fogY = null;
-
-  private Area renderFog(Graphics2D g, PlayerView view) {
+  private void renderFog(Graphics2D g, PlayerView view) {
     Dimension size = getSize();
     Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
-    Area combined = null;
 
-    // Optimization for panning
-    if (!flushFog
-        && fogX != null
-        && fogY != null
-        && (fogX != getViewOffsetX() || fogY != getViewOffsetY())) {
-      // This optimization does not seem to keep the alpha channel correctly, and sometimes leaves
-      // lines on some graphics boards, we'll leave it out for now
-      // if (Math.abs(fogX - getViewOffsetX()) < size.width && Math.abs(fogY - getViewOffsetY()) <
-      // size.height) {
-      // int deltaX = getViewOffsetX() - fogX;
-      // int deltaY = getViewOffsetY() - fogY;
-      //
-      // Graphics2D buffG = fogBuffer.createGraphics();
-      //
-      // buffG.setComposite(AlphaComposite.Src);
-      // buffG.copyArea(0, 0, size.width, size.height, deltaX, deltaY);
-      // buffG.dispose();
-      //
-      // fogClip = new Area();
-      // if (deltaX < 0) {
-      // fogClip.add(new Area(new Rectangle(size.width+deltaX, 0, -deltaX, size.height)));
-      // } else if (deltaX > 0){
-      // fogClip.add(new Area(new Rectangle(0, 0, deltaX, size.height)));
-      // }
-      //
-      // if (deltaY < 0) {
-      // fogClip.add(new Area(new Rectangle(0, size.height + deltaY, size.width, -deltaY)));
-      // } else if (deltaY > 0) {
-      // fogClip.add(new Area(new Rectangle(0, 0, size.width, deltaY)));
-      // }
-      // }
-      flushFog = true;
-    }
-    boolean cacheNotValid =
-        (fogBuffer == null
-            || fogBuffer.getWidth() != size.width
-            || fogBuffer.getHeight() != size.height);
-    timer.start("renderFog");
-    if (flushFog || cacheNotValid) {
-      fogX = getViewOffsetX();
-      fogY = getViewOffsetY();
+    timer.start("renderFog-allocateBufferedImage");
+    try (final var entry = tempBufferPool.acquire()) {
+      final var buffer = entry.get();
+      timer.stop("renderFog-allocateBufferedImage");
 
-      boolean newImage = false;
-      if (cacheNotValid) {
-        newImage = true;
-        timer.start("renderFog-allocateBufferedImage");
-        fogBuffer = new BufferedImage(size.width, size.height, BufferedImage.TYPE_INT_ARGB_PRE);
-        timer.stop("renderFog-allocateBufferedImage");
-      }
-      Graphics2D buffG = fogBuffer.createGraphics();
+      timer.start("renderFog");
+      final var fogX = getViewOffsetX();
+      final var fogY = getViewOffsetY();
+
+      Graphics2D buffG = buffer.createGraphics();
       buffG.setClip(fogClip);
       SwingUtil.useAntiAliasing(buffG);
 
-      // XXX Is this even needed? Immediately below is another call to fillRect() with the same
-      // dimensions!
-      if (!newImage) {
-        timer.start("renderFog-clearOldImage");
-        // Composite oldComposite = buffG.getComposite();
-        buffG.setComposite(AlphaComposite.Clear);
-        // buffG.fillRect(0, 0, size.width, size.height); // Jamz: Removed as it's called again
-        // below
-        // buffG.setComposite(oldComposite);
-        timer.stop("renderFog-clearOldImage");
-      }
       timer.start("renderFog-fill");
       // Fill
       double scale = getScale();
@@ -1848,84 +1789,23 @@ public class ZoneRenderer extends JComponent
 
       String msg = null;
       if (timer.isEnabled()) {
-        List<Token> list = view.getTokens();
-        msg = "renderFog-combined(" + (list == null ? 0 : list.size()) + ")";
+        msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
       }
       timer.start(msg);
-      combined = zone.getExposedArea(view);
+      Area combined = zoneView.getExposedArea(view);
       timer.stop(msg);
 
       timer.start("renderFogArea");
-      Area exposedArea = null;
-      Area tempArea = new Area();
-      boolean combinedView =
-          !zoneView.isUsingVision()
-              || MapTool.isPersonalServer()
-              || !MapTool.getServerPolicy().isUseIndividualFOW()
-              || view.isGMView();
-
-      if (view.getTokens() != null) {
-        // if there are tokens selected combine the areas, then, if individual FOW is enabled
-        // we pass the combined exposed area to build the soft FOW and visible area.
-        for (Token tok : view.getTokens()) {
-          ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          exposedArea = meta.getExposedAreaHistory();
-          tempArea.add(new Area(exposedArea));
-        }
-        if (combinedView) {
-          // combined = zone.getExposedArea(view);
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        } else {
-          // 'combined' already includes the area encompassed by 'tempArea', so just
-          // use 'combined' instead in this block of code?
-          tempArea.add(combined);
-          buffG.fill(tempArea);
-          renderFogArea(buffG, view, tempArea, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        }
-      } else {
-        // No tokens selected, so if we are using Individual FOW, we build up all the owned tokens
-        // exposed area's to build the soft FOW.
-        if (combinedView) {
-          if (combined.isEmpty()) {
-            combined = zone.getExposedArea();
-          }
-          buffG.fill(combined);
-          renderFogArea(buffG, view, combined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        } else {
-          Area myCombined = new Area();
-          List<Token> myToks = zone.getTokens();
-          for (Token tok : myToks) {
-            if (!AppUtil.playerOwns(
-                tok)) { // Only here if !isGMview() so should the tokens already be in
-              // PlayerView.getTokens()?
-              continue;
-            }
-            ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-            exposedArea = meta.getExposedAreaHistory();
-            myCombined.add(new Area(exposedArea));
-          }
-          buffG.fill(myCombined);
-          renderFogArea(buffG, view, myCombined, visibleArea);
-          renderFogOutline(buffG, view, visibleArea);
-        }
-      }
-      // renderFogArea(buffG, view, combined, visibleArea);
+      buffG.fill(combined);
+      renderFogArea(buffG, view, combined, visibleArea);
+      renderFogOutline(buffG, view, visibleArea);
       timer.stop("renderFogArea");
 
-      // timer.start("renderFogOutline");
-      // renderFogOutline(buffG, view, combined);
-      // timer.stop("renderFogOutline");
-
       buffG.dispose();
-      flushFog = false;
+      timer.stop("renderFog");
+
+      g.drawImage(buffer, 0, 0, this);
     }
-    timer.stop("renderFog");
-    g.drawImage(fogBuffer, 0, 0, this);
-    return combined;
   }
 
   private void renderFogArea(
@@ -4798,52 +4678,95 @@ public class ZoneRenderer extends JComponent
   @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {}
 
-  /** ZONE MODEL CHANGE LISTENER */
-  private class ZoneModelChangeListener implements ModelChangeListener {
-
-    /**
-     * ALL events trigger updateTokenTree and a repaint. Reacts specifically to events
-     * TOPOLOGY_CHANGED, TOKEN_CHANGED, TOKEN_REMOVED, and TOKEN_ADDED.
-     *
-     * @param event the event
-     */
-    public void modelChanged(ModelChangeEvent event) {
-      Object evt = event.getEvent();
-
-      if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-        flushFog();
-        flushLight();
-      }
-      if (evt == Zone.Event.TOKEN_CHANGED
-          || evt == Zone.Event.TOKEN_REMOVED
-          || evt == Zone.Event.TOKEN_ADDED) {
-        for (Token token : event.getTokensAsList()) {
-          flush(token);
-        }
-      }
-      if (evt == Zone.Event.FOG_CHANGED) {
-        flushFog = true;
-      }
-      if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
-        DrawnElement de = (DrawnElement) event.getArg();
-        switch (de.getDrawable().getLayer()) {
-          case TOKEN:
-            tokenDrawableRenderer.setDirty();
-            break;
-          case GM:
-            gmDrawableRenderer.setDirty();
-            break;
-          case OBJECT:
-            objectDrawableRenderer.setDirty();
-            break;
-          case BACKGROUND:
-            backgroundDrawableRenderer.setDirty();
-            break;
-        }
-      }
-      MapTool.getFrame().updateTokenTree(); // for any event
-      repaintDebouncer.dispatch();
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != this.zone) {
+      return;
     }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onFogChanged(FogChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    zoneView.flushFog();
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTopologyChanged(TopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    flushFog();
+    flushLight();
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  private void markDrawableLayerDirty(Layer layer) {
+    switch (layer) {
+      case TOKEN -> tokenDrawableRenderer.setDirty();
+      case GM -> gmDrawableRenderer.setDirty();
+      case OBJECT -> objectDrawableRenderer.setDirty();
+      case BACKGROUND -> backgroundDrawableRenderer.setDirty();
+    }
+  }
+
+  @Subscribe
+  private void onDrawableAdded(DrawableAdded event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onDrawableRemoved(DrawableRemoved event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
   }
 
   //

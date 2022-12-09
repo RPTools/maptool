@@ -65,10 +65,15 @@ public class getInfoFunction extends AbstractFunction {
     sysInfoProvider = new MapToolSysInfoProvider();
   }
 
-  // the following is here mostly for testing purpose, until we find a better way to inject
+  // region the following is here mostly for testing purpose, until we find a better way to inject
   protected void setSysInfoProvider(SysInfoProvider sysInfoProvider) {
     this.sysInfoProvider = sysInfoProvider;
   }
+
+  protected void resetSysInfoProvider() {
+    sysInfoProvider = new MapToolSysInfoProvider();
+  }
+  // endregion
 
   /**
    * Gets the instance of getInfoFunction.

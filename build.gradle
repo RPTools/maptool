@@ -15,7 +15,7 @@ buildscript {
 // Access Git info from build script
 plugins {
     id "application"
-    id "org.ajoberstar.grgit" version "4.1.0"
+    id "org.ajoberstar.grgit" version "4.1.1"
     id "com.diffplug.spotless" version "5.14.3"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.12.7'
@@ -322,7 +322,7 @@ dependencies {
     implementation 'net.rptools.decktool:decktool:1.0.b1'
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     implementation 'com.github.RPTools:parser:1.8.3'
-    implementation 'net.rptools.dicelib:dicelib:1.8.3'
+    implementation 'net.rptools.dicelib:dicelib:1.8.6'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
@@ -445,6 +445,9 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.14.3'
 
     implementation 'com.google.guava:guava:31.0.1-jre'
+
+    implementation 'org.apache.commons:commons-compress:1.22'
+    implementation 'org.tukaani:xz:1.9'
 }
 
 

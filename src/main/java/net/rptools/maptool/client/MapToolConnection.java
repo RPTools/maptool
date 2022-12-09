@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.maptool.server.proto.Message.MessageTypeCase.HEARTBEAT_MSG;
+
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
@@ -98,6 +100,13 @@ public class MapToolConnection {
   }
 
   public void sendMessage(Message msg) {
+    var msgType = msg.getMessageTypeCase();
+    var logText = player.getName() + " sent " + msg.getMessageTypeCase();
+    if (msgType == HEARTBEAT_MSG) {
+      log.debug(logText);
+    } else {
+      log.info(logText);
+    }
     connection.sendMessage(msg.toByteArray());
   }
 }

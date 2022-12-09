@@ -223,7 +223,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
       newFowExposedArea =
           zoneRenderer.getZone().hasFog()
-              ? zoneRenderer.getZone().getExposedArea(zoneRenderer.getPlayerView())
+              ? zoneView.getExposedArea(zoneRenderer.getPlayerView())
               : null;
     }
 
