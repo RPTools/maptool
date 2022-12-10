@@ -15,13 +15,12 @@
 package net.rptools.maptool.client.ui.theme;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
-
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.*;
-
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.swing.ImageBorder;
 import org.javatuples.Triplet;
 
 public class IconMap {
@@ -53,7 +52,7 @@ public class IconMap {
           put(Icons.COLORPICKER_CAP_ROUND, CLASSIC_ICONS + "round_cap.png");
           put(Icons.COLORPICKER_CAP_SQUARE, CLASSIC_ICONS + "square_cap.png");
           put(Icons.COLORPICKER_PENCIL, CLASSIC_ICONS + "pencil.png");
-          put(Icons.COLORPICKER_SNAP_ON, CLASSIC_ICONS+ "shape_handles.png");
+          put(Icons.COLORPICKER_SNAP_ON, CLASSIC_ICONS + "shape_handles.png");
           put(Icons.COLORPICKER_SNAP_OFF, CLASSIC_ICONS + "freehand.png");
           put(Icons.COLORPICKER_OPACITY, CLASSIC_ICONS + "contrast_high.png");
           put(Icons.COLORPICKER_PEN_WIDTH, CLASSIC_ICONS + "paintbrush.png");
@@ -94,9 +93,7 @@ public class IconMap {
           put(Icons.TOOLBAR_POINTERTOOL_MEASURE, IMAGE_DIR + "/tool/ruler-blue.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_ON, IMAGE_DIR + "/tool/ai-blue-green.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_OFF, IMAGE_DIR + "/tool/ai-blue-off.png");
-          put(
-              Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON,
-              IMAGE_DIR + "/tool/use-vbl-on-move.png");
+          put(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON, IMAGE_DIR + "/tool/use-vbl-on-move.png");
           put(
               Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF,
               IMAGE_DIR + "/tool/ignore-vbl-on-move.png");
@@ -111,12 +108,8 @@ public class IconMap {
           put(Icons.TOOLBAR_DRAW_DIAMOND, IMAGE_DIR + "/tool/draw-blue-diamond.png");
           put(Icons.TOOLBAR_TEMPLATE_ON, IMAGE_DIR + "/tool/temp-blue.png");
           put(Icons.TOOLBAR_TEMPLATE_OFF, IMAGE_DIR + "/tool/temp-blue-off.png");
-          put(
-              Icons.TOOLBAR_TEMPLATE_RADIUS,
-              IMAGE_DIR + "/tool/temp-blue-vertex-radius.png");
-          put(
-              Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,
-              IMAGE_DIR + "/tool/temp-blue-cell-radius.png");
+          put(Icons.TOOLBAR_TEMPLATE_RADIUS, IMAGE_DIR + "/tool/temp-blue-vertex-radius.png");
+          put(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, IMAGE_DIR + "/tool/temp-blue-cell-radius.png");
           put(Icons.TOOLBAR_TEMPLATE_CONE, IMAGE_DIR + "/tool/temp-blue-cone.png");
           put(Icons.TOOLBAR_TEMPLATE_LINE, IMAGE_DIR + "/tool/temp-blue-vertex-line.png");
           put(Icons.TOOLBAR_TEMPLATE_LINE_CELL, IMAGE_DIR + "/tool/temp-blue-cell-line.png");
@@ -140,17 +133,11 @@ public class IconMap {
           put(Icons.TOOLBAR_TOPOLOGY_POLYLINE, IMAGE_DIR + "/tool/top-blue-free.png");
           put(Icons.TOOLBAR_TOPOLOGY_CROSS, IMAGE_DIR + "/tool/top-blue-cross.png");
           put(Icons.TOOLBAR_TOPOLOGY_DIAMOND, IMAGE_DIR + "/tool/top-blue-diamond.png");
-          put(
-              Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW,
-              IMAGE_DIR + "/tool/top-blue-hdiamond.png");
+          put(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW, IMAGE_DIR + "/tool/top-blue-hdiamond.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, IMAGE_DIR + "/tool/wall-vbl-only.png");
-          put(
-              Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
-              IMAGE_DIR + "/tool/wall-vbl-only-off.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, IMAGE_DIR + "/tool/wall-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON, IMAGE_DIR + "/tool/hill-vbl-only.png");
-          put(
-              Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
-              IMAGE_DIR + "/tool/hill-vbl-only-off.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF, IMAGE_DIR + "/tool/hill-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, IMAGE_DIR + "/tool/pit-vbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF, IMAGE_DIR + "/tool/pit-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON, IMAGE_DIR + "/tool/mbl-only.png");
@@ -158,21 +145,13 @@ public class IconMap {
           put(Icons.TOOLBAR_VOLUME_ON, IMAGE_DIR + "/audio/volume.png");
           put(Icons.TOOLBAR_VOLUME_OFF, IMAGE_DIR + "/audio/mute.png");
           put(Icons.TOOLBAR_TOKENSELECTION_ALL_ON, IMAGE_DIR + "/tool/select-all-blue.png");
-          put(
-              Icons.TOOLBAR_TOKENSELECTION_ALL_OFF,
-              IMAGE_DIR + "/tool/select-all-blue-off.png");
+          put(Icons.TOOLBAR_TOKENSELECTION_ALL_OFF, IMAGE_DIR + "/tool/select-all-blue-off.png");
           put(Icons.TOOLBAR_TOKENSELECTION_ME_ON, IMAGE_DIR + "/tool/select-me-blue.png");
-          put(
-              Icons.TOOLBAR_TOKENSELECTION_ME_OFF,
-              IMAGE_DIR + "/tool/select-me-blue-off.png");
+          put(Icons.TOOLBAR_TOKENSELECTION_ME_OFF, IMAGE_DIR + "/tool/select-me-blue-off.png");
           put(Icons.TOOLBAR_TOKENSELECTION_PC_ON, IMAGE_DIR + "/tool/select-pc-blue.png");
-          put(
-              Icons.TOOLBAR_TOKENSELECTION_PC_OFF,
-              IMAGE_DIR + "/tool/select-pc-blue-off.png");
+          put(Icons.TOOLBAR_TOKENSELECTION_PC_OFF, IMAGE_DIR + "/tool/select-pc-blue-off.png");
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_ON, IMAGE_DIR + "/tool/select-npc-blue.png");
-          put(
-              Icons.TOOLBAR_TOKENSELECTION_NPC_OFF,
-              IMAGE_DIR + "/tool/select-npc-blue-off.png");
+          put(Icons.TOOLBAR_TOKENSELECTION_NPC_OFF, IMAGE_DIR + "/tool/select-npc-blue-off.png");
           put(Icons.TOOLBAR_ZONE, IMAGE_DIR + "/tool/btn-world.png");
           put(Icons.WINDOW_CONNECTIONS, IMAGE_DIR + "/computer.png");
           put(Icons.WINDOW_MAP_EXPLORER, IMAGE_DIR + "/eye.png");
@@ -190,15 +169,34 @@ public class IconMap {
         }
       };
 
-  private static final HashMap<Images, String> images = new HashMap<>() {{
-    put(Images.BOX_BLUE,"net/rptools/maptool/client/image/blueLabelbox.png");
-    put(Images.BOX_GRAY,"net/rptools/maptool/client/image/grayLabelbox.png");
-    put(Images.BOX_DARK_GRAY,"net/rptools/maptool/client/image/darkGreyLabelbox.png");
-    put(Images.BROKEN, "net/rptools/maptool/client/image/broken.png");
-    put(Images.UNKNOWN, "net/rptools/maptool/client/image/unknown.png");
-    put(Images.EMPTY, IMAGE_DIR + "/empty.png");
-    put(Images.TEXTURE_TRANSPARENT, IMAGE_DIR + "/transparent.png");
-  }};
+  private static final HashMap<Images, String> images =
+      new HashMap<>() {
+        {
+          put(Images.BOX_BLUE, "net/rptools/maptool/client/image/blueLabelbox.png");
+          put(Images.BOX_GRAY, "net/rptools/maptool/client/image/grayLabelbox.png");
+          put(Images.BOX_DARK_GRAY, "net/rptools/maptool/client/image/darkGreyLabelbox.png");
+          put(Images.BROKEN, "net/rptools/maptool/client/image/broken.png");
+          put(Images.UNKNOWN, "net/rptools/maptool/client/image/unknown.png");
+          put(Images.EMPTY, IMAGE_DIR + "/empty.png");
+          put(Images.TEXTURE_TRANSPARENT, IMAGE_DIR + "/transparent.png");
+        }
+      };
+
+  private static final HashMap<Borders, String> borders =
+      new HashMap<>() {
+        {
+          put(Borders.GRAY, "net/rptools/maptool/client/image/border/gray");
+          put(Borders.FOW_TOOLS, "net/rptools/maptool/client/image/border/shadow");
+          put(Borders.HIGHLIGHT, "net/rptools/maptool/client/image/border/highlight");
+          put(Borders.SHADOW, "net/rptools/maptool/client/image/border/shadow");
+          put(Borders.GREEN, "net/rptools/maptool/client/image/border/green");
+          put(Borders.PURPLE, "net/rptools/maptool/client/image/border/purple");
+          put(Borders.YELLOW, "net/rptools/maptool/client/image/border/fowtools");
+          put(Borders.GRAY2, "net/rptools/maptool/client/image/border/gray2");
+          put(Borders.RED, "net/rptools/maptool/client/image/border/red");
+          put(Borders.BLUE, "net/rptools/maptool/client/image/border/blue");
+        }
+      };
 
   private static final String ROD_ICONS = ICON_DIR + "rod_takehara/";
   private static final HashMap<Icons, String> rodIcons =
@@ -222,20 +220,14 @@ public class IconMap {
           put(
               Icons.ACTION_RESET_TOKEN_SELECTION,
               ROD_ICONS + "misc/Revert to previous selection (tokens).svg");
-          put(
-              Icons.CHAT_SHOW_TYPING_NOTIFICATION,
-              ROD_ICONS + "misc/Show Typing notification.svg");
-          put(
-              Icons.CHAT_HIDE_TYPING_NOTIFICATION,
-              ROD_ICONS + "misc/Hide Typing notification.svg");
+          put(Icons.CHAT_SHOW_TYPING_NOTIFICATION, ROD_ICONS + "misc/Show Typing notification.svg");
+          put(Icons.CHAT_HIDE_TYPING_NOTIFICATION, ROD_ICONS + "misc/Hide Typing notification.svg");
           put(Icons.CHAT_SCROLL_LOCK_ON, ROD_ICONS + "misc/Scroll Lock.svg");
           // put(Icons.CHAT_SCROLL_LOCK_OFF,
           // ROD_ICON_DIR + "misc/Scroll Lock.svg");
           // put(Icons.EDIT_TOKEN_HEROLAB,
           // ROD_ICON_DIR + "hero-lab-icon-small.png");
-          put(
-              Icons.EDIT_TOKEN_COLOR_PICKER,
-              ROD_ICONS + "misc/Colour Selection (eye dropper).svg");
+          put(Icons.EDIT_TOKEN_COLOR_PICKER, ROD_ICONS + "misc/Colour Selection (eye dropper).svg");
           // put(Icons.EDIT_TOKEN_REFRESH_ON,
           // ROD_ICON_DIR + "refresh_arrows_small.png");
           // put(Icons.EDIT_TOKEN_REFRESH_OFF,
@@ -258,9 +250,7 @@ public class IconMap {
           put(
               Icons.STATUSBAR_SERVER_DISCONNECTED,
               ROD_ICONS + "bottom/Server Status - Disconected.svg");
-          put(
-              Icons.STATUSBAR_SERVER_CONNECTED,
-              ROD_ICONS + "bottom/Server Status - Connected.svg");
+          put(Icons.STATUSBAR_SERVER_CONNECTED, ROD_ICONS + "bottom/Server Status - Connected.svg");
           put(Icons.STATUSBAR_SERVER_RUNNING, ROD_ICONS + "bottom/Server Status - Running.svg");
           put(Icons.STATUSBAR_TRANSMIT_ON, ROD_ICONS + "bottom/Send Data - Active.svg");
           put(Icons.STATUSBAR_TRANSMIT_OFF, ROD_ICONS + "bottom/Send Data - Inactive.svg");
@@ -314,18 +304,14 @@ public class IconMap {
           put(Icons.TOOLBAR_TOPOLOGY_ON, ROD_ICONS + "ribbon/Vision Blocking Layer Tools.svg");
           put(Icons.TOOLBAR_TOPOLOGY_OFF, ROD_ICONS + "ribbon/Vision Blocking Layer Tools.svg");
           put(Icons.TOOLBAR_TOPOLOGY_BOX, ROD_ICONS + "ribbon/Draw Rectangle.svg");
-          put(
-              Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW,
-              ROD_ICONS + "ribbon/Draw Hollow Rectangle.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW, ROD_ICONS + "ribbon/Draw Hollow Rectangle.svg");
           put(Icons.TOOLBAR_TOPOLOGY_OVAL, ROD_ICONS + "ribbon/Draw Oval.svg");
           put(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW, ROD_ICONS + "ribbon/Draw Hollow Oval.svg");
           put(Icons.TOOLBAR_TOPOLOGY_POLYGON, ROD_ICONS + "ribbon/Draw Polygon.svg");
           put(Icons.TOOLBAR_TOPOLOGY_POLYLINE, ROD_ICONS + "ribbon/Draw Poly Line.svg");
           put(Icons.TOOLBAR_TOPOLOGY_CROSS, ROD_ICONS + "ribbon/Draw Cross.svg");
           put(Icons.TOOLBAR_TOPOLOGY_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond.svg");
-          put(
-              Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW,
-              ROD_ICONS + "ribbon/Draw Hollow Diamond.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW, ROD_ICONS + "ribbon/Draw Hollow Diamond.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON, ROD_ICONS + "ribbon/Draw Hill VBL.svg");
@@ -369,52 +355,39 @@ public class IconMap {
   private static HashMap<Triplet<String, Integer, Integer>, ImageIcon> iconCache = new HashMap<>();
   private static HashMap<String, BufferedImage> imageCache = new HashMap<>();
   private static HashMap<String, javafx.scene.image.Image> fxImageCache = new HashMap<>();
+  private static HashMap<String, ImageBorder> borderCache = new HashMap<>();
+
+  public static ImageBorder getBorder(Borders border) {
+    return getFromHashMapsAndCache(
+        border, borderCache, path -> new ImageBorder(path), path -> path, borders);
+  }
 
   public static javafx.scene.image.Image getFxImage(Images image) {
-    String imagePath = null;
-    if (images.containsKey(image)) {
-      imagePath = images.get(image);
-    }
-
-    if (imagePath == null) {
-      return null;
-    }
-
-    if (fxImageCache.containsKey(imagePath)) {
-      return fxImageCache.get(imagePath);
-    }
-
-      var imageObject = new javafx.scene.image.Image(imagePath);
-      fxImageCache.put(imagePath, imageObject);
-      return imageObject;
+    return getFromHashMapsAndCache(
+        image, fxImageCache, path -> new javafx.scene.image.Image(path), path -> path, images);
   }
 
   public static BufferedImage getImage(Images image) {
-    String imagePath = null;
-    if (images.containsKey(image)) {
-      imagePath = images.get(image);
-    }
-
-    if (imagePath == null) {
-      return null;
-    }
-
-    if (imageCache.containsKey(imagePath)) {
-      return imageCache.get(imagePath);
-    }
-
-    try {
-      var imageObject = ImageUtil.getCompatibleImage(imagePath);
-      imageCache.put(imagePath, imageObject);
-      return imageObject;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+    return getFromHashMapsAndCache(
+        image,
+        imageCache,
+        (path) -> {
+          try {
+            return ImageUtil.getCompatibleImage(path);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        },
+        path -> path,
+        images);
   }
 
   private static ImageIcon getIcon(Icons icon, int widthAndHeight) {
     return getIcon(icon, widthAndHeight, widthAndHeight);
   }
+
+  public static int smallIconSize = 16;
+  public static int bigIconSize = 32;
 
   public static ImageIcon getSmallIcon(Icons icon) {
     return getIcon(icon, smallIconSize);
@@ -424,41 +397,64 @@ public class IconMap {
     return getIcon(icon, bigIconSize);
   }
 
-  public static int smallIconSize = 16;
-  public static int bigIconSize = 32;
-
   private static ImageIcon getIcon(Icons icon, int width, int height) {
-    try {
-      String iconPath = null;
-      if (selectedIconSet.equals(ROD_TAKEHARA) && rodIcons.containsKey(icon)) {
-        iconPath = rodIcons.get(icon);
-      } else if (classicIcons.containsKey(icon)) {
-        iconPath = classicIcons.get(icon);
-      }
-
-      if (iconPath == null) {
-        return null;
-      }
-
-      var key = Triplet.with(iconPath, width, height);
-      if (iconCache.containsKey(key)) {
-        return iconCache.get(key);
-      }
-
-      ImageIcon imageIcon = null;
-      if (iconPath.endsWith(".svg")) {
-        imageIcon = new FlatSVGIcon(iconPath, width, height);
-        // var image = ImageUtil.getImage(iconPath);
-        // imageIcon = new ImageIcon(ImageUtil.createCompatibleImage(image, width, height, null));
-      } else {
-        // for non-svg we assume that they already have to correct size
-        var image = ImageUtil.getCompatibleImage(iconPath);
-        imageIcon = new ImageIcon(image);
-      }
-      iconCache.put(key, imageIcon);
-      return imageIcon;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
+    var iconPaths = classicIcons;
+    switch (selectedIconSet) {
+      case ROD_TAKEHARA -> iconPaths = rodIcons;
     }
+
+    return getFromHashMapsAndCache(
+        icon,
+        iconCache,
+        iconPath -> {
+          try {
+            if (iconPath.endsWith(".svg")) {
+              return new FlatSVGIcon(iconPath, width, height);
+              // var image = ImageUtil.getImage(iconPath);
+              // imageIcon = new ImageIcon(ImageUtil.createCompatibleImage(image, width, height,
+              // null));
+            } else {
+              // for non-svg we assume that they already have to correct size
+              var image = ImageUtil.getCompatibleImage(iconPath);
+              return new ImageIcon(image);
+            }
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        },
+        iconPath -> Triplet.with(iconPath, width, height),
+        iconPaths,
+        classicIcons);
+  }
+
+  private interface Creator<K, V> {
+    V create(K key);
+  }
+
+  private static <KEY, CACHEKEY, RESULT> RESULT getFromHashMapsAndCache(
+      KEY key,
+      HashMap<CACHEKEY, RESULT> cache,
+      Creator<String, RESULT> creator,
+      Creator<String, CACHEKEY> transformer,
+      HashMap<KEY, String>... maps) {
+    String ressourcePath = null;
+    for (var map : maps) {
+      if (map.containsKey(key)) {
+        ressourcePath = map.get(key);
+        break;
+      }
+    }
+    if (ressourcePath == null) {
+      return null;
+    }
+
+    CACHEKEY cachekey = transformer.create(ressourcePath);
+    if (cache.containsKey(cachekey)) {
+      return cache.get(cachekey);
+    }
+
+    RESULT ressourceObject = creator.create(ressourcePath);
+    cache.put(cachekey, ressourceObject);
+    return ressourceObject;
   }
 }

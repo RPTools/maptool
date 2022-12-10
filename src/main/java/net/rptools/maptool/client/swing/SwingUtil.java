@@ -29,7 +29,6 @@ import java.awt.Transparency;
 import java.awt.Window;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -37,7 +36,6 @@ import java.util.function.Supplier;
 import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.*;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.MeasureTool;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
@@ -48,11 +46,11 @@ public class SwingUtil {
   public static javafx.scene.Cursor emptyCursorFX;
 
   static {
-      emptyCursor =
-          Toolkit.getDefaultToolkit()
-              .createCustomCursor(IconMap.getImage(Images.EMPTY), new Point(0, 0), "");
-      Platform.runLater(
-          () -> emptyCursorFX = new ImageCursor(IconMap.getFxImage(Images.EMPTY), 0, 0));
+    emptyCursor =
+        Toolkit.getDefaultToolkit()
+            .createCustomCursor(IconMap.getImage(Images.EMPTY), new Point(0, 0), "");
+    Platform.runLater(
+        () -> emptyCursorFX = new ImageCursor(IconMap.getFxImage(Images.EMPTY), 0, 0));
   }
 
   public static void useAntiAliasing(JComponent component) {

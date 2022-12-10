@@ -37,11 +37,10 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.GeometryUtil;
-import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.ui.theme.IconMap;
-import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 

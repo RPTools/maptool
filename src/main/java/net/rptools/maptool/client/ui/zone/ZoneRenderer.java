@@ -39,11 +39,11 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
@@ -53,6 +53,8 @@ import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
@@ -3428,7 +3430,7 @@ public class ZoneRenderer extends JComponent
               || tool instanceof OvalExposeTool
               || tool instanceof FreehandExposeTool
               || tool instanceof PolygonExposeTool) {
-            selectedBorder = AppConstants.FOW_TOOLS_BORDER;
+            selectedBorder = IconMap.getBorder(Borders.FOW_TOOLS);
           }
         }
         if (token.hasFacing()

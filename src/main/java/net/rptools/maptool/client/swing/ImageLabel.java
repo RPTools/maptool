@@ -16,8 +16,6 @@ package net.rptools.maptool.client.swing;
 
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import net.rptools.lib.image.ImageUtil;
 
 public class ImageLabel {
 

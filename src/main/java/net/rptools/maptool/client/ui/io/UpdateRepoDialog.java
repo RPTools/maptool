@@ -34,8 +34,8 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.Location;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

@@ -17,9 +17,6 @@ package net.rptools.maptool.client.swing;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
-import net.rptools.maptool.client.ui.theme.IconMap;
-import net.rptools.maptool.client.ui.theme.Icons;
-
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -36,6 +33,8 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.BevelBorder;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 
 public class ColorPicker extends JPanel {
   private final JFrame owner;
@@ -128,9 +127,9 @@ public class ColorPicker extends JPanel {
     eraseToggle.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_PENCIL));
     eraseToggle.setSelectedIcon(IconMap.getSmallIcon(Icons.COLORPICKER_ERASER));
 
-    var opacityLabel =  (JETALabel)panel.getComponentByName("opacityLabel");
+    var opacityLabel = (JETALabel) panel.getComponentByName("opacityLabel");
     opacityLabel.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_OPACITY));
-    var penWidthLabel = (JETALabel)panel.getComponentByName("penWidthLabel");
+    var penWidthLabel = (JETALabel) panel.getComponentByName("penWidthLabel");
     penWidthLabel.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_PEN_WIDTH));
 
     penWidthSpinner = panel.getSpinner("penWidth");

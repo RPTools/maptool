@@ -23,13 +23,10 @@ import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
 
@@ -69,8 +66,8 @@ public class TaskPanel extends JPanel {
   private static Icon openIcon;
 
   static {
-      closeIcon = IconMap.getSmallIcon(Icons.ACTION_CLOSE);
-      openIcon = IconMap.getSmallIcon(Icons.ACTION_OPEN);
+    closeIcon = IconMap.getSmallIcon(Icons.ACTION_CLOSE);
+    openIcon = IconMap.getSmallIcon(Icons.ACTION_OPEN);
   }
 
   private State state;

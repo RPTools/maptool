@@ -25,6 +25,8 @@ import java.util.Map.Entry;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.IconMap;
 
 @SuppressWarnings("serial")
 public class ImagePanel extends JComponent
@@ -257,7 +259,8 @@ public class ImagePanel extends JComponent
       // Selected
       if (selectedIDList.contains(model.getID(i))) {
         // TODO: Let the user pick the border
-        ImageBorder.RED.paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
+        IconMap.getBorder(Borders.RED)
+            .paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
       }
       // Decorations
       Image[] decorations = model.getDecorations(i);

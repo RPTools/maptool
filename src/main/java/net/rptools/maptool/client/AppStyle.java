@@ -20,17 +20,19 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.swing.ImageBorder;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.IconMap;
 
 /** @author trevor */
 public class AppStyle {
 
-  public static ImageBorder border = ImageBorder.GRAY;
-  public static ImageBorder selectedBorder = ImageBorder.RED;
-  public static ImageBorder selectedStampBorder = ImageBorder.BLUE;
-  public static ImageBorder selectedUnownedBorder = AppConstants.GREEN_BORDER;
-  public static ImageBorder miniMapBorder = AppConstants.GRAY_BORDER;
-  public static ImageBorder shadowBorder = AppConstants.SHADOW_BORDER;
-  public static ImageBorder commonMacroBorder = AppConstants.HIGHLIGHT_BORDER;
+  public static ImageBorder border = IconMap.getBorder(Borders.GRAY2);
+  public static ImageBorder selectedBorder = IconMap.getBorder(Borders.RED);
+  public static ImageBorder selectedStampBorder = IconMap.getBorder(Borders.BLUE);
+  public static ImageBorder selectedUnownedBorder = IconMap.getBorder(Borders.GREEN);
+  public static ImageBorder miniMapBorder = IconMap.getBorder(Borders.GRAY);
+  public static ImageBorder shadowBorder = IconMap.getBorder(Borders.SHADOW);
+  public static ImageBorder commonMacroBorder = IconMap.getBorder(Borders.HIGHLIGHT);
 
   public static Font labelFont = Font.decode("serif-NORMAL-12");
 

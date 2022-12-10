@@ -20,7 +20,6 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-
 import net.rptools.maptool.client.swing.preference.WindowPreferences;
 import org.junit.jupiter.api.Test;
 

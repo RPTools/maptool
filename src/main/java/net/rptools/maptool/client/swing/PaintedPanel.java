@@ -14,10 +14,6 @@
  */
 package net.rptools.maptool.client.swing;
 
-import net.rptools.maptool.client.ui.theme.IconMap;
-import net.rptools.maptool.client.ui.theme.Images;
-
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -25,9 +21,9 @@ import java.awt.Paint;
 import java.awt.Rectangle;
 import java.awt.TexturePaint;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
-import javax.imageio.ImageIO;
 import javax.swing.JPanel;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 
 @SuppressWarnings("serial")
 public class PaintedPanel extends JPanel {
@@ -64,10 +60,10 @@ public class PaintedPanel extends JPanel {
       ((Graphics2D) g).setPaint(paint);
       g.fillRect(0, 0, size.width, size.height);
     } else {
-        BufferedImage texture = IconMap.getImage(Images.TEXTURE_TRANSPARENT);
-        TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
-        ((Graphics2D) g).setPaint(tp);
-        g.fillRect(0, 0, size.width, size.height);
+      BufferedImage texture = IconMap.getImage(Images.TEXTURE_TRANSPARENT);
+      TexturePaint tp = new TexturePaint(texture, new Rectangle(0, 0, 28, 28));
+      ((Graphics2D) g).setPaint(tp);
+      g.fillRect(0, 0, size.width, size.height);
     }
   }
 }

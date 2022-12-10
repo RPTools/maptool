@@ -34,8 +34,8 @@ import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.JDialog;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Asset;
 
 /**

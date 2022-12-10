@@ -14,12 +14,15 @@
  */
 package net.rptools.maptool.client.ui.theme;
 
-public enum Images {
-  BOX_BLUE,
-  BOX_GRAY,
-  BOX_DARK_GRAY,
-  BROKEN,
-  UNKNOWN,
-  EMPTY,
-  TEXTURE_TRANSPARENT,
+public enum Borders {
+  GRAY,
+  SHADOW,
+  HIGHLIGHT,
+  GREEN,
+  YELLOW,
+  PURPLE,
+  FOW_TOOLS,
+  GRAY2,
+  RED,
+  BLUE,
 }
