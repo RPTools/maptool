@@ -15,14 +15,14 @@
 package net.rptools.maptool.client.ui.theme;
 
 public enum Borders {
-  GRAY,
-  SHADOW,
-  HIGHLIGHT,
-  GREEN,
-  YELLOW,
-  PURPLE,
-  FOW_TOOLS,
-  GRAY2,
-  RED,
   BLUE,
+  FOW_TOOLS,
+  GRAY,
+  GRAY2,
+  GREEN,
+  HIGHLIGHT,
+  PURPLE,
+  RED,
+  SHADOW,
+  YELLOW,
 }

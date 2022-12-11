@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.*;
@@ -164,6 +165,7 @@ public class MapPropertiesDialog extends JDialog {
     initHexHoriRadio();
     initHexVertRadio();
     initSquareRadio();
+    initNoGridRadio();
 
     add(formPanel);
 
@@ -224,20 +226,40 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getRadioButton("hexHoriRadio");
   }
 
+  public ImageComponent getHexHorizontalIcon() {
+    return (ImageComponent) formPanel.getComponentByName("hexHoriIcon");
+  }
+
   public JRadioButton getHexVerticalRadio() {
     return formPanel.getRadioButton("hexVertRadio");
+  }
+
+  public ImageComponent getHexVerticalIcon() {
+    return (ImageComponent) formPanel.getComponentByName("hexVertIcon");
   }
 
   public JRadioButton getSquareRadio() {
     return formPanel.getRadioButton("squareRadio");
   }
 
+  public ImageComponent getSquareIcon() {
+    return (ImageComponent) formPanel.getComponentByName("squareIcon");
+  }
+
   public JRadioButton getNoGridRadio() {
     return formPanel.getRadioButton("noGridRadio");
   }
 
+  public ImageComponent getNoGridIcon() {
+    return (ImageComponent) formPanel.getComponentByName("noGridIcon");
+  }
+
   public JRadioButton getIsometricRadio() {
     return formPanel.getRadioButton("isoRadio");
+  }
+
+  public ImageComponent getIsometricIcon() {
+    return (ImageComponent) formPanel.getComponentByName("isoIcon");
   }
 
   public JRadioButton getIsometricHexRadio() {
@@ -302,24 +324,29 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initIsometricRadio() {
     getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.getDefaultGridType()));
+    getIsometricIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC));
   }
 
   private void initHexHoriRadio() {
     getHexHorizontalRadio()
         .setSelected(GridFactory.isHexHorizontal(AppPreferences.getDefaultGridType()));
+    getHexHorizontalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_HORIZONTAL));
   }
 
   private void initHexVertRadio() {
     getHexVerticalRadio()
         .setSelected(GridFactory.isHexVertical(AppPreferences.getDefaultGridType()));
+    getHexVerticalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL));
   }
 
   private void initSquareRadio() {
     getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.getDefaultGridType()));
+    getSquareIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_SQUARE));
   }
 
   private void initNoGridRadio() {
     getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.getDefaultGridType()));
+    getNoGridIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_NONE));
   }
 
   public JTextField getDistanceTextField() {
