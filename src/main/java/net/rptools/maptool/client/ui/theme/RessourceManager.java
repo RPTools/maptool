@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.ImageBorder;
 import org.javatuples.Triplet;
 
@@ -31,13 +32,14 @@ public class RessourceManager {
       new HashMap<>() {
         {
           // This icons don't exist in classic.
-          // put(Icons.ACTION_EXPORT, "");
-          // put(Icons.ACTION_IMPORT, "");
-          // put(Icons.PROPERTIES_TABLE_ALPHABETIC, "");
-          // put(Icons.PROPERTIES_TABLE_CATEGORIES,"");
-          // put(Icons.PROPERTIES_TABLE_COLLAPSE,"");
-          // put(Icons.PROPERTIES_TABLE_EXPAND,"");
-          // put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION,"");
+          put(Icons.ACTION_EXPORT, "");
+          put(Icons.ACTION_IMPORT, "");
+          put(Icons.PROPERTIES_TABLE_ALPHABETIC, "");
+          put(Icons.PROPERTIES_TABLE_CATEGORIES, "");
+          put(Icons.PROPERTIES_TABLE_COLLAPSE, "");
+          put(Icons.PROPERTIES_TABLE_EXPAND, "");
+          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, "");
+
           put(Icons.ACTION_CANCEL, IMAGE_DIR + "cancel_sm.png");
           put(Icons.ACTION_CLOSE, CLASSIC_ICONS + "collapse.png");
           put(Icons.ACTION_COPY, IMAGE_DIR + "page_copy.png");
@@ -91,10 +93,18 @@ public class RessourceManager {
           put(Icons.DRAWPANEL_TEMPLATE_BLAST, IMAGE_DIR + "tool/drawpanel-temp-blue-square.png");
           put(Icons.DRAWPANEL_TEMPLATE_BURST, IMAGE_DIR + "tool/drawpanel-temp-blue-burst.png");
           put(Icons.DRAWPANEL_TEMPLATE_CONE, IMAGE_DIR + "tool/drawpanel-temp-blue-cone.png");
-          put(Icons.DRAWPANEL_TEMPLATE_LINE, IMAGE_DIR + "tool/drawpanel-temp-blue-vertex-line.png");
-          put(Icons.DRAWPANEL_TEMPLATE_LINECELL, IMAGE_DIR + "tool/drawpanel-temp-blue-cell-line.png");
-          put(Icons.DRAWPANEL_TEMPLATE_RADIUS, IMAGE_DIR + "tool/drawpanel-temp-blue-vertex-radius.png");
-          put(Icons.DRAWPANEL_TEMPLATE_RADIUSCELL,IMAGE_DIR + "tool/drawpanel-temp-blue-cell-radius.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINE,
+              IMAGE_DIR + "tool/drawpanel-temp-blue-vertex-line.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINECELL,
+              IMAGE_DIR + "tool/drawpanel-temp-blue-cell-line.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUS,
+              IMAGE_DIR + "tool/drawpanel-temp-blue-vertex-radius.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUSCELL,
+              IMAGE_DIR + "tool/drawpanel-temp-blue-cell-radius.png");
           put(Icons.DRAWPANEL_TEMPLATE_WALL, IMAGE_DIR + "tool/drawpanel-temp-blue-wall.png");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, IMAGE_DIR + "color-picker-32.png");
           put(Icons.EDIT_TOKEN_HEROLAB, IMAGE_DIR + "hero-lab-icon-small.png");
@@ -278,7 +288,9 @@ public class RessourceManager {
           put(Icons.ACTION_PREVIOUS, ROD_ICONS + "initiative/Previous Initiative.svg");
           put(Icons.ACTION_PREVIOUS_TOKEN, ROD_ICONS + "misc/Select Next Token.svg");
           put(Icons.ACTION_RESET, ROD_ICONS + "initiative/Reset Round.svg");
-          put(Icons.ACTION_RESET_TOKEN_SELECTION, ROD_ICONS + "misc/Revert to previous selection (tokens).svg");
+          put(
+              Icons.ACTION_RESET_TOKEN_SELECTION,
+              ROD_ICONS + "misc/Revert to previous selection (tokens).svg");
           put(Icons.ACTION_SELECT_ALL_TOKENS, ROD_ICONS + "misc/Select All Tokens.svg");
           put(Icons.ACTION_SELECT_NO_TOKENS, ROD_ICONS + "misc/Deselect All Tokens.svg");
           put(Icons.ACTION_SETTINGS, ROD_ICONS + "initiative/Initiative Settings.svg");
@@ -298,14 +310,18 @@ public class RessourceManager {
           put(Icons.PROPERTIES_TABLE_CATEGORIES, ROD_ICONS + "misc/Categorised.svg");
           put(Icons.PROPERTIES_TABLE_COLLAPSE, ROD_ICONS + "misc/Collapse.svg");
           put(Icons.PROPERTIES_TABLE_EXPAND, ROD_ICONS + "misc/Expand.svg");
-          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, ROD_ICONS + "misc/Show - Hide Description Area.svg");
+          put(
+              Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION,
+              ROD_ICONS + "misc/Show - Hide Description Area.svg");
           put(Icons.STATUSBAR_ASSET_CACHE, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_FREE_SPACE, ROD_ICONS + "bottom/Free Space.svg");
           put(Icons.STATUSBAR_IMAGE_CACHE, ROD_ICONS + "bottom/Image Thumbs Cache.svg");
           put(Icons.STATUSBAR_RECEIVE_OFF, ROD_ICONS + "bottom/Receive Data - Inactive.svg");
           put(Icons.STATUSBAR_RECEIVE_ON, ROD_ICONS + "bottom/Receive Data - Active.svg");
           put(Icons.STATUSBAR_SERVER_CONNECTED, ROD_ICONS + "bottom/Server Status - Connected.svg");
-          put(Icons.STATUSBAR_SERVER_DISCONNECTED, ROD_ICONS + "bottom/Server Status - Disconected.svg");
+          put(
+              Icons.STATUSBAR_SERVER_DISCONNECTED,
+              ROD_ICONS + "bottom/Server Status - Disconected.svg");
           put(Icons.STATUSBAR_SERVER_RUNNING, ROD_ICONS + "bottom/Server Status - Running.svg");
           put(Icons.STATUSBAR_TRANSMIT_OFF, ROD_ICONS + "bottom/Send Data - Inactive.svg");
           put(Icons.STATUSBAR_TRANSMIT_ON, ROD_ICONS + "bottom/Send Data - Active.svg");
@@ -325,23 +341,31 @@ public class RessourceManager {
           put(Icons.TOOLBAR_FOG_EXPOSE_POLYGON, ROD_ICONS + "ribbon/Draw Polygon.svg");
           put(Icons.TOOLBAR_FOG_OFF, ROD_ICONS + "ribbon/Fog of War Tools.svg");
           put(Icons.TOOLBAR_FOG_ON, ROD_ICONS + "ribbon/Fog of War Tools.svg");
-          put(Icons.TOOLBAR_POINTERTOOL_AI_OFF, ROD_ICONS + "ribbon/Pathing MBL - VBL (AI) - OFF.svg");
+          put(
+              Icons.TOOLBAR_POINTERTOOL_AI_OFF,
+              ROD_ICONS + "ribbon/Pathing MBL - VBL (AI) - OFF.svg");
           put(Icons.TOOLBAR_POINTERTOOL_AI_ON, ROD_ICONS + "ribbon/Pathing MBL - VBL (AI).svg");
           put(Icons.TOOLBAR_POINTERTOOL_MEASURE, ROD_ICONS + "ribbon/Measure Distance.svg");
           put(Icons.TOOLBAR_POINTERTOOL_OFF, ROD_ICONS + "ribbon/Interaction Tools.svg");
           put(Icons.TOOLBAR_POINTERTOOL_ON, ROD_ICONS + "ribbon/Interaction Tools.svg");
           put(Icons.TOOLBAR_POINTERTOOL_POINTER, ROD_ICONS + "ribbon/Pointer Tool.svg");
-          put(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF, ROD_ICONS + "ribbon/Pathing MBL - OFF.svg");
+          put(
+              Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_OFF,
+              ROD_ICONS + "ribbon/Pathing MBL - OFF.svg");
           put(Icons.TOOLBAR_POINTERTOOL_VBL_ON_MOVE_ON, ROD_ICONS + "ribbon/Pathing MBL.svg");
           put(Icons.TOOLBAR_TEMPLATE_BLAST, ROD_ICONS + "ribbon/Blast Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_BURST, ROD_ICONS + "ribbon/Burst Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_CONE, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_LINE, ROD_ICONS + "ribbon/Line Template.svg");
-          put(Icons.TOOLBAR_TEMPLATE_LINE_CELL, ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
+          put(
+              Icons.TOOLBAR_TEMPLATE_LINE_CELL,
+              ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Cone Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
-          put(Icons.TOOLBAR_TEMPLATE_RADIUS_CELL, ROD_ICONS + "ribbon/Radius Template Centered on Grid.svg");
+          put(
+              Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,
+              ROD_ICONS + "ribbon/Radius Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_WALL, ROD_ICONS + "ribbon/Wall Line Template.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_ALL_OFF, ROD_ICONS + "ribbon/All.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_ALL_ON, ROD_ICONS + "ribbon/All.svg");
@@ -387,11 +411,8 @@ public class RessourceManager {
           put(Icons.WINDOW_TABLES, ROD_ICONS + "windows/Tables.svg");
         }
       };
-
   public static final String ROD_TAKEHARA = "Rod Takehara";
   public static final String CLASSIC = "Classic";
-
-  private static String selectedIconSet = ROD_TAKEHARA;
 
   private static HashMap<Triplet<String, Integer, Integer>, ImageIcon> iconCache = new HashMap<>();
   private static HashMap<String, BufferedImage> imageCache = new HashMap<>();
@@ -440,7 +461,7 @@ public class RessourceManager {
 
   private static ImageIcon getIcon(Icons icon, int width, int height) {
     var iconPaths = classicIcons;
-    switch (selectedIconSet) {
+    switch (AppPreferences.getIconTheme()) {
       case ROD_TAKEHARA -> iconPaths = rodIcons;
     }
 
@@ -451,12 +472,12 @@ public class RessourceManager {
           try {
             if (iconPath.endsWith(".svg")) {
               return new FlatSVGIcon(iconPath, width, height);
-              // var image = ImageUtil.getImage(iconPath);
-              // imageIcon = new ImageIcon(ImageUtil.createCompatibleImage(image, width, height,
-              // null));
             } else {
-              // for non-svg we assume that they already have to correct size
-              var image = ImageUtil.getCompatibleImage(iconPath);
+              // for non-svg we assume that they already have to correct size, unless they are to
+              // big
+              var image = ImageUtil.getImage(iconPath);
+              if (image.getWidth(null) > width || image.getHeight(null) > height)
+                image = ImageUtil.createCompatibleImage(image, width, height, null);
               return new ImageIcon(image);
             }
           } catch (IOException e) {
