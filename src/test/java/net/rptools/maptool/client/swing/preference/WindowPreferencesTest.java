@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.swing.preference;
+package net.rptools.maptool.client.swing.preference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,7 +20,6 @@ import java.awt.Window;
 import java.awt.event.WindowEvent;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
-import net.rptools.maptool.client.swing.preference.WindowPreferences;
 import org.junit.jupiter.api.Test;
 
 class WindowPreferencesTest {

@@ -12,13 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.lib.image;
+package net.rptools.maptool.client.image;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import net.rptools.lib.image.ImageUtil;
 import org.junit.jupiter.api.Test;
 
 public class ImageUtilTest {
