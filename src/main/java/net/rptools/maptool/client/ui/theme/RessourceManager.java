@@ -17,7 +17,10 @@ package net.rptools.maptool.client.ui.theme;
 import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
+import java.util.Set;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -27,7 +30,6 @@ import org.javatuples.Triplet;
 public class RessourceManager {
   private static final String IMAGE_DIR = "net/rptools/maptool/client/image/";
   private static final String ICON_DIR = "net/rptools/maptool/client/icons/";
-  private static final String CLASSIC_ICONS = ICON_DIR + "classic/";
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
@@ -41,7 +43,7 @@ public class RessourceManager {
           put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, "");
 
           put(Icons.ACTION_CANCEL, IMAGE_DIR + "cancel_sm.png");
-          put(Icons.ACTION_CLOSE, CLASSIC_ICONS + "collapse.png");
+          put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
           put(Icons.ACTION_COPY, IMAGE_DIR + "page_copy.png");
           put(Icons.ACTION_DELETE, IMAGE_DIR + "delete.png");
           put(Icons.ACTION_EDIT, IMAGE_DIR + "pencil.png");
@@ -49,7 +51,7 @@ public class RessourceManager {
           put(Icons.ACTION_NEW_SMALL, IMAGE_DIR + "add_sm.png");
           put(Icons.ACTION_NEXT, IMAGE_DIR + "arrow_right.png");
           put(Icons.ACTION_NEXT_TOKEN, IMAGE_DIR + "arrow_right.png");
-          put(Icons.ACTION_OPEN, CLASSIC_ICONS + "expand.png");
+          put(Icons.ACTION_OPEN, IMAGE_DIR + "expand.png");
           put(Icons.ACTION_PAUSE, IMAGE_DIR + "arrow_hold.png");
           put(Icons.ACTION_PREVIOUS, IMAGE_DIR + "arrow_left.png");
           put(Icons.ACTION_PREVIOUS_TOKEN, IMAGE_DIR + "arrow_left.png");
@@ -72,14 +74,14 @@ public class RessourceManager {
           put(Icons.CHAT_SCROLL_LOCK_ON, IMAGE_DIR + "comments.png");
           put(Icons.CHAT_SHOW_TYPING_NOTIFICATION, IMAGE_DIR + "chatNotifyOn.png");
           put(Icons.CHAT_SMILEY, IMAGE_DIR + "smiley/emsmile.png");
-          put(Icons.COLORPICKER_CAP_ROUND, CLASSIC_ICONS + "round_cap.png");
-          put(Icons.COLORPICKER_CAP_SQUARE, CLASSIC_ICONS + "square_cap.png");
-          put(Icons.COLORPICKER_ERASER, CLASSIC_ICONS + "eraser.png");
-          put(Icons.COLORPICKER_OPACITY, CLASSIC_ICONS + "contrast_high.png");
-          put(Icons.COLORPICKER_PENCIL, CLASSIC_ICONS + "pencil.png");
-          put(Icons.COLORPICKER_PEN_WIDTH, CLASSIC_ICONS + "paintbrush.png");
-          put(Icons.COLORPICKER_SNAP_OFF, CLASSIC_ICONS + "freehand.png");
-          put(Icons.COLORPICKER_SNAP_ON, CLASSIC_ICONS + "shape_handles.png");
+          put(Icons.COLORPICKER_CAP_ROUND, IMAGE_DIR + "round_cap.png");
+          put(Icons.COLORPICKER_CAP_SQUARE, IMAGE_DIR + "square_cap.png");
+          put(Icons.COLORPICKER_ERASER, IMAGE_DIR + "eraser.png");
+          put(Icons.COLORPICKER_OPACITY, IMAGE_DIR + "contrast_high.png");
+          put(Icons.COLORPICKER_PENCIL, IMAGE_DIR + "pencil.png");
+          put(Icons.COLORPICKER_PEN_WIDTH, IMAGE_DIR + "paintbrush.png");
+          put(Icons.COLORPICKER_SNAP_OFF, IMAGE_DIR + "freehand.png");
+          put(Icons.COLORPICKER_SNAP_ON, IMAGE_DIR + "shape_handles.png");
           put(Icons.DRAWPANEL_AREA_DRAW, IMAGE_DIR + "tool/drawpanel-poly.png");
           put(Icons.DRAWPANEL_AREA_ERASE, IMAGE_DIR + "tool/drawpanel-poly-erase.png");
           put(Icons.DRAWPANEL_ELLIPSE_DRAW, IMAGE_DIR + "tool/drawpanel-ellipse.png");
@@ -113,7 +115,7 @@ public class RessourceManager {
           put(Icons.GRID_HEX_HORIZONTAL, IMAGE_DIR + "gridHorizontalHex.png");
           put(Icons.GRID_HEX_VERTICAL, IMAGE_DIR + "gridVerticalHex.png");
           put(Icons.GRID_ISOMETRIC, IMAGE_DIR + "gridIsometric.png");
-          put(Icons.GRID_NONE, "net/rptools/maptool/client/icons/classic/cross.png");
+          put(Icons.GRID_NONE, IMAGE_DIR + "cross.png");
           put(Icons.GRID_SQUARE, IMAGE_DIR + "gridSquare.png");
           put(Icons.INITIATIVE_CURRENT_INDICATOR, IMAGE_DIR + "currentIndicator.png");
           put(Icons.MAPTOOL, IMAGE_DIR + "maptool_icon.png");
@@ -518,5 +520,47 @@ public class RessourceManager {
     RESULT ressourceObject = creator.create(ressourcePath);
     cache.put(cachekey, ressourceObject);
     return ressourceObject;
+  }
+
+  public static void main(String[] args) {
+    checkMissingFiles();
+    checkMissingIcons(classicIcons, rodIcons);
+    for (var img : Set.of(images.values())) System.out.println(img);
+  }
+
+  private static void checkMissingIcons(
+      HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
+    for (var key : classicIcons.keySet()) {
+      if (rodIcons.containsKey(key)) continue;
+
+      System.out.println(
+          key + " missing from iconset. File for classic icon is :" + classicIcons.get(key));
+    }
+  }
+
+  public static void checkMissingFiles() {
+    String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
+    for (String value : Set.copyOf(images.values())) {
+      var source = Path.of(basedir, value);
+      var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
+
+      if (Files.notExists(source)) {
+        System.out.println(value + " is missing!");
+      }
+    }
+    for (String value : Set.copyOf(classicIcons.values())) {
+      var source = Path.of(basedir, value);
+
+      if (Files.notExists(source)) {
+        System.out.println(value + " is missing!");
+      }
+    }
+    for (String value : Set.copyOf(rodIcons.values())) {
+      var source = Path.of(basedir, value);
+
+      if (Files.notExists(source)) {
+        System.out.println(value + " is missing!");
+      }
+    }
   }
 }
