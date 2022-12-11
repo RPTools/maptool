@@ -26,8 +26,8 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -129,7 +129,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     removeAll();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
-        .setFrameIcon(IconMap.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
+        .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
     MapTool.getFrame()
         .setFrameTitle(
             MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));
@@ -207,7 +207,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
   @Deprecated
   public void addCancelButton() {
     JButton button =
-        new JButton("Cancel Impersonation", IconMap.getSmallIcon(Icons.ACTION_CANCEL)) {
+        new JButton("Cancel Impersonation", RessourceManager.getSmallIcon(Icons.ACTION_CANCEL)) {
           @Override
           public Insets getInsets() {
             return new Insets(3, 3, 3, 3);

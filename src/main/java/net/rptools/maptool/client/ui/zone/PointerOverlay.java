@@ -22,8 +22,8 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArgumentBuilder;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArguments;
 import net.rptools.maptool.client.ui.zone.callout.SpeechBubbleRenderer;
@@ -40,9 +40,9 @@ import net.rptools.maptool.util.GraphicsUtil;
  */
 public class PointerOverlay implements ZoneOverlay {
   private final List<PointerPair> pointerList = new ArrayList<PointerPair>();
-  private static BufferedImage POINTER_IMAGE = IconMap.getImage(Images.CURSOR_POINTER);
-  private static BufferedImage THOUGHT_IMAGE = IconMap.getImage(Images.CURSOR_THOUGHT);
-  private static BufferedImage LOOK_HERE_IMAGE = IconMap.getImage(Images.CURSOR_LOOK_HERE);
+  private static BufferedImage POINTER_IMAGE = RessourceManager.getImage(Images.CURSOR_POINTER);
+  private static BufferedImage THOUGHT_IMAGE = RessourceManager.getImage(Images.CURSOR_THOUGHT);
+  private static BufferedImage LOOK_HERE_IMAGE = RessourceManager.getImage(Images.CURSOR_LOOK_HERE);
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();

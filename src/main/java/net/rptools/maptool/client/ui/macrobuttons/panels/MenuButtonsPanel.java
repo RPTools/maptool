@@ -19,8 +19,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
@@ -39,7 +39,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectAllButton() {
-    ImageIcon i = IconMap.getSmallIcon(Icons.ACTION_SELECT_ALL_TOKENS);
+    ImageIcon i = RessourceManager.getSmallIcon(Icons.ACTION_SELECT_ALL_TOKENS);
     JButton label = new JButton(i);
     label.addMouseListener(
         new MouseAdapter() {
@@ -58,7 +58,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addDeselectAllButton() {
-    ImageIcon i3 = IconMap.getSmallIcon(Icons.ACTION_SELECT_NO_TOKENS);
+    ImageIcon i3 = RessourceManager.getSmallIcon(Icons.ACTION_SELECT_NO_TOKENS);
     JButton label3 = new JButton(i3);
     label3.addMouseListener(
         new MouseAdapter() {
@@ -76,7 +76,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addRevertToPreviousButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_RESET_TOKEN_SELECTION);
+    ImageIcon i1 = RessourceManager.getSmallIcon(Icons.ACTION_RESET_TOKEN_SELECTION);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -93,7 +93,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectNextButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_NEXT_TOKEN);
+    ImageIcon i1 = RessourceManager.getSmallIcon(Icons.ACTION_NEXT_TOKEN);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {
@@ -110,7 +110,7 @@ public class MenuButtonsPanel extends JToolBar {
   }
 
   private void addSelectPreviousButton() {
-    ImageIcon i1 = IconMap.getSmallIcon(Icons.ACTION_PREVIOUS_TOKEN);
+    ImageIcon i1 = RessourceManager.getSmallIcon(Icons.ACTION_PREVIOUS_TOKEN);
     JButton label1 = new JButton(i1);
     label1.addMouseListener(
         new MouseAdapter() {

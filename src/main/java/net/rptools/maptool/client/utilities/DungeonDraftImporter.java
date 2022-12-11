@@ -31,8 +31,8 @@ import java.io.InputStreamReader;
 import java.math.BigDecimal;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -90,7 +90,7 @@ public class DungeonDraftImporter {
 
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset =
-      Asset.createImageAsset("LightSource", IconMap.getImage(Images.LIGHT_SOURCE));
+      Asset.createImageAsset("LightSource", RessourceManager.getImage(Images.LIGHT_SOURCE));
 
   static {
     AssetManager.putAsset(lightSourceAsset);

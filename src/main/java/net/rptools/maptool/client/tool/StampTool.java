@@ -61,8 +61,8 @@ import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -105,7 +105,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private int dragStartX;
   private int dragStartY;
 
-  private BufferedImage resizeImg = IconMap.getImage(Images.RESIZE);
+  private BufferedImage resizeImg = RessourceManager.getImage(Images.RESIZE);
 
   public StampTool() {
     layerSelectionDialog =

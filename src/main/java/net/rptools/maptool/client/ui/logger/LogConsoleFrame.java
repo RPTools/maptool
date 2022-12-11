@@ -29,8 +29,8 @@ import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -50,7 +50,7 @@ public class LogConsoleFrame extends JFrame {
   public LogConsoleFrame() {
     setTitle(I18N.getString("action.openLogConsole.title"));
     setSize(800, 600);
-    setIconImage(IconMap.getSmallIcon(Icons.WINDOW_LOG).getImage());
+    setIconImage(RessourceManager.getSmallIcon(Icons.WINDOW_LOG).getImage());
     initUI();
   }
 

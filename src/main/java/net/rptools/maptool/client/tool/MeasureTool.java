@@ -32,8 +32,8 @@ import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -55,9 +55,11 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   public MeasureTool() {
     measureCursor =
         Toolkit.getDefaultToolkit()
-            .createCustomCursor(IconMap.getImage(Images.MEASURE), new Point(2, 28), CURSOR_NAME);
+            .createCustomCursor(
+                RessourceManager.getImage(Images.MEASURE), new Point(2, 28), CURSOR_NAME);
     Platform.runLater(
-        () -> measureCursorFX = new ImageCursor(IconMap.getFxImage(Images.MEASURE), 2, 28));
+        () ->
+            measureCursorFX = new ImageCursor(RessourceManager.getFxImage(Images.MEASURE), 2, 28));
   }
 
   public static Cursor getMeasureCursor() {

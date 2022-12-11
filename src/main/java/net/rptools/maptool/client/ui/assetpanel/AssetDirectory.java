@@ -29,17 +29,18 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 
 public class AssetDirectory extends Directory {
 
   public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
-  private static final Image PDF_IMAGE = IconMap.getSmallIcon(Icons.ASSETPANEL_PDF).getImage();
+  private static final Image PDF_IMAGE =
+      RessourceManager.getSmallIcon(Icons.ASSETPANEL_PDF).getImage();
   private static final Image HERO_LAB_IMAGE =
-      IconMap.getSmallIcon(Icons.ASSETPANEL_HEROLABS).getImage();
+      RessourceManager.getSmallIcon(Icons.ASSETPANEL_HEROLABS).getImage();
 
   private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 

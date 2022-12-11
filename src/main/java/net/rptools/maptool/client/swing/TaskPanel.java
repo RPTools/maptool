@@ -27,8 +27,8 @@ import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 
 /*
  * $Id: TaskPanel.java 5381 2010-09-07 17:17:26Z azhrei_fje $
@@ -66,8 +66,8 @@ public class TaskPanel extends JPanel {
   private static Icon openIcon;
 
   static {
-    closeIcon = IconMap.getSmallIcon(Icons.ACTION_CLOSE);
-    openIcon = IconMap.getSmallIcon(Icons.ACTION_OPEN);
+    closeIcon = RessourceManager.getSmallIcon(Icons.ACTION_CLOSE);
+    openIcon = RessourceManager.getSmallIcon(Icons.ACTION_OPEN);
   }
 
   private State state;

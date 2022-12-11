@@ -33,8 +33,8 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -54,7 +54,8 @@ public class IsometricGrid extends Grid {
   private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
   private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight = IconMap.getImage(Images.GRID_BORDER_ISOMETRIC);
+  private static BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
   public IsometricGrid() {
     super();

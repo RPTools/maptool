@@ -33,8 +33,8 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -682,7 +682,7 @@ public class MapPropertiesDialog extends JDialog {
 
     private JButton getCancelButton() {
       if (cancelButton == null) {
-        cancelButton = new JButton(IconMap.getSmallIcon(Icons.ACTION_CANCEL));
+        cancelButton = new JButton(RessourceManager.getSmallIcon(Icons.ACTION_CANCEL));
         cancelButton.setContentAreaFilled(false);
         cancelButton.setBorderPainted(false);
         cancelButton.setFocusable(false);

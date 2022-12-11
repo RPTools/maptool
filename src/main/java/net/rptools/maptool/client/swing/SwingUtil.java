@@ -37,8 +37,8 @@ import javafx.application.Platform;
 import javafx.scene.ImageCursor;
 import javax.swing.*;
 import net.rptools.maptool.client.tool.MeasureTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 
 /** */
 public class SwingUtil {
@@ -48,9 +48,9 @@ public class SwingUtil {
   static {
     emptyCursor =
         Toolkit.getDefaultToolkit()
-            .createCustomCursor(IconMap.getImage(Images.EMPTY), new Point(0, 0), "");
+            .createCustomCursor(RessourceManager.getImage(Images.EMPTY), new Point(0, 0), "");
     Platform.runLater(
-        () -> emptyCursorFX = new ImageCursor(IconMap.getFxImage(Images.EMPTY), 0, 0));
+        () -> emptyCursorFX = new ImageCursor(RessourceManager.getFxImage(Images.EMPTY), 0, 0));
   }
 
   public static void useAntiAliasing(JComponent component) {

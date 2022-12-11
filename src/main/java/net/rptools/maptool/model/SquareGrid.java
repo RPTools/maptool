@@ -37,8 +37,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -49,8 +49,9 @@ import net.rptools.maptool.server.proto.SquareGridDto;
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
-  private static BufferedImage pathHighlight = IconMap.getImage(Images.GRID_BORDER_SQUARE);
-  private static BufferedImage pathHighlightAlt = IconMap.getImage(Images.GRID_BORDER_SQUARE_RED);
+  private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
+  private static BufferedImage pathHighlightAlt =
+      RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
 
   private static List<TokenFootprint> footprintList;
 

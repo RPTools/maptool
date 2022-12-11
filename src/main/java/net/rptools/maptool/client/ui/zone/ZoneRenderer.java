@@ -54,8 +54,8 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Borders;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
@@ -2109,7 +2109,8 @@ public class ZoneRenderer extends JComponent
             for (CellPoint point : blockedMoves) {
               ZonePoint zp = point.midZonePoint(getZone().getGrid(), position);
               double r = (zp.x - 1) * 45;
-              showBlockedMoves(g, zp, r, IconMap.getImage(Images.ZONE_RENDERER_BLOCK_MOVE), 1.0f);
+              showBlockedMoves(
+                  g, zp, r, RessourceManager.getImage(Images.ZONE_RENDERER_BLOCK_MOVE), 1.0f);
             }
           }
         }
@@ -2375,7 +2376,7 @@ public class ZoneRenderer extends JComponent
       int w = 0;
       for (ZonePoint p : waypointList) {
         ZonePoint zp = new ZonePoint(p.x + cellOffset.width, p.y + cellOffset.height);
-        highlightCell(g, zp, IconMap.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
+        highlightCell(g, zp, RessourceManager.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
 
       // Line path
@@ -2488,7 +2489,7 @@ public class ZoneRenderer extends JComponent
             new ZonePoint(
                 (int) (p.x + (footprintBounds.width / 2) * footprint.getScale()),
                 (int) (p.y + (footprintBounds.height / 2) * footprint.getScale()));
-        highlightCell(g, p, IconMap.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
+        highlightCell(g, p, RessourceManager.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
       timer.stop("renderPath-3");
     }
@@ -3431,7 +3432,7 @@ public class ZoneRenderer extends JComponent
               || tool instanceof OvalExposeTool
               || tool instanceof FreehandExposeTool
               || tool instanceof PolygonExposeTool) {
-            selectedBorder = IconMap.getBorder(Borders.FOW_TOOLS);
+            selectedBorder = RessourceManager.getBorder(Borders.FOW_TOOLS);
           }
         }
         if (token.hasFacing()
@@ -3567,7 +3568,7 @@ public class ZoneRenderer extends JComponent
             // token is offscreen
             continue;
           }
-          BufferedImage stackImage = IconMap.getImage(Images.ZONE_RENDERER_STACK_IMAGE);
+          BufferedImage stackImage = RessourceManager.getImage(Images.ZONE_RENDERER_STACK_IMAGE);
           clippedG.drawImage(
               stackImage,
               bounds.getBounds().x + bounds.getBounds().width - stackImage.getWidth() + 2,

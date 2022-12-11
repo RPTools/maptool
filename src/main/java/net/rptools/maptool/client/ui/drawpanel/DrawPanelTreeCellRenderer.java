@@ -20,8 +20,8 @@ import javax.swing.Icon;
 import javax.swing.JTree;
 import javax.swing.SwingUtilities;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -111,36 +111,36 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
   private Icon setDrawPanelIcon(String key, boolean eraser) {
     switch (key) {
       case "panel.DrawExplorer.ShapeDrawable.Area":
-        if (eraser) return IconMap.getSmallIcon(Icons.DRAWPANEL_AREA_ERASE);
-        else return IconMap.getSmallIcon(Icons.DRAWPANEL_AREA_DRAW);
+        if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_ERASE);
+        else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Polygon":
-        if (eraser) return IconMap.getSmallIcon(Icons.DRAWPANEL_POLYGON_ERASE);
-        else return IconMap.getSmallIcon(Icons.DRAWPANEL_POLYGON_DRAW);
+        if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_ERASE);
+        else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Float":
-        if (eraser) return IconMap.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_ERASE);
-        else return IconMap.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_DRAW);
+        if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_ERASE);
+        else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Rectangle":
-        if (eraser) return IconMap.getSmallIcon(Icons.DRAWPANEL_RECTANGLE_ERASE);
-        else return IconMap.getSmallIcon(Icons.DRAWPANEL_RECTANGLE_DRAW);
+        if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_RECTANGLE_ERASE);
+        else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_RECTANGLE_DRAW);
       case "panel.DrawExplorer.LineSegment.Line":
-        if (eraser) return IconMap.getSmallIcon(Icons.DRAWPANEL_LINE_ERASE);
-        else return IconMap.getSmallIcon(Icons.DRAWPANEL_LINE_DRAW);
+        if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_LINE_ERASE);
+        else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_LINE_DRAW);
       case "panel.DrawExplorer.Template.RadiusCellTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_RADIUSCELL);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_RADIUSCELL);
       case "panel.DrawExplorer.Template.RadiusTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_RADIUS);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_RADIUS);
       case "panel.DrawExplorer.Template.ConeTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_CONE);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_CONE);
       case "panel.DrawExplorer.Template.LineTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_LINE);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_LINE);
       case "panel.DrawExplorer.Template.LineCellTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_LINECELL);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_LINECELL);
       case "panel.DrawExplorer.Template.BurstTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_BURST);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_BURST);
       case "panel.DrawExplorer.Template.BlastTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_BLAST);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_BLAST);
       case "panel.DrawExplorer.Template.WallTemplate":
-        return IconMap.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_WALL);
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_WALL);
     }
     return null;
   }

@@ -20,8 +20,8 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -34,7 +34,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static Icon diskSpaceIcon;
 
   static {
-    diskSpaceIcon = IconMap.getSmallIcon(Icons.STATUSBAR_FREE_SPACE);
+    diskSpaceIcon = RessourceManager.getSmallIcon(Icons.STATUSBAR_FREE_SPACE);
   }
 
   public AppHomeDiskSpaceStatusBar() {

@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.maptool.util.SysInfoProvider;
@@ -91,7 +91,7 @@ public class SysInfoDialog {
 
     SysInfoDialog sysInfoDialog = new SysInfoDialog();
     frame.setContentPane(sysInfoDialog.createContentPane());
-    frame.setIconImage(IconMap.getSmallIcon(Icons.MAPTOOL).getImage());
+    frame.setIconImage(RessourceManager.getSmallIcon(Icons.MAPTOOL).getImage());
     frame.setSize(550, 640);
     frame.setLocationByPlatform(true);
     frame.setVisible(true);

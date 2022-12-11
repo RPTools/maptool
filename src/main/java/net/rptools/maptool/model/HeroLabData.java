@@ -37,8 +37,8 @@ import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.server.proto.HeroLabDataDto;
 
 /**
@@ -92,10 +92,11 @@ public class HeroLabData {
 
     try {
       DEFAULT_HERO_LAB_TOKEN_ASSET =
-          Asset.createImageAsset("DEFAULT_HERO_LAB_TOKEN", IconMap.getImage(Images.HEROLABS_TOKEN));
+          Asset.createImageAsset(
+              "DEFAULT_HERO_LAB_TOKEN", RessourceManager.getImage(Images.HEROLABS_TOKEN));
       DEFAULT_HERO_LAB_PORTRAIT_ASSET =
           Asset.createImageAsset(
-              "DEFAULT_HERO_LAB_PORTRAIT", IconMap.getImage(Images.HEROLABS_PORTRAIT));
+              "DEFAULT_HERO_LAB_PORTRAIT", RessourceManager.getImage(Images.HEROLABS_PORTRAIT));
     } catch (Exception e) {
       e.printStackTrace();
     }

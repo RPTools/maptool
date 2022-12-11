@@ -23,8 +23,8 @@ import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
@@ -78,7 +78,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
           item.setSelected(true);
           selection = item;
         } else if (!renderer.getZone().isVisible()) {
-          item.setIcon(IconMap.getSmallIcon(Icons.TOOLBAR_ZONE_NOT_VISIBLE));
+          item.setIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_ZONE_NOT_VISIBLE));
         }
         add(item);
       }

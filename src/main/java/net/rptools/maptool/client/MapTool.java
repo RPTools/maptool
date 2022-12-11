@@ -72,8 +72,8 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -1283,7 +1283,7 @@ public class MapTool {
 
           defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
           // is true
-          defaults.put("OptionPane.bannerIcon", IconMap.getSmallIcon(Icons.MAPTOOL));
+          defaults.put("OptionPane.bannerIcon", RessourceManager.getSmallIcon(Icons.MAPTOOL));
           defaults.put("OptionPane.bannerFontSize", 13);
           defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
           defaults.put("OptionPane.bannerMaxCharsPerLine", 60);

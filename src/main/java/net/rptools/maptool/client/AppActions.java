@@ -95,8 +95,8 @@ import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -1718,7 +1718,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SHOW_GRIDS));
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_GRIDS));
         }
 
         @Override
@@ -1912,7 +1912,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
         }
 
         @Override

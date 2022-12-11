@@ -18,18 +18,18 @@ import java.awt.Color;
 import java.awt.Font;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.ui.theme.Borders;
-import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 
 /** @author trevor */
 public class AppStyle {
 
-  public static ImageBorder border = IconMap.getBorder(Borders.GRAY2);
-  public static ImageBorder selectedBorder = IconMap.getBorder(Borders.RED);
-  public static ImageBorder selectedStampBorder = IconMap.getBorder(Borders.BLUE);
-  public static ImageBorder selectedUnownedBorder = IconMap.getBorder(Borders.GREEN);
-  public static ImageBorder miniMapBorder = IconMap.getBorder(Borders.GRAY);
-  public static ImageBorder shadowBorder = IconMap.getBorder(Borders.SHADOW);
-  public static ImageBorder commonMacroBorder = IconMap.getBorder(Borders.HIGHLIGHT);
+  public static ImageBorder border = RessourceManager.getBorder(Borders.GRAY2);
+  public static ImageBorder selectedBorder = RessourceManager.getBorder(Borders.RED);
+  public static ImageBorder selectedStampBorder = RessourceManager.getBorder(Borders.BLUE);
+  public static ImageBorder selectedUnownedBorder = RessourceManager.getBorder(Borders.GREEN);
+  public static ImageBorder miniMapBorder = RessourceManager.getBorder(Borders.GRAY);
+  public static ImageBorder shadowBorder = RessourceManager.getBorder(Borders.SHADOW);
+  public static ImageBorder commonMacroBorder = RessourceManager.getBorder(Borders.HIGHLIGHT);
   public static Font labelFont = Font.decode("serif-NORMAL-12");
   public static Color selectionBoxOutline = Color.black;
   public static Color selectionBoxFill = Color.blue;

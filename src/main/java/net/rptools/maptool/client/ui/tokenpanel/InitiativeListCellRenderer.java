@@ -35,8 +35,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Borders;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -83,18 +83,18 @@ public class InitiativeListCellRenderer extends JPanel
 
   /** The icon for the current indicator. */
   public static final Icon CURRENT_INDICATOR_ICON =
-      IconMap.getSmallIcon(Icons.INITIATIVE_CURRENT_INDICATOR);
+      RessourceManager.getSmallIcon(Icons.INITIATIVE_CURRENT_INDICATOR);
 
   /** Border used to show that an item is selected */
-  public static final Border SELECTED_BORDER = IconMap.getBorder(Borders.RED);
+  public static final Border SELECTED_BORDER = RessourceManager.getBorder(Borders.RED);
 
   /** Border used to show that an item is not selected */
   public static final Border UNSELECTED_BORDER =
       BorderFactory.createEmptyBorder(
-          IconMap.getBorder(Borders.RED).getTopMargin(),
-          IconMap.getBorder(Borders.RED).getLeftMargin(),
-          IconMap.getBorder(Borders.RED).getBottomMargin(),
-          IconMap.getBorder(Borders.RED).getRightMargin());
+          RessourceManager.getBorder(Borders.RED).getTopMargin(),
+          RessourceManager.getBorder(Borders.RED).getLeftMargin(),
+          RessourceManager.getBorder(Borders.RED).getBottomMargin(),
+          RessourceManager.getBorder(Borders.RED).getRightMargin());
 
   /** Border used for name plate */
   public static final Border NAME_BORDER = BorderFactory.createEmptyBorder(2, 4, 3, 4);

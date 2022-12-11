@@ -23,7 +23,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.swing.ImageBorder;
 import org.javatuples.Triplet;
 
-public class IconMap {
+public class RessourceManager {
   private static final String IMAGE_DIR = "net/rptools/maptool/client/image";
   private static final String ICON_DIR = "net/rptools/maptool/client/icons/";
   private static final String CLASSIC_ICONS = ICON_DIR + "classic/";

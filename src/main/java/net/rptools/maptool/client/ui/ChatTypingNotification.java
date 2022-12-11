@@ -23,16 +23,17 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.commons.collections4.map.LinkedMap;
 
 @SuppressWarnings("serial")
 public class ChatTypingNotification extends JPanel {
   private BufferedImage chatImage =
-      ImageUtil.createCompatibleImage(IconMap.getSmallIcon(Icons.CHAT_NOTIFICATION).getImage());
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.CHAT_NOTIFICATION).getImage());
   /**
    * This component is only made visible when there are notifications to be displayed. That means
    * the first couple of IF statements in this method are redundant since paintComponent() will not
@@ -62,7 +63,7 @@ public class ChatTypingNotification extends JPanel {
     int PADDING3 = 3;
     int PADDING2 = 2;
 
-    BufferedImage img = IconMap.getImage(Images.TEXTURE_PANEL);
+    BufferedImage img = RessourceManager.getImage(Images.TEXTURE_PANEL);
     int rowHeight = Math.max(valueFM.getHeight(), keyFM.getHeight());
 
     setBorder(null);

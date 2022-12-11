@@ -34,8 +34,8 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -61,7 +61,8 @@ public class CommandPanel extends JPanel {
   private JButton emotePopupButton;
   private String typedCommandBuffer;
   private BufferedImage cancelButton =
-      ImageUtil.createCompatibleImage(IconMap.getSmallIcon(Icons.ACTION_CANCEL).getImage());
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
   // private long chatNotifyDuration; // Initialize it on first load
@@ -425,7 +426,7 @@ public class CommandPanel extends JPanel {
 
   public JButton getEmotePopupButton() {
     if (emotePopupButton == null) {
-      emotePopupButton = new JButton(IconMap.getSmallIcon(Icons.CHAT_SMILEY));
+      emotePopupButton = new JButton(RessourceManager.getSmallIcon(Icons.CHAT_SMILEY));
       emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
       emotePopupButton.setContentAreaFilled(false);
       emotePopupButton.setBorderPainted(false);
@@ -439,8 +440,8 @@ public class CommandPanel extends JPanel {
   public JToggleButton getScrollLockButton() {
     if (scrollLockButton == null) {
       scrollLockButton = new JToggleButton();
-      scrollLockButton.setIcon(IconMap.getSmallIcon(Icons.CHAT_SCROLL_LOCK_OFF));
-      scrollLockButton.setSelectedIcon(IconMap.getSmallIcon(Icons.CHAT_SCROLL_LOCK_ON));
+      scrollLockButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_OFF));
+      scrollLockButton.setSelectedIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_ON));
       scrollLockButton.setToolTipText(I18N.getText("action.chat.scrolllock.tooltip"));
       scrollLockButton.setUI(new BasicToggleButtonUI());
       scrollLockButton.setBorderPainted(false);
@@ -459,8 +460,9 @@ public class CommandPanel extends JPanel {
   public JToggleButton getNotifyButton() {
     if (chatNotifyButton == null) {
       chatNotifyButton = new JToggleButton();
-      chatNotifyButton.setIcon(IconMap.getSmallIcon(Icons.CHAT_SHOW_TYPING_NOTIFICATION));
-      chatNotifyButton.setSelectedIcon(IconMap.getSmallIcon(Icons.CHAT_HIDE_TYPING_NOTIFICATION));
+      chatNotifyButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SHOW_TYPING_NOTIFICATION));
+      chatNotifyButton.setSelectedIcon(
+          RessourceManager.getSmallIcon(Icons.CHAT_HIDE_TYPING_NOTIFICATION));
       chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);

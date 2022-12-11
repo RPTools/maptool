@@ -23,8 +23,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -86,8 +86,8 @@ public class TopologyModeSelectionPanel extends JToolBar {
       Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();
 
-    button.setIcon(IconMap.getBigIcon(offIcon));
-    button.setSelectedIcon(IconMap.getBigIcon(icon));
+    button.setIcon(RessourceManager.getBigIcon(offIcon));
+    button.setSelectedIcon(RessourceManager.getBigIcon(icon));
 
     button.setToolTipText(I18N.getText(toolTipKey));
     button.setSelected(initiallySelectedTypes.contains(type));

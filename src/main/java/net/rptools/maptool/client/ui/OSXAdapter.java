@@ -21,8 +21,8 @@ import java.awt.desktop.AboutHandler;
 import java.awt.desktop.OpenFilesHandler;
 import java.awt.desktop.PreferencesHandler;
 import java.awt.desktop.QuitHandler;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -105,7 +105,7 @@ public class OSXAdapter {
     // We wait until after we call initialize() so that the asset and image managers
     // are configured.
 
-    Image img = IconMap.getImage(Images.MAPTOOL_DOCK);
+    Image img = RessourceManager.getImage(Images.MAPTOOL_DOCK);
 
     if (Taskbar.isTaskbarSupported()) {
       try {

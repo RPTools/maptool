@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.net.URL;
@@ -25,8 +24,8 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetAvailableListener;
 import net.rptools.maptool.model.AssetManager;
@@ -81,8 +80,8 @@ public class ImageManager {
       new ConcurrentHashMap<MD5Key, Set<ImageObserver>>();
 
   static {
-    TRANSFERING_IMAGE = IconMap.getImage(Images.UNKNOWN);
-    BROKEN_IMAGE = IconMap.getImage(Images.BROKEN);
+    TRANSFERING_IMAGE = RessourceManager.getImage(Images.UNKNOWN);
+    BROKEN_IMAGE = RessourceManager.getImage(Images.BROKEN);
   }
 
   /**

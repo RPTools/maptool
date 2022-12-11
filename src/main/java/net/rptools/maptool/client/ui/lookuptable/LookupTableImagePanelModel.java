@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImagePanelModel;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
@@ -66,7 +66,7 @@ public class LookupTableImagePanelModel implements ImagePanelModel {
       return ImageManager.BROKEN_IMAGE;
     }
 
-    Image image = IconMap.getImage(Images.LOOKUP_TABLE_DEFAULT);
+    Image image = RessourceManager.getImage(Images.LOOKUP_TABLE_DEFAULT);
     if (table.getTableImage() != null) {
       image = ImageManager.getImage(table.getTableImage(), imageObservers);
     }

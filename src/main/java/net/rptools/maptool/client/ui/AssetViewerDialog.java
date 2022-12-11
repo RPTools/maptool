@@ -38,8 +38,8 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 
@@ -49,7 +49,8 @@ public class AssetViewerDialog extends JDialog {
   private boolean sized;
   private Rectangle cancelBounds;
   private BufferedImage cancelButton =
-      ImageUtil.createCompatibleImage(IconMap.getSmallIcon(Icons.ACTION_CANCEL).getImage());
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
   private boolean showHelp;
 
   public AssetViewerDialog(String title, MD5Key assetId) {

@@ -18,14 +18,14 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
 
 public class LightSourceIconOverlay implements ZoneOverlay {
-  private BufferedImage lightSourceIcon = IconMap.getImage(Images.LIGHT_SOURCE);
+  private BufferedImage lightSourceIcon = RessourceManager.getImage(Images.LIGHT_SOURCE);
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
 

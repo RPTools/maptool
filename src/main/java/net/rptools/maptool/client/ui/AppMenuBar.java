@@ -34,8 +34,8 @@ import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -327,8 +327,8 @@ public class AppMenuBar extends JMenuBar {
   protected JToggleButton createMinimizeButton(
       final Icons icon, final Icons offIcon, String hidetooltip, String unhidetooltip) {
     final JToggleButton button = new JToggleButton();
-    button.setSelectedIcon(IconMap.getSmallIcon(Icons.TOOLBAR_HIDE_ON));
-    button.setIcon(IconMap.getSmallIcon(Icons.TOOLBAR_HIDE_OFF));
+    button.setSelectedIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_ON));
+    button.setIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_OFF));
     button.setOpaque(false);
     button.setContentAreaFilled(false);
     button.setBorderPainted(false);
@@ -377,17 +377,17 @@ public class AppMenuBar extends JMenuBar {
         OpenUrlAction temp = new AppActions.OpenUrlAction(key);
         switch (key) {
           case "action.helpurl.01" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_DOCUMENTATION));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_DOCUMENTATION));
           case "action.helpurl.02" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_TUTORIALS));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_TUTORIALS));
           case "action.helpurl.03" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_FORUMS));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FORUMS));
           case "action.helpurl.04" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_NETWORK_SETUP));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_NETWORK_SETUP));
           case "action.helpurl.05" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_SCRIPTING));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SCRIPTING));
           case "action.helpurl.06" -> temp.putValue(
-              Action.SMALL_ICON, IconMap.getSmallIcon(Icons.MENU_FRAMEWORKS));
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FRAMEWORKS));
         }
         menu.add(new JMenuItem(temp));
       }

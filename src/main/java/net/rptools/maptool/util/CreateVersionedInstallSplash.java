@@ -37,8 +37,8 @@ import javafx.stage.StageStyle;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import net.rptools.maptool.client.swing.SplashScreen;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -100,7 +100,7 @@ public class CreateVersionedInstallSplash extends Application {
   }
 
   public static BufferedImage createLaunchSplash(String versionText) {
-    Image splashIcon = IconMap.getImage(Images.MAPTOOL_SPLASH);
+    Image splashIcon = RessourceManager.getImage(Images.MAPTOOL_SPLASH);
     if (resourceImage != null) {
       splashIcon =
           new ImageIcon(SplashScreen.class.getClassLoader().getResource(resourceImage)).getImage();

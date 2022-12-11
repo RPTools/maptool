@@ -32,8 +32,8 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -146,7 +146,9 @@ public class InitiativePanel extends JPanel
     popupMenu = new JPopupMenu();
     toolBar.add(
         SwingUtil.makePopupMenuButton(
-            new JButton(IconMap.getSmallIcon(Icons.ACTION_SETTINGS)), () -> popupMenu, false));
+            new JButton(RessourceManager.getSmallIcon(Icons.ACTION_SETTINGS)),
+            () -> popupMenu,
+            false));
 
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));
@@ -189,10 +191,12 @@ public class InitiativePanel extends JPanel
     map.put("REMOVE_TOKEN_ACTION", REMOVE_TOKEN_ACTION);
 
     // Set action text and icons
-    PREV_ACTION.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.ACTION_PREVIOUS));
-    TOGGLE_HOLD_ACTION.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.ACTION_PAUSE));
-    NEXT_ACTION.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.ACTION_NEXT));
-    RESET_COUNTER_ACTION.putValue(Action.SMALL_ICON, IconMap.getSmallIcon(Icons.ACTION_RESET));
+    PREV_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PREVIOUS));
+    TOGGLE_HOLD_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PAUSE));
+    NEXT_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_NEXT));
+    RESET_COUNTER_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_RESET));
 
     I18N.setAction("initPanel.sort", SORT_LIST_ACTION);
     I18N.setAction("initPanel.toggleHold", TOGGLE_HOLD_ACTION);

@@ -33,8 +33,8 @@ import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.border.BevelBorder;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 
 public class ColorPicker extends JPanel {
   private final JFrame owner;
@@ -116,21 +116,21 @@ public class ColorPicker extends JPanel {
       recentColors.add(paintedPanel);
     }
     snapToggle = (JToggleButton) panel.getButton("toggleSnapToGrid");
-    snapToggle.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_SNAP_OFF));
-    snapToggle.setSelectedIcon(IconMap.getSmallIcon(Icons.COLORPICKER_SNAP_ON));
+    snapToggle.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_SNAP_OFF));
+    snapToggle.setSelectedIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_SNAP_ON));
 
     squareCapToggle = (JToggleButton) panel.getButton("toggleSquareCap");
-    squareCapToggle.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_CAP_ROUND));
-    squareCapToggle.setSelectedIcon(IconMap.getSmallIcon(Icons.COLORPICKER_CAP_SQUARE));
+    squareCapToggle.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_CAP_ROUND));
+    squareCapToggle.setSelectedIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_CAP_SQUARE));
 
     eraseToggle = (JToggleButton) panel.getButton("toggleErase");
-    eraseToggle.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_PENCIL));
-    eraseToggle.setSelectedIcon(IconMap.getSmallIcon(Icons.COLORPICKER_ERASER));
+    eraseToggle.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_PENCIL));
+    eraseToggle.setSelectedIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_ERASER));
 
     var opacityLabel = (JETALabel) panel.getComponentByName("opacityLabel");
-    opacityLabel.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_OPACITY));
+    opacityLabel.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_OPACITY));
     var penWidthLabel = (JETALabel) panel.getComponentByName("penWidthLabel");
-    penWidthLabel.setIcon(IconMap.getSmallIcon(Icons.COLORPICKER_PEN_WIDTH));
+    penWidthLabel.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_PEN_WIDTH));
 
     penWidthSpinner = panel.getSpinner("penWidth");
     penWidthSpinner.setModel(new SpinnerNumberModel(3, 1, maxPenWidth, 1));

@@ -21,8 +21,8 @@ import javax.swing.Icon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import org.apache.logging.log4j.LogManager;
@@ -36,7 +36,7 @@ public class AssetCacheStatusBar extends JLabel {
   private static Icon assetCacheIcon;
 
   static {
-    assetCacheIcon = IconMap.getSmallIcon(Icons.STATUSBAR_ASSET_CACHE);
+    assetCacheIcon = RessourceManager.getSmallIcon(Icons.STATUSBAR_ASSET_CACHE);
   }
 
   public AssetCacheStatusBar() {

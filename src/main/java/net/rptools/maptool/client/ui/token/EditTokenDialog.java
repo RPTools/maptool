@@ -100,8 +100,8 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
@@ -131,9 +131,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   private static final Logger log = LogManager.getLogger();
   private static final long serialVersionUID = 1295729281890170792L;
-  private static final ImageIcon REFRESH_ICON_ON = IconMap.getBigIcon(Icons.EDIT_TOKEN_REFRESH_ON);
+  private static final ImageIcon REFRESH_ICON_ON =
+      RessourceManager.getBigIcon(Icons.EDIT_TOKEN_REFRESH_ON);
   private static final ImageIcon REFRESH_ICON_OFF =
-      IconMap.getBigIcon(Icons.EDIT_TOKEN_REFRESH_OFF);
+      RessourceManager.getBigIcon(Icons.EDIT_TOKEN_REFRESH_OFF);
   // private CharSheetController controller;
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
@@ -369,23 +370,26 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     getWallVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.WALL_VBL));
-    getWallVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
-    getWallVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
+    getWallVblToggle()
+        .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
+    getWallVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON));
 
     getHillVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.HILL_VBL));
-    getHillVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
-    getHillVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
+    getHillVblToggle()
+        .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
+    getHillVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON));
 
     getPitVblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.PIT_VBL));
-    getPitVblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
-    getPitVblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
+    getPitVblToggle()
+        .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
+    getPitVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
 
     getMblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.MBL));
-    getMblToggle().setSelectedIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
-    getMblToggle().setIcon(IconMap.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
+    getMblToggle().setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
+    getMblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
 
     getAlwaysVisibleButton().setSelected(token.isAlwaysVisible());
 
@@ -413,7 +417,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), true);
       tabbedPane.setIconAt(
-          tabbedPane.indexOfTab(heroLabTitle), IconMap.getSmallIcon(Icons.EDIT_TOKEN_HEROLAB));
+          tabbedPane.indexOfTab(heroLabTitle),
+          RessourceManager.getSmallIcon(Icons.EDIT_TOKEN_HEROLAB));
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
@@ -1405,7 +1410,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 getTokenTopologyPanel()
                     .setTopologyColorPick(getTopologyIgnoreColorWell().getColor()));
 
-    getTopologyColorPickerToggleButton().setIcon(IconMap.getBigIcon(Icons.EDIT_TOKEN_COLOR_PICKER));
+    getTopologyColorPickerToggleButton()
+        .setIcon(RessourceManager.getBigIcon(Icons.EDIT_TOKEN_COLOR_PICKER));
     getTopologyColorPickerToggleButton()
         .addActionListener(
             e -> {

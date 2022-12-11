@@ -49,8 +49,8 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -99,7 +99,7 @@ public class TokenTopologyPanel extends JPanel {
   private ScheduledFuture<?> future = executor.schedule(() -> {}, 0, TimeUnit.MILLISECONDS);
 
   private boolean mouseDragged = false;
-  BufferedImage squaresTexture = IconMap.getImage(Images.TEXTURE_SQUARES);
+  BufferedImage squaresTexture = RessourceManager.getImage(Images.TEXTURE_SQUARES);
 
   public TokenTopologyPanel(EditTokenDialog editTokenDialog) {
     this.editTokenDialog = editTokenDialog;
