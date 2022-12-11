@@ -1028,7 +1028,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public JLabel getChatActionLabel() {
     if (chatActionLabel == null) {
-      chatActionLabel = new JLabel(new ImageIcon(AppStyle.chatImage));
+      chatActionLabel = new JLabel(IconMap.getSmallIcon(Icons.CHAT_NOTIFICATION));
       chatActionLabel.setSize(chatActionLabel.getPreferredSize());
       chatActionLabel.setVisible(false);
       chatActionLabel.addMouseListener(

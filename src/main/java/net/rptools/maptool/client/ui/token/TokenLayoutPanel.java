@@ -32,6 +32,8 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
@@ -189,13 +191,13 @@ public class TokenLayoutPanel extends JPanel {
     Point centerPoint = new Point(size.width / 2, size.height / 2);
     Graphics2D g2d = (Graphics2D) g;
 
+    var panelTexture = IconMap.getImage(Images.TEXTURE_PANEL);
     // Background
     ((Graphics2D) g)
         .setPaint(
             new TexturePaint(
-                AppStyle.panelTexture,
-                new Rectangle(
-                    0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+                panelTexture,
+                new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
     g2d.fillRect(0, 0, size.width, size.height);
     AppStyle.shadowBorder.paintWithin((Graphics2D) g, 0, 0, size.width, size.height);
 

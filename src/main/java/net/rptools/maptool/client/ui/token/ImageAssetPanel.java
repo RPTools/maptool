@@ -34,15 +34,16 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.List;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JPanel;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableHelper;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
@@ -84,7 +85,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 
   public JButton getCancelButton() {
     if (cancelButton == null) {
-      cancelButton = new JButton(new ImageIcon(AppStyle.cancelButton));
+      cancelButton = new JButton(IconMap.getSmallIcon(Icons.ACTION_CANCEL));
       cancelButton.setContentAreaFilled(false);
       cancelButton.setBorderPainted(false);
       cancelButton.setFocusable(false);
@@ -97,7 +98,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
 
   public JButton getAddButton() {
     if (addButton == null) {
-      addButton = new JButton(new ImageIcon(AppStyle.addButton));
+      addButton = new JButton(IconMap.getSmallIcon(Icons.ACTION_NEW_SMALL));
       addButton.setContentAreaFilled(false);
       addButton.setBorderPainted(false);
       addButton.setFocusable(false);
@@ -140,12 +141,12 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
   @Override
   protected void paintComponent(Graphics g) {
     Dimension size = getSize();
+    var panelTexture = IconMap.getImage(Images.TEXTURE_PANEL);
     ((Graphics2D) g)
         .setPaint(
             new TexturePaint(
-                AppStyle.panelTexture,
-                new Rectangle(
-                    0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+                panelTexture,
+                new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
     g.fillRect(0, 0, size.width, size.height);
 
     if (imageId == null) {

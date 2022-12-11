@@ -64,6 +64,8 @@ import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -105,6 +107,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private int dragOffsetY;
   private int dragStartX;
   private int dragStartY;
+
+  private BufferedImage resizeImg = IconMap.getImage(Images.RESIZE);
 
   public StampTool() {
     layerSelectionDialog =
@@ -1281,11 +1285,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               ScreenPoint.fromZonePoint(renderer, footprintBounds.x, footprintBounds.y);
 
           // distance to place the resize image in the lower left corner of an unrotated stamp
-          double tx = stampLocation.x + scaledWidth - AppStyle.resize.getWidth();
-          double ty = stampLocation.y + scaledHeight - AppStyle.resize.getHeight();
+          double tx = stampLocation.x + scaledWidth - resizeImg.getWidth();
+          double ty = stampLocation.y + scaledHeight - resizeImg.getHeight();
 
-          Rectangle resizeBounds =
-              new Rectangle(0, 0, AppStyle.resize.getHeight(), AppStyle.resize.getWidth());
+          Rectangle resizeBounds = new Rectangle(0, 0, resizeImg.getHeight(), resizeImg.getWidth());
           Area resizeBoundsArea = new Area(resizeBounds);
 
           AffineTransform at = new AffineTransform();
@@ -1297,16 +1300,16 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             // rotate the resize image with the stamp.
             double theta = Math.toRadians(-token.getFacing() - 90);
             double anchorX =
-                -scaledWidth / 2 + AppStyle.resize.getWidth() - (token.getAnchor().x * scale);
+                -scaledWidth / 2 + resizeImg.getWidth() - (token.getAnchor().x * scale);
             double anchorY =
-                -scaledHeight / 2 + AppStyle.resize.getHeight() - (token.getAnchor().y * scale);
+                -scaledHeight / 2 + resizeImg.getHeight() - (token.getAnchor().y * scale);
             at.rotate(theta, anchorX, anchorY);
           }
           // place the map over the image.
           resizeBoundsArea.transform(at);
           resizeBoundsMap.put(resizeBoundsArea, token);
 
-          g.drawImage(AppStyle.resize, at, renderer);
+          g.drawImage(resizeImg, at, renderer);
         }
 
         // g.setColor(Color.red);

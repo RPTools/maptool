@@ -16,9 +16,6 @@ package net.rptools.maptool.client;
 
 import java.awt.Color;
 import java.awt.Font;
-import java.awt.image.BufferedImage;
-import java.io.IOException;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.IconMap;
@@ -33,9 +30,7 @@ public class AppStyle {
   public static ImageBorder miniMapBorder = IconMap.getBorder(Borders.GRAY);
   public static ImageBorder shadowBorder = IconMap.getBorder(Borders.SHADOW);
   public static ImageBorder commonMacroBorder = IconMap.getBorder(Borders.HIGHLIGHT);
-
   public static Font labelFont = Font.decode("serif-NORMAL-12");
-
   public static Color selectionBoxOutline = Color.black;
   public static Color selectionBoxFill = Color.blue;
   public static Color resizeBoxOutline = Color.red;
@@ -50,44 +45,4 @@ public class AppStyle {
   public static Color tokenHillVblColor = new Color(255, 136, 0, 128);
   public static Color tokenPitVblColor = new Color(255, 0, 0, 128);
   public static Color tokenMblColor = new Color(255, 128, 255, 128);
-  public static BufferedImage notVisible;
-  public static BufferedImage cellWaypointImage;
-  public static BufferedImage blockMoveImage;
-  public static BufferedImage stackImage;
-  public static BufferedImage chatImage;
-  public static BufferedImage cancelButton;
-  public static BufferedImage addButton;
-  public static BufferedImage panelTexture;
-  public static BufferedImage squaresTexture;
-  public static BufferedImage lookupTableDefaultImage;
-  public static BufferedImage resize;
-  public static BufferedImage lightSourceIcon;
-
-  static {
-    try {
-      // Set defaults
-      notVisible = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/notvisible.png");
-      cellWaypointImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/redDot.png");
-      blockMoveImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/block_move.png");
-      stackImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/stack.png");
-      chatImage = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/chat-blue.png");
-      panelTexture =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/panelTexture.jpg");
-      squaresTexture =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/squaresTexture.png");
-
-      cancelButton = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/cancel_sm.png");
-      addButton = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/add_sm.png");
-
-      lookupTableDefaultImage =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/document.png");
-      resize = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/resize.png");
-      lightSourceIcon =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/lightbulb.png");
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
 }

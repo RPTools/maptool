@@ -49,6 +49,8 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -97,6 +99,7 @@ public class TokenTopologyPanel extends JPanel {
   private ScheduledFuture<?> future = executor.schedule(() -> {}, 0, TimeUnit.MILLISECONDS);
 
   private boolean mouseDragged = false;
+  BufferedImage squaresTexture = IconMap.getImage(Images.TEXTURE_SQUARES);
 
   public TokenTopologyPanel(EditTokenDialog editTokenDialog) {
     this.editTokenDialog = editTokenDialog;
@@ -243,12 +246,9 @@ public class TokenTopologyPanel extends JPanel {
     ((Graphics2D) g)
         .setPaint(
             new TexturePaint(
-                AppStyle.squaresTexture,
+                squaresTexture,
                 new java.awt.Rectangle(
-                    0,
-                    0,
-                    AppStyle.squaresTexture.getWidth() * 2,
-                    AppStyle.squaresTexture.getHeight() * 2)));
+                    0, 0, squaresTexture.getWidth() * 2, squaresTexture.getHeight() * 2)));
 
     g2d.fillRect(0, 0, panelSize.width, panelSize.height);
     AppStyle.shadowBorder.paintWithin((Graphics2D) g, 0, 0, panelSize.width, panelSize.height);

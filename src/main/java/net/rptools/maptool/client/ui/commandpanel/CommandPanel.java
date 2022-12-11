@@ -61,6 +61,8 @@ public class CommandPanel extends JPanel {
   private JPopupMenu emotePopup;
   private JButton emotePopupButton;
   private String typedCommandBuffer;
+  private BufferedImage cancelButton =
+      ImageUtil.createCompatibleImage(IconMap.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
   // private long chatNotifyDuration; // Initialize it on first load
@@ -910,7 +912,6 @@ public class CommandPanel extends JPanel {
           this);
 
       // Cancel
-      BufferedImage cancelButton = AppStyle.cancelButton;
       int x = size.width - cancelButton.getWidth();
       int y = 2;
       g.drawImage(cancelButton, x, y, this);

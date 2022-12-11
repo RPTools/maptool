@@ -31,9 +31,11 @@ public class IconMap {
       new HashMap<>() {
         {
           put(Icons.ACTION_NEW, IMAGE_DIR + "/add.png");
+          put(Icons.ACTION_NEW_SMALL, "net/rptools/maptool/client/image/add_sm.png");
           put(Icons.ACTION_EDIT, IMAGE_DIR + "/pencil.png");
           put(Icons.ACTION_DELETE, IMAGE_DIR + "/delete.png");
           put(Icons.ACTION_COPY, IMAGE_DIR + "/page_copy.png");
+          put(Icons.ACTION_CANCEL, "net/rptools/maptool/client/image/cancel_sm.png");
           //    put(Icons.ACTION_IMPORT, "");
           //    put(Icons.ACTION_EXPORT, "");
           put(Icons.ACTION_SETTINGS, IMAGE_DIR + "/arrow_menu.png");
@@ -60,6 +62,7 @@ public class IconMap {
           put(Icons.CHAT_HIDE_TYPING_NOTIFICATION, IMAGE_DIR + "/chatNotifyOff.png");
           put(Icons.CHAT_SCROLL_LOCK_ON, IMAGE_DIR + "/comments.png");
           put(Icons.CHAT_SCROLL_LOCK_OFF, IMAGE_DIR + "/comments_delete.png");
+          put(Icons.CHAT_NOTIFICATION, "net/rptools/maptool/client/image/chat-blue.png");
           put(Icons.EDIT_TOKEN_HEROLAB, IMAGE_DIR + "/hero-lab-icon-small.png");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, IMAGE_DIR + "/color-picker-32.png");
           put(Icons.EDIT_TOKEN_REFRESH_ON, IMAGE_DIR + "/refresh_arrows_small.png");
@@ -153,6 +156,7 @@ public class IconMap {
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_ON, IMAGE_DIR + "/tool/select-npc-blue.png");
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_OFF, IMAGE_DIR + "/tool/select-npc-blue-off.png");
           put(Icons.TOOLBAR_ZONE, IMAGE_DIR + "/tool/btn-world.png");
+          put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, "net/rptools/maptool/client/image/notvisible.png");
           put(Icons.WINDOW_CONNECTIONS, IMAGE_DIR + "/computer.png");
           put(Icons.WINDOW_MAP_EXPLORER, IMAGE_DIR + "/eye.png");
           put(Icons.WINDOW_DRAW_EXPLORER, IMAGE_DIR + "/eye.png");
@@ -178,7 +182,15 @@ public class IconMap {
           put(Images.BROKEN, "net/rptools/maptool/client/image/broken.png");
           put(Images.UNKNOWN, "net/rptools/maptool/client/image/unknown.png");
           put(Images.EMPTY, IMAGE_DIR + "/empty.png");
+          put(Images.LIGHT_SOURCE, "net/rptools/maptool/client/image/lightbulb.png");
+          put(Images.LOOKUP_TABLE_DEFAULT, "net/rptools/maptool/client/image/document.png");
+          put(Images.RESIZE, "net/rptools/maptool/client/image/resize.png");
           put(Images.TEXTURE_TRANSPARENT, IMAGE_DIR + "/transparent.png");
+          put(Images.TEXTURE_PANEL, "net/rptools/maptool/client/image/panelTexture.jpg");
+          put(Images.TEXTURE_SQUARES, "net/rptools/maptool/client/image/squaresTexture.png");
+          put(Images.ZONE_RENDERER_CELL_WAYPOINT, "net/rptools/maptool/client/image/redDot.png");
+          put(Images.ZONE_RENDERER_BLOCK_MOVE, "net/rptools/maptool/client/image/block_move.png");
+          put(Images.ZONE_RENDERER_STACK_IMAGE, "net/rptools/maptool/client/image/stack.png");
         }
       };
 

@@ -22,7 +22,6 @@ import java.awt.event.MouseEvent;
 import java.util.Collections;
 import java.util.List;
 import javax.swing.*;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -207,9 +206,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
    */
   @Deprecated
   public void addCancelButton() {
-    ImageIcon i = new ImageIcon(AppStyle.cancelButton);
     JButton button =
-        new JButton("Cancel Impersonation", i) {
+        new JButton("Cancel Impersonation", IconMap.getSmallIcon(Icons.ACTION_CANCEL)) {
           @Override
           public Insets getInsets() {
             return new Insets(3, 3, 3, 3);

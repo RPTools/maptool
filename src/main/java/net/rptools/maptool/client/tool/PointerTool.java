@@ -40,6 +40,8 @@ import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.*;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -66,6 +68,7 @@ import org.apache.logging.log4j.Logger;
 public class PointerTool extends DefaultTool {
   private static final long serialVersionUID = 8606021718606275084L;
   private static final Logger log = LogManager.getLogger(PointerTool.class);
+  private BufferedImage panelTexture = IconMap.getImage(Images.TEXTURE_PANEL);
 
   private boolean isShowingTokenStackPopup;
   private boolean isShowingPointer;
@@ -1867,12 +1870,8 @@ public class PointerTool extends DefaultTool {
                     statSize.height);
             statsG.setPaint(
                 new TexturePaint(
-                    AppStyle.panelTexture,
-                    new Rectangle(
-                        0,
-                        0,
-                        AppStyle.panelTexture.getWidth(),
-                        AppStyle.panelTexture.getHeight())));
+                    panelTexture,
+                    new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);
@@ -1945,12 +1944,8 @@ public class PointerTool extends DefaultTool {
 
             statsG.setPaint(
                 new TexturePaint(
-                    AppStyle.panelTexture,
-                    new Rectangle(
-                        0,
-                        0,
-                        AppStyle.panelTexture.getWidth(),
-                        AppStyle.panelTexture.getHeight())));
+                    panelTexture,
+                    new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
             AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
@@ -2029,9 +2024,8 @@ public class PointerTool extends DefaultTool {
       // g.setComposite(composite);
       g.setPaint(
           new TexturePaint(
-              AppStyle.panelTexture,
-              new Rectangle(
-                  0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+              panelTexture,
+              new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
       g.fillRect(location.x, location.y, size.width, size.height);
 
       // Content

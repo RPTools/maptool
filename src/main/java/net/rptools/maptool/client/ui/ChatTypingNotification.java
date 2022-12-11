@@ -14,24 +14,25 @@
  */
 package net.rptools.maptool.client.ui;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Set;
 import javax.swing.JPanel;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.language.I18N;
 import org.apache.commons.collections4.map.LinkedMap;
 
 @SuppressWarnings("serial")
 public class ChatTypingNotification extends JPanel {
+  private BufferedImage chatImage =
+      ImageUtil.createCompatibleImage(IconMap.getSmallIcon(Icons.CHAT_NOTIFICATION).getImage());
   /**
    * This component is only made visible when there are notifications to be displayed. That means
    * the first couple of IF statements in this method are redundant since paintComponent() will not
@@ -61,7 +62,7 @@ public class ChatTypingNotification extends JPanel {
     int PADDING3 = 3;
     int PADDING2 = 2;
 
-    BufferedImage img = AppStyle.panelTexture;
+    BufferedImage img = IconMap.getImage(Images.TEXTURE_PANEL);
     int rowHeight = Math.max(valueFM.getHeight(), keyFM.getHeight());
 
     setBorder(null);
@@ -85,7 +86,7 @@ public class ChatTypingNotification extends JPanel {
                 + PADDING2);
 
     int y = bounds.y + rowHeight;
-    rowHeight = Math.max(rowHeight, AppStyle.chatImage.getHeight());
+    rowHeight = Math.max(rowHeight, chatImage.getHeight());
 
     setSize(
         getWidth(),
@@ -101,8 +102,8 @@ public class ChatTypingNotification extends JPanel {
         new Rectangle(
             AppStyle.miniMapBorder.getLeftMargin() + PADDING7,
             AppStyle.miniMapBorder.getTopMargin() + PADDING7,
-            AppStyle.chatImage.getWidth(),
-            AppStyle.chatImage.getHeight());
+            chatImage.getWidth(),
+            chatImage.getHeight());
 
     Set<String> keySet = chatTypers.keySet();
     @SuppressWarnings("unchecked")
@@ -123,7 +124,7 @@ public class ChatTypingNotification extends JPanel {
             rowHeight);
       }
       g.drawImage(
-          AppStyle.chatImage,
+          chatImage,
           bounds.x + 5,
           y - keyFM.getAscent(),
           (int) rightRow.getWidth(),
@@ -135,7 +136,7 @@ public class ChatTypingNotification extends JPanel {
       statsG.setFont(boldFont);
       statsG.drawString(
           I18N.getText("msg.commandPanel.liveTyping", playerNamer),
-          bounds.x + AppStyle.chatImage.getWidth() + PADDING7 * 2,
+          bounds.x + chatImage.getWidth() + PADDING7 * 2,
           y + 5);
 
       y += PADDING2 + rowHeight;
