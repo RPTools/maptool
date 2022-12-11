@@ -34,7 +34,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,12 +44,10 @@ import java.util.Set;
 import java.util.Stack;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
@@ -126,12 +123,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
                 }
               }
             });
-    try {
-      setIcon(
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/stamper.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
   }
 
   public void updateLayerSelectionView() {

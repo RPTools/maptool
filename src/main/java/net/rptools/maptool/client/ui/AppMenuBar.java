@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.AppConstants;
@@ -64,8 +63,8 @@ public class AppMenuBar extends JMenuBar {
 
     add(
         createMinimizeButton(
-            "net/rptools/maptool/client/image/tool/downArrow.png",
-            "net/rptools/maptool/client/image/tool/upArrow.png",
+            Icons.TOOLBAR_HIDE_ON,
+            Icons.TOOLBAR_HIDE_OFF,
             I18N.getText("tools.hidetoolbar.tooltip"),
             I18N.getText("tools.unhidetoolbar.tooltip")));
   }
@@ -326,14 +325,10 @@ public class AppMenuBar extends JMenuBar {
    * @return the JToggleButton
    */
   protected JToggleButton createMinimizeButton(
-      final String icon, final String offIcon, String hidetooltip, String unhidetooltip) {
+      final Icons icon, final Icons offIcon, String hidetooltip, String unhidetooltip) {
     final JToggleButton button = new JToggleButton();
-    try {
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage((icon))));
-      button.setIcon(new ImageIcon(ImageUtil.getImage((offIcon))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    button.setSelectedIcon(IconMap.getSmallIcon(Icons.TOOLBAR_HIDE_ON));
+    button.setIcon(IconMap.getSmallIcon(Icons.TOOLBAR_HIDE_OFF));
     button.setOpaque(false);
     button.setContentAreaFilled(false);
     button.setBorderPainted(false);

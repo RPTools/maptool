@@ -50,6 +50,13 @@ public class IconMap {
           put(Icons.ACTION_RESET_TOKEN_SELECTION, IMAGE_DIR + "/arrow_rotate_clockwise.png");
           put(Icons.ACTION_OPEN, CLASSIC_ICONS + "expand.png");
           put(Icons.ACTION_CLOSE, CLASSIC_ICONS + "collapse.png");
+          put(Icons.ASSETPANEL_PDF, "net/rptools/maptool/client/image/pdf_icon.png");
+          put(Icons.ASSETPANEL_PDF_FOLDER, "net/rptools/maptool/client/image/pdf_folder.png");
+          put(Icons.ASSETPANEL_HEROLABS, "net/rptools/maptool/client/image/hero-lab-icon.png");
+          put(
+              Icons.ASSETPANEL_HEROLABS_FOLDER,
+              "net/rptools/maptool/client/image/hero_lab_folder.png");
+          put(Icons.ASSETPANEL_SEARCH, "net/rptools/maptool/client/image/zoom.png");
           put(Icons.COLORPICKER_ERASER, CLASSIC_ICONS + "eraser.png");
           put(Icons.COLORPICKER_CAP_ROUND, CLASSIC_ICONS + "round_cap.png");
           put(Icons.COLORPICKER_CAP_SQUARE, CLASSIC_ICONS + "square_cap.png");
@@ -63,10 +70,69 @@ public class IconMap {
           put(Icons.CHAT_SCROLL_LOCK_ON, IMAGE_DIR + "/comments.png");
           put(Icons.CHAT_SCROLL_LOCK_OFF, IMAGE_DIR + "/comments_delete.png");
           put(Icons.CHAT_NOTIFICATION, "net/rptools/maptool/client/image/chat-blue.png");
+          put(Icons.CHAT_SMILEY, "net/rptools/maptool/client/image/smiley/emsmile.png");
+          put(
+              Icons.DRAWPANEL_AREA_ERASE,
+              "net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png");
+          put(
+              Icons.DRAWPANEL_AREA_DRAW,
+              "net/rptools/maptool/client/image/tool/drawpanel-poly.png");
+          put(
+              Icons.DRAWPANEL_POLYGON_ERASE,
+              "net/rptools/maptool/client/image/tool/drawpanel-poly-erase.png");
+          put(
+              Icons.DRAWPANEL_POLYGON_DRAW,
+              "net/rptools/maptool/client/image/tool/drawpanel-poly.png");
+          put(
+              Icons.DRAWPANEL_ELLIPSE_ERASE,
+              "net/rptools/maptool/client/image/tool/drawpanel-ellipse-erase.png");
+          put(
+              Icons.DRAWPANEL_ELLIPSE_DRAW,
+              "net/rptools/maptool/client/image/tool/drawpanel-ellipse.png");
+          put(
+              Icons.DRAWPANEL_RECTANGLE_ERASE,
+              "net/rptools/maptool/client/image/tool/drawpanel-rectangle-erase.png");
+          put(
+              Icons.DRAWPANEL_RECTANGLE_DRAW,
+              "net/rptools/maptool/client/image/tool/drawpanel-rectangle.png");
+          put(
+              Icons.DRAWPANEL_LINE_ERASE,
+              "net/rptools/maptool/client/image/tool/drawpanel-line-erase.png");
+          put(
+              Icons.DRAWPANEL_LINE_DRAW,
+              "net/rptools/maptool/client/image/tool/drawpanel-line.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUS,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-vertex-radius.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUSCELL,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-cell-radius.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_CONE,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-cone.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINE,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-vertex-line.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINECELL,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-cell-line.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_BURST,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-burst.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_BLAST,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-square.png");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_WALL,
+              "net/rptools/maptool/client/image/tool/drawpanel-temp-blue-wall.png");
           put(Icons.EDIT_TOKEN_HEROLAB, IMAGE_DIR + "/hero-lab-icon-small.png");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, IMAGE_DIR + "/color-picker-32.png");
           put(Icons.EDIT_TOKEN_REFRESH_ON, IMAGE_DIR + "/refresh_arrows_small.png");
           put(Icons.EDIT_TOKEN_REFRESH_OFF, IMAGE_DIR + "/refresh_off_arrows_small.png");
+          put(
+              Icons.INITIATIVE_CURRENT_INDICATOR,
+              "net/rptools/maptool/client/image/currentIndicator.png");
+          put(Icons.MAPTOOL, "net/rptools/maptool/client/image/maptool_icon.png");
           put(Icons.MENU_DOCUMENTATION, IMAGE_DIR + "/book_open.png");
           put(Icons.MENU_FORUMS, IMAGE_DIR + "/marker.png");
           put(Icons.MENU_FRAMEWORKS, IMAGE_DIR + "/minilogo.png");
@@ -157,6 +223,8 @@ public class IconMap {
           put(Icons.TOOLBAR_TOKENSELECTION_NPC_OFF, IMAGE_DIR + "/tool/select-npc-blue-off.png");
           put(Icons.TOOLBAR_ZONE, IMAGE_DIR + "/tool/btn-world.png");
           put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, "net/rptools/maptool/client/image/notvisible.png");
+          put(Icons.TOOLBAR_HIDE_ON, "net/rptools/maptool/client/image/tool/downArrow.png");
+          put(Icons.TOOLBAR_HIDE_OFF, "net/rptools/maptool/client/image/tool/upArrow.png");
           put(Icons.WINDOW_CONNECTIONS, IMAGE_DIR + "/computer.png");
           put(Icons.WINDOW_MAP_EXPLORER, IMAGE_DIR + "/eye.png");
           put(Icons.WINDOW_DRAW_EXPLORER, IMAGE_DIR + "/eye.png");
@@ -164,6 +232,7 @@ public class IconMap {
           put(Icons.WINDOW_CHAT, IMAGE_DIR + "/application.png");
           put(Icons.WINDOW_TABLES, IMAGE_DIR + "/layers.png");
           put(Icons.WINDOW_INITIATIVE, IMAGE_DIR + "/initiativePanel.png");
+          put(Icons.WINDOW_LOG, "net/rptools/maptool/client/image/log4j_icon.png");
           put(Icons.WINDOW_GLOBAL_MACROS, IMAGE_DIR + "/global_panel.png");
           put(Icons.WINDOW_CAMPAIGN_MACROS, IMAGE_DIR + "/campaign_panel.png");
           put(Icons.WINDOW_GM_MACROS, IMAGE_DIR + "/campaign_panel.png");
@@ -180,10 +249,34 @@ public class IconMap {
           put(Images.BOX_GRAY, "net/rptools/maptool/client/image/grayLabelbox.png");
           put(Images.BOX_DARK_GRAY, "net/rptools/maptool/client/image/darkGreyLabelbox.png");
           put(Images.BROKEN, "net/rptools/maptool/client/image/broken.png");
+          put(Images.CURSOR_POINTER, "net/rptools/maptool/client/image/arrow.png");
+          put(Images.CURSOR_LOOK_HERE, "net/rptools/maptool/client/image/look_here.png");
+          put(Images.CURSOR_THOUGHT, "net/rptools/maptool/client/image/thought.png");
+          put(
+              Images.DECORATION_HEROLABS,
+              "net/rptools/maptool/client/image/hero-lab-decoration.png");
+          put(Images.DECORATION_RPTOK, "net/rptools/maptool/client/image/rptokIcon.png");
           put(Images.UNKNOWN, "net/rptools/maptool/client/image/unknown.png");
           put(Images.EMPTY, IMAGE_DIR + "/empty.png");
+          put(Images.GRID_BORDER_HEX, "net/rptools/maptool/client/image/hexBorder.png");
+          put(Images.GRID_BORDER_ISOMETRIC, "net/rptools/maptool/client/image/hexBorder.png");
+          put(Images.GRID_BORDER_SQUARE, "net/rptools/maptool/client/image/whiteBorder.png");
+          put(
+              Images.GRID_BORDER_SQUARE_RED,
+              "net/rptools/maptool/client/image/grid-square-red.png");
+          put(Images.HEROLABS_TOKEN, "net/rptools/maptool/client/image/hero-lab-token.png");
+          put(
+              Images.HEROLABS_PORTRAIT,
+              "net/rptools/maptool/client/image/powered_by_hero_lab_small.png");
           put(Images.LIGHT_SOURCE, "net/rptools/maptool/client/image/lightbulb.png");
           put(Images.LOOKUP_TABLE_DEFAULT, "net/rptools/maptool/client/image/document.png");
+          put(Images.MAPTOOL_LOGO, "net/rptools/maptool/client/image/maptool-logo.png");
+          put(Images.MAPTOOL_LOGO_MINI, "net/rptools/maptool/client/image/minilogo.png");
+          put(Images.MAPTOOL_DOCK, "net/rptools/maptool/client/image/maptool-dock-icon.png");
+          put(
+              Images.MAPTOOL_SPLASH,
+              "net/rptools/maptool/client/image/maptool_splash_template.png");
+          put(Images.MEASURE, "net/rptools/maptool/client/image/cursor-tape-measure.png");
           put(Images.RESIZE, "net/rptools/maptool/client/image/resize.png");
           put(Images.TEXTURE_TRANSPARENT, IMAGE_DIR + "/transparent.png");
           put(Images.TEXTURE_PANEL, "net/rptools/maptool/client/image/panelTexture.jpg");

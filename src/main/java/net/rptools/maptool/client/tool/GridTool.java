@@ -27,12 +27,10 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
-import java.io.IOException;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JSlider;
 import javax.swing.JSpinner;
@@ -43,7 +41,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -84,11 +81,6 @@ public class GridTool extends DefaultTool {
   private boolean oldShowGrid;
 
   public GridTool() {
-    try {
-      setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/grid.gif")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
     // Create the control panel
     controlPanel =
         new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustGridControlPanel.xml");

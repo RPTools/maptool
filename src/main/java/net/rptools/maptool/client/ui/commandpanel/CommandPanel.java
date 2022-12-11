@@ -18,7 +18,6 @@ import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -426,20 +425,13 @@ public class CommandPanel extends JPanel {
 
   public JButton getEmotePopupButton() {
     if (emotePopupButton == null) {
-      try {
-        emotePopupButton =
-            new JButton(
-                new ImageIcon(
-                    ImageUtil.getImage("net/rptools/maptool/client/image/smiley/emsmile.png")));
-        emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
-        emotePopupButton.setContentAreaFilled(false);
-        emotePopupButton.setBorderPainted(false);
-        emotePopupButton.setFocusPainted(false);
-        emotePopupButton.setOpaque(false);
-        emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
+      emotePopupButton = new JButton(IconMap.getSmallIcon(Icons.CHAT_SMILEY));
+      emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
+      emotePopupButton.setContentAreaFilled(false);
+      emotePopupButton.setBorderPainted(false);
+      emotePopupButton.setFocusPainted(false);
+      emotePopupButton.setOpaque(false);
+      emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
     }
     return emotePopupButton;
   }

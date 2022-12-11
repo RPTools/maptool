@@ -18,12 +18,12 @@ import java.awt.Color;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArgumentBuilder;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArguments;
 import net.rptools.maptool.client.ui.zone.callout.SpeechBubbleRenderer;
@@ -40,21 +40,9 @@ import net.rptools.maptool.util.GraphicsUtil;
  */
 public class PointerOverlay implements ZoneOverlay {
   private final List<PointerPair> pointerList = new ArrayList<PointerPair>();
-  private static BufferedImage POINTER_IMAGE;
-  private static BufferedImage THOUGHT_IMAGE;
-  private static BufferedImage LOOK_HERE_IMAGE;
-
-  static {
-    try {
-      POINTER_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/arrow.png");
-      THOUGHT_IMAGE = ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/thought.png");
-      LOOK_HERE_IMAGE =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/look_here.png");
-
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  private static BufferedImage POINTER_IMAGE = IconMap.getImage(Images.CURSOR_POINTER);
+  private static BufferedImage THOUGHT_IMAGE = IconMap.getImage(Images.CURSOR_THOUGHT);
+  private static BufferedImage LOOK_HERE_IMAGE = IconMap.getImage(Images.CURSOR_LOOK_HERE);
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     Zone zone = renderer.getZone();

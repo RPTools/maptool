@@ -16,25 +16,19 @@ package net.rptools.maptool.client.ui.assetpanel;
 
 import java.awt.Component;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeCellRenderer;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 
 /** */
 public class AssetTreeCellRenderer extends DefaultTreeCellRenderer {
   // Jamz: Add PDF's as a "Leaf" and show the extracted images in the asset window...
-  private static final Icon PDF_FOLDER =
-      new ImageIcon(
-          AssetTreeCellRenderer.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/pdf_folder.png"));
+  private static final Icon PDF_FOLDER = IconMap.getSmallIcon(Icons.ASSETPANEL_PDF_FOLDER);
   // Jamz: Add Hero Lab Portfolio's as a "Leaf" and show the extracted characters in the asset
   // window...
   private static final Icon HERO_LAB_FOLDER =
-      new ImageIcon(
-          AssetTreeCellRenderer.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/hero_lab_folder.png"));
+      IconMap.getSmallIcon(Icons.ASSETPANEL_HEROLABS_FOLDER);
 
   public Component getTreeCellRendererComponent(
       JTree tree,

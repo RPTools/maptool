@@ -36,6 +36,7 @@ import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -82,10 +83,7 @@ public class InitiativeListCellRenderer extends JPanel
 
   /** The icon for the current indicator. */
   public static final Icon CURRENT_INDICATOR_ICON =
-      new ImageIcon(
-          InitiativePanel.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/currentIndicator.png"));
+      IconMap.getSmallIcon(Icons.INITIATIVE_CURRENT_INDICATOR);
 
   /** Border used to show that an item is selected */
   public static final Border SELECTED_BORDER = IconMap.getBorder(Borders.RED);

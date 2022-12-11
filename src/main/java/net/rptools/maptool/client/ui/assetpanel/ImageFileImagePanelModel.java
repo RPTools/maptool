@@ -39,13 +39,14 @@ import javax.imageio.stream.FileImageInputStream;
 import javax.imageio.stream.ImageInputStream;
 import javax.swing.SwingWorker;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableAsset;
 import net.rptools.maptool.client.TransferableToken;
 import net.rptools.maptool.client.swing.ImagePanelModel;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -63,19 +64,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
   private static final Logger log = LogManager.getLogger(ImageFileImagePanelModel.class);
   private static final Color TOKEN_BG_COLOR = new Color(215, 215, 215);
-  private static Image rptokenDecorationImage;
-  private static Image herolabDecorationImage;
-
-  static {
-    try {
-      rptokenDecorationImage = ImageUtil.getImage("net/rptools/maptool/client/image/rptokIcon.png");
-      herolabDecorationImage =
-          ImageUtil.getImage("net/rptools/maptool/client/image/hero-lab-decoration.png");
-    } catch (IOException ioe) {
-      rptokenDecorationImage = null;
-      herolabDecorationImage = null;
-    }
-  }
+  private static Image rptokenDecorationImage = IconMap.getImage(Images.DECORATION_RPTOK);
+  private static Image herolabDecorationImage = IconMap.getImage(Images.DECORATION_HEROLABS);
 
   private final AssetPanel assetPanel;
 

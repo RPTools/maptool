@@ -40,7 +40,6 @@ import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.events.ZoneActivated;
@@ -78,6 +77,7 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
 import net.rptools.maptool.client.ui.theme.IconMap;
 import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.token.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
@@ -110,10 +110,7 @@ import org.xml.sax.SAXException;
 public class MapToolFrame extends DefaultDockableHolder implements WindowListener {
   private static final Logger log = LogManager.getLogger(MapToolFrame.class);
   private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
-  private static final String MAPTOOL_LOGO_IMAGE =
-      "net/rptools/maptool/client/image/maptool-logo.png";
   private static final String CREDITS_HTML = "net/rptools/maptool/client/credits.html";
-  private static final String MINILOGO_IMAGE = "net/rptools/maptool/client/image/minilogo.png";
   private static final long serialVersionUID = 3905523813025329458L;
   private static final String DOCKING_PROFILE_NAME = "maptoolDocking";
 
@@ -345,13 +342,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     SwingUtil.centerOnScreen(this);
     setFocusTraversalPolicy(new MapToolFocusTraversalPolicy());
 
-    try {
-      setIconImage(ImageUtil.getImage(MINILOGO_IMAGE));
-    } catch (IOException ioe) {
-      String msg = I18N.getText("msg.error.loadingIconImage");
-      log.error(msg, ioe);
-      System.err.println(msg);
-    }
+    setIconImage(IconMap.getImage(Images.MAPTOOL_LOGO_MINI));
     // Notify duration
     initializeNotifyDuration();
 
@@ -378,7 +369,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
       version = MapTool.getVersion();
       credits = credits.replace("%VERSION%", version);
-      logo = ImageUtil.getImage(MAPTOOL_LOGO_IMAGE);
+      logo = IconMap.getImage(Images.MAPTOOL_LOGO);
     } catch (Exception ioe) {
       log.error(I18N.getText("msg.error.credits"), ioe);
       ioe.printStackTrace();

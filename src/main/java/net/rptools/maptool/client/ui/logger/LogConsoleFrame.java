@@ -20,7 +20,6 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.IOException;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -29,8 +28,9 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.text.JTextComponent;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,8 +42,6 @@ public class LogConsoleFrame extends JFrame {
   // private RSyntaxTextArea jLoggingConsole; // Doesn't look like RSyntaxTextArea can keep up with
   // large amounts of logging
   private JTextArea jLoggingConsole;
-
-  private static final String LOGGER_IMAGE = "net/rptools/maptool/client/image/log4j_icon.png";
   private static final Font LOGGER_FONT = new Font("Lucida Console", Font.PLAIN, 12);
 
   private JButton clearButton;
@@ -52,14 +50,7 @@ public class LogConsoleFrame extends JFrame {
   public LogConsoleFrame() {
     setTitle(I18N.getString("action.openLogConsole.title"));
     setSize(800, 600);
-    try {
-      setIconImage(ImageUtil.getImage(LOGGER_IMAGE));
-    } catch (IOException ioe) {
-      String msg = I18N.getText("msg.error.loadingIconImage");
-      log.error(msg, ioe);
-      System.err.println(msg);
-    }
-
+    setIconImage(IconMap.getSmallIcon(Icons.WINDOW_LOG).getImage());
     initUI();
   }
 

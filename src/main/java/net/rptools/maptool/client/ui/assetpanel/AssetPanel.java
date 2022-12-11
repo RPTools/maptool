@@ -42,15 +42,13 @@ import net.rptools.maptool.client.swing.SelectionListener;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.preference.SplitPanePreferences;
 import net.rptools.maptool.client.swing.preference.TreePreferences;
+import net.rptools.maptool.client.ui.theme.IconMap;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 
 public class AssetPanel extends JComponent {
-  private static final ImageIcon FILTER_IMAGE =
-      new ImageIcon(
-          AssetPanel.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/zoom.png"));
+  private static final ImageIcon FILTER_IMAGE = IconMap.getSmallIcon(Icons.ASSETPANEL_SEARCH);
 
   private final AssetTree assetTree;
   private ImagePanel imagePanel;
