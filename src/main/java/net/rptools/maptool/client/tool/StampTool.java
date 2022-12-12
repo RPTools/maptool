@@ -97,8 +97,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   // private Map<Shape, Token> rotateBoundsMap = new HashMap<Shape, Token>();
   private final Map<Shape, Token> resizeBoundsMap = new HashMap<Shape, Token>();
 
-  private final LayerSelectionDialog layerSelectionDialog;
-
   // Offset from token's X,Y when dragging. Values are in cell coordinates.
   private int dragOffsetX;
   private int dragOffsetY;
@@ -107,26 +105,14 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   private BufferedImage resizeImg = RessourceManager.getImage(Images.RESIZE);
 
-  public StampTool() {
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
+  public StampTool() {}
 
-                if (layer == Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
-                }
-              }
-            });
-  }
-
-  public void updateLayerSelectionView() {
-    layerSelectionDialog.updateViewList();
+  @Override
+  protected void selectedLayerChanged(Zone.Layer layer) {
+    super.selectedLayerChanged(layer);
+    if (layer == Layer.TOKEN && MapTool.getFrame() != null) {
+      MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
+    }
   }
 
   @Override
@@ -142,7 +128,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
-    MapTool.getFrame().showControlPanel(layerSelectionDialog);
+    MapTool.getFrame().showControlPanel(getLayerSelectionDialog());
     super.attachTo(renderer);
 
     // Jamz: Lets remember token selections during Tool class switches which causes
@@ -150,8 +136,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     if (renderer.getSelectedTokenSet().size() > 0) {
       renderer.setKeepSelectedTokenSet(true);
     }
-
-    layerSelectionDialog.updateViewList();
   }
 
   @Override
