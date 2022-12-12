@@ -24,11 +24,9 @@ import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.io.IOException;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JRadioButton;
 import javax.swing.JTextField;
@@ -37,7 +35,6 @@ import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -82,11 +79,6 @@ public class BoardTool extends DefaultTool {
 
   /** Initialize the panel and set up the actions. */
   public BoardTool() {
-    try {
-      setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/board.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
     // Create the control panel
     controlPanel =
         new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");

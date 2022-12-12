@@ -18,7 +18,6 @@ import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -26,15 +25,17 @@ import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -59,6 +60,9 @@ public class CommandPanel extends JPanel {
   private JPopupMenu emotePopup;
   private JButton emotePopupButton;
   private String typedCommandBuffer;
+  private BufferedImage cancelButton =
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
   // private long chatNotifyDuration; // Initialize it on first load
@@ -422,20 +426,13 @@ public class CommandPanel extends JPanel {
 
   public JButton getEmotePopupButton() {
     if (emotePopupButton == null) {
-      try {
-        emotePopupButton =
-            new JButton(
-                new ImageIcon(
-                    ImageUtil.getImage("net/rptools/maptool/client/image/smiley/emsmile.png")));
-        emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
-        emotePopupButton.setContentAreaFilled(false);
-        emotePopupButton.setBorderPainted(false);
-        emotePopupButton.setFocusPainted(false);
-        emotePopupButton.setOpaque(false);
-        emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
+      emotePopupButton = new JButton(RessourceManager.getSmallIcon(Icons.CHAT_SMILEY));
+      emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
+      emotePopupButton.setContentAreaFilled(false);
+      emotePopupButton.setBorderPainted(false);
+      emotePopupButton.setFocusPainted(false);
+      emotePopupButton.setOpaque(false);
+      emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
     }
     return emotePopupButton;
   }
@@ -443,8 +440,8 @@ public class CommandPanel extends JPanel {
   public JToggleButton getScrollLockButton() {
     if (scrollLockButton == null) {
       scrollLockButton = new JToggleButton();
-      scrollLockButton.setIcon(new ImageIcon(AppStyle.chatScrollImage));
-      scrollLockButton.setSelectedIcon(new ImageIcon(AppStyle.chatScrollLockImage));
+      scrollLockButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_OFF));
+      scrollLockButton.setSelectedIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_ON));
       scrollLockButton.setToolTipText(I18N.getText("action.chat.scrolllock.tooltip"));
       scrollLockButton.setUI(new BasicToggleButtonUI());
       scrollLockButton.setBorderPainted(false);
@@ -463,8 +460,9 @@ public class CommandPanel extends JPanel {
   public JToggleButton getNotifyButton() {
     if (chatNotifyButton == null) {
       chatNotifyButton = new JToggleButton();
-      chatNotifyButton.setIcon(new ImageIcon(AppStyle.showTypingNotification));
-      chatNotifyButton.setSelectedIcon(new ImageIcon(AppStyle.hideTypingNotification));
+      chatNotifyButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SHOW_TYPING_NOTIFICATION));
+      chatNotifyButton.setSelectedIcon(
+          RessourceManager.getSmallIcon(Icons.CHAT_HIDE_TYPING_NOTIFICATION));
       chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);
@@ -908,7 +906,6 @@ public class CommandPanel extends JPanel {
           this);
 
       // Cancel
-      BufferedImage cancelButton = AppStyle.cancelButton;
       int x = size.width - cancelButton.getWidth();
       int y = 2;
       g.drawImage(cancelButton, x, y, this);

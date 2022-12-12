@@ -63,7 +63,6 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.tool.BoardTool;
 import net.rptools.maptool.client.tool.GridTool;
 import net.rptools.maptool.client.ui.AddResourceDialog;
@@ -96,6 +95,8 @@ import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -1717,13 +1718,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          try {
-            putValue(
-                Action.SMALL_ICON,
-                new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/grid.gif")));
-          } catch (IOException ioe) {
-            MapTool.showError("While retrieving built-in 'grid.gif' image", ioe);
-          }
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_GRIDS));
         }
 
         @Override
@@ -1917,13 +1912,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          try {
-            putValue(
-                Action.SMALL_ICON,
-                new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/names.png")));
-          } catch (IOException ioe) {
-            MapTool.showError("While retrieving built-in 'names.png' image", ioe);
-          }
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
         }
 
         @Override
@@ -3529,17 +3518,9 @@ public class AppActions {
     public OpenUrlAction(String key) {
       // The init() method will load the "key", "key.accel", and "key.description".
       // The value of "key" will be used as the menu text, the accelerator is not used,
-      // and the description will be the destination URL. We also configure "key.icon"
-      // to be the value of SMALL_ICON. Only the Help menu uses these objects and
+      // and the description will be the destination URL. Only the Help menu uses these objects and
       // only the Help menu expects that field to be set...
       init(key);
-      try {
-        Image img = ImageUtil.getImage(I18N.getString(key + ".icon"));
-        img = ImageUtil.createCompatibleImage(img, 16, 16, null);
-        putValue(Action.SMALL_ICON, new ImageIcon(img));
-      } catch (Exception e) {
-        // Apparently the image is not available.
-      }
     }
 
     @Override

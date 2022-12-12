@@ -34,10 +34,12 @@ import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.ImageManager;
 
@@ -46,7 +48,9 @@ public class AssetViewerDialog extends JDialog {
   private final MD5Key assetId;
   private boolean sized;
   private Rectangle cancelBounds;
-
+  private BufferedImage cancelButton =
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
   private boolean showHelp;
 
   public AssetViewerDialog(String title, MD5Key assetId) {
@@ -172,7 +176,6 @@ public class AssetViewerDialog extends JDialog {
       g.drawRect(0, 0, size.width - 1, size.height - 1);
 
       // Controls
-      BufferedImage cancelButton = AppStyle.cancelButton;
       int x = size.width - cancelButton.getWidth() - 1;
       int y = 1;
 

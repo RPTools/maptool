@@ -17,9 +17,6 @@ package net.rptools.maptool.client.tool.drawing;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.event.MouseMotionListener;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.LineSegment;
@@ -30,19 +27,7 @@ import net.rptools.maptool.model.drawing.ShapeDrawable;
 public class PolygonTool extends LineTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolygonTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-strtlines.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolygonTool() {}
 
   @Override
   public String getTooltip() {

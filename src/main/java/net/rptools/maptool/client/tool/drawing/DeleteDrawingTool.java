@@ -20,13 +20,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.io.Serial;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.tool.DefaultTool;
@@ -57,12 +55,7 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
   private static Layer selectedLayer = Layer.TOKEN;
 
   public DeleteDrawingTool() {
-    try {
-      setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/delete.png")));
-      new MapToolEventBus().getMainEventBus().register(this);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   @Override
