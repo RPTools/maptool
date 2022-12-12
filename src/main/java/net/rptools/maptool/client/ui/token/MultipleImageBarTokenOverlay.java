@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;

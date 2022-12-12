@@ -15,7 +15,6 @@
 package net.rptools.lib.image;
 
 import com.twelvemonkeys.image.ResampleOp;
-import com.vladsch.flexmark.util.misc.ImageUtils;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
@@ -95,10 +94,6 @@ public class ImageUtil {
       dataStream.write(bite);
     }
     return bytesToImage(dataStream.toByteArray(), image);
-  }
-
-  public static Image getImage(String image, int w, int h) throws IOException {
-    return resizeImage(getImage(image), w, h);
   }
 
   public static BufferedImage getCompatibleImage(String image) throws IOException {
@@ -416,34 +411,6 @@ public class ImageUtil {
     wig.dispose();
 
     return workImage;
-  }
-
-  /*
-   * Jamz: Some common image utility methods
-   */
-  public static ImageIcon resizeImage(ImageIcon imageIcon) {
-    // Default to 30x30 w/h not passed
-    return resizeImage(imageIcon, 30, 30);
-  }
-
-  public static ImageIcon resizeImage(ImageIcon imageIcon, int w, int h) {
-    return new ImageIcon(imageIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH));
-  }
-
-  public static Image resizeImage(Image image) {
-    // Default to 30x30 w/h not passed
-    return resizeImage(image, 30, 30);
-  }
-
-  public static Image resizeImage(Image image, int w, int h) {
-    // Default to 30x30 w/h not passed
-    ResampleOp resampleOp =
-        new ResampleOp(w, h, AppPreferences.getRenderQuality().getResampleOpFilter());
-    if (image instanceof BufferedImage) {
-      return resampleOp.filter((BufferedImage) image, null);
-    } else {
-      return resampleOp.filter(ImageUtils.toBufferedImage(image), null);
-    }
   }
 
   public static ImageIcon scaleImage(ImageIcon icon, int w, int h) {

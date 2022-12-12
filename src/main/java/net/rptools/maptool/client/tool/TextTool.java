@@ -20,22 +20,19 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -53,14 +50,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   private boolean isDragging;
   private boolean selectedNewLabel;
 
-  public TextTool() {
-    try {
-      setIcon(
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/text-blue.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public TextTool() {}
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {

@@ -25,12 +25,12 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.List;
-import net.rptools.lib.swing.ColorPicker;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.ColorPicker;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.LayerSelectionDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
@@ -56,8 +56,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   private static final LayerSelectionDialog layerSelectionDialog;
 
   private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
-
-  protected static final int TOOLBAR_ICON_SIZE = 32;
 
   static {
     layerSelectionDialog =

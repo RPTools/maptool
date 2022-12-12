@@ -21,8 +21,8 @@ import java.awt.desktop.AboutHandler;
 import java.awt.desktop.OpenFilesHandler;
 import java.awt.desktop.PreferencesHandler;
 import java.awt.desktop.QuitHandler;
-import java.io.IOException;
-import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import org.apache.log4j.Logger;
 
 /**
@@ -52,8 +52,6 @@ public class OSXAdapter {
 
   private static final Logger log = Logger.getLogger(OSXAdapter.class);
   private static Desktop dt = Desktop.getDesktop();
-  private static final String MAPTOOL_DOCK_ICON_PNG =
-      "net/rptools/maptool/client/image/maptool-dock-icon.png";
 
   /**
    * Sets the quit handler for the main menu on macOS so that it invokes the proper method of the
@@ -107,12 +105,7 @@ public class OSXAdapter {
     // We wait until after we call initialize() so that the asset and image managers
     // are configured.
 
-    Image img = null;
-    try {
-      img = ImageUtil.getImage(MAPTOOL_DOCK_ICON_PNG);
-    } catch (IOException e) {
-      log.warn("Cannot read '" + MAPTOOL_DOCK_ICON_PNG + "'; no dock icon", e);
-    }
+    Image img = RessourceManager.getImage(Images.MAPTOOL_DOCK);
 
     if (Taskbar.isTaskbarSupported()) {
       try {

@@ -17,7 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;

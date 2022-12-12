@@ -24,7 +24,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.AppConstants;
@@ -35,6 +34,8 @@ import net.rptools.maptool.client.MRUCampaignManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -62,8 +63,8 @@ public class AppMenuBar extends JMenuBar {
 
     add(
         createMinimizeButton(
-            "net/rptools/maptool/client/image/tool/downArrow.png",
-            "net/rptools/maptool/client/image/tool/upArrow.png",
+            Icons.TOOLBAR_HIDE_ON,
+            Icons.TOOLBAR_HIDE_OFF,
             I18N.getText("tools.hidetoolbar.tooltip"),
             I18N.getText("tools.unhidetoolbar.tooltip")));
   }
@@ -324,14 +325,10 @@ public class AppMenuBar extends JMenuBar {
    * @return the JToggleButton
    */
   protected JToggleButton createMinimizeButton(
-      final String icon, final String offIcon, String hidetooltip, String unhidetooltip) {
+      final Icons icon, final Icons offIcon, String hidetooltip, String unhidetooltip) {
     final JToggleButton button = new JToggleButton();
-    try {
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage((icon))));
-      button.setIcon(new ImageIcon(ImageUtil.getImage((offIcon))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    button.setSelectedIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_ON));
+    button.setIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_OFF));
     button.setOpaque(false);
     button.setContentAreaFilled(false);
     button.setBorderPainted(false);
@@ -378,10 +375,20 @@ public class AppMenuBar extends JMenuBar {
       Arrays.sort(helpArray);
       for (String key : helpArray) {
         OpenUrlAction temp = new AppActions.OpenUrlAction(key);
-        /*
-         * TODO This could be more efficient by using ImageManager or AssetManager, but I'm not sure those facilities have been initialized by the time this code is executed so this is safer.
-         * :-/
-         */
+        switch (key) {
+          case "action.helpurl.01" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_DOCUMENTATION));
+          case "action.helpurl.02" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_TUTORIALS));
+          case "action.helpurl.03" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FORUMS));
+          case "action.helpurl.04" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_NETWORK_SETUP));
+          case "action.helpurl.05" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SCRIPTING));
+          case "action.helpurl.06" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FRAMEWORKS));
+        }
         menu.add(new JMenuItem(temp));
       }
       menu.addSeparator();
