@@ -140,51 +140,51 @@ public abstract class DefaultTool extends Tool
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
         new FlipTokenVerticalActionListener());
-   
-   // Disable until the conrete hotkeys are decided.
-   /* 
-   actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK),
-        new AbstractAction() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (layerSelectionDialog.isVisible()) {
-              layerSelectionDialog.setSelectedLayer(Zone.Layer.TOKEN);
-            }
-          }
-        });
-    actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_DOWN_MASK),
-        new AbstractAction() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (layerSelectionDialog.isVisible()) {
-              layerSelectionDialog.setSelectedLayer(Zone.Layer.GM);
-            }
-          }
-        });
-    actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_DOWN_MASK),
-        new AbstractAction() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (layerSelectionDialog.isVisible()) {
 
-              layerSelectionDialog.setSelectedLayer(Zone.Layer.OBJECT);
-            }
-          }
-        });
+    // Disable until the conrete hotkeys are decided.
+    /*
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_DOWN_MASK),
-        new AbstractAction() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (layerSelectionDialog.isVisible()) {
-              layerSelectionDialog.setSelectedLayer(Zone.Layer.BACKGROUND);
-            }
-          }
-        });
-        */
+         KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.TOKEN);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.GM);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.OBJECT);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.BACKGROUND);
+             }
+           }
+         });
+         */
   }
 
   ////
