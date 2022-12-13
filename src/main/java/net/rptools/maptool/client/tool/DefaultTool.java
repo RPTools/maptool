@@ -140,7 +140,10 @@ public abstract class DefaultTool extends Tool
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
         new FlipTokenVerticalActionListener());
-    actionMap.put(
+   
+   // Disable until the conrete hotkeys are decided.
+   /* 
+   actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK),
         new AbstractAction() {
           @Override
@@ -181,6 +184,7 @@ public abstract class DefaultTool extends Tool
             }
           }
         });
+        */
   }
 
   ////
