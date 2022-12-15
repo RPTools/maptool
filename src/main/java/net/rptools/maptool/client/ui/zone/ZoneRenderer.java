@@ -1514,7 +1514,7 @@ public class ZoneRenderer extends JComponent
     // Setup
     timer.start("renderAuras:getAuras");
     if (drawableAuras == null) {
-      drawableAuras = new ArrayList<>(zoneView.getLights(LightSource.Type.AURA));
+      drawableAuras = new ArrayList<>(zoneView.getDrawableAuras());
     }
     timer.stop("renderAuras:getAuras");
 

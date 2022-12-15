@@ -534,15 +534,15 @@ public class ZoneView {
   }
 
   /**
-   * Get the lists of drawable light from lightSourceMap.
+   * Get the lists of drawable auras.
    *
-   * @param type the type of lights to get.
-   * @return the list of drawable lights of the given type.
+   * @return the list of drawable auras.
    */
-  public List<DrawableLight> getLights(LightSource.Type type) {
+  public List<DrawableLight> getDrawableAuras() {
     List<DrawableLight> lightList = new LinkedList<DrawableLight>();
-    if (lightSourceMap.get(type) != null) {
-      for (GUID lightSourceToken : lightSourceMap.get(type)) {
+    final var auraTokenGUIDs = lightSourceMap.get(LightSource.Type.AURA);
+    if (auraTokenGUIDs != null) {
+      for (GUID lightSourceToken : auraTokenGUIDs) {
         Token token = zone.getToken(lightSourceToken);
         if (token == null) {
           continue;
@@ -554,40 +554,52 @@ public class ZoneView {
           if (lightSource == null) {
             continue;
           }
-          if (lightSource.getType() == type) {
-            // This needs to be cached somehow
-            Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
-            Area visibleArea =
-                FogUtil.calculateVisibility(
-                    p.x,
-                    p.y,
-                    lightSourceArea,
-                    getTopologyTree(Zone.TopologyType.WALL_VBL),
-                    getTopologyTree(Zone.TopologyType.HILL_VBL),
-                    getTopologyTree(Zone.TopologyType.PIT_VBL));
-            if (visibleArea == null) {
+          // Token can also have non-auras lights, we don't want those.
+          if (lightSource.getType() != LightSource.Type.AURA) {
+            continue;
+          }
+
+          Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
+          Area visibleArea =
+              FogUtil.calculateVisibility(
+                  p.x,
+                  p.y,
+                  lightSourceArea,
+                  getTopologyTree(Zone.TopologyType.WALL_VBL),
+                  getTopologyTree(Zone.TopologyType.HILL_VBL),
+                  getTopologyTree(Zone.TopologyType.PIT_VBL));
+
+          // This needs to be cached somehow
+          for (Light light : lightSource.getLightList()) {
+            // If there is no paint, it's a "bright aura" that just shows whatever is beneath it and
+            //  doesn't need to be rendered.
+            if (light.getPaint() == null) {
               continue;
             }
-            for (Light light : lightSource.getLightList()) {
-              boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
-              if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
-                continue;
-              }
-              if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
-                continue;
-              }
-              if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
-                continue;
-              }
-              if (light.isOwnerOnly()
-                  && lightSource.getType() == LightSource.Type.AURA
-                  && !isOwner
-                  && !MapTool.getPlayer().isEffectiveGM()) {
-                continue;
-              }
-              lightList.add(
-                  new DrawableLight(type, light.getPaint(), visibleArea, lightSource.getLumens()));
+            boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
+            if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
+              continue;
             }
+            if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
+              continue;
+            }
+            if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+              continue;
+            }
+            if (light.isOwnerOnly() && !isOwner && !MapTool.getPlayer().isEffectiveGM()) {
+              continue;
+            }
+
+            // Calculate the area covered by this particular range.
+            Area lightArea = lightSource.getArea(token, zone, Direction.CENTER, light);
+            if (lightArea == null) {
+              continue;
+            }
+            lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
+            lightArea.intersect(visibleArea);
+            lightList.add(
+                new DrawableLight(
+                    LightSource.Type.AURA, light.getPaint(), lightArea, lightSource.getLumens()));
           }
         }
       }
