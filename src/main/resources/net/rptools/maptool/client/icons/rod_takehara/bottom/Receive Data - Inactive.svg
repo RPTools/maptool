@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-171,0)">
+        <g id="Receive-Data---Inactive" serif:id="Receive Data - Inactive" transform="matrix(1,0,0,1,171,0)">
+            <rect x="0" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(-2.99427e-16,-1.66667,-1.33333,-1.08755e-17,16,21.3333)">
+                <path d="M7.4,6.75L7.4,9L5,6L7.4,3L7.4,5.25L11,5.25L11,6.75L7.4,6.75Z" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>
