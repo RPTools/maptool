@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
+    <g transform="matrix(1,0,0,1,-38,0)">
+        <g id="Draw-Explorer" serif:id="Draw Explorer" transform="matrix(1,0,0,1,38,0)">
+            <rect x="0" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(0.917219,0,0,0.917219,-33.9021,0.248343)">
+                <path d="M43.921,3.813C44.652,3.301 45.541,3 46.5,3C48.984,3 51,5.016 51,7.5C51,8.522 50.658,9.466 50.083,10.222" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.09px;"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-38,-2)">
+                <circle cx="44.5" cy="11.5" r="4.5" style="fill:rgb(56,159,214);"/>
+                <path d="M44.5,7C46.984,7 49,9.016 49,11.5C49,13.984 46.984,16 44.5,16C42.016,16 40,13.984 40,11.5C40,9.016 42.016,7 44.5,7ZM44.5,8C46.432,8 48,9.568 48,11.5C48,13.432 46.432,15 44.5,15C42.568,15 41,13.432 41,11.5C41,9.568 42.568,8 44.5,8Z" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>

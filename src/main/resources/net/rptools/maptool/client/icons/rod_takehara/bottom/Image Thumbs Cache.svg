@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-19,0)">
+        <g id="Image-Thumbs-Cache" serif:id="Image Thumbs Cache" transform="matrix(1,0,0,1,19,0)">
+            <rect x="0" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,-20,-1)">
+                <path d="M29,2L21,2L21,10L29,10L29,2ZM22.337,8.667C22.335,8.644 22.333,8.621 22.333,8.597C22.333,7.125 23.528,5.93 25,5.93C26.472,5.93 27.667,7.125 27.667,8.597C27.667,8.621 27.665,8.644 27.662,8.667L27.667,8.667L27.667,10L22.333,10L22.333,8.667L22.337,8.667ZM25,2.715C25.736,2.715 26.333,3.312 26.333,4.048C26.333,4.784 25.736,5.381 25,5.381C24.264,5.381 23.667,4.784 23.667,4.048C23.667,3.312 24.264,2.715 25,2.715Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1,0,0,1,0,8)">
+                <path d="M13,3L3,3L3,6L13,6L13,3ZM12,4L11,4L11,5L12,5L12,4ZM10,4L7,4L7,5L10,5L10,4Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-19,0)">
+                <path d="M29,3L29,6L32,6L32,3L29,3ZM31,4L30,4L30,5L31,5L31,4Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1,0,0,1,-19,0)">
+                <path d="M29,7L29,10L32,10L32,7L29,7ZM31,8L30,8L30,9L31,9L31,8Z" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>
