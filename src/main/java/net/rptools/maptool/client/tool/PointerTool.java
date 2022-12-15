@@ -95,7 +95,6 @@ public class PointerTool extends DefaultTool {
   private final TokenStackPanel tokenStackPanel = new TokenStackPanel();
   private final HTMLPanelRenderer htmlRenderer = new HTMLPanelRenderer();
   private final Font boldFont = AppStyle.labelFont.deriveFont(Font.BOLD);
-  private final LayerSelectionDialog layerSelectionDialog;
 
   private BufferedImage statSheet;
   private Token tokenOnStatSheet;
@@ -119,22 +118,14 @@ public class PointerTool extends DefaultTool {
     htmlRenderer.setOpaque(false);
     htmlRenderer.addStyleSheetRule("body{color:black}");
     htmlRenderer.addStyleSheetRule(".title{font-size: 14pt}");
+  }
 
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
-
-                if (layer != Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-                }
-              }
-            });
+  @Override
+  protected void selectedLayerChanged(Zone.Layer layer) {
+    super.selectedLayerChanged(layer);
+    if (layer != Layer.TOKEN) {
+      MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+    }
   }
 
   @Override
@@ -142,12 +133,11 @@ public class PointerTool extends DefaultTool {
     super.attachTo(renderer);
 
     if (MapTool.getPlayer().isGM()) {
-      MapTool.getFrame().showControlPanel(layerSelectionDialog);
+      MapTool.getFrame().showControlPanel(getLayerSelectionDialog());
     }
     htmlRenderer.attach(renderer);
-    layerSelectionDialog.updateViewList();
 
-    if (MapTool.getFrame().getLastSelectedLayer() != Zone.Layer.TOKEN) {
+    if (renderer.getActiveLayer() != Zone.Layer.TOKEN) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
