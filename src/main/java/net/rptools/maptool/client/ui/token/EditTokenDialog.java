@@ -124,7 +124,7 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 
 /** This dialog is used to display all of the token states and notes to the user. */
-public class EditTokenDialog extends AbeillePanel<Token> {
+public class EditTokenDialog extends AbeillePanel<Token>  {
 
   /** The size used to constrain the icon. */
   public static final int SIZE = 64;
@@ -151,10 +151,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
-    super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
+    super(new TokenPropertiesDialog().$$$getRootComponent$$$());
+    //super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
     panelInit();
   }
-
   public void initPlayerNotesTextArea() {
     getNotesTextArea().addMouseListener(new MouseHandler(getNotesTextArea()));
   }

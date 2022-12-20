@@ -46,7 +46,14 @@ public class FormPanelI18N extends FormPanel {
    *
    * @param comp the component to be translated
    */
-  private static void translateComponent(Component comp) {
+  protected static void translateComponent(Component comp) {
+    if (comp instanceof JLabel jLabel) {
+      jLabel.setText(I18N.getText(jLabel.getText()));
+      String tooltip = jLabel.getToolTipText();
+      if (tooltip != null) {
+        jLabel.setToolTipText(I18N.getText(tooltip));
+      }
+    }
     if (comp instanceof JETALabel) {
       JETALabel label = (JETALabel) comp;
       label.setText(I18N.getText(label.getText()));
@@ -68,15 +75,21 @@ public class FormPanelI18N extends FormPanel {
       if (tooltip != null) {
         jSpin.setToolTipText(I18N.getText(tooltip));
       }
-    } else if (comp instanceof JComboBox) {
-      JComboBox<?> jComboBox = (JComboBox<?>) comp;
+    } else if (comp instanceof JComboBox jComboBox) {
       String tooltip = jComboBox.getToolTipText();
       if (tooltip != null) {
         jComboBox.setToolTipText(I18N.getText(tooltip));
       }
       for (int i = 0; i < jComboBox.getItemCount(); ++i) {
-        ListItemProperty item = (ListItemProperty) jComboBox.getItemAt(i);
-        item.setLabel(I18N.getText(item.getLabel()));
+        var comboBoxItem = jComboBox.getItemAt(i);
+        if(comboBoxItem instanceof  ListItemProperty itemProperty) {
+          itemProperty.setLabel(I18N.getText(itemProperty.getLabel()));
+        } else if(comboBoxItem instanceof  String string) {
+          jComboBox.removeItemAt(i);
+          jComboBox.insertItemAt(I18N.getText(string),i);
+        } else {
+          throw new RuntimeException("Untranslated type of JComboBox item: " + comboBoxItem.getClass().getName());
+        }
       }
     } else if (comp instanceof JTextField) {
       JTextField jTextField = (JTextField) comp;
@@ -108,31 +121,18 @@ public class FormPanelI18N extends FormPanel {
         // Translate the tab titles
         jTabbedPane.setTitleAt(i, I18N.getText(jTabbedPane.getTitleAt(i)));
       }
-      for (Component subComp : jTabbedPane.getComponents()) {
-        // Recursively translate the sub components
-        translateComponent(subComp);
-      }
     } else if (comp instanceof GridView) {
       GridView gridView = (GridView) comp;
-      Iterator<?> iter = gridView.beanIterator();
-      while (iter.hasNext()) {
-        // Recursively translate the sub components
-        translateComponent((Component) iter.next());
-      }
       Border border = gridView.getBorder();
       // Translate the titled border, if any
       if (border instanceof TitledBorder) {
         TitledBorder titledBorder = (TitledBorder) border;
         titledBorder.setTitle(I18N.getText(titledBorder.getTitle()));
       }
-    } else if (comp instanceof FormComponent) {
-      // Translate the GridView inside the form
-      FormComponent form = (FormComponent) comp;
-      translateComponent(form.getChildView());
-    } else if (comp instanceof JScrollPane) {
-      JScrollPane jScrollPane = (JScrollPane) comp;
-      // Translate the child of the scroll pane
-      translateComponent(jScrollPane.getViewport().getView());
+    }
+    if(comp instanceof Container container) {
+      for(Component c: container.getComponents())
+        translateComponent(c);
     }
   }
 }
