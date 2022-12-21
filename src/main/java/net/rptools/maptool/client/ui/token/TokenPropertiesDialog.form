@@ -496,23 +496,29 @@
               </vspacer>
             </children>
           </grid>
-          <grid id="ff3b9" layout-manager="FormLayout">
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:grow"/>
-            <colspec value="fill:d:grow"/>
+          <grid id="ff3b9" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.ownership"/>
             </constraints>
             <properties>
               <name value="ownershipPanel"/>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
+              <component id="41fb4" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="ownershipList"/>
+                  <text value=""/>
+                </properties>
+              </component>
               <component id="3044d" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="All Players"/>
@@ -520,16 +526,11 @@
                   <text value="EditTokenDialog.label.allplayers"/>
                 </properties>
               </component>
-              <component id="41fb4" class="javax.swing.JLabel">
+              <vspacer id="7737e">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false" defaultalign-vert="false"/>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <name value="ownershipList"/>
-                  <text value=""/>
-                </properties>
-              </component>
+              </vspacer>
             </children>
           </grid>
           <grid id="3a658" layout-manager="FormLayout">
@@ -1251,90 +1252,19 @@
               </hspacer>
             </children>
           </grid>
-          <grid id="81e06" layout-manager="FormLayout">
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <colspec value="fill:111px:noGrow"/>
-            <colspec value="left:5dlu:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="81e06" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.libToken"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
               <component id="3dd3a" class="javax.swing.JLabel">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
                 </constraints>
                 <properties>
                   <text value="Label.allowURIAccess"/>
@@ -1342,18 +1272,26 @@
               </component>
               <component id="22d90" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="Label.LibURIError"/>
-                  <text value="sgsgssg"/>
+                  <text value="no error yet"/>
                 </properties>
               </component>
+              <hspacer id="a4c2e">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <vspacer id="36751">
+                <constraints>
+                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
               <component id="3fcda" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@allowURIAccess"/>
