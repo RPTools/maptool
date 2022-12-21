@@ -3,7 +3,7 @@
   <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="10" y="10" width="1191" height="692"/>
+      <xy x="10" y="10" width="1191" height="808"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
@@ -116,47 +116,8 @@
               </component>
             </children>
           </grid>
-          <grid id="10203" layout-manager="FormLayout">
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:39px:noGrow"/>
-            <rowspec value="center:2dlu:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2dlu:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2dlu:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:26px:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:26px:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:25px:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="fill:d:noGrow"/>
-            <rowspec value="center:3px:noGrow"/>
-            <rowspec value="fill:d:noGrow"/>
-            <colspec value="left:d:noGrow"/>
-            <colspec value="fill:4dlu:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:20dlu:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:32dlu:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:grow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="10203" layout-manager="GridLayoutManager" row-count="17" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.vbl"/>
             </constraints>
@@ -165,303 +126,10 @@
             </properties>
             <border type="none"/>
             <children>
-              <component id="e73a" class="javax.swing.JCheckBox">
-                <constraints>
-                  <grid row="22" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Always Show&#9;"/>
-                  <horizontalAlignment value="0"/>
-                  <name value="copyOrMoveCheckbox"/>
-                  <selected value="true"/>
-                  <text value="EditTokenDialog.option.vbl.erase"/>
-                  <toolTipText value="EditTokenDialog.option.vbl.erase.tooltip"/>
-                </properties>
-              </component>
-              <component id="3af85" class="javax.swing.JCheckBox">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Hide Preview"/>
-                  <name value="inverseVblCheckbox"/>
-                  <text value="EditTokenDialog.label.vbl.invert"/>
-                  <toolTipText value="EditTokenDialog.label.vbl.invert.tooltip"/>
-                </properties>
-              </component>
-              <component id="c4024" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <name value="ignoreColorLabel"/>
-                  <text value="EditTokenDialog.label.vbl.color"/>
-                </properties>
-              </component>
-              <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
-                <constraints>
-                  <grid row="4" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false" defaultalign-vert="false"/>
-                </constraints>
-                <properties>
-                  <font swing-font="Panel.font"/>
-                  <name value="vblIgnoreColorWell"/>
-                  <toolTipText value="EditTokenDialog.label.vbl.well"/>
-                </properties>
-              </component>
-              <component id="d0058" class="javax.swing.JToggleButton">
-                <constraints>
-                  <grid row="4" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="vblColorPickerToggleButton"/>
-                  <text value=""/>
-                  <toolTipText value="EditTokenDialog.label.vbl.toggle"/>
-                </properties>
-              </component>
-              <component id="32f87" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <name value="alphaSensitivityLabel"/>
-                  <text value="EditTokenDialog.label.vbl.sensitivity"/>
-                </properties>
-              </component>
-              <component id="c53ad" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="28" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <text value="EditTokenDialog.label.vbl.tolerance"/>
-                </properties>
-              </component>
-              <component id="8688c" class="javax.swing.JCheckBox">
-                <constraints>
-                  <grid row="26" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Always Show&#9;"/>
-                  <horizontalAlignment value="0"/>
-                  <name value="alwaysVisibleButton"/>
-                  <selected value="true"/>
-                  <text value="EditTokenDialog.label.vbl.over"/>
-                  <toolTipText value="EditTokenDialog.label.vbl.over.tooltip"/>
-                </properties>
-              </component>
-              <component id="2498e" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="24" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <font name="SansSerif" style="1"/>
-                  <name value="visibilityLabel"/>
-                  <text value="EditTokenDialog.label.vbl.visiblity"/>
-                </properties>
-              </component>
-              <component id="750c0" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <name value="jtsDistanceToleranceLabel"/>
-                  <text value="EditTokenDialog.label.vbl.level"/>
-                </properties>
-              </component>
-              <component id="4078e" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <name value="jtsDistanceToleranceLabel"/>
-                  <text value="EditTokenDialog.label.vbl.method"/>
-                </properties>
-              </component>
-              <component id="dbcb0" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <font name="SansSerif" style="1"/>
-                  <name value="optimizationLabel"/>
-                  <text value="EditTokenDialog.label.vbl.optimize"/>
-                </properties>
-              </component>
-              <component id="628b8" class="javax.swing.JSpinner">
-                <constraints>
-                  <grid row="28" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="visibilityToleranceSpinner"/>
-                  <toolTipText value="EditTokenDialog.vbl.explanation.tooltip"/>
-                </properties>
-              </component>
-              <component id="e11c9" class="javax.swing.JComboBox">
-                <constraints>
-                  <grid row="14" column="1" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <actionCommand value="comboBoxChanged"/>
-                  <name value="jtsMethodComboBox"/>
-                  <toolTipText value="EditTokenDialog.drop.vbl.optimize.tooltip"/>
-                </properties>
-              </component>
-              <component id="69045" class="javax.swing.JSpinner">
-                <constraints>
-                  <grid row="6" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="alphaSensitivitySpinner"/>
-                  <toolTipText value="EditTokenDialog.label.vbl.sensitivity.tooltip"/>
-                </properties>
-              </component>
-              <component id="3f3b3" class="javax.swing.JSpinner">
-                <constraints>
-                  <grid row="12" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="jtsDistanceToleranceSpinner"/>
-                  <toolTipText value="EditTokenDialog.spinner.tolerance.tooltip"/>
-                </properties>
-              </component>
-              <component id="8d0a6" class="javax.swing.JCheckBox">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Hide Preview"/>
-                  <name value="hideTokenCheckbox"/>
-                  <text value="EditTokenDialog.label.vbl.preview"/>
-                  <toolTipText value="EditTokenDialog.label.vbl.preview.tooltip"/>
-                </properties>
-              </component>
-              <component id="c8874" class="javax.swing.JButton">
-                <constraints>
-                  <grid row="16" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="clearVblButton"/>
-                  <text value="EditTokenDialog.button.vbl.clear"/>
-                  <toolTipText value="EditTokenDialog.button.vbl.clear.tooltip"/>
-                </properties>
-              </component>
-              <component id="50255" class="javax.swing.JButton">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Generate VBL&#9;"/>
-                  <name value="autoGenerateVblButton"/>
-                  <text value="EditTokenDialog.button.vbl"/>
-                  <toolTipText value="EditTokenDialog.button.vbl.tooltip"/>
-                </properties>
-              </component>
-              <component id="db6f4" class="javax.swing.JButton">
-                <constraints>
-                  <grid row="18" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="transferVblToMap"/>
-                  <text value="EditTokenDialog.button.vbl.tomap"/>
-                </properties>
-              </component>
-              <component id="4497" class="javax.swing.JButton">
-                <constraints>
-                  <grid row="20" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="transferVblFromMap"/>
-                  <text value="EditTokenDialog.button.vbl.frommap"/>
-                </properties>
-              </component>
-              <grid id="149c6" layout-manager="FormLayout">
-                <rowspec value="center:d:noGrow"/>
-                <colspec value="fill:d:noGrow"/>
-                <colspec value="fill:d:noGrow"/>
-                <colspec value="fill:d:noGrow"/>
-                <colspec value="fill:d:noGrow"/>
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="e2975" class="javax.swing.JToggleButton">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                    <properties>
-                      <name value="wallVblToggle"/>
-                      <text value=""/>
-                    </properties>
-                  </component>
-                  <component id="9e8c7" class="javax.swing.JToggleButton">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                    <properties>
-                      <name value="hillVblToggle"/>
-                      <text value=""/>
-                    </properties>
-                  </component>
-                  <component id="d415c" class="javax.swing.JToggleButton">
-                    <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                    <properties>
-                      <name value="pitVblToggle"/>
-                      <text value=""/>
-                    </properties>
-                  </component>
-                  <component id="e4b0f" class="javax.swing.JToggleButton">
-                    <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                    <properties>
-                      <name value="mblToggle"/>
-                      <text value=""/>
-                    </properties>
-                  </component>
-                </children>
-              </grid>
               <grid id="afbcf" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="0" column="7" row-span="29" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="3" row-span="16" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="vblPreviewPanel"/>
@@ -483,6 +151,273 @@
                   </component>
                 </children>
               </grid>
+              <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="e4b0f" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="mblToggle"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="e2975" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="wallVblToggle"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="9e8c7" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="hillVblToggle"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="d415c" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="pitVblToggle"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <component id="8d0a6" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Hide Preview"/>
+                  <name value="hideTokenCheckbox"/>
+                  <text value="EditTokenDialog.label.vbl.preview"/>
+                  <toolTipText value="EditTokenDialog.label.vbl.preview.tooltip"/>
+                </properties>
+              </component>
+              <component id="2498e" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font name="SansSerif" style="1"/>
+                  <name value="visibilityLabel"/>
+                  <text value="EditTokenDialog.label.vbl.visiblity"/>
+                </properties>
+              </component>
+              <component id="c4024" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <name value="ignoreColorLabel"/>
+                  <text value="EditTokenDialog.label.vbl.color"/>
+                </properties>
+              </component>
+              <component id="50255" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Generate VBL&#9;"/>
+                  <name value="autoGenerateVblButton"/>
+                  <text value="EditTokenDialog.button.vbl"/>
+                  <toolTipText value="EditTokenDialog.button.vbl.tooltip"/>
+                </properties>
+              </component>
+              <component id="32f87" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <name value="alphaSensitivityLabel"/>
+                  <text value="EditTokenDialog.label.vbl.sensitivity"/>
+                </properties>
+              </component>
+              <component id="3af85" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Hide Preview"/>
+                  <name value="inverseVblCheckbox"/>
+                  <text value="EditTokenDialog.label.vbl.invert"/>
+                  <toolTipText value="EditTokenDialog.label.vbl.invert.tooltip"/>
+                </properties>
+              </component>
+              <component id="dbcb0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font name="SansSerif" style="1"/>
+                  <name value="optimizationLabel"/>
+                  <text value="EditTokenDialog.label.vbl.optimize"/>
+                </properties>
+              </component>
+              <component id="c8874" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="clearVblButton"/>
+                  <text value="EditTokenDialog.button.vbl.clear"/>
+                  <toolTipText value="EditTokenDialog.button.vbl.clear.tooltip"/>
+                </properties>
+              </component>
+              <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font swing-font="Panel.font"/>
+                  <name value="vblIgnoreColorWell"/>
+                  <toolTipText value="EditTokenDialog.label.vbl.well"/>
+                </properties>
+              </component>
+              <component id="d0058" class="javax.swing.JToggleButton">
+                <constraints>
+                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="vblColorPickerToggleButton"/>
+                  <text value=""/>
+                  <toolTipText value="EditTokenDialog.label.vbl.toggle"/>
+                </properties>
+              </component>
+              <component id="69045" class="javax.swing.JSpinner">
+                <constraints>
+                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="alphaSensitivitySpinner"/>
+                  <toolTipText value="EditTokenDialog.label.vbl.sensitivity.tooltip"/>
+                </properties>
+              </component>
+              <component id="750c0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <name value="jtsDistanceToleranceLabel"/>
+                  <text value="EditTokenDialog.label.vbl.level"/>
+                </properties>
+              </component>
+              <component id="3f3b3" class="javax.swing.JSpinner">
+                <constraints>
+                  <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="jtsDistanceToleranceSpinner"/>
+                  <toolTipText value="EditTokenDialog.spinner.tolerance.tooltip"/>
+                </properties>
+              </component>
+              <component id="e11c9" class="javax.swing.JComboBox">
+                <constraints>
+                  <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="comboBoxChanged"/>
+                  <name value="jtsMethodComboBox"/>
+                  <toolTipText value="EditTokenDialog.drop.vbl.optimize.tooltip"/>
+                </properties>
+              </component>
+              <component id="4078e" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <name value="jtsDistanceToleranceLabel"/>
+                  <text value="EditTokenDialog.label.vbl.method"/>
+                </properties>
+              </component>
+              <component id="db6f4" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="transferVblToMap"/>
+                  <text value="EditTokenDialog.button.vbl.tomap"/>
+                </properties>
+              </component>
+              <component id="4497" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="transferVblFromMap"/>
+                  <text value="EditTokenDialog.button.vbl.frommap"/>
+                </properties>
+              </component>
+              <component id="e73a" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Always Show&#9;"/>
+                  <horizontalAlignment value="0"/>
+                  <name value="copyOrMoveCheckbox"/>
+                  <selected value="true"/>
+                  <text value="EditTokenDialog.option.vbl.erase"/>
+                  <toolTipText value="EditTokenDialog.option.vbl.erase.tooltip"/>
+                </properties>
+              </component>
+              <component id="8688c" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Always Show&#9;"/>
+                  <horizontalAlignment value="0"/>
+                  <name value="alwaysVisibleButton"/>
+                  <selected value="true"/>
+                  <text value="EditTokenDialog.label.vbl.over"/>
+                  <toolTipText value="EditTokenDialog.label.vbl.over.tooltip"/>
+                </properties>
+              </component>
+              <component id="c53ad" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="15" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <text value="EditTokenDialog.label.vbl.tolerance"/>
+                </properties>
+              </component>
+              <component id="628b8" class="javax.swing.JSpinner">
+                <constraints>
+                  <grid row="15" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="visibilityToleranceSpinner"/>
+                  <toolTipText value="EditTokenDialog.vbl.explanation.tooltip"/>
+                </properties>
+              </component>
+              <hspacer id="4088c">
+                <constraints>
+                  <grid row="16" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
             </children>
           </grid>
           <grid id="c15c1" layout-manager="FormLayout">
