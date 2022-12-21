@@ -151,7 +151,11 @@ public class EditTokenDialog extends AbeillePanel<Token>  {
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
+    // intellij gui editor generated java
     super(new TokenPropertiesDialog().$$$getRootComponent$$$());
+    //java export of abaille xml
+    //super(new TokenPropertiesDialogRaw());
+    //abaille xml
     //super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
     panelInit();
   }

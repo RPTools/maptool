@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
+import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.label.JETALabel;
@@ -134,9 +135,16 @@ public class AbeillePanel<T> extends JPanel {
     } else {
       var placeHolder = getComponent(name);
       var container = (JPanel) getComponent(panelName);
-      var parent = placeHolder.getParent();
-      var layout = (FormLayout)container.getLayout();
-      var constraints = layout.getConstraints(placeHolder);
+      Object constraints = null;
+      var layout = container.getLayout();
+      if( layout instanceof FormLayout formLayout) {
+        constraints = formLayout.getConstraints(placeHolder);
+      } else if ( layout instanceof GridLayoutManager gridLayoutManager) {
+        constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
+      } else {
+        throw new RuntimeException("Replacement of components not implemented for layout: " + layout.getClass().getName());
+      }
+
       container.remove(placeHolder);
       container.add(replacement, constraints);
       container.revalidate();

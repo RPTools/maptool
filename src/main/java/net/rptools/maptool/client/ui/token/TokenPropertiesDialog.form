@@ -1,52 +1,38 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.token.TokenPropertiesDialog">
-  <grid id="ca1c7" binding="mainPanel" layout-manager="FormLayout">
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="fill:d:grow"/>
-    <rowspec value="center:28px:grow"/>
-    <colspec value="fill:8dlu:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
-    <colspec value="fill:6dlu:noGrow"/>
-    <colspec value="fill:d:grow"/>
-    <colspec value="fill:8dlu:noGrow"/>
+  <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="10" y="10" width="1429" height="670"/>
+      <xy x="10" y="10" width="1191" height="692"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
     </properties>
     <border type="none"/>
     <children>
-      <component id="52bc2" class="javax.swing.JLabel">
+      <component id="52bc2" class="javax.swing.JLabel" binding="tokenImage">
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="202" height="16"/>
+          </grid>
         </constraints>
         <properties>
           <name value="tokenImage"/>
           <text value="Label.image"/>
         </properties>
       </component>
-      <tabbedpane id="240f0">
+      <tabbedpane id="240f0" binding="tabPanel">
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <name value="TabPane"/>
-          <visible value="false"/>
+          <visible value="true"/>
         </properties>
         <border type="none"/>
         <children>
-          <grid id="e19d" layout-manager="FormLayout">
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:d:grow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:grow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="e19d" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.notes"/>
             </constraints>
@@ -58,8 +44,7 @@
             <children>
               <scrollpane id="c267e">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false" defaultalign-vert="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -77,61 +62,10 @@
                   </component>
                 </children>
               </scrollpane>
-              <component id="c5547" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <text value="EditTokenDialog.tab.notes"/>
-                </properties>
-              </component>
-              <hspacer id="498a4">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c813e">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="944f2">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="24fb4">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="23647">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c1203">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
             </children>
           </grid>
-          <grid id="4451" layout-manager="FormLayout">
-            <rowspec value="center:3px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="fill:d:grow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:grow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="4451" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.label.gmnotes"/>
             </constraints>
@@ -140,19 +74,9 @@
             </properties>
             <border type="none"/>
             <children>
-              <component id="afeeb" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <text value="EditTokenDialog.label.gmnotes"/>
-                </properties>
-              </component>
               <scrollpane id="5c97f">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -168,52 +92,10 @@
                   </component>
                 </children>
               </scrollpane>
-              <hspacer id="9de6a">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fea2d">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fabce">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3db9c">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2c4cb">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="80b6b">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
             </children>
           </grid>
-          <grid id="b3fbc" layout-manager="FormLayout">
-            <rowspec value="center:3px:noGrow"/>
-            <rowspec value="fill:d:grow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:grow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="b3fbc" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.properties"/>
             </constraints>
@@ -225,54 +107,16 @@
             <children>
               <component id="6abf3" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="propertiesTable"/>
                   <text value="propertiesTable"/>
                 </properties>
               </component>
-              <hspacer id="32ed7">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="9ef1c">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="74ef2">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="4584a">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="8a634">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fdee3">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
             </children>
           </grid>
           <grid id="10203" layout-manager="FormLayout">
-            <rowspec value="center:1dlu:noGrow"/>
             <rowspec value="center:2px:noGrow"/>
             <rowspec value="center:d:noGrow"/>
             <rowspec value="center:d:noGrow"/>
@@ -302,7 +146,6 @@
             <rowspec value="fill:d:noGrow"/>
             <rowspec value="center:3px:noGrow"/>
             <rowspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
             <colspec value="left:d:noGrow"/>
             <colspec value="fill:4dlu:noGrow"/>
             <colspec value="fill:d:noGrow"/>
@@ -314,18 +157,17 @@
             <colspec value="fill:d:noGrow"/>
             <colspec value="fill:d:noGrow"/>
             <colspec value="fill:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.vbl"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
               <component id="e73a" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="23" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="22" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -339,7 +181,7 @@
               </component>
               <component id="3af85" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="9" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -351,7 +193,7 @@
               </component>
               <component id="c4024" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -362,7 +204,7 @@
               </component>
               <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
                 <constraints>
-                  <grid row="5" column="4" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false" defaultalign-vert="false"/>
                 </constraints>
                 <properties>
@@ -373,7 +215,7 @@
               </component>
               <component id="d0058" class="javax.swing.JToggleButton">
                 <constraints>
-                  <grid row="5" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -384,7 +226,7 @@
               </component>
               <component id="32f87" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -395,7 +237,7 @@
               </component>
               <component id="c53ad" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="29" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="28" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -405,7 +247,7 @@
               </component>
               <component id="8688c" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="27" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="26" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -419,7 +261,7 @@
               </component>
               <component id="2498e" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="25" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="24" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -430,7 +272,7 @@
               </component>
               <component id="750c0" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -441,7 +283,7 @@
               </component>
               <component id="4078e" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -452,7 +294,7 @@
               </component>
               <component id="dbcb0" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="11" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="10" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -463,7 +305,7 @@
               </component>
               <component id="628b8" class="javax.swing.JSpinner">
                 <constraints>
-                  <grid row="29" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="28" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -473,7 +315,7 @@
               </component>
               <component id="e11c9" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="15" column="2" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="14" column="1" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -484,7 +326,7 @@
               </component>
               <component id="69045" class="javax.swing.JSpinner">
                 <constraints>
-                  <grid row="7" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -494,7 +336,7 @@
               </component>
               <component id="3f3b3" class="javax.swing.JSpinner">
                 <constraints>
-                  <grid row="13" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -504,7 +346,7 @@
               </component>
               <component id="8d0a6" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="3" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms defaultalign-horz="false"/>
                 </constraints>
                 <properties>
@@ -516,7 +358,7 @@
               </component>
               <component id="c8874" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="17" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="16" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -528,7 +370,7 @@
               </component>
               <component id="50255" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="4" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -540,7 +382,7 @@
               </component>
               <component id="db6f4" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="19" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="18" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -551,7 +393,7 @@
               </component>
               <component id="4497" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="21" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="20" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -566,9 +408,8 @@
                 <colspec value="fill:d:noGrow"/>
                 <colspec value="fill:d:noGrow"/>
                 <colspec value="fill:d:noGrow"/>
-                <colspec value="fill:d:noGrow"/>
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="6" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties/>
@@ -614,19 +455,12 @@
                       <text value=""/>
                     </properties>
                   </component>
-                  <hspacer id="95e6c">
-                    <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
                 </children>
               </grid>
-              <grid id="afbcf" layout-manager="FormLayout">
-                <rowspec value="fill:d:grow"/>
-                <colspec value="fill:d:grow"/>
+              <grid id="afbcf" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="1" column="8" row-span="29" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="7" row-span="29" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -640,8 +474,7 @@
                 <children>
                   <component id="abf38" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <name value="vblPreview"/>
@@ -650,258 +483,6 @@
                   </component>
                 </children>
               </grid>
-              <hspacer id="2f415">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="120be">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="bc51a">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3a4">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1fea0">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="9bd4c">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7070f">
-                <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="8fe10">
-                <constraints>
-                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="a2358">
-                <constraints>
-                  <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="44f02">
-                <constraints>
-                  <grid row="0" column="9" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="49755">
-                <constraints>
-                  <grid row="0" column="10" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="8eec8">
-                <constraints>
-                  <grid row="0" column="11" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c783b">
-                <constraints>
-                  <grid row="0" column="12" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="eeab9">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d25d9">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1b19">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7c8bb">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fcb68">
-                <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="44f05">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="695db">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="51398">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2d7ca">
-                <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7c758">
-                <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="be771">
-                <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="ebeb8">
-                <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="6de8c">
-                <constraints>
-                  <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2126f">
-                <constraints>
-                  <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="da479">
-                <constraints>
-                  <grid row="15" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1f4f4">
-                <constraints>
-                  <grid row="16" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="a6a36">
-                <constraints>
-                  <grid row="17" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f5baf">
-                <constraints>
-                  <grid row="18" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="dc62f">
-                <constraints>
-                  <grid row="19" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="80619">
-                <constraints>
-                  <grid row="20" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="711e2">
-                <constraints>
-                  <grid row="21" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3aaa1">
-                <constraints>
-                  <grid row="22" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="cdbbb">
-                <constraints>
-                  <grid row="23" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c8531">
-                <constraints>
-                  <grid row="24" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="5afdc">
-                <constraints>
-                  <grid row="25" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2d12b">
-                <constraints>
-                  <grid row="26" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="bef7c">
-                <constraints>
-                  <grid row="27" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="44533">
-                <constraints>
-                  <grid row="28" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="deb63">
-                <constraints>
-                  <grid row="29" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
             </children>
           </grid>
           <grid id="c15c1" layout-manager="FormLayout">
@@ -1202,7 +783,7 @@
               <tabbedpane title="EditTokenDialog.tab.config"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -1890,42 +1471,6 @@
                       </component>
                     </children>
                   </grid>
-                  <hspacer id="a3736">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="412f2">
-                    <constraints>
-                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="79163">
-                    <constraints>
-                      <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="685eb">
-                    <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="56cea">
-                    <constraints>
-                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="77c7">
-                    <constraints>
-                      <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
                 </children>
               </grid>
               <hspacer id="1d739">
@@ -1952,7 +1497,8 @@
             <rowspec value="center:d:noGrow"/>
             <rowspec value="center:d:noGrow"/>
             <rowspec value="center:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
+            <colspec value="fill:111px:noGrow"/>
+            <colspec value="left:5dlu:noGrow"/>
             <colspec value="fill:d:noGrow"/>
             <colspec value="fill:d:noGrow"/>
             <colspec value="fill:d:noGrow"/>
@@ -2038,17 +1584,17 @@
               </component>
               <component id="22d90" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="67" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
                   <name value="Label.LibURIError"/>
-                  <text value=""/>
+                  <text value="sgsgssg"/>
                 </properties>
               </component>
               <component id="3fcda" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                   <forms/>
                 </constraints>
                 <properties>
@@ -2056,402 +1602,6 @@
                   <text value=""/>
                 </properties>
               </component>
-              <hspacer id="2d8ad">
-                <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="138c3">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="a5b3b">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f2aeb">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="6b694">
-                <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="b2488">
-                <constraints>
-                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="bd87d">
-                <constraints>
-                  <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fc3e9">
-                <constraints>
-                  <grid row="0" column="9" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="681d7">
-                <constraints>
-                  <grid row="0" column="10" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7e9fa">
-                <constraints>
-                  <grid row="0" column="11" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f58d2">
-                <constraints>
-                  <grid row="0" column="12" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="86a50">
-                <constraints>
-                  <grid row="0" column="13" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="79742">
-                <constraints>
-                  <grid row="0" column="14" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d6d19">
-                <constraints>
-                  <grid row="0" column="15" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1d2ac">
-                <constraints>
-                  <grid row="0" column="16" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f8d8">
-                <constraints>
-                  <grid row="0" column="17" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7b4dc">
-                <constraints>
-                  <grid row="0" column="18" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f5ec9">
-                <constraints>
-                  <grid row="0" column="19" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1a57d">
-                <constraints>
-                  <grid row="0" column="20" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="273e3">
-                <constraints>
-                  <grid row="0" column="21" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="422b5">
-                <constraints>
-                  <grid row="0" column="22" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1fddb">
-                <constraints>
-                  <grid row="0" column="23" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="cdd11">
-                <constraints>
-                  <grid row="0" column="24" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d2b21">
-                <constraints>
-                  <grid row="0" column="25" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="dd12">
-                <constraints>
-                  <grid row="0" column="26" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="b32d1">
-                <constraints>
-                  <grid row="0" column="27" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="e8b5a">
-                <constraints>
-                  <grid row="0" column="28" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="f7988">
-                <constraints>
-                  <grid row="0" column="29" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2b23">
-                <constraints>
-                  <grid row="0" column="30" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d369b">
-                <constraints>
-                  <grid row="0" column="31" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="335c8">
-                <constraints>
-                  <grid row="0" column="32" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="735cb">
-                <constraints>
-                  <grid row="0" column="33" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="15149">
-                <constraints>
-                  <grid row="0" column="34" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fd84e">
-                <constraints>
-                  <grid row="0" column="35" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2d75a">
-                <constraints>
-                  <grid row="0" column="36" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c096a">
-                <constraints>
-                  <grid row="0" column="37" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7d232">
-                <constraints>
-                  <grid row="0" column="38" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="fda0b">
-                <constraints>
-                  <grid row="0" column="39" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="1fc79">
-                <constraints>
-                  <grid row="0" column="40" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="58877">
-                <constraints>
-                  <grid row="0" column="41" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="bf5c4">
-                <constraints>
-                  <grid row="0" column="42" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="6c133">
-                <constraints>
-                  <grid row="0" column="43" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="b01c9">
-                <constraints>
-                  <grid row="0" column="44" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="50835">
-                <constraints>
-                  <grid row="0" column="45" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="91112">
-                <constraints>
-                  <grid row="0" column="46" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d9fc">
-                <constraints>
-                  <grid row="0" column="47" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="c8306">
-                <constraints>
-                  <grid row="0" column="48" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="d6b5">
-                <constraints>
-                  <grid row="0" column="49" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="64e71">
-                <constraints>
-                  <grid row="0" column="50" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="31292">
-                <constraints>
-                  <grid row="0" column="51" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="28b17">
-                <constraints>
-                  <grid row="0" column="52" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="49982">
-                <constraints>
-                  <grid row="0" column="53" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="378ce">
-                <constraints>
-                  <grid row="0" column="54" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="6b5e5">
-                <constraints>
-                  <grid row="0" column="55" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="51a70">
-                <constraints>
-                  <grid row="0" column="56" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="13d92">
-                <constraints>
-                  <grid row="0" column="57" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="49164">
-                <constraints>
-                  <grid row="0" column="58" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="df239">
-                <constraints>
-                  <grid row="0" column="59" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="81ce2">
-                <constraints>
-                  <grid row="0" column="60" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="e0686">
-                <constraints>
-                  <grid row="0" column="61" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="cbaef">
-                <constraints>
-                  <grid row="0" column="62" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="97ba3">
-                <constraints>
-                  <grid row="0" column="63" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="6ec02">
-                <constraints>
-                  <grid row="0" column="64" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3ef6a">
-                <constraints>
-                  <grid row="0" column="65" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3498d">
-                <constraints>
-                  <grid row="0" column="66" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="57e90">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
             </children>
           </grid>
           <grid id="fff3c" layout-manager="FormLayout">
@@ -2775,7 +1925,7 @@
                       <tabbedpane title="EditTokenDialog.tab.hero.images"/>
                     </constraints>
                     <properties>
-                      <visible value="true"/>
+                      <visible value="false"/>
                     </properties>
                     <border type="none"/>
                     <children>
@@ -3079,72 +2229,19 @@
           </grid>
         </children>
       </tabbedpane>
-      <grid id="f57d1" layout-manager="FormLayout">
-        <rowspec value="center:d:noGrow"/>
-        <colspec value="fill:d:noGrow"/>
-        <colspec value="fill:8dlu:noGrow"/>
-        <colspec value="fill:d:noGrow"/>
+      <grid id="c2325" binding="headPanel" layout-manager="GridLayoutManager" row-count="4" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-          <forms defaultalign-horz="false"/>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="9c66c" class="javax.swing.JButton">
-            <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-            <properties>
-              <actionCommand value="Cancel"/>
-              <name value="cancelButton"/>
-              <text value="Button.cancel"/>
-            </properties>
-          </component>
-          <component id="910a8" class="javax.swing.JButton">
-            <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-            <properties>
-              <actionCommand value="OK"/>
-              <name value="okButton"/>
-              <text value="Button.ok"/>
-            </properties>
-          </component>
-          <hspacer id="bedcd">
-            <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-        </children>
-      </grid>
-      <grid id="c2325" layout-manager="FormLayout">
-        <rowspec value="center:d:noGrow"/>
-        <rowspec value="center:2px:noGrow"/>
-        <rowspec value="center:d:noGrow"/>
-        <rowspec value="center:2px:noGrow"/>
-        <rowspec value="center:d:noGrow"/>
-        <rowspec value="center:2px:noGrow"/>
-        <rowspec value="center:d:noGrow"/>
-        <colspec value="fill:d:noGrow"/>
-        <colspec value="fill:6dlu:noGrow"/>
-        <colspec value="fill:339px:noGrow"/>
-        <colspec value="fill:6dlu:noGrow"/>
-        <colspec value="fill:d:noGrow"/>
-        <constraints>
-          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-        <properties/>
+        <properties>
+          <name value=""/>
+        </properties>
         <border type="none"/>
         <children>
           <component id="ed69b" class="javax.swing.JLabel">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
             </constraints>
             <properties>
               <text value="Label.name"/>
@@ -3152,8 +2249,7 @@
           </component>
           <component id="a99fc" class="javax.swing.JTextField">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <columns value="30"/>
@@ -3164,8 +2260,7 @@
           </component>
           <component id="7058e" class="javax.swing.JLabel">
             <constraints>
-              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <name value="tokenGMNameLabel"/>
@@ -3174,8 +2269,7 @@
           </component>
           <component id="41ff1" class="javax.swing.JTextField">
             <constraints>
-              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <columns value="30"/>
@@ -3186,8 +2280,7 @@
           </component>
           <component id="21c32" class="javax.swing.JComboBox">
             <constraints>
-              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="comboBoxChanged"/>
@@ -3196,8 +2289,7 @@
           </component>
           <component id="3413f" class="javax.swing.JLabel">
             <constraints>
-              <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="EditTokenDialog.label.label"/>
@@ -3205,8 +2297,7 @@
           </component>
           <component id="2da94" class="javax.swing.JTextField">
             <constraints>
-              <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <name value="@label"/>
@@ -3215,8 +2306,7 @@
           </component>
           <component id="cfd09" class="javax.swing.JLabel">
             <constraints>
-              <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <text value="Label.speechName"/>
@@ -3224,112 +2314,50 @@
           </component>
           <component id="e1e2f" class="javax.swing.JTextField">
             <constraints>
-              <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
               <name value="@speechName"/>
               <text value=""/>
             </properties>
           </component>
-          <hspacer id="604c2">
+          <hspacer id="a8fec">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-          <hspacer id="d5ffe">
-            <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-          <hspacer id="2579c">
-            <constraints>
-              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-          <hspacer id="67a70">
-            <constraints>
-              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-          <hspacer id="7965f">
-            <constraints>
-              <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-              <forms/>
-            </constraints>
-          </hspacer>
-          <hspacer id="57336">
-            <constraints>
-              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <forms defaultalign-horz="false"/>
-            </constraints>
-          </hspacer>
-          <hspacer id="4c6e9">
-            <constraints>
-              <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <forms defaultalign-horz="false"/>
-            </constraints>
-          </hspacer>
-          <hspacer id="fe775">
-            <constraints>
-              <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-              <forms defaultalign-horz="false"/>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
         </children>
       </grid>
-      <hspacer id="aeef7">
+      <grid id="f57d1" binding="buttonPanel" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="6" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
-      </hspacer>
-      <hspacer id="1cc8">
-        <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="a8459">
-        <constraints>
-          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="eb0e1">
-        <constraints>
-          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="6d5c4">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="70fb">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="ebd5f">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="cbe25">
-        <constraints>
-          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="9c66c" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="Cancel"/>
+              <name value="cancelButton"/>
+              <text value="Button.cancel"/>
+            </properties>
+          </component>
+          <component id="910a8" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="OK"/>
+              <name value="okButton"/>
+              <text value="Button.ok"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
     </children>
   </grid>
 </form>
