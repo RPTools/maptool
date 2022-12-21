@@ -3,7 +3,7 @@
   <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="4" left="4" bottom="4" right="4"/>
     <constraints>
-      <xy x="10" y="10" width="1199" height="808"/>
+      <xy x="10" y="10" width="1251" height="958"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
@@ -1258,7 +1258,7 @@
               <tabbedpane title="EditTokenDialog.tab.libToken"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -1300,45 +1300,19 @@
               </component>
             </children>
           </grid>
-          <grid id="fff3c" layout-manager="FormLayout">
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="center:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="bottom:d:noGrow"/>
-            <rowspec value="center:2px:noGrow"/>
-            <rowspec value="fill:d:grow"/>
-            <rowspec value="center:3px:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="left:d:noGrow"/>
-            <colspec value="fill:5dlu:noGrow"/>
-            <colspec value="left:d:grow"/>
-            <colspec value="fill:d:noGrow"/>
-            <colspec value="center:d:noGrow"/>
-            <colspec value="fill:d:noGrow"/>
+          <grid id="fff3c" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
             <constraints>
               <tabbedpane title="EditTokenDialog.tab.hero"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
-              <component id="4b309" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="summaryLabel"/>
-                  <text value="EditTokenDialog.label.hero.summary"/>
-                </properties>
-              </component>
               <tabbedpane id="c8a4f">
                 <constraints>
-                  <grid row="7" column="1" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="StatblockTabPane"/>
@@ -1346,9 +1320,8 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <grid id="a7a75" layout-manager="FormLayout">
-                    <rowspec value="center:d:grow"/>
-                    <colspec value="fill:d:grow"/>
+                  <grid id="a7a75" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <tabbedpane title="EditTokenDialog.tab.hero.html"/>
                     </constraints>
@@ -1358,7 +1331,6 @@
                       <scrollpane id="c6eb9">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                          <forms defaultalign-horz="false" defaultalign-vert="false"/>
                         </constraints>
                         <properties/>
                         <border type="none"/>
@@ -1376,17 +1348,8 @@
                       </scrollpane>
                     </children>
                   </grid>
-                  <grid id="319b6" layout-manager="FormLayout">
-                    <rowspec value="fill:d:grow"/>
-                    <rowspec value="center:3dlu:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:3dlu:noGrow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:d:grow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
+                  <grid id="319b6" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <tabbedpane title="EditTokenDialog.tab.hero.xml"/>
                     </constraints>
@@ -1396,20 +1359,9 @@
                     </properties>
                     <border type="none"/>
                     <children>
-                      <component id="d80c2" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                        <properties>
-                          <name value="expressionLabel"/>
-                          <text value="EditTokenDialog.label.hero.statBlockSearch"/>
-                        </properties>
-                      </component>
                       <component id="27236" class="javax.swing.JTextField">
                         <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <name value="xmlStatblockSearchTextField"/>
@@ -1419,8 +1371,7 @@
                       </component>
                       <component id="e3091" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="2" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <actionCommand value="Find"/>
@@ -1431,75 +1382,36 @@
                       </component>
                       <component id="66430" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <name value="xmlStatblockRTextScrollPane"/>
                           <text value=""/>
                         </properties>
                       </component>
-                      <hspacer id="2b846">
+                      <component id="d80c2" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="expressionLabel"/>
+                          <text value="EditTokenDialog.label.hero.statBlockSearch"/>
+                        </properties>
+                      </component>
+                      <hspacer id="bd4ff">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                       </hspacer>
-                      <hspacer id="208ee">
+                      <vspacer id="55ae9">
                         <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                         </constraints>
-                      </hspacer>
-                      <hspacer id="9ab2">
-                        <constraints>
-                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="f2fb5">
-                        <constraints>
-                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="4e917">
-                        <constraints>
-                          <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="77bac">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="37fd7">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="bd19e">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
+                      </vspacer>
                     </children>
                   </grid>
-                  <grid id="d3925" layout-manager="FormLayout">
-                    <rowspec value="fill:d:grow"/>
-                    <rowspec value="center:3dlu:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:3dlu:noGrow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:d:grow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:5dlu:noGrow"/>
+                  <grid id="d3925" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <tabbedpane title="EditTokenDialog.tab.hero.text"/>
                     </constraints>
@@ -1511,8 +1423,7 @@
                     <children>
                       <component id="86e3e" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="2" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="2" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <actionCommand value="Find"/>
@@ -1521,20 +1432,9 @@
                           <toolTipText value="EditTokenDialog.button.hero.statBlockSearch.tooltip"/>
                         </properties>
                       </component>
-                      <component id="e053e" class="javax.swing.JLabel">
-                        <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                        <properties>
-                          <name value="expressionLabel"/>
-                          <text value="EditTokenDialog.label.hero.statBlockSearch"/>
-                        </properties>
-                      </component>
                       <component id="af7eb" class="javax.swing.JTextField">
                         <constraints>
-                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <name value="textStatblockSearchTextField"/>
@@ -1544,79 +1444,36 @@
                       </component>
                       <component id="72596" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <name value="textStatblockRTextScrollPane"/>
                           <text value=""/>
                         </properties>
                       </component>
-                      <hspacer id="5b948">
+                      <component id="e053e" class="javax.swing.JLabel">
                         <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="expressionLabel"/>
+                          <text value="EditTokenDialog.label.hero.statBlockSearch"/>
+                        </properties>
+                      </component>
+                      <hspacer id="83a24">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                       </hspacer>
-                      <hspacer id="99076">
+                      <vspacer id="f1f80">
                         <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                         </constraints>
-                      </hspacer>
-                      <hspacer id="5b0fd">
-                        <constraints>
-                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="6290b">
-                        <constraints>
-                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="e49b5">
-                        <constraints>
-                          <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="4a064">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="7a0fa">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="462eb">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
+                      </vspacer>
                     </children>
                   </grid>
-                  <grid id="dc6d0" layout-manager="FormLayout">
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <rowspec value="fill:d:grow"/>
-                    <rowspec value="center:d:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:d:noGrow"/>
-                    <colspec value="fill:d:grow"/>
-                    <colspec value="fill:d:noGrow"/>
+                  <grid id="dc6d0" layout-manager="GridLayoutManager" row-count="5" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <tabbedpane title="EditTokenDialog.tab.hero.images"/>
                     </constraints>
@@ -1625,21 +1482,9 @@
                     </properties>
                     <border type="none"/>
                     <children>
-                      <component id="d0edf" class="javax.swing.JButton">
-                        <constraints>
-                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                        <properties>
-                          <actionCommand value="Set as Token Handout"/>
-                          <name value="setAsHandoutButton"/>
-                          <text value="EditTokenDialog.button.hero.setAsTokenHandout"/>
-                        </properties>
-                      </component>
                       <scrollpane id="717ea">
                         <constraints>
-                          <grid row="1" column="3" row-span="7" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-                          <forms defaultalign-vert="false"/>
+                          <grid row="0" column="1" row-span="4" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties/>
                         <border type="none"/>
@@ -1652,21 +1497,9 @@
                           </component>
                         </children>
                       </scrollpane>
-                      <component id="cc434" class="javax.swing.JButton">
-                        <constraints>
-                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                        <properties>
-                          <actionCommand value="Set as Token Image"/>
-                          <name value="setAsImageButton"/>
-                          <text value="EditTokenDialog.button.hero.setAsTokenImage"/>
-                        </properties>
-                      </component>
                       <component id="2d50a" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <actionCommand value="Set as Token Portrait"/>
@@ -1674,112 +1507,87 @@
                           <text value="EditTokenDialog.button.hero.setAsTokenPortrait"/>
                         </properties>
                       </component>
-                      <hspacer id="5ffbf">
+                      <component id="cc434" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
-                      </hspacer>
-                      <hspacer id="fc781">
+                        <properties>
+                          <actionCommand value="Set as Token Image"/>
+                          <name value="setAsImageButton"/>
+                          <text value="EditTokenDialog.button.hero.setAsTokenImage"/>
+                        </properties>
+                      </component>
+                      <component id="d0edf" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
-                      </hspacer>
-                      <hspacer id="fc8ab">
+                        <properties>
+                          <actionCommand value="Set as Token Handout"/>
+                          <name value="setAsHandoutButton"/>
+                          <text value="EditTokenDialog.button.hero.setAsTokenHandout"/>
+                        </properties>
+                      </component>
+                      <vspacer id="110e2">
                         <constraints>
-                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                         </constraints>
-                      </hspacer>
-                      <hspacer id="19083">
+                      </vspacer>
+                      <hspacer id="292f5">
                         <constraints>
-                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="5d52">
-                        <constraints>
-                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="377a4">
-                        <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="6771c">
-                        <constraints>
-                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="cab8c">
-                        <constraints>
-                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="d638b">
-                        <constraints>
-                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="6b8e8">
-                        <constraints>
-                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="caaad">
-                        <constraints>
-                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="82e4d">
-                        <constraints>
-                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
-                        </constraints>
-                      </hspacer>
-                      <hspacer id="cdbc7">
-                        <constraints>
-                          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                          <forms/>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                       </hspacer>
                     </children>
                   </grid>
                 </children>
               </tabbedpane>
+              <component id="4b309" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="summaryLabel"/>
+                  <text value="EditTokenDialog.label.hero.summary"/>
+                </properties>
+              </component>
               <component id="40d1f" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="portfolioLabel"/>
                   <text value="EditTokenDialog.label.hero.portfolio"/>
                 </properties>
               </component>
+              <component id="3ea9c" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text value="EditTokenDialog.label.hero.last"/>
+                </properties>
+              </component>
               <component id="c5b35" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="summaryText"/>
                   <text value=""/>
                 </properties>
               </component>
+              <component id="83b74" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="lastModified"/>
+                  <text value=""/>
+                </properties>
+              </component>
               <component id="6e34d" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <autoscrolls value="true"/>
@@ -1787,41 +1595,9 @@
                   <text value=""/>
                 </properties>
               </component>
-              <component id="3ea9c" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <text value="EditTokenDialog.label.hero.last"/>
-                </properties>
-              </component>
-              <component id="83b74" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-                <properties>
-                  <name value="lastModified"/>
-                  <text value=""/>
-                </properties>
-              </component>
-              <component id="8a320" class="javax.swing.JCheckBox">
-                <constraints>
-                  <grid row="5" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms defaultalign-horz="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Is Ally?"/>
-                  <enabled value="false"/>
-                  <name value="isAllyCheckBox"/>
-                  <text value="EditTokenDialog.label.hero.isAlly"/>
-                </properties>
-              </component>
               <component id="59d4c" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="1" column="5" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="0" column="2" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <alignmentY value="0.0"/>
@@ -1831,101 +1607,32 @@
                   <toolTipText value="EditTokenDialog.button.hero.refresh.tooltip.off"/>
                 </properties>
               </component>
-              <hspacer id="9fc20">
+              <component id="8a320" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Is Ally?"/>
+                  <enabled value="false"/>
+                  <name value="isAllyCheckBox"/>
+                  <text value="EditTokenDialog.label.hero.isAlly"/>
+                </properties>
+              </component>
+              <hspacer id="503f8">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
-              <hspacer id="50273">
+              <vspacer id="13f07">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
+                  <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </hspacer>
-              <hspacer id="43dd">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="b1087">
-                <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="8e6d4">
-                <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="77c20">
-                <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="88a0a">
-                <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="3d5a8">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="a184b">
-                <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="90c35">
-                <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="7667">
-                <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="2d05b">
-                <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="5e2b6">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="894ab">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
-              <hspacer id="794ba">
-                <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                  <forms/>
-                </constraints>
-              </hspacer>
+              </vspacer>
             </children>
           </grid>
         </children>
       </tabbedpane>
-      <grid id="c2325" binding="headPanel" layout-manager="GridLayoutManager" row-count="4" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="c2325" binding="headPanel" layout-manager="GridLayoutManager" row-count="4" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -2019,7 +1726,7 @@
           </component>
           <hspacer id="a8fec">
             <constraints>
-              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="4" row-span="1" col-span="4" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
           </hspacer>
         </children>
