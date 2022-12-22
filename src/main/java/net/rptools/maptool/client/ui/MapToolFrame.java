@@ -1578,25 +1578,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
     String versionString =
         MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
-    setTitle(
-        AppConstants.APP_NAME
-            + " "
-            + versionString
-            + " - "
-            + MapTool.getPlayer()
-            + campaignName
-            + (renderer != null
-                ? " - "
-                    + (((renderer.getZone().getPlayerAlias() != null)
-                            && !MapTool.getPlayer().isGM())
-                        ? renderer.getZone().getPlayerAlias()
-                        : (renderer.getZone().getPlayerAlias().equals(renderer.getZone().getName())
-                            ? renderer.getZone().getName()
-                            : renderer.getZone().getPlayerAlias()
-                                + " ("
-                                + renderer.getZone().getName()
-                                + ")"))
-                : ""));
+    var title =
+        AppConstants.APP_NAME + " " + versionString + " - " + MapTool.getPlayer() + campaignName;
+
+    if (renderer != null) {
+      title += "-" + renderer.getZone().toString();
+    }
+    setTitle(title);
   }
 
   /**

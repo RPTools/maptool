@@ -367,18 +367,13 @@ public class Zone {
     fogPaint = paint;
   }
 
-  @Override
-  public String toString() {
-    return name;
-  }
-
   /** @return name of the zone */
   public String getName() {
     return name;
   }
 
   public String getPlayerAlias() {
-    return playerAlias == null ? name : playerAlias;
+    return playerAlias;
   }
 
   public void setName(String name) {
@@ -395,6 +390,17 @@ public class Zone {
     }
     this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
     return true;
+  }
+
+  @Override
+  public String toString() {
+    if (!MapTool.getPlayer().isGM()) {
+      return playerAlias != null ? playerAlias : name;
+    } else if (playerAlias == null || name.equals(playerAlias)) {
+      return name;
+    } else {
+      return playerAlias + " (" + name + ")";
+    }
   }
 
   public MD5Key getMapAssetId() {
