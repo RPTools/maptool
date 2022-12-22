@@ -261,16 +261,10 @@ public class ZoneRenderer extends JComponent
     }
 
     centerOn(new ZonePoint(token.getX(), token.getY()));
+    setActiveLayer(token.getLayer());
     MapTool.getFrame()
         .getToolbox()
         .setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
-    setActiveLayer(token.getLayer());
-
-    // Jamz: even though the layer was being activated the dialog list was not updating...
-    Tool currentTool = MapTool.getFrame().getToolbox().getSelectedTool();
-    if (currentTool instanceof StampTool) {
-      ((StampTool) currentTool).updateLayerSelectionView();
-    }
 
     selectToken(token.getId());
     requestFocusInWindow();
@@ -1520,7 +1514,7 @@ public class ZoneRenderer extends JComponent
     // Setup
     timer.start("renderAuras:getAuras");
     if (drawableAuras == null) {
-      drawableAuras = new ArrayList<>(zoneView.getLights(LightSource.Type.AURA));
+      drawableAuras = new ArrayList<>(zoneView.getDrawableAuras());
     }
     timer.stop("renderAuras:getAuras");
 

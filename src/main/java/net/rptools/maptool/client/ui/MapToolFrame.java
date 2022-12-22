@@ -946,14 +946,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return coordinateStatusBar;
   }
 
-  public Layer getLastSelectedLayer() {
-    return lastSelectedLayer;
-  }
-
-  public void setLastSelectedLayer(Layer lastSelectedLayer) {
-    this.lastSelectedLayer = lastSelectedLayer;
-  }
-
   public void hideControlPanel() {
     if (visibleControlPanel != null) {
       if (zoneRendererPanel != null) {
