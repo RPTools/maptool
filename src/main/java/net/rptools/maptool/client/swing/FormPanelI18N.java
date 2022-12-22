@@ -14,18 +14,13 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.image.ImageComponent;
 import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
-import com.jeta.forms.gui.form.FormComponent;
-import com.jeta.forms.gui.form.GridView;
 import com.jeta.forms.store.properties.ListItemProperty;
 import java.awt.*;
 import java.util.Iterator;
 import javax.swing.*;
-import javax.swing.border.Border;
 import javax.swing.border.TitledBorder;
 import net.rptools.maptool.language.I18N;
 
@@ -57,82 +52,42 @@ public class FormPanelI18N extends FormPanel {
     if (comp instanceof JETALabel) {
       JETALabel label = (JETALabel) comp;
       label.setText(I18N.getText(label.getText()));
-      String tooltip = label.getToolTipText();
-      if (tooltip != null) {
-        label.setToolTipText(I18N.getText(tooltip));
-      }
     } else if (comp instanceof AbstractButton) {
       // Includes JToggleButton, JCheckBox, JButton
       AbstractButton jButton = (AbstractButton) comp;
       jButton.setText(I18N.getText(jButton.getText()));
-      String tooltip = jButton.getToolTipText();
-      if (tooltip != null) {
-        jButton.setToolTipText(I18N.getText(tooltip));
-      }
-    } else if (comp instanceof JSpinner) {
-      JSpinner jSpin = (JSpinner) comp;
-      String tooltip = jSpin.getToolTipText();
-      if (tooltip != null) {
-        jSpin.setToolTipText(I18N.getText(tooltip));
-      }
     } else if (comp instanceof JComboBox jComboBox) {
-      String tooltip = jComboBox.getToolTipText();
-      if (tooltip != null) {
-        jComboBox.setToolTipText(I18N.getText(tooltip));
-      }
       for (int i = 0; i < jComboBox.getItemCount(); ++i) {
         var comboBoxItem = jComboBox.getItemAt(i);
-        if(comboBoxItem instanceof  ListItemProperty itemProperty) {
+        if (comboBoxItem instanceof ListItemProperty itemProperty) {
           itemProperty.setLabel(I18N.getText(itemProperty.getLabel()));
-        } else if(comboBoxItem instanceof  String string) {
+        } else if (comboBoxItem instanceof String string) {
           jComboBox.removeItemAt(i);
-          jComboBox.insertItemAt(I18N.getText(string),i);
+          jComboBox.insertItemAt(I18N.getText(string), i);
         } else {
-          throw new RuntimeException("Untranslated type of JComboBox item: " + comboBoxItem.getClass().getName());
+          throw new RuntimeException(
+              "Untranslated type of JComboBox item: " + comboBoxItem.getClass().getName());
         }
-      }
-    } else if (comp instanceof JTextField) {
-      JTextField jTextField = (JTextField) comp;
-      String tooltip = jTextField.getToolTipText();
-      if (tooltip != null) {
-        jTextField.setToolTipText(I18N.getText(tooltip));
-      }
-    } else if (comp instanceof JList) {
-      JList<?> jList = (JList<?>) comp;
-      String tooltip = jList.getToolTipText();
-      if (tooltip != null) {
-        jList.setToolTipText(I18N.getText(tooltip));
-      }
-    } else if (comp instanceof JETAColorWell) {
-      JETAColorWell jetaColorWell = (JETAColorWell) comp;
-      String tooltip = jetaColorWell.getToolTipText();
-      if (tooltip != null) {
-        jetaColorWell.setToolTipText(I18N.getText(tooltip));
-      }
-    } else if (comp instanceof ImageComponent) {
-      ImageComponent jImage = (ImageComponent) comp;
-      String tooltip = jImage.getToolTipText();
-      if (tooltip != null) {
-        jImage.setToolTipText(I18N.getText(tooltip));
       }
     } else if (comp instanceof JTabbedPane) {
       JTabbedPane jTabbedPane = (JTabbedPane) comp;
       for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
-        // Translate the tab titles
         jTabbedPane.setTitleAt(i, I18N.getText(jTabbedPane.getTitleAt(i)));
       }
-    } else if (comp instanceof GridView) {
-      GridView gridView = (GridView) comp;
-      Border border = gridView.getBorder();
-      // Translate the titled border, if any
+    }
+    if (comp instanceof JComponent jComponent) {
+      var border = jComponent.getBorder();
       if (border instanceof TitledBorder) {
         TitledBorder titledBorder = (TitledBorder) border;
         titledBorder.setTitle(I18N.getText(titledBorder.getTitle()));
       }
-    }
-    if(comp instanceof Container container) {
-      for(Component c: container.getComponents())
+      String tooltip = jComponent.getToolTipText();
+      if (tooltip != null) {
+        jComponent.setToolTipText(I18N.getText(tooltip));
+      }
+      for (Component c : jComponent.getComponents()) {
         translateComponent(c);
+      }
     }
   }
 }

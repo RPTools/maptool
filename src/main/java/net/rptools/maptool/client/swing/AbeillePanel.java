@@ -15,29 +15,15 @@
 package net.rptools.maptool.client.swing;
 
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.image.ImageComponent;
-import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
-
+import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
-import java.util.Iterator;
 import javax.swing.*;
-import javax.swing.border.Border;
-import javax.swing.border.TitledBorder;
-
-import com.jeta.forms.gui.form.FormComponent;
-import com.jeta.forms.gui.form.GridComponent;
-import com.jeta.forms.gui.form.GridView;
-import com.jeta.forms.store.properties.ListItemProperty;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -100,9 +86,8 @@ public class AbeillePanel<T> extends JPanel {
     init();
   }
 
-  public AbeillePanel(Container mainPanel) {
+  public AbeillePanel(JComponent mainPanel) {
     panel = mainPanel;
-
     init();
   }
 
@@ -128,8 +113,9 @@ public class AbeillePanel<T> extends JPanel {
       }
     }
   }
+
   protected void replaceComponent(String panelName, String name, Component replacement) {
-    if(panel instanceof  FormPanel formPanel) {
+    if (panel instanceof FormPanel formPanel) {
       formPanel.getFormAccessor(panelName).replaceBean(name, replacement);
       formPanel.reset();
     } else {
@@ -137,12 +123,13 @@ public class AbeillePanel<T> extends JPanel {
       var container = (JPanel) getComponent(panelName);
       Object constraints = null;
       var layout = container.getLayout();
-      if( layout instanceof FormLayout formLayout) {
+      if (layout instanceof FormLayout formLayout) {
         constraints = formLayout.getConstraints(placeHolder);
-      } else if ( layout instanceof GridLayoutManager gridLayoutManager) {
+      } else if (layout instanceof GridLayoutManager gridLayoutManager) {
         constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
       } else {
-        throw new RuntimeException("Replacement of components not implemented for layout: " + layout.getClass().getName());
+        throw new RuntimeException(
+            "Replacement of components not implemented for layout: " + layout.getClass().getName());
       }
 
       container.remove(placeHolder);
@@ -160,25 +147,25 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   private void collectComponents(Component component) {
-      var name = component.getName();
+    var name = component.getName();
 
-      if(name != null && !name.isEmpty()) {
-        componentMap.put(name, component);
-      }
+    if (name != null && !name.isEmpty()) {
+      componentMap.put(name, component);
+    }
 
-      if(component instanceof Container container) {
-        for (var comp : container.getComponents()) {
-          collectComponents(comp);
-        }
+    if (component instanceof Container container) {
+      for (var comp : container.getComponents()) {
+        collectComponents(comp);
       }
+    }
   }
 
   protected Component getComponent(String name) {
-    if(panel instanceof FormPanel formPanel) {
+    if (panel instanceof FormPanel formPanel) {
       return formPanel.getComponentByName(name);
     }
 
-    if(componentMap == null) {
+    if (componentMap == null) {
       createComponentMap();
     }
     if (componentMap.containsKey(name)) {
