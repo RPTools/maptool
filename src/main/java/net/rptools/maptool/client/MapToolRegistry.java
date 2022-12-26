@@ -99,7 +99,7 @@ public class MapToolRegistry {
       // change to boolean. So we check what the type is. Can be removed when
       // we get it as boolean.
       var webrtcProperty = json.getAsJsonPrimitive("webrtc");
-      if(webrtcProperty.isBoolean()) {
+      if (webrtcProperty.isBoolean()) {
         details.webrtc = webrtcProperty.getAsBoolean();
       } else {
         details.webrtc = webrtcProperty.getAsInt() > 0;
