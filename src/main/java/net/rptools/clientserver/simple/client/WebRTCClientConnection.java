@@ -275,7 +275,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   private void onLogin(LoginMessageDto message) {
     if (!message.success) {
-      MapTool.showError("Player already taken!");
+      MapTool.showError("Handshake.msg.playerAlreadyConnected");
       return;
     }
 
