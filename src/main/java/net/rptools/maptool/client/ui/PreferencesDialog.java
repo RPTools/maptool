@@ -38,7 +38,6 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
@@ -47,6 +46,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -119,6 +120,7 @@ public class PreferencesDialog extends JDialog {
   private final JTextField chatFilenameFormat;
   private final JSpinner typingNotificationDuration;
   private final JComboBox<String> macroEditorThemeCombo;
+  private final JComboBox<String> iconThemeCombo;
   // Chat Notification
   private final JETAColorWell chatNotificationColor;
   private final JCheckBox chatNotificationShowBackground;
@@ -368,6 +370,7 @@ public class PreferencesDialog extends JDialog {
     chatFilenameFormat = panel.getTextField("chatFilenameFormat");
 
     macroEditorThemeCombo = panel.getComboBox("macroEditorThemeCombo");
+    iconThemeCombo = panel.getComboBox("iconThemeCombo");
 
     fitGMView = panel.getCheckBox("fitGMView");
     hideNPCs = panel.getCheckBox("hideNPCs");
@@ -976,6 +979,13 @@ public class PreferencesDialog extends JDialog {
         e ->
             AppPreferences.setDefaultMacroEditorTheme(
                 (String) macroEditorThemeCombo.getSelectedItem()));
+
+    iconThemeCombo.setModel(new DefaultComboBoxModel<>());
+    iconThemeCombo.addItem(RessourceManager.CLASSIC);
+    iconThemeCombo.addItem(RessourceManager.ROD_TAKEHARA);
+    iconThemeCombo.setSelectedItem(AppPreferences.getIconTheme());
+    iconThemeCombo.addItemListener(
+        e -> AppPreferences.setIconTheme((String) iconThemeCombo.getSelectedItem()));
 
     themeFilterCombo.setModel(getLocalizedModel(themeFilterComboItems, "All"));
     themeFilterCombo.addItemListener(

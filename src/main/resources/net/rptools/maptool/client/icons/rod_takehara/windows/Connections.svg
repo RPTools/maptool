@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <rect id="Connections" x="0" y="0" width="16" height="16" style="fill:none;"/>
+    <g id="Connections1" serif:id="Connections">
+        <g transform="matrix(1,0,0,1,-57,0)">
+            <path d="M62,5L69,5L69,9L72,9L72,1L62,1L62,5Z" style="fill:rgb(110,110,110);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-57,0)">
+            <path d="M63,5L69,5L69,8L71,8L71,2L63,2L63,5Z" style="fill:rgb(56,159,214);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-59,4)">
+            <rect x="60" y="2" width="10" height="8" style="fill:rgb(110,110,110);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-59,4)">
+            <rect x="61" y="3" width="8" height="6" style="fill:rgb(56,159,214);"/>
+        </g>
+        <g transform="matrix(1.53081e-17,0.25,-4,2.44929e-16,44,-1.75)">
+            <rect x="63" y="9" width="4" height="1" style="fill:rgb(110,110,110);"/>
+        </g>
+        <g transform="matrix(0.25,4.62223e-33,0,3,-2.75,-18)">
+            <rect x="63" y="9" width="4" height="1" style="fill:rgb(110,110,110);"/>
+        </g>
+        <g transform="matrix(1,0,0,1,-17,4)">
+            <path d="M29,7L29,10L32,10L32,7L29,7ZM31,8L30,8L30,9L31,9L31,8Z" style="fill:rgb(110,110,110);"/>
+        </g>
+        <g transform="matrix(1.53081e-17,0.25,-3,1.83697e-16,40,-3.75)">
+            <rect x="63" y="9" width="4" height="1" style="fill:rgb(110,110,110);"/>
+        </g>
+    </g>
+</svg>

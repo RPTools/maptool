@@ -25,7 +25,6 @@ import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.KeyStroke;
-import net.rptools.lib.swing.SwingUtil;
 
 public class GenericDialog extends JDialog {
   private static final long serialVersionUID = 6739665491287916519L;

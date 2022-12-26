@@ -26,6 +26,7 @@ import javax.script.ScriptException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.script.javascript.JSArray;
+import net.rptools.maptool.client.script.javascript.JSContext;
 import net.rptools.maptool.client.script.javascript.JSObject;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.client.script.javascript.api.MapToolJSAPIInterface;
@@ -52,13 +53,14 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
 
   private MacroJavaScriptBridge() {
     super(
-        1,
+        0,
         UNLIMITED_PARAMETERS,
         "js.eval",
         "js.evalNS",
         "js.evalURI",
         "js.removeNS",
-        "js.createNS");
+        "js.createNS",
+        "js.listNS");
   }
 
   public static MacroJavaScriptBridge getInstance() {
@@ -72,6 +74,20 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     variableResolver = (MapToolVariableResolver) resolver;
     String contextName = null;
 
+    if ("js.listNS".equalsIgnoreCase(functionName)) {
+      JsonArray array = new JsonArray();
+      JSScriptEngine.getContexts().stream()
+          .sorted(Comparator.comparing(JSContext::name))
+          .forEach(
+              c -> {
+                JsonObject obj = new JsonObject();
+                obj.addProperty("name", c.name());
+                obj.addProperty("trusted", c.trusted());
+                array.add(obj);
+              });
+      return array;
+    }
+
     if ("js.evalNS".equalsIgnoreCase(functionName) || "js.evalURI".equalsIgnoreCase(functionName)) {
       if (args.size() < 2) {
         throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
@@ -80,11 +96,17 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
     }
 
     if ("js.removeNS".equalsIgnoreCase(functionName)) {
+      if (args.size() < 1) {
+        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
+      }
       contextName = (String) args.remove(0);
       JSScriptEngine.removeContext(contextName, MapTool.getParser().isMacroTrusted());
       return "removed";
     }
     if ("js.createNS".equalsIgnoreCase(functionName)) {
+      if (args.size() < 1) {
+        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
+      }
       contextName = (String) args.remove(0);
       boolean makeTrusted = MapTool.getParser().isMacroTrusted();
       if (args.size() > 0) {
@@ -97,6 +119,9 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
 
     String script;
     if ("js.evalURI".equalsIgnoreCase(functionName)) {
+      if (args.size() < 1) {
+        throw new ParameterException(String.format(NOT_ENOUGH_PARAM, functionName, 2, args.size()));
+      }
       URL url;
       try {
         url = new URL(args.get(0).toString());

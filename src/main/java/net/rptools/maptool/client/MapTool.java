@@ -57,7 +57,6 @@ import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;
@@ -66,12 +65,15 @@ import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
 import net.rptools.maptool.client.swing.SplashScreen;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -1281,12 +1283,7 @@ public class MapTool {
 
           defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
           // is true
-          defaults.put(
-              "OptionPane.bannerIcon",
-              new ImageIcon(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+          defaults.put("OptionPane.bannerIcon", RessourceManager.getSmallIcon(Icons.MAPTOOL));
           defaults.put("OptionPane.bannerFontSize", 13);
           defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
           defaults.put("OptionPane.bannerMaxCharsPerLine", 60);

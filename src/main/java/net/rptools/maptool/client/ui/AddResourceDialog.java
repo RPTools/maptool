@@ -47,6 +47,8 @@ import net.rptools.maptool.client.RemoteFileDownloader;
 import net.rptools.maptool.client.WebDownloader;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -123,6 +125,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
     final JTabbedPane tabPane = (JTabbedPane) getComponent("tabPane");
 
+    tabPane.setIconAt(0, RessourceManager.getBigIcon(Icons.ADD_RESSOURCE_LOCAL));
+    tabPane.setIconAt(1, RessourceManager.getBigIcon(Icons.ADD_RESSOURCE_WEB));
+    tabPane.setIconAt(2, RessourceManager.getBigIcon(Icons.ADD_RESSOURCE_RPTOOLS));
     tabPane
         .getModel()
         .addChangeListener(

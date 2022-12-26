@@ -35,22 +35,21 @@ import javax.swing.Timer;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.plaf.basic.BasicSliderUI;
-import net.rptools.lib.swing.ImagePanel;
-import net.rptools.lib.swing.ImagePanel.SelectionMode;
-import net.rptools.lib.swing.SelectionListener;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.lib.swing.preference.SplitPanePreferences;
-import net.rptools.lib.swing.preference.TreePreferences;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.swing.ImagePanel;
+import net.rptools.maptool.client.swing.ImagePanel.SelectionMode;
+import net.rptools.maptool.client.swing.SelectionListener;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.preference.SplitPanePreferences;
+import net.rptools.maptool.client.swing.preference.TreePreferences;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 
 public class AssetPanel extends JComponent {
   private static final ImageIcon FILTER_IMAGE =
-      new ImageIcon(
-          AssetPanel.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/zoom.png"));
+      RessourceManager.getSmallIcon(Icons.ASSETPANEL_SEARCH);
 
   private final AssetTree assetTree;
   private ImagePanel imagePanel;

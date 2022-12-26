@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
+    <g transform="matrix(1,0,0,1,-76,0)">
+        <g id="Reset-Round" serif:id="Reset Round" transform="matrix(1,0,0,1,-63.6667,0)">
+            <rect x="139.667" y="0" width="16" height="16" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect x="139.667" y="0" width="16" height="16"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1,0,0,1,63.6667,0)">
+                    <path d="M79,7L79,12L89,12L89,5L86,5" style="fill:none;stroke:rgb(110,110,110);stroke-width:2px;"/>
+                </g>
+                <g transform="matrix(1.33333,5.58032e-16,8.2942e-16,-1.33333,137,13)">
+                    <path d="M8,6.75L8,9L5,6L8,3L8,5.25L11,5.25L11,6.75L8,6.75Z" style="fill:rgb(110,110,110);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

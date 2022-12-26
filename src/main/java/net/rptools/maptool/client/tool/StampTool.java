@@ -34,7 +34,6 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -45,25 +44,25 @@ import java.util.Set;
 import java.util.Stack;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.ImageIcon;
 import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.AutoResizeStampDialog;
 import net.rptools.maptool.client.ui.StampPopupMenu;
 import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.Toolbox;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -98,40 +97,22 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   // private Map<Shape, Token> rotateBoundsMap = new HashMap<Shape, Token>();
   private final Map<Shape, Token> resizeBoundsMap = new HashMap<Shape, Token>();
 
-  private final LayerSelectionDialog layerSelectionDialog;
-
   // Offset from token's X,Y when dragging. Values are in cell coordinates.
   private int dragOffsetX;
   private int dragOffsetY;
   private int dragStartX;
   private int dragStartY;
 
-  public StampTool() {
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
+  private BufferedImage resizeImg = RessourceManager.getImage(Images.RESIZE);
 
-                if (layer == Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
-                }
-              }
-            });
-    try {
-      setIcon(
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/tool/stamper.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
+  public StampTool() {}
+
+  @Override
+  protected void selectedLayerChanged(Zone.Layer layer) {
+    super.selectedLayerChanged(layer);
+    if (layer == Layer.TOKEN && MapTool.getFrame() != null) {
+      MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
     }
-  }
-
-  public void updateLayerSelectionView() {
-    layerSelectionDialog.updateViewList();
   }
 
   @Override
@@ -147,7 +128,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
-    MapTool.getFrame().showControlPanel(layerSelectionDialog);
+    MapTool.getFrame().showControlPanel(getLayerSelectionDialog());
     super.attachTo(renderer);
 
     // Jamz: Lets remember token selections during Tool class switches which causes
@@ -155,8 +136,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     if (renderer.getSelectedTokenSet().size() > 0) {
       renderer.setKeepSelectedTokenSet(true);
     }
-
-    layerSelectionDialog.updateViewList();
   }
 
   @Override
@@ -1281,11 +1260,10 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               ScreenPoint.fromZonePoint(renderer, footprintBounds.x, footprintBounds.y);
 
           // distance to place the resize image in the lower left corner of an unrotated stamp
-          double tx = stampLocation.x + scaledWidth - AppStyle.resize.getWidth();
-          double ty = stampLocation.y + scaledHeight - AppStyle.resize.getHeight();
+          double tx = stampLocation.x + scaledWidth - resizeImg.getWidth();
+          double ty = stampLocation.y + scaledHeight - resizeImg.getHeight();
 
-          Rectangle resizeBounds =
-              new Rectangle(0, 0, AppStyle.resize.getHeight(), AppStyle.resize.getWidth());
+          Rectangle resizeBounds = new Rectangle(0, 0, resizeImg.getHeight(), resizeImg.getWidth());
           Area resizeBoundsArea = new Area(resizeBounds);
 
           AffineTransform at = new AffineTransform();
@@ -1297,16 +1275,16 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             // rotate the resize image with the stamp.
             double theta = Math.toRadians(-token.getFacing() - 90);
             double anchorX =
-                -scaledWidth / 2 + AppStyle.resize.getWidth() - (token.getAnchor().x * scale);
+                -scaledWidth / 2 + resizeImg.getWidth() - (token.getAnchor().x * scale);
             double anchorY =
-                -scaledHeight / 2 + AppStyle.resize.getHeight() - (token.getAnchor().y * scale);
+                -scaledHeight / 2 + resizeImg.getHeight() - (token.getAnchor().y * scale);
             at.rotate(theta, anchorX, anchorY);
           }
           // place the map over the image.
           resizeBoundsArea.transform(at);
           resizeBoundsMap.put(resizeBoundsArea, token);
 
-          g.drawImage(AppStyle.resize, at, renderer);
+          g.drawImage(resizeImg, at, renderer);
         }
 
         // g.setColor(Color.red);

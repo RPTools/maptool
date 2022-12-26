@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-95,0)">
+        <g id="Select-Previous-Token" serif:id="Select Previous Token" transform="matrix(1,0,0,1,-208.667,0)">
+            <rect x="303.667" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,189.667,0)">
+                <path d="M124,14.71C123.367,14.898 122.695,15 122,15C118.137,15 115,11.863 115,8C115,4.137 118.137,1 122,1C125.863,1 129,4.137 129,8C129,8.318 128.979,8.631 128.938,8.938L124,4L124,8.675C123.443,8.254 122.751,8.004 122,8.004C120.167,8.004 118.679,9.492 118.679,11.325L118.679,11.737C119.563,12.523 120.726,13 122,13C122.711,13 123.387,12.851 124,12.583L124,14.71ZM122,4C122.916,4 123.66,4.744 123.66,5.66C123.66,6.577 122.916,7.321 122,7.321C121.084,7.321 120.34,6.577 120.34,5.66C120.34,4.744 121.084,4 122,4Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(6.99798e-17,1.14286,-1,6.12323e-17,326.667,-127.857)">
+                <path d="M121.5,8L125,12L118,12L121.5,8Z" style="fill:rgb(56,159,214);"/>
+            </g>
+        </g>
+    </g>
+</svg>
