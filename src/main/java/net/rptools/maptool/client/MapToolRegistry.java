@@ -94,7 +94,16 @@ public class MapToolRegistry {
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
-      details.webrtc = json.getAsJsonPrimitive("webrtc").getAsInt() > 0; // .getAsBoolean();
+
+      // currently the webrtc property is sent as int. In the future this will
+      // change to boolean. So we check what the type is. Can be removed when
+      // we get it as boolean.
+      var webrtcProperty = json.getAsJsonPrimitive("webrtc");
+      if(webrtcProperty.isBoolean()) {
+        details.webrtc = webrtcProperty.getAsBoolean();
+      } else {
+        details.webrtc = webrtcProperty.getAsInt() > 0;
+      }
 
       return details;
 
