@@ -23,7 +23,6 @@ import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
@@ -264,9 +263,11 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
                 prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
                 prefs.setPlayerLibraryLock(lockPlayerLibrary.isSelected());
+
                 JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
-                AppState.setUseWebRTC(
+                prefs.setKeyUseWebrtc(
                     useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
+
                 accepted = true;
                 dialog.closeDialog();
               }

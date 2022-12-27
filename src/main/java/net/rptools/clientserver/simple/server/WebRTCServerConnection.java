@@ -108,7 +108,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
       case "login" -> {
         var loginMsg = gson.fromJson(message, LoginMessageDto.class);
         if (!loginMsg.success) {
-          MapTool.showError("Servername already taken!");
+          MapTool.showError("ServerDialog.error.serverAlreadyExists");
         }
       }
       case "offer" -> {

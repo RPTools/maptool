@@ -1035,7 +1035,7 @@ public class MapTool {
       try {
         MapToolRegistry.RegisterResponse result =
             MapToolRegistry.getInstance()
-                .registerInstance(config.getServerName(), config.getPort());
+                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
         if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         }

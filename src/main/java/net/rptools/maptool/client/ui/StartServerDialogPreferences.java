@@ -52,6 +52,8 @@ public class StartServerDialogPreferences {
   private static final String KEY_START_LOCKED_PLAYER_MOVEMENT = "lockPlayerMovementOnStartup";
   private static final String KEY_LOCK_PLAYER_LIBRARY = "lockPlayerLibrary";
 
+  private static final String KEY_USE_WEBRTC = "useWebRTC";
+
   private static Boolean useToolTipsForUnformattedRolls = null;
 
   public Player.Role getRole() {
@@ -258,5 +260,13 @@ public class StartServerDialogPreferences {
 
   public void setPlayerLibraryLock(boolean flag) {
     prefs.putBoolean(KEY_LOCK_PLAYER_LIBRARY, flag);
+  }
+
+  public boolean getUseWebRtc() {
+    return prefs.getBoolean(KEY_USE_WEBRTC, false);
+  }
+
+  public void setKeyUseWebrtc(boolean flag) {
+    prefs.putBoolean(KEY_USE_WEBRTC, flag);
   }
 }
