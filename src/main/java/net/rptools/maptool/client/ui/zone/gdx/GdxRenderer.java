@@ -48,16 +48,18 @@ import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.gdx.GifDecoder;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ZoneActivated;
+import net.rptools.maptool.client.swing.ImageBorder;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
 import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
 import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.DrawableLight;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -1133,20 +1135,20 @@ public class GdxRenderer extends ApplicationAdapter implements AssetAvailableLis
     var alpha = AppPreferences.getAuraOverlayOpacity() / 255.0f;
 
     timer.start("auras-4");
-
-    for (DrawableLight light : zoneRenderer.getZoneView().getLights(LightSource.Type.AURA)) {
-      var paint = light.getPaint();
-      if (paint != null && paint instanceof DrawableColorPaint) {
-        var colorPaint = (DrawableColorPaint) paint;
-        Color.argb8888ToColor(tmpColor, colorPaint.getColor());
-        tmpColor.a = alpha;
-      } else {
-        tmpColor.set(1, 1, 1, 0.59f);
-      }
-      drawer.setColor(tmpColor);
-      areaRenderer.fillArea(light.getArea());
-    }
-
+    /*
+        for (DrawableLight light : zoneRenderer.getZoneView().getLights(LightSource.Type.AURA)) {
+          var paint = light.getPaint();
+          if (paint != null && paint instanceof DrawableColorPaint) {
+            var colorPaint = (DrawableColorPaint) paint;
+            Color.argb8888ToColor(tmpColor, colorPaint.getColor());
+            tmpColor.a = alpha;
+          } else {
+            tmpColor.set(1, 1, 1, 0.59f);
+          }
+          drawer.setColor(tmpColor);
+          areaRenderer.fillArea(light.getArea());
+        }
+    */
     timer.stop("auras-4");
   }
 
@@ -1806,7 +1808,7 @@ public class GdxRenderer extends ApplicationAdapter implements AssetAvailableLis
               || tool instanceof OvalExposeTool
               || tool instanceof FreehandExposeTool
               || tool instanceof PolygonExposeTool) {
-            selectedBorder = AppConstants.FOW_TOOLS_BORDER;
+            selectedBorder = RessourceManager.getBorder(Borders.FOW_TOOLS);
           }
         }
 

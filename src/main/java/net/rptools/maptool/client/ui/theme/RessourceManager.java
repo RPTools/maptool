@@ -155,6 +155,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_FOG_ON, IMAGE_DIR + "tool/fog-blue.png");
           put(Icons.TOOLBAR_HIDE_OFF, IMAGE_DIR + "tool/upArrow.png");
           put(Icons.TOOLBAR_HIDE_ON, IMAGE_DIR + "tool/downArrow.png");
+          put(Icons.TOOLBAR_LIBGDX, IMAGE_DIR + "libgdx.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_OFF, IMAGE_DIR + "tool/ai-blue-off.png");
           put(Icons.TOOLBAR_POINTERTOOL_AI_ON, IMAGE_DIR + "tool/ai-blue-green.png");
           put(Icons.TOOLBAR_POINTERTOOL_MEASURE, IMAGE_DIR + "tool/ruler-blue.png");
