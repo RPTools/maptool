@@ -85,8 +85,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
  *
  * <p>
  */
-public class GdxRenderer extends ApplicationAdapter
-    implements AssetAvailableListener {
+public class GdxRenderer extends ApplicationAdapter implements AssetAvailableListener {
 
   private static final Logger log = LogManager.getLogger(GdxRenderer.class);
 
@@ -3198,11 +3197,11 @@ public class GdxRenderer extends ApplicationAdapter
 
     if (oldZone != null) {
       disposeZoneResources();
-   //   oldZone.removeModelChangeListener(this);
+      //   oldZone.removeModelChangeListener(this);
     }
 
     var newZone = event.zone();
-   // newZone.addModelChangeListener(this);
+    // newZone.addModelChangeListener(this);
     initializeZoneResources(newZone);
     // just in case we are running before create was called and hence initializeZoneResources does
     // nothing
@@ -3240,29 +3239,29 @@ public class GdxRenderer extends ApplicationAdapter
             }
         }
     */
-    /*
-    if (evt == Zone.Event.TOKEN_CHANGED
-            || evt == Zone.Event.TOKEN_REMOVED
-            || evt == Zone.Event.TOKEN_ADDED) {
-        if (event.getArg() instanceof List<?>) {
-            @SuppressWarnings("unchecked")
-            List<Token> list = (List<Token>) (event.getArg());
-            for (Token token : list) {
-                zoneRenderer.flush(token);
-            }
-        } else {
-            zoneRenderer.flush((Token) event.getArg());
-        }
-    }*/
-    /*
-          var currentZone = zone;
+  /*
+  if (evt == Zone.Event.TOKEN_CHANGED
+          || evt == Zone.Event.TOKEN_REMOVED
+          || evt == Zone.Event.TOKEN_ADDED) {
+      if (event.getArg() instanceof List<?>) {
+          @SuppressWarnings("unchecked")
+          List<Token> list = (List<Token>) (event.getArg());
+          for (Token token : list) {
+              zoneRenderer.flush(token);
+          }
+      } else {
+          zoneRenderer.flush((Token) event.getArg());
+      }
+  }*/
+  /*
+            var currentZone = zone;
 
-          // for now quick and dirty
-          disposeZoneResources();
-          initializeZoneResources(currentZone);
+            // for now quick and dirty
+            disposeZoneResources();
+            initializeZoneResources(currentZone);
 
-  }
-*/
+    }
+  */
   public void setScale(Scale scale) {
     if (!initialized) {
       return;

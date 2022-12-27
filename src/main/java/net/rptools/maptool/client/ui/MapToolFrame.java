@@ -14,9 +14,9 @@
  */
 package net.rptools.maptool.client.ui;
 
-import com.google.common.eventbus.Subscribe;
 import com.badlogic.gdx.backends.jogamp.JoglAwtApplicationConfiguration;
 import com.badlogic.gdx.backends.jogamp.JoglSwingCanvas;
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import com.jogamp.opengl.awt.GLJPanel;
@@ -89,8 +89,8 @@ import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
