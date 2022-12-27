@@ -25,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
@@ -194,6 +195,9 @@ public class AppPreferences {
 
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
   private static final String DEFAULT_MACRO_EDITOR_THEME = "Default";
+
+  private static final String ICON_THEME = "iconTheme";
+  private static final String DEFAULT_ICON_THEME = RessourceManager.ROD_TAKEHARA;
 
   // When hill VBL was introduced, older versions of MapTool were unable to read the new topology
   // modes. So we use a different preference key than in the past so older versions would not
@@ -1361,6 +1365,14 @@ public class AppPreferences {
 
   public static void setDefaultMacroEditorTheme(String type) {
     prefs.put(MACRO_EDITOR_THEME, type);
+  }
+
+  public static String getIconTheme() {
+    return prefs.get(ICON_THEME, DEFAULT_ICON_THEME);
+  }
+
+  public static void setIconTheme(String theme) {
+    prefs.put(ICON_THEME, theme);
   }
 
   public static Zone.TopologyTypeSet getTopologyTypes() {

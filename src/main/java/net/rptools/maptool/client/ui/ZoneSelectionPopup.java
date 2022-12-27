@@ -22,8 +22,9 @@ import java.util.List;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 
@@ -64,8 +65,8 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
       else
         rendererList.sort(
             (o1, o2) -> {
-              String name1 = o1.getZone().getPlayerAlias();
-              String name2 = o2.getZone().getPlayerAlias();
+              String name1 = o1.getZone().toString();
+              String name2 = o2.getZone().toString();
 
               return String.CASE_INSENSITIVE_ORDER.compare(name1, name2);
             });
@@ -77,7 +78,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
           item.setSelected(true);
           selection = item;
         } else if (!renderer.getZone().isVisible()) {
-          item.setIcon(new ImageIcon(AppStyle.notVisible));
+          item.setIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_ZONE_NOT_VISIBLE));
         }
         add(item);
       }
@@ -92,12 +93,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
 
     ZoneItem(ZoneRenderer renderer) {
       this.renderer = renderer;
-      String name =
-          MapTool.getPlayer().isGM()
-              ? renderer.getZone().getName().equals(renderer.getZone().getPlayerAlias())
-                  ? renderer.getZone().getName()
-                  : renderer.getZone().getPlayerAlias() + " (" + renderer.getZone().getName() + ")"
-              : renderer.getZone().getPlayerAlias();
+      String name = renderer.getZone().toString();
       if ("".equals(name)) {
         name = I18N.getText("Button.map");
       }

@@ -449,6 +449,9 @@ dependencies {
 
     implementation 'com.google.guava:guava:31.0.1-jre'
 
+    implementation 'org.apache.commons:commons-compress:1.22'
+    implementation 'org.tukaani:xz:1.9'
+
     // libgdx
     implementation 'com.github.thelsing:libgdx-jogl-backend:1.11.3'
     //maven local for development

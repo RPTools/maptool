@@ -14,40 +14,41 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DockableFrame;
 import java.util.*;
-import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.tokens.TokenMacroChanged;
+import net.rptools.maptool.model.tokens.TokenPanelChanged;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensRemoved;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class SelectionPanel extends AbstractMacroPanel {
   private static final Logger log = LogManager.getLogger(SelectionPanel.class);
 
-  private final List<Token> tokenList = null;
   private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
   private CodeTimer timer;
 
   public SelectionPanel() {
     // TODO: refactoring reminder
     setPanelClass("SelectionPanel");
-    init(
-        new ArrayList<
-            Token>()); // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just
-    // send an empty list
+    // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just send an empty list
+    init(new ArrayList<Token>());
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public List<MacroButtonProperties> getCommonMacros() {
@@ -113,21 +114,34 @@ public class SelectionPanel extends AbstractMacroPanel {
     new MapToolEventBus().getMainEventBus().register(this);
   }
 
-  @Override
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Event.TOKEN_REMOVED
-        || event.eventType == Event.TOKEN_MACRO_CHANGED
-        || event.eventType == Event.TOKEN_PANEL_CHANGED
-        || event.eventType == Event.TOKEN_EDITED) {
-      // Only resets if one of the selected tokens is among those changed/deleted.
-      ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-      if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
-        List<Token> tokenList = event.getTokensAsList();
-        for (Token token : tokenList) {
-          if (zr.getSelectedTokenSet().contains(token.getId())) {
-            reset();
-            break;
-          }
+  @Subscribe
+  private void onTokenMacroChanged(TokenMacroChanged event) {
+    resetIfSelected(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokenPanelChanged(TokenPanelChanged event) {
+    resetIfSelected(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    resetIfSelected(event.tokens());
+  }
+
+  @Subscribe
+  private void onTokenEdited(TokenEdited event) {
+    resetIfSelected(Collections.singletonList(event.token()));
+  }
+
+  private void resetIfSelected(List<Token> tokenList) {
+    // Only resets if one of the selected tokens is among those changed/deleted.
+    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
+    if (zr != null && !zr.getSelectedTokenSet().isEmpty()) {
+      for (Token token : tokenList) {
+        if (zr.getSelectedTokenSet().contains(token.getId())) {
+          reset();
+          break;
         }
       }
     }
@@ -203,7 +217,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     // reset the tab icon
     MapTool.getFrame()
         .getFrame(MTFrame.SELECTION)
-        .setFrameIcon(new ImageIcon(AppStyle.selectionPanelImage));
+        .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN));
     super.clear();
   }
 

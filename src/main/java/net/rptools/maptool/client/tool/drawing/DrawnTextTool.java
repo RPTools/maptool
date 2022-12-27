@@ -71,18 +71,7 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
    *-------------------------------------------------------------------------------------------*/
 
   /** Initialize the tool icon */
-  public DrawnTextTool() {
-    // try {
-    // setIcon(new ImageIcon(
-    // ImageIO
-    // .read(getClass()
-    // .getClassLoader()
-    // .getResourceAsStream(
-    // "net/rptools/maptool/client/image/Tool_Draw_Write.gif"))));
-    // } catch (IOException ioe) {
-    // ioe.printStackTrace();
-    // } // endtry
-  }
+  public DrawnTextTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Tool & AbstractDrawingTool Abstract Methods

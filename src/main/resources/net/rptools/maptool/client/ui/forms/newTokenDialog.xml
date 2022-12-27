@@ -395,7 +395,7 @@
                  </at>
                  <at name="name">@type.NPC</at>
                  <at name="width">45</at>
-                 <at name="text">NPC</at>
+                 <at name="text">Token.Type.NPC</at>
                  <at name="height">17</at>
                 </object>
                </at>
@@ -457,7 +457,7 @@
                  </at>
                  <at name="name">@type.PC</at>
                  <at name="width">36</at>
-                 <at name="text">PC</at>
+                 <at name="text">Token.Type.PC</at>
                  <at name="height">17</at>
                 </object>
                </at>

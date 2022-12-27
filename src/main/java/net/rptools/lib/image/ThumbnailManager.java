@@ -22,8 +22,8 @@ import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.commons.io.FileUtils;
 
 public class ThumbnailManager {

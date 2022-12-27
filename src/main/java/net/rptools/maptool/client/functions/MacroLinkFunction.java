@@ -34,7 +34,6 @@ import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -584,7 +583,7 @@ public class MacroLinkFunction extends AbstractFunction {
   }
 
   private static void doWhisper(String message, Token token, String playerName) {
-    ObservableList<Player> playerList = MapTool.getPlayerList();
+    List<Player> playerList = MapTool.getPlayerList();
     List<String> players = new ArrayList<>();
     for (int count = 0; count < playerList.size(); count++) {
       Player p = playerList.get(count);

@@ -14,9 +14,7 @@
  */
 package net.rptools.clientserver.simple;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -28,6 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.log4j.Logger;
 
 /**
@@ -54,6 +54,11 @@ public abstract class AbstractConnection implements Connection {
     messageHandlers.remove(handler);
   }
 
+  protected final void dispatchCompressedMessage(String id, byte[] compressedMessage) {
+    var message = inflate(compressedMessage);
+    dispatchMessage(id, message);
+  }
+
   public final void dispatchMessage(String id, byte[] message) {
     if (messageHandlers.size() == 0) {
       log.warn("message received but not messageHandlers registered.");
@@ -70,9 +75,36 @@ public abstract class AbstractConnection implements Connection {
 
   public synchronized void addMessage(Object channel, byte[] message) {
     List<byte[]> queue = getOutQueue(channel);
-    queue.add(message);
+    queue.add(compress(message));
     // Queue up for sending
     outQueueList.add(queue);
+  }
+
+  private byte[] compress(byte[] message) {
+    try {
+      ByteArrayOutputStream baos = new ByteArrayOutputStream(message.length);
+      OutputStream ios = new LZMACompressorOutputStream(baos);
+      ios.write(message);
+      ios.close();
+
+      var compressedMessage = baos.toByteArray();
+      return compressedMessage;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  private byte[] inflate(byte[] compressedMessage) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedMessage.length);
+    InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
+    try {
+      InputStream ios = new LZMACompressorInputStream(bytesIn);
+      var decompressed = ios.readAllBytes();
+      ios.close();
+      return decompressed;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   protected List<byte[]> getOutQueue(Object channel) {

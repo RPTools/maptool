@@ -57,17 +57,23 @@ import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.events.ChatMessageAdded;
+import net.rptools.maptool.client.events.PlayerConnected;
+import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.client.events.ServerStopped;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
 import net.rptools.maptool.client.swing.SplashScreen;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -78,7 +84,6 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
@@ -88,7 +93,10 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -145,8 +153,7 @@ public class MapTool {
 
   private static Campaign campaign;
 
-  private static ObservableList<Player> playerList;
-  private static ObservableList<TextMessage> messageList;
+  private static List<Player> playerList;
   private static LocalPlayer player;
 
   private static MapToolConnection conn;
@@ -651,9 +658,7 @@ public class MapTool {
     assetTransferManager = new AssetTransferManager();
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-    playerList = new ObservableList<Player>();
-    messageList =
-        new ObservableList<TextMessage>(Collections.synchronizedList(new ArrayList<TextMessage>()));
+    playerList = new ArrayList<>();
 
     handler = new ClientMessageHandler();
 
@@ -744,6 +749,7 @@ public class MapTool {
   public static void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
+      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
       new Players().playerSignedIn(player);
 
       // LATER: Make this non-anonymous
@@ -757,20 +763,13 @@ public class MapTool {
     }
   }
 
-  public Player getPlayer(String name) {
-    for (int i = 0; i < playerList.size(); i++) {
-      if (playerList.get(i).getName().equals(name)) {
-        return playerList.get(i);
-      }
-    }
-    return null;
-  }
-
   public static void removePlayer(Player player) {
     if (player == null) {
       return;
     }
     playerList.remove(player);
+    new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
+
     new Players().playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
@@ -778,10 +777,6 @@ public class MapTool {
           MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
       addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
     }
-  }
-
-  public static ObservableList<TextMessage> getMessageList() {
-    return messageList;
   }
 
   /**
@@ -816,7 +811,8 @@ public class MapTool {
     if (message.isWhisper()) {
       setLastWhisperer(message.getSource());
     }
-    messageList.add(message);
+
+    new MapToolEventBus().getMainEventBus().post(new ChatMessageAdded(message));
   }
 
   /**
@@ -960,6 +956,8 @@ public class MapTool {
         currRenderer = renderer;
       }
       new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+      // Now we have fire off adding the tokens in the zone
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1072,7 +1070,7 @@ public class MapTool {
     getFrame().getConnectionPanel().stopHosting();
   }
 
-  public static ObservableList<Player> getPlayerList() {
+  public static List<Player> getPlayerList() {
     return playerList;
   }
 
@@ -1120,6 +1118,10 @@ public class MapTool {
     MapTool.serverCommand().removeZone(zone.getId());
     MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zone.getId()));
     MapTool.getCampaign().removeZone(zone.getId());
+
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
   public static void addZone(Zone zone) {
@@ -1137,6 +1139,8 @@ public class MapTool {
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
     new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+    // Now we have fire off adding the tokens in the zone
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
 
     // Show the new zone
     if (changeZone) {
@@ -1254,7 +1258,10 @@ public class MapTool {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
     }
+
+    new MapToolEventBus().getMainEventBus().post(new ServerStopped());
     playerList.clear();
+
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);
@@ -1276,12 +1283,7 @@ public class MapTool {
 
           defaults.put("OptionPane.showBanner", Boolean.TRUE); // show banner or not. default
           // is true
-          defaults.put(
-              "OptionPane.bannerIcon",
-              new ImageIcon(
-                  MapTool.class
-                      .getClassLoader()
-                      .getResource("net/rptools/maptool/client/image/maptool_icon.png")));
+          defaults.put("OptionPane.bannerIcon", RessourceManager.getSmallIcon(Icons.MAPTOOL));
           defaults.put("OptionPane.bannerFontSize", 13);
           defaults.put("OptionPane.bannerFontStyle", Font.BOLD);
           defaults.put("OptionPane.bannerMaxCharsPerLine", 60);

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 17 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-38,-171)">
+        <g id="PC" transform="matrix(1,0,0,1,-51.9031,171)">
+            <rect x="90" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(1.70048,0,0,1.92048,13.3705,-394.142)">
+                <text x="47.171px" y="210.852px" style="font-family:'Inter-Black', 'Inter', sans-serif;font-weight:900;font-size:4px;fill:rgb(110,110,110);">PC</text>
+            </g>
+        </g>
+    </g>
+</svg>

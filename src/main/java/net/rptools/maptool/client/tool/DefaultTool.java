@@ -20,11 +20,11 @@ import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
@@ -39,6 +39,14 @@ public abstract class DefaultTool extends Tool
     implements MouseListener, MouseMotionListener, MouseWheelListener {
   private static final long serialVersionUID = 3258411729238372921L;
 
+  private final LayerSelectionDialog layerSelectionDialog =
+      new LayerSelectionDialog(
+          new Zone.Layer[] {
+            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
+          },
+          this::selectedLayerChanged);
+
+  private Zone.Layer selectedLayer;
   private boolean isDraggingMap;
   private int dragStartX;
   private int dragStartY;
@@ -57,10 +65,26 @@ public abstract class DefaultTool extends Tool
 
   protected ZoneRenderer renderer;
 
+  protected Zone.Layer getSelectedLayer() {
+    return selectedLayer;
+  }
+
+  protected LayerSelectionDialog getLayerSelectionDialog() {
+    return layerSelectionDialog;
+  }
+
+  protected void selectedLayerChanged(Zone.Layer layer) {
+    selectedLayer = layer;
+    if (renderer != null) {
+      renderer.setActiveLayer(layer);
+    }
+  }
+
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     this.renderer = renderer;
+    layerSelectionDialog.updateViewList();
   }
 
   @Override
@@ -116,6 +140,51 @@ public abstract class DefaultTool extends Tool
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_F, InputEvent.SHIFT_DOWN_MASK),
         new FlipTokenVerticalActionListener());
+
+    // Disable until the conrete hotkeys are decided.
+    /*
+    actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_1, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.TOKEN);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_2, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.GM);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_3, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.OBJECT);
+             }
+           }
+         });
+     actionMap.put(
+         KeyStroke.getKeyStroke(KeyEvent.VK_4, InputEvent.CTRL_DOWN_MASK),
+         new AbstractAction() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+             if (layerSelectionDialog.isVisible()) {
+               layerSelectionDialog.setSelectedLayer(Zone.Layer.BACKGROUND);
+             }
+           }
+         });
+         */
   }
 
   ////

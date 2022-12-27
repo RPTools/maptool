@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.dnd.DropTargetDragEvent;
@@ -38,11 +39,11 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.ImageLabel;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
+import net.rptools.maptool.client.swing.ImageBorder;
+import net.rptools.maptool.client.swing.ImageLabel;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
@@ -52,11 +53,15 @@ import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.NewTokenDialog;
 import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
@@ -66,6 +71,13 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zones.DrawableAdded;
+import net.rptools.maptool.model.zones.DrawableRemoved;
+import net.rptools.maptool.model.zones.FogChanged;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.TopologyChanged;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -178,7 +190,6 @@ public class ZoneRenderer extends JComponent
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
-    zone.addModelChangeListener(new ZoneModelChangeListener());
 
     // The interval, in milliseconds, during which calls to repaint() will be debounced.
     int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
@@ -223,6 +234,7 @@ public class ZoneRenderer extends JComponent
         });
     // fps.start();
 
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public void setAutoResizeStamp(boolean value) {
@@ -256,16 +268,10 @@ public class ZoneRenderer extends JComponent
     }
 
     centerOn(new ZonePoint(token.getX(), token.getY()));
+    setActiveLayer(token.getLayer());
     MapTool.getFrame()
         .getToolbox()
         .setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
-    setActiveLayer(token.getLayer());
-
-    // Jamz: even though the layer was being activated the dialog list was not updating...
-    Tool currentTool = MapTool.getFrame().getToolbox().getSelectedTool();
-    if (currentTool instanceof StampTool) {
-      ((StampTool) currentTool).updateLayerSelectionView();
-    }
 
     selectToken(token.getId());
     requestFocusInWindow();
@@ -1560,7 +1566,7 @@ public class ZoneRenderer extends JComponent
     // Setup
     timer.start("renderAuras:getAuras");
     if (drawableAuras == null) {
-      drawableAuras = new ArrayList<>(zoneView.getLights(LightSource.Type.AURA));
+      drawableAuras = new ArrayList<>(zoneView.getDrawableAuras());
     }
     timer.stop("renderAuras:getAuras");
 
@@ -2153,7 +2159,8 @@ public class ZoneRenderer extends JComponent
             for (CellPoint point : blockedMoves) {
               ZonePoint zp = point.midZonePoint(getZone().getGrid(), position);
               double r = (zp.x - 1) * 45;
-              showBlockedMoves(g, zp, r, AppStyle.blockMoveImage, 1.0f);
+              showBlockedMoves(
+                  g, zp, r, RessourceManager.getImage(Images.ZONE_RENDERER_BLOCK_MOVE), 1.0f);
             }
           }
         }
@@ -2419,7 +2426,7 @@ public class ZoneRenderer extends JComponent
       int w = 0;
       for (ZonePoint p : waypointList) {
         ZonePoint zp = new ZonePoint(p.x + cellOffset.width, p.y + cellOffset.height);
-        highlightCell(g, zp, AppStyle.cellWaypointImage, .333f);
+        highlightCell(g, zp, RessourceManager.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
 
       // Line path
@@ -2532,7 +2539,7 @@ public class ZoneRenderer extends JComponent
             new ZonePoint(
                 (int) (p.x + (footprintBounds.width / 2) * footprint.getScale()),
                 (int) (p.y + (footprintBounds.height / 2) * footprint.getScale()));
-        highlightCell(g, p, AppStyle.cellWaypointImage, .333f);
+        highlightCell(g, p, RessourceManager.getImage(Images.ZONE_RENDERER_CELL_WAYPOINT), .333f);
       }
       timer.stop("renderPath-3");
     }
@@ -3483,7 +3490,7 @@ public class ZoneRenderer extends JComponent
               || tool instanceof OvalExposeTool
               || tool instanceof FreehandExposeTool
               || tool instanceof PolygonExposeTool) {
-            selectedBorder = AppConstants.FOW_TOOLS_BORDER;
+            selectedBorder = RessourceManager.getBorder(Borders.FOW_TOOLS);
           }
         }
         if (token.hasFacing()
@@ -3620,7 +3627,7 @@ public class ZoneRenderer extends JComponent
             // token is offscreen
             continue;
           }
-          BufferedImage stackImage = AppStyle.stackImage;
+          BufferedImage stackImage = RessourceManager.getImage(Images.ZONE_RENDERER_STACK_IMAGE);
           clippedG.drawImage(
               stackImage,
               bounds.getBounds().x + bounds.getBounds().width - stackImage.getWidth() + 2,
@@ -4738,52 +4745,95 @@ public class ZoneRenderer extends JComponent
   @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {}
 
-  /** ZONE MODEL CHANGE LISTENER */
-  private class ZoneModelChangeListener implements ModelChangeListener {
-
-    /**
-     * ALL events trigger updateTokenTree and a repaint. Reacts specifically to events
-     * TOPOLOGY_CHANGED, TOKEN_CHANGED, TOKEN_REMOVED, and TOKEN_ADDED.
-     *
-     * @param event the event
-     */
-    public void modelChanged(ModelChangeEvent event) {
-      Object evt = event.getEvent();
-
-      if (evt == Zone.Event.TOPOLOGY_CHANGED) {
-        flushFog();
-        flushLight();
-      }
-      if (evt == Zone.Event.TOKEN_CHANGED
-          || evt == Zone.Event.TOKEN_REMOVED
-          || evt == Zone.Event.TOKEN_ADDED) {
-        for (Token token : event.getTokensAsList()) {
-          flush(token);
-        }
-      }
-      if (evt == Zone.Event.FOG_CHANGED) {
-        zoneView.flushFog();
-      }
-      if (evt == Zone.Event.DRAWABLE_ADDED || evt == Zone.Event.DRAWABLE_REMOVED) {
-        DrawnElement de = (DrawnElement) event.getArg();
-        switch (de.getDrawable().getLayer()) {
-          case TOKEN:
-            tokenDrawableRenderer.setDirty();
-            break;
-          case GM:
-            gmDrawableRenderer.setDirty();
-            break;
-          case OBJECT:
-            objectDrawableRenderer.setDirty();
-            break;
-          case BACKGROUND:
-            backgroundDrawableRenderer.setDirty();
-            break;
-        }
-      }
-      MapTool.getFrame().updateTokenTree(); // for any event
-      repaintDebouncer.dispatch();
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != this.zone) {
+      return;
     }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    for (Token token : event.tokens()) {
+      flush(token);
+    }
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onFogChanged(FogChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    zoneView.flushFog();
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onTopologyChanged(TopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+
+    flushFog();
+    flushLight();
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  private void markDrawableLayerDirty(Layer layer) {
+    switch (layer) {
+      case TOKEN -> tokenDrawableRenderer.setDirty();
+      case GM -> gmDrawableRenderer.setDirty();
+      case OBJECT -> objectDrawableRenderer.setDirty();
+      case BACKGROUND -> backgroundDrawableRenderer.setDirty();
+    }
+  }
+
+  @Subscribe
+  private void onDrawableAdded(DrawableAdded event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onDrawableRemoved(DrawableRemoved event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
+    MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
   }
 
   //

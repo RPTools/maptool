@@ -44,12 +44,12 @@ import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
@@ -69,7 +69,7 @@ import org.apache.logging.log4j.Logger;
  */
 
 // Lee: made tokens cloneable
-public class Token extends BaseModel implements Cloneable {
+public class Token implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
@@ -2432,9 +2432,7 @@ public class Token extends BaseModel implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
-  @Override
   protected Object readResolve() {
-    super.readResolve();
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.

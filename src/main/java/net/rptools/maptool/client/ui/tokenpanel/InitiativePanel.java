@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -27,24 +28,27 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.InitiativeListModel;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.InitiativeListChanged;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
 
 /**
  * This panel shows the initiative order inside of MapTools.
@@ -52,7 +56,7 @@ import net.rptools.maptool.model.Zone.Event;
  * @author Jay
  */
 public class InitiativePanel extends JPanel
-    implements PropertyChangeListener, ModelChangeListener, ListSelectionListener {
+    implements PropertyChangeListener, ListSelectionListener {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -129,7 +133,6 @@ public class InitiativePanel extends JPanel
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
-
   /** Setup the menu */
   public InitiativePanel() {
 
@@ -143,7 +146,9 @@ public class InitiativePanel extends JPanel
     popupMenu = new JPopupMenu();
     toolBar.add(
         SwingUtil.makePopupMenuButton(
-            new JButton(new ImageIcon(AppStyle.arrowMenu)), () -> popupMenu, false));
+            new JButton(RessourceManager.getSmallIcon(Icons.ACTION_SETTINGS)),
+            () -> popupMenu,
+            false));
 
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));
@@ -186,10 +191,12 @@ public class InitiativePanel extends JPanel
     map.put("REMOVE_TOKEN_ACTION", REMOVE_TOKEN_ACTION);
 
     // Set action text and icons
-    PREV_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowLeft));
-    TOGGLE_HOLD_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowHold));
-    NEXT_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowRight));
-    RESET_COUNTER_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowRotateClockwise));
+    PREV_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PREVIOUS));
+    TOGGLE_HOLD_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PAUSE));
+    NEXT_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_NEXT));
+    RESET_COUNTER_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_RESET));
 
     I18N.setAction("initPanel.sort", SORT_LIST_ACTION);
     I18N.setAction("initPanel.toggleHold", TOGGLE_HOLD_ACTION);
@@ -214,6 +221,8 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.next", NEXT_ACTION);
     I18N.setAction("initPanel.prev", PREV_ACTION);
     updateView();
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   private static class TextlessButton extends JButton {
@@ -367,9 +376,7 @@ public class InitiativePanel extends JPanel
   public void setZone(Zone aZone) {
     // Clean up listeners
     if (aZone == zone) return;
-    if (zone != null) zone.removeModelChangeListener(this);
     zone = aZone;
-    if (zone != null) zone.addModelChangeListener(this);
 
     // Older campaigns didn't have a list, make sure this one does
     InitiativeList list = (zone != null) ? zone.getInitiativeList() : new InitiativeList(null);
@@ -484,6 +491,42 @@ public class InitiativePanel extends JPanel
     this.initStateSecondLine = initStateSecondLine;
   }
 
+  @Subscribe
+  private void onInitiativeListChanged(InitiativeListChanged event) {
+    final var list = event.initiativeList();
+    if (list.getZone() != zone) {
+      return;
+    }
+
+    int oldSize = model.getSize();
+    setList(list);
+    if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
+  }
+
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
+  }
+
   /*---------------------------------------------------------------------------------------------
    * ListSelectionListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
@@ -535,29 +578,6 @@ public class InitiativePanel extends JPanel
     } else if (evt.getPropertyName().equals(InitiativeList.OWNER_PERMISSIONS_PROP)) {
       updateView();
     } // endif
-  }
-
-  /*---------------------------------------------------------------------------------------------
-   * ModelChangeListener Interface Methods
-   *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.ModelChangeListener#modelChanged(net.rptools.maptool.model.ModelChangeEvent)
-   */
-  @Override
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if (event.getModel() == zone) {
-        int oldSize = model.getSize();
-        setList(((Zone) event.getModel()).getInitiativeList());
-        if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
-      }
-    } else if (event.getEvent().equals(Event.TOKEN_ADDED)
-        || event.getEvent().equals(Event.TOKEN_CHANGED)
-        || event.getEvent().equals(Event.TOKEN_REMOVED)) {
-      model.updateModel();
-    }
   }
 
   /*---------------------------------------------------------------------------------------------

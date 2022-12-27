@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -25,12 +26,17 @@ import java.util.Map.Entry;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.TopologyChanged;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Responsible for calculating lights and vision. */
-public class ZoneView implements ModelChangeListener {
+public class ZoneView {
   private static final Logger log = LogManager.getLogger(ZoneView.class);
 
   /** The zone of the ZoneView. */
@@ -69,7 +75,8 @@ public class ZoneView implements ModelChangeListener {
   public ZoneView(Zone zone) {
     this.zone = zone;
     findLightSources();
-    zone.addModelChangeListener(this);
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public Area getExposedArea(PlayerView view) {
@@ -527,15 +534,15 @@ public class ZoneView implements ModelChangeListener {
   }
 
   /**
-   * Get the lists of drawable light from lightSourceMap.
+   * Get the lists of drawable auras.
    *
-   * @param type the type of lights to get.
-   * @return the list of drawable lights of the given type.
+   * @return the list of drawable auras.
    */
-  public List<DrawableLight> getLights(LightSource.Type type) {
+  public List<DrawableLight> getDrawableAuras() {
     List<DrawableLight> lightList = new LinkedList<DrawableLight>();
-    if (lightSourceMap.get(type) != null) {
-      for (GUID lightSourceToken : lightSourceMap.get(type)) {
+    final var auraTokenGUIDs = lightSourceMap.get(LightSource.Type.AURA);
+    if (auraTokenGUIDs != null) {
+      for (GUID lightSourceToken : auraTokenGUIDs) {
         Token token = zone.getToken(lightSourceToken);
         if (token == null) {
           continue;
@@ -547,40 +554,52 @@ public class ZoneView implements ModelChangeListener {
           if (lightSource == null) {
             continue;
           }
-          if (lightSource.getType() == type) {
-            // This needs to be cached somehow
-            Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
-            Area visibleArea =
-                FogUtil.calculateVisibility(
-                    p.x,
-                    p.y,
-                    lightSourceArea,
-                    getTopologyTree(Zone.TopologyType.WALL_VBL),
-                    getTopologyTree(Zone.TopologyType.HILL_VBL),
-                    getTopologyTree(Zone.TopologyType.PIT_VBL));
-            if (visibleArea == null) {
+          // Token can also have non-auras lights, we don't want those.
+          if (lightSource.getType() != LightSource.Type.AURA) {
+            continue;
+          }
+
+          Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
+          Area visibleArea =
+              FogUtil.calculateVisibility(
+                  p.x,
+                  p.y,
+                  lightSourceArea,
+                  getTopologyTree(Zone.TopologyType.WALL_VBL),
+                  getTopologyTree(Zone.TopologyType.HILL_VBL),
+                  getTopologyTree(Zone.TopologyType.PIT_VBL));
+
+          // This needs to be cached somehow
+          for (Light light : lightSource.getLightList()) {
+            // If there is no paint, it's a "bright aura" that just shows whatever is beneath it and
+            //  doesn't need to be rendered.
+            if (light.getPaint() == null) {
               continue;
             }
-            for (Light light : lightSource.getLightList()) {
-              boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
-              if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
-                continue;
-              }
-              if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
-                continue;
-              }
-              if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
-                continue;
-              }
-              if (light.isOwnerOnly()
-                  && lightSource.getType() == LightSource.Type.AURA
-                  && !isOwner
-                  && !MapTool.getPlayer().isEffectiveGM()) {
-                continue;
-              }
-              lightList.add(
-                  new DrawableLight(type, light.getPaint(), visibleArea, lightSource.getLumens()));
+            boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
+            if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
+              continue;
             }
+            if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
+              continue;
+            }
+            if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+              continue;
+            }
+            if (light.isOwnerOnly() && !isOwner && !MapTool.getPlayer().isEffectiveGM()) {
+              continue;
+            }
+
+            // Calculate the area covered by this particular range.
+            Area lightArea = lightSource.getArea(token, zone, Direction.CENTER, light);
+            if (lightArea == null) {
+              continue;
+            }
+            lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
+            lightArea.intersect(visibleArea);
+            lightList.add(
+                new DrawableLight(
+                    LightSource.Type.AURA, light.getPaint(), lightArea, lightSource.getLumens()));
           }
         }
       }
@@ -733,62 +752,96 @@ public class ZoneView implements ModelChangeListener {
     // "ms");
   }
 
-  /**
-   * MODEL CHANGE LISTENER for events TOKEN_CHANGED, TOKEN_REMOVED, TOKEN_ADDED.
-   *
-   * @param event the event.
-   */
-  public void modelChanged(ModelChangeEvent event) {
-    Object evt = event.getEvent();
-    if (event.getModel() instanceof Zone) {
-      boolean tokenChangedTopology = false;
+  @Subscribe
+  private void onTopologyChanged(TopologyChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
 
-      if (evt == Zone.Event.TOKEN_CHANGED || evt == Zone.Event.TOKEN_REMOVED) {
-        for (Token token : event.getTokensAsList()) {
-          if (token.hasAnyTopology()) tokenChangedTopology = true;
-          flush(token);
+    flush();
+    topologyAreas.clear();
+    topologyTrees.clear();
+  }
+
+  private boolean flushExistingTokens(List<Token> tokens) {
+    boolean tokenChangedTopology = false;
+    for (Token token : tokens) {
+      if (token.hasAnyTopology()) tokenChangedTopology = true;
+      flush(token);
+    }
+    // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
+    // cleared on another token, changes aren't pushed to client?
+    // tokenVisionCache.clear();
+    return tokenChangedTopology;
+  }
+
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
+
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
+    }
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    boolean tokenChangedTopology = flushExistingTokens(event.tokens());
+
+    for (Token token : event.tokens()) {
+      if (token.hasAnyTopology()) tokenChangedTopology = true;
+      for (AttachedLightSource als : token.getLightSources()) {
+        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+        if (lightSource == null) {
+          continue;
         }
-        // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
-        // cleared on another token, changes aren't pushed to client?
-        // tokenVisionCache.clear();
-      }
-
-      if (evt == Zone.Event.TOKEN_ADDED || evt == Zone.Event.TOKEN_CHANGED) {
-        tokenChangedTopology = processTokenAddChangeEvent(event.getTokensAsList());
-      }
-
-      if (evt == Zone.Event.TOKEN_REMOVED) {
-        for (Token token : event.getTokensAsList()) {
-          if (token.hasAnyTopology()) tokenChangedTopology = true;
-          for (AttachedLightSource als : token.getLightSources()) {
-            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-            if (lightSource == null) {
-              continue;
-            }
-            Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
-            if (lightSet != null) {
-              lightSet.remove(token.getId());
-            }
-          }
+        Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
+        if (lightSet != null) {
+          lightSet.remove(token.getId());
         }
       }
+    }
 
-      // Moved this event to the bottom so we can check the other events
-      // since if a token that has topology is added/removed/edited (rotated/moved/etc)
-      // it should also trip a Topology change
-      if (evt == Zone.Event.TOPOLOGY_CHANGED || tokenChangedTopology) {
-        tokenVisionCache.clear();
-        lightSourceCache.clear();
-        drawableLightCache.clear();
-        personalDrawableLightCache.clear();
-        exposedAreaMap.clear();
-        visibleAreaMap.clear();
-        topologyAreas.clear();
-        topologyTrees.clear();
-        tokenVisibleAreaCache.clear();
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
+    }
+  }
 
-        // topologyAreaData = null; // Jamz: This isn't used, probably never completed code.
-      }
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    flushExistingTokens(event.tokens());
+
+    boolean tokenChangedTopology = processTokenAddChangeEvent(event.tokens());
+
+    // Moved this event to the bottom so we can check the other events
+    // since if a token that has topology is added/removed/edited (rotated/moved/etc)
+    // it should also trip a Topology change
+    if (tokenChangedTopology) {
+      flush();
+      topologyAreas.clear();
+      topologyTrees.clear();
     }
   }
 
