@@ -151,7 +151,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
-    super("net/rptools/maptool/client/ui/forms/tokenPropertiesDialog.xml");
+    super(new TokenPropertiesDialog().$$$getRootComponent$$$());
     panelInit();
   }
 
