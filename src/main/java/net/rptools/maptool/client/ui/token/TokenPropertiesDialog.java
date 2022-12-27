@@ -28,6 +28,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
+import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 
 public class TokenPropertiesDialog {
 
@@ -36,6 +37,8 @@ public class TokenPropertiesDialog {
   private JPanel buttonPanel;
   private JLabel tokenImage;
   private JTabbedPane tabPanel;
+  private HtmlEditorSplit gmNotesEditor;
+  private HtmlEditorSplit playerNotesEditor;
   private JLabel ownershipList;
 
   {
@@ -52,6 +55,7 @@ public class TokenPropertiesDialog {
    * @noinspection ALL
    */
   private void $$$setupUI$$$() {
+    createUIComponents();
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridLayoutManager(3, 3, new Insets(4, 4, 4, 4), -1, -1));
     mainPanel.setName("mainPanel");
@@ -91,21 +95,20 @@ public class TokenPropertiesDialog {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            null,
+            new Dimension(1, 1),
             null,
             0,
             false));
     final JPanel panel1 = new JPanel();
-    panel1.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+    panel1.setLayout(new GridLayoutManager(1, 1, new Insets(5, 5, 5, 5), -1, -1));
     panel1.setName("notesPanel");
     panel1.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.notes"),
         panel1);
-    final JScrollPane scrollPane1 = new JScrollPane();
     panel1.add(
-        scrollPane1,
+        playerNotesEditor,
         new GridConstraints(
             0,
             0,
@@ -116,28 +119,20 @@ public class TokenPropertiesDialog {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            new Dimension(945, 354),
+            null,
             null,
             0,
             false));
-    final JTextArea textArea1 = new JTextArea();
-    textArea1.setLineWrap(true);
-    textArea1.setName("@notes");
-    textArea1.setSelectionEnd(0);
-    textArea1.setSelectionStart(0);
-    textArea1.setText("");
-    textArea1.setWrapStyleWord(true);
-    scrollPane1.setViewportView(textArea1);
     final JPanel panel2 = new JPanel();
-    panel2.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel2.setVisible(false);
+    panel2.setLayout(new GridLayoutManager(1, 1, new Insets(5, 5, 5, 5), -1, -1));
+    panel2.setName("gmNotesPanel");
+    panel2.setVisible(true);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.gmnotes"),
         panel2);
-    final JScrollPane scrollPane2 = new JScrollPane();
     panel2.add(
-        scrollPane2,
+        gmNotesEditor,
         new GridConstraints(
             0,
             0,
@@ -146,20 +141,14 @@ public class TokenPropertiesDialog {
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
             null,
             null,
             0,
             false));
-    final JTextArea textArea2 = new JTextArea();
-    textArea2.setLineWrap(true);
-    textArea2.setName("@GMNotes");
-    textArea2.setText("");
-    textArea2.setWrapStyleWord(true);
-    scrollPane2.setViewportView(textArea2);
     final JPanel panel3 = new JPanel();
-    panel3.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+    panel3.setLayout(new GridLayoutManager(1, 2, new Insets(5, 5, 5, 5), -1, -1));
     panel3.setName("propertiesPanel");
     panel3.setVisible(false);
     tabPanel.addTab(
@@ -186,8 +175,8 @@ public class TokenPropertiesDialog {
             0,
             false));
     final JPanel panel4 = new JPanel();
-    panel4.setLayout(new GridLayoutManager(17, 5, new Insets(0, 0, 0, 0), -1, -1));
-    panel4.setVisible(true);
+    panel4.setLayout(new GridLayoutManager(17, 5, new Insets(4, 4, 4, 4), -1, -1));
+    panel4.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.vbl"),
@@ -251,8 +240,8 @@ public class TokenPropertiesDialog {
             0,
             1,
             3,
-            GridConstraints.ANCHOR_WEST,
-            GridConstraints.FILL_VERTICAL,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
@@ -346,13 +335,14 @@ public class TokenPropertiesDialog {
     checkBox1.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.preview.tooltip"));
+    checkBox1.setVisible(true);
     panel4.add(
         checkBox1,
         new GridConstraints(
             1,
             0,
             1,
-            3,
+            2,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -362,18 +352,102 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
+    final Spacer spacer1 = new Spacer();
+    panel4.add(
+        spacer1,
+        new GridConstraints(
+            16,
+            3,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_WANT_GROW,
+            1,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final Spacer spacer2 = new Spacer();
+    panel4.add(
+        spacer2,
+        new GridConstraints(
+            16,
+            4,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_VERTICAL,
+            1,
+            GridConstraints.SIZEPOLICY_WANT_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JLabel label3 = new JLabel();
-    Font label3Font = this.$$$getFont$$$("SansSerif", Font.BOLD, -1, label3.getFont());
-    if (label3Font != null) label3.setFont(label3Font);
-    label3.setName("visibilityLabel");
+    label3.setHorizontalAlignment(2);
+    label3.setName("ignoreColorLabel");
     this.$$$loadLabelText$$$(
         label3,
         this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.visiblity"));
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.color"));
+    label3.setVisible(true);
     panel4.add(
         label3,
         new GridConstraints(
-            13,
+            2,
+            0,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JETAColorWell jETAColorWell1 = new JETAColorWell();
+    Font jETAColorWell1Font = UIManager.getFont("Panel.font");
+    if (jETAColorWell1Font != null) jETAColorWell1.setFont(jETAColorWell1Font);
+    jETAColorWell1.setName("vblIgnoreColorWell");
+    jETAColorWell1.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.well"));
+    jETAColorWell1.setVerifyInputWhenFocusTarget(true);
+    jETAColorWell1.setVisible(true);
+    panel4.add(
+        jETAColorWell1,
+        new GridConstraints(
+            2,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JLabel label4 = new JLabel();
+    Font label4Font = this.$$$getFont$$$("SansSerif", Font.BOLD, -1, label4.getFont());
+    if (label4Font != null) label4.setFont(label4Font);
+    label4.setName("optimizationLabel");
+    this.$$$loadLabelText$$$(
+        label4,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.optimize"));
+    label4.setVisible(true);
+    panel4.add(
+        label4,
+        new GridConstraints(
+            5,
             0,
             1,
             3,
@@ -386,70 +460,68 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final JLabel label4 = new JLabel();
-    label4.setHorizontalAlignment(2);
-    label4.setName("ignoreColorLabel");
-    this.$$$loadLabelText$$$(
-        label4,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.color"));
-    panel4.add(
-        label4,
-        new GridConstraints(
-            3,
-            0,
-            1,
-            1,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JButton button1 = new JButton();
-    button1.setActionCommand("Generate VBL\t");
-    button1.setName("autoGenerateVblButton");
-    this.$$$loadButtonText$$$(
-        button1,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl"));
-    button1.setToolTipText(
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.tooltip"));
-    panel4.add(
-        button1,
-        new GridConstraints(
-            2,
-            0,
-            1,
-            3,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
     final JLabel label5 = new JLabel();
     label5.setHorizontalAlignment(2);
-    label5.setName("alphaSensitivityLabel");
+    label5.setName("jtsDistanceToleranceLabel");
     this.$$$loadLabelText$$$(
         label5,
         this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.sensitivity"));
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.level"));
+    label5.setVisible(true);
     panel4.add(
         label5,
         new GridConstraints(
-            4,
+            6,
             0,
             1,
             2,
             GridConstraints.ANCHOR_WEST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JLabel label6 = new JLabel();
+    label6.setHorizontalAlignment(2);
+    label6.setName("alphaSensitivityLabel");
+    this.$$$loadLabelText$$$(
+        label6,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.sensitivity"));
+    label6.setVisible(true);
+    panel4.add(
+        label6,
+        new GridConstraints(
+            3,
+            0,
+            1,
+            2,
+            GridConstraints.ANCHOR_WEST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JSpinner spinner1 = new JSpinner();
+    spinner1.setName("alphaSensitivitySpinner");
+    spinner1.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.sensitivity.tooltip"));
+    spinner1.setVisible(true);
+    panel4.add(
+        spinner1,
+        new GridConstraints(
+            3,
+            2,
+            1,
+            1,
+            GridConstraints.ANCHOR_EAST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -468,88 +540,16 @@ public class TokenPropertiesDialog {
     checkBox2.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.invert.tooltip"));
+    checkBox2.setVisible(true);
     panel4.add(
         checkBox2,
         new GridConstraints(
-            5,
+            4,
             0,
             1,
             3,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JLabel label6 = new JLabel();
-    Font label6Font = this.$$$getFont$$$("SansSerif", Font.BOLD, -1, label6.getFont());
-    if (label6Font != null) label6.setFont(label6Font);
-    label6.setName("optimizationLabel");
-    this.$$$loadLabelText$$$(
-        label6,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.optimize"));
-    panel4.add(
-        label6,
-        new GridConstraints(
-            6,
-            0,
-            1,
-            3,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JButton button2 = new JButton();
-    button2.setActionCommand("Clear VBL");
-    button2.setName("clearVblButton");
-    this.$$$loadButtonText$$$(
-        button2,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.clear"));
-    button2.setToolTipText(
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.clear.tooltip"));
-    panel4.add(
-        button2,
-        new GridConstraints(
-            9,
-            0,
-            1,
-            3,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JETAColorWell jETAColorWell1 = new JETAColorWell();
-    Font jETAColorWell1Font = UIManager.getFont("Panel.font");
-    if (jETAColorWell1Font != null) jETAColorWell1.setFont(jETAColorWell1Font);
-    jETAColorWell1.setName("vblIgnoreColorWell");
-    jETAColorWell1.setToolTipText(
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.well"));
-    panel4.add(
-        jETAColorWell1,
-        new GridConstraints(
-            3,
-            1,
-            1,
-            1,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
@@ -563,35 +563,15 @@ public class TokenPropertiesDialog {
     toggleButton5.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.toggle"));
+    toggleButton5.setVisible(true);
     panel4.add(
         toggleButton5,
         new GridConstraints(
-            3,
+            1,
+            2,
             2,
             1,
-            1,
-            GridConstraints.ANCHOR_EAST,
-            GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JSpinner spinner1 = new JSpinner();
-    spinner1.setName("alphaSensitivitySpinner");
-    spinner1.setToolTipText(
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.sensitivity.tooltip"));
-    panel4.add(
-        spinner1,
-        new GridConstraints(
-            4,
-            2,
-            1,
-            1,
-            GridConstraints.ANCHOR_EAST,
+            GridConstraints.ANCHOR_SOUTHEAST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -606,36 +586,16 @@ public class TokenPropertiesDialog {
     this.$$$loadLabelText$$$(
         label7,
         this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.level"));
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.method"));
+    label7.setVisible(true);
     panel4.add(
         label7,
         new GridConstraints(
             7,
             0,
             1,
-            2,
+            1,
             GridConstraints.ANCHOR_WEST,
-            GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JSpinner spinner2 = new JSpinner();
-    spinner2.setName("jtsDistanceToleranceSpinner");
-    spinner2.setToolTipText(
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.spinner.tolerance.tooltip"));
-    panel4.add(
-        spinner2,
-        new GridConstraints(
-            7,
-            2,
-            1,
-            1,
-            GridConstraints.ANCHOR_EAST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -650,10 +610,33 @@ public class TokenPropertiesDialog {
     comboBox1.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.drop.vbl.optimize.tooltip"));
+    comboBox1.setVisible(true);
     panel4.add(
         comboBox1,
         new GridConstraints(
-            8,
+            7,
+            1,
+            1,
+            2,
+            GridConstraints.ANCHOR_EAST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JSpinner spinner2 = new JSpinner();
+    spinner2.setName("jtsDistanceToleranceSpinner");
+    spinner2.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.spinner.tolerance.tooltip"));
+    spinner2.setVisible(true);
+    panel4.add(
+        spinner2,
+        new GridConstraints(
+            6,
             2,
             1,
             1,
@@ -667,67 +650,23 @@ public class TokenPropertiesDialog {
             0,
             false));
     final JLabel label8 = new JLabel();
-    label8.setHorizontalAlignment(2);
-    label8.setName("jtsDistanceToleranceLabel");
+    Font label8Font = this.$$$getFont$$$("SansSerif", Font.BOLD, -1, label8.getFont());
+    if (label8Font != null) label8.setFont(label8Font);
+    label8.setName("visibilityLabel");
     this.$$$loadLabelText$$$(
         label8,
         this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.method"));
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.visiblity"));
+    label8.setVisible(true);
     panel4.add(
         label8,
         new GridConstraints(
-            8,
+            9,
             0,
             1,
-            2,
-            GridConstraints.ANCHOR_WEST,
+            3,
+            GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JButton button3 = new JButton();
-    button3.setActionCommand("Clear VBL");
-    button3.setName("transferVblToMap");
-    this.$$$loadButtonText$$$(
-        button3,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.tomap"));
-    panel4.add(
-        button3,
-        new GridConstraints(
-            10,
-            0,
-            1,
-            3,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final JButton button4 = new JButton();
-    button4.setActionCommand("Clear VBL");
-    button4.setName("transferVblFromMap");
-    this.$$$loadButtonText$$$(
-        button4,
-        this.$$$getMessageFromBundle$$$(
-            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.frommap"));
-    panel4.add(
-        button4,
-        new GridConstraints(
-            11,
-            0,
-            1,
-            3,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
@@ -747,10 +686,11 @@ public class TokenPropertiesDialog {
     checkBox3.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.option.vbl.erase.tooltip"));
+    checkBox3.setVisible(true);
     panel4.add(
         checkBox3,
         new GridConstraints(
-            12,
+            8,
             0,
             1,
             3,
@@ -775,10 +715,11 @@ public class TokenPropertiesDialog {
     checkBox4.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.over.tooltip"));
+    checkBox4.setVisible(true);
     panel4.add(
         checkBox4,
         new GridConstraints(
-            14,
+            10,
             0,
             1,
             3,
@@ -797,14 +738,15 @@ public class TokenPropertiesDialog {
         label9,
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.tolerance"));
+    label9.setVisible(true);
     panel4.add(
         label9,
         new GridConstraints(
-            15,
+            11,
             0,
             1,
             2,
-            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.ANCHOR_WEST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -818,10 +760,11 @@ public class TokenPropertiesDialog {
     spinner3.setToolTipText(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.vbl.explanation.tooltip"));
+    spinner3.setVisible(true);
     panel4.add(
         spinner3,
         new GridConstraints(
-            15,
+            11,
             2,
             1,
             1,
@@ -834,85 +777,119 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer1 = new Spacer();
+    final JButton button1 = new JButton();
+    button1.setActionCommand("Generate VBL\t");
+    button1.setName("autoGenerateVblButton");
+    this.$$$loadButtonText$$$(
+        button1,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl"));
+    button1.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.tooltip"));
+    button1.setVisible(true);
     panel4.add(
-        spacer1,
+        button1,
         new GridConstraints(
-            16,
+            12,
+            0,
+            1,
             3,
-            1,
-            1,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
-            1,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
             null,
             null,
             0,
             false));
-    final Spacer spacer2 = new Spacer();
+    final JButton button2 = new JButton();
+    button2.setActionCommand("Clear VBL");
+    button2.setName("clearVblButton");
+    this.$$$loadButtonText$$$(
+        button2,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.clear"));
+    button2.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.clear.tooltip"));
+    button2.setVisible(true);
     panel4.add(
-        spacer2,
+        button2,
         new GridConstraints(
+            13,
             0,
-            4,
             1,
-            1,
+            3,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
-            1,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
             null,
             null,
             0,
             false));
-    final Spacer spacer3 = new Spacer();
+    final JButton button3 = new JButton();
+    button3.setActionCommand("Clear VBL");
+    button3.setName("transferVblToMap");
+    this.$$$loadButtonText$$$(
+        button3,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.tomap"));
+    button3.setVisible(true);
     panel4.add(
-        spacer3,
+        button3,
         new GridConstraints(
-            16,
-            2,
+            14,
+            0,
             1,
-            1,
+            3,
             GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_VERTICAL,
-            1,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
             null,
             null,
             0,
             false));
-    final Spacer spacer4 = new Spacer();
+    final JButton button4 = new JButton();
+    button4.setActionCommand("Clear VBL");
+    button4.setName("transferVblFromMap");
+    this.$$$loadButtonText$$$(
+        button4,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.frommap"));
+    button4.setVisible(true);
     panel4.add(
-        spacer4,
+        button4,
         new GridConstraints(
-            16,
+            15,
             0,
             1,
-            1,
+            3,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_WANT_GROW,
-            1,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
             null,
             null,
             0,
             false));
     final JPanel panel7 = new JPanel();
-    panel7.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+    panel7.setLayout(new GridLayoutManager(1, 1, new Insets(4, 4, 4, 4), -1, -1));
     panel7.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.state"),
         panel7);
-    final JScrollPane scrollPane3 = new JScrollPane();
-    scrollPane3.setHorizontalScrollBarPolicy(31);
+    final JScrollPane scrollPane1 = new JScrollPane();
+    scrollPane1.setHorizontalScrollBarPolicy(31);
     panel7.add(
-        scrollPane3,
+        scrollPane1,
         new GridConstraints(
             0,
             0,
@@ -930,18 +907,18 @@ public class TokenPropertiesDialog {
     final JPanel panel8 = new JPanel();
     panel8.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
     panel8.setName("statesPanel");
-    scrollPane3.setViewportView(panel8);
+    scrollPane1.setViewportView(panel8);
     final JPanel panel9 = new JPanel();
-    panel9.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
+    panel9.setLayout(new GridLayoutManager(2, 2, new Insets(4, 4, 4, 4), -1, -1));
     panel9.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.speech"),
         panel9);
-    final JScrollPane scrollPane4 = new JScrollPane();
-    scrollPane4.setHorizontalScrollBarPolicy(31);
+    final JScrollPane scrollPane2 = new JScrollPane();
+    scrollPane2.setHorizontalScrollBarPolicy(31);
     panel9.add(
-        scrollPane4,
+        scrollPane2,
         new GridConstraints(
             0,
             0,
@@ -958,7 +935,7 @@ public class TokenPropertiesDialog {
             false));
     final JTable table1 = new JTable();
     table1.setName("speechTable");
-    scrollPane4.setViewportView(table1);
+    scrollPane2.setViewportView(table1);
     final JButton button5 = new JButton();
     button5.setActionCommand("Clear All");
     button5.setName("speechClearAllButton");
@@ -981,9 +958,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer5 = new Spacer();
+    final Spacer spacer3 = new Spacer();
     panel9.add(
-        spacer5,
+        spacer3,
         new GridConstraints(
             0,
             1,
@@ -999,7 +976,7 @@ public class TokenPropertiesDialog {
             0,
             false));
     final JPanel panel10 = new JPanel();
-    panel10.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
+    panel10.setLayout(new GridLayoutManager(2, 2, new Insets(4, 4, 4, 4), -1, -1));
     panel10.setName("ownershipPanel");
     panel10.setVisible(false);
     tabPanel.addTab(
@@ -1048,9 +1025,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer6 = new Spacer();
+    final Spacer spacer4 = new Spacer();
     panel10.add(
-        spacer6,
+        spacer4,
         new GridConstraints(
             1,
             1,
@@ -1066,7 +1043,7 @@ public class TokenPropertiesDialog {
             0,
             false));
     final JPanel panel11 = new JPanel();
-    panel11.setLayout(new GridLayoutManager(7, 10, new Insets(0, 0, 0, 0), -1, -1));
+    panel11.setLayout(new GridLayoutManager(7, 10, new Insets(4, 4, 4, 4), -1, -1));
     panel11.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
@@ -1538,9 +1515,9 @@ public class TokenPropertiesDialog {
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.border.title.charsheet"));
     panel15.add(label22, cc.xy(1, 1));
-    final Spacer spacer7 = new Spacer();
+    final Spacer spacer5 = new Spacer();
     panel12.add(
-        spacer7,
+        spacer5,
         new GridConstraints(
             0,
             3,
@@ -1555,9 +1532,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer8 = new Spacer();
+    final Spacer spacer6 = new Spacer();
     panel12.add(
-        spacer8,
+        spacer6,
         new GridConstraints(
             0,
             1,
@@ -1572,9 +1549,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer9 = new Spacer();
+    final Spacer spacer7 = new Spacer();
     panel12.add(
-        spacer9,
+        spacer7,
         new GridConstraints(
             1,
             0,
@@ -1774,9 +1751,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer10 = new Spacer();
+    final Spacer spacer8 = new Spacer();
     panel11.add(
-        spacer10,
+        spacer8,
         new GridConstraints(
             0,
             9,
@@ -1817,9 +1794,9 @@ public class TokenPropertiesDialog {
             new Dimension(-1, 100),
             0,
             false));
-    final Spacer spacer11 = new Spacer();
+    final Spacer spacer9 = new Spacer();
     panel11.add(
-        spacer11,
+        spacer9,
         new GridConstraints(
             5,
             6,
@@ -1835,7 +1812,7 @@ public class TokenPropertiesDialog {
             0,
             false));
     final JPanel panel16 = new JPanel();
-    panel16.setLayout(new GridLayoutManager(2, 4, new Insets(0, 0, 0, 0), -1, -1));
+    panel16.setLayout(new GridLayoutManager(2, 4, new Insets(4, 4, 4, 4), -1, -1));
     panel16.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
@@ -1853,7 +1830,7 @@ public class TokenPropertiesDialog {
             0,
             1,
             1,
-            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.ANCHOR_WEST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -1871,7 +1848,7 @@ public class TokenPropertiesDialog {
             1,
             0,
             1,
-            3,
+            2,
             GridConstraints.ANCHOR_NORTHWEST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -1881,26 +1858,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer12 = new Spacer();
+    final Spacer spacer10 = new Spacer();
     panel16.add(
-        spacer12,
-        new GridConstraints(
-            0,
-            2,
-            1,
-            2,
-            GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_HORIZONTAL,
-            GridConstraints.SIZEPOLICY_WANT_GROW,
-            1,
-            null,
-            null,
-            null,
-            0,
-            false));
-    final Spacer spacer13 = new Spacer();
-    panel16.add(
-        spacer13,
+        spacer10,
         new GridConstraints(
             1,
             3,
@@ -1927,15 +1887,32 @@ public class TokenPropertiesDialog {
             1,
             GridConstraints.ANCHOR_WEST,
             GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            1,
+            1,
+            null,
+            new Dimension(10, 10),
+            null,
+            0,
+            false));
+    final Spacer spacer11 = new Spacer();
+    panel16.add(
+        spacer11,
+        new GridConstraints(
+            0,
+            2,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_WANT_GROW,
+            1,
             null,
             null,
             null,
             0,
             false));
     final JPanel panel17 = new JPanel();
-    panel17.setLayout(new GridLayoutManager(5, 4, new Insets(0, 0, 0, 0), -1, -1));
+    panel17.setLayout(new GridLayoutManager(5, 4, new Insets(4, 4, 4, 4), -1, -1));
     panel17.setVisible(false);
     tabPanel.addTab(
         this.$$$getMessageFromBundle$$$(
@@ -1943,6 +1920,7 @@ public class TokenPropertiesDialog {
         panel17);
     final JTabbedPane tabbedPane1 = new JTabbedPane();
     tabbedPane1.setName("StatblockTabPane");
+    tabbedPane1.setTabPlacement(1);
     tabbedPane1.setToolTipText("View the statblocks from Hero Lab");
     panel17.add(
         tabbedPane1,
@@ -1966,9 +1944,9 @@ public class TokenPropertiesDialog {
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.hero.html"),
         panel18);
-    final JScrollPane scrollPane5 = new JScrollPane();
+    final JScrollPane scrollPane3 = new JScrollPane();
     panel18.add(
-        scrollPane5,
+        scrollPane3,
         new GridConstraints(
             0,
             0,
@@ -1988,7 +1966,7 @@ public class TokenPropertiesDialog {
     editorPane1.setEditable(false);
     editorPane1.setName("HTMLstatblockTextArea");
     editorPane1.setText("");
-    scrollPane5.setViewportView(editorPane1);
+    scrollPane3.setViewportView(editorPane1);
     final JPanel panel19 = new JPanel();
     panel19.setLayout(new GridLayoutManager(3, 4, new Insets(0, 0, 0, 0), -1, -1));
     panel19.setName("xmlStatblockPanel");
@@ -2089,9 +2067,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer14 = new Spacer();
+    final Spacer spacer12 = new Spacer();
     panel19.add(
-        spacer14,
+        spacer12,
         new GridConstraints(
             2,
             1,
@@ -2106,9 +2084,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer15 = new Spacer();
+    final Spacer spacer13 = new Spacer();
     panel19.add(
-        spacer15,
+        spacer13,
         new GridConstraints(
             0,
             3,
@@ -2223,9 +2201,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer16 = new Spacer();
+    final Spacer spacer14 = new Spacer();
     panel20.add(
-        spacer16,
+        spacer14,
         new GridConstraints(
             2,
             1,
@@ -2240,9 +2218,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer17 = new Spacer();
+    final Spacer spacer15 = new Spacer();
     panel20.add(
-        spacer17,
+        spacer15,
         new GridConstraints(
             0,
             3,
@@ -2264,9 +2242,9 @@ public class TokenPropertiesDialog {
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "EditTokenDialog.tab.hero.images"),
         panel21);
-    final JScrollPane scrollPane6 = new JScrollPane();
+    final JScrollPane scrollPane4 = new JScrollPane();
     panel21.add(
-        scrollPane6,
+        scrollPane4,
         new GridConstraints(
             0,
             1,
@@ -2283,7 +2261,7 @@ public class TokenPropertiesDialog {
             false));
     final JList list2 = new JList();
     list2.setName("heroLabImagesList");
-    scrollPane6.setViewportView(list2);
+    scrollPane4.setViewportView(list2);
     final JButton button8 = new JButton();
     button8.setActionCommand("Set as Token Portrait");
     button8.setName("setAsPortraitButton");
@@ -2353,9 +2331,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer18 = new Spacer();
+    final Spacer spacer16 = new Spacer();
     panel21.add(
-        spacer18,
+        spacer16,
         new GridConstraints(
             3,
             0,
@@ -2370,9 +2348,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer19 = new Spacer();
+    final Spacer spacer17 = new Spacer();
     panel21.add(
-        spacer19,
+        spacer17,
         new GridConstraints(
             4,
             1,
@@ -2559,9 +2537,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer20 = new Spacer();
+    final Spacer spacer18 = new Spacer();
     panel17.add(
-        spacer20,
+        spacer18,
         new GridConstraints(
             0,
             1,
@@ -2576,9 +2554,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer21 = new Spacer();
+    final Spacer spacer19 = new Spacer();
     panel17.add(
-        spacer21,
+        spacer19,
         new GridConstraints(
             4,
             3,
@@ -2795,9 +2773,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer22 = new Spacer();
+    final Spacer spacer20 = new Spacer();
     headPanel.add(
-        spacer22,
+        spacer20,
         new GridConstraints(
             0,
             3,
@@ -2874,9 +2852,9 @@ public class TokenPropertiesDialog {
             null,
             0,
             false));
-    final Spacer spacer23 = new Spacer();
+    final Spacer spacer21 = new Spacer();
     mainPanel.add(
-        spacer23,
+        spacer21,
         new GridConstraints(
             1,
             2,
@@ -2887,7 +2865,7 @@ public class TokenPropertiesDialog {
             1,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
             null,
-            new Dimension(-1, 10),
+            null,
             null,
             0,
             false));
@@ -2994,5 +2972,14 @@ public class TokenPropertiesDialog {
   /** @noinspection ALL */
   public JComponent $$$getRootComponent$$$() {
     return mainPanel;
+  }
+
+  public TokenPropertiesDialog() {}
+
+  private void createUIComponents() {
+    gmNotesEditor = new HtmlEditorSplit();
+    gmNotesEditor.setName("gmNotesEditor");
+    playerNotesEditor = new HtmlEditorSplit();
+    playerNotesEditor.setName("playerNotesEditor");
   }
 }

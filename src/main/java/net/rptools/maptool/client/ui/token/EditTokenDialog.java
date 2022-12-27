@@ -39,12 +39,7 @@ import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridLayout;
-import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.awt.geom.Area;
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,35 +47,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-import javax.swing.AbstractButton;
-import javax.swing.AbstractListModel;
-import javax.swing.BorderFactory;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JEditorPane;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JPopupMenu;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.JTabbedPane;
-import javax.swing.JTable;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.JToggleButton;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
-import javax.swing.WindowConstants;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -100,6 +67,7 @@ import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL;
@@ -116,6 +84,7 @@ import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fife.rsta.ui.search.*;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 import org.fife.ui.rsyntaxtextarea.Theme;
@@ -139,6 +108,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final WordWrapCellRenderer propertyCellRenderer = new WordWrapCellRenderer();
+
   private boolean tokenSaved;
   private GenericDialog dialog;
   private ImageAssetPanel imagePanel;
@@ -155,15 +125,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     panelInit();
   }
 
-  public void initPlayerNotesTextArea() {
-    getNotesTextArea().addMouseListener(new MouseHandler(getNotesTextArea()));
-  }
-
-  public void initGMNotesTextArea() {
-    if (MapTool.getPlayer().isGM()) {
-      getGMNotesTextArea().addMouseListener(new MouseHandler(getGMNotesTextArea()));
-    }
-    getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
+  public void initGMNotesEditorPane() {
+    setGmNotesEnabled(MapTool.getPlayer().isGM());
   }
 
   public void initTerrainModifierOperationComboBox() {
@@ -203,7 +166,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     bind(token);
 
     getRootPane().setDefaultButton(getOKButton());
-    getComponent("@GMNotes").setEnabled(MapTool.getPlayer().isGM());
+    setGmNotesEnabled(MapTool.getPlayer().isGM());
     getComponent("@GMName").setEnabled(MapTool.getPlayer().isGM());
 
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
@@ -245,6 +208,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   public void bind(final Token token) {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
+
+    // NOTES
+    getGMNotesEditor().setText(token.getGMNotes());
+    getPlayerNotesEditor().setText(token.getNotes());
 
     // TYPE
     getTypeCombo().setSelectedItem(token.getType());
@@ -484,6 +451,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     super.bind(token);
   }
 
+  private void setGmNotesEnabled(boolean enabled) {
+    JTabbedPane tabbedPane = getTabbedPane();
+    String libTokenTile = I18N.getString("EditTokenDialog.label.gmnotes");
+    tabbedPane.setEnabledAt(tabbedPane.indexOfTab(libTokenTile), enabled);
+    getGMNotesEditor().setEnabled(enabled);
+  }
+
   private void setLibTokenPaneEnabled(boolean show) {
     JTabbedPane tabbedPane = getTabbedPane();
     String libTokenTile = I18N.getString("EditTokenDialog.tab.libToken");
@@ -495,25 +469,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JTabbedPane) getComponent("TabPane");
   }
 
-  public JTextArea getNotesTextArea() {
-    return (JTextArea) getComponent("@notes");
+  public HtmlEditorSplit getPlayerNotesEditor() {
+    return (HtmlEditorSplit) getComponent("playerNotesEditor");
   }
-
-  public JTextArea getGMNotesTextArea() {
-    return (JTextArea) getComponent("@GMNotes");
-  }
-
-  // private JLabel getGMNameLabel() {
-  // return (JLabel) getComponent("tokenGMNameLabel");
-  // }
-  //
-  // public JTextField getNameTextField() {
-  // return (JTextField) getComponent("tokenName");
-  // }
-  //
-  // public JTextField getGMNameTextField() {
-  // return (JTextField) getComponent("tokenGMName");
-  // }
 
   public void initTypeCombo() {
     getTypeCombo().setModel(new DefaultComboBoxModel<>(Token.Type.values()));
@@ -718,6 +676,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (getTypeCombo().getSelectedItem() != token.getType()) {
       token.setType((Token.Type) getTypeCombo().getSelectedItem());
     }
+
+    // NOTES
+    token.setGMNotes(getGMNotesEditor().getText());
+    token.setNotes(getPlayerNotesEditor().getText());
 
     // SIZE
     token.setSnapToScale(getSizeCombo().getSelectedIndex() != 0);
@@ -1024,8 +986,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JCheckBox) getComponent("@visibleOnlyToOwner");
   }
 
-  private JPanel getGMNotesPanel() {
-    return (JPanel) getComponent("gmNotesPanel");
+  private HtmlEditorSplit getGMNotesEditor() {
+    return (HtmlEditorSplit) getComponent("gmNotesEditor");
   }
 
   private JTextField getNameField() {
@@ -2037,9 +1999,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   // HANDLER
   public static class MouseHandler extends MouseAdapter {
 
-    JTextArea source;
+    HtmlEditorSplit source;
 
-    public MouseHandler(JTextArea source) {
+    public MouseHandler(HtmlEditorSplit source) {
       this.source = source;
     }
 

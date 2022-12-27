@@ -3,7 +3,7 @@
   <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="4" left="4" bottom="4" right="4"/>
     <constraints>
-      <xy x="10" y="10" width="772" height="783"/>
+      <xy x="10" y="10" width="809" height="781"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
@@ -21,7 +21,9 @@
       </component>
       <tabbedpane id="240f0" binding="tabPanel">
         <constraints>
-          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="1" height="1"/>
+          </grid>
         </constraints>
         <properties>
           <name value="TabPane"/>
@@ -30,7 +32,7 @@
         <border type="none"/>
         <children>
           <grid id="e19d" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="5" left="5" bottom="5" right="5"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.notes"/>
             </constraints>
@@ -40,60 +42,35 @@
             </properties>
             <border type="none"/>
             <children>
-              <scrollpane id="c267e">
+              <component id="b625" class="net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit" binding="playerNotesEditor" custom-create="true">
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="b4851" class="javax.swing.JTextArea">
-                    <constraints/>
-                    <properties>
-                      <lineWrap value="true"/>
-                      <name value="@notes"/>
-                      <selectionEnd value="0"/>
-                      <selectionStart value="0"/>
-                      <text value=""/>
-                      <wrapStyleWord value="true"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
+              </component>
             </children>
           </grid>
           <grid id="4451" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="5" left="5" bottom="5" right="5"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.label.gmnotes"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <name value="gmNotesPanel"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
-              <scrollpane id="5c97f">
+              <component id="7fba1" class="net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit" binding="gmNotesEditor" custom-create="true">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="de56a" class="javax.swing.JTextArea">
-                    <constraints/>
-                    <properties>
-                      <lineWrap value="true"/>
-                      <name value="@GMNotes"/>
-                      <text value=""/>
-                      <wrapStyleWord value="true"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
+              </component>
             </children>
           </grid>
           <grid id="b3fbc" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="5" left="5" bottom="5" right="5"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.properties"/>
             </constraints>
@@ -115,12 +92,12 @@
             </children>
           </grid>
           <grid id="10203" layout-manager="GridLayoutManager" row-count="17" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.vbl"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -152,7 +129,7 @@
               <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -197,179 +174,161 @@
               </grid>
               <component id="8d0a6" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="Hide Preview"/>
                   <name value="hideTokenCheckbox"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.preview"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.preview.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
-              <component id="2498e" class="javax.swing.JLabel">
+              <hspacer id="ad062">
                 <constraints>
-                  <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="16" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <font name="SansSerif" style="1"/>
-                  <name value="visibilityLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.visiblity"/>
-                </properties>
-              </component>
+              </hspacer>
+              <vspacer id="40bc2">
+                <constraints>
+                  <grid row="16" column="4" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
               <component id="c4024" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <horizontalAlignment value="2"/>
                   <name value="ignoreColorLabel"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.color"/>
+                  <visible value="true"/>
                 </properties>
               </component>
-              <component id="50255" class="javax.swing.JButton">
+              <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <actionCommand value="Generate VBL&#9;"/>
-                  <name value="autoGenerateVblButton"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tooltip"/>
+                  <font swing-font="Panel.font"/>
+                  <name value="vblIgnoreColorWell"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.well"/>
+                  <verifyInputWhenFocusTarget value="true"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="dbcb0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font name="SansSerif" style="1"/>
+                  <name value="optimizationLabel"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.optimize"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="750c0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <horizontalAlignment value="2"/>
+                  <name value="jtsDistanceToleranceLabel"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.level"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="32f87" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <horizontalAlignment value="2"/>
                   <name value="alphaSensitivityLabel"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.sensitivity"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="69045" class="javax.swing.JSpinner">
+                <constraints>
+                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="alphaSensitivitySpinner"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.sensitivity.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="3af85" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="Hide Preview"/>
                   <name value="inverseVblCheckbox"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.invert"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.invert.tooltip"/>
-                </properties>
-              </component>
-              <component id="dbcb0" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font name="SansSerif" style="1"/>
-                  <name value="optimizationLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.optimize"/>
-                </properties>
-              </component>
-              <component id="c8874" class="javax.swing.JButton">
-                <constraints>
-                  <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="clearVblButton"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.clear"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.clear.tooltip"/>
-                </properties>
-              </component>
-              <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
-                <constraints>
-                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <font swing-font="Panel.font"/>
-                  <name value="vblIgnoreColorWell"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.well"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="d0058" class="javax.swing.JToggleButton">
                 <constraints>
-                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="2" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="6" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="vblColorPickerToggleButton"/>
                   <text value=""/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.toggle"/>
-                </properties>
-              </component>
-              <component id="69045" class="javax.swing.JSpinner">
-                <constraints>
-                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <name value="alphaSensitivitySpinner"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.sensitivity.tooltip"/>
-                </properties>
-              </component>
-              <component id="750c0" class="javax.swing.JLabel">
-                <constraints>
-                  <grid row="7" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <horizontalAlignment value="2"/>
-                  <name value="jtsDistanceToleranceLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.level"/>
-                </properties>
-              </component>
-              <component id="3f3b3" class="javax.swing.JSpinner">
-                <constraints>
-                  <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <name value="jtsDistanceToleranceSpinner"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.spinner.tolerance.tooltip"/>
-                </properties>
-              </component>
-              <component id="e11c9" class="javax.swing.JComboBox">
-                <constraints>
-                  <grid row="8" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties>
-                  <actionCommand value="comboBoxChanged"/>
-                  <name value="jtsMethodComboBox"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.drop.vbl.optimize.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="4078e" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="8" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <horizontalAlignment value="2"/>
                   <name value="jtsDistanceToleranceLabel"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.method"/>
+                  <visible value="true"/>
                 </properties>
               </component>
-              <component id="db6f4" class="javax.swing.JButton">
+              <component id="e11c9" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="7" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="transferVblToMap"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
+                  <actionCommand value="comboBoxChanged"/>
+                  <name value="jtsMethodComboBox"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.drop.vbl.optimize.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
-              <component id="4497" class="javax.swing.JButton">
+              <component id="3f3b3" class="javax.swing.JSpinner">
                 <constraints>
-                  <grid row="11" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <actionCommand value="Clear VBL"/>
-                  <name value="transferVblFromMap"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
+                  <name value="jtsDistanceToleranceSpinner"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.spinner.tolerance.tooltip"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="2498e" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="9" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font name="SansSerif" style="1"/>
+                  <name value="visibilityLabel"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.visiblity"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="e73a" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="8" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="Always Show&#9;"/>
@@ -378,11 +337,12 @@
                   <selected value="true"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.option.vbl.erase"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.option.vbl.erase.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="8688c" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="10" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="Always Show&#9;"/>
@@ -391,50 +351,79 @@
                   <selected value="true"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.over"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.over.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="c53ad" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="15" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="11" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <horizontalAlignment value="2"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.vbl.tolerance"/>
+                  <visible value="true"/>
                 </properties>
               </component>
               <component id="628b8" class="javax.swing.JSpinner">
                 <constraints>
-                  <grid row="15" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="11" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="visibilityToleranceSpinner"/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.vbl.explanation.tooltip"/>
+                  <visible value="true"/>
                 </properties>
               </component>
-              <hspacer id="4088c">
+              <component id="50255" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="16" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="12" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </hspacer>
-              <hspacer id="fb7f8">
+                <properties>
+                  <actionCommand value="Generate VBL&#9;"/>
+                  <name value="autoGenerateVblButton"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tooltip"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="c8874" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="13" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </hspacer>
-              <vspacer id="53ee6">
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="clearVblButton"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.clear"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.clear.tooltip"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="db6f4" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="16" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="14" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </vspacer>
-              <hspacer id="2f4ea">
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="transferVblToMap"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
+              <component id="4497" class="javax.swing.JButton">
                 <constraints>
-                  <grid row="16" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="15" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
-              </hspacer>
+                <properties>
+                  <actionCommand value="Clear VBL"/>
+                  <name value="transferVblFromMap"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
+                  <visible value="true"/>
+                </properties>
+              </component>
             </children>
           </grid>
           <grid id="c15c1" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.state"/>
             </constraints>
@@ -466,7 +455,7 @@
             </children>
           </grid>
           <grid id="cb03" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.speech"/>
             </constraints>
@@ -509,8 +498,8 @@
               </vspacer>
             </children>
           </grid>
-          <grid id="ff3b9" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+          <grid id="ff3b9" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.ownership"/>
             </constraints>
@@ -547,7 +536,7 @@
             </children>
           </grid>
           <grid id="3a658" layout-manager="GridLayoutManager" row-count="7" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.config"/>
             </constraints>
@@ -922,7 +911,7 @@
             </children>
           </grid>
           <grid id="81e06" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.libToken"/>
             </constraints>
@@ -933,7 +922,7 @@
             <children>
               <component id="3dd3a" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.allowURIAccess"/>
@@ -941,18 +930,13 @@
               </component>
               <component id="22d90" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="Label.LibURIError"/>
                   <text value=""/>
                 </properties>
               </component>
-              <hspacer id="a4c2e">
-                <constraints>
-                  <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-                </constraints>
-              </hspacer>
               <vspacer id="36751">
                 <constraints>
                   <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
@@ -960,17 +944,24 @@
               </vspacer>
               <component id="3fcda" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="1" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                    <preferred-size width="10" height="10"/>
+                  </grid>
                 </constraints>
                 <properties>
                   <name value="@allowURIAccess"/>
                   <text value=""/>
                 </properties>
               </component>
+              <hspacer id="e266">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
             </children>
           </grid>
           <grid id="fff3c" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="0" left="0" bottom="0" right="0"/>
+            <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.hero"/>
             </constraints>
@@ -985,6 +976,7 @@
                 </constraints>
                 <properties>
                   <name value="StatblockTabPane"/>
+                  <tabPlacement value="1"/>
                   <toolTipText value="View the statblocks from Hero Lab"/>
                 </properties>
                 <border type="none"/>
@@ -1432,9 +1424,7 @@
       </grid>
       <vspacer id="ffd18">
         <constraints>
-          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false">
-            <preferred-size width="-1" height="10"/>
-          </grid>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="7" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
       </vspacer>
     </children>
