@@ -2032,8 +2032,11 @@ public class PointerTool extends DefaultTool {
   }
 
   private String createHoverNote(Token marker) {
-    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMNotes());
-    boolean showNotes = !StringUtil.isEmpty(marker.getNotes());
+    var notes = marker.getNotes();
+    var gmNotes = marker.getGMNotes();
+
+    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
+    boolean showNotes = !StringUtil.isEmpty(notes);
 
     StringBuilder builder = new StringBuilder();
 
@@ -2042,22 +2045,37 @@ public class PointerTool extends DefaultTool {
     }
     if (showGMNotes || showNotes) {
       builder.append("<b><span class='title'>").append(marker.getName());
-      if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMName())) {
+      if (MapTool.getPlayer().isGM()
+          && !StringUtil.isEmpty(marker.getGMName())
+          && !marker.getName().equals(marker.getGMName())) {
         builder.append(" (").append(marker.getGMName()).append(")");
       }
       builder.append("</span></b><br>");
     }
     if (showNotes) {
-      builder.append(marker.getNotes());
+      if (!notes.startsWith("<html")) {
+        notes = notes.replaceAll("\n", "<br>");
+      }
+      if(showGMNotes) {
+        notes = notes.replaceAll("</html>", "");
+        notes = notes.replaceAll("</body>", "");
+      }
+      builder.append(notes);
       // add a gap between player and gmNotes
       if (showGMNotes) {
-        builder.append("\n\n");
+        builder.append("<br><br>");
       }
     }
     if (showGMNotes) {
-      builder.append("<b><span class='title'>GM Notes");
-      builder.append("</span></b><br>");
-      builder.append(marker.getGMNotes());
+      if (showNotes) {
+        builder.append("<b><span class='title'>GM Notes</span></b><br>");
+        gmNotes = gmNotes.replaceAll("<html[^>]*>", "");
+        gmNotes = gmNotes.replaceAll("<body[^>]*>", "");
+      }
+      if (!gmNotes.startsWith("<html")) {
+        gmNotes = gmNotes.replaceAll("\n", "<br>");
+      }
+      builder.append(gmNotes);
     }
     if (marker.getPortraitImage() != null) {
       BufferedImage image = ImageManager.getImageAndWait(marker.getPortraitImage());
@@ -2076,8 +2094,7 @@ public class PointerTool extends DefaultTool {
           .append(imgSize.height)
           .append("></tr></table>");
     }
-    String notes = builder.toString();
-    notes = notes.replaceAll("\n", "<br>");
-    return notes;
+    String hoverText = builder.toString();
+    return hoverText;
   }
 }
