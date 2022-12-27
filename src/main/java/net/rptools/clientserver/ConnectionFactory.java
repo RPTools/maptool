@@ -22,7 +22,6 @@ import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.ServerConnection;
 import net.rptools.clientserver.simple.server.SocketServerConnection;
 import net.rptools.clientserver.simple.server.WebRTCServerConnection;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectionFactory {
@@ -34,7 +33,7 @@ public class ConnectionFactory {
 
   public ClientConnection createClientConnection(String id, ServerConfig config)
       throws IOException {
-    if (!AppState.useWebRTC() || config.isPersonalServer())
+    if (!config.getUseWebRTC() || config.isPersonalServer())
       return new SocketClientConnection(id, config.getHostName(), config.getPort());
 
     return new WebRTCClientConnection(id, config);
@@ -42,7 +41,7 @@ public class ConnectionFactory {
 
   public ServerConnection createServerConnection(ServerConfig config, HandshakeProvider handshake)
       throws IOException {
-    if (!AppState.useWebRTC() || config.isPersonalServer())
+    if (!config.getUseWebRTC() || config.isPersonalServer())
       return new SocketServerConnection(config.getPort(), handshake);
 
     return new WebRTCServerConnection(config, handshake);
