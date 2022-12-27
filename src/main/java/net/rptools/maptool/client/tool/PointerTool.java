@@ -2056,7 +2056,7 @@ public class PointerTool extends DefaultTool {
       if (!notes.startsWith("<html")) {
         notes = notes.replaceAll("\n", "<br>");
       }
-      if(showGMNotes) {
+      if (showGMNotes) {
         notes = notes.replaceAll("</html>", "");
         notes = notes.replaceAll("</body>", "");
       }
