@@ -14,8 +14,8 @@
  */
 package net.rptools.maptool.model;
 
-import com.withay.util.HexCode;
 import java.io.Serializable;
+import java.util.HexFormat;
 import java.util.UUID;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
@@ -62,7 +62,7 @@ public class GUID implements Serializable, Comparable<GUID> {
   public GUID(String strGUID) {
     if (strGUID == null) throw new InvalidGUIDException("GUID is null");
 
-    this.baGUID = HexCode.decode(strGUID);
+    this.baGUID = HexFormat.of().parseHex(strGUID);
     validateGUID();
   }
 
@@ -134,7 +134,7 @@ public class GUID implements Serializable, Comparable<GUID> {
   /** Returns a string for the GUID. */
   @Override
   public String toString() {
-    return HexCode.encode(baGUID, false); // false means uppercase
+    return HexFormat.of().withUpperCase().formatHex(baGUID);
   }
 
   /**
