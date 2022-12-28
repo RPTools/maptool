@@ -82,7 +82,7 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   public AbeillePanel(String panelForm) {
-    panel = new FormPanel(panelForm);
+    panel = new FormPanelI18N(panelForm);
     init();
   }
 
@@ -93,7 +93,6 @@ public class AbeillePanel<T> extends JPanel {
 
   private void init() {
     setLayout(new BorderLayout());
-    FormPanelI18N.translateComponent(panel);
     add(panel, "Center");
   }
 
@@ -160,7 +159,7 @@ public class AbeillePanel<T> extends JPanel {
     }
   }
 
-  protected Component getComponent(String name) {
+  public Component getComponent(String name) {
     if (panel instanceof FormPanel formPanel) {
       return formPanel.getComponentByName(name);
     }

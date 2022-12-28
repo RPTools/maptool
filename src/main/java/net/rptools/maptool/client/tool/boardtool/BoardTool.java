@@ -12,9 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.client.tool.boardtool;
 
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.Dimension;
 import java.awt.Image;
 import java.awt.Point;
@@ -38,7 +37,8 @@ import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
@@ -72,7 +72,7 @@ public class BoardTool extends DefaultTool {
   // UI button fields
   private final JTextField boardPositionXTextField;
   private final JTextField boardPositionYTextField;
-  private final FormPanel controlPanel;
+  private final AbeillePanel controlPanel;
   private final JRadioButton snapNoneButton;
   private final JRadioButton snapGridButton;
   private final JRadioButton snapTileButton;
@@ -80,27 +80,25 @@ public class BoardTool extends DefaultTool {
   /** Initialize the panel and set up the actions. */
   public BoardTool() {
     // Create the control panel
-    controlPanel =
-        new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustBoardControlPanel.xml");
-    // controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().$$$getRootComponent$$$());
 
-    boardPositionXTextField = controlPanel.getTextField("offsetX");
+    boardPositionXTextField = (JTextField) controlPanel.getComponent("offsetX");
     boardPositionXTextField.addKeyListener(new UpdateBoardListener());
 
-    boardPositionYTextField = controlPanel.getTextField("offsetY");
+    boardPositionYTextField = (JTextField) controlPanel.getComponent("offsetY");
     boardPositionYTextField.addKeyListener(new UpdateBoardListener());
 
     ActionListener enforceRules = evt -> enforceButtonRules();
-    snapNoneButton = controlPanel.getRadioButton("snapNone");
+    snapNoneButton = (JRadioButton) controlPanel.getComponent("snapNone");
     snapNoneButton.addActionListener(enforceRules);
 
-    snapGridButton = controlPanel.getRadioButton("snapGrid");
+    snapGridButton = (JRadioButton) controlPanel.getComponent("snapGrid");
     snapGridButton.addActionListener(enforceRules);
 
-    snapTileButton = controlPanel.getRadioButton("snapTile");
+    snapTileButton = (JRadioButton) controlPanel.getComponent("snapTile");
     snapTileButton.addActionListener(enforceRules);
 
-    JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
+    JButton closeButton = (JButton) controlPanel.getComponent("closeButton");
     closeButton.addActionListener(e -> resetTool());
   }
 
