@@ -14,9 +14,12 @@
  */
 package net.rptools.maptool.client.tool.boardtool;
 
+import com.intellij.uiDesigner.core.GridConstraints;
+import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
+import java.awt.*;
+import java.lang.reflect.Method;
+import java.util.ResourceBundle;
 import javax.swing.*;
 
 public class AdjustBoardControlPanelView {
@@ -37,102 +40,323 @@ public class AdjustBoardControlPanelView {
    */
   private void $$$setupUI$$$() {
     mainPanel = new JPanel();
-    mainPanel.setLayout(
-        new FormLayout(
-            "fill:d:noGrow,fill:d:noGrow,fill:d:noGrow,fill:d:noGrow,fill:21dlu:noGrow,fill:d:noGrow",
-            "center:2dlu:noGrow,center:d:noGrow,center:4dlu:noGrow,center:20px:noGrow,center:20px:noGrow,center:20px:noGrow,center:4dlu:noGrow,center:d:noGrow,center:4dlu:noGrow,center:d:noGrow,center:16px:noGrow,center:4dlu:noGrow,center:d:noGrow,center:4dlu:noGrow"));
+    mainPanel.setLayout(new GridLayoutManager(8, 2, new Insets(5, 5, 5, 5), -1, -1));
     final JLabel label1 = new JLabel();
     label1.setName("snapTitle");
-    label1.setText("AdjustBoardDialog.snapto");
-    CellConstraints cc = new CellConstraints();
-    mainPanel.add(label1, cc.xy(2, 4));
+    this.$$$loadLabelText$$$(
+        label1,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AdjustBoardDialog.snapto"));
+    mainPanel.add(
+        label1,
+        new GridConstraints(
+            1,
+            0,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JLabel label2 = new JLabel();
-    label2.setText("GridControlPanel.offset.x");
-    mainPanel.add(label2, cc.xy(2, 8));
-    final JLabel label3 = new JLabel();
-    label3.setText("GridControlPanel.offset.y");
-    mainPanel.add(label3, cc.xy(2, 10));
-    final JTextField textField1 = new JTextField();
-    textField1.setColumns(6);
-    textField1.setName("offsetX");
-    textField1.setText("");
-    mainPanel.add(textField1, cc.xyw(4, 8, 2));
-    final JTextField textField2 = new JTextField();
-    textField2.setColumns(6);
-    textField2.setName("offsetY");
-    textField2.setText("");
-    mainPanel.add(textField2, cc.xyw(4, 10, 2));
-    final JButton button1 = new JButton();
-    button1.setActionCommand("Close");
-    button1.setName("closeButton");
-    button1.setText("Button.close");
-    mainPanel.add(button1, cc.xyw(2, 13, 4));
+    label2.setHorizontalAlignment(0);
+    this.$$$loadLabelText$$$(
+        label2,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AdjustBoardDialog.title"));
+    mainPanel.add(
+        label2,
+        new GridConstraints(
+            0,
+            0,
+            1,
+            2,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JRadioButton radioButton1 = new JRadioButton();
     radioButton1.setActionCommand("None");
     radioButton1.setName("snapNone");
-    radioButton1.setText("AddResourcesDialog.label.none");
-    radioButton1.setToolTipText("AdjustBoardDialog.none.tooltip");
-    mainPanel.add(radioButton1, cc.xy(4, 4));
+    this.$$$loadButtonText$$$(
+        radioButton1,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AddResourcesDialog.label.none"));
+    radioButton1.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AdjustBoardDialog.none.tooltip"));
+    mainPanel.add(
+        radioButton1,
+        new GridConstraints(
+            1,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_WEST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JRadioButton radioButton2 = new JRadioButton();
     radioButton2.setActionCommand("None");
     radioButton2.setName("snapGrid");
-    radioButton2.setText("Label.grid");
-    radioButton2.setToolTipText("AdjustBoardDialog.grid.tooltip");
-    mainPanel.add(radioButton2, cc.xy(4, 5));
+    this.$$$loadButtonText$$$(
+        radioButton2,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.grid"));
+    radioButton2.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AdjustBoardDialog.grid.tooltip"));
+    mainPanel.add(
+        radioButton2,
+        new GridConstraints(
+            2,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_WEST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JRadioButton radioButton3 = new JRadioButton();
     radioButton3.setActionCommand("None");
     radioButton3.setName("snapTile");
     radioButton3.setSelected(true);
-    radioButton3.setText("Label.tile");
-    radioButton3.setToolTipText("AdjustBoardDialog.tile.tooltip");
-    mainPanel.add(radioButton3, cc.xy(4, 6));
+    this.$$$loadButtonText$$$(
+        radioButton3,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.tile"));
+    radioButton3.setToolTipText(
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AdjustBoardDialog.tile.tooltip"));
+    mainPanel.add(
+        radioButton3,
+        new GridConstraints(
+            3,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_WEST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JLabel label3 = new JLabel();
+    this.$$$loadLabelText$$$(
+        label3,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "GridControlPanel.offset.x"));
+    mainPanel.add(
+        label3,
+        new GridConstraints(
+            4,
+            0,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JTextField textField1 = new JTextField();
+    textField1.setColumns(6);
+    textField1.setName("offsetX");
+    textField1.setText("");
+    mainPanel.add(
+        textField1,
+        new GridConstraints(
+            4,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final JLabel label4 = new JLabel();
-    label4.setHorizontalAlignment(0);
-    label4.setText("AdjustBoardDialog.title");
-    mainPanel.add(label4, cc.xyw(2, 2, 4));
+    this.$$$loadLabelText$$$(
+        label4,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "GridControlPanel.offset.y"));
+    mainPanel.add(
+        label4,
+        new GridConstraints(
+            5,
+            0,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JTextField textField2 = new JTextField();
+    textField2.setColumns(6);
+    textField2.setName("offsetY");
+    textField2.setText("");
+    mainPanel.add(
+        textField2,
+        new GridConstraints(
+            5,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
+    final JButton button1 = new JButton();
+    button1.setActionCommand("Close");
+    button1.setName("closeButton");
+    this.$$$loadButtonText$$$(
+        button1,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.close"));
+    mainPanel.add(
+        button1,
+        new GridConstraints(
+            7,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_EAST,
+            GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            null,
+            null,
+            null,
+            0,
+            false));
     final Spacer spacer1 = new Spacer();
-    mainPanel.add(spacer1, cc.xy(1, 1));
-    final Spacer spacer2 = new Spacer();
-    mainPanel.add(spacer2, cc.xy(2, 1));
-    final Spacer spacer3 = new Spacer();
-    mainPanel.add(spacer3, cc.xy(3, 1));
-    final Spacer spacer4 = new Spacer();
-    mainPanel.add(spacer4, cc.xy(4, 1));
-    final Spacer spacer5 = new Spacer();
-    mainPanel.add(spacer5, cc.xy(5, 1));
-    final Spacer spacer6 = new Spacer();
-    mainPanel.add(spacer6, cc.xy(6, 1));
-    final Spacer spacer7 = new Spacer();
-    mainPanel.add(spacer7, cc.xy(1, 2));
-    final Spacer spacer8 = new Spacer();
-    mainPanel.add(spacer8, cc.xy(1, 3));
-    final Spacer spacer9 = new Spacer();
-    mainPanel.add(spacer9, cc.xy(1, 4));
-    final Spacer spacer10 = new Spacer();
-    mainPanel.add(spacer10, cc.xy(1, 5));
-    final Spacer spacer11 = new Spacer();
-    mainPanel.add(spacer11, cc.xy(1, 6));
-    final Spacer spacer12 = new Spacer();
-    mainPanel.add(spacer12, cc.xy(1, 7));
-    final Spacer spacer13 = new Spacer();
-    mainPanel.add(spacer13, cc.xy(1, 8));
-    final Spacer spacer14 = new Spacer();
-    mainPanel.add(spacer14, cc.xy(1, 9));
-    final Spacer spacer15 = new Spacer();
-    mainPanel.add(spacer15, cc.xy(1, 10));
-    final Spacer spacer16 = new Spacer();
-    mainPanel.add(spacer16, cc.xy(1, 11));
-    final Spacer spacer17 = new Spacer();
-    mainPanel.add(spacer17, cc.xy(1, 12));
-    final Spacer spacer18 = new Spacer();
-    mainPanel.add(spacer18, cc.xy(1, 13));
-    final Spacer spacer19 = new Spacer();
-    mainPanel.add(spacer19, cc.xy(1, 14));
+    mainPanel.add(
+        spacer1,
+        new GridConstraints(
+            6,
+            1,
+            1,
+            1,
+            GridConstraints.ANCHOR_CENTER,
+            GridConstraints.FILL_HORIZONTAL,
+            GridConstraints.SIZEPOLICY_WANT_GROW,
+            1,
+            null,
+            null,
+            null,
+            0,
+            false));
     ButtonGroup buttonGroup;
     buttonGroup = new ButtonGroup();
     buttonGroup.add(radioButton1);
     buttonGroup.add(radioButton2);
     buttonGroup.add(radioButton3);
+  }
+
+  private static Method $$$cachedGetBundleMethod$$$ = null;
+
+  private String $$$getMessageFromBundle$$$(String path, String key) {
+    ResourceBundle bundle;
+    try {
+      Class<?> thisClass = this.getClass();
+      if ($$$cachedGetBundleMethod$$$ == null) {
+        Class<?> dynamicBundleClass =
+            thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+        $$$cachedGetBundleMethod$$$ =
+            dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+      }
+      bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+    } catch (Exception e) {
+      bundle = ResourceBundle.getBundle(path);
+    }
+    return bundle.getString(key);
+  }
+
+  /** @noinspection ALL */
+  private void $$$loadLabelText$$$(JLabel component, String text) {
+    StringBuffer result = new StringBuffer();
+    boolean haveMnemonic = false;
+    char mnemonic = '\0';
+    int mnemonicIndex = -1;
+    for (int i = 0; i < text.length(); i++) {
+      if (text.charAt(i) == '&') {
+        i++;
+        if (i == text.length()) break;
+        if (!haveMnemonic && text.charAt(i) != '&') {
+          haveMnemonic = true;
+          mnemonic = text.charAt(i);
+          mnemonicIndex = result.length();
+        }
+      }
+      result.append(text.charAt(i));
+    }
+    component.setText(result.toString());
+    if (haveMnemonic) {
+      component.setDisplayedMnemonic(mnemonic);
+      component.setDisplayedMnemonicIndex(mnemonicIndex);
+    }
+  }
+
+  /** @noinspection ALL */
+  private void $$$loadButtonText$$$(AbstractButton component, String text) {
+    StringBuffer result = new StringBuffer();
+    boolean haveMnemonic = false;
+    char mnemonic = '\0';
+    int mnemonicIndex = -1;
+    for (int i = 0; i < text.length(); i++) {
+      if (text.charAt(i) == '&') {
+        i++;
+        if (i == text.length()) break;
+        if (!haveMnemonic && text.charAt(i) != '&') {
+          haveMnemonic = true;
+          mnemonic = text.charAt(i);
+          mnemonicIndex = result.length();
+        }
+      }
+      result.append(text.charAt(i));
+    }
+    component.setText(result.toString());
+    if (haveMnemonic) {
+      component.setMnemonic(mnemonic);
+      component.setDisplayedMnemonicIndex(mnemonicIndex);
+    }
   }
 
   /** @noinspection ALL */
