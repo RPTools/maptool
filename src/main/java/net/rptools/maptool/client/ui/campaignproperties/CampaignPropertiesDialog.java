@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,7 +36,7 @@ import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -64,7 +63,7 @@ public class CampaignPropertiesDialog extends JDialog {
   private TokenBarController tokenBarController;
 
   private Status status;
-  private FormPanel formPanel;
+  private AbeillePanel formPanel;
   private Campaign campaign;
 
   public CampaignPropertiesDialog(JFrame owner) {
@@ -91,8 +90,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel =
-        new FormPanelI18N("net/rptools/maptool/client/ui/forms/campaignPropertiesDialog.xml");
+    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().$$$getRootComponent$$$());
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);
@@ -129,13 +127,9 @@ public class CampaignPropertiesDialog extends JDialog {
     getRootPane().setDefaultButton(getOKButton());
   }
 
-  private void initTokenPropertiesDialog(FormPanel panel) {
+  private void initTokenPropertiesDialog(AbeillePanel panel) {
     tokenPropertiesPanel = new TokenPropertiesManagementPanel();
-
-    panel
-        .getFormAccessor("propertiesPanel")
-        .replaceBean("tokenPropertiesPanel", tokenPropertiesPanel);
-    panel.reset();
+    panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
   }
 
   public JTextField getNewServerTextField() {
@@ -143,12 +137,12 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void initHelp() {
-    JEditorPane lightHelp = (JEditorPane) formPanel.getComponentByName("lightHelp");
+    JEditorPane lightHelp = (JEditorPane) formPanel.getComponent("lightHelp");
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
     lightHelp.setCaretPosition(0);
 
-    JEditorPane sightHelp = (JEditorPane) formPanel.getComponentByName("sightHelp");
+    JEditorPane sightHelp = (JEditorPane) formPanel.getComponent("sightHelp");
     sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
     sightHelp.setCaretPosition(0);

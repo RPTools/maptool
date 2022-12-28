@@ -25,6 +25,7 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -83,7 +84,7 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   public AbeillePanel(String panelForm) {
-    panel = new FormPanelI18N(panelForm);
+    panel = new FormPanel(panelForm);
     init();
   }
 
@@ -95,6 +96,7 @@ public class AbeillePanel<T> extends JPanel {
   private void init() {
     setLayout(new BorderLayout());
     add(panel, "Center");
+    FormPanelI18N.translateComponent(panel);
   }
 
   public T getModel() {
@@ -114,7 +116,7 @@ public class AbeillePanel<T> extends JPanel {
     }
   }
 
-  protected void replaceComponent(String panelName, String name, Component replacement) {
+  public void replaceComponent(String panelName, String name, Component replacement) {
     if (panel instanceof FormPanel formPanel) {
       formPanel.getFormAccessor(panelName).replaceBean(name, replacement);
       formPanel.reset();
@@ -259,6 +261,22 @@ public class AbeillePanel<T> extends JPanel {
 
   public JTree getTree(String name) {
     return (JTree) getComponent(name);
+  }
+
+  public JSpinner getSpinner(String name) {
+    return (JSpinner) getComponent(name);
+  }
+
+  public JList getList(String name) {
+    return (JList) getComponent(name);
+  }
+
+  public JCheckBox getCheckBox(String name) {
+    return (JCheckBox) getComponent(name);
+  }
+
+  public JTextComponent getTextComponent(String name) {
+    return (JTextComponent) getComponent(name);
   }
 
   public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {
