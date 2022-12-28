@@ -14,4 +14,6 @@
  */
 package net.rptools.maptool.model.zones;
 
-public record GridChanged() {}
+import net.rptools.maptool.model.Zone;
+
+public record GridChanged(Zone zone) {}

@@ -1,63 +1,60 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.tool.gridtool.AdjustGridControlPanelView">
-  <grid id="4c346" layout-manager="FormLayout">
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:4dlu:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:4dlu:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:11dlu:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:4dlu:noGrow"/>
-    <rowspec value="center:d:noGrow"/>
-    <rowspec value="center:4dlu:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
-    <colspec value="fill:21dlu:noGrow"/>
-    <colspec value="fill:d:noGrow"/>
+  <grid id="241de" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="235" height="258"/>
+      <xy x="10" y="10" width="308" height="258"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
       <component id="3c6d" class="javax.swing.JLabel">
         <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="GridControlPanel.size"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size"/>
+        </properties>
+      </component>
+      <component id="4491d" class="javax.swing.JSpinner">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="gridSize"/>
+        </properties>
+      </component>
+      <component id="8631a" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <horizontalAlignment value="4"/>
+          <name value="gridSecondDimensionLabel"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size.second"/>
+        </properties>
+      </component>
+      <component id="fc376" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <columns value="6"/>
+          <name value="gridSecondDimension"/>
+          <text value=""/>
         </properties>
       </component>
       <component id="91ce8" class="javax.swing.JLabel">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="GridControlPanel.offset.x"/>
-        </properties>
-      </component>
-      <component id="dd1cc" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-        <properties>
-          <text value="GridControlPanel.offset.y"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.x"/>
         </properties>
       </component>
       <component id="cbe69" class="javax.swing.JTextField">
         <constraints>
-          <grid row="4" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <columns value="6"/>
@@ -65,30 +62,25 @@
           <text value=""/>
         </properties>
       </component>
-      <component id="6cd53" class="javax.swing.JTextField">
+      <component id="dd1cc" class="javax.swing.JLabel">
         <constraints>
-          <grid row="6" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <columns value="6"/>
-          <name value="offsetY"/>
-          <text value=""/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.y"/>
         </properties>
       </component>
       <component id="fc6e2" class="javax.swing.JLabel">
         <constraints>
-          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text value="GridControlPanel.color"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.color"/>
         </properties>
       </component>
       <component id="38456" class="com.jeta.forms.components.colors.JETAColorWell">
         <constraints>
-          <grid row="8" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font swing-font="Panel.font"/>
@@ -97,170 +89,43 @@
       </component>
       <component id="e83dd" class="javax.swing.JSlider">
         <constraints>
-          <grid row="10" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="5" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <majorTickSpacing value="20"/>
           <name value="zoomSlider"/>
         </properties>
       </component>
-      <component id="4491d" class="javax.swing.JSpinner">
-        <constraints>
-          <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-        <properties>
-          <name value="gridSize"/>
-        </properties>
-      </component>
       <component id="3c06e" class="javax.swing.JButton">
         <constraints>
-          <grid row="12" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="7" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <actionCommand value="Close"/>
           <name value="closeButton"/>
-          <text value="Button.close"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.close"/>
         </properties>
       </component>
-      <component id="8631a" class="javax.swing.JLabel">
+      <vspacer id="9fd">
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="6" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
-        <properties>
-          <horizontalAlignment value="4"/>
-          <name value="gridSecondDimensionLabel"/>
-          <text value="GridControlPanel.size.second"/>
-        </properties>
-      </component>
-      <component id="fc376" class="javax.swing.JTextField">
+      </vspacer>
+      <hspacer id="47d6b">
         <constraints>
-          <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <component id="6cd53" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <columns value="6"/>
-          <name value="gridSecondDimension"/>
+          <name value="offsetY"/>
           <text value=""/>
         </properties>
       </component>
-      <hspacer id="5bbf1">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="32993">
-        <constraints>
-          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="162c">
-        <constraints>
-          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="b59fd">
-        <constraints>
-          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="32fad">
-        <constraints>
-          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="ee4d">
-        <constraints>
-          <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="ccf92">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="12889">
-        <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="b30da">
-        <constraints>
-          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="ae3f5">
-        <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="a8543">
-        <constraints>
-          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="ff103">
-        <constraints>
-          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="eb204">
-        <constraints>
-          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="66677">
-        <constraints>
-          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="26e99">
-        <constraints>
-          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="54612">
-        <constraints>
-          <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="c5891">
-        <constraints>
-          <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="e456f">
-        <constraints>
-          <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
-      <hspacer id="76257">
-        <constraints>
-          <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-          <forms/>
-        </constraints>
-      </hspacer>
     </children>
   </grid>
 </form>

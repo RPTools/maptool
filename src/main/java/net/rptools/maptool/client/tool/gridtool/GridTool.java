@@ -15,8 +15,6 @@
 package net.rptools.maptool.client.tool.gridtool;
 
 import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.label.JETALabel;
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -28,23 +26,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseWheelEvent;
 import java.util.Map;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.BorderFactory;
-import javax.swing.JButton;
-import javax.swing.JSlider;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SpinnerNumberModel;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -69,8 +58,8 @@ public class GridTool extends DefaultTool {
   private final JETAColorWell colorWell;
   private final JSlider zoomSlider;
   private final JTextField gridSecondDimension;
-  private final JETALabel gridSecondDimensionLabel;
-  private final FormPanel controlPanel;
+  private final JLabel gridSecondDimensionLabel;
+  private final AbeillePanel controlPanel;
 
   private int lastZoomIndex;
   private int dragOffsetX;
@@ -83,28 +72,26 @@ public class GridTool extends DefaultTool {
 
   public GridTool() {
     // Create the control panel
-    controlPanel =
-        new FormPanelI18N("net/rptools/maptool/client/ui/forms/adjustGridControlPanel.xml");
-    controlPanel.setBorder(BorderFactory.createLineBorder(Color.black));
+    controlPanel = new AbeillePanel(new AdjustGridControlPanelView().$$$getRootComponent$$$());
 
-    gridSizeSpinner = controlPanel.getSpinner("gridSize");
+    gridSizeSpinner = (JSpinner) controlPanel.getComponent("gridSize");
     gridSizeSpinner.setModel(new SpinnerNumberModel());
     gridSizeSpinner.addChangeListener(new UpdateGridListener());
 
-    gridOffsetXTextField = controlPanel.getTextField("offsetX");
+    gridOffsetXTextField = (JTextField) controlPanel.getComponent("offsetX");
     gridOffsetXTextField.addKeyListener(new UpdateGridListener());
 
-    gridOffsetYTextField = controlPanel.getTextField("offsetY");
+    gridOffsetYTextField = (JTextField) controlPanel.getComponent("offsetY");
     gridOffsetYTextField.addKeyListener(new UpdateGridListener());
 
-    gridSecondDimensionLabel = (JETALabel) controlPanel.getLabel("gridSecondDimensionLabel");
-    gridSecondDimension = controlPanel.getTextField("gridSecondDimension");
+    gridSecondDimensionLabel = (JLabel) controlPanel.getComponent("gridSecondDimensionLabel");
+    gridSecondDimension = (JTextField) controlPanel.getComponent("gridSecondDimension");
     gridSecondDimension.addFocusListener(new UpdateGridListener());
 
-    colorWell = (JETAColorWell) controlPanel.getComponentByName("colorWell");
+    colorWell = (JETAColorWell) controlPanel.getComponent("colorWell");
     colorWell.addActionListener(e -> copyControlPanelToGrid());
 
-    JButton closeButton = (JButton) controlPanel.getComponentByName("closeButton");
+    JButton closeButton = (JButton) controlPanel.getComponent("closeButton");
     closeButton.addActionListener(
         e -> {
           resetTool();
@@ -112,7 +99,7 @@ public class GridTool extends DefaultTool {
           Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
           z.putTokens(z.getTokens());
         });
-    zoomSlider = (JSlider) controlPanel.getComponentByName("zoomSlider");
+    zoomSlider = (JSlider) controlPanel.getComponent("zoomSlider");
     zoomSlider.setMinimum(0);
     zoomSlider.setMaximum(zoomSliderStopCount);
     ZoomChangeListener zoomListener = new ZoomChangeListener();
@@ -188,8 +175,6 @@ public class GridTool extends DefaultTool {
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
     grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
-
-    renderer.repaint();
   }
 
   @Override
@@ -306,7 +291,6 @@ public class GridTool extends DefaultTool {
 
       renderer.getZone().getGrid().setOffset(x, y);
 
-      // renderer.repaint();
       copyGridToControlPanel();
     } else {
       super.mouseDragged(e);

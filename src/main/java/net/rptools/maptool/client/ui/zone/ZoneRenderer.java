@@ -4769,6 +4769,14 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  @Subscribe
+  private void onGridChanged(GridChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    repaintDebouncer.dispatch();
+  }
+
   //
   // COMPARABLE
   public int compareTo(@NotNull ZoneRenderer o) {
