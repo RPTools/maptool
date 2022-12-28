@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.addresource;
 
 import com.jidesoft.swing.FolderChooser;
 import io.sentry.Sentry;
@@ -75,7 +75,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   private boolean install = false;
 
   public AddResourceDialog() {
-    super("net/rptools/maptool/client/ui/forms/addResourcesDialog.xml");
+    super(new AddRessourcesDialogView().$$$getRootComponent$$$());
 
     setPreferredSize(new Dimension(550, 300));
 
