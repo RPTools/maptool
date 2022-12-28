@@ -225,6 +225,18 @@ public class AbeillePanel<T> extends JPanel {
     model = null;
   }
 
+  public JButton getButton(String name) {
+    return (JButton) getComponent(name);
+  }
+
+  public JRadioButton getRadioButton(String name) {
+    return (JRadioButton) getComponent(name);
+  }
+
+  public JComboBox getComboBox(String name) {
+    return (JComboBox) getComponent(name);
+  }
+
   public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {
     private JRadioButton button;
     private Enum selected;

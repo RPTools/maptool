@@ -12,9 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.campaignexportdialog;
 
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
 import java.awt.event.ItemEvent;
 import java.io.File;
@@ -25,8 +24,9 @@ import javax.swing.JDialog;
 import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.exportdialog.CampaignExportDialogView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.CampaignExport;
 import org.apache.logging.log4j.LogManager;
@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
 public class CampaignExportDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(CampaignExportDialog.class);
 
-  private static FormPanel mainPanel;
+  private static AbeillePanel mainPanel;
   private static JEditorPane versionNotesText;
   private static JComboBox selectVersionCombo;
   private static File campaignFile;
@@ -62,7 +62,7 @@ public class CampaignExportDialog extends JDialog {
     //
     // Initialize the panel and button actions
     //
-    mainPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/campaignExportDialog.xml");
+    mainPanel = new AbeillePanel(new CampaignExportDialogView().$$$getRootComponent$$$());
     setLayout(new GridLayout());
     add(mainPanel);
     getRootPane().setDefaultButton((JButton) mainPanel.getButton("exportButton"));
@@ -77,7 +77,7 @@ public class CampaignExportDialog extends JDialog {
               dispose();
             });
 
-    versionNotesText = (JEditorPane) mainPanel.getComponentByName("versionNotesText");
+    versionNotesText = (JEditorPane) mainPanel.getComponent("versionNotesText");
     versionNotesText.setEditable(false);
 
     selectVersionCombo = mainPanel.getComboBox("selectVersionCombo");
