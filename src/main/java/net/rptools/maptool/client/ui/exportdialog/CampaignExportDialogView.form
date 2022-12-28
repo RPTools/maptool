@@ -1,0 +1,228 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="CampainExportDialogView">
+  <grid id="ff3" layout-manager="FormLayout">
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="fill:200px:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <rowspec value="center:d:noGrow"/>
+    <colspec value="fill:d:noGrow"/>
+    <colspec value="fill:500px:noGrow"/>
+    <colspec value="fill:d:noGrow"/>
+    <constraints>
+      <xy x="10" y="10" width="528" height="347"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="4336b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <font name="SansSerif" style="1"/>
+          <text value="ExportCampaign.desc"/>
+        </properties>
+      </component>
+      <grid id="2666b" layout-manager="FormLayout">
+        <rowspec value="center:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms defaultalign-horz="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="c35e1" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <actionCommand value="Export"/>
+              <name value="exportButton"/>
+              <text value="Button.export"/>
+            </properties>
+          </component>
+          <component id="c09aa" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <actionCommand value="Cancel"/>
+              <name value="cancelButton"/>
+              <text value="Button.cancel"/>
+            </properties>
+          </component>
+          <hspacer id="87f55">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+          </hspacer>
+          <hspacer id="5ad9b">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+          </hspacer>
+        </children>
+      </grid>
+      <grid id="5819a" layout-manager="FormLayout">
+        <rowspec value="center:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <colspec value="fill:d:noGrow"/>
+        <colspec value="fill:100px:noGrow"/>
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="143a9" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <text value="Label.version"/>
+            </properties>
+          </component>
+          <component id="9f66" class="javax.swing.JComboBox">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+            <properties>
+              <actionCommand value="comboBoxChanged"/>
+              <model>
+                <item value="1.4.0.0"/>
+              </model>
+              <name value="selectVersionCombo"/>
+            </properties>
+          </component>
+          <hspacer id="4d92a">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <forms/>
+            </constraints>
+          </hspacer>
+        </children>
+      </grid>
+      <component id="361e4" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties>
+          <text value="EditTokenDialog.tab.notes"/>
+        </properties>
+      </component>
+      <scrollpane id="d63c">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="35987" class="javax.swing.JEditorPane">
+            <constraints/>
+            <properties>
+              <contentType value="text/html"/>
+              <editable value="false"/>
+              <name value="versionNotesText"/>
+              <selectionEnd value="1"/>
+              <selectionStart value="1"/>
+              <text value="&lt;html&gt;&#10;  &lt;head&gt;&#10;    &#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;&#10;"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <hspacer id="29419">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="9bd45">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="d8f34">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="c8160">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="bb926">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="f212c">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="d8456">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="d39c1">
+        <constraints>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="b5360">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="a1a47">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="164ad">
+        <constraints>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+      <hspacer id="c9da2">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <forms/>
+        </constraints>
+      </hspacer>
+    </children>
+  </grid>
+</form>

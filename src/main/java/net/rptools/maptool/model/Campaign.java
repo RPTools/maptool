@@ -31,7 +31,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ExportDialog;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;

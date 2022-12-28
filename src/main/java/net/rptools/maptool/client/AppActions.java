@@ -71,7 +71,7 @@ import net.rptools.maptool.client.ui.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.ExportDialog;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;

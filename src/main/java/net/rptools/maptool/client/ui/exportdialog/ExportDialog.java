@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.exportdialog;
 
 import com.jeta.forms.components.panel.FormPanel;
 import com.jeta.forms.gui.form.FormAccessor;
@@ -44,6 +44,8 @@ import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.Scale;
+import net.rptools.maptool.client.ui.ZoneImageGenerator;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
