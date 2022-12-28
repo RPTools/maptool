@@ -22,6 +22,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.*;
 import org.apache.logging.log4j.LogManager;
@@ -225,8 +226,8 @@ public class AbeillePanel<T> extends JPanel {
     model = null;
   }
 
-  public JButton getButton(String name) {
-    return (JButton) getComponent(name);
+  public AbstractButton getButton(String name) {
+    return (AbstractButton) getComponent(name);
   }
 
   public JRadioButton getRadioButton(String name) {
@@ -235,6 +236,25 @@ public class AbeillePanel<T> extends JPanel {
 
   public JComboBox getComboBox(String name) {
     return (JComboBox) getComponent(name);
+  }
+
+  public JLabel getLabel(String name) {
+    return (JLabel) getComponent(name);
+  }
+
+  public JTabbedPane getTabbedPane(String name) {
+    return (JTabbedPane) getComponent(name);
+  }
+
+  public JTextField getTextField(String name) {
+    return (JTextField) getComponent(name);
+  }
+
+  public Collection<Component> getAllCompoments() {
+    if (componentMap == null) {
+      createComponentMap();
+    }
+    return componentMap.values();
   }
 
   public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {

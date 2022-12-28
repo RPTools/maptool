@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui.exportdialog;
 
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.Graphics2D;
 import java.awt.GridLayout;
 import java.awt.Image;
@@ -28,7 +26,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
@@ -42,7 +39,7 @@ import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.ZoneImageGenerator;
@@ -72,7 +69,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private static final ExportDialog instance = new ExportDialog();
 
   /** the modal panel the user uses to select the screenshot options */
-  private static FormPanel interactPanel;
+  private static AbeillePanel interactPanel;
 
   /** The modal panel showing screenshot progress */
   private static JLabel progressLabel;
@@ -154,12 +151,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     LAYERS_CURRENT,
     LAYERS_AS_SELECTED;
 
-    private static FormPanel form;
+    private static AbeillePanel form;
 
     //
     // SetForm stores the form this is attached to
     //
-    public static void setForm(FormPanel form) {
+    public static void setForm(AbeillePanel form) {
       ExportRadioButtons.form = form;
 
       for (ExportRadioButtons button : ExportRadioButtons.values()) {
@@ -245,7 +242,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     LAYER_FOG(false),
     LAYER_VISIBILITY(true);
 
-    private static FormPanel form;
+    private static AbeillePanel form;
 
     private final boolean playerCanModify;
 
@@ -264,7 +261,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
      *
      * @param form The FormPanel this dialog is part of.
      */
-    public static void setForm(FormPanel form) {
+    public static void setForm(AbeillePanel form) {
       ExportLayers.form = form;
       for (ExportLayers button : ExportLayers.values()) {
         try {
@@ -392,7 +389,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // Initialize the panel and button actions
     //
     createWaitPanel();
-    interactPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/exportDialog.xml");
+    interactPanel = new AbeillePanel(new ExportDialogView().$$$getRootComponent$$$());
     setLayout(new GridLayout());
     add(interactPanel);
     getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));
@@ -461,7 +458,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // TODO: Make this less fragile
     switch (interactPanel.getTabbedPane("tabs").getSelectedIndex()) {
       case 0:
-        File file = new File(interactPanel.getText("locationTextField").trim());
+        File file = new File(interactPanel.getTextField("locationTextField").getText().trim());
 
         // PNG only supported for now
         if (file.getName().endsWith("/")) {
@@ -473,10 +470,10 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
         exportLocation = new LocalLocation(file);
         break;
       case 1:
-        String username = interactPanel.getText("username").trim();
-        String password = interactPanel.getText("password").trim();
-        String host = interactPanel.getText("host").trim();
-        String path = interactPanel.getText("path").trim();
+        String username = interactPanel.getTextField("username").getText().trim();
+        String password = interactPanel.getTextField("password").getText().trim();
+        String host = interactPanel.getTextField("host").getText().trim();
+        String path = interactPanel.getTextField("path").getText().trim();
 
         // PNG only supported for now
         if (path.endsWith("/")) {
@@ -503,7 +500,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       chooser.setSelectedFile(((LocalLocation) exportLocation).getFile());
     }
     if (chooser.showOpenDialog(ExportDialog.this) == JFileChooser.APPROVE_OPTION) {
-      interactPanel.setText("locationTextField", chooser.getSelectedFile().getAbsolutePath());
+      interactPanel
+          .getTextField("locationTextField")
+          .setText(chooser.getSelectedFile().getAbsolutePath());
     }
   }
 
@@ -548,8 +547,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           break;
         case TYPE_ENTIRE_MAP:
           switchToWaitPanel();
-          if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")
-              || interactPanel.isSelected("METHOD_IMAGE_WRITER")) {
+          if (interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()
+              || interactPanel.getRadioButton("METHOD_IMAGE_WRITER").isSelected()) {
             // Using a buffer in memory for the whole image
             try {
               final PlayerView view = preScreenshot();
@@ -558,7 +557,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
                   .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotStreaming"));
 
               BufferedImage image;
-              if (interactPanel.isSelected("METHOD_BUFFERED_IMAGE")) {
+              if (interactPanel.getRadioButton("METHOD_BUFFERED_IMAGE").isSelected()) {
                 image =
                     new BufferedImage(
                         renderer.getWidth(), renderer.getHeight(), Transparency.OPAQUE);
@@ -586,7 +585,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
               MapTool.getFrame()
                   .setStatusMessage(I18N.getString("dialog.screenshot.msg.screenshotSaved"));
             }
-          } else if (interactPanel.isSelected("METHOD_BACKGROUND")) {
+          } else if (interactPanel.getRadioButton("METHOD_BACKGROUND").isSelected()) {
             // We must call preScreenshot before creating the ZoneImageGenerator, because
             // ZoneImageGenerator uses the ZoneRenderer's bounds to set itself up
 
@@ -640,12 +639,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
   public Map<String, Boolean> getExportSettings() {
     Map<String, Boolean> settings = new HashMap<>(16);
-    FormAccessor fa = interactPanel.getFormAccessor();
-    Iterator<?> iter = fa.beanIterator(true);
-    while (iter.hasNext()) {
-      Object obj = iter.next();
-      if (obj instanceof JToggleButton) {
-        JToggleButton jtb = (JToggleButton) obj;
+    for (var component : interactPanel.getAllCompoments()) {
+      if (component instanceof JToggleButton jtb) {
         settings.put(jtb.getName(), jtb.isSelected());
       }
     }
@@ -657,12 +652,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * turned on, since {@link #enforceButtonRules()} will turn them back on as appropriate.
    */
   private void resetExportSettings() {
-    FormAccessor fa = interactPanel.getFormAccessor();
-    Iterator<?> iter = fa.beanIterator(true);
-    while (iter.hasNext()) {
-      Object obj = iter.next();
-      if (obj instanceof JToggleButton) {
-        JToggleButton jtb = (JToggleButton) obj;
+    for (var component : interactPanel.getAllCompoments()) {
+      if (component instanceof JToggleButton jtb) {
         jtb.setSelected(false);
       }
     }
@@ -672,7 +663,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     resetExportSettings();
     if (settings != null) {
       for (var entry : settings.entrySet()) {
-        JToggleButton jtb = (JToggleButton) interactPanel.getComponentByName(entry.getKey());
+        JToggleButton jtb = (JToggleButton) interactPanel.getComponent(entry.getKey());
         if (jtb == null) {
           log.warn("GUI component for export setting '" + entry.getKey() + "' not found.");
         } else {
