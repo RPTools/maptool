@@ -257,6 +257,10 @@ public class AbeillePanel<T> extends JPanel {
     return componentMap.values();
   }
 
+  public JTree getTree(String name) {
+    return (JTree) getComponent(name);
+  }
+
   public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {
     private JRadioButton button;
     private Enum selected;
