@@ -18,7 +18,9 @@ import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
 import java.awt.*;
+import java.lang.reflect.Method;
 import java.util.Locale;
+import java.util.ResourceBundle;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
@@ -86,7 +88,10 @@ public class AddRessourcesDialogView {
     final JLabel label1 = new JLabel();
     Font label1Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 14, label1.getFont());
     if (label1Font != null) label1.setFont(label1Font);
-    label1.setText("AddResourcesDialog.label.localdirectory");
+    this.$$$loadLabelText$$$(
+        label1,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AddResourcesDialog.label.localdirectory"));
     panel1.add(
         label1,
         new GridConstraints(
@@ -106,7 +111,8 @@ public class AddRessourcesDialogView {
     final JLabel label2 = new JLabel();
     Font label2Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 11, label2.getFont());
     if (label2Font != null) label2.setFont(label2Font);
-    label2.setText("Label.path");
+    this.$$$loadLabelText$$$(
+        label2, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.path"));
     panel1.add(
         label2,
         new GridConstraints(
@@ -135,7 +141,7 @@ public class AddRessourcesDialogView {
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
-            GridConstraints.FILL_NONE,
+            GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
@@ -146,7 +152,10 @@ public class AddRessourcesDialogView {
     final JLabel label3 = new JLabel();
     Font label3Font = this.$$$getFont$$$("SansSerif", Font.ITALIC, 11, label3.getFont());
     if (label3Font != null) label3.setFont(label3Font);
-    label3.setText("AddResourcesDialog.label.example");
+    this.$$$loadLabelText$$$(
+        label3,
+        this.$$$getMessageFromBundle$$$(
+            "net/rptools/maptool/language/i18n", "AddResourcesDialog.label.example"));
     panel1.add(
         label3,
         new GridConstraints(
@@ -203,7 +212,8 @@ public class AddRessourcesDialogView {
     final JLabel label4 = new JLabel();
     Font label4Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 14, label4.getFont());
     if (label4Font != null) label4.setFont(label4Font);
-    label4.setText("Label.url");
+    this.$$$loadLabelText$$$(
+        label4, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.url"));
     panel2.add(
         label4,
         new GridConstraints(
@@ -240,7 +250,8 @@ public class AddRessourcesDialogView {
     final JLabel label5 = new JLabel();
     Font label5Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 11, label5.getFont());
     if (label5Font != null) label5.setFont(label5Font);
-    label5.setText("Label.name");
+    this.$$$loadLabelText$$$(
+        label5, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
     panel2.add(
         label5,
         new GridConstraints(
@@ -299,7 +310,8 @@ public class AddRessourcesDialogView {
     final JLabel label7 = new JLabel();
     Font label7Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 11, label7.getFont());
     if (label7Font != null) label7.setFont(label7Font);
-    label7.setText("Label.url2");
+    this.$$$loadLabelText$$$(
+        label7, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.url2"));
     panel2.add(
         label7,
         new GridConstraints(
@@ -374,12 +386,14 @@ public class AddRessourcesDialogView {
             false));
     final JPanel panel3 = new JPanel();
     panel3.setLayout(new GridLayoutManager(2, 2, new Insets(0, 0, 0, 0), -1, -1));
-    panel3.setVisible(true);
+    panel3.setVisible(false);
     tabbedPane1.addTab("", panel3);
     final JLabel label9 = new JLabel();
     Font label9Font = this.$$$getFont$$$("SansSerif", Font.BOLD, 14, label9.getFont());
     if (label9Font != null) label9.setFont(label9Font);
-    label9.setText("Label.library");
+    this.$$$loadLabelText$$$(
+        label9,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.library"));
     panel3.add(
         label9,
         new GridConstraints(
@@ -437,7 +451,9 @@ public class AddRessourcesDialogView {
     final JButton button2 = new JButton();
     button2.setActionCommand("Cancel");
     button2.setName("cancelButton");
-    button2.setText("Button.cancel");
+    this.$$$loadButtonText$$$(
+        button2,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.cancel"));
     mainPanel.add(
         button2,
         new GridConstraints(
@@ -457,7 +473,9 @@ public class AddRessourcesDialogView {
     final JButton button3 = new JButton();
     button3.setActionCommand("Install >>");
     button3.setName("installButton");
-    button3.setText("Button.install");
+    this.$$$loadButtonText$$$(
+        button3,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.install"));
     mainPanel.add(
         button3,
         new GridConstraints(
@@ -537,6 +555,75 @@ public class AddRessourcesDialogView {
     return fontWithFallback instanceof FontUIResource
         ? fontWithFallback
         : new FontUIResource(fontWithFallback);
+  }
+
+  private static Method $$$cachedGetBundleMethod$$$ = null;
+
+  private String $$$getMessageFromBundle$$$(String path, String key) {
+    ResourceBundle bundle;
+    try {
+      Class<?> thisClass = this.getClass();
+      if ($$$cachedGetBundleMethod$$$ == null) {
+        Class<?> dynamicBundleClass =
+            thisClass.getClassLoader().loadClass("com.intellij.DynamicBundle");
+        $$$cachedGetBundleMethod$$$ =
+            dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
+      }
+      bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
+    } catch (Exception e) {
+      bundle = ResourceBundle.getBundle(path);
+    }
+    return bundle.getString(key);
+  }
+
+  /** @noinspection ALL */
+  private void $$$loadLabelText$$$(JLabel component, String text) {
+    StringBuffer result = new StringBuffer();
+    boolean haveMnemonic = false;
+    char mnemonic = '\0';
+    int mnemonicIndex = -1;
+    for (int i = 0; i < text.length(); i++) {
+      if (text.charAt(i) == '&') {
+        i++;
+        if (i == text.length()) break;
+        if (!haveMnemonic && text.charAt(i) != '&') {
+          haveMnemonic = true;
+          mnemonic = text.charAt(i);
+          mnemonicIndex = result.length();
+        }
+      }
+      result.append(text.charAt(i));
+    }
+    component.setText(result.toString());
+    if (haveMnemonic) {
+      component.setDisplayedMnemonic(mnemonic);
+      component.setDisplayedMnemonicIndex(mnemonicIndex);
+    }
+  }
+
+  /** @noinspection ALL */
+  private void $$$loadButtonText$$$(AbstractButton component, String text) {
+    StringBuffer result = new StringBuffer();
+    boolean haveMnemonic = false;
+    char mnemonic = '\0';
+    int mnemonicIndex = -1;
+    for (int i = 0; i < text.length(); i++) {
+      if (text.charAt(i) == '&') {
+        i++;
+        if (i == text.length()) break;
+        if (!haveMnemonic && text.charAt(i) != '&') {
+          haveMnemonic = true;
+          mnemonic = text.charAt(i);
+          mnemonicIndex = result.length();
+        }
+      }
+      result.append(text.charAt(i));
+    }
+    component.setText(result.toString());
+    if (haveMnemonic) {
+      component.setMnemonic(mnemonic);
+      component.setDisplayedMnemonicIndex(mnemonicIndex);
+    }
   }
 
   /** @noinspection ALL */

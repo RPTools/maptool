@@ -41,7 +41,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="14" style="1"/>
-                  <text value="AddResourcesDialog.label.localdirectory"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="AddResourcesDialog.label.localdirectory"/>
                 </properties>
               </component>
               <component id="ff398" class="javax.swing.JLabel">
@@ -50,7 +50,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="11" style="1"/>
-                  <text value="Label.path"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.path"/>
                 </properties>
               </component>
               <component id="1eb7a" class="javax.swing.JTextField">
@@ -69,7 +69,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="11" style="2"/>
-                  <text value="AddResourcesDialog.label.example"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="AddResourcesDialog.label.example"/>
                 </properties>
               </component>
               <vspacer id="ae8bb">
@@ -98,7 +98,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="14" style="1"/>
-                  <text value="Label.url"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.url"/>
                 </properties>
               </component>
               <hspacer id="7425d">
@@ -112,7 +112,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="11" style="1"/>
-                  <text value="Label.name"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
                 </properties>
               </component>
               <component id="4b2b4" class="javax.swing.JTextField">
@@ -139,7 +139,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="11" style="1"/>
-                  <text value="Label.url2"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.url2"/>
                 </properties>
               </component>
               <component id="dc371" class="javax.swing.JTextField">
@@ -183,7 +183,7 @@
                 </constraints>
                 <properties>
                   <font name="SansSerif" size="14" style="1"/>
-                  <text value="Label.library"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.library"/>
                 </properties>
               </component>
               <scrollpane id="19cce">
@@ -219,7 +219,7 @@
         <properties>
           <actionCommand value="Cancel"/>
           <name value="cancelButton"/>
-          <text value="Button.cancel"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.cancel"/>
         </properties>
       </component>
       <component id="2f2d3" class="javax.swing.JButton">
@@ -229,7 +229,7 @@
         <properties>
           <actionCommand value="Install &gt;&gt;"/>
           <name value="installButton"/>
-          <text value="Button.install"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.install"/>
         </properties>
       </component>
       <hspacer id="ccf0f">
