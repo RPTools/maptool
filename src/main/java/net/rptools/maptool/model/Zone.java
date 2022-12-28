@@ -384,11 +384,15 @@ public class Zone {
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
     for (ZoneRenderer z : rendererList) {
-      if (z.getZone().getPlayerAlias().equals(playerAlias)) {
+      if (z.getZone().getPlayerAlias() != null
+          && z.getZone().getPlayerAlias().equals(playerAlias)) {
         return false;
       }
     }
-    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
+    this.playerAlias =
+        playerAlias == null || playerAlias.equals("") || playerAlias.equals(name)
+            ? null
+            : playerAlias;
     return true;
   }
 
