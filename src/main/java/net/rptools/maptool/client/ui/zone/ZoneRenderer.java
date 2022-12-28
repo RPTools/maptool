@@ -70,13 +70,7 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.zones.DrawableAdded;
-import net.rptools.maptool.model.zones.DrawableRemoved;
-import net.rptools.maptool.model.zones.FogChanged;
-import net.rptools.maptool.model.zones.TokensAdded;
-import net.rptools.maptool.model.zones.TokensChanged;
-import net.rptools.maptool.model.zones.TokensRemoved;
-import net.rptools.maptool.model.zones.TopologyChanged;
+import net.rptools.maptool.model.zones.*;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -4764,6 +4758,14 @@ public class ZoneRenderer extends JComponent
     }
     markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
     MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onBoardChanged(BoardChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
     repaintDebouncer.dispatch();
   }
 

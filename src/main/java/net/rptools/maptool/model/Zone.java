@@ -658,14 +658,14 @@ public class Zone {
     boardPosition.x = position.x;
     boardPosition.y = position.y;
     setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(mapAsset));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(int newX, int newY) {
     boardPosition.x = newX;
     boardPosition.y = newY;
     setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(mapAsset));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(Point position, MD5Key asset) {
