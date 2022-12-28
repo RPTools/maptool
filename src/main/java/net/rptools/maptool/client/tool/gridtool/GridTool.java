@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.client.tool.gridtool;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import com.jeta.forms.components.label.JETALabel;
@@ -46,6 +46,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.FormPanelI18N;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
