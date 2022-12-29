@@ -249,6 +249,7 @@ public class CampaignPropertiesDialogView {
             false));
     final JPanel panel4 = new JPanel();
     panel4.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+    panel4.setPreferredSize(new Dimension(-1, -1));
     panel4.setVisible(false);
     tabbedPane1.addTab(
         this.$$$getMessageFromBundle$$$(
@@ -264,21 +265,24 @@ public class CampaignPropertiesDialogView {
             1,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_BOTH,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            null,
+            new Dimension(600, 300),
             null,
             0,
             false));
     final JEditorPane editorPane1 = new JEditorPane();
+    editorPane1.setAutoscrolls(true);
     editorPane1.setContentType("text/plain");
     editorPane1.setName("sightPanel");
     editorPane1.setText("");
+    editorPane1.setVisible(true);
     scrollPane2.setViewportView(editorPane1);
     final JScrollPane scrollPane3 = new JScrollPane();
     scrollPane3.setHorizontalScrollBarPolicy(31);
     scrollPane3.setVerticalScrollBarPolicy(22);
+    scrollPane3.setVisible(true);
     panel4.add(
         scrollPane3,
         new GridConstraints(
@@ -291,7 +295,7 @@ public class CampaignPropertiesDialogView {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            null,
+            new Dimension(600, 300),
             null,
             0,
             false));
@@ -303,15 +307,17 @@ public class CampaignPropertiesDialogView {
     editorPane2.setSelectionEnd(1);
     editorPane2.setSelectionStart(1);
     editorPane2.setText("<html>\n  <head>\n    \n  </head>\n  <body>\n  </body>\n</html>\n");
+    editorPane2.setVisible(true);
     scrollPane3.setViewportView(editorPane2);
     final JPanel panel5 = new JPanel();
-    panel5.setLayout(new GridLayoutManager(3, 1, new Insets(5, 5, 5, 5), -1, -1));
+    panel5.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
     panel5.setVisible(false);
     tabbedPane1.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "CampaignPropertiesDialog.tab.light"),
         panel5);
     final JScrollPane scrollPane4 = new JScrollPane();
+    scrollPane4.setVisible(true);
     panel5.add(
         scrollPane4,
         new GridConstraints(
@@ -324,7 +330,7 @@ public class CampaignPropertiesDialogView {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            null,
+            new Dimension(600, 300),
             null,
             0,
             false));
@@ -337,19 +343,20 @@ public class CampaignPropertiesDialogView {
     final JScrollPane scrollPane5 = new JScrollPane();
     scrollPane5.setHorizontalScrollBarPolicy(31);
     scrollPane5.setVerticalScrollBarPolicy(22);
+    scrollPane5.setVisible(true);
     panel5.add(
         scrollPane5,
         new GridConstraints(
             1,
             0,
-            2,
+            1,
             1,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             null,
-            null,
+            new Dimension(600, 300),
             null,
             0,
             false));
@@ -365,7 +372,7 @@ public class CampaignPropertiesDialogView {
     final JPanel panel6 = new JPanel();
     panel6.setLayout(new GridLayoutManager(7, 11, new Insets(5, 5, 5, 5), -1, -1));
     panel6.setName("tokenStatesPanel");
-    panel6.setVisible(true);
+    panel6.setVisible(false);
     tabbedPane1.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "CampaignPropertiesDialog.tab.states"),
@@ -1210,8 +1217,8 @@ public class CampaignPropertiesDialogView {
             0,
             false));
     final JPanel panel10 = new JPanel();
-    panel10.setLayout(new GridLayoutManager(8, 12, new Insets(5, 5, 5, 5), -1, -1));
-    panel10.setVisible(false);
+    panel10.setLayout(new GridLayoutManager(8, 11, new Insets(5, 5, 5, 5), -1, -1));
+    panel10.setVisible(true);
     tabbedPane1.addTab(
         this.$$$getMessageFromBundle$$$(
             "net/rptools/maptool/language/i18n", "CampaignPropertiesDialog.tab.bars"),
@@ -1245,7 +1252,7 @@ public class CampaignPropertiesDialogView {
             0,
             1,
             1,
-            8,
+            7,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -1292,7 +1299,7 @@ public class CampaignPropertiesDialogView {
             1,
             1,
             1,
-            2,
+            1,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -1312,7 +1319,7 @@ public class CampaignPropertiesDialogView {
         label15,
         new GridConstraints(
             1,
-            3,
+            2,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1333,7 +1340,7 @@ public class CampaignPropertiesDialogView {
         jETAColorWell2,
         new GridConstraints(
             1,
-            4,
+            3,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1355,7 +1362,7 @@ public class CampaignPropertiesDialogView {
         label16,
         new GridConstraints(
             1,
-            5,
+            4,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1373,7 +1380,7 @@ public class CampaignPropertiesDialogView {
         spinner5,
         new GridConstraints(
             1,
-            6,
+            5,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1394,7 +1401,7 @@ public class CampaignPropertiesDialogView {
         label17,
         new GridConstraints(
             1,
-            7,
+            6,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1412,7 +1419,7 @@ public class CampaignPropertiesDialogView {
         spinner6,
         new GridConstraints(
             1,
-            8,
+            7,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1460,7 +1467,7 @@ public class CampaignPropertiesDialogView {
             2,
             1,
             1,
-            2,
+            1,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -1480,7 +1487,7 @@ public class CampaignPropertiesDialogView {
         label19,
         new GridConstraints(
             2,
-            3,
+            2,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1500,7 +1507,7 @@ public class CampaignPropertiesDialogView {
         jETAColorWell3,
         new GridConstraints(
             2,
-            4,
+            3,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1521,7 +1528,7 @@ public class CampaignPropertiesDialogView {
         label20,
         new GridConstraints(
             2,
-            5,
+            4,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1539,7 +1546,7 @@ public class CampaignPropertiesDialogView {
         spinner7,
         new GridConstraints(
             2,
-            6,
+            5,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1560,7 +1567,7 @@ public class CampaignPropertiesDialogView {
         label21,
         new GridConstraints(
             2,
-            7,
+            6,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1579,7 +1586,7 @@ public class CampaignPropertiesDialogView {
         checkBox5,
         new GridConstraints(
             2,
-            8,
+            7,
             1,
             1,
             GridConstraints.ANCHOR_WEST,
@@ -1619,7 +1626,7 @@ public class CampaignPropertiesDialogView {
         panel11,
         new GridConstraints(
             4,
-            11,
+            10,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1765,7 +1772,7 @@ public class CampaignPropertiesDialogView {
             5,
             1,
             1,
-            8,
+            7,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_HORIZONTAL,
             GridConstraints.SIZEPOLICY_WANT_GROW,
@@ -1780,7 +1787,7 @@ public class CampaignPropertiesDialogView {
         spacer11,
         new GridConstraints(
             0,
-            9,
+            8,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1842,7 +1849,7 @@ public class CampaignPropertiesDialogView {
         panel12,
         new GridConstraints(
             6,
-            11,
+            10,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -1988,7 +1995,7 @@ public class CampaignPropertiesDialogView {
             4,
             1,
             1,
-            9,
+            8,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
@@ -2009,7 +2016,7 @@ public class CampaignPropertiesDialogView {
             6,
             1,
             1,
-            9,
+            8,
             GridConstraints.ANCHOR_CENTER,
             GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
@@ -2031,7 +2038,7 @@ public class CampaignPropertiesDialogView {
             3,
             0,
             1,
-            7,
+            6,
             GridConstraints.ANCHOR_WEST,
             GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
@@ -2126,7 +2133,7 @@ public class CampaignPropertiesDialogView {
         spacer13,
         new GridConstraints(
             4,
-            10,
+            9,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
@@ -2143,7 +2150,7 @@ public class CampaignPropertiesDialogView {
         spacer14,
         new GridConstraints(
             6,
-            10,
+            9,
             1,
             1,
             GridConstraints.ANCHOR_CENTER,
