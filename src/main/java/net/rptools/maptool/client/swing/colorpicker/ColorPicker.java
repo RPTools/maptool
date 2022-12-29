@@ -12,11 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.swing;
+package net.rptools.maptool.client.swing.colorpicker;
 
-import com.jeta.forms.components.label.JETALabel;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.GridLayout;
@@ -26,13 +23,11 @@ import java.awt.event.MouseEvent;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.BorderFactory;
-import javax.swing.JFrame;
-import javax.swing.JPanel;
-import javax.swing.JSpinner;
-import javax.swing.JToggleButton;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.border.BevelBorder;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.PaintChooser;
+import net.rptools.maptool.client.swing.PaintedPanel;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 
@@ -79,7 +74,7 @@ public class ColorPicker extends JPanel {
     paintChooser = new PaintChooser();
     paintChooser.setPreferredSize(new Dimension(450, 400));
 
-    FormPanel panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/colorPanel.xml");
+    AbeillePanel panel = new AbeillePanel(new ColorPanelView().$$$getRootComponent$$$());
 
     ColorWellListener listener = new ColorWellListener(1);
 
@@ -96,13 +91,10 @@ public class ColorPicker extends JPanel {
     wrappedBackground.add(backgroundColor);
     backgroundColor.addMouseListener(listener);
 
-    FormAccessor accessor = panel.getFormAccessor("colorPanel");
-
-    accessor.replaceBean("foregroundColor", wrappedForeground);
-    accessor.replaceBean("backgroundColor", wrappedBackground);
+    panel.replaceComponent("colorPanel", "foregroundColor", wrappedForeground);
+    panel.replaceComponent("colorPanel", "backgroundColor", wrappedBackground);
 
     listener = new ColorWellListener(2);
-    accessor = panel.getFormAccessor("recentColors");
     for (int i = 0; i < RECENT_COLOR_LIST_SIZE; i++) {
       PaintedPanel paintedPanel = new PaintedPanel();
       paintedPanel.setPreferredSize(new Dimension(15, 15));
@@ -111,7 +103,7 @@ public class ColorPicker extends JPanel {
       wrappedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
       wrappedPanel.add(paintedPanel);
 
-      accessor.replaceBean("recentColor" + i, wrappedPanel);
+      panel.replaceComponent("recentColors", "recentColor" + i, wrappedPanel);
       paintedPanel.addMouseListener(listener);
       recentColors.add(paintedPanel);
     }
@@ -127,9 +119,9 @@ public class ColorPicker extends JPanel {
     eraseToggle.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_PENCIL));
     eraseToggle.setSelectedIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_ERASER));
 
-    var opacityLabel = (JETALabel) panel.getComponentByName("opacityLabel");
+    var opacityLabel = (JLabel) panel.getComponent("opacityLabel");
     opacityLabel.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_OPACITY));
-    var penWidthLabel = (JETALabel) panel.getComponentByName("penWidthLabel");
+    var penWidthLabel = (JLabel) panel.getComponent("penWidthLabel");
     penWidthLabel.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_PEN_WIDTH));
 
     penWidthSpinner = panel.getSpinner("penWidth");
