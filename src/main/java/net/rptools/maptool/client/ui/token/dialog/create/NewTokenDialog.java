@@ -56,7 +56,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
    * @param y y value for center point of the token dialog
    */
   public NewTokenDialog(Token token, int x, int y) {
-    super("net/rptools/maptool/client/ui/forms/newTokenDialog.xml");
+    super(new NewTokenDialogView().$$$getRootComponent$$$());
 
     this.token = token;
     centerX = x;
