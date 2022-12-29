@@ -37,7 +37,7 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
   private GenericDialog dialog;
 
   public TransferProgressDialog() {
-    super("net/rptools/maptool/client/ui/forms/transferProgressDialog.xml");
+    super(new TransferProgressDialogView().$$$getRootComponent$$$());
 
     panelInit();
   }
