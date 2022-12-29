@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.connecttoserverdialog;
 
 import java.awt.Dimension;
 import java.awt.event.MouseAdapter;
@@ -63,7 +63,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
   /** This is the default constructor */
   public ConnectToServerDialog() {
-    super("net/rptools/maptool/client/ui/forms/connectToServerDialog.xml");
+    super(new ConnectToServerDialogView().$$$getRootComponent$$$());
     setPreferredSize(new Dimension(600, 500));
     panelInit();
   }
@@ -149,6 +149,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   }
 
   public void initLocalServerList() {
+    getLocalServerList().setModel(new DefaultListModel());
     getLocalServerList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     getLocalServerList()
         .addMouseListener(
