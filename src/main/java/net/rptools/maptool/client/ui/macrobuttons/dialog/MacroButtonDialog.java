@@ -12,12 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.macrobuttons.dialog;
 
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.GridView;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
@@ -27,22 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
-import javax.swing.Action;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JOptionPane;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
-import javax.swing.UIManager;
-import javax.swing.border.TitledBorder;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
@@ -52,9 +34,11 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.preference.WindowPreferences;
+import net.rptools.maptool.client.ui.ColorComboBoxRenderer;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
@@ -88,7 +72,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   public static final String DEFAULT_COLOR_NAME = "default";
 
   private static final long serialVersionUID = 8228617911117087993L;
-  private final FormPanel panel;
+  private final AbeillePanel panel;
   MacroButton button;
   MacroButtonProperties properties;
   boolean isTokenMacro = false;
@@ -117,7 +101,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     super(MapTool.getFrame(), "", true);
     this.setModalityType(ModalityType.MODELESS);
 
-    panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/macroButtonDialog.xml");
+    panel = new AbeillePanel(new MacroButtonDialogView().$$$getRootComponent$$$());
     setContentPane(panel);
     setSize(700, 400);
 
@@ -317,7 +301,6 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       return;
     }
 
-    initI18NSupport();
     this.button = button;
     updateOpenMacroList(true);
     this.isTokenMacro = button.getToken() != null;
@@ -465,7 +448,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             });
 
     csp = new CollapsibleSectionPanel();
-    ((GridView) panel.getComponentByName("macroEditorPanel")).add(csp);
+    ((JPanel) panel.getComponent("macroEditorPanel")).add(csp);
 
     csp.add(new ErrorStrip(macroEditorRSyntaxTextArea), BorderLayout.LINE_END);
 
@@ -498,7 +481,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     replaceToolBar = new ReplaceToolBar(this);
     replaceToolBar.setSearchContext(context);
 
-    status = (JLabel) panel.getComponentByName("statusBarLabel");
+    status = (JLabel) panel.getComponent("statusBarLabel");
   }
 
   /**
@@ -878,7 +861,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   }
 
   private RSyntaxTextArea getToolTipTextField() {
-    return (RSyntaxTextArea) panel.getComponentByName("toolTip");
+    return (RSyntaxTextArea) panel.getComponent("toolTip");
   }
 
   // Begin comparison customization
@@ -908,88 +891,4 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   }
 
   // End comparison customization
-
-  protected void replaceComponent(String panelName, String name, Component component) {
-    panel.getFormAccessor(panelName).replaceBean(name, component);
-    panel.reset();
-  }
-
-  private void initI18NSupport() {
-    panel.getTabbedPane("macroTabs").setTitleAt(0, I18N.getText("component.tab.macro.editor"));
-    panel.getTabbedPane("macroTabs").setTitleAt(1, I18N.getText("component.tab.macro.details"));
-    panel.getTabbedPane("macroTabs").setTitleAt(2, I18N.getText("component.tab.macro.options"));
-    panel.getLabel("macroLabelLabel").setText(I18N.getText("component.label.macro.label") + ":");
-    getLabelTextField().setToolTipText(I18N.getText("component.tooltip.macro.label"));
-    panel.getLabel("macroGroupLabel").setText(I18N.getText("component.label.macro.group") + ":");
-    getGroupTextField().setToolTipText(I18N.getText("component.tooltip.macro.group"));
-    panel
-        .getLabel("macroSortPrefixLabel")
-        .setText(I18N.getText("component.label.macro.sortPrefix") + ":");
-    getSortbyTextField().setToolTipText(I18N.getText("component.tooltip.macro.sortPrefix"));
-    panel.getLabel("macroHotKeyLabel").setText(I18N.getText("component.label.macro.hotKey") + ":");
-    getHotKeyCombo().setToolTipText(I18N.getText("component.tooltip.macro.hotKey"));
-    // Jamz: FIXME need to edit border text for gridview
-    // panel.getLabel("macroCommandLabel").setText(I18N.getText("component.label.macro.command"));
-    panel
-        .getLabel("macroButtonColorLabel")
-        .setText(I18N.getText("component.label.macro.buttonColor") + ":");
-    getColorComboBox().setToolTipText(I18N.getText("component.tooltip.macro.buttonColor"));
-    panel
-        .getLabel("macroFontColorLabel")
-        .setText(I18N.getText("component.label.macro.fontColor") + ":");
-    getFontColorComboBox().setToolTipText(I18N.getText("component.tooltip.macro.fontColor"));
-    panel
-        .getLabel("macroFontSizeLabel")
-        .setText(I18N.getText("component.label.macro.fontSize") + ":");
-    getFontSizeComboBox().setToolTipText(I18N.getText("component.tooltip.macro.fontSize"));
-    panel
-        .getLabel("macroMinWidthLabel")
-        .setText(I18N.getText("component.label.macro.minWidth") + ":");
-    getMinWidthTextField().setToolTipText(I18N.getText("component.tooltip.macro.minWidth"));
-    panel
-        .getLabel("macroMaxWidthLabel")
-        .setText(I18N.getText("component.label.macro.maxWidth") + ":");
-    getMaxWidthTextField().setToolTipText(I18N.getText("component.tooltip.macro.maxWidth"));
-    panel
-        .getLabel("macroToolTipLabel")
-        .setText(I18N.getText("component.label.macro.toolTip") + ":");
-    getToolTipTextField().setToolTipText(I18N.getText("component.tooltip.macro.tooltip"));
-    getIncludeLabelCheckBox().setText(I18N.getText("component.label.macro.includeLabel"));
-    getIncludeLabelCheckBox().setToolTipText(I18N.getText("component.tooltip.macro.includeLabel"));
-    getAutoExecuteCheckBox().setText(I18N.getText("component.label.macro.autoExecute"));
-    getAutoExecuteCheckBox().setToolTipText(I18N.getText("component.tooltip.macro.autoExecute"));
-    getApplyToTokensCheckBox().setText(I18N.getText("component.label.macro.applyToSelected"));
-    getApplyToTokensCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.applyToSelected"));
-    getAllowPlayerEditsCheckBox().setText(I18N.getText("component.label.macro.allowPlayerEdits"));
-    getAllowPlayerEditsCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.allowPlayerEdits"));
-    getDisplayHotkeyCheckBox().setText(I18N.getText("component.label.macro.displayHotKey"));
-    getDisplayHotkeyCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.displayHotKey"));
-    ((TitledBorder) ((GridView) panel.getComponentByName("macroComparisonGridView")).getBorder())
-        .setTitle(I18N.getText("component.label.macro.macroCommonality"));
-    getCompareIncludeLabelCheckBox()
-        .setText(I18N.getText("component.label.macro.compareUseIncludeLabel"));
-    getCompareIncludeLabelCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseIncludeLabel"));
-    getCompareAutoExecuteCheckBox()
-        .setText(I18N.getText("component.label.macro.compareUseAutoExecute"));
-    getCompareAutoExecuteCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseAutoExecute"));
-    getCompareApplyToSelectedTokensCheckBox()
-        .setText(I18N.getText("component.label.macro.compareApplyToSelected"));
-    getCompareApplyToSelectedTokensCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseApplyToSelected"));
-    getCompareGroupCheckBox().setText(I18N.getText("component.label.macro.compareUseGroup"));
-    getCompareGroupCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseGroup"));
-    getCompareSortPrefixCheckBox()
-        .setText(I18N.getText("component.label.macro.compareUseSortPrefix"));
-    getCompareSortPrefixCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseSortPrefix"));
-    getCompareCommandCheckBox().setText(I18N.getText("component.label.macro.compareUseCommand"));
-    getCompareCommandCheckBox()
-        .setToolTipText(I18N.getText("component.tooltip.macro.compareUseCommand"));
-  }
 }
