@@ -12,13 +12,12 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.preferencesdialog;
 
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
 import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
@@ -45,7 +44,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -255,8 +254,7 @@ public class PreferencesDialog extends JDialog {
         .forEach(lm::addElement);
     lightThemesListModel = lm;
 
-    FormPanel panel =
-        new FormPanelI18N("net/rptools/maptool/client/ui/forms/preferencesDialog.xml");
+    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().$$$getRootComponent$$$());
 
     JButton okButton = (JButton) panel.getButton("okButton");
     getRootPane().setDefaultButton(okButton);
@@ -356,14 +354,14 @@ public class PreferencesDialog extends JDialog {
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
     suppressToolTipsMacroLinks = panel.getCheckBox("suppressToolTipsMacroLinks");
-    trustedOuputForeground = (JETAColorWell) panel.getComponentByName("trustedOuputForeground");
-    trustedOuputBackground = (JETAColorWell) panel.getComponentByName("trustedOuputBackground");
+    trustedOuputForeground = (JETAColorWell) panel.getComponent("trustedOuputForeground");
+    trustedOuputBackground = (JETAColorWell) panel.getComponent("trustedOuputBackground");
     toolTipInitialDelay = panel.getTextField("toolTipInitialDelay");
     toolTipDismissDelay = panel.getTextField("toolTipDismissDelay");
     facingFaceEdges = panel.getCheckBox("facingFaceEdges");
     facingFaceVertices = panel.getCheckBox("facingFaceVertices");
 
-    chatNotificationColor = (JETAColorWell) panel.getComponentByName("chatNotificationColor");
+    chatNotificationColor = (JETAColorWell) panel.getComponent("chatNotificationColor");
     chatNotificationShowBackground = panel.getCheckBox("chatNotificationShowBackground");
 
     chatAutosaveTime = panel.getSpinner("chatAutosaveTime");
@@ -388,9 +386,9 @@ public class PreferencesDialog extends JDialog {
     copyPublicKey = (JButton) panel.getButton("copyKey");
 
     themeList = (JList<String>) panel.getList("themeList");
-    themeImageLabel = (JLabel) panel.getComponentByName("themeImage");
-    themeNameLabel = (JLabel) panel.getComponentByName("currentThemeName");
-    useThemeForChat = (JCheckBox) panel.getComponentByName("useThemeForChat");
+    themeImageLabel = (JLabel) panel.getComponent("themeImage");
+    themeNameLabel = (JLabel) panel.getComponent("currentThemeName");
+    useThemeForChat = (JCheckBox) panel.getComponent("useThemeForChat");
     themeFilterCombo = panel.getComboBox("themeFilterCombo");
 
     jvmXmxTextField = panel.getTextField("jvmXmxTextField");
