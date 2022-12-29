@@ -24,6 +24,7 @@ import java.awt.geom.AffineTransform;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
@@ -322,7 +323,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   /**
    * New instance of the template, at the current vertex
    *
-   * @see net.rptools.maptool.client.ui.Tool#resetTool()
+   * @see Tool#resetTool()
    */
   @Override
   protected void resetTool() {
@@ -346,10 +347,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
     return pen;
   }
 
-  /**
-   * @see
-   *     net.rptools.maptool.client.ui.Tool#detachFrom(net.rptools.maptool.client.ui.zone.ZoneRenderer)
-   */
+  /** @see Tool#detachFrom(net.rptools.maptool.client.ui.zone.ZoneRenderer) */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
@@ -357,10 +355,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
     renderer.repaint();
   }
 
-  /**
-   * @see
-   *     net.rptools.maptool.client.ui.Tool#attachTo(net.rptools.maptool.client.ui.zone.ZoneRenderer)
-   */
+  /** @see Tool#attachTo(net.rptools.maptool.client.ui.zone.ZoneRenderer) */
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     template.setZoneId(renderer.getZone().getId());
@@ -368,13 +363,13 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
     super.attachTo(renderer);
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.radiusCellTemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.radiustemplate.instructions";

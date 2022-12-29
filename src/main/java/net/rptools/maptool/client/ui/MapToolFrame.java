@@ -63,6 +63,8 @@ import net.rptools.maptool.client.swing.ZoomStatusBar;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.tool.Tool;
+import net.rptools.maptool.client.tool.Toolbox;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;

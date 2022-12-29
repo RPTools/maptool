@@ -59,8 +59,6 @@ import net.rptools.maptool.client.ui.AutoResizeStampDialog;
 import net.rptools.maptool.client.ui.StampPopupMenu;
 import net.rptools.maptool.client.ui.TokenLocation;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
-import net.rptools.maptool.client.ui.Tool;
-import net.rptools.maptool.client.ui.Toolbox;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;

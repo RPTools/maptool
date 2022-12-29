@@ -24,6 +24,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
@@ -163,7 +164,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
     return true;
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#resetTool() */
+  /** @see Tool#resetTool() */
   @Override
   protected void resetTool() {
     if (line != null) {

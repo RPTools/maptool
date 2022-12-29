@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.client.tool.texttool;
 
 import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Cursor;
@@ -33,6 +33,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -217,7 +218,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     private final EditLabelDialog dialog;
 
     public EditLabelPanel(EditLabelDialog dialog) {
-      super("net/rptools/maptool/client/ui/forms/editLabelDialog.xml");
+      super(new EditLabelDialogView().$$$getRootComponent$$$());
 
       this.dialog = dialog;
       panelInit();
