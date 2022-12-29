@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.startserverdialog;
 
 import java.text.DecimalFormat;
 import javax.swing.DefaultComboBoxModel;
@@ -56,7 +56,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useEasyConnect;
 
   public StartServerDialog() {
-    super("net/rptools/maptool/client/ui/forms/startServerDialog.xml");
+    super(new StartServerDialogView().$$$getRootComponent$$$());
     panelInit();
   }
 
