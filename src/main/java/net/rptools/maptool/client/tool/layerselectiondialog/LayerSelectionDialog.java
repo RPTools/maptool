@@ -12,9 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.tool;
+package net.rptools.maptool.client.tool.layerselectiondialog;
 
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
 import javax.swing.BorderFactory;
 import javax.swing.DefaultListModel;
@@ -22,18 +21,18 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.model.Zone;
 
 public class LayerSelectionDialog extends JPanel {
 
-  private final FormPanel panel;
+  private final AbeillePanel panel;
   private JList<Zone.Layer> list;
   private final LayerSelectionListener listener;
   private final Zone.Layer[] layerList;
 
   public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
-    panel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/layerSelectionDialog.xml");
+    panel = new AbeillePanel(new LayerSelectionDialogView().$$$getRootComponent$$$());
     this.listener = listener;
     this.layerList = layerList;
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
