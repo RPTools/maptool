@@ -15,7 +15,9 @@
 package net.rptools.maptool.client.swing;
 
 import com.intellij.uiDesigner.core.GridLayoutManager;
+import com.jeta.forms.components.label.JETALabel;
 import com.jeta.forms.components.panel.FormPanel;
+import com.jeta.forms.store.properties.ListItemProperty;
 import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.awt.event.ItemEvent;
@@ -25,7 +27,9 @@ import java.lang.reflect.Method;
 import java.util.Collection;
 import java.util.HashMap;
 import javax.swing.*;
+import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
+import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -83,20 +87,11 @@ public class AbeillePanel<T> extends JPanel {
         });
   }
 
-  public AbeillePanel(String panelForm) {
-    panel = new FormPanel(panelForm);
-    init();
-  }
-
   public AbeillePanel(JComponent mainPanel) {
     panel = mainPanel;
-    init();
-  }
-
-  private void init() {
     setLayout(new BorderLayout());
     add(panel, "Center");
-    FormPanelI18N.translateComponent(panel);
+    translateComponent(panel);
   }
 
   public T getModel() {
@@ -112,6 +107,56 @@ public class AbeillePanel<T> extends JPanel {
         } catch (IllegalArgumentException | IllegalAccessException | InvocationTargetException e) {
           log.error("Could not init method: " + method.getName(), e);
         }
+      }
+    }
+  }
+
+  private static void translateComponent(Component comp) {
+    if (comp instanceof JLabel jLabel) {
+      jLabel.setText(I18N.getText(jLabel.getText()));
+      String tooltip = jLabel.getToolTipText();
+      if (tooltip != null) {
+        jLabel.setToolTipText(I18N.getText(tooltip));
+      }
+    }
+    if (comp instanceof JETALabel) {
+      JETALabel label = (JETALabel) comp;
+      label.setText(I18N.getText(label.getText()));
+    } else if (comp instanceof AbstractButton) {
+      // Includes JToggleButton, JCheckBox, JButton
+      AbstractButton jButton = (AbstractButton) comp;
+      jButton.setText(I18N.getText(jButton.getText()));
+    } else if (comp instanceof JComboBox jComboBox) {
+      for (int i = 0; i < jComboBox.getItemCount(); ++i) {
+        var comboBoxItem = jComboBox.getItemAt(i);
+        if (comboBoxItem instanceof ListItemProperty itemProperty) {
+          itemProperty.setLabel(I18N.getText(itemProperty.getLabel()));
+        } else if (comboBoxItem instanceof String string) {
+          jComboBox.removeItemAt(i);
+          jComboBox.insertItemAt(I18N.getText(string), i);
+        } else {
+          throw new RuntimeException(
+              "Untranslated type of JComboBox item: " + comboBoxItem.getClass().getName());
+        }
+      }
+    } else if (comp instanceof JTabbedPane) {
+      JTabbedPane jTabbedPane = (JTabbedPane) comp;
+      for (int i = 0; i < jTabbedPane.getTabRunCount(); i += 1) {
+        jTabbedPane.setTitleAt(i, I18N.getText(jTabbedPane.getTitleAt(i)));
+      }
+    }
+    if (comp instanceof JComponent jComponent) {
+      var border = jComponent.getBorder();
+      if (border instanceof TitledBorder) {
+        TitledBorder titledBorder = (TitledBorder) border;
+        titledBorder.setTitle(I18N.getText(titledBorder.getTitle()));
+      }
+      String tooltip = jComponent.getToolTipText();
+      if (tooltip != null) {
+        jComponent.setToolTipText(I18N.getText(tooltip));
+      }
+      for (Component c : jComponent.getComponents()) {
+        translateComponent(c);
       }
     }
   }
