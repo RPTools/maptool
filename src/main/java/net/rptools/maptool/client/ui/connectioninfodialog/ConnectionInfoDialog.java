@@ -12,9 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.connectioninfodialog;
 
-import com.jeta.forms.components.panel.FormPanel;
 import java.awt.GridLayout;
 import java.io.IOException;
 import java.net.InetAddress;
@@ -31,7 +30,7 @@ import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServer;
@@ -55,8 +54,7 @@ public class ConnectionInfoDialog extends JDialog {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);
 
-    FormPanel panel =
-        new FormPanelI18N("net/rptools/maptool/client/ui/forms/connectionInfoDialog.xml");
+    AbeillePanel panel = new AbeillePanel(new ConnectionInfoDialogView().$$$getRootComponent$$$());
 
     JTextField nameLabel = panel.getTextField("name");
     JTextField localAddressLabel = panel.getTextField("localAddress");
