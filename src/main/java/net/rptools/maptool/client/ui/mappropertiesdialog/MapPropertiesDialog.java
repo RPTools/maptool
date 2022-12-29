@@ -12,11 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.ui.mappropertiesdialog;
 
 import com.jeta.forms.components.image.ImageComponent;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.gui.form.FormAccessor;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -28,9 +26,11 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.swing.FormPanelI18N;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.PaintChooser;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
+import net.rptools.maptool.client.ui.TextureChooserPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanelModel;
@@ -66,7 +66,7 @@ public class MapPropertiesDialog extends JDialog {
   private PreviewPanelFileChooser imageFileChooser;
   private MapPreviewPanel imagePreviewPanel;
   private MapSelectorDialog mapSelectorDialog;
-  private FormPanel formPanel;
+  private AbeillePanel formPanel;
 
   private DrawablePaint backgroundPaint;
   private Asset mapAsset;
@@ -141,7 +141,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new FormPanelI18N("net/rptools/maptool/client/ui/forms/mapPropertiesDialog.xml");
+    formPanel = new AbeillePanel(new MapPropertiesDialogView().$$$getRootComponent$$$());
 
     initDistanceTextField();
 
@@ -227,7 +227,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   public ImageComponent getHexHorizontalIcon() {
-    return (ImageComponent) formPanel.getComponentByName("hexHoriIcon");
+    return (ImageComponent) formPanel.getComponent("hexHoriIcon");
   }
 
   public JRadioButton getHexVerticalRadio() {
@@ -235,7 +235,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   public ImageComponent getHexVerticalIcon() {
-    return (ImageComponent) formPanel.getComponentByName("hexVertIcon");
+    return (ImageComponent) formPanel.getComponent("hexVertIcon");
   }
 
   public JRadioButton getSquareRadio() {
@@ -243,7 +243,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   public ImageComponent getSquareIcon() {
-    return (ImageComponent) formPanel.getComponentByName("squareIcon");
+    return (ImageComponent) formPanel.getComponent("squareIcon");
   }
 
   public JRadioButton getNoGridRadio() {
@@ -251,7 +251,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   public ImageComponent getNoGridIcon() {
-    return (ImageComponent) formPanel.getComponentByName("noGridIcon");
+    return (ImageComponent) formPanel.getComponent("noGridIcon");
   }
 
   public JRadioButton getIsometricRadio() {
@@ -259,7 +259,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   public ImageComponent getIsometricIcon() {
-    return (ImageComponent) formPanel.getComponentByName("isoIcon");
+    return (ImageComponent) formPanel.getComponent("isoIcon");
   }
 
   public JRadioButton getIsometricHexRadio() {
@@ -366,11 +366,10 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initMapPreviewPanel() {
-    FormAccessor accessor = formPanel.getFormAccessor("previewPanel");
     JPanel previewPanel = new JPanel(new GridLayout());
     previewPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
     previewPanel.add(getMapPreviewPanel());
-    accessor.replaceBean("mapPreviewPanel", previewPanel);
+    formPanel.replaceComponent("previewPanel", "mapPreviewPanel", previewPanel);
   }
 
   public JTextField getNameTextField() {
