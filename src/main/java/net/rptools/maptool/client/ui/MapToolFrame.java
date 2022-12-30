@@ -197,7 +197,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final FileFilter campaignFilter =
       new MTFileFilter(I18N.getText("file.ext.cmpgn"), "cmpgn");
   private final FileFilter campaignDirectoryFilter =
-          new MTFileFilter("cmpgndir", I18N.getText("file.ext.cmpgnDirectory"), true);
+      new MTFileFilter(I18N.getText("file.ext.cmpgnDirectory"), true, "cmpgndir");
   private final FileFilter mapFilter = new MTFileFilter(I18N.getText("file.ext.rpmap"), "rpmap");
   private final FileFilter propertiesFilter =
       new MTFileFilter(I18N.getText("file.ext.mtprops"), "mtprops");
@@ -768,7 +768,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   /** Accepts 1 or more file extensions */
   public static class MTFileFilter extends FileFilter {
     private final String[] extensions;
-    private final String extension;
     private final String description;
     private final boolean directory;
 
@@ -780,9 +779,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       super();
       extensions = extens;
       description = desc;
-      directory = directory;
+      directory = dir;
     }
-
 
     /** Accept directories and files matching any of the provided extensions */
     @Override
@@ -811,10 +809,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     @Override
     public String getDescription() {
       return description;
-    }
-
-    public String getExtension() {
-      return extension;
     }
 
     public String getExtension(File f) {
@@ -1919,7 +1913,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
           return;
         }
         if (result == JOptionPane.YES_OPTION) {
-          AppActions.doSaveCampaign(() -> MapTool.getFrame().close());
+          AppActions.doSaveCampaign(() -> MapTool.getFrame().close(), false);
           return;
         }
       } else {

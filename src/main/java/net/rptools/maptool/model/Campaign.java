@@ -57,8 +57,7 @@ public class Campaign {
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
-  private final Map<GUID, Zone> zones =
-      Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
+  private Map<GUID, Zone> zones = Collections.synchronizedMap(new LinkedHashMap<GUID, Zone>());
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
@@ -746,6 +745,26 @@ public class Campaign {
 
   public CampaignExportDialog getExportCampaignDialog() {
     return campaignExportDialog;
+  }
+
+  public List<MacroButtonProperties> getMacroButtonProperties() {
+    return macroButtonProperties;
+  }
+
+  public Location getExportLocation() {
+    return exportLocation;
+  }
+
+  public Map<String, Boolean> getExportSettings() {
+    return exportSettings;
+  }
+
+  public int getMacroButtonLastIndex() {
+    return macroButtonLastIndex;
+  }
+
+  public Boolean getHasUsedFogToolbar() {
+    return hasUsedFogToolbar;
   }
 
   public void initDefault() {

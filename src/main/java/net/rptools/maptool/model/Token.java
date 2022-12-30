@@ -52,7 +52,9 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.tokens.TokenMacroChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
@@ -2003,6 +2005,38 @@ public class Token implements Cloneable {
    */
   public void deleteMacro(int index) {
     getMacroPropertiesMap(false).remove(index);
+  }
+
+  public void replaceMacroList(List<MacroButtonProperties> newMacroList) {
+    // used by the token edit dialog, which will handle resetting panels and putting token to
+    // zone
+    macroPropertiesMap.clear();
+    List<MacroButtonProperties> macrosWithDuplicateIndex = new LinkedList<>();
+    int index = -1;
+    for (MacroButtonProperties macro : newMacroList) {
+      if (macro.getLabel() == null
+          || macro.getLabel().trim().length() == 0
+          || macro.getCommand().trim().length() == 0) {
+        continue;
+      }
+      if (macro.getIndex() == -1 || macroPropertiesMap.containsKey(macro.getIndex())) {
+        macrosWithDuplicateIndex.add(macro);
+      } else {
+        macroPropertiesMap.put(macro.getIndex(), macro);
+        index = Integer.max(index, macro.getIndex());
+      }
+      // Allows the token macro panels to update only if a macro changes
+      new MapToolEventBus().getMainEventBus().post(new TokenMacroChanged(this));
+    }
+
+    // fill macros with already used index with a new index and add again
+    for (MacroButtonProperties macro : macrosWithDuplicateIndex) {
+      index++;
+      macro.setIndex(index);
+      macroPropertiesMap.put(macro.getIndex(), macro);
+      // Allows the token macro panels to update only if a macro changes
+      new MapToolEventBus().getMainEventBus().post(new TokenMacroChanged(this));
+    }
   }
 
   public List<String> getMacroNames(boolean secure) {

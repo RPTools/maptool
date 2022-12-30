@@ -585,6 +585,11 @@ public class Zone {
     return id;
   }
 
+  public GUID resetId() {
+    id = new GUID();
+    return id;
+  }
+
   /**
    * Should be invoked only when a Zone has been imported from an external source and needs to be
    * cleaned up before being used. Currently this cleanup consists of allocating a new GUID, setting
@@ -2077,24 +2082,9 @@ public class Zone {
         visionType = VisionType.OFF;
       }
     }
-    // Look for the bizarre z-ordering disappearing trick
-    boolean foundZero = false;
-    boolean fixZOrder = false;
-    for (Token token : tokenOrderedList) {
-      if (token.getZOrder() == 0) {
-        if (foundZero) {
-          fixZOrder = true;
-          break;
-        }
-        foundZero = true;
-      }
-    }
-    if (fixZOrder) {
-      int z = 0;
-      for (Token token : tokenOrderedList) {
-        token.setZOrder(z++);
-      }
-    }
+
+    fixZOrder();
+
     // Transient "undo" field added in 1.3.b88
     // This will be true; it's just in case we decide to make it persistent in the future
     if (undo == null) {
@@ -2128,6 +2118,30 @@ public class Zone {
     }
 
     return this;
+  }
+
+  public void fixZOrder() {
+    // Look for the bizarre z-ordering disappearing trick
+    boolean foundZero = false;
+    boolean fixZOrder = false;
+
+    if (tokenOrderedList != null) {
+      for (Token token : tokenOrderedList) {
+        if (token.getZOrder() == 0) {
+          if (foundZero) {
+            fixZOrder = true;
+            break;
+          }
+          foundZero = true;
+        }
+      }
+      if (fixZOrder) {
+        int z = 0;
+        for (Token token : tokenOrderedList) {
+          token.setZOrder(z++);
+        }
+      }
+    }
   }
 
   /** @return the exposedAreaMeta. */

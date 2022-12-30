@@ -275,8 +275,6 @@ public class PackedFile implements AutoCloseable {
     } catch (NullPointerException npe) {
       log.error("Problem finding/converting content file", npe);
       return null;
-    } finally {
-      IOUtils.closeQuietly(r);
     }
   }
 

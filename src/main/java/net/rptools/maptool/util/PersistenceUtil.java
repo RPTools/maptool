@@ -19,22 +19,17 @@ import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
+import java.util.zip.ZipOutputStream;
 import javax.imageio.ImageIO;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
@@ -42,6 +37,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
+import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -391,7 +387,7 @@ public class PersistenceUtil {
               "campaignProperties.xml", persistedCampaign.campaign.getCampaignProperties());
 
           // save tables
-          for (Entry<String, LookupTable> tableEntry :
+          for (Map.Entry<String, LookupTable> tableEntry :
               persistedCampaign.campaign.getLookupTableMap().entrySet()) {
             String tableFile =
                 joinFilePaths(
@@ -456,9 +452,9 @@ public class PersistenceUtil {
 
               // save token macros
               List<MacroFileWrapper> tokenMacroFiles = new LinkedList<MacroFileWrapper>();
-              for (Map.Entry<Integer, Object> macroEntry :
+              for (Map.Entry<Integer, MacroButtonProperties> macroEntry :
                   token.getMacroPropertiesMap(false).entrySet()) {
-                MacroButtonProperties macro = (MacroButtonProperties) macroEntry.getValue();
+                MacroButtonProperties macro = macroEntry.getValue();
                 String macroFile =
                     joinFilePaths(
                         zonePath,
@@ -1036,7 +1032,7 @@ public class PersistenceUtil {
       MapTool.showWarning(
           I18N.getText(
               "PersistenceUtil.warn.campaignWrongFileType",
-              pakFile.getContent().getClass().getSimpleName()));
+              pakFile.getContent(PackedFile.CONTENT_FILE).getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
@@ -1131,7 +1127,6 @@ public class PersistenceUtil {
    * new ID.
    *
    * @param ids
-   * @param macroButtonProperties
    * @param fileName
    */
   private static void checkIDs(Map<String, String> ids, Zone zone, String fileName) {
@@ -1153,7 +1148,6 @@ public class PersistenceUtil {
    * new ID.
    *
    * @param ids
-   * @param macroButtonProperties
    * @param fileName
    */
   private static void checkIDs(Map<String, String> ids, Token token, String fileName) {
@@ -1168,47 +1162,6 @@ public class PersistenceUtil {
       id = newId;
     }
     ids.put(id.toString(), fileName);
-  }
-
-  public static PersistedCampaign loadLegacyCampaign(File campaignFile) {
-    HessianInput his = null;
-    PersistedCampaign persistedCampaign = null;
-    try {
-      InputStream is = new BufferedInputStream(new FileInputStream(campaignFile));
-      his = new HessianInput(is);
-      persistedCampaign = (PersistedCampaign) his.readObject(null);
-
-      for (MD5Key key : persistedCampaign.assetMap.keySet()) {
-        Asset asset = persistedCampaign.assetMap.get(key);
-        if (!AssetManager.hasAsset(key)) AssetManager.putAsset(asset);
-        if (!MapTool.isHostingServer() && !MapTool.isPersonalServer()) {
-          // If we are remotely installing this campaign, we'll need to
-          // send the image data to the server
-          MapTool.serverCommand().putAsset(asset);
-        }
-      }
-      // Do some sanity work on the campaign
-      // This specifically handles the case when the zone mappings
-      // are out of sync in the save file
-      Campaign campaign = persistedCampaign.campaign;
-      Set<Zone> zoneSet = new HashSet<Zone>(campaign.getZones());
-      campaign.removeAllZones();
-      for (Zone zone : zoneSet) {
-        campaign.putZone(zone);
-      }
-    } catch (FileNotFoundException fnfe) {
-      if (log.isInfoEnabled()) log.info("Campaign file not found -- this can't happen?!", fnfe);
-      persistedCampaign = null;
-    } catch (IOException ioe) {
-      if (log.isInfoEnabled()) log.info("Campaign is not in legacy Hessian format either.", ioe);
-      persistedCampaign = null;
-    } finally {
-      try {
-        his.close();
-      } catch (Exception e) {
-      }
-    }
-    return persistedCampaign;
   }
 
   private static String getThumbFilename(PackedFile pakFile) throws IOException {
@@ -1582,7 +1535,7 @@ public class PersistenceUtil {
         MapTool.showWarning(
             I18N.getText(
                 "PersistenceUtil.warn.campaignProperties.importWrongFileType",
-                pakFile.getContent().getClass().getSimpleName()));
+                pakFile.getContent(PackedFile.CONTENT_FILE).getClass().getSimpleName()));
       }
       return props;
     } catch (IOException e) {
