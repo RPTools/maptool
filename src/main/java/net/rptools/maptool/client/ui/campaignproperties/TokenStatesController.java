@@ -33,19 +33,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.SpinnerListModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -76,6 +64,7 @@ import net.rptools.maptool.client.ui.token.overlays.ShadedTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.TriangleTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.YieldTokenOverlay;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -226,6 +215,32 @@ public class TokenStatesController
     {true, false, false, true, false, false}, // Flow Square
   };
 
+  private static final List<String> types =
+      List.of(
+          "CampaignPropertiesDialog.combo.states.type.image",
+          "CampaignPropertiesDialog.combo.states.type.cornerImage",
+          "CampaignPropertiesDialog.combo.states.type.gridImage",
+          "CampaignPropertiesDialog.combo.states.type.dot",
+          "CampaignPropertiesDialog.combo.states.type.gridDot",
+          "CampaignPropertiesDialog.combo.states.type.circle",
+          "CampaignPropertiesDialog.combo.states.type.shaded",
+          "CampaignPropertiesDialog.combo.states.type.x",
+          "CampaignPropertiesDialog.combo.states.type.cross",
+          "CampaignPropertiesDialog.combo.states.type.diamond",
+          "CampaignPropertiesDialog.combo.states.type.gridDiamond",
+          "CampaignPropertiesDialog.combo.states.type.yield",
+          "CampaignPropertiesDialog.combo.states.type.gridYield",
+          "CampaignPropertiesDialog.combo.states.type.triangle",
+          "CampaignPropertiesDialog.combo.states.type.gridTriangle",
+          "CampaignPropertiesDialog.combo.states.type.gridSquare");
+
+  private static final List<String> corners =
+      List.of(
+          "CampaignPropertiesDialog.combo.states.corner.topRight",
+          "CampaignPropertiesDialog.combo.states.corner.topLeft",
+          "CampaignPropertiesDialog.combo.states.corner.bottomRight",
+          "CampaignPropertiesDialog.combo.states.corner.bottomLeft");
+
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
    *
@@ -239,7 +254,20 @@ public class TokenStatesController
     panel.getButton(UPDATE).addActionListener(this);
     panel.getButton(MOVE_UP).addActionListener(this);
     panel.getButton(MOVE_DOWN).addActionListener(this);
-    panel.getComboBox(TYPE).addActionListener(this);
+
+    var typeComboBox = panel.getComboBox(TYPE);
+    typeComboBox.setModel(new DefaultComboBoxModel());
+    for (var type : types) {
+      typeComboBox.addItem(I18N.getText(type));
+    }
+    typeComboBox.addActionListener(this);
+
+    var cornerComboBox = panel.getComboBox(CORNER);
+    cornerComboBox.setModel(new DefaultComboBoxModel());
+    for (var corner : corners) {
+      cornerComboBox.addItem(I18N.getText(corner));
+    }
+
     panel.getSpinner(WIDTH).setModel(new SpinnerNumberModel(5, 1, 10, 1));
     panel
         .getSpinner(FLOW_GRID)

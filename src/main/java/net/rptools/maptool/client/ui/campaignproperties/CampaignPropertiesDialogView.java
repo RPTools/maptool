@@ -380,22 +380,6 @@ public class CampaignPropertiesDialogView {
     final JComboBox comboBox1 = new JComboBox();
     comboBox1.setActionCommand("comboBoxChanged");
     final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.image");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.cornerImage");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridImage");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.dot");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridDot");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.circle");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.shaded");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.x");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.cross");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.diamond");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridDiamond");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.yield");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridYield");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.triangle");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridTriangle");
-    defaultComboBoxModel1.addElement("CampaignPropertiesDialog.combo.states.type.gridSquare");
     comboBox1.setModel(defaultComboBoxModel1);
     comboBox1.setName("tokenStatesType");
     panel6.add(
@@ -561,10 +545,6 @@ public class CampaignPropertiesDialogView {
     final JComboBox comboBox2 = new JComboBox();
     comboBox2.setActionCommand("comboBoxChanged");
     final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
-    defaultComboBoxModel2.addElement("CampaignPropertiesDialog.combo.states.corner.topRight");
-    defaultComboBoxModel2.addElement("CampaignPropertiesDialog.combo.states.corner.topLeft");
-    defaultComboBoxModel2.addElement("CampaignPropertiesDialog.combo.states.corner.bottomRight");
-    defaultComboBoxModel2.addElement("CampaignPropertiesDialog.combo.states.corner.bottomLeft");
     comboBox2.setModel(defaultComboBoxModel2);
     comboBox2.setName("tokenStatesCorner");
     panel6.add(
@@ -1286,11 +1266,6 @@ public class CampaignPropertiesDialogView {
     final JComboBox comboBox3 = new JComboBox();
     comboBox3.setActionCommand("comboBoxChanged");
     final DefaultComboBoxModel defaultComboBoxModel3 = new DefaultComboBoxModel();
-    defaultComboBoxModel3.addElement("CampaignPropertiesDialog.combo.bars.type.twoImages");
-    defaultComboBoxModel3.addElement("CampaignPropertiesDialog.combo.bars.type.singleImage");
-    defaultComboBoxModel3.addElement("CampaignPropertiesDialog.combo.bars.type.multipleImages");
-    defaultComboBoxModel3.addElement("CampaignPropertiesDialog.combo.bars.type.solid");
-    defaultComboBoxModel3.addElement("CampaignPropertiesDialog.combo.bars.type.twoTone");
     comboBox3.setModel(defaultComboBoxModel3);
     comboBox3.setName("tokenBarType");
     panel10.add(
@@ -1455,10 +1430,6 @@ public class CampaignPropertiesDialogView {
     final JComboBox comboBox4 = new JComboBox();
     comboBox4.setActionCommand("comboBoxChanged");
     final DefaultComboBoxModel defaultComboBoxModel4 = new DefaultComboBoxModel();
-    defaultComboBoxModel4.addElement("CampaignPropertiesDialog.combo.bars.side.top");
-    defaultComboBoxModel4.addElement("CampaignPropertiesDialog.combo.bars.type.bottom");
-    defaultComboBoxModel4.addElement("CampaignPropertiesDialog.combo.bars.type.left");
-    defaultComboBoxModel4.addElement("CampaignPropertiesDialog.combo.bars.type.right");
     comboBox4.setModel(defaultComboBoxModel4);
     comboBox4.setName("tokenBarSide");
     panel10.add(

@@ -259,24 +259,7 @@
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
-                  <model>
-                    <item value="CampaignPropertiesDialog.combo.states.type.image"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.cornerImage"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridImage"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.dot"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridDot"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.circle"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.shaded"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.x"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.cross"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.diamond"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridDiamond"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.yield"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridYield"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.triangle"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridTriangle"/>
-                    <item value="CampaignPropertiesDialog.combo.states.type.gridSquare"/>
-                  </model>
+                  <model/>
                   <name value="tokenStatesType"/>
                 </properties>
               </component>
@@ -348,12 +331,7 @@
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
-                  <model>
-                    <item value="CampaignPropertiesDialog.combo.states.corner.topRight"/>
-                    <item value="CampaignPropertiesDialog.combo.states.corner.topLeft"/>
-                    <item value="CampaignPropertiesDialog.combo.states.corner.bottomRight"/>
-                    <item value="CampaignPropertiesDialog.combo.states.corner.bottomLeft"/>
-                  </model>
+                  <model/>
                   <name value="tokenStatesCorner"/>
                 </properties>
               </component>
@@ -676,13 +654,7 @@
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
-                  <model>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.twoImages"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.singleImage"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.multipleImages"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.solid"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.twoTone"/>
-                  </model>
+                  <model/>
                   <name value="tokenBarType"/>
                 </properties>
               </component>
@@ -752,12 +724,7 @@
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
-                  <model>
-                    <item value="CampaignPropertiesDialog.combo.bars.side.top"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.bottom"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.left"/>
-                    <item value="CampaignPropertiesDialog.combo.bars.type.right"/>
-                  </model>
+                  <model/>
                   <name value="tokenBarSide"/>
                 </properties>
               </component>

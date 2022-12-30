@@ -31,17 +31,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -62,6 +52,7 @@ import net.rptools.maptool.client.ui.token.overlays.MultipleImageBarTokenOverlay
 import net.rptools.maptool.client.ui.token.overlays.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.TwoToneBarTokenOverlay;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.util.ImageManager;
@@ -228,6 +219,21 @@ public class TokenBarController
     new String[0], // Two Tone
   };
 
+  private static final List<String> types =
+      List.of(
+          "CampaignPropertiesDialog.combo.bars.type.twoImages",
+          "CampaignPropertiesDialog.combo.bars.type.singleImage",
+          "CampaignPropertiesDialog.combo.bars.type.multipleImages",
+          "CampaignPropertiesDialog.combo.bars.type.solid",
+          "CampaignPropertiesDialog.combo.bars.type.twoTone");
+
+  private static final List<String> sides =
+      List.of(
+          "CampaignPropertiesDialog.combo.bars.side.top",
+          "CampaignPropertiesDialog.combo.bars.type.bottom",
+          "CampaignPropertiesDialog.combo.bars.type.left",
+          "CampaignPropertiesDialog.combo.bars.type.right");
+
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
    *
@@ -245,7 +251,20 @@ public class TokenBarController
     panel.getButton(IMAGE_UPDATE).addActionListener(this);
     panel.getButton(IMAGE_MOVE_UP).addActionListener(this);
     panel.getButton(IMAGE_MOVE_DOWN).addActionListener(this);
-    panel.getComboBox(TYPE).addActionListener(this);
+
+    var typeComboBox = panel.getComboBox(TYPE);
+    typeComboBox.setModel(new DefaultComboBoxModel());
+    for (var type : types) {
+      typeComboBox.addItem(I18N.getText(type));
+    }
+    typeComboBox.addActionListener(this);
+
+    var sideComboBox = panel.getComboBox(SIDE);
+    sideComboBox.setModel(new DefaultComboBoxModel());
+    for (var side : sides) {
+      sideComboBox.addItem(I18N.getText(side));
+    }
+
     panel.getSpinner(THICKNESS).setModel(new SpinnerNumberModel(5, 2, 10, 1));
     panel.getSpinner(INCREMENTS).setModel(new SpinnerNumberModel(0, 0, 100, 1));
     panel.getSpinner(INCREMENTS).addChangeListener(this);
