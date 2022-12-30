@@ -134,6 +134,29 @@ public class Campaign {
     return this;
   }
 
+  public Campaign(
+      GUID id,
+      CampaignProperties campaignProperties,
+      Map<String, Boolean> exportSettings,
+      Location exportLocation,
+      Boolean hasUsedFogToolbar,
+      Integer macroButtonLastIndex,
+      ArrayList<MacroButtonProperties> macroButtonPropertiesList,
+      Map<GUID, Zone> zones) {
+    this.id = id;
+    this.exportLocation = exportLocation;
+    this.exportSettings = exportSettings;
+    this.campaignProperties = campaignProperties;
+    this.macroButtonProperties = macroButtonPropertiesList;
+    this.zones = zones;
+    if (macroButtonLastIndex != null) {
+      this.macroButtonLastIndex = macroButtonLastIndex;
+    }
+    if (hasUsedFogToolbar != null) {
+      this.hasUsedFogToolbar = hasUsedFogToolbar;
+    }
+  }
+
   private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();
@@ -168,7 +191,7 @@ public class Campaign {
    */
   public Campaign(Campaign campaign) {
     name = campaign.getName();
-
+    id = campaign.id;
     /*
      * Don't forget that since these are new zones AND new tokens created here from the old one,
      * if you have any data that needs to transfer over you will need to manually copy it

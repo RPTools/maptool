@@ -125,7 +125,7 @@ public class AutoSaveManager {
       try {
         long startSave = System.currentTimeMillis();
         log.info("Starting autosave..."); // $NON-NLS-1$
-        PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null);
+        PersistenceUtil.saveCampaign(campaign, AUTOSAVE_FILE, null, false);
         String msg =
             I18N.getText(
                 "AutoSaveManager.status.autoSaveComplete", System.currentTimeMillis() - startSave);

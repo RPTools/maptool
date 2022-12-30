@@ -1070,6 +1070,9 @@ public class Token implements Cloneable {
 
   @Override
   public int hashCode() {
+    if (id == null) {
+      return -1;
+    }
     return id.hashCode();
   }
 
@@ -1178,7 +1181,23 @@ public class Token implements Cloneable {
   }
 
   public GUID getId() {
+    if (id == null) {
+      resetId();
+    }
     return id;
+  }
+
+  public GUID resetId() {
+    id = new GUID();
+    return id;
+  }
+
+  /**
+   * needed so that when copy/pasting the ID can be cleared on copy and a new one is generated for
+   * every paste.
+   */
+  public void clearID() {
+    id = null;
   }
 
   public ZoneRenderer getZoneRenderer() { // Returns the ZoneRenderer the token is on

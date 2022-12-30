@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import net.rptools.maptool.util.PersistenceUtil;
 
 public class BackupManager {
 
@@ -47,11 +48,15 @@ public class BackupManager {
     maxBackupSize = size;
   }
 
-  public void backup(File file) throws IOException {
+  public File backup(File file) throws IOException {
+    return backup(file, false);
+  }
+
+  public File backup(File file, boolean forceBackup) throws IOException {
 
     // Active ?
-    if (maxBackupSize < 1) {
-      return;
+    if (maxBackupSize < 1 && !forceBackup) {
+      return null;
     }
 
     // Enough room ?
@@ -70,7 +75,14 @@ public class BackupManager {
     }
 
     // Save
-    FileUtil.copyFile(file, newFile);
+    if (file.isDirectory()) {
+      PersistenceUtil.pack(file, newFile);
+      // FileUtil.copyDirectory(file, newFile);
+    } else {
+      FileUtil.copyFile(file, newFile);
+    }
+
+    return newFile;
   }
 
   /** List of existing backup files, with the oldest at the front */

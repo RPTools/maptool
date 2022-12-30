@@ -75,6 +75,7 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.MapToolFrame.MTFileFilter;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.PreferencesDialog;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
@@ -957,7 +958,7 @@ public class AppActions {
         @Override
         protected void executeAction() {
           ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-          copyTokens(renderer.getSelectedTokenSet());
+          copyTokens(renderer.getSelectedTokenSet(), false);
         }
       };
 
@@ -989,7 +990,7 @@ public class AppActions {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (anythingCopied) {
-      copyTokens(tokenList);
+      copyTokens(tokenList, keepGUIDs);
     } else {
       MapTool.playSound(MapTool.SND_INVALID_OPERATION);
     }
@@ -1214,6 +1215,11 @@ public class AppActions {
         // asking it could be seriously confusing. Yet we don't want to popup a confirmation every
         // time the GM pastes either. :(
         tokenNeedsNewName = token.getType() != Token.Type.PC;
+
+        // we don't need a new name is the name is not used yet, e.g. when cut&paste
+        if (zone.getTokenByName(token.getName()) == null) {
+          tokenNeedsNewName = false;
+        }
       } else {
         // For Players, check to see if the name is already in use. If it is already in use, make
         // sure the current Player
@@ -1526,7 +1532,7 @@ public class AppActions {
                   I18N.getText("dialog.copyZone.msg"),
                   I18N.getText("dialog.copyZone.initial", zone.getName()));
           if (zoneName != null) {
-            Zone zoneCopy = new Zone(zone);
+            Zone zoneCopy = new Zone(zone, false);
             zoneCopy.setName(zoneName);
             MapTool.addZone(zoneCopy);
           }
@@ -2538,7 +2544,7 @@ public class AppActions {
           if (MapTool.isCampaignDirty() && !MapTool.confirm("msg.confirm.loseChanges")) return;
           JFileChooser chooser = new CampaignPreviewFileChooser();
           chooser.setDialogTitle(I18N.getText("msg.title.loadCampaign"));
-          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+          chooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
           chooser.setFileFilter(MapTool.getFrame().getCmpgnFileFilter());
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
@@ -2554,6 +2560,7 @@ public class AppActions {
     CampaignPreviewFileChooser() {
       super();
       addChoosableFileFilter(MapTool.getFrame().getCmpgnFileFilter());
+      addChoosableFileFilter(MapTool.getFrame().getCmpgnDirectoryFileFilter());
     }
 
     @Override
@@ -2587,6 +2594,7 @@ public class AppActions {
   private static class CampaignLoader extends SwingWorker<PersistedCampaign, String> {
     private File campaignFile;
     private int maxWaitForLock = 30;
+    boolean useTemporaryFile = false;
 
     public CampaignLoader(File campaignFile) {
       this.campaignFile = campaignFile;
@@ -2609,9 +2617,23 @@ public class AppActions {
 
       try {
         // Before we do anything, let's back it up
+        File backedUpFile = null;
         if (MapTool.getBackupManager() != null) {
-          MapTool.getBackupManager().backup(campaignFile);
+            backedUpFile = MapTool.getBackupManager().backup(campaignFile);
         }
+
+        File loadFile = campaignFile;
+        // in case this is a directory and now backup file was
+        // created get the packed file to be compatible with existing code
+        if (campaignFile.isDirectory()) {
+            if (backedUpFile == null) {
+                loadFile = MapTool.getBackupManager().backup(campaignFile, true);
+                useTemporaryFile = true;
+            } else {
+                loadFile = backedUpFile;
+            }
+        }
+
         // Load
         return PersistenceUtil.loadCampaign(campaignFile);
       } finally {
@@ -2631,6 +2653,10 @@ public class AppActions {
       MapTool.getFrame().hideGlassPane();
       try {
         PersistedCampaign campaign = get();
+
+          if (useTemporaryFile) {
+              loadFile.delete();
+          }
 
         ImageManager.flush(); // Clear out the old campaign's images
 
@@ -2697,7 +2723,8 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          doSaveCampaign(null);
+          boolean saveUnpackedAsDirectory = AppState.getCampaignFile().isDirectory();
+          doSaveCampaign(null, saveUnpackedAsDirectory);
         }
       };
 
@@ -2718,25 +2745,25 @@ public class AppActions {
         }
       };
 
-  public static void doSaveCampaign(Runnable onSuccess) {
+  public static void doSaveCampaign(Runnable onSuccess, boolean saveUnpackedAsDirectory) {
     if (AppState.getCampaignFile() == null) {
       doSaveCampaignAs(onSuccess);
       return;
     }
-    doSaveCampaign(AppState.getCampaignFile(), onSuccess);
+    doSaveCampaign(AppState.getCampaignFile(), onSuccess, saveUnpackedAsDirectory);
   }
 
   private static void doSaveCampaign(final File file, Runnable onSuccess) {
-    doSaveCampaign(file, null, onSuccess);
+    doSaveCampaign(file, null, onSuccess, false);
   }
 
-  private static void doSaveCampaign(File file, String campaignVersion, Runnable onSuccess) {
+  private static void doSaveCampaign(File file, String campaignVersion, Runnable onSuccess, boolean saveUnpackedAsDirectory) {
 
     if (AppState.testBackgroundTaskLock()) {
       MapTool.showError("msg.error.failedSaveCampaignLock");
       return;
     }
-    new CampaignSaver(file, campaignVersion, onSuccess).execute();
+    new CampaignSaver(file, campaignVersion, onSuccess, saveUnpackedAsDirectory).execute();
   }
 
   private static class CampaignSaver extends SwingWorker<Object, String> {
@@ -2745,11 +2772,13 @@ public class AppActions {
     private String campaignVersion;
     private Runnable onSuccess;
     private int maxWaitForLock = 30;
+    private boolean boolean saveUnpackedAsDirectory;
 
-    public CampaignSaver(File file, String campaignVersion, Runnable onSuccess) {
+    public CampaignSaver(File file, String campaignVersion, Runnable onSuccess, boolean saveUnpackedAsDirectory) {
       this.file = file;
       this.campaignVersion = campaignVersion;
       this.onSuccess = onSuccess;
+      this.saveUnpackedAsDirectory = saveUnpackedAsDirectory;
     }
 
     @Override
@@ -2761,7 +2790,7 @@ public class AppActions {
 
       try {
         long start = System.currentTimeMillis();
-        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file, campaignVersion);
+        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file, campaignVersion, saveUnpackedAsDirectory);
 
         publish(I18N.getString("msg.info.campaignSaved"));
 
@@ -2803,7 +2832,11 @@ public class AppActions {
     JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
     int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
     if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(null, chooser.getSelectedFile(), onSuccess);
+        boolean saveUnpackedAsDirectory = ((MTFileFilter) chooser.getFileFilter()).isDirectory();
+        if (campaignFile.isDirectory()) {
+            saveUnpackedAsDirectory = true;
+        }
+      saveAndUpdateCampaignName(null, chooser.getSelectedFile(), onSuccess, saveUnpackedAsDirectory);
     }
   }
 
@@ -2817,12 +2850,17 @@ public class AppActions {
   }
 
   private static void saveAndUpdateCampaignName(
-      String campaignVersion, File selectedFile, Runnable onSuccess) {
-    File campaignFile = getFileWithExtension(selectedFile, AppConstants.CAMPAIGN_FILE_EXTENSION);
+      String campaignVersion, File selectedFile, Runnable onSuccess, boolean saveUnpackedAsDirectory) {
+      String _extension = AppConstants.CAMPAIGN_FILE_EXTENSION;
+      if (saveUnpackedAsDirectory) {
+          _extension = AppConstants.CAMPAIGN_DIRECTIORY_EXTENSION;
+      }
+
+    File campaignFile = getFileWithExtension(selectedFile, _extension);
     if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
       return;
     }
-    doSaveCampaign(campaignFile, campaignVersion, onSuccess);
+    doSaveCampaign(campaignFile, campaignVersion, onSuccess, saveUnpackedAsDirectory);
     AppState.setCampaignFile(campaignFile);
     AppPreferences.setSaveDir(campaignFile.getParentFile());
     AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());

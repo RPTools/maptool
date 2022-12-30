@@ -106,7 +106,7 @@ import org.xml.sax.SAXException;
 public class PackedFile implements AutoCloseable {
 
   private static final String PROPERTY_FILE = "properties.xml";
-  private static final String CONTENT_FILE = "content.xml";
+  public static final String CONTENT_FILE = "content.xml";
 
   private static final Logger log = LogManager.getLogger(PackedFile.class);
 
@@ -213,11 +213,12 @@ public class PackedFile implements AutoCloseable {
    * Retrieves the contents of the <code>CONTENT_FILE</code> as a POJO. This object is the top-level
    * data structure for all information regarding the content of the PackedFile.
    *
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException when the property file is missing
    */
-  public Object getContent() throws IOException {
-    return getContent(versionManager, (String) getProperty("version"));
+  public Object getContent(String file) throws IOException {
+    return getContent(versionManager, (String) getProperty("version"), file);
   }
 
   /**
@@ -227,11 +228,26 @@ public class PackedFile implements AutoCloseable {
    * the transformation as a simplified XSTL process.)
    *
    * @param fileVersion such as "1.3.70"
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException when the property file is missing
    */
-  public Object getContent(String fileVersion) throws IOException {
-    return getContent(versionManager, fileVersion);
+  public Object getContent(String fileVersion, String file) throws IOException {
+    return getContent(versionManager, fileVersion, file);
+  }
+
+  /**
+   * Same as {@link #getContent()} except that the version can be specified. This allows a newer
+   * release of an application to provide automatic transformation information that will be applied
+   * to the content. The default transformation manager is used.
+   *
+   * @param fileVersion such as "1.3.70"
+   * @param file file to load
+   * @return the results of the deserialization
+   * @throws IOException
+   */
+  public String getContentAsString(String fileVersion, String file) throws IOException {
+    return getContentAsString(versionManager, fileVersion, file);
   }
 
   /**
@@ -240,10 +256,11 @@ public class PackedFile implements AutoCloseable {
    *
    * @param versionManager which set of transforms to apply to older file versions
    * @param fileVersion such as "1.3.70"
+   * @param file file to load
    * @return the results of the deserialization
    * @throws IOException when the property file is missing
    */
-  public Object getContent(ModelVersionManager versionManager, String fileVersion)
+  public Object getContent(ModelVersionManager versionManager, String fileVersion, String file)
       throws IOException {
     try (Reader r = getFileAsReader(CONTENT_FILE)) {
       if (versionManager != null && versionManager.isTransformationRequired(fileVersion)) {
@@ -253,7 +270,39 @@ public class PackedFile implements AutoCloseable {
         // classes/fields added.
         return xstream.fromXML(xml);
       } else {
-        return getFileObject(CONTENT_FILE);
+        return getFileObject(file);
+      }
+    } catch (NullPointerException npe) {
+      log.error("Problem finding/converting content file", npe);
+      return null;
+    } finally {
+      IOUtils.closeQuietly(r);
+    }
+  }
+
+  /**
+   * Same as {@link #getContent(String)} except that the transformation manager, <code>
+   * versionManager</code>, is specified as a parameter.
+   *
+   * @param versionManager which set of transforms to apply to older file versions
+   * @param fileVersion such as "1.3.70"
+   * @param file file to load
+   * @return the results of the deserialization
+   * @throws IOException
+   */
+  public String getContentAsString(
+      ModelVersionManager versionManager, String fileVersion, String file) throws IOException {
+    Reader r = null;
+    try {
+      if (versionManager != null && versionManager.isTransformationRequired(fileVersion)) {
+        r = getFileAsReader(file);
+        String content = IOUtils.toString(r);
+        content = versionManager.transform(content, fileVersion);
+        return content;
+      } else {
+        r = getFileAsReader(file);
+        String content = IOUtils.toString(r);
+        return content;
       }
     } catch (NullPointerException npe) {
       log.error("Problem finding/converting content file", npe);
@@ -499,6 +548,23 @@ public class PackedFile implements AutoCloseable {
 
       bw.newLine(); // Not necessary but editing the file looks nicer. ;-)
     }
+  }
+
+  /**
+   * Write the String to the given path in the ZIP file; character set encoding will take place as
+   * the data is written to the (temporary) file.
+   *
+   * @param path location within the ZIP file
+   * @param obj the object to be written
+   * @throws IOException
+   */
+  public void putFileAsString(String path, String content) throws IOException {
+    File explodedFile = putFileImpl(path);
+    FileOutputStream fos = new FileOutputStream(explodedFile);
+    OutputStreamWriter osw = new OutputStreamWriter(fos, "UTF-8");
+    BufferedWriter bw = new BufferedWriter(osw);
+    bw.append(content);
+    IOUtils.closeQuietly(bw);
   }
 
   /**

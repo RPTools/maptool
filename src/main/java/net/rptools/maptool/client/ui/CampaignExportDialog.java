@@ -46,6 +46,7 @@ public class CampaignExportDialog extends JDialog {
   private static JEditorPane versionNotesText;
   private static JComboBox selectVersionCombo;
   private static File campaignFile;
+  private static MTFileFilter selectedFileFilter;
   private static int saveStatus = -1;
 
   private static final CampaignExportDialog instance = new CampaignExportDialog();
@@ -122,11 +123,16 @@ public class CampaignExportDialog extends JDialog {
     return campaignFile;
   }
 
+  public MTFileFilter getSelectedMTFileFilter() {
+    return selectedFileFilter;
+  }
+
   private void exportButtonAction() {
     try {
       JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
       saveStatus = chooser.showSaveDialog(MapTool.getFrame());
       campaignFile = chooser.getSelectedFile();
+      selectedFileFilter = (MTFileFilter) chooser.getFileFilter();
     } catch (Exception ex) {
       MapTool.showError(I18N.getString("dialog.campaignexport.error.failedExporting"), ex);
     } finally {

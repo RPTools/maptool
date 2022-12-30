@@ -55,6 +55,7 @@ public class AppConstants {
       };
 
   public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";
+  public static final String CAMPAIGN_DIRECTIORY_EXTENSION = ".cmpgndir";
   public static final String CAMPAIGN_FILE_EXTENSION_ND = "cmpgn";
   public static final String CAMPAIGN_PROPERTIES_FILE_EXTENSION = ".mtprops";
   public static final String MAP_FILE_EXTENSION = ".rpmap";
