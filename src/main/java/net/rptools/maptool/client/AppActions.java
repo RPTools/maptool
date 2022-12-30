@@ -2564,6 +2564,17 @@ public class AppActions {
     }
 
     @Override
+    public void approveSelection() {
+        var file = getSelectedFile();
+        if(getFileFilter() instanceof MTFileFilter mtFilter) {
+            if (file == null || file.isDirectory() && !mtFilter.isDirectory())
+                return;
+
+            super.approveSelection();
+        }
+    }
+
+    @Override
     protected File getImageFileOfSelectedFile() {
       if (getSelectedFile() == null) {
         return null;

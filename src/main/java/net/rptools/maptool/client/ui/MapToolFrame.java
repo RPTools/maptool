@@ -865,7 +865,18 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public JFileChooser getSaveCmpgnFileChooser() {
     if (saveCmpgnFileChooser == null) {
-      saveCmpgnFileChooser = new JFileChooser();
+      saveCmpgnFileChooser = new JFileChooser() {
+        @Override
+        public void approveSelection() {
+          var file = getSelectedFile();
+          if(getFileFilter() instanceof MTFileFilter mtFilter) {
+            if (file == null || file.isDirectory() && !mtFilter.isDirectory())
+              return;
+
+            super.approveSelection();
+          }
+        }
+      };
       saveCmpgnFileChooser.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
       saveCmpgnFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
       saveCmpgnFileChooser.addChoosableFileFilter(campaignFilter);
