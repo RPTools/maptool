@@ -102,6 +102,7 @@ spotless {
             exclude '**/JTextAreaAppender.java'
         }
         licenseHeaderFile 'spotless.license.java'
+        toggleOffOn()
 
         // Now using the Google Java style guide
         googleJavaFormat()
