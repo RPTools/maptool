@@ -1913,7 +1913,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
           return;
         }
         if (result == JOptionPane.YES_OPTION) {
-          AppActions.doSaveCampaign(() -> MapTool.getFrame().close(), false);
+          AppActions.doSaveCampaign(() -> MapTool.getFrame().close());
           return;
         }
       } else {

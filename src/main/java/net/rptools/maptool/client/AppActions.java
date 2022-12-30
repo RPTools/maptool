@@ -2724,8 +2724,7 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          boolean saveUnpackedAsDirectory = AppState.getCampaignFile().isDirectory();
-          doSaveCampaign(null, saveUnpackedAsDirectory);
+          doSaveCampaign(null);
         }
       };
 
@@ -2746,11 +2745,12 @@ public class AppActions {
         }
       };
 
-  public static void doSaveCampaign(Runnable onSuccess, boolean saveUnpackedAsDirectory) {
+  public static void doSaveCampaign(Runnable onSuccess) {
     if (AppState.getCampaignFile() == null) {
       doSaveCampaignAs(onSuccess);
       return;
     }
+    boolean saveUnpackedAsDirectory = AppState.getCampaignFile() .isDirectory();
     doSaveCampaign(AppState.getCampaignFile(), onSuccess, saveUnpackedAsDirectory);
   }
 
