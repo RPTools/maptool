@@ -2636,7 +2636,7 @@ public class AppActions {
         }
 
         // Load
-        return PersistenceUtil.loadCampaign(campaignFile);
+        return PersistenceUtil.loadCampaign(loadFile);
       } finally {
         AppState.releaseBackgroundTaskLock();
       }
@@ -2750,7 +2750,7 @@ public class AppActions {
       doSaveCampaignAs(onSuccess);
       return;
     }
-    boolean saveUnpackedAsDirectory = AppState.getCampaignFile() .isDirectory();
+    boolean saveUnpackedAsDirectory = AppState.getCampaignFile().isDirectory();
     doSaveCampaign(AppState.getCampaignFile(), onSuccess, saveUnpackedAsDirectory);
   }
 
@@ -2880,7 +2880,10 @@ public class AppActions {
 
   private static File getFileWithExtension(File file, String extension) {
     if (!file.getName().toLowerCase().endsWith(extension)) {
-      file = new File(file.getAbsolutePath() + extension);
+      // if it is a directory and it exists already do not add an extension
+      if (!file.isDirectory() || !file.exists()) {
+        file = new File(file.getAbsolutePath() + extension);
+      }
     }
     return file;
   }

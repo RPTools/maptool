@@ -142,7 +142,11 @@ public class Campaign {
       Integer macroButtonLastIndex,
       ArrayList<MacroButtonProperties> macroButtonPropertiesList,
       Map<GUID, Zone> zones) {
-    this.id = id;
+
+    if (id != null) {
+      this.id = id;
+    }
+
     this.exportLocation = exportLocation;
     this.exportSettings = exportSettings;
     this.campaignProperties = campaignProperties;

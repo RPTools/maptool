@@ -244,12 +244,12 @@ public class Zone {
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
   /** Map each token GUID to the corresponding token. */
-  private final Map<GUID, Token> tokenMap = new HashMap<GUID, Token>();
+  private Map<GUID, Token> tokenMap = new HashMap<GUID, Token>();
   /** Map each token GUID to its exposed area metadata */
   private Map<GUID, ExposedAreaMetaData> exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
 
   /** Token list ordered by Z. */
-  private final List<Token> tokenOrderedList = new LinkedList<Token>();
+  private List<Token> tokenOrderedList = new LinkedList<Token>();
 
   private InitiativeList initiativeList = new InitiativeList(this);
 
@@ -2115,6 +2115,13 @@ public class Zone {
       if (de.getDrawable() instanceof AbstractTemplate at) {
         at.setZoneId(id);
       }
+    }
+
+    if (tokenOrderedList == null) {
+      tokenOrderedList = new LinkedList<Token>();
+    }
+    if (tokenMap == null) {
+      tokenMap = new HashMap<GUID, Token>();
     }
 
     return this;
