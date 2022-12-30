@@ -2565,13 +2565,12 @@ public class AppActions {
 
     @Override
     public void approveSelection() {
-        var file = getSelectedFile();
-        if(getFileFilter() instanceof MTFileFilter mtFilter) {
-            if (file == null || file.isDirectory() && !mtFilter.isDirectory())
-                return;
+      var file = getSelectedFile();
+      if (getFileFilter() instanceof MTFileFilter mtFilter) {
+        if (file == null || file.isDirectory() && !mtFilter.isDirectory()) return;
 
-            super.approveSelection();
-        }
+        super.approveSelection();
+      }
     }
 
     @Override
