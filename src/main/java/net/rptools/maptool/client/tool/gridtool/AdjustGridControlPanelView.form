@@ -78,7 +78,7 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.color"/>
         </properties>
       </component>
-      <component id="38456" class="com.jeta.forms.components.colors.JETAColorWell">
+      <component id="47354" class="net.rptools.maptool.client.swing.ColorWell">
         <constraints>
           <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>

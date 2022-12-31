@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.token.edit;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.jeta.forms.components.colors.JETAColorWell;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
@@ -28,6 +27,7 @@ import javax.swing.*;
 import javax.swing.border.TitledBorder;
 import javax.swing.plaf.FontUIResource;
 import javax.swing.text.StyleContext;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 
 public class TokenPropertiesDialog {
@@ -73,7 +73,7 @@ public class TokenPropertiesDialog {
         final JPanel panel1 = new JPanel();
         panel1.setLayout(new GridLayoutManager(1, 1, new Insets(5, 5, 5, 5), -1, -1));
         panel1.setName("notesPanel");
-        panel1.setVisible(true);
+        panel1.setVisible(false);
         tabPanel.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.tab.notes"), panel1);
         panel1.add(playerNotesEditor, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel2 = new JPanel();
@@ -93,7 +93,7 @@ public class TokenPropertiesDialog {
         panel3.add(label1, new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel4 = new JPanel();
         panel4.setLayout(new GridLayoutManager(17, 5, new Insets(4, 4, 4, 4), -1, -1));
-        panel4.setVisible(false);
+        panel4.setVisible(true);
         tabPanel.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.tab.vbl"), panel4);
         final JPanel panel5 = new JPanel();
         panel5.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
@@ -140,14 +140,14 @@ public class TokenPropertiesDialog {
         this.$$$loadLabelText$$$(label3, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.color"));
         label3.setVisible(true);
         panel4.add(label3, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
-        final JETAColorWell jETAColorWell1 = new JETAColorWell();
-        Font jETAColorWell1Font = UIManager.getFont("Panel.font");
-        if (jETAColorWell1Font != null) jETAColorWell1.setFont(jETAColorWell1Font);
-        jETAColorWell1.setName("vblIgnoreColorWell");
-        jETAColorWell1.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.well"));
-        jETAColorWell1.setVerifyInputWhenFocusTarget(true);
-        jETAColorWell1.setVisible(true);
-        panel4.add(jETAColorWell1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
+        final ColorWell colorWell1 = new ColorWell();
+        Font colorWell1Font = UIManager.getFont("Panel.font");
+        if (colorWell1Font != null) colorWell1.setFont(colorWell1Font);
+        colorWell1.setName("vblIgnoreColorWell");
+        colorWell1.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.label.vbl.well"));
+        colorWell1.setVerifyInputWhenFocusTarget(true);
+        colorWell1.setVisible(true);
+        panel4.add(colorWell1, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JLabel label4 = new JLabel();
         Font label4Font = this.$$$getFont$$$("SansSerif", Font.BOLD, -1, label4.getFont());
         if (label4Font != null) label4.setFont(label4Font);

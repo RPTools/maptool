@@ -16,7 +16,6 @@ package net.rptools.maptool.client.swing.colorpicker;
 
 import java.awt.Color;
 import java.awt.Dimension;
-import java.awt.GridLayout;
 import java.awt.Paint;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -24,19 +23,18 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.border.BevelBorder;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.PaintChooser;
-import net.rptools.maptool.client.swing.PaintedPanel;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 
 public class ColorPicker extends JPanel {
   private final JFrame owner;
 
-  private final PaintedPanel foregroundColor;
-  private final PaintedPanel backgroundColor;
-  private final List<PaintedPanel> recentColors = new ArrayList<>(16);
+  private final ColorWell foregroundColor;
+  private final ColorWell backgroundColor;
+  private final List<ColorWell> recentColors = new ArrayList<>(16);
   private final JToggleButton snapToggle;
   private final JToggleButton eraseToggle;
   private final JToggleButton squareCapToggle;
@@ -78,34 +76,18 @@ public class ColorPicker extends JPanel {
 
     ColorWellListener listener = new ColorWellListener(1);
 
-    foregroundColor = new PaintedPanel();
-    backgroundColor = new PaintedPanel();
+    foregroundColor = (ColorWell) panel.getComponent("foregroundColor");
+    backgroundColor = (ColorWell) panel.getComponent("backgroundColor");
 
-    JPanel wrappedForeground = new JPanel(new GridLayout());
-    wrappedForeground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-    wrappedForeground.add(foregroundColor);
-    foregroundColor.addMouseListener(listener);
+    foregroundColor.setMouseAdapter(listener);
 
-    JPanel wrappedBackground = new JPanel(new GridLayout());
-    wrappedBackground.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-    wrappedBackground.add(backgroundColor);
-    backgroundColor.addMouseListener(listener);
-
-    panel.replaceComponent("colorPanel", "foregroundColor", wrappedForeground);
-    panel.replaceComponent("colorPanel", "backgroundColor", wrappedBackground);
+    backgroundColor.setMouseAdapter(listener);
 
     listener = new ColorWellListener(2);
     for (int i = 0; i < RECENT_COLOR_LIST_SIZE; i++) {
-      PaintedPanel paintedPanel = new PaintedPanel();
-      paintedPanel.setPreferredSize(new Dimension(15, 15));
-
-      JPanel wrappedPanel = new JPanel(new GridLayout());
-      wrappedPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.LOWERED));
-      wrappedPanel.add(paintedPanel);
-
-      panel.replaceComponent("recentColors", "recentColor" + i, wrappedPanel);
-      paintedPanel.addMouseListener(listener);
-      recentColors.add(paintedPanel);
+      ColorWell colorWell = (ColorWell) panel.getComponent("recentColor" + i);
+      colorWell.setMouseAdapter(listener);
+      recentColors.add(colorWell);
     }
     snapToggle = (JToggleButton) panel.getButton("toggleSnapToGrid");
     snapToggle.setIcon(RessourceManager.getSmallIcon(Icons.COLORPICKER_SNAP_OFF));
@@ -247,7 +229,7 @@ public class ColorPicker extends JPanel {
 
     @Override
     public void mouseReleased(MouseEvent evt) {
-      PaintedPanel comp = (PaintedPanel) evt.getSource();
+      ColorWell comp = (ColorWell) evt.getSource();
 
       if (evt.getClickCount() == clickCount) {
         Paint result = paintChooser.choosePaint(owner, comp.getPaint());

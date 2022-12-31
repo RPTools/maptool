@@ -18,7 +18,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="bf6c2" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="33498" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="30" height="30"/>
@@ -29,7 +29,7 @@
               <name value="foregroundColor"/>
             </properties>
           </component>
-          <component id="2dc29" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="a938" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
                 <preferred-size width="30" height="30"/>
@@ -52,7 +52,7 @@
         </properties>
         <border type="none"/>
         <children>
-          <component id="85966" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="6111a" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -61,7 +61,7 @@
               <name value="recentColor4"/>
             </properties>
           </component>
-          <component id="a5465" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="57e12" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -70,7 +70,7 @@
               <name value="recentColor0"/>
             </properties>
           </component>
-          <component id="f9f1a" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="54d1a" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -79,7 +79,7 @@
               <name value="recentColor1"/>
             </properties>
           </component>
-          <component id="7eb25" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="2af43" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -88,7 +88,7 @@
               <name value="recentColor5"/>
             </properties>
           </component>
-          <component id="d09c1" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="81349" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -97,7 +97,7 @@
               <name value="recentColor2"/>
             </properties>
           </component>
-          <component id="fb20" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="d774" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -106,7 +106,7 @@
               <name value="recentColor3"/>
             </properties>
           </component>
-          <component id="e3654" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="e27e" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -115,7 +115,7 @@
               <name value="recentColor7"/>
             </properties>
           </component>
-          <component id="2c296" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="f8eb5" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -124,7 +124,7 @@
               <name value="recentColor6"/>
             </properties>
           </component>
-          <component id="2c9f5" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="a6fab" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -133,7 +133,7 @@
               <name value="recentColor8"/>
             </properties>
           </component>
-          <component id="b7bf5" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="6889e" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -142,7 +142,7 @@
               <name value="recentColor9"/>
             </properties>
           </component>
-          <component id="8dee8" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="81131" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -151,7 +151,7 @@
               <name value="recentColor15"/>
             </properties>
           </component>
-          <component id="d52d1" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="319c" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -160,7 +160,7 @@
               <name value="recentColor10"/>
             </properties>
           </component>
-          <component id="77354" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="7defb" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -169,7 +169,7 @@
               <name value="recentColor11"/>
             </properties>
           </component>
-          <component id="e8154" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="5ac10" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -178,7 +178,7 @@
               <name value="recentColor12"/>
             </properties>
           </component>
-          <component id="5cbd8" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="572a3" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
@@ -187,7 +187,7 @@
               <name value="recentColor13"/>
             </properties>
           </component>
-          <component id="8aa2e" class="com.jeta.forms.components.colors.JETAColorWell">
+          <component id="6db2c" class="net.rptools.maptool.client.swing.ColorWell">
             <constraints>
               <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>

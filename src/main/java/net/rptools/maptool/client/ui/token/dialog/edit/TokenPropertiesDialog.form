@@ -38,7 +38,7 @@
             </constraints>
             <properties>
               <name value="notesPanel"/>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -95,7 +95,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.vbl"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -203,7 +203,7 @@
                   <visible value="true"/>
                 </properties>
               </component>
-              <component id="b9016" class="com.jeta.forms.components.colors.JETAColorWell">
+              <component id="b177c" class="net.rptools.maptool.client.swing.ColorWell">
                 <constraints>
                   <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>

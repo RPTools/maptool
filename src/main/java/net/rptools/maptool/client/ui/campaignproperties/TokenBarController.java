@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -43,6 +42,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.campaignproperties.TokenStatesController.StateListRenderer;
 import net.rptools.maptool.client.ui.token.overlays.BarTokenOverlay;
@@ -562,12 +562,12 @@ public class TokenBarController
         int type = -1;
         if (bar instanceof DrawnBarTokenOverlay) {
           formPanel.getSpinner(THICKNESS).setValue(((DrawnBarTokenOverlay) bar).getThickness());
-          ((JETAColorWell) formPanel.getComponent(COLOR))
+          ((ColorWell) formPanel.getComponent(COLOR))
               .setColor(((DrawnBarTokenOverlay) bar).getBarColor());
           type = 3;
         } // endif
         if (bar instanceof TwoToneBarTokenOverlay) {
-          ((JETAColorWell) formPanel.getComponent(BG_COLOR))
+          ((ColorWell) formPanel.getComponent(BG_COLOR))
               .setColor(((TwoToneBarTokenOverlay) bar).getBgColor());
           type = 4;
         } // endif
@@ -722,8 +722,8 @@ public class TokenBarController
   public BarTokenOverlay createTokenOverlay(BarTokenOverlay updatedOverlay) {
 
     // Need the color and name for everything
-    Color color = ((JETAColorWell) formPanel.getComponent(COLOR)).getColor();
-    Color bgColor = ((JETAColorWell) formPanel.getComponent(BG_COLOR)).getColor();
+    Color color = ((ColorWell) formPanel.getComponent(COLOR)).getColor();
+    Color bgColor = ((ColorWell) formPanel.getComponent(BG_COLOR)).getColor();
     String name = formPanel.getTextComponent(NAME).getText();
     boolean mouseover = formPanel.getCheckBox(MOUSEOVER).isSelected();
     String overlay = ((String) formPanel.getComboBox(TYPE).getSelectedItem());

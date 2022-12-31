@@ -674,7 +674,7 @@
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.trusted.foreground.tooltip"/>
                         </properties>
                       </component>
-                      <component id="7827a" class="com.jeta.forms.components.colors.JETAColorWell">
+                      <component id="377a5" class="net.rptools.maptool.client.swing.ColorWell">
                         <constraints>
                           <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -683,7 +683,7 @@
                           <name value="trustedOuputBackground"/>
                         </properties>
                       </component>
-                      <component id="8f766" class="com.jeta.forms.components.colors.JETAColorWell">
+                      <component id="e3e7" class="net.rptools.maptool.client.swing.ColorWell">
                         <constraints>
                           <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -710,7 +710,7 @@
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.color.tooltip"/>
                         </properties>
                       </component>
-                      <component id="d751d" class="com.jeta.forms.components.colors.JETAColorWell">
+                      <component id="50f21" class="net.rptools.maptool.client.swing.ColorWell">
                         <constraints>
                           <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
@@ -1955,7 +1955,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.startup"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>

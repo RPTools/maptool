@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token.edit;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import com.jgoodies.forms.layout.CellConstraints;
 import com.jgoodies.forms.layout.FormLayout;
 import com.jgoodies.forms.layout.RowSpec;
@@ -66,6 +65,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 import net.rptools.maptool.client.ui.ImageAssetPanel;
@@ -1052,8 +1052,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JCheckBox) getComponent("alwaysVisibleButton");
   }
 
-  public JETAColorWell getTopologyIgnoreColorWell() {
-    return (JETAColorWell) getComponent("vblIgnoreColorWell");
+  public ColorWell getTopologyIgnoreColorWell() {
+    return (ColorWell) getComponent("vblIgnoreColorWell");
   }
 
   public JToggleButton getTopologyColorPickerToggleButton() {

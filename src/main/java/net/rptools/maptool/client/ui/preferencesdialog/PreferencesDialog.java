@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
@@ -45,6 +44,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -113,15 +113,15 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox allowPlayerMacroEditsDefault;
   private final JCheckBox toolTipInlineRolls;
   private final JCheckBox suppressToolTipsMacroLinks;
-  private final JETAColorWell trustedOuputForeground;
-  private final JETAColorWell trustedOuputBackground;
+  private final ColorWell trustedOuputForeground;
+  private final ColorWell trustedOuputBackground;
   private final JSpinner chatAutosaveTime;
   private final JTextField chatFilenameFormat;
   private final JSpinner typingNotificationDuration;
   private final JComboBox<String> macroEditorThemeCombo;
   private final JComboBox<String> iconThemeCombo;
   // Chat Notification
-  private final JETAColorWell chatNotificationColor;
+  private final ColorWell chatNotificationColor;
   private final JCheckBox chatNotificationShowBackground;
   // Defaults
   private final JComboBox<LocalizedComboItem> defaultGridTypeCombo;
@@ -354,14 +354,14 @@ public class PreferencesDialog extends JDialog {
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
     suppressToolTipsMacroLinks = panel.getCheckBox("suppressToolTipsMacroLinks");
-    trustedOuputForeground = (JETAColorWell) panel.getComponent("trustedOuputForeground");
-    trustedOuputBackground = (JETAColorWell) panel.getComponent("trustedOuputBackground");
+    trustedOuputForeground = (ColorWell) panel.getComponent("trustedOuputForeground");
+    trustedOuputBackground = (ColorWell) panel.getComponent("trustedOuputBackground");
     toolTipInitialDelay = panel.getTextField("toolTipInitialDelay");
     toolTipDismissDelay = panel.getTextField("toolTipDismissDelay");
     facingFaceEdges = panel.getCheckBox("facingFaceEdges");
     facingFaceVertices = panel.getCheckBox("facingFaceVertices");
 
-    chatNotificationColor = (JETAColorWell) panel.getComponent("chatNotificationColor");
+    chatNotificationColor = (ColorWell) panel.getComponent("chatNotificationColor");
     chatNotificationShowBackground = panel.getCheckBox("chatNotificationShowBackground");
 
     chatAutosaveTime = panel.getSpinner("chatAutosaveTime");

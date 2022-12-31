@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.tool.gridtool;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.event.ActionEvent;
@@ -34,6 +33,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -55,7 +55,7 @@ public class GridTool extends DefaultTool {
   private final JSpinner gridSizeSpinner;
   private final JTextField gridOffsetXTextField;
   private final JTextField gridOffsetYTextField;
-  private final JETAColorWell colorWell;
+  private final ColorWell colorWell;
   private final JSlider zoomSlider;
   private final JTextField gridSecondDimension;
   private final JLabel gridSecondDimensionLabel;
@@ -88,7 +88,7 @@ public class GridTool extends DefaultTool {
     gridSecondDimension = (JTextField) controlPanel.getComponent("gridSecondDimension");
     gridSecondDimension.addFocusListener(new UpdateGridListener());
 
-    colorWell = (JETAColorWell) controlPanel.getComponent("colorWell");
+    colorWell = (ColorWell) controlPanel.getComponent("colorWell");
     colorWell.addActionListener(e -> copyControlPanelToGrid());
 
     JButton closeButton = (JButton) controlPanel.getComponent("closeButton");

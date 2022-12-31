@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -45,6 +44,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.token.overlays.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.overlays.BooleanTokenOverlay;
@@ -521,7 +521,7 @@ public class TokenStatesController
       if (s instanceof XTokenOverlay) {
         type = 7;
         formPanel.getSpinner(WIDTH).setValue(((XTokenOverlay) s).getWidth());
-        ((JETAColorWell) formPanel.getComponent(COLOR)).setColor(((XTokenOverlay) s).getColor());
+        ((ColorWell) formPanel.getComponent(COLOR)).setColor(((XTokenOverlay) s).getColor());
       } // endif
 
       // Get the the flow grid for most components from FlowColorDotTokenOverlay
@@ -552,8 +552,7 @@ public class TokenStatesController
         type = 5;
       } else if (s instanceof ShadedTokenOverlay) {
         type = 6;
-        ((JETAColorWell) formPanel.getComponent(COLOR))
-            .setColor(((ShadedTokenOverlay) s).getColor());
+        ((ColorWell) formPanel.getComponent(COLOR)).setColor(((ShadedTokenOverlay) s).getColor());
       } else if (s instanceof CrossTokenOverlay) {
         type = 8;
       } else if (s instanceof DiamondTokenOverlay) {
@@ -687,7 +686,7 @@ public class TokenStatesController
   public BooleanTokenOverlay createTokenOverlay(BooleanTokenOverlay updatedOverlay) {
 
     // Need the color group, and name for everything
-    Color color = ((JETAColorWell) formPanel.getComponent(COLOR)).getColor();
+    Color color = ((ColorWell) formPanel.getComponent(COLOR)).getColor();
     String name = formPanel.getTextComponent(NAME).getText();
     String group = formPanel.getTextComponent(GROUP).getText();
     boolean mouseover = formPanel.getCheckBox(MOUSEOVER).isSelected();

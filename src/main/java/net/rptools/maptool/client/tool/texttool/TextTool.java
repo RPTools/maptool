@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.tool.texttool;
 
-import com.jeta.forms.components.colors.JETAColorWell;
 import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -32,6 +31,7 @@ import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
@@ -240,8 +240,8 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       return super.commit();
     }
 
-    public JETAColorWell getColorWell() {
-      return (JETAColorWell) getComponent("foregroundColor");
+    public ColorWell getColorWell() {
+      return (ColorWell) getComponent("foregroundColor");
     }
 
     public JTextField getLabelTextField() {
