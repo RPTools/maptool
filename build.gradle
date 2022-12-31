@@ -345,11 +345,6 @@ dependencies {
     implementation 'net.sf.ezmorph:ezmorph:1.0.6'
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
 
-    // This is just the standard abeille-formsrt but need to rename it so jpackage puts it at the
-    // end of the classpath list becuase it contains an old version of batik which is causing
-    // SVG rendering to fail.
-    implementation 'net.java.abeille:zz-abeille-formsrt:2.0'
-
     implementation 'org.hibernate:antlr:2.7.5H3'
     implementation 'org.reflections:reflections:0.9.11'
     implementation 'org.mozilla:rhino:1.7.12'
@@ -442,9 +437,9 @@ dependencies {
 
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.14.3'
-
+    // eventbus
     implementation 'com.google.guava:guava:31.0.1-jre'
-
+    // message compression
     implementation 'org.apache.commons:commons-compress:1.22'
     implementation 'org.tukaani:xz:1.9'
     // intellij forms runtime

@@ -45,7 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
-
 import net.miginfocom.swing.MigLayout;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -752,7 +751,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     public void actionPerformed(ActionEvent e) {
       String name = (String) getValue(NAME);
       JSlider slider = new JSlider(0, 100);
-      JCheckBox hide = new JCheckBox("Hide");
+      JCheckBox hide = new JCheckBox(I18N.getText("EditTokenDialog.checkbox.state.hide"));
       hide.putClientProperty("JSlider", slider);
       hide.addChangeListener(
           e1 -> {

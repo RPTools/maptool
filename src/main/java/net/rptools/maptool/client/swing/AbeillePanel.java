@@ -105,23 +105,23 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   public void replaceComponent(String panelName, String name, Component replacement) {
-      var placeHolder = getComponent(name);
-      var container = (JPanel) getComponent(panelName);
-      Object constraints = null;
-      var layout = container.getLayout();
-      if (layout instanceof GridLayoutManager gridLayoutManager) {
-        constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
-      } else {
-        throw new RuntimeException(
-            "Replacement of components not implemented for layout: " + layout.getClass().getName());
-      }
+    var placeHolder = getComponent(name);
+    var container = (JPanel) getComponent(panelName);
+    Object constraints = null;
+    var layout = container.getLayout();
+    if (layout instanceof GridLayoutManager gridLayoutManager) {
+      constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
+    } else {
+      throw new RuntimeException(
+          "Replacement of components not implemented for layout: " + layout.getClass().getName());
+    }
 
-      container.remove(placeHolder);
-      container.add(replacement, constraints);
-      container.revalidate();
-      container.repaint();
-      componentMap.remove(name);
-      collectComponents(replacement);
+    container.remove(placeHolder);
+    container.add(replacement, constraints);
+    container.revalidate();
+    container.repaint();
+    componentMap.remove(name);
+    collectComponents(replacement);
   }
 
   private void createComponentMap() {

@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token.edit;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
-import com.jgoodies.forms.layout.RowSpec;
 import com.jidesoft.combobox.MultilineStringExComboBox;
 import com.jidesoft.combobox.PopupPanel;
 import com.jidesoft.grid.AbstractPropertyTableModel;
@@ -57,6 +54,7 @@ import javax.swing.text.JTextComponent;
 import javax.swing.text.Position.Bias;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.HTMLEditorKit;
+import net.miginfocom.swing.MigLayout;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppConstants;
@@ -242,10 +240,17 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // BARS
     if (barPanel != null) {
-      Component[] bars = ((Container) barPanel).getComponents();
-      for (int i = 0; i < bars.length; i += 2) {
-        JCheckBox cb = (JCheckBox) ((Container) bars[i]).getComponent(1);
-        JSlider bar = (JSlider) bars[i + 1];
+      Component[] barComponents = ((Container) barPanel).getComponents();
+      JCheckBox cb = null;
+      JSlider bar = null;
+      for (var tokenBarPanel : barComponents) {
+        for (var component : ((Container) tokenBarPanel).getComponents()) {
+          if (component instanceof JCheckBox) {
+            cb = (JCheckBox) component;
+          } else if (component instanceof JSlider) {
+            bar = (JSlider) component;
+          }
+        }
         if (token.getState(bar.getName()) == null) {
           cb.setSelected(true);
           bar.setEnabled(false);
@@ -864,72 +869,54 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     List<BooleanTokenOverlay> overlays =
         new ArrayList<BooleanTokenOverlay>(MapTool.getCampaign().getTokenStatesMap().values());
     Map<String, JPanel> groups = new TreeMap<String, JPanel>();
-    groups.put("", new JPanel(new FormLayout("0px:grow 2px 0px:grow 2px 0px:grow 2px 0px:grow")));
+    var noGroupPanel =
+        new JPanel(new MigLayout("wrap 4", "[fill,grow][fill,grow][fill,grow][fill,grow]"));
+    noGroupPanel.setName("no group");
+    groups.put("", noGroupPanel);
     for (BooleanTokenOverlay overlay : overlays) {
       String group = overlay.getGroup();
       if (group != null && (group = group.trim()).length() != 0) {
         JPanel panel = groups.get(group);
         if (panel == null) {
-          panel = new JPanel(new FormLayout("0px:grow 2px 0px:grow 2px 0px:grow 2px 0px:grow"));
+          panel =
+              new JPanel(new MigLayout("wrap 4", "[fill,grow][fill,grow][fill,grow][fill,grow]"));
+          panel.setName(group);
           panel.setBorder(BorderFactory.createTitledBorder(group));
           groups.put(group, panel);
         }
       }
     }
+
     // Add the group panels and bar panel to the states panel
-    JPanel panel = getStatesPanel();
-    panel.removeAll();
-    FormLayout layout = new FormLayout("0px:grow");
-    panel.setLayout(layout);
-    int row = 1;
-    for (JPanel gPanel : groups.values()) {
-      layout.appendRow(new RowSpec("pref"));
-      layout.appendRow(new RowSpec("2px"));
-      panel.add(gPanel, new CellConstraints(1, row));
-      row += 2;
-    }
-    layout.appendRow(new RowSpec("pref"));
-    layout.appendRow(new RowSpec("2px"));
-    JPanel barPanel = new JPanel(new FormLayout("right:pref 2px pref 5px right:pref 2px pref"));
-    panel.add(barPanel, new CellConstraints(1, row));
+    JPanel statesPanel = getStatesPanel();
+    MigLayout layout = new MigLayout("wrap", "[fill,grow]");
+    statesPanel.setLayout(layout);
+    statesPanel.removeAll();
 
     // Add the individual check boxes.
     for (BooleanTokenOverlay state : overlays) {
       String group = state.getGroup();
-      panel = groups.get("");
+      var panel = groups.get("");
       if (group != null && (group = group.trim()).length() != 0) {
         panel = groups.get(group);
       }
-      int x = panel.getComponentCount() % 4;
-      int y = panel.getComponentCount() / 4;
-      if (x == 0) {
-        layout = (FormLayout) panel.getLayout();
-        if (y != 0) {
-          layout.appendRow(new RowSpec("2px"));
-        }
-        layout.appendRow(new RowSpec("pref"));
-      }
-      panel.add(new JCheckBox(state.getName()), new CellConstraints(x * 2 + 1, y * 2 + 1));
+      panel.add(new JCheckBox(state.getName()));
     }
+
+    for (JPanel gPanel : groups.values()) {
+      if (gPanel.getComponentCount() == 0) continue;
+
+      statesPanel.add(gPanel);
+    }
+
+    JPanel barPanel = new JPanel(new MigLayout("wrap 2", "[fill,grow][fill,grow]"));
+    barPanel.setName("bar");
     // Add sliders to the bar panel
     if (MapTool.getCampaign().getTokenBarsMap().size() > 0) {
-      layout = (FormLayout) barPanel.getLayout();
-      barPanel.setName("bar");
       barPanel.setBorder(
           BorderFactory.createTitledBorder(I18N.getText("CampaignPropertiesDialog.tab.bars")));
-      int count = 0;
-      row = 0;
+
       for (BarTokenOverlay bar : MapTool.getCampaign().getTokenBarsMap().values()) {
-        int working = count % 2;
-        if (working == 0) { // slider row
-          layout.appendRow(new RowSpec("pref"));
-          row += 1;
-        }
-        JPanel labelPanel = new JPanel(new FormLayout("pref", "pref 2px:grow pref"));
-        barPanel.add(labelPanel, new CellConstraints(1 + working * 4, row));
-        labelPanel.add(
-            new JLabel(bar.getName() + ":"),
-            new CellConstraints(1, 1, CellConstraints.RIGHT, CellConstraints.TOP));
         JSlider slider = new JSlider(0, 100);
         JCheckBox hide = new JCheckBox(I18N.getString("EditTokenDialog.checkbox.state.hide"));
         hide.putClientProperty("JSlider", slider);
@@ -938,20 +925,20 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               JSlider js = (JSlider) ((JCheckBox) e.getSource()).getClientProperty("JSlider");
               js.setEnabled(!((JCheckBox) e.getSource()).isSelected());
             });
-        labelPanel.add(hide, new CellConstraints(1, 3, CellConstraints.RIGHT, CellConstraints.TOP));
         slider.setName(bar.getName());
         slider.setPaintLabels(true);
         slider.setPaintTicks(true);
         slider.setMajorTickSpacing(20);
         slider.createStandardLabels(20);
         slider.setMajorTickSpacing(10);
-        barPanel.add(slider, new CellConstraints(3 + working * 4, row));
-        if (working != 0) { // spacer row
-          layout.appendRow(new RowSpec("2px"));
-          row += 1;
-        }
-        count += 1;
+
+        JPanel tokenbarPanel = new JPanel(new MigLayout("wrap 2", "[fill,grow][fill,grow]"));
+        tokenbarPanel.add(new JLabel(bar.getName() + ":"));
+        tokenbarPanel.add(slider, "span 1 2 align right");
+        tokenbarPanel.add(hide);
+        barPanel.add(tokenbarPanel);
       }
+      statesPanel.add(barPanel);
     }
   }
 

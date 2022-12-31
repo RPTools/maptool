@@ -26,7 +26,6 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
-
 import net.miginfocom.swing.MigLayout;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -199,7 +198,7 @@ public class InitiativeListCellRenderer extends JPanel
     var alignment = ti.isHolding() ? SwingConstants.LEFT : SwingConstants.RIGHT;
     name.setHorizontalTextPosition(alignment);
     MigLayout layout = (MigLayout) getLayout();
-   //
+    //
     if (alignment == SwingConstants.RIGHT) {
       layout.setComponentConstraints(name, "align left");
     } else {

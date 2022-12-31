@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.token.edit;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-
 import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
