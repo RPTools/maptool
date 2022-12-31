@@ -28,7 +28,9 @@ import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 
 /**
  * @author drice
@@ -38,7 +40,7 @@ import org.apache.log4j.Logger;
 public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
-  private static final Logger log = Logger.getLogger(AbstractConnection.class);
+  private static final Logger log = LogManager.getLogger(AbstractConnection.class);
   protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();
   protected List<List<byte[]>> outQueueList = new LinkedList<List<byte[]>>();
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();

@@ -41,7 +41,8 @@ import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -52,7 +53,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
   private final LinkedBlockingQueue<MD5Key> assetRetrieveQueue = new LinkedBlockingQueue<MD5Key>();
-  private static final Logger log = Logger.getLogger(ServerCommandClientImpl.class);
+  private static final Logger log = LogManager.getLogger(ServerCommandClientImpl.class);
 
   public ServerCommandClientImpl() {
     movementUpdateQueue.start();

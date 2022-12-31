@@ -70,7 +70,8 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -79,7 +80,7 @@ import org.apache.log4j.Logger;
  * @author drice
  */
 public class ClientMessageHandler implements MessageHandler {
-  private static final Logger log = Logger.getLogger(ClientMessageHandler.class);
+  private static final Logger log = LogManager.getLogger(ClientMessageHandler.class);
 
   public ClientMessageHandler() {}
 

@@ -288,9 +288,6 @@ repositories {
 dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.15.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.15.0'	// Bridges v1 to v2 for other code in other libs
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '1.7.36'
-    implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
