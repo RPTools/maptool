@@ -14,17 +14,12 @@
  */
 package net.rptools.maptool.client.ui.token.dialog.create;
 
-import com.jeta.forms.components.image.ImageComponent;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JTextField;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -99,8 +94,8 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     dialog.showDialog();
   }
 
-  public ImageComponent getTokenIconPanel() {
-    return (ImageComponent) getComponent("tokenIcon");
+  public JLabel getTokenIconPanel() {
+    return (JLabel) getComponent("tokenIcon");
   }
 
   public JTextField getNameTextField() {

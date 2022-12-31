@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.mappropertiesdialog;
 
-import com.jeta.forms.components.image.ImageComponent;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -226,40 +225,40 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getRadioButton("hexHoriRadio");
   }
 
-  public ImageComponent getHexHorizontalIcon() {
-    return (ImageComponent) formPanel.getComponent("hexHoriIcon");
+  public JLabel getHexHorizontalIcon() {
+    return (JLabel) formPanel.getComponent("hexHoriIcon");
   }
 
   public JRadioButton getHexVerticalRadio() {
     return formPanel.getRadioButton("hexVertRadio");
   }
 
-  public ImageComponent getHexVerticalIcon() {
-    return (ImageComponent) formPanel.getComponent("hexVertIcon");
+  public JLabel getHexVerticalIcon() {
+    return (JLabel) formPanel.getComponent("hexVertIcon");
   }
 
   public JRadioButton getSquareRadio() {
     return formPanel.getRadioButton("squareRadio");
   }
 
-  public ImageComponent getSquareIcon() {
-    return (ImageComponent) formPanel.getComponent("squareIcon");
+  public JLabel getSquareIcon() {
+    return (JLabel) formPanel.getComponent("squareIcon");
   }
 
   public JRadioButton getNoGridRadio() {
     return formPanel.getRadioButton("noGridRadio");
   }
 
-  public ImageComponent getNoGridIcon() {
-    return (ImageComponent) formPanel.getComponent("noGridIcon");
+  public JLabel getNoGridIcon() {
+    return (JLabel) formPanel.getComponent("noGridIcon");
   }
 
   public JRadioButton getIsometricRadio() {
     return formPanel.getRadioButton("isoRadio");
   }
 
-  public ImageComponent getIsometricIcon() {
-    return (ImageComponent) formPanel.getComponent("isoIcon");
+  public JLabel getIsometricIcon() {
+    return (JLabel) formPanel.getComponent("isoIcon");
   }
 
   public JRadioButton getIsometricHexRadio() {
