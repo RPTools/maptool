@@ -445,7 +445,7 @@ dependencies {
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:223.7571.182'
     // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:5.0'
+    implementation 'com.miglayout:miglayout-swing:11.0'
 }
 
 
