@@ -26,7 +26,7 @@ import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
-import net.rptools.maptool.client.ui.token.overlays.BooleanTokenOverlay;
+import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.language.I18N;
 
 /**

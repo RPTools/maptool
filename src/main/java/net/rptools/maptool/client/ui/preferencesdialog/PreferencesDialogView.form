@@ -3,7 +3,7 @@
   <grid id="3f87d" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="966" height="646"/>
+      <xy x="10" y="10" width="935" height="644"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -1955,7 +1955,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.startup"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -2185,11 +2185,8 @@
                   </component>
                 </children>
               </grid>
-              <grid id="261e4" layout-manager="FormLayout">
-                <rowspec value="center:2dlu:noGrow"/>
-                <rowspec value="fill:d:grow"/>
-                <rowspec value="center:2dlu:noGrow"/>
-                <colspec value="fill:d:grow"/>
+              <grid id="261e4" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="2" row-span="5" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
@@ -2202,26 +2199,13 @@
                 <children>
                   <component id="bde4e" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <name value="startupInfoLabel"/>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="startup.preferences.info"/>
                     </properties>
                   </component>
-                  <hspacer id="8c765">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
-                  <hspacer id="832f5">
-                    <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="6" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-                      <forms/>
-                    </constraints>
-                  </hspacer>
                 </children>
               </grid>
               <vspacer id="23f1f">

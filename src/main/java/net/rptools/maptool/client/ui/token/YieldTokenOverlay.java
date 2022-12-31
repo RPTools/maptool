@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.overlays;
+package net.rptools.maptool.client.ui.token;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -25,33 +25,33 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
- * Place a Triangle (triangle point down) over a token.
+ * Place a Yield (triangle point down) over a token.
  *
  * @author pwright
  * @version $Revision$ $Date$ $Author$
  */
-public class TriangleTokenOverlay extends XTokenOverlay {
+public class YieldTokenOverlay extends XTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
-  public TriangleTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.MAGENTA, 5);
+  public YieldTokenOverlay() {
+    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.YELLOW, 5);
   }
 
   /**
-   * Create a Triangle token overlay with the given name.
+   * Create a Yield token overlay with the given name.
    *
    * @param aName Name of this token overlay.
    * @param aColor The color of this token overlay.
    * @param aWidth The width of the lines in this token overlay.
    */
-  public TriangleTokenOverlay(String aName, Color aColor, int aWidth) {
+  public YieldTokenOverlay(String aName, Color aColor, int aWidth) {
     super(aName, aColor, aWidth);
   }
 
   /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
-    BooleanTokenOverlay overlay = new TriangleTokenOverlay(getName(), getColor(), getWidth());
+    BooleanTokenOverlay overlay = new YieldTokenOverlay(getName(), getColor(), getWidth());
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -69,7 +69,7 @@ public class TriangleTokenOverlay extends XTokenOverlay {
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
     double hc = (double) bounds.width / 2;
-    double vc = bounds.height * 0.866;
+    double vc = bounds.height * 0.134;
     Color tempColor = g.getColor();
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();
@@ -79,20 +79,20 @@ public class TriangleTokenOverlay extends XTokenOverlay {
       g.setComposite(
           AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
     g.draw(new Line2D.Double(0, vc, bounds.width, vc));
-    g.draw(new Line2D.Double(bounds.width, vc, hc, 0));
-    g.draw(new Line2D.Double(hc, 0, 0, vc));
+    g.draw(new Line2D.Double(bounds.width, vc, hc, bounds.height));
+    g.draw(new Line2D.Double(hc, bounds.height, 0, vc));
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
   }
 
-  public static TriangleTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new TriangleTokenOverlay();
+  public static YieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new YieldTokenOverlay();
     overlay.fillFrom(dto);
     return overlay;
   }
 
   public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.TRIANGLE).build();
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.YIELD).build();
   }
 }

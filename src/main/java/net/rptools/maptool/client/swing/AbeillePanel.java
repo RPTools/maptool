@@ -15,8 +15,6 @@
 package net.rptools.maptool.client.swing;
 
 import com.intellij.uiDesigner.core.GridLayoutManager;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
@@ -37,7 +35,7 @@ import yasb.swing.AbstractComponentAdapter;
 import yasb.swing.BindingResolver;
 
 /**
- * This class acts as a "field binding front-end" for the {@link FormPanel} class.
+ * This class acts as a "field binding front-end" and accessor for the different view classes.
  *
  * <p>After instantiating an object and passing it the name of the Abeille form, call the {@link
  * #bind(Object)} method and pass the data model instance as a parameter. This class will then copy
@@ -107,17 +105,11 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   public void replaceComponent(String panelName, String name, Component replacement) {
-    if (panel instanceof FormPanel formPanel) {
-      formPanel.getFormAccessor(panelName).replaceBean(name, replacement);
-      formPanel.reset();
-    } else {
       var placeHolder = getComponent(name);
       var container = (JPanel) getComponent(panelName);
       Object constraints = null;
       var layout = container.getLayout();
-      if (layout instanceof FormLayout formLayout) {
-        constraints = formLayout.getConstraints(placeHolder);
-      } else if (layout instanceof GridLayoutManager gridLayoutManager) {
+      if (layout instanceof GridLayoutManager gridLayoutManager) {
         constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
       } else {
         throw new RuntimeException(
@@ -130,7 +122,6 @@ public class AbeillePanel<T> extends JPanel {
       container.repaint();
       componentMap.remove(name);
       collectComponents(replacement);
-    }
   }
 
   private void createComponentMap() {
@@ -153,10 +144,6 @@ public class AbeillePanel<T> extends JPanel {
   }
 
   public Component getComponent(String name) {
-    if (panel instanceof FormPanel formPanel) {
-      return formPanel.getComponentByName(name);
-    }
-
     if (componentMap == null) {
       createComponentMap();
     }

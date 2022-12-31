@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.overlays;
+package net.rptools.maptool.client.ui.token;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -20,38 +20,39 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.geom.Line2D;
+import java.awt.geom.Ellipse2D;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
- * Place a Yield (triangle point down) over a token.
+ * Draw an empty circle over a token.
  *
- * @author pwright
- * @version $Revision$ $Date$ $Author$
+ * @author jgorrell
+ * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
+ *     azhrei_fje $
  */
-public class YieldTokenOverlay extends XTokenOverlay {
+public class OTokenOverlay extends XTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
-  public YieldTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.YELLOW, 5);
+  public OTokenOverlay() {
+    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
   }
 
   /**
-   * Create a Yield token overlay with the given name.
+   * Create an O token overlay with the given name.
    *
    * @param aName Name of this token overlay.
    * @param aColor The color of this token overlay.
    * @param aWidth The width of the lines in this token overlay.
    */
-  public YieldTokenOverlay(String aName, Color aColor, int aWidth) {
+  public OTokenOverlay(String aName, Color aColor, int aWidth) {
     super(aName, aColor, aWidth);
   }
 
   /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
-    BooleanTokenOverlay overlay = new YieldTokenOverlay(getName(), getColor(), getWidth());
+    BooleanTokenOverlay overlay = new OTokenOverlay(getName(), getColor(), getWidth());
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -63,13 +64,11 @@ public class YieldTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see XTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     java.awt.Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
-    double hc = (double) bounds.width / 2;
-    double vc = bounds.height * 0.134;
     Color tempColor = g.getColor();
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();
@@ -78,21 +77,22 @@ public class YieldTokenOverlay extends XTokenOverlay {
     if (getOpacity() != 100)
       g.setComposite(
           AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-    g.draw(new Line2D.Double(0, vc, bounds.width, vc));
-    g.draw(new Line2D.Double(bounds.width, vc, hc, bounds.height));
-    g.draw(new Line2D.Double(hc, bounds.height, 0, vc));
+    double offset = getStroke().getLineWidth() / 2.0;
+    g.draw(
+        new Ellipse2D.Double(
+            0 + offset, 0 + offset, bounds.width - offset * 2, bounds.height - offset * 2));
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
   }
 
-  public static YieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new YieldTokenOverlay();
+  public static OTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new OTokenOverlay();
     overlay.fillFrom(dto);
     return overlay;
   }
 
   public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.YIELD).build();
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.O).build();
   }
 }

@@ -12,13 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.overlays;
+package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
 import java.awt.Rectangle;
 import java.awt.Shape;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Rectangle2D;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
@@ -27,11 +25,11 @@ import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
  *
  * @author Jay
  */
-public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
+public class FlowColorSquareTokenOverlay extends FlowColorDotTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
-  public FlowYieldTokenOverlay() {
-    this(DEFAULT_STATE_NAME, Color.RED, -1);
+  public FlowColorSquareTokenOverlay() {
+    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, -1);
   }
 
   /**
@@ -42,14 +40,14 @@ public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
    * @param aGrid Size of the overlay grid for this state. All states with the same grid size share
    *     the same overlay.
    */
-  public FlowYieldTokenOverlay(String aName, Color aColor, int aGrid) {
+  public FlowColorSquareTokenOverlay(String aName, Color aColor, int aGrid) {
     super(aName, aColor, aGrid);
   }
 
   /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
-    BooleanTokenOverlay overlay = new FlowYieldTokenOverlay(getName(), getColor(), getGrid());
+    BooleanTokenOverlay overlay = new FlowColorSquareTokenOverlay(getName(), getColor(), getGrid());
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -63,23 +61,18 @@ public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
   /** @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token) */
   @Override
   protected Shape getShape(Rectangle bounds, Token token) {
-    Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());
-    GeneralPath p = new GeneralPath();
-    p.moveTo((float) r.getX(), (float) r.getY());
-    p.lineTo((float) r.getCenterX(), (float) r.getMaxY());
-    p.lineTo((float) r.getMaxX(), (float) r.getY());
-    p.lineTo((float) r.getX(), (float) r.getY());
-    p.closePath();
-    return p;
+    return getFlow().getStateBounds2D(bounds, token, getName());
   }
 
-  public static FlowYieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new FlowYieldTokenOverlay();
+  public static FlowColorSquareTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowColorSquareTokenOverlay();
     overlay.fillFrom(dto);
     return overlay;
   }
 
   public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_YIELD).build();
+    return getDto()
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_COLOR_SQUARE)
+        .build();
   }
 }

@@ -34,12 +34,12 @@ import net.rptools.maptool.client.ui.ToolbarPanel;
 import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
-import net.rptools.maptool.client.ui.token.overlays.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.BooleanTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.ImageTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.MultipleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.SingleImageBarTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.TwoImageBarTokenOverlay;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
+import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
+import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
+import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
+import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
+import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.server.proto.CampaignDto;
 
 /**

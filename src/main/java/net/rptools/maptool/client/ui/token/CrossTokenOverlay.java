@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.overlays;
+package net.rptools.maptool.client.ui.token;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
@@ -20,39 +20,38 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
-import java.awt.geom.Ellipse2D;
+import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
- * Draw an empty circle over a token.
+ * Place a cross over a token.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
+ * @version $Revision$ $Date$ $Author$
  */
-public class OTokenOverlay extends XTokenOverlay {
+public class CrossTokenOverlay extends XTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
-  public OTokenOverlay() {
+  public CrossTokenOverlay() {
     this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
   }
 
   /**
-   * Create an O token overlay with the given name.
+   * Create a Cross token overlay with the given name.
    *
    * @param aName Name of this token overlay.
    * @param aColor The color of this token overlay.
    * @param aWidth The width of the lines in this token overlay.
    */
-  public OTokenOverlay(String aName, Color aColor, int aWidth) {
+  public CrossTokenOverlay(String aName, Color aColor, int aWidth) {
     super(aName, aColor, aWidth);
   }
 
   /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
-    BooleanTokenOverlay overlay = new OTokenOverlay(getName(), getColor(), getWidth());
+    BooleanTokenOverlay overlay = new CrossTokenOverlay(getName(), getColor(), getWidth());
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -64,8 +63,8 @@ public class OTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
-   *     Rectangle)
+   * @see XTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -77,22 +76,22 @@ public class OTokenOverlay extends XTokenOverlay {
     if (getOpacity() != 100)
       g.setComposite(
           AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-    double offset = getStroke().getLineWidth() / 2.0;
     g.draw(
-        new Ellipse2D.Double(
-            0 + offset, 0 + offset, bounds.width - offset * 2, bounds.height - offset * 2));
+        new Line2D.Double(0, (double) bounds.height / 2, bounds.width, (double) bounds.height / 2));
+    g.draw(
+        new Line2D.Double((double) bounds.width / 2, 0, (double) bounds.width / 2, bounds.height));
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
   }
 
-  public static OTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new OTokenOverlay();
+  public static CrossTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new CrossTokenOverlay();
     overlay.fillFrom(dto);
     return overlay;
   }
 
   public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.O).build();
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.CROSS).build();
   }
 }

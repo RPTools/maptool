@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.overlays;
+package net.rptools.maptool.client.ui.token;
 
 import java.awt.Color;
 import java.awt.Rectangle;
@@ -27,11 +27,11 @@ import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
  *
  * @author Jay
  */
-public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
+public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
-  public FlowDiamondTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, -1);
+  public FlowYieldTokenOverlay() {
+    this(DEFAULT_STATE_NAME, Color.RED, -1);
   }
 
   /**
@@ -42,14 +42,14 @@ public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
    * @param aGrid Size of the overlay grid for this state. All states with the same grid size share
    *     the same overlay.
    */
-  public FlowDiamondTokenOverlay(String aName, Color aColor, int aGrid) {
+  public FlowYieldTokenOverlay(String aName, Color aColor, int aGrid) {
     super(aName, aColor, aGrid);
   }
 
   /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
-    BooleanTokenOverlay overlay = new FlowDiamondTokenOverlay(getName(), getColor(), getGrid());
+    BooleanTokenOverlay overlay = new FlowYieldTokenOverlay(getName(), getColor(), getGrid());
     overlay.setOrder(getOrder());
     overlay.setGroup(getGroup());
     overlay.setMouseover(isMouseover());
@@ -65,22 +65,21 @@ public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
   protected Shape getShape(Rectangle bounds, Token token) {
     Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());
     GeneralPath p = new GeneralPath();
-    p.moveTo((float) r.getCenterX(), (float) r.getY());
-    p.lineTo((float) r.getX(), (float) r.getCenterY());
+    p.moveTo((float) r.getX(), (float) r.getY());
     p.lineTo((float) r.getCenterX(), (float) r.getMaxY());
-    p.lineTo((float) r.getMaxX(), (float) r.getCenterY());
-    p.lineTo((float) r.getCenterX(), (float) r.getY());
+    p.lineTo((float) r.getMaxX(), (float) r.getY());
+    p.lineTo((float) r.getX(), (float) r.getY());
     p.closePath();
     return p;
   }
 
-  public static FlowDiamondTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
-    var overlay = new FlowDiamondTokenOverlay();
+  public static FlowYieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowYieldTokenOverlay();
     overlay.fillFrom(dto);
     return overlay;
   }
 
   public BooleanTokenOverlayDto toDto() {
-    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_DIAMOND).build();
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_YIELD).build();
   }
 }

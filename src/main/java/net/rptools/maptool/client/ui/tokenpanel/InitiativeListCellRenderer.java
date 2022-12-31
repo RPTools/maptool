@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.CellConstraints.Alignment;
-import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -29,6 +26,8 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+
+import net.miginfocom.swing.MigLayout;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -37,8 +36,8 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.token.overlays.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.overlays.BarTokenOverlay;
+import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -115,7 +114,7 @@ public class InitiativeListCellRenderer extends JPanel
 
     // Set up the panel
     panel = aPanel;
-    setLayout(new FormLayout("1px pref 1px pref:grow", "fill:pref"));
+    setLayout(new MigLayout("", "[][grow]"));
     //    setBorder(SELECTED_BORDER);
     //    setBackground(Color.WHITE);
 
@@ -124,7 +123,7 @@ public class InitiativeListCellRenderer extends JPanel
     currentIndicator.setPreferredSize(INDICATOR_SIZE);
     currentIndicator.setHorizontalAlignment(SwingConstants.CENTER);
     currentIndicator.setVerticalAlignment(SwingConstants.CENTER);
-    add(currentIndicator, new CellConstraints(2, 1));
+    add(currentIndicator);
 
     // And the name
     name = new NameLabel();
@@ -132,7 +131,7 @@ public class InitiativeListCellRenderer extends JPanel
     name.setBorder(NAME_BORDER);
     name.setFont(getFont().deriveFont(Font.BOLD));
     textHeight = getFontMetrics(getFont()).getHeight();
-    add(name, new CellConstraints(4, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+    add(name);
     validate();
   }
 
@@ -197,13 +196,14 @@ public class InitiativeListCellRenderer extends JPanel
     name.setIcon(icon);
 
     // Align it properly
-    Alignment alignment = ti.isHolding() ? CellConstraints.RIGHT : CellConstraints.LEFT;
-    FormLayout layout = (FormLayout) getLayout();
-    layout.setConstraints(name, new CellConstraints(4, 1, alignment, CellConstraints.CENTER));
-    if (alignment == CellConstraints.RIGHT) {
-      name.setHorizontalTextPosition(SwingConstants.LEFT);
+    var alignment = ti.isHolding() ? SwingConstants.LEFT : SwingConstants.RIGHT;
+    name.setHorizontalTextPosition(alignment);
+    MigLayout layout = (MigLayout) getLayout();
+   //
+    if (alignment == SwingConstants.RIGHT) {
+      layout.setComponentConstraints(name, "align left");
     } else {
-      name.setHorizontalTextPosition(SwingConstants.RIGHT);
+      layout.setComponentConstraints(name, "align right");
     } // endif
 
     // Selected?

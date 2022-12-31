@@ -17,8 +17,6 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import com.intellij.uiDesigner.core.GridConstraints;
 import com.intellij.uiDesigner.core.GridLayoutManager;
 import com.intellij.uiDesigner.core.Spacer;
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.Locale;
@@ -893,7 +891,7 @@ public class PreferencesDialogView {
         panel25.add(button4, new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel26 = new JPanel();
         panel26.setLayout(new GridLayoutManager(6, 3, new Insets(5, 5, 5, 5), -1, -1));
-        panel26.setVisible(false);
+        panel26.setVisible(true);
         tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.startup"), panel26);
         final JPanel panel27 = new JPanel();
         panel27.setLayout(new GridLayoutManager(3, 2, new Insets(0, 0, 0, 0), -1, -1));
@@ -1002,24 +1000,19 @@ public class PreferencesDialogView {
         textField16.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Preferences.label.options.directory.tooltip"));
         panel30.add(textField16, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel31 = new JPanel();
-        panel31.setLayout(new FormLayout("fill:d:grow", "center:2dlu:noGrow,fill:d:grow,center:2dlu:noGrow"));
+        panel31.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
         panel26.add(panel31, new GridConstraints(0, 2, 5, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         panel31.setBorder(BorderFactory.createTitledBorder(null, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Preferences.startup.label.info"), TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, this.$$$getFont$$$("Dialog", Font.BOLD, 12, panel31.getFont()), new Color(-13538620)));
         final JLabel label91 = new JLabel();
         label91.setName("startupInfoLabel");
         this.$$$loadLabelText$$$(label91, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "startup.preferences.info"));
-        CellConstraints cc = new CellConstraints();
-        panel31.add(label91, cc.xy(1, 2));
+        panel31.add(label91, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final Spacer spacer15 = new Spacer();
-        panel31.add(spacer15, cc.xy(1, 1));
+        panel26.add(spacer15, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer16 = new Spacer();
-        panel31.add(spacer16, cc.xy(1, 3));
+        panel26.add(spacer16, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer17 = new Spacer();
-        panel26.add(spacer17, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer18 = new Spacer();
-        panel26.add(spacer18, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
-        final Spacer spacer19 = new Spacer();
-        mainPanel.add(spacer19, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        mainPanel.add(spacer17, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
 
     /**
