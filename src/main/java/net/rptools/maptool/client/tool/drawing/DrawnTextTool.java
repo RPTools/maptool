@@ -29,6 +29,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.text.Style;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.drawing.DrawnLabel;
 import net.rptools.maptool.model.drawing.Pen;
@@ -89,19 +90,19 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
     aG.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.text.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.text.instructions";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#resetTool() */
+  /** @see Tool#resetTool() */
   @Override
   protected void resetTool() {
     anchorSet = false;

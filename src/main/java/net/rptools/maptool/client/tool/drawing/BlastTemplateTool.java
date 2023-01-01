@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.event.MouseEvent;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.BlastTemplate;
@@ -42,13 +43,13 @@ public class BlastTemplateTool extends BurstTemplateTool {
     return new BlastTemplate();
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.blasttemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.blasttemplate.instructions";

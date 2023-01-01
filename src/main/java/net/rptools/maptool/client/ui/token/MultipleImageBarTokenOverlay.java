@@ -40,7 +40,7 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
 
   /** Needed for serialization */
   public MultipleImageBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, null);
+    this(DEFAULT_STATE_NAME, null);
   }
 
   /**
@@ -54,7 +54,7 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     assetIds = theAssetIds;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /** @see AbstractTokenOverlay#clone() */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new MultipleImageBarTokenOverlay(getName(), assetIds);
@@ -71,8 +71,8 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {

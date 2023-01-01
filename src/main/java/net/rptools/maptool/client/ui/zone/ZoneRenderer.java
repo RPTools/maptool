@@ -46,19 +46,19 @@ import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
 import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
 import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
-import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.NewTokenDialog;
+import net.rptools.maptool.client.ui.token.dialog.create.NewTokenDialog;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -70,13 +70,7 @@ import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.zones.DrawableAdded;
-import net.rptools.maptool.model.zones.DrawableRemoved;
-import net.rptools.maptool.model.zones.FogChanged;
-import net.rptools.maptool.model.zones.TokensAdded;
-import net.rptools.maptool.model.zones.TokensChanged;
-import net.rptools.maptool.model.zones.TokensRemoved;
-import net.rptools.maptool.model.zones.TopologyChanged;
+import net.rptools.maptool.model.zones.*;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -4764,6 +4758,22 @@ public class ZoneRenderer extends JComponent
     }
     markDrawableLayerDirty(event.drawnElement().getDrawable().getLayer());
     MapTool.getFrame().updateTokenTree(); // for any event
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onBoardChanged(BoardChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
+    repaintDebouncer.dispatch();
+  }
+
+  @Subscribe
+  private void onGridChanged(GridChanged event) {
+    if (event.zone() != this.zone) {
+      return;
+    }
     repaintDebouncer.dispatch();
   }
 

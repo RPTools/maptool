@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -89,13 +90,13 @@ public class BurstTemplateTool extends RadiusTemplateTool {
     return super.getRadiusAtMouse(e);
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.bursttemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.bursttemplate.instructions";

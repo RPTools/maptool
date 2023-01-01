@@ -40,7 +40,7 @@ public class PaintChooser extends JPanel {
 
   private Paint paint;
 
-  private final PaintedPanel previewPanel;
+  private final ColorWell previewPanel;
 
   private final JTabbedPane tabbedPane;
 
@@ -51,7 +51,7 @@ public class PaintChooser extends JPanel {
 
     tabbedPane = new JTabbedPane();
 
-    previewPanel = new PaintedPanel();
+    previewPanel = new ColorWell();
     previewPanel.setBorder(BorderFactory.createLineBorder(Color.black));
     previewPanel.setPreferredSize(new Dimension(150, 100));
 

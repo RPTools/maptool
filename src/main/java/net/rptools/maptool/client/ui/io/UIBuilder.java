@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.io;
 
-import com.jeta.forms.components.panel.FormPanel;
 import com.jidesoft.swing.CheckBoxTree;
 import com.jidesoft.swing.CheckBoxTreeSelectionModel;
 import java.awt.Dimension;
@@ -32,6 +31,7 @@ import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -210,9 +210,8 @@ public class UIBuilder extends JDialog {
     }
   }
 
-  private static final String LOAD_SAVE_DIALOG =
-      "net/rptools/maptool/client/ui/forms/campaignItemList.xml";
-  private static final FormPanel form = new FormPanel(LOAD_SAVE_DIALOG);
+  private static final AbeillePanel form =
+      new AbeillePanel(new CampaignItemListView().$$$getRootComponent$$$());
 
   private final CheckBoxTree tree;
   private final TreeModel dtm;

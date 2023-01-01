@@ -22,6 +22,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
@@ -144,7 +145,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
     }
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#resetTool() */
+  /** @see Tool#resetTool() */
   @Override
   protected void resetTool() {
 

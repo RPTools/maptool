@@ -61,16 +61,13 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
     return flow;
   }
 
-  /**
-   * @see net.rptools.maptool.client.ui.token.ImageTokenOverlay#getImageBounds(java.awt.Rectangle,
-   *     Token)
-   */
+  /** @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token) */
   @Override
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
     return getFlow().getStateBounds(bounds, token, getName());
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowImageTokenOverlay(getName(), getAssetId(), grid);
