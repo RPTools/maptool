@@ -31,7 +31,6 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-
 /**
  * @author drice
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
