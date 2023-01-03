@@ -25,13 +25,14 @@ import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.ServerConfig;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class WebRTCClientConnection extends AbstractConnection
     implements ClientConnection, PeerConnectionObserver, RTCDataChannelObserver {
-  private static final Logger log = Logger.getLogger(WebRTCClientConnection.class);
+  private static final Logger log = LogManager.getLogger(WebRTCClientConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private final ServerConfig config;

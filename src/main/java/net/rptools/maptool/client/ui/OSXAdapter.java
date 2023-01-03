@@ -23,7 +23,8 @@ import java.awt.desktop.PreferencesHandler;
 import java.awt.desktop.QuitHandler;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Apple's new platform API has deprecated the <code>ApplicationListener</code> class. The preferred
@@ -50,7 +51,7 @@ import org.apache.log4j.Logger;
  */
 public class OSXAdapter {
 
-  private static final Logger log = Logger.getLogger(OSXAdapter.class);
+  private static final Logger log = LogManager.getLogger(OSXAdapter.class);
   private static Desktop dt = Desktop.getDesktop();
 
   /**
