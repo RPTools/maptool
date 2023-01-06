@@ -48,7 +48,7 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     corner = aCorner;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new CornerImageTokenOverlay(getName(), getAssetId(), corner);
@@ -62,10 +62,7 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     return overlay;
   }
 
-  /**
-   * @see net.rptools.maptool.client.ui.token.ImageTokenOverlay#getImageBounds(java.awt.Rectangle,
-   *     Token)
-   */
+  /** @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token) */
   @Override
   public Rectangle getImageBounds(Rectangle bounds, Token token) {
     int x = (bounds.width + 1) / 2;

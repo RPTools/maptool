@@ -25,7 +25,6 @@ import java.util.Map;
 import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
-import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -45,12 +44,17 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private EditLookupTablePanel editorPanel;
 
   public LookupTablePanel() {
-    super("net/rptools/maptool/client/ui/forms/lookupTablePanel.xml");
+    super(new LookupTablePaneView().$$$getRootComponent$$$());
     panelInit();
   }
 
   public void updateView() {
-    getButtonPanel().setVisible(MapTool.getPlayer().isGM());
+    getNewButton().setVisible(MapTool.getPlayer().isGM());
+    getEditButton().setVisible(MapTool.getPlayer().isGM());
+    getExportButton().setVisible(MapTool.getPlayer().isGM());
+    getImportButton().setVisible(MapTool.getPlayer().isGM());
+    getDuplicateButton().setVisible(MapTool.getPlayer().isGM());
+    getDeleteButton().setVisible(MapTool.getPlayer().isGM());
     revalidate();
     repaint();
   }
@@ -96,10 +100,6 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
             imagePanel,
             JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
             JScrollPane.HORIZONTAL_SCROLLBAR_NEVER));
-  }
-
-  public JPanel getButtonPanel() {
-    return (JPanel) getComponent("buttonPanel");
   }
 
   public void initEditorPanel() {

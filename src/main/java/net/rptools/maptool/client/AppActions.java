@@ -63,30 +63,26 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.tool.BoardTool;
-import net.rptools.maptool.client.tool.GridTool;
-import net.rptools.maptool.client.ui.AddResourceDialog;
+import net.rptools.maptool.client.tool.boardtool.BoardTool;
+import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ConnectToServerDialog;
-import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
-import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.ExportDialog;
-import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.PreferencesDialog;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
-import net.rptools.maptool.client.ui.StartServerDialog;
-import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
+import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
+import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
+import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
+import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialog;
+import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialogPreferences;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.FTPClient;
 import net.rptools.maptool.client.ui.io.FTPTransferObject;
@@ -94,10 +90,14 @@ import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
+import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
+import net.rptools.maptool.client.ui.preferencesdialog.PreferencesDialog;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialog;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.token.TransferProgressDialog;
+import net.rptools.maptool.client.ui.transferprogressdialog.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
@@ -2242,7 +2242,8 @@ public class AppActions {
                         serverProps.getPort(),
                         serverProps.getRPToolsName(),
                         "localhost",
-                        serverProps.getUseEasyConnect());
+                        serverProps.getUseEasyConnect(),
+                        serverProps.getUseWebRtc());
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2414,7 +2415,8 @@ public class AppActions {
                           "",
                           dialog.getPort(),
                           prefs.getServerName(),
-                          dialog.getServer());
+                          dialog.getServer(),
+                          dialog.getUseWebRTC());
 
                   String password =
                       prefs.getUsePublicKey()

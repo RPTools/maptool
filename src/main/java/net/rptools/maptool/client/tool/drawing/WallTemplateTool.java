@@ -20,6 +20,7 @@ import java.util.List;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -50,13 +51,13 @@ public class WallTemplateTool extends BurstTemplateTool {
     return new WallTemplate();
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.walltemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.walltemplate.instructions";

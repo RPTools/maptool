@@ -48,8 +48,8 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, java.lang.Object)
+   * @see AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, java.lang.Object)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {

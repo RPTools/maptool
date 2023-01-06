@@ -37,7 +37,7 @@ import javax.swing.ToolTipManager;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;

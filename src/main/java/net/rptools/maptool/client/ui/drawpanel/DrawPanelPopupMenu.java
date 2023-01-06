@@ -35,7 +35,7 @@ import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.macro.MacroContext;
-import net.rptools.maptool.client.swing.ColorPicker;
+import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;

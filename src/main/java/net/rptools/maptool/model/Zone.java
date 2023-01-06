@@ -384,11 +384,15 @@ public class Zone {
     List<ZoneRenderer> rendererList =
         new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
     for (ZoneRenderer z : rendererList) {
-      if (z.getZone().getPlayerAlias().equals(playerAlias)) {
+      if (z.getZone().getPlayerAlias() != null
+          && z.getZone().getPlayerAlias().equals(playerAlias)) {
         return false;
       }
     }
-    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
+    this.playerAlias =
+        playerAlias == null || playerAlias.equals("") || playerAlias.equals(name)
+            ? null
+            : playerAlias;
     return true;
   }
 
@@ -621,7 +625,7 @@ public class Zone {
   public void setGrid(Grid grid) {
     this.grid = grid;
     grid.setZone(this);
-    new MapToolEventBus().getMainEventBus().post(new GridChanged());
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(this));
   }
 
   public Grid getGrid() {
@@ -654,14 +658,14 @@ public class Zone {
     boardPosition.x = position.x;
     boardPosition.y = position.y;
     setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(mapAsset));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(int newX, int newY) {
     boardPosition.x = newX;
     boardPosition.y = newY;
     setBoardChanged(true);
-    new MapToolEventBus().getMainEventBus().post(new BoardChanged(mapAsset));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(Point position, MD5Key asset) {

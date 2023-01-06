@@ -70,8 +70,8 @@ import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
-import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -1035,7 +1035,7 @@ public class MapTool {
       try {
         MapToolRegistry.RegisterResponse result =
             MapToolRegistry.getInstance()
-                .registerInstance(config.getServerName(), config.getPort());
+                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
         if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         }

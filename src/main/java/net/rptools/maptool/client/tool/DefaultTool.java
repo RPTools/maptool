@@ -25,7 +25,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.tool.layerselectiondialog.LayerSelectionDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;

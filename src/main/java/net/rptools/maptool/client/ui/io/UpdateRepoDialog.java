@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.io;
 
-import com.jeta.forms.components.panel.FormPanel;
 import com.jidesoft.swing.CheckBoxListWithSelectable;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -35,6 +34,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,9 +43,8 @@ import org.apache.logging.log4j.Logger;
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(FTPClient.class);
-  private static final String UPDATE_REPO_DIALOG =
-      "net/rptools/maptool/client/ui/forms/updateRepoDialog.xml";
-  private static final FormPanel form = new FormPanel(UPDATE_REPO_DIALOG);
+  private static final AbeillePanel form =
+      new AbeillePanel(new UpdateRepoDialogView().$$$getRootComponent$$$());
 
   private int status = -1;
   private CheckBoxListWithSelectable list;
@@ -102,13 +101,13 @@ public class UpdateRepoDialog extends JDialog {
   }
 
   protected void initFields() {
-    list = (CheckBoxListWithSelectable) form.getComponentByName("checkBoxList");
+    list = (CheckBoxListWithSelectable) form.getComponent("checkBoxList");
     saveTo = form.getTextField("@saveTo");
     hostname = form.getTextField("@hostname");
     directory = form.getTextField("@directory");
     username = form.getTextField("@username");
     subdir = form.getCheckBox("@subdir");
-    password = (JPasswordField) form.getComponentByName("@password");
+    password = (JPasswordField) form.getComponent("@password");
     // If any of the above are null, there's a mismatch with the form.
     if (list == null
         || saveTo == null
@@ -116,7 +115,8 @@ public class UpdateRepoDialog extends JDialog {
         || directory == null
         || username == null
         || subdir == null
-        || password == null) log.error("Form does not match code: " + UPDATE_REPO_DIALOG);
+        || password == null)
+      log.error("Form does not match code: " + UpdateRepoDialogView.class.getSimpleName());
   }
 
   protected void initFTPLocation(Location loc) {
@@ -130,7 +130,7 @@ public class UpdateRepoDialog extends JDialog {
     }
   }
 
-  public FormPanel getForm() {
+  public AbeillePanel getForm() {
     return form;
   }
 

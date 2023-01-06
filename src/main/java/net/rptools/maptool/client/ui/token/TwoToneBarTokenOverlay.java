@@ -41,7 +41,7 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   /** Default constructor for serialization */
   public TwoToneBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
+    this(DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
   }
 
   /** @return Getter for bgColor */
@@ -55,8 +55,8 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -93,7 +93,7 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /** @see AbstractTokenOverlay#clone() */
   @Override
   public Object clone() {
     BarTokenOverlay overlay =

@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.store.properties.ListItemProperty;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics2D;
@@ -35,19 +32,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JSpinner;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.SpinnerListModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -58,6 +43,8 @@ import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -77,6 +64,7 @@ import net.rptools.maptool.client.ui.token.ShadedTokenOverlay;
 import net.rptools.maptool.client.ui.token.TriangleTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -100,7 +88,7 @@ public class TokenStatesController
         ChangeListener {
 
   /** Panel containing the campaign properties form panel */
-  private final FormPanel formPanel;
+  private final AbeillePanel formPanel;
 
   /** The names of states currently in the list data model */
   private Set<String> names = new HashSet<String>();
@@ -227,12 +215,38 @@ public class TokenStatesController
     {true, false, false, true, false, false}, // Flow Square
   };
 
+  private static final List<String> types =
+      List.of(
+          "CampaignPropertiesDialog.combo.states.type.image",
+          "CampaignPropertiesDialog.combo.states.type.cornerImage",
+          "CampaignPropertiesDialog.combo.states.type.gridImage",
+          "CampaignPropertiesDialog.combo.states.type.dot",
+          "CampaignPropertiesDialog.combo.states.type.gridDot",
+          "CampaignPropertiesDialog.combo.states.type.circle",
+          "CampaignPropertiesDialog.combo.states.type.shaded",
+          "CampaignPropertiesDialog.combo.states.type.x",
+          "CampaignPropertiesDialog.combo.states.type.cross",
+          "CampaignPropertiesDialog.combo.states.type.diamond",
+          "CampaignPropertiesDialog.combo.states.type.gridDiamond",
+          "CampaignPropertiesDialog.combo.states.type.yield",
+          "CampaignPropertiesDialog.combo.states.type.gridYield",
+          "CampaignPropertiesDialog.combo.states.type.triangle",
+          "CampaignPropertiesDialog.combo.states.type.gridTriangle",
+          "CampaignPropertiesDialog.combo.states.type.gridSquare");
+
+  private static final List<String> corners =
+      List.of(
+          "CampaignPropertiesDialog.combo.states.corner.topRight",
+          "CampaignPropertiesDialog.combo.states.corner.topLeft",
+          "CampaignPropertiesDialog.combo.states.corner.bottomRight",
+          "CampaignPropertiesDialog.combo.states.corner.bottomLeft");
+
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
    *
    * @param panel The {@link CampaignProperties} form panel
    */
-  public TokenStatesController(FormPanel panel) {
+  public TokenStatesController(AbeillePanel panel) {
     formPanel = panel;
     panel.getButton(ADD).addActionListener(this);
     panel.getButton(DELETE).addActionListener(this);
@@ -240,7 +254,20 @@ public class TokenStatesController
     panel.getButton(UPDATE).addActionListener(this);
     panel.getButton(MOVE_UP).addActionListener(this);
     panel.getButton(MOVE_DOWN).addActionListener(this);
-    panel.getComboBox(TYPE).addActionListener(this);
+
+    var typeComboBox = panel.getComboBox(TYPE);
+    typeComboBox.setModel(new DefaultComboBoxModel());
+    for (var type : types) {
+      typeComboBox.addItem(I18N.getText(type));
+    }
+    typeComboBox.addActionListener(this);
+
+    var cornerComboBox = panel.getComboBox(CORNER);
+    cornerComboBox.setModel(new DefaultComboBoxModel());
+    for (var corner : corners) {
+      cornerComboBox.addItem(I18N.getText(corner));
+    }
+
     panel.getSpinner(WIDTH).setModel(new SpinnerNumberModel(5, 1, 10, 1));
     panel
         .getSpinner(FLOW_GRID)
@@ -298,14 +325,14 @@ public class TokenStatesController
           model.insertElementAt(oldElement, selected + 1);
         }
 
-        formPanel.setText(NAME, "");
-        formPanel.setText(GROUP, "");
-        formPanel.setSelected(MOUSEOVER, false);
+        formPanel.getTextComponent(NAME).setText("");
+        formPanel.getTextComponent(GROUP).setText("");
+        formPanel.getCheckBox(MOUSEOVER).setSelected(false);
         formPanel.getSpinner(OPACITY).setValue(100);
         formPanel.getSpinner(INDEX).setValue(selected);
-        formPanel.setSelected(SHOW_GM, true);
-        formPanel.setSelected(SHOW_OWNER, true);
-        formPanel.setSelected(SHOW_OTHERS, true);
+        formPanel.getCheckBox(SHOW_GM).setSelected(true);
+        formPanel.getCheckBox(SHOW_OWNER).setSelected(true);
+        formPanel.getCheckBox(SHOW_OTHERS).setSelected(true);
 
         list.ensureIndexIsVisible(selected);
         list.setSelectedIndex(selected);
@@ -328,7 +355,7 @@ public class TokenStatesController
             || imageFile.isDirectory()
             || !imageFile.exists()
             || !imageFile.canRead()) return;
-        formPanel.setText(IMAGE, imageFile.getPath());
+        formPanel.getTextComponent(IMAGE).setText(imageFile.getPath());
         AppPreferences.setLoadDir(imageFile.getParentFile());
       } // endif
 
@@ -338,7 +365,8 @@ public class TokenStatesController
 
       // Update the selected overlay
     } else if (UPDATE.equals(name)) {
-      BooleanTokenOverlay selectedOverlay = (BooleanTokenOverlay) formPanel.getSelectedItem(STATES);
+      BooleanTokenOverlay selectedOverlay =
+          (BooleanTokenOverlay) formPanel.getList(STATES).getSelectedValue();
       BooleanTokenOverlay overlay = createTokenOverlay(selectedOverlay);
       if (overlay != null) model.set(selected, overlay);
 
@@ -384,12 +412,10 @@ public class TokenStatesController
   private void enableDataComponents() {
     int selected = formPanel.getComboBox(TYPE).getSelectedIndex();
     for (int i = 0; i < DATA_ENTRY_COMPONENTS.length; i++) {
-      formPanel
-          .getComponentByName(DATA_ENTRY_COMPONENTS[i])
-          .setEnabled(NEEDED_COMPONENTS[selected][i]);
+      formPanel.getComponent(DATA_ENTRY_COMPONENTS[i]).setEnabled(NEEDED_COMPONENTS[selected][i]);
       if (i < DATA_ENTRY_COMPONENT_LABELS.length)
         formPanel
-            .getComponentByName(DATA_ENTRY_COMPONENT_LABELS[i])
+            .getComponent(DATA_ENTRY_COMPONENT_LABELS[i])
             .setEnabled(NEEDED_COMPONENTS[selected][i]);
     } // endfor
   }
@@ -426,17 +452,18 @@ public class TokenStatesController
    */
   @Override
   public void changedUpdate(DocumentEvent e) {
-    String text = formPanel.getText(IMAGE);
+    String text = formPanel.getTextComponent(IMAGE).getText();
     boolean hasImage =
-        !((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName().contains("Image")
+        !((String) formPanel.getComboBox(TYPE).getSelectedItem()).contains("Image")
             || text != null && (text = text.trim()).length() != 0;
-    text = formPanel.getText(NAME);
+    text = formPanel.getTextComponent(NAME).getText();
     boolean hasName = text != null && (text = text.trim()).length() != 0;
     boolean hasShow =
-        formPanel.isSelected(SHOW_GM)
-            || formPanel.isSelected(SHOW_OWNER)
-            || formPanel.isSelected(SHOW_OTHERS);
-    BooleanTokenOverlay selectedState = (BooleanTokenOverlay) formPanel.getSelectedItem(STATES);
+        formPanel.getCheckBox(SHOW_GM).isSelected()
+            || formPanel.getCheckBox(SHOW_OWNER).isSelected()
+            || formPanel.getCheckBox(SHOW_OTHERS).isSelected();
+    BooleanTokenOverlay selectedState =
+        (BooleanTokenOverlay) formPanel.getList(STATES).getSelectedValue();
     boolean hasUniqueUpdateName = false;
     if (selectedState != null)
       hasUniqueUpdateName = selectedState.getName().equals(text) || !getNames().contains(text);
@@ -479,23 +506,22 @@ public class TokenStatesController
 
       // Set name, and always clear image
       BooleanTokenOverlay s = (BooleanTokenOverlay) formPanel.getList(STATES).getSelectedValue();
-      formPanel.setText(NAME, s.getName());
-      formPanel.setText(GROUP, s.getGroup());
-      formPanel.setText(IMAGE, "");
-      formPanel.setSelected(MOUSEOVER, s.isMouseover());
+      formPanel.getTextComponent(NAME).setText(s.getName());
+      formPanel.getTextComponent(GROUP).setText(s.getGroup());
+      formPanel.getTextComponent(IMAGE).setText("");
+      formPanel.getCheckBox(MOUSEOVER).setSelected(s.isMouseover());
       formPanel.getSpinner(OPACITY).setValue(s.getOpacity());
       formPanel.getSpinner(INDEX).setValue(selected);
-      formPanel.setSelected(SHOW_GM, s.isShowGM());
-      formPanel.setSelected(SHOW_OWNER, s.isShowOwner());
-      formPanel.setSelected(SHOW_OTHERS, s.isShowOthers());
+      formPanel.getCheckBox(SHOW_GM).setSelected(s.isShowGM());
+      formPanel.getCheckBox(SHOW_OWNER).setSelected(s.isShowOwner());
+      formPanel.getCheckBox(SHOW_OTHERS).setSelected(s.isShowOthers());
 
       // Get most of the colors and all of the widths from the XTokenOverlay
       int type = -1;
       if (s instanceof XTokenOverlay) {
         type = 7;
         formPanel.getSpinner(WIDTH).setValue(((XTokenOverlay) s).getWidth());
-        ((JETAColorWell) formPanel.getComponentByName(COLOR))
-            .setColor(((XTokenOverlay) s).getColor());
+        ((ColorWell) formPanel.getComponent(COLOR)).setColor(((XTokenOverlay) s).getColor());
       } // endif
 
       // Get the the flow grid for most components from FlowColorDotTokenOverlay
@@ -526,8 +552,7 @@ public class TokenStatesController
         type = 5;
       } else if (s instanceof ShadedTokenOverlay) {
         type = 6;
-        ((JETAColorWell) formPanel.getComponentByName(COLOR))
-            .setColor(((ShadedTokenOverlay) s).getColor());
+        ((ColorWell) formPanel.getComponent(COLOR)).setColor(((ShadedTokenOverlay) s).getColor());
       } else if (s instanceof CrossTokenOverlay) {
         type = 8;
       } else if (s instanceof DiamondTokenOverlay) {
@@ -661,21 +686,21 @@ public class TokenStatesController
   public BooleanTokenOverlay createTokenOverlay(BooleanTokenOverlay updatedOverlay) {
 
     // Need the color group, and name for everything
-    Color color = ((JETAColorWell) formPanel.getComponentByName(COLOR)).getColor();
-    String name = formPanel.getText(NAME);
-    String group = formPanel.getText(GROUP);
-    boolean mouseover = formPanel.isSelected(MOUSEOVER);
-    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName();
+    Color color = ((ColorWell) formPanel.getComponent(COLOR)).getColor();
+    String name = formPanel.getTextComponent(NAME).getText();
+    String group = formPanel.getTextComponent(GROUP).getText();
+    boolean mouseover = formPanel.getCheckBox(MOUSEOVER).isSelected();
+    String overlay = ((String) formPanel.getComboBox(TYPE).getSelectedItem());
     int opacity = getSpinner(OPACITY, "opacity", formPanel);
     int index = getSpinner(INDEX, "index", formPanel);
-    boolean showGM = formPanel.isSelected(SHOW_GM);
-    boolean showOwner = formPanel.isSelected(SHOW_OWNER);
-    boolean showOthers = formPanel.isSelected(SHOW_OTHERS);
+    boolean showGM = formPanel.getCheckBox(SHOW_GM).isSelected();
+    boolean showOwner = formPanel.getCheckBox(SHOW_OWNER).isSelected();
+    boolean showOthers = formPanel.getCheckBox(SHOW_OTHERS).isSelected();
 
     // Check for overlays that don't use width
     BooleanTokenOverlay to = null;
     if (overlay.equals("Dot")) {
-      String cornerName = ((ListItemProperty) formPanel.getSelectedItem(CORNER)).getName();
+      String cornerName = ((String) formPanel.getComboBox(CORNER).getSelectedItem());
       to = new ColorDotTokenOverlay(name, color, Quadrant.valueOf(cornerName));
     } else if (overlay.equals("Shaded")) {
       to = new ShadedTokenOverlay(name, color);
@@ -724,7 +749,7 @@ public class TokenStatesController
     // If we get here it is an image overlay, grab the image as an asset
     if (to == null) {
       MD5Key assetId = null;
-      String fName = formPanel.getText(IMAGE).trim();
+      String fName = formPanel.getTextComponent(IMAGE).getText().trim();
       fName = fName.length() == 0 ? null : fName;
       if (updatedOverlay == null || fName != null) {
         assetId = loadAsssetFile(fName, formPanel);
@@ -738,7 +763,7 @@ public class TokenStatesController
         if (overlay.equals("Image")) {
           to = new ImageTokenOverlay(name, assetId);
         } else if (overlay.equals("Corner Image")) {
-          String cornerName = ((ListItemProperty) formPanel.getSelectedItem(CORNER)).getName();
+          String cornerName = ((String) formPanel.getComboBox(CORNER).getSelectedItem());
           to = new CornerImageTokenOverlay(name, assetId, Quadrant.valueOf(cornerName));
         } else if (overlay.equals("Grid Image")) {
           to = new FlowImageTokenOverlay(name, assetId, grid);
@@ -767,7 +792,7 @@ public class TokenStatesController
    * @param formPanel The form panel containing the component.
    * @return The integer value selected.
    */
-  public static int getSpinner(String name, String displayName, FormPanel formPanel) {
+  public static int getSpinner(String name, String displayName, AbeillePanel formPanel) {
     int width = 0;
     JSpinner spinner = formPanel.getSpinner(name);
     try {
@@ -805,7 +830,7 @@ public class TokenStatesController
    * @param formPanel Panel to use as parent for displaying error messages
    * @return The asset id if found or <code>null</code> if it could not be found.
    */
-  public static MD5Key loadAsssetFile(String fName, FormPanel formPanel) {
+  public static MD5Key loadAsssetFile(String fName, AbeillePanel formPanel) {
     if (StringUtil.isEmpty(fName)) return null;
     File file = new File(fName);
     String message = null;
