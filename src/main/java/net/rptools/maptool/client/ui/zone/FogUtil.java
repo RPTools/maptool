@@ -16,7 +16,6 @@ package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,24 +72,18 @@ public class FogUtil {
   /**
    * Return the visible area for an origin, a lightSourceArea and a VBL.
    *
-   * @param x the x vision origin.
-   * @param y the y vision origin.
+   * @param origin the vision origin.
    * @param vision the lightSourceArea.
    * @param topology the VBL topology.
    * @return the visible area.
    */
   public static Area calculateVisibility(
-      int x, int y, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
-    vision = new Area(vision);
-    vision.transform(AffineTransform.getTranslateInstance(x, y));
-
+      Point origin, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
     final var shapeReader = new ShapeReader(geometryFactory);
     // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
     final var visionGeometry =
         PreparedGeometryFactory.prepare(
             shapeReader.read(new ReverseShapePathIterator(vision.getPathIterator(null))));
-
-    final Point origin = new Point(x, y);
 
     /*
      * Find the visible area for each topology type independently.
@@ -125,6 +118,7 @@ public class FogUtil {
     }
 
     // We have to intersect all the results in order to find the true remaining visible area.
+    vision = new Area(vision);
     if (!visibleAreas.isEmpty()) {
       // We intersect in AWT space because JTS can be really finicky about intersection precision.
       var shapeWriter = new ShapeWriter();
@@ -363,7 +357,8 @@ public class FogUtil {
           tokenClone.setY(zp.y);
 
           renderer.flush(tokenClone);
-          Area tokenVision = renderer.getZoneView().getVisibleArea(tokenClone);
+          Area tokenVision =
+              renderer.getZoneView().getVisibleArea(tokenClone, renderer.getPlayerView());
           if (tokenVision != null) {
             Set<GUID> filteredToks = new HashSet<GUID>();
             filteredToks.add(tokenClone.getId());
@@ -374,7 +369,7 @@ public class FogUtil {
         renderer.flush(token);
       } else {
         renderer.flush(token);
-        Area tokenVision = renderer.getVisibleArea(token);
+        Area tokenVision = renderer.getZoneView().getVisibleArea(token, renderer.getPlayerView());
         if (tokenVision != null) {
           Set<GUID> filteredToks = new HashSet<GUID>();
           filteredToks.add(token.getId());
@@ -405,7 +400,7 @@ public class FogUtil {
       token.setY(zp.y);
       renderer.flush(token);
 
-      Area tokenVision = renderer.getZoneView().getVisibleArea(token);
+      Area tokenVision = renderer.getZoneView().getVisibleArea(token, renderer.getPlayerView());
       if (tokenVision != null) {
         Set<GUID> filteredToks = new HashSet<GUID>();
         filteredToks.add(token.getId());
@@ -553,7 +548,7 @@ public class FogUtil {
             tokenClone.setX(zp.x);
             tokenClone.setY(zp.y);
 
-            Area currVisionArea = zoneView.getVisibleArea(tokenClone);
+            Area currVisionArea = zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
             if (currVisionArea != null) {
               visionArea.add(currVisionArea);
               meta.addToExposedAreaHistory(currVisionArea);
