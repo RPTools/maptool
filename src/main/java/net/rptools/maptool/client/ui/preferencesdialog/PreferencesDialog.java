@@ -97,8 +97,7 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner haloLineWidthSpinner;
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
-  private final JSpinner lightOverlayOpacitySpinner;
-  private final JSpinner darknessOverlayOpacitySpinner;
+  private final JSpinner lumensOverlayOpacitySpinner;
   private final JSpinner fogOverlayOpacitySpinner;
   private final JCheckBox useHaloColorAsVisionOverlayCheckBox;
   private final JCheckBox autoRevealVisionOnGMMoveCheckBox;
@@ -334,8 +333,7 @@ public class PreferencesDialog extends JDialog {
     haloLineWidthSpinner = panel.getSpinner("haloLineWidthSpinner");
     haloOverlayOpacitySpinner = panel.getSpinner("haloOverlayOpacitySpinner");
     auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
-    lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
-    darknessOverlayOpacitySpinner = panel.getSpinner("darknessOverlayOpacitySpinner");
+    lumensOverlayOpacitySpinner = panel.getSpinner("lumensOverlayOpacitySpinner");
     fogOverlayOpacitySpinner = panel.getSpinner("fogOverlayOpacitySpinner");
     mapVisibilityWarning = panel.getCheckBox("mapVisibilityWarning");
 
@@ -709,19 +707,11 @@ public class PreferencesDialog extends JDialog {
             MapTool.getFrame().refresh();
           }
         });
-    lightOverlayOpacitySpinner.addChangeListener(
+    lumensOverlayOpacitySpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setLightOverlayOpacity(value);
-            MapTool.getFrame().refresh();
-          }
-        });
-    darknessOverlayOpacitySpinner.addChangeListener(
-        new ChangeListenerProxy() {
-          @Override
-          protected void storeSpinnerValue(int value) {
-            AppPreferences.setDarknessOverlayOpacity(value);
+            AppPreferences.setLumensOverlayOpacity(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1093,10 +1083,8 @@ public class PreferencesDialog extends JDialog {
         new SpinnerNumberModel(AppPreferences.getHaloOverlayOpacity(), 0, 255, 1));
     auraOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getAuraOverlayOpacity(), 0, 255, 1));
-    lightOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getLightOverlayOpacity(), 0, 255, 1));
-    darknessOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getDarknessOverlayOpacity(), 0, 255, 1));
+    lumensOverlayOpacitySpinner.setModel(
+        new SpinnerNumberModel(AppPreferences.getLumensOverlayOpacity(), 0, 255, 1));
     fogOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getFogOverlayOpacity(), 0, 255, 1));
 

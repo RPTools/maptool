@@ -15,21 +15,18 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.geom.Area;
-import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 
 public class DrawableLight {
 
   private DrawablePaint paint;
   private Area area;
-  private LightSource.Type type;
   private int lumens;
 
-  public DrawableLight(LightSource.Type type, DrawablePaint paint, Area area, int lumens) {
+  public DrawableLight(DrawablePaint paint, Area area, int lumens) {
     super();
     this.paint = paint;
     this.area = area;
-    this.type = type;
     this.lumens = lumens;
   }
 
@@ -39,10 +36,6 @@ public class DrawableLight {
 
   public Area getArea() {
     return area;
-  }
-
-  public LightSource.Type getType() {
-    return type;
   }
 
   public int getLumens() {

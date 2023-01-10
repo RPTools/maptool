@@ -271,6 +271,16 @@ public class AppMenuBar extends JMenuBar {
     menu.add(gridSizeMenu);
 
     menu.addSeparator();
+    JCheckBoxMenuItem toggleLumensOverlay =
+        new RPCheckBoxMenuItem(AppActions.TOGGLE_LUMENS_OVERLAY, menu);
+    toggleLumensOverlay.setSelected(AppState.isShowLumensOverlay());
+    menu.add(toggleLumensOverlay);
+    JCheckBoxMenuItem toggleShowLights =
+        new RPCheckBoxMenuItem(AppActions.TOGGLE_SHOW_LIGHTS, menu);
+    toggleShowLights.setSelected(AppState.isShowLights());
+    menu.add(toggleShowLights);
+
+    menu.addSeparator();
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_DRAW_MEASUREMENTS, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_DOUBLE_WIDE, menu));
 

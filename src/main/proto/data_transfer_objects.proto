@@ -74,9 +74,7 @@ message LightSourceDto {
   google.protobuf.StringValue name = 2;
   google.protobuf.StringValue id = 3;
   LightTypeDto type = 4;
-  ShapeTypeDto shape_type = 5;
-  int32 lumens = 6;;
-  bool scale_with_token = 7;
+  bool scale_with_token = 5;
 }
 
 enum ShapeTypeDto {
@@ -95,6 +93,7 @@ message LightDto {
   ShapeTypeDto shape = 5;
   bool is_gm = 6;
   bool owner_only = 7;
+  int32 lumens = 8;
 }
 
 message LocationDto {
