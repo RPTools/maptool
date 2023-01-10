@@ -219,9 +219,7 @@ public class ZoneView {
         continue;
       }
       SightType sight = MapTool.getCampaign().getSightType(sightName);
-      Area visibleArea =
-          calculateLightSourceArea(
-              lightSource, lightSourceToken, sight, attachedLightSource.getDirection());
+      Area visibleArea = calculateLightSourceArea(lightSource, lightSourceToken, sight);
 
       if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
         var lumens = lightSource.getLumens();
@@ -245,12 +243,11 @@ public class ZoneView {
    * @param lightSource the personal light source.
    * @param lightSourceToken the token holding the light source.
    * @param sight the sight type.
-   * @param direction the direction of the light source.
    * @return the area visible.
    */
   private Area calculatePersonalLightSourceArea(
-      LightSource lightSource, Token lightSourceToken, SightType sight, Direction direction) {
-    return calculateLightSourceArea(lightSource, lightSourceToken, sight, direction, true);
+      LightSource lightSource, Token lightSourceToken, SightType sight) {
+    return calculateLightSourceArea(lightSource, lightSourceToken, sight, true);
   }
 
   /**
@@ -260,12 +257,11 @@ public class ZoneView {
    * @param lightSource the light source. Not a personal light.
    * @param lightSourceToken the token holding the light source.
    * @param sight the sight type.
-   * @param direction the direction of the light source.
    * @return the area visible.
    */
   private Area calculateLightSourceArea(
-      LightSource lightSource, Token lightSourceToken, SightType sight, Direction direction) {
-    return calculateLightSourceArea(lightSource, lightSourceToken, sight, direction, false);
+      LightSource lightSource, Token lightSourceToken, SightType sight) {
+    return calculateLightSourceArea(lightSource, lightSourceToken, sight, false);
   }
 
   /**
@@ -275,21 +271,16 @@ public class ZoneView {
    * @param lightSource the light source. Not a personal light.
    * @param lightSourceToken the token holding the light source.
    * @param sight the sight type.
-   * @param direction the direction of the light source.
    * @param isPersonalLight is the light a personal light?
    * @return the area visible.
    */
   private Area calculateLightSourceArea(
-      LightSource lightSource,
-      Token lightSourceToken,
-      SightType sight,
-      Direction direction,
-      boolean isPersonalLight) {
+      LightSource lightSource, Token lightSourceToken, SightType sight, boolean isPersonalLight) {
     if (sight == null) {
       return null;
     }
     Point p = FogUtil.calculateVisionCenter(lightSourceToken, zone);
-    Area lightSourceArea = lightSource.getArea(lightSourceToken, zone, direction);
+    Area lightSourceArea = lightSource.getArea(lightSourceToken, zone);
 
     // Calculate exposed area
     // Jamz: OK, let not have lowlight vision type multiply darkness radius
@@ -307,8 +298,7 @@ public class ZoneView {
             getTopologyTree(Zone.TopologyType.PIT_VBL));
 
     if (visibleArea != null && lightSource.getType() == LightSource.Type.NORMAL) {
-      addLightSourceToCache(
-          visibleArea, p, lightSource, lightSourceToken, sight, direction, isPersonalLight);
+      addLightSourceToCache(visibleArea, p, lightSource, lightSourceToken, sight, isPersonalLight);
     }
     return visibleArea;
   }
@@ -322,7 +312,6 @@ public class ZoneView {
    * @param lightSource the light source
    * @param lightSourceToken the light source token
    * @param sight the sight
-   * @param direction the direction of the light source
    */
   private void addLightSourceToCache(
       Area visibleArea,
@@ -330,12 +319,11 @@ public class ZoneView {
       LightSource lightSource,
       Token lightSourceToken,
       SightType sight,
-      Direction direction,
       boolean isPersonalLight) {
     // Keep track of colored light
     Set<DrawableLight> lightSet = new HashSet<DrawableLight>();
     for (Light light : lightSource.getLightList()) {
-      Area lightArea = lightSource.getArea(lightSourceToken, zone, direction, light);
+      Area lightArea = lightSource.getArea(lightSourceToken, zone, light);
       if (sight.getMultiplier() != 1) {
         lightArea.transform(
             AffineTransform.getScaleInstance(sight.getMultiplier(), sight.getMultiplier()));
@@ -475,8 +463,7 @@ public class ZoneView {
       // Check for personal vision and add to overall light map
       if (sight.hasPersonalLightSource()) {
         Area lightArea =
-            calculatePersonalLightSourceArea(
-                sight.getPersonalLightSource(), token, sight, Direction.CENTER);
+            calculatePersonalLightSourceArea(sight.getPersonalLightSource(), token, sight);
         if (lightArea != null) {
           var lumens = sight.getPersonalLightSource().getLumens();
           lumens = (lumens == 0) ? LUMEN_VISION : lumens;
@@ -559,7 +546,7 @@ public class ZoneView {
             continue;
           }
 
-          Area lightSourceArea = lightSource.getArea(token, zone, Direction.CENTER);
+          Area lightSourceArea = lightSource.getArea(token, zone);
           Area visibleArea =
               FogUtil.calculateVisibility(
                   p.x,
@@ -591,7 +578,7 @@ public class ZoneView {
             }
 
             // Calculate the area covered by this particular range.
-            Area lightArea = lightSource.getArea(token, zone, Direction.CENTER, light);
+            Area lightArea = lightSource.getArea(token, zone, light);
             if (lightArea == null) {
               continue;
             }

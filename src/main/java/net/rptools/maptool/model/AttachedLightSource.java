@@ -19,24 +19,17 @@ import net.rptools.maptool.server.proto.AttachedLightSourceDto;
 public class AttachedLightSource {
 
   private GUID lightSourceId;
-  private String direction;
 
   public AttachedLightSource() {
     // for serialization
   }
 
-  private AttachedLightSource(GUID lightSourceId, String direction) {
+  private AttachedLightSource(GUID lightSourceId) {
     this.lightSourceId = lightSourceId;
-    this.direction = direction;
   }
 
-  public AttachedLightSource(LightSource source, Direction direction) {
+  public AttachedLightSource(LightSource source) {
     lightSourceId = source.getId();
-    this.direction = direction.name();
-  }
-
-  public Direction getDirection() {
-    return direction != null ? Direction.valueOf(direction) : Direction.CENTER;
   }
 
   public GUID getLightSourceId() {
@@ -44,13 +37,12 @@ public class AttachedLightSource {
   }
 
   public static AttachedLightSource fromDto(AttachedLightSourceDto dto) {
-    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()), dto.getDirection());
+    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()));
   }
 
   public AttachedLightSourceDto toDto() {
     var dto = AttachedLightSourceDto.newBuilder();
     dto.setLightSourceId(getLightSourceId().toString());
-    dto.setDirection(getDirection().name());
     return dto.build();
   }
 }

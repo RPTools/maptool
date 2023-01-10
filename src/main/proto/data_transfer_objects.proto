@@ -379,7 +379,6 @@ message TerrainModifierOperationListDto {
 
 message AttachedLightSourceDto {
   string light_source_id = 1;
-  string direction = 2;
 }
 
 message MacroButtonPropertiesDto {
