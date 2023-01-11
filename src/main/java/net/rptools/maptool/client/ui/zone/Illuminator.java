@@ -39,24 +39,23 @@ public class Illuminator {
   public record LitArea(int lumens, Area area) {}
 
   /** Nodes are ordered from low lumens strength to high lumens strength. */
-  private final ArrayList<Node> nodes = new ArrayList<>();
+  private final ArrayList<IlluminationNode> nodes = new ArrayList<>();
 
   public void add(LitArea litArea) {
     final var lumens = litArea.lumens();
     final var lumensStrength = Math.abs(lumens);
-    final var isDarkness = lumens < 0;
 
     var index =
         Collections.binarySearch(
             Lists.transform(nodes, node -> node.lumensStrength), lumensStrength, Integer::compare);
     // If index is negative, it corresponds to the insertion point, so use then when creating
     // a new node.
-    final Node node;
+    final IlluminationNode node;
     if (index >= 0) {
       node = nodes.get(index);
     } else {
       index = -index - 1;
-      node = new Node(lumensStrength);
+      node = new IlluminationNode(lumensStrength);
       nodes.add(index, node);
     }
 
@@ -64,8 +63,7 @@ public class Illuminator {
 
     if (node.isValidated) {
       // We can easily keep it validated, so do so.
-      final var path = isDarkness ? node.totalDarknessArea : node.totalLightArea;
-      path.append(litArea.area().getPathIterator(null, 1), false);
+      extendPath(node, litArea);
     }
   }
 
@@ -85,7 +83,23 @@ public class Illuminator {
     }
   }
 
-  private void revalidateNode(Node node) {
+  /**
+   * Utility method for adding a {@link net.rptools.maptool.client.ui.zone.Illuminator.LitArea}'s
+   * area to {@link net.rptools.maptool.client.ui.zone.Illuminator.IlluminationNode}'s union paths.
+   *
+   * <p>If the lit area is darkness, it will be added to {@code node.totalDarknessArea}, otherwise
+   * it will be added to {@code node.totalLightArea}.
+   *
+   * @param node The node to extend.
+   * @param litArea The area to add to the node.
+   */
+  private void extendPath(IlluminationNode node, LitArea litArea) {
+    final var isDarkness = litArea.lumens() < 0;
+    final var path = isDarkness ? node.totalDarknessArea : node.totalLightArea;
+    path.append(litArea.area().getPathIterator(null, 1), false);
+  }
+
+  private void revalidateNode(IlluminationNode node) {
     if (node.isValidated) {
       return;
     }
@@ -93,9 +107,7 @@ public class Illuminator {
     node.totalLightArea = new Path2D.Double();
     node.totalDarknessArea = new Path2D.Double();
     for (final var litArea : node.contributingLitAreas) {
-      final var isDarkness = litArea.lumens() < 0;
-      final var path = isDarkness ? node.totalDarknessArea : node.totalLightArea;
-      path.append(litArea.area().getPathIterator(null, 1), false);
+      extendPath(node, litArea);
     }
 
     node.isValidated = true;
@@ -131,7 +143,18 @@ public class Illuminator {
     return new Illumination(lumensLevels);
   }
 
-  private static final class Node {
+  /**
+   * An {@code IlluminationNode} collects all {@link
+   * net.rptools.maptool.client.ui.zone.Illuminator.LitArea} for a given lumens strength. Light and
+   * darkness of the same magnitude are collected in the same node as it make certain operations
+   * easier.
+   *
+   * <p>The node also holds the union of all light and the union of all darkness, represented as a
+   * {@link java.awt.geom.Path2D}. This allows us to - relatively quickly - keep the unioned area
+   * up-to-date as {@code LitArea}s are added. Any removals invalidate the node and require the
+   * union to be recalculated.
+   */
+  private static final class IlluminationNode {
     /** The absolute value of the lumens of all lights represented by this node. */
     public final int lumensStrength;
 
@@ -156,7 +179,7 @@ public class Illuminator {
     public Path2D totalDarknessArea = new Path2D.Double();
     // endregion
 
-    public Node(int lumensStrength) {
+    public IlluminationNode(int lumensStrength) {
       this.lumensStrength = lumensStrength;
     }
   }
