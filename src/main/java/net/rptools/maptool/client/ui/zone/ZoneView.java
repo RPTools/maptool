@@ -867,20 +867,12 @@ public class ZoneView {
       return;
     }
     // Cache it
+    final var illumination = getIllumination(view);
+    // We _could_ instead union up all the individual token's areas, but we already have the same
+    // result via the view's illumination.
     VisibleAreaMeta meta = new VisibleAreaMeta();
-    meta.visibleArea = new Area();
-
+    meta.visibleArea = illumination.getVisibleArea();
     visibleAreaMap.put(view, meta);
-
-    // Calculate it
-    getTokensForView(view)
-        .forEach(
-            token -> {
-              Area tokenVision = getVisibleArea(token, view);
-              if (tokenVision != null) {
-                meta.visibleArea.add(tokenVision);
-              }
-            });
   }
 
   @Subscribe
