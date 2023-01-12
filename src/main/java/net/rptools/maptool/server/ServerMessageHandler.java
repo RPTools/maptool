@@ -37,7 +37,8 @@ import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.apache.tika.utils.ExceptionUtils;
 
 /**
@@ -52,7 +53,7 @@ import org.apache.tika.utils.ExceptionUtils;
 public class ServerMessageHandler implements MessageHandler {
   private final MapToolServer server;
   private final Object MUTEX = new Object();
-  private static final Logger log = Logger.getLogger(ServerMessageHandler.class);
+  private static final Logger log = LogManager.getLogger(ServerMessageHandler.class);
 
   public ServerMessageHandler(MapToolServer server) {
     this.server = server;
