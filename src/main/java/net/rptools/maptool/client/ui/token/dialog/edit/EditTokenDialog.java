@@ -718,10 +718,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
-    Component barPanel = null;
+    Container barPanel = null;
     for (Component stateComponent : stateComponents) {
       if ("bar".equals(stateComponent.getName())) {
-        barPanel = stateComponent;
+        barPanel = (Container) stateComponent;
         continue;
       }
       Component[] components = ((Container) stateComponent).getComponents();
@@ -734,10 +734,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // BARS
     if (barPanel != null) {
-      Component[] bars = ((Container) barPanel).getComponents();
-      for (int i = 0; i < bars.length; i += 2) {
-        JCheckBox cb = (JCheckBox) ((Container) bars[i]).getComponent(1);
-        JSlider bar = (JSlider) bars[i + 1];
+      for (var barContainer : barPanel.getComponents()) {
+        var barComponents = ((Container) barContainer).getComponents();
+
+        JSlider bar = (JSlider) barComponents[1];
+        JCheckBox cb = (JCheckBox) barComponents[2];
+
         BigDecimal value =
             cb.isSelected() ? null : new BigDecimal(bar.getValue()).divide(new BigDecimal(100));
         token.setState(bar.getName(), value);
