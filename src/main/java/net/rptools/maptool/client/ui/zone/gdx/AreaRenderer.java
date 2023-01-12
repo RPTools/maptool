@@ -14,11 +14,16 @@
  */
 package net.rptools.maptool.client.ui.zone.gdx;
 
+//import com.badlogic.gdx.graphics.g2d.RepeatablePolygonSprite;
+import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Bezier;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
+
+import net.rptools.lib.gdx.RepeatablePolygonSprite;
 import space.earlygrey.shapedrawer.JoinType;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
@@ -34,8 +39,19 @@ public class AreaRenderer {
   private Vector2 tmpVector3 = new Vector2();
   private Vector2 tmpVectorOut = new Vector2();
 
+ // private RepeatablePolygonSprite polygonSprite = new RepeatablePolygonSprite();
+  private TextureRegion textureRegion = null;
+
   public AreaRenderer(ShapeDrawer drawer) {
     this.drawer = drawer;
+  }
+
+  public TextureRegion getTextureRegion() {
+    return textureRegion;
+  }
+
+  public void setTextureRegion(TextureRegion textureRegion) {
+    this.textureRegion = textureRegion;
   }
 
   public void fillArea(Area area) {
@@ -59,7 +75,15 @@ public class AreaRenderer {
       if (lastX != tmpFloat.get(0) && lastY != tmpFloat.get(1))
         tmpFloat.add(tmpFloat.get(0), tmpFloat.get(1));
 
-      drawer.filledPolygon(tmpFloat.toArray());
+      if(textureRegion == null) {
+        drawer.filledPolygon(tmpFloat.toArray());
+      } else {
+        var sprite = new RepeatablePolygonSprite();
+       // sprite.setPolygon(textureRegion, tmpFloat.toArray());
+        sprite.setTextureRegion(textureRegion);
+        sprite.setVertices(tmpFloat.toArray());
+        sprite.draw((PolygonSpriteBatch) drawer.getBatch());
+      }
     } else {
       if (tmpFloat.get(0) == tmpFloat.get(tmpFloat.size - 2)
           && tmpFloat.get(1) == tmpFloat.get(tmpFloat.size - 1)) {

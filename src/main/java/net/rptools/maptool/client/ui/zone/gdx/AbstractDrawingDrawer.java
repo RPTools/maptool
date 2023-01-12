@@ -15,13 +15,15 @@
 package net.rptools.maptool.client.ui.zone.gdx;
 
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.Pixmap;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.FloatArray;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.Pen;
+
+import net.rptools.maptool.model.drawing.*;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 
 public abstract class AbstractDrawingDrawer {
@@ -40,6 +42,16 @@ public abstract class AbstractDrawingDrawer {
       var colorPaint = (DrawableColorPaint) pen.getBackgroundPaint();
       Color.argb8888ToColor(tmpColor, colorPaint.getColor());
       drawer.setColor(tmpColor);
+      areaRenderer.setTextureRegion(null);
+    } else if(pen.getBackgroundPaint() instanceof DrawableTexturePaint texturePaint) {
+      var image = texturePaint.getAsset().getData();
+      var pix = new Pixmap(image, 0, image.length);
+
+      //FIXME properly dispose
+      var region = new TextureRegion(new Texture(pix));
+      region.flip(false, true);
+      areaRenderer.setTextureRegion(region);
+      pix.dispose();
     }
     drawBackground(element, pen);
 
