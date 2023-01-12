@@ -94,7 +94,7 @@ public class isVisibleFunction extends AbstractFunction {
     int x = ((BigDecimal) param.get(0)).intValue();
     int y = ((BigDecimal) param.get(1)).intValue();
 
-    Area visArea = zr.getZoneView().getVisibleArea(token);
+    Area visArea = zr.getZoneView().getVisibleArea(token, zr.getPlayerView());
     if (visArea == null) {
       return BigDecimal.ZERO;
     }

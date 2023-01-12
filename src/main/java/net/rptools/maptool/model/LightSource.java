@@ -15,9 +15,6 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.io.IOException;
 import java.util.LinkedList;
@@ -141,73 +138,27 @@ public class LightSource implements Comparable<LightSource> {
   /*
    * Area for a single light, subtracting any previous lights
    */
-  public Area getArea(Token token, Zone zone, Direction position, Light light) {
+  public Area getArea(Token token, Zone zone, Light light) {
     Area area = light.getArea(token, zone, scaleWithToken);
     // TODO: This seems horribly inefficient
     // Subtract out the lights that are previously defined
     for (int i = getLightList().indexOf(light) - 1; i >= 0; i--) {
       Light lessLight = getLightList().get(i);
-      area.subtract(getArea(token, zone, position, lessLight.getArea(token, zone, scaleWithToken)));
+      area.subtract(lessLight.getArea(token, zone, scaleWithToken));
     }
-    return getArea(token, zone, position, area);
+    return area;
   }
 
   /* Area for all lights combined */
-  public Area getArea(Token token, Zone zone, Direction position) {
+  public Area getArea(Token token, Zone zone) {
     Area area = new Area();
 
     for (Light light : getLightList()) {
       area.add(light.getArea(token, zone, isScaleWithToken()));
     }
-    return getArea(token, zone, position, area);
-  }
 
-  private Area getArea(Token token, Zone zone, Direction position, Area area) {
-    Grid grid = zone.getGrid();
-    Rectangle footprintBounds =
-        token
-            .getFootprint(grid)
-            .getBounds(grid, grid.convert(new ZonePoint(token.getX(), token.getY())));
-
-    int tx = 0;
-    int ty = 0;
-    switch (position) {
-      case NW:
-        tx -= footprintBounds.width / 2;
-        ty -= footprintBounds.height / 2;
-        break;
-      case N:
-        ty -= footprintBounds.height / 2;
-        break;
-      case NE:
-        tx += footprintBounds.width / 2;
-        ty -= footprintBounds.height / 2;
-        break;
-      case W:
-        tx -= footprintBounds.width / 2;
-        break;
-      case CENTER:
-        break;
-      case E:
-        tx += footprintBounds.width / 2;
-        break;
-      case SW:
-        tx -= footprintBounds.width / 2;
-        ty += footprintBounds.height / 2;
-        break;
-      case S:
-        ty += footprintBounds.height / 2;
-        break;
-      case SE:
-        tx += footprintBounds.width / 2;
-        ty += footprintBounds.height / 2;
-        break;
-    }
-    area.transform(AffineTransform.getTranslateInstance(tx, ty));
     return area;
   }
-
-  public void render(Graphics2D g, Token token, Grid grid) {}
 
   @SuppressWarnings("unchecked")
   public static Map<String, List<LightSource>> getDefaultLightSources() throws IOException {

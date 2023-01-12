@@ -144,7 +144,7 @@ public class FacingTool extends DefaultTool {
       }
 
       if (revealFog) {
-        visibleArea = renderer.getZoneView().getVisibleArea(token);
+        visibleArea = renderer.getZoneView().getVisibleArea(token, renderer.getPlayerView());
         remoteSelected.add(token.getId());
         renderer.getZone().exposeArea(visibleArea, token);
       }

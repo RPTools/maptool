@@ -907,8 +907,8 @@ public class Token implements Cloneable {
     return imageTableName;
   }
 
-  public void addLightSource(LightSource source, Direction direction) {
-    lightSourceList.add(new AttachedLightSource(source, direction));
+  public void addLightSource(LightSource source) {
+    lightSourceList.add(new AttachedLightSource(source));
   }
 
   public void removeLightSourceType(LightSource.Type lightType) {
@@ -2753,9 +2753,7 @@ public class Token implements Cloneable {
         break;
       case addLightSource:
         lightChanged = true;
-        addLightSource(
-            LightSource.fromDto(parameters.get(0).getLightSource()),
-            Direction.valueOf(parameters.get(1).getStringValue()));
+        addLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
         break;
       case setHasSight:
         if (hasLightSources()) {
