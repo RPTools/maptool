@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
@@ -43,7 +44,6 @@ import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.ConvexHull;
-import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -69,7 +69,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private Area fowExposedArea = new Area();
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
-  private ShapeReader shapeReader = new ShapeReader(geometryFactory);
   private PreparedGeometry vblGeometry = null;
   private PreparedGeometry fowExposedAreaGeometry = null;
   // private long avgRetrieveTime;
@@ -237,8 +236,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.vblGeometry = null;
       } else {
         try {
-          var vblGeometry =
-              shapeReader.read(new ReverseShapePathIterator(vbl.getPathIterator(null)));
+          var vblGeometry = GeometryUtil.toJts(vbl);
 
           // polygons
           if (!vblGeometry.isValid()) {
@@ -265,8 +263,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
-          var fowExposedAreaGeometry =
-              shapeReader.read(new ReverseShapePathIterator(fowExposedArea.getPathIterator(null)));
+          var fowExposedAreaGeometry = GeometryUtil.toJts(fowExposedArea);
 
           // polygons
           if (!fowExposedAreaGeometry.isValid()) {
