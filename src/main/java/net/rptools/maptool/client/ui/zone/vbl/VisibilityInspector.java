@@ -147,7 +147,6 @@ public class VisibilityInspector extends JPanel {
             pitVblTree);
 
     final var obstructedVision = new Area(unobstructedVision);
-    obstructedVision.transform(AffineTransform.getTranslateInstance(point.getX(), point.getY()));
 
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
     if (vision != null) {
