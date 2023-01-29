@@ -30,12 +30,12 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
 import net.rptools.maptool.client.ui.zone.vbl.VisibilitySweepEndpoint;
 import net.rptools.maptool.client.ui.zone.vbl.VisionBlockingAccumulator;
-import net.rptools.maptool.client.walker.astar.ReverseShapePathIterator;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
@@ -50,7 +50,6 @@ import net.rptools.maptool.model.player.Player.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.Orientation;
-import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
@@ -58,7 +57,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 import org.locationtech.jts.geom.util.LineStringExtracter;
@@ -66,8 +64,7 @@ import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
-  private static final PrecisionModel precisionModel = new PrecisionModel(100000);
-  private static final GeometryFactory geometryFactory = new GeometryFactory(precisionModel);
+  private static final GeometryFactory geometryFactory = GeometryUtil.getGeometryFactory();
 
   /**
    * Return the visible area for an origin, a lightSourceArea and a VBL.
@@ -79,11 +76,8 @@ public class FogUtil {
    */
   public static Area calculateVisibility(
       Point origin, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
-    final var shapeReader = new ShapeReader(geometryFactory);
     // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
-    final var visionGeometry =
-        PreparedGeometryFactory.prepare(
-            shapeReader.read(new ReverseShapePathIterator(vision.getPathIterator(null))));
+    final var visionGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vision));
 
     /*
      * Find the visible area for each topology type independently.

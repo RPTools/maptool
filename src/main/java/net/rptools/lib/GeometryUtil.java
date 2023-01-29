@@ -14,11 +14,21 @@
  */
 package net.rptools.lib;
 
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
+import org.locationtech.jts.awt.ShapeReader;
+import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.operation.polygonize.Polygonizer;
 
 public class GeometryUtil {
   private static final PrecisionModel precisionModel = new PrecisionModel(1_000_000.0);
+  private static final GeometryFactory geometryFactory = new GeometryFactory(precisionModel);
 
   public static double getAngle(Point2D origin, Point2D target) {
     double angle =
@@ -45,5 +55,25 @@ public class GeometryUtil {
 
   public static PrecisionModel getPrecisionModel() {
     return precisionModel;
+  }
+
+  public static GeometryFactory getGeometryFactory() {
+    return geometryFactory;
+  }
+
+  public static Geometry toJts(Area area) {
+    final var pathIterator = area.getPathIterator(null);
+    final var polygonizer = new Polygonizer(true);
+    final var coords = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
+    final var geometries = new ArrayList<LineString>();
+    for (final var coordinateArray : coords) {
+      for (final var coord : coordinateArray) {
+        precisionModel.makePrecise(coord);
+      }
+      final var lineString = geometryFactory.createLineString(coordinateArray);
+      geometries.add(lineString);
+    }
+    polygonizer.add(geometries);
+    return polygonizer.getGeometry();
   }
 }
