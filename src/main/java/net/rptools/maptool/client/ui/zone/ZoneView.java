@@ -455,6 +455,13 @@ public class ZoneView {
         illuminationKey, key -> getUpToDateIlluminator(key).getIllumination());
   }
 
+  /**
+   * Add personal lights and daylight for a token, as well as any normal lights if the token is
+   * temporary.
+   *
+   * @param token
+   * @return All extra light contributions to be made for this token.
+   */
   private @Nonnull List<ContributedLight> getPersonalTokenContributions(Token token) {
     if (!token.getHasSight()) {
       return Collections.emptyList();
@@ -475,6 +482,14 @@ public class ZoneView {
         final var contributedLight = ContributedLight.forDaylight(tokenVisibleArea);
         // Treat the entire visible area like a light source of minimal lumens.
         personalLights.add(contributedLight);
+      }
+
+      if (token.hasLightSources()
+          && !lightSourceMap
+              .getOrDefault(LightSource.Type.NORMAL, Collections.emptySet())
+              .contains(token.getId())) {
+        // This accounts for temporary tokens (such as during an Expose Last Path)
+        personalLights.addAll(calculateLitAreas(token, sight.getMultiplier()));
       }
 
       if (sight.hasPersonalLightSource()) {
