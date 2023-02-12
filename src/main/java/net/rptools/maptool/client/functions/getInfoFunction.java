@@ -138,6 +138,7 @@ public class getInfoFunction extends AbstractFunction {
 
     String visionType = zone.getVisionType().name();
     minfo.addProperty("vision type", visionType);
+    minfo.addProperty("vision distance", zone.getTokenVisionDistance());
 
     JsonObject ginfo = new JsonObject();
 
