@@ -161,7 +161,7 @@ public class InitiativePanel extends JPanel
     toolBar.add(Box.createHorizontalStrut(8));
 
     // ensure that the preferred width is enough to show the round counter in fullscreen
-    round.setText(I18N.getText("initPanel.round") + " 99");
+    round.setText(I18N.getText("initPanel.round") + "WWW");
     round.setPreferredSize(round.getMinimumSize());
     round.setText("");
 
