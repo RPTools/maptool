@@ -36,6 +36,8 @@ public class AppState {
   private static boolean enforceNotification = false;
   private static File campaignFile;
   private static int gridSize = 1;
+  private static boolean showLumensOverlay = true;
+  private static boolean showLights = false;
   private static boolean showAsPlayer = false;
   private static boolean showLightSources = false;
   private static boolean zoomLocked = false;
@@ -170,6 +172,22 @@ public class AppState {
 
   public static boolean getShowTextLabels() {
     return showTextLabels;
+  }
+
+  public static boolean isShowLights() {
+    return showLights;
+  }
+
+  public static void setShowLights(boolean show) {
+    showLights = show;
+  }
+
+  public static boolean isShowLumensOverlay() {
+    return showLumensOverlay;
+  }
+
+  public static void setShowLumensOverlay(boolean show) {
+    showLumensOverlay = show;
   }
 
   public static boolean isShowAsPlayer() {

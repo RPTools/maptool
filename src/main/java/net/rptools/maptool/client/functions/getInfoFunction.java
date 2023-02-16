@@ -327,8 +327,6 @@ public class getInfoFunction extends AbstractFunction {
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
         linfo.addProperty("type", ls.getType().toString());
-        linfo.addProperty("shape", ls.getShapeType().toString());
-        linfo.addProperty("lumens", ls.getLumens());
         linfo.addProperty("scale", ls.isScaleWithToken());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
