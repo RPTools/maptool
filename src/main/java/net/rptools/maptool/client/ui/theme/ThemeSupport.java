@@ -15,8 +15,7 @@
 package net.rptools.maptool.client.ui.theme;
 
 import com.formdev.flatlaf.FlatIconColors;
-import com.formdev.flatlaf.IntelliJTheme;
-import com.formdev.flatlaf.IntelliJTheme.ThemeLaf;
+import com.formdev.flatlaf.FlatLaf;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
@@ -34,6 +33,10 @@ import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.themes.AahLAF;
+import net.rptools.maptool.client.ui.themes.AahLAF_LP;
+import net.rptools.maptool.client.ui.themes.AahLAF_SP;
+import net.rptools.maptool.client.ui.themes.AahLAF_VLP;
 import net.rptools.maptool.events.MapToolEventBus;
 
 /** Class used to implement Theme support for MapTool. */
@@ -96,7 +99,6 @@ public class ThemeSupport {
       this.lightIconColor = lightIconColor;
       this.darkIconColor = darkIconColor;
     }
-    ;
 
     String getPropertyName() {
       return propertyName;
@@ -135,10 +137,7 @@ public class ThemeSupport {
    * @param imagePath the path to an example image of the theme
    */
   public record ThemeDetails(
-      String name,
-      Class<? extends IntelliJTheme.ThemeLaf> themeClass,
-      String imagePath,
-      boolean dark) {}
+      String name, Class<? extends FlatLaf> themeClass, String imagePath, boolean dark) {}
 
   /** The list of themes that are available. */
   public static final ThemeDetails[] THEMES =
@@ -475,6 +474,10 @@ public class ThemeSupport {
             com.formdev.flatlaf.intellijthemes.FlatXcodeDarkIJTheme.class,
             "Xcode-Dark.png",
             true),
+        new ThemeDetails("Aah", AahLAF.class, "Aah.png", false),
+        new ThemeDetails("Aah(Large Print)", AahLAF_LP.class, "Aah-LP.png", false),
+        new ThemeDetails("Aah(Small Print)", AahLAF_SP.class, "Aah-SP.png", false),
+        new ThemeDetails("Aah(Very Large Print)", AahLAF_VLP.class, "Aah-VLP.png", false),
       };
 
   /** The current theme being used. */
@@ -484,7 +487,7 @@ public class ThemeSupport {
   private static ThemeDetails pendingThemeDetails = currentThemeDetails;
 
   /** The current look and feel in use. */
-  private static IntelliJTheme.ThemeLaf currentLaf;
+  private static FlatLaf currentLaf;
 
   /** Should the chat window use the colors from the theme. */
   private static boolean useThemeColorsForChat = false;
@@ -533,7 +536,7 @@ public class ThemeSupport {
    *
    * @param laf the look and feel to use.
    */
-  private static void setLaf(ThemeLaf laf) {
+  private static void setLaf(FlatLaf laf) {
     currentLaf = laf;
   }
 

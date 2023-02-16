@@ -138,6 +138,7 @@ public class getInfoFunction extends AbstractFunction {
 
     String visionType = zone.getVisionType().name();
     minfo.addProperty("vision type", visionType);
+    minfo.addProperty("vision distance", zone.getTokenVisionDistance());
 
     JsonObject ginfo = new JsonObject();
 
@@ -326,6 +327,9 @@ public class getInfoFunction extends AbstractFunction {
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
         linfo.addProperty("type", ls.getType().toString());
+        linfo.addProperty("shape", ls.getShapeType().toString());
+        linfo.addProperty("lumens", ls.getLumens());
+        linfo.addProperty("scale", ls.isScaleWithToken());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
         // lights.add(light);
