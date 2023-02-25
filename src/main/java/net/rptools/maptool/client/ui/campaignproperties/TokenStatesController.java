@@ -475,7 +475,9 @@ public class TokenStatesController
     String text = formPanel.getTextComponent(IMAGE).getText();
     var overlayType = OverlayType.values()[formPanel.getComboBox(TYPE).getSelectedIndex()];
     boolean hasImage =
-            !(overlayType == OverlayType.CornerImage || overlayType == OverlayType.GridImage || overlayType == OverlayType.Image)
+        !(overlayType == OverlayType.CornerImage
+                || overlayType == OverlayType.GridImage
+                || overlayType == OverlayType.Image)
             || text != null && (text = text.trim()).length() != 0;
     text = formPanel.getTextComponent(NAME).getText();
     boolean hasName = text != null && (text = text.trim()).length() != 0;
@@ -721,7 +723,9 @@ public class TokenStatesController
     // Check for overlays that don't use width
     BooleanTokenOverlay to = null;
     if (overlay == OverlayType.Dot) {
-      to = new ColorDotTokenOverlay(name, color, Quadrant.values()[formPanel.getComboBox(CORNER).getSelectedIndex()]);
+      to =
+          new ColorDotTokenOverlay(
+              name, color, Quadrant.values()[formPanel.getComboBox(CORNER).getSelectedIndex()]);
     } else if (overlay == OverlayType.Shaded) {
       to = new ShadedTokenOverlay(name, color);
     } // endif
@@ -783,7 +787,11 @@ public class TokenStatesController
         if (overlay == OverlayType.Image) {
           to = new ImageTokenOverlay(name, assetId);
         } else if (overlay == OverlayType.CornerImage) {
-          to = new CornerImageTokenOverlay(name, assetId, Quadrant.values()[formPanel.getComboBox(CORNER).getSelectedIndex()]);
+          to =
+              new CornerImageTokenOverlay(
+                  name,
+                  assetId,
+                  Quadrant.values()[formPanel.getComboBox(CORNER).getSelectedIndex()]);
         } else if (overlay == OverlayType.GridImage) {
           to = new FlowImageTokenOverlay(name, assetId, grid);
         } // endif
