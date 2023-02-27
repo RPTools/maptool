@@ -444,6 +444,10 @@ public class Zone {
    * @param keepIds Should the token ids stay the same.
    */
   public Zone(Zone zone, boolean keepIds) {
+    if (keepIds) {
+      this.id = zone.getId();
+    }
+
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;

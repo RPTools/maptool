@@ -167,6 +167,7 @@ public class Campaign {
    * @param campaign The campaign to copy from.
    */
   public Campaign(Campaign campaign) {
+    id = campaign.getId();
     name = campaign.getName();
 
     /*
