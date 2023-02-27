@@ -26,7 +26,7 @@ jobs:
           java-version: "17"
       - uses: axel-op/googlejavaformat-action@v3
         with:
-          args: "--dry-run --skip-sorting-imports --replace"
+          args: "--dry-run --skip-sorting-imports"
   build:
     name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
     runs-on:  ${{ matrix.os }}
