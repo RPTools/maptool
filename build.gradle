@@ -313,6 +313,9 @@ dependencies {
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.4'
 
+    // needed for preference dialog at runtime
+    implementation 'commons-beanutils:commons-beanutils:1.9.4'
+
     // RPTool Libs
     // default ressources (token, textures etc.)
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
