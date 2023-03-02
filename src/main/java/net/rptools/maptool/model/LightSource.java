@@ -89,16 +89,17 @@ public class LightSource implements Comparable<LightSource>, Serializable {
   @SuppressWarnings("ConstantConditions")
   @Serial
   private @Nonnull Object readResolve() {
+    final List<Light> originalLights =
+        Objects.requireNonNullElse(lightList, Collections.emptyList());
     final List<Light> lights;
     if (lumens == Integer.MIN_VALUE) {
       // This is an up-to-date Lightsource with lumens already stored in the Lights.
-      lights = this.lightList;
+      lights = originalLights;
     } else {
       // This is an old light source with a lumens value that needs to be pushed into the individual
       // Lights.
       lights = new ArrayList<>();
-      for (final var light :
-          Objects.requireNonNullElse(lightList, Collections.<Light>emptyList())) {
+      for (final var light : originalLights) {
         lights.add(
             new Light(
                 light.getShape(),
