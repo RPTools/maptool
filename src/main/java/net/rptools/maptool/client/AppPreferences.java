@@ -87,6 +87,15 @@ public class AppPreferences {
   private static final String KEY_LUMENS_OVERLAY_OPACITY = "lumensOverlayOpacity";
   private static final int DEFAULT_LUMENS_OVERLAY_OPACITY = 120;
 
+  private static final String KEY_LUMENS_OVERLAY_BORDER_THICKNESS = "lumensOverlayBorderThickness";
+  private static final int DEFAULT_LUMENS_OVERLAY_BORDER_THICKNESS = 5;
+
+  private static final String KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT = "lumensOverlayShowByDefault";
+  private static final boolean DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT = true;
+
+  private static final String KEY_LIGHTS_SHOW_BY_DEFAULT = "lightsShowByDefault";
+  private static final boolean DEFAULT_LIGHTS_SHOW_BY_DEFAULT = false;
+
   private static final String KEY_FOG_OVERLAY_OPACITY = "fogOverlayOpacity";
   private static final int DEFAULT_FOG_OVERLAY_OPACITY = 100;
 
@@ -345,6 +354,32 @@ public class AppPreferences {
   public static int getLumensOverlayOpacity() {
     int value = prefs.getInt(KEY_LUMENS_OVERLAY_OPACITY, DEFAULT_LUMENS_OVERLAY_OPACITY);
     return range0to255(value);
+  }
+
+  public static void setLumensOverlayBorderThickness(int thickness) {
+    prefs.putInt(KEY_LUMENS_OVERLAY_BORDER_THICKNESS, thickness);
+  }
+
+  public static int getLumensOverlayBorderThickness() {
+    return prefs.getInt(
+        KEY_LUMENS_OVERLAY_BORDER_THICKNESS, DEFAULT_LUMENS_OVERLAY_BORDER_THICKNESS);
+  }
+
+  public static void setLumensOverlayShowByDefault(boolean show) {
+    prefs.putBoolean(KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT, show);
+  }
+
+  public static boolean getLumensOverlayShowByDefault() {
+    return prefs.getBoolean(
+        KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT, DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT);
+  }
+
+  public static void setLightsShowByDefault(boolean show) {
+    prefs.putBoolean(KEY_LIGHTS_SHOW_BY_DEFAULT, show);
+  }
+
+  public static boolean getLightsShowByDefault() {
+    return prefs.getBoolean(KEY_LIGHTS_SHOW_BY_DEFAULT, DEFAULT_LIGHTS_SHOW_BY_DEFAULT);
   }
 
   public static void setFogOverlayOpacity(int size) {

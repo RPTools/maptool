@@ -1535,11 +1535,14 @@ public class ZoneRenderer extends JComponent
     overlayG.fill(area);
     timer.stop("renderLumensOverlay:drawLights:fillArea");
 
-    timer.start("renderLumensOverlay:drawLights:drawArea");
-    overlayG.setStroke(new BasicStroke(5.f));
-    overlayG.setPaint(Color.black);
-    overlayG.draw(area);
-    timer.stop("renderLumensOverlay:drawLights:drawArea");
+    final var borderThickness = AppPreferences.getLumensOverlayBorderThickness();
+    if (borderThickness > 0) {
+      timer.start("renderLumensOverlay:drawLights:drawArea");
+      overlayG.setStroke(new BasicStroke((float) borderThickness));
+      overlayG.setPaint(Color.black);
+      overlayG.draw(area);
+      timer.stop("renderLumensOverlay:drawLights:drawArea");
+    }
   }
 
   private void renderLumensOverlay(
