@@ -48,6 +48,7 @@ public class ServerConfig {
   private boolean personalServer;
   private String serverName;
   private String hostName;
+  private final boolean useEasyConnect;
 
   public static String getPersonalServerGMPassword() {
     return personalServerGMPassword;
@@ -60,6 +61,7 @@ public class ServerConfig {
   public ServerConfig() {
     playerPassword = getPersonalServerPlayerPassword();
     gmPassword = getPersonalServerGMPassword();
+    useEasyConnect = false;
   }
 
   public ServerConfig(
@@ -69,12 +71,24 @@ public class ServerConfig {
       int port,
       String serverName,
       String hostName) {
+    this(hostPlayerId, gmPassword, playerPassword, port, serverName, hostName, false);
+  }
+
+  public ServerConfig(
+      String hostPlayerId,
+      String gmPassword,
+      String playerPassword,
+      int port,
+      String serverName,
+      String hostName,
+      boolean useEasyConnect) {
     this.hostPlayerId = hostPlayerId;
     this.gmPassword = gmPassword;
     this.playerPassword = playerPassword;
     this.port = port;
     this.serverName = serverName;
     this.hostName = hostName;
+    this.useEasyConnect = useEasyConnect;
   }
 
   public String getHostPlayerId() {
@@ -123,6 +137,10 @@ public class ServerConfig {
 
   public String getHostName() {
     return hostName;
+  }
+
+  public boolean getUseEasyConnect() {
+    return useEasyConnect;
   }
 
   private static Random r = new Random();

@@ -72,6 +72,12 @@ public class AddOnLibrary implements Library {
   /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
+  /** The Asset for the library read me file. */
+  private final String readMeFile;
+
+  /** The Asset for the library license file. */
+  private final String licenseFile;
+
   /** The name of the add-on library. */
   private final String name;
 
@@ -192,6 +198,9 @@ public class AddOnLibrary implements Library {
 
     urlPathAssetMap = Collections.unmodifiableMap(urlsMap);
     mtsFunctionAssetMap = Collections.unmodifiableMap(mtsMap);
+
+    licenseFile = dto.getLicenseFile();
+    readMeFile = dto.getReadMeFile();
   }
 
   /**
@@ -247,7 +256,9 @@ public class AddOnLibrary implements Library {
             license,
             description,
             shortDescription,
-            allowsUriAccess));
+            allowsUriAccess,
+            readMeFile.isEmpty() ? null : readMeFile,
+            licenseFile.isEmpty() ? null : licenseFile));
   }
 
   /**
@@ -318,6 +329,32 @@ public class AddOnLibrary implements Library {
   public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
     String source = context.getSource().replaceFirst("(?i)^lib:", "");
     return context == null || source.equalsIgnoreCase(namespace);
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getReadMeAsset() {
+    if (readMeFile.isEmpty()) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    } else {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            var asset = pathAssetMap.get(readMeFile);
+            return Optional.of(AssetManager.getAsset(asset.getValue0()));
+          });
+    }
+  }
+
+  @Override
+  public CompletableFuture<Optional<Asset>> getLicenseAsset() {
+    if (licenseFile.isEmpty()) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    } else {
+      return CompletableFuture.supplyAsync(
+          () -> {
+            var asset = pathAssetMap.get(licenseFile);
+            return Optional.of(AssetManager.getAsset(asset.getValue0()));
+          });
+    }
   }
 
   @Override

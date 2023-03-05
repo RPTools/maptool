@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.data.LibraryData;
 
@@ -188,4 +189,18 @@ public interface Library {
    * @return if the context is able to access the private values in the library.
    */
   boolean canMTScriptAccessPrivate(MapToolMacroContext context);
+
+  /**
+   * Returns the {@link Asset} for the library readme file if it has one.
+   *
+   * @return the {@link Asset} for the library readme file if it has one.
+   */
+  CompletableFuture<Optional<Asset>> getReadMeAsset();
+
+  /**
+   * Returns the {@link Asset} for the library license file if it has one.
+   *
+   * @return the {@link Asset} for the library license file if it has one.
+   */
+  CompletableFuture<Optional<Asset>> getLicenseAsset();
 }

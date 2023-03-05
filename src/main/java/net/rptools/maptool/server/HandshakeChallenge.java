@@ -39,10 +39,11 @@ public class HandshakeChallenge {
     String toEncrypt = username + password;
     byte[] challenge = encryptor.doFinal(toEncrypt.getBytes(StandardCharsets.UTF_8));
     byte[] response;
+    var revPassword = new StringBuilder(password).reverse().toString();
     if (key.asymmetric()) {
-      response = password.getBytes(StandardCharsets.UTF_8);
+      response = revPassword.getBytes(StandardCharsets.UTF_8);
     } else {
-      response = encryptor.doFinal(password.getBytes(StandardCharsets.UTF_8));
+      response = encryptor.doFinal(revPassword.getBytes(StandardCharsets.UTF_8));
     }
     return new HandshakeChallenge(challenge, response);
   }
@@ -59,11 +60,12 @@ public class HandshakeChallenge {
     }
     String responseString = challengeString.replace(username, "");
     byte[] response;
+    var revPassword = new StringBuilder(responseString).reverse().toString();
     if (key.asymmetric()) {
-      response = responseString.getBytes(StandardCharsets.UTF_8);
+      response = revPassword.getBytes(StandardCharsets.UTF_8);
     } else {
       Cipher encryptor = CipherUtil.createEncryptor(key);
-      response = encryptor.doFinal(responseString.getBytes(StandardCharsets.UTF_8));
+      response = encryptor.doFinal(revPassword.getBytes(StandardCharsets.UTF_8));
     }
 
     return new HandshakeChallenge(challenge, response);

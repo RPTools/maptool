@@ -666,6 +666,22 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
+  public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
+    PlayerDetails pd = getPlayerDetails(player.getName());
+    if (pd == null) {
+      CompletableFuture.completedFuture(null);
+    }
+
+    return CompletableFuture.supplyAsync(
+        () -> {
+          assert pd != null;
+          Optional<PublicKeyDetails> key =
+              pd.publicKeyDetails().stream().filter(pk -> pk.md5Key().equals(md5key)).findFirst();
+          return key.isPresent();
+        });
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return playerExists(name);

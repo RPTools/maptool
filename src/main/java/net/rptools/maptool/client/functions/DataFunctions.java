@@ -43,6 +43,7 @@ public class DataFunctions extends AbstractFunction {
     super(
         0,
         4,
+        /* Commented out are only used for debugging.
         "data.listTypes",
         "data.listNamespaces",
         "data.createNamespace",
@@ -51,7 +52,7 @@ public class DataFunctions extends AbstractFunction {
         "data.listData",
         "data.clearData",
         "data.clearNamespace",
-        "data.clearAllData",
+        "data.clearAllData",*/
         "data.getStaticData");
   }
 

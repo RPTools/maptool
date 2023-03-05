@@ -23,6 +23,9 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.library.AddOnsAddedEvent;
+import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -77,6 +80,9 @@ public class AddOnLibraryManager {
     }
 
     library.initialize();
+    new MapToolEventBus()
+        .getMainEventBus()
+        .post(new AddOnsAddedEvent(Set.of(library.getLibraryInfo().join())));
   }
 
   /**
@@ -85,7 +91,12 @@ public class AddOnLibraryManager {
    * @param namespace the namespace of the library to deregister.
    */
   public void deregisterLibrary(String namespace) {
-    namespaceLibraryMap.remove(namespace.toLowerCase());
+    var removed = namespaceLibraryMap.remove(namespace.toLowerCase());
+    if (removed != null) {
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
+    }
   }
 
   /**
@@ -153,7 +164,16 @@ public class AddOnLibraryManager {
 
   /** Remove all the add-on libraries. */
   public void removeAllLibraries() {
-    namespaceLibraryMap.clear();
+    var libs =
+        namespaceLibraryMap.values().stream()
+            .map(AddOnLibrary::getLibraryInfo)
+            .map(CompletableFuture::join)
+            .collect(Collectors.toSet());
+
+    if (libs.size() > 0) {
+      new MapToolEventBus().getMainEventBus().post(new AddOnsRemovedEvent(libs));
+      namespaceLibraryMap.clear();
+    }
   }
 
   /**

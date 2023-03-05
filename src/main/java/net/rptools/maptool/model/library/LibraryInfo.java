@@ -25,5 +25,7 @@ public record LibraryInfo(
     String license,
     String description,
     String shortDescription,
-    boolean allowsUrlAccess) {}
+    boolean allowsUrlAccess,
+    String readMeFile,
+    String licenseFile) {}
 ;

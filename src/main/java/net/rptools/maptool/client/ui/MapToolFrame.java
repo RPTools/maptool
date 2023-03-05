@@ -67,6 +67,7 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
+import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
@@ -638,9 +639,7 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
-            MTFrame.CONNECTIONS,
-            new JScrollPane(connectionPanel),
-            new ImageIcon(AppStyle.connectionsImage)));
+            MTFrame.CONNECTIONS, connectionPanel, new ImageIcon(AppStyle.connectionsImage)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(

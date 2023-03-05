@@ -45,6 +45,7 @@ Resources
  - **Wiki:**    https://wiki.rptools.info/index.php/Main_Page
  - **Discord:** https://discord.gg/gevEtpC
  - **Reddit:**  https://www.reddit.com/r/MapTool/
+ - **Crowdin:** https://crowdin.com/project/maptool
 
 Configuration Steps Prior to Building MapTool
 ---------------------------------------------

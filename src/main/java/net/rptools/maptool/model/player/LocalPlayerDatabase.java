@@ -154,6 +154,13 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
+  public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
+    return new PublicPrivateKeyStore()
+        .getKeys()
+        .thenApply(k -> CipherUtil.publicKeyMD5(k.getKey().publicKey()).equals(md5key));
+  }
+
+  @Override
   public boolean isPlayerRegistered(String name)
       throws InterruptedException, InvocationTargetException {
     return localPlayer != null

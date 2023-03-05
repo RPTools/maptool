@@ -21,8 +21,6 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.ResourceBundle;
-import java.util.Set;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
@@ -41,8 +39,8 @@ import javafx.util.Callback;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.javfx.AbstractSwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
-import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.PasswordDatabaseException;
 import net.rptools.maptool.model.player.Player.Role;
@@ -50,9 +48,8 @@ import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.model.player.PlayerInfo;
 import net.rptools.maptool.model.player.Players;
 
-public class PlayerDatabaseDialogController implements SwingJavaFXDialogController {
-
-  private final Set<SwingJavaFXDialogEventHandler> eventHandlers = ConcurrentHashMap.newKeySet();
+public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogController
+    implements SwingJavaFXDialogController {
 
   @FXML // ResourceBundle that was given to the FXMLLoader
   private ResourceBundle resources;
@@ -104,16 +101,6 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
         : "fx:id=\"saveChangesButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
     assert addButton != null
         : "fx:id=\"addButton\" was not injected: check your FXML file 'PlayerDatabaseDialog.fxml'.";
-  }
-
-  @Override
-  public void registerEventHandler(SwingJavaFXDialogEventHandler handler) {
-    eventHandlers.add(handler);
-  }
-
-  @Override
-  public void deregisterEventHandler(SwingJavaFXDialogEventHandler handler) {
-    eventHandlers.remove(handler);
   }
 
   @Override
@@ -198,11 +185,6 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
     saveChangesButton.setOnAction(a -> performClose());
   }
 
-  private void performClose() {
-    eventHandlers.forEach(e -> e.close(this));
-    close();
-  }
-
   @Override
   public void close() {
     try {
@@ -247,10 +229,10 @@ public class PlayerDatabaseDialogController implements SwingJavaFXDialogControll
 
   private Callback<TableColumn<PlayerInfo, Void>, TableCell<PlayerInfo, Void>>
       createButtonCellFactory(String buttonText, Consumer<PlayerInfo> callback) {
-    return new Callback<TableColumn<PlayerInfo, Void>, TableCell<PlayerInfo, Void>>() {
+    return new Callback<>() {
       @Override
       public TableCell<PlayerInfo, Void> call(final TableColumn<PlayerInfo, Void> param) {
-        return new TableCell<PlayerInfo, Void>() {
+        return new TableCell<>() {
 
           private final Button btn = new Button(buttonText);
 

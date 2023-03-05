@@ -1075,6 +1075,10 @@ public class MapTool {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
     }
+
+    if (MapTool.isHostingServer()) {
+      getFrame().getConnectionPanel().startHosting();
+    }
     server.start();
   }
 
@@ -1094,6 +1098,7 @@ public class MapTool {
     disconnect();
     server.stop();
     server = null;
+    getFrame().getConnectionPanel().stopHosting();
   }
 
   public static ObservableList<Player> getPlayerList() {

@@ -37,6 +37,7 @@ public class MapToolServerConnection
   private final MapToolServer server;
   private final MethodServerConnection connection;
   private final PlayerDatabase playerDatabase;
+  private final boolean useEasyConnect;
 
   public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
       throws IOException {
@@ -44,6 +45,7 @@ public class MapToolServerConnection
         ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
     this.server = server;
     this.playerDatabase = playerDatabase;
+    this.useEasyConnect = server.getConfig().getUseEasyConnect();
     addObserver(this);
   }
 
@@ -53,7 +55,7 @@ public class MapToolServerConnection
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
   public Handshake getConnectionHandshake(ClientConnection conn) {
-    var handshake = new ServerHandshake(conn, playerDatabase);
+    var handshake = new ServerHandshake(conn, playerDatabase, useEasyConnect);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
     conn.addMessageHandler(handshake);
