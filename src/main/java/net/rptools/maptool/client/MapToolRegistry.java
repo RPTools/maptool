@@ -70,6 +70,7 @@ public class MapToolRegistry {
   public static class SeverConnectionDetails {
     public String address;
     public int port;
+    public boolean webrtc;
   }
 
   public enum RegisterResponse {
@@ -93,6 +94,16 @@ public class MapToolRegistry {
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
+
+      // currently the webrtc property is sent as int. In the future this will
+      // change to boolean. So we check what the type is. Can be removed when
+      // we get it as boolean.
+      var webrtcProperty = json.getAsJsonPrimitive("webrtc");
+      if (webrtcProperty.isBoolean()) {
+        details.webrtc = webrtcProperty.getAsBoolean();
+      } else {
+        details.webrtc = webrtcProperty.getAsInt() > 0;
+      }
 
       return details;
 
@@ -121,11 +132,12 @@ public class MapToolRegistry {
     }
   }
 
-  public RegisterResponse registerInstance(String id, int port) {
+  public RegisterResponse registerInstance(String id, int port, boolean webrtc) {
     JsonObject body = new JsonObject();
     body.addProperty("name", id);
     body.addProperty("port", port);
     body.addProperty("address", getAddress());
+    body.addProperty("webrtc", webrtc);
     if (MapTool.isDevelopment()) {
       body.addProperty("version", "Dev");
     } else {

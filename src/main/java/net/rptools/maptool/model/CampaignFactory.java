@@ -17,6 +17,7 @@ package net.rptools.maptool.model;
 public class CampaignFactory {
   public static Campaign createBasicCampaign() {
     Campaign campaign = new Campaign();
+    campaign.initDefault();
     campaign.putZone(ZoneFactory.createZone());
     return campaign;
   }

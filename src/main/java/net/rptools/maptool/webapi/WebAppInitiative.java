@@ -14,25 +14,26 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import javax.swing.*;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.zones.InitiativeListChanged;
 
 public class WebAppInitiative {
 
   private static final WebAppInitiative instance = new WebAppInitiative();
 
-  private class InitiativeListener
-      implements PropertyChangeListener, ModelChangeListener, AppEventListener {
+  private class InitiativeListener implements PropertyChangeListener {
 
     private InitiativeList initiativeList;
     private Zone zone;
@@ -47,11 +48,7 @@ public class WebAppInitiative {
 
     private void setZone(Zone z) {
       setList(z.getInitiativeList());
-      if (zone != null) {
-        zone.removeModelChangeListener(this);
-      }
       zone = z;
-      zone.addModelChangeListener(this);
     }
 
     @Override
@@ -62,17 +59,20 @@ public class WebAppInitiative {
       System.out.println("Here!");
     }
 
-    public void modelChanged(ModelChangeEvent event) {
-      if (event.getEvent().equals(Zone.Event.INITIATIVE_LIST_CHANGED)) {
-        setList(((Zone) event.getModel()).getInitiativeList());
-        sendInitiative();
+    @Subscribe
+    void onInitiativeListChanged(InitiativeListChanged event) {
+      final var list = event.initiativeList();
+      if (list.getZone() != zone) {
+        return;
       }
+
+      setList(list);
+      sendInitiative();
     }
 
-    @Override
-    public void handleAppEvent(AppEvent appEvent) {
-      System.out.println("Here in handleAppEvent");
-      setZone((Zone) appEvent.getNewValue());
+    @Subscribe
+    void onZoneActivated(ZoneActivated event) {
+      setZone(event.zone());
       sendInitiative();
     }
 
@@ -91,7 +91,7 @@ public class WebAppInitiative {
     initiativeListener = new InitiativeListener();
     SwingUtilities.invokeLater(
         () -> {
-          MapTool.getEventDispatcher().addListener(initiativeListener, MapTool.ZoneEvent.Activated);
+          new MapToolEventBus().getMainEventBus().register(this);
           initiativeListener.updateListeners();
           System.out.println("Here...");
         });

@@ -28,10 +28,12 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import javax.script.ScriptException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -49,6 +51,7 @@ import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
+import net.rptools.parser.ParserException;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */
@@ -59,6 +62,9 @@ public class AddOnLibrary implements Library {
 
   /** The name of the event for initialization. */
   private static final String INIT_EVENT = "onInit";
+
+  /** The prefix for the name of the JavaScript context for this addon. */
+  private static final String JS_CONTEXT_PREFIX = "addon:";
 
   /** Record used to store information about the MacrScript functions for this library. */
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
@@ -121,10 +127,16 @@ public class AddOnLibrary implements Library {
   private final Map<String, String> legacyEventNameMap = new HashMap<>();
 
   /** The mapping between MTScript function paths and non legacy events. */
-  private final Map<String, String> eventNameMap = new HashMap<>();
+  private final Map<String, String> mtScriptEventNameMap = new HashMap<>();
+
+  /** The mapping between JavaScript script paths and non legacy events. */
+  private final Map<String, String> jsEventNameMap = new HashMap<>();
 
   /** The ID of the asset for the whole of the add-on Library. */
   private final MD5Key assetKey;
+
+  /** The name of the JavaScript context for the add on library. */
+  private final String jsContextName;
 
   /**
    * Class used to represent Drop In Libraries.
@@ -172,7 +184,11 @@ public class AddOnLibrary implements Library {
 
     eventsDto.getEventsList().stream()
         .filter(e -> !e.getMts().isEmpty())
-        .forEach(e -> eventNameMap.put(e.getName(), e.getMts()));
+        .forEach(e -> mtScriptEventNameMap.put(e.getName(), e.getMts()));
+
+    eventsDto.getEventsList().stream()
+        .filter(e -> !e.getJs().isEmpty())
+        .forEach(e -> jsEventNameMap.put(e.getName(), e.getJs()));
 
     eventsDto.getLegacyEventsList().stream()
         .filter(e -> !e.getMts().isEmpty())
@@ -201,6 +217,8 @@ public class AddOnLibrary implements Library {
 
     licenseFile = dto.getLicenseFile();
     readMeFile = dto.getReadMeFile();
+
+    jsContextName = JS_CONTEXT_PREFIX + namespace;
   }
 
   /**
@@ -358,6 +376,14 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public void cleanup() {
+    // Remove any existing JavaScript context if it exists
+    if (JSScriptEngine.hasAddOnContext(jsContextName)) {
+      JSScriptEngine.removeAddOnContext(jsContextName);
+    }
+  }
+
+  @Override
   public CompletableFuture<String> getVersion() {
     return CompletableFuture.completedFuture(version);
   }
@@ -485,14 +511,27 @@ public class AddOnLibrary implements Library {
                         data.needsInitialization()
                             .thenAccept(
                                 needInit -> {
+                                  // First remove any existing JavaScript context if it exists
+                                  if (JSScriptEngine.hasAddOnContext(jsContextName)) {
+                                    JSScriptEngine.removeAddOnContext(jsContextName);
+                                  }
+                                  // Then create a new JavaScript context for the add-on library
+                                  JSScriptEngine.registerAddOnContext(jsContextName);
                                   if (needInit) {
-                                    if (eventNameMap.containsKey(FIRST_INIT_EVENT)) {
-                                      callMTSFunction(eventNameMap.get(FIRST_INIT_EVENT)).join();
+                                    if (jsEventNameMap.containsKey(FIRST_INIT_EVENT)) {
+                                      runJS(jsEventNameMap.get(FIRST_INIT_EVENT));
+                                    }
+                                    if (mtScriptEventNameMap.containsKey(FIRST_INIT_EVENT)) {
+                                      callMTSFunction(mtScriptEventNameMap.get(FIRST_INIT_EVENT))
+                                          .join();
                                       data.setNeedsToBeInitialized(false).join();
                                     }
                                   }
-                                  if (eventNameMap.containsKey(INIT_EVENT)) {
-                                    callMTSFunction(eventNameMap.get(INIT_EVENT)).join();
+                                  if (jsEventNameMap.containsKey(INIT_EVENT)) {
+                                    runJS(jsEventNameMap.get(INIT_EVENT));
+                                  }
+                                  if (mtScriptEventNameMap.containsKey(INIT_EVENT)) {
+                                    callMTSFunction(mtScriptEventNameMap.get(INIT_EVENT)).join();
                                   }
                                 });
                       });
@@ -514,6 +553,26 @@ public class AddOnLibrary implements Library {
               MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
               return null;
             });
+  }
+
+  /**
+   * Run the specified JavaScript code from the add-on library in the add-on library's JavaScript
+   * context.
+   *
+   * @param file the JavaScript file withing the file to run.
+   */
+  private void runJS(String file) {
+    readFile(file)
+        .thenAccept(
+            script -> {
+              try {
+                JSScriptEngine.getJSScriptEngine()
+                    .evalScript(jsContextName, script.asAsset().getDataAsString(), true);
+              } catch (ParserException | ScriptException e) {
+                throw new RuntimeException(e);
+              }
+            })
+        .join();
   }
 
   CompletableFuture<DataValue> readFile(String path) {

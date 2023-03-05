@@ -28,8 +28,9 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
-import javax.swing.ImageIcon;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
 
@@ -37,17 +38,9 @@ public class AssetDirectory extends Directory {
 
   public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
   private static final Image PDF_IMAGE =
-      new ImageIcon(
-              AssetDirectory.class
-                  .getClassLoader()
-                  .getResource("net/rptools/maptool/client/image/pdf_icon.png"))
-          .getImage();
+      RessourceManager.getSmallIcon(Icons.ASSETPANEL_PDF).getImage();
   private static final Image HERO_LAB_IMAGE =
-      new ImageIcon(
-              AssetDirectory.class
-                  .getClassLoader()
-                  .getResource("net/rptools/maptool/client/image/hero-lab-icon.png"))
-          .getImage();
+      RessourceManager.getSmallIcon(Icons.ASSETPANEL_HEROLABS).getImage();
 
   private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 

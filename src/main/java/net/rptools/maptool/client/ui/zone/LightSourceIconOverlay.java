@@ -16,13 +16,16 @@ package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.AppStyle;
+import java.awt.image.BufferedImage;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
 
 public class LightSourceIconOverlay implements ZoneOverlay {
+  private BufferedImage lightSourceIcon = RessourceManager.getImage(Images.LIGHT_SOURCE);
 
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
 
@@ -47,12 +50,9 @@ public class LightSourceIconOverlay implements ZoneOverlay {
           continue;
         }
 
-        int x =
-            area.getBounds().x + (area.getBounds().width - AppStyle.lightSourceIcon.getWidth()) / 2;
-        int y =
-            area.getBounds().y
-                + (area.getBounds().height - AppStyle.lightSourceIcon.getHeight()) / 2;
-        g.drawImage(AppStyle.lightSourceIcon, x, y, null);
+        int x = area.getBounds().x + (area.getBounds().width - lightSourceIcon.getWidth()) / 2;
+        int y = area.getBounds().y + (area.getBounds().height - lightSourceIcon.getHeight()) / 2;
+        g.drawImage(lightSourceIcon, x, y, null);
       }
     }
   }

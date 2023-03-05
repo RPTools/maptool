@@ -22,17 +22,12 @@ import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.prefs.Preferences;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -410,35 +405,6 @@ public class AppUtil {
   }
 
   /**
-   * Returns the available theme files for the MapTool UI.
-   *
-   * @return the available theme files for the MapTool UI.
-   */
-  public static Map<String, File> getUIThemeNames() {
-    // Make sure there are themes installed
-    AppSetup.installDefaultUIThemes();
-
-    Path themesDir = AppConstants.UI_THEMES_DIR.toPath();
-
-    Map<String, File> themes = new TreeMap<>();
-    try (Stream<Path> walk = Files.walk(themesDir)) {
-      Set<Path> result =
-          walk.filter(f -> f.getFileName().toString().endsWith(".theme"))
-              .collect(Collectors.toSet());
-
-      for (Path path : result) {
-        String name =
-            path.getFileName().toString().replaceFirst("\\.theme$", "").replaceAll("_", " ");
-        themes.put(name, path.toFile());
-      }
-    } catch (IOException e) {
-      log.error("msg.error.unableToGetThemeList", e);
-    }
-
-    return themes;
-  }
-
-  /**
    * Returns the name of the theme to use for the MapTool UI.
    *
    * @return the name of the theme to use for the MapTool UI.
@@ -456,15 +422,5 @@ public class AppUtil {
   public static void setThemeName(String themeName) {
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/ui/theme");
     prefs.put("themeName", themeName);
-  }
-
-  /**
-   * Returns the file containing the theme settings for the specified theme name.
-   *
-   * @param themeName the name of the theme to retrieve the settings file for.
-   * @return the file containing the theme settings.
-   */
-  public static File getThemeFile(String themeName) {
-    return getUIThemeNames().get(themeName);
   }
 }

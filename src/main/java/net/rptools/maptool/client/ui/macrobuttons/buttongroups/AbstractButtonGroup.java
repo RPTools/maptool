@@ -35,13 +35,15 @@ import java.util.Set;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.AbstractBorder;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.TokenPopupMenu;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -264,11 +266,13 @@ public abstract class AbstractButtonGroup extends JPanel
               new Rectangle(10, 2, image.getWidth(null) + stringWidth, image.getHeight(null));
           // display impersonated image if impersonated
           if (getToken() != null && getToken().isBeingImpersonated()) {
-            g.drawImage(AppStyle.impersonatePanelImage, (int) imageBounds.getMaxX() + 5, 4, null);
+            var impersonatedImage =
+                RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS).getImage();
+            g.drawImage(impersonatedImage, (int) imageBounds.getMaxX() + 5, 4, null);
           }
         }
 
-        g.setColor(Color.BLACK);
+        g.setColor(UIManager.getColor("TitledBorder.titleColor"));
         g.drawString(label, strx + 3, (20 - stringHeight) / 2 + stringHeight - 2);
       }
     }

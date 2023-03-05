@@ -26,8 +26,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -62,40 +62,43 @@ public class TokenVBL {
    * Alpha transparency level greater than or equal to the alphaSensitivity parameter.
    *
    * @param token the token
-   * @param alphaSensitivity the alpha sensitivity of the VBL area
-   * @param inverseVbl match the ignoreColor or everything but ignoreColor
-   * @param ignoreColor color to match for VBL generation
+   * @param alphaSensitivity the alpha sensitivity of the topology area
+   * @param inverseTopology match the ignoreColor or everything but ignoreColor
+   * @param ignoreColor color to match for topology generation
    * @param distanceTolerance JTS distance tolerance
    * @param method JTS method to use for optimization
    * @return Area
    * @author Jamz
    * @since 1.6.0
    */
-  public static Area createOptimizedVblArea(
+  public static Area createOptimizedTopologyArea(
       Token token,
       int alphaSensitivity,
-      boolean inverseVbl,
+      boolean inverseTopology,
       Color ignoreColor,
       int distanceTolerance,
       String method) {
-    final Area vblArea = createVblAreaFromToken(token, alphaSensitivity, inverseVbl, ignoreColor);
+    final Area topologyArea =
+        createTopologyAreaFromToken(token, alphaSensitivity, inverseTopology, ignoreColor);
     final JTS_SimplifyMethodType jtsMethod = JTS_SimplifyMethodType.fromString(method);
 
-    return simplifyArea(vblArea, distanceTolerance, jtsMethod);
+    return simplifyArea(topologyArea, distanceTolerance, jtsMethod);
   }
 
-  public static Area createVblAreaFromToken(
-      Token token, int alphaSensitivity, boolean inverseVbl, Color ignoredColor) {
+  public static Area createTopologyAreaFromToken(
+      Token token, int alphaSensitivity, boolean inverseTopology, Color ignoredColor) {
     Stopwatch stopwatch = Stopwatch.createStarted();
     BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
 
     List<Geometry> geometryList =
-        createVblGeometry(image, alphaSensitivity, inverseVbl, ignoredColor);
-    log.debug("Time to complete createVblGeometry(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        createTopologyGeometry(image, alphaSensitivity, inverseTopology, ignoredColor);
+    log.debug(
+        "Time to complete createTopologyGeometry(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
 
     final Area area = createAreaFromGeometries(geometryList);
     log.debug(
-        "Total time for createVblAreaFromToken(): {}", stopwatch.elapsed(TimeUnit.MILLISECONDS));
+        "Total time for createTopologyAreaFromToken(): {}",
+        stopwatch.elapsed(TimeUnit.MILLISECONDS));
     return area;
   }
 
@@ -114,29 +117,29 @@ public class TokenVBL {
   }
 
   public static Area simplifyArea(
-      Area vblArea, double distanceTolerance, JTS_SimplifyMethodType simplifyMethod) {
+      Area topologyArea, double distanceTolerance, JTS_SimplifyMethodType simplifyMethod) {
 
     if (simplifyMethod.equals(JTS_SimplifyMethodType.NONE)) {
-      return vblArea;
+      return topologyArea;
     }
 
     final GeometryFactory geometryFactory = new GeometryFactory();
     ShapeReader shapeReader = new ShapeReader(geometryFactory);
-    Geometry vblGeometry = null;
+    Geometry topologyGeometry = null;
 
-    if (!vblArea.isEmpty()) {
+    if (!topologyArea.isEmpty()) {
       try {
-        vblGeometry = shapeReader.read(vblArea.getPathIterator(null));
+        topologyGeometry = shapeReader.read(topologyArea.getPathIterator(null));
         // .buffer(1); // helps creating valid geometry and prevent self-intersecting polygons
-        if (!vblGeometry.isValid()) {
+        if (!topologyGeometry.isValid()) {
           log.debug(
-              "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
+              "topology geometry is invalid! May cause issues. Check for self-intersecting polygons.");
         }
       } catch (Exception e) {
-        log.error("There is a problem reading vblGeometry: ", e);
+        log.error("There is a problem reading topology geometry: ", e);
       }
     } else {
-      return vblArea;
+      return topologyArea;
     }
 
     ShapeWriter sw = new ShapeWriter();
@@ -144,18 +147,18 @@ public class TokenVBL {
 
     switch (simplifyMethod) {
       case DOUGLAS_PEUCKER_SIMPLIFIER:
-        DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(vblGeometry);
+        DouglasPeuckerSimplifier dps = new DouglasPeuckerSimplifier(topologyGeometry);
         dps.setDistanceTolerance(distanceTolerance);
         dps.setEnsureValid(false);
         simplifiedGeometry = dps.getResultGeometry();
         break;
       case TOPOLOGY_PRESERVING_SIMPLIFIER:
-        TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(vblGeometry);
+        TopologyPreservingSimplifier tss = new TopologyPreservingSimplifier(topologyGeometry);
         tss.setDistanceTolerance(distanceTolerance);
         simplifiedGeometry = tss.getResultGeometry();
         break;
       case VW_SIMPLIFIER:
-        VWSimplifier vws = new VWSimplifier(vblGeometry);
+        VWSimplifier vws = new VWSimplifier(topologyGeometry);
         vws.setDistanceTolerance(distanceTolerance);
         vws.setEnsureValid(false);
         simplifiedGeometry = vws.getResultGeometry();
@@ -175,12 +178,12 @@ public class TokenVBL {
   }
 
   /**
-   * This is a convenience method to send the VBL Area to be rendered to the server
+   * This is a convenience method to send the topology Area to be rendered to the server
    *
    * @param renderer Reference to the ZoneRenderer
-   * @param area A valid Area containing VBL polygons
-   * @param erase Set to true to erase the VBL, otherwise draw it
-   * @param topologyType Determines which topology (Wall VBL, Hill VBL, MBL) to modify.
+   * @param area A valid Area containing topology polygons
+   * @param erase Set to true to erase the topology, otherwise draw it
+   * @param topologyType Determines which topology (Wall VBL, Hill VBL, Pit VBL, MBL) to modify.
    */
   public static void renderTopology(
       ZoneRenderer renderer, Area area, boolean erase, Zone.TopologyType topologyType) {
@@ -196,9 +199,10 @@ public class TokenVBL {
     renderer.repaint();
   }
 
-  public static Area getMapVBL_transformed(ZoneRenderer renderer, Token token) {
+  public static Area getMapTopology_transformed(
+      ZoneRenderer renderer, Token token, Zone.TopologyType topologyType) {
     Rectangle footprintBounds = token.getBounds(renderer.getZone());
-    Area newTokenVBL = new Area(footprintBounds);
+    Area newTokenTopology = new Area(footprintBounds);
     Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
     SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
     AffineTransform atArea = new AffineTransform();
@@ -209,51 +213,51 @@ public class TokenVBL {
     // raw untransformed version on the Token
     if (token.isSnapToScale()) {
       tx =
-          -newTokenVBL.getBounds().getX()
+          -newTokenTopology.getBounds().getX()
               - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2);
       ty =
-          -newTokenVBL.getBounds().getY()
+          -newTokenTopology.getBounds().getY()
               - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2);
       sx = 1 / (imgSize.getWidth() / token.getWidth());
       sy = 1 / (imgSize.getHeight() / token.getHeight());
 
     } else {
-      tx = -newTokenVBL.getBounds().getX();
-      ty = -newTokenVBL.getBounds().getY();
+      tx = -newTokenTopology.getBounds().getX();
+      ty = -newTokenTopology.getBounds().getY();
       sx = 1 / token.getScaleX();
       sy = 1 / token.getScaleY();
     }
 
     atArea.concatenate(AffineTransform.getScaleInstance(sx, sy));
 
-    Area mapArea = renderer.getZone().getTopology();
+    Area mapArea = renderer.getZone().getTopology(topologyType);
 
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
       // Get the center of the token bounds
-      double rx = newTokenVBL.getBounds2D().getCenterX();
-      double ry = newTokenVBL.getBounds2D().getCenterY();
+      double rx = newTokenTopology.getBounds2D().getCenterX();
+      double ry = newTokenTopology.getBounds2D().getCenterY();
 
       // Rotate the area to match the token facing
       AffineTransform captureArea =
           AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
 
-      // Capture the VBL via intersection
-      newTokenVBL.intersect(mapArea);
+      // Capture the topology via intersection
+      newTokenTopology.intersect(mapArea);
 
       // Rotate the area back to prep to store on Token
       captureArea =
           AffineTransform.getRotateInstance(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
     } else {
-      // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(mapArea);
+      // Token will not be rotated so lets just capture the topology
+      newTokenTopology.intersect(mapArea);
     }
 
     // Translate the capture to zero out the x,y to store on the Token
     atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+    newTokenTopology = new Area(atArea.createTransformedShape(newTokenTopology));
 
     // Lets account for flipped images...
     atArea = new AffineTransform();
@@ -268,20 +272,21 @@ public class TokenVBL {
     }
 
     // Do any final transformations for flipped images
-    newTokenVBL = new Area(atArea.createTransformedShape(newTokenVBL));
+    newTokenTopology = new Area(atArea.createTransformedShape(newTokenTopology));
 
-    return newTokenVBL;
+    return newTokenTopology;
   }
 
-  public static Area getVBL_underToken(ZoneRenderer renderer, Token token) {
+  public static Area getTopology_underToken(
+      ZoneRenderer renderer, Token token, Zone.TopologyType topologyType) {
     Rectangle footprintBounds = token.getBounds(renderer.getZone());
-    Area newTokenVBL = new Area(footprintBounds);
+    Area newTokenTopology = new Area(footprintBounds);
     Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
     SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
     AffineTransform atArea = new AffineTransform();
 
     double sx, sy;
-    Area vblOnMap = renderer.getZone().getTopology();
+    Area topologyOnMap = renderer.getZone().getTopology(topologyType);
 
     if (token.isSnapToScale()) {
       sx = 1 / (imgSize.getWidth() / token.getWidth());
@@ -296,92 +301,29 @@ public class TokenVBL {
     if (token.getShape() == Token.TokenShape.TOP_DOWN
         && Math.toRadians(token.getFacingInDegrees()) != 0.0) {
       // Get the center of the token bounds
-      double rx = newTokenVBL.getBounds2D().getCenterX();
-      double ry = newTokenVBL.getBounds2D().getCenterY();
+      double rx = newTokenTopology.getBounds2D().getCenterX();
+      double ry = newTokenTopology.getBounds2D().getCenterY();
 
       // Rotate the area to match the token facing
       AffineTransform captureArea =
           AffineTransform.getRotateInstance(Math.toRadians(token.getFacingInDegrees()), rx, ry);
-      newTokenVBL = new Area(captureArea.createTransformedShape(newTokenVBL));
+      newTokenTopology = new Area(captureArea.createTransformedShape(newTokenTopology));
 
-      // Capture the VBL via intersection
-      newTokenVBL.intersect(vblOnMap);
+      // Capture the topology via intersection
+      newTokenTopology.intersect(topologyOnMap);
     } else {
-      // Token will not be rotated so lets just capture the VBL
-      newTokenVBL.intersect(vblOnMap);
+      // Token will not be rotated so lets just capture the topology
+      newTokenTopology.intersect(topologyOnMap);
     }
 
-    return newTokenVBL;
+    return newTokenTopology;
   }
 
   /**
-   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
-   * vblRectangle where the alpha of the image is greater or equal to the sensitivity.
-   *
-   * @param image the buffered image.
-   * @param alphaSensitivity the alphaSensitivity.
-   * @param inverseVbl
-   * @return the area.
-   */
-  private static Area createVblArea(BufferedImage image, int alphaSensitivity, boolean inverseVbl) {
-    // Assumes all colors form the VBL Area, eg everything except transparent pixels with alpha
-    // >=
-    // alphaSensitivity
-    if (image == null) {
-      return new Area();
-    }
-
-    Area vblArea = new Area();
-    Rectangle vblRectangle;
-    int y1, y2;
-    boolean addArea = false;
-
-    for (int x = 0; x < image.getWidth(); x++) {
-      y1 = 99;
-      y2 = -1;
-      for (int y = 0; y < image.getHeight(); y++) {
-        Color pixelColor = new Color(image.getRGB(x, y), true);
-        addArea = false;
-
-        if (!inverseVbl && pixelColor.getAlpha() >= alphaSensitivity) {
-          addArea = true;
-        }
-
-        if (inverseVbl && pixelColor.getAlpha() <= alphaSensitivity) {
-          addArea = true;
-        }
-
-        if (addArea) {
-          if (y1 == 99) {
-            y1 = y;
-            y2 = y;
-          }
-          if (y > (y2 + 1)) {
-            vblRectangle = new Rectangle(x, y1, 1, y2 - y1);
-            vblArea.add(new Area(vblRectangle));
-            y1 = y;
-            y2 = y;
-          }
-          y2 = y;
-        }
-      }
-      if ((y2 - y1) >= 0) {
-        vblRectangle = new Rectangle(x, y1, 1, y2 - y1 + 1);
-        vblArea.add(new Area(vblRectangle));
-      }
-    }
-
-    if (vblArea.isEmpty()) {
-      return new Area();
-    } else {
-      return vblArea;
-    }
-  }
-
-  /**
-   * Create a VBL area from a bufferedImage and alphaSensitity. The area is created by combining
-   * vblRectangle where the alpha of the image is greater or equal to the sensitivity. Assumes all
-   * colors form the VBL Area, everything except transparent pixels with alpha >= alphaSensitivity
+   * Create a topology area from a bufferedImage and alphaSensitity. The area is created by
+   * combining topology rectangle where the alpha of the image is greater or equal to the
+   * sensitivity. Assumes all colors form the topology area, everything except transparent pixels
+   * with alpha >= alphaSensitivity
    *
    * @param image the buffered image.
    * @param colorTolerance the alphaSensitivity.
@@ -389,7 +331,7 @@ public class TokenVBL {
    * @param pickColor color to compare against pixel color
    * @return the area.
    */
-  private static List<Geometry> createVblGeometry(
+  private static List<Geometry> createTopologyGeometry(
       BufferedImage image, int colorTolerance, boolean inversePickColor, Color pickColor) {
 
     if (image == null) {

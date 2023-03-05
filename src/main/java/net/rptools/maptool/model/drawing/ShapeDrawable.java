@@ -14,15 +14,26 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.ShapeDrawableDto;
 
 /** An rectangle */
 public class ShapeDrawable extends AbstractDrawing {
   private final Shape shape;
   private final boolean useAntiAliasing;
+
+  public ShapeDrawable(GUID id, Shape shape, boolean useAntiAliasing) {
+    super(id);
+    this.shape = shape;
+    this.useAntiAliasing = useAntiAliasing;
+  }
 
   public ShapeDrawable(Shape shape, boolean useAntiAliasing) {
     this.shape = shape;
@@ -31,6 +42,10 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public ShapeDrawable(Shape shape) {
     this(shape, true);
+  }
+
+  public boolean getUseAntiAliasing() {
+    return useAntiAliasing;
   }
 
   /*
@@ -44,6 +59,21 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public Area getArea() {
     return new Area(shape);
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var shape = Mapper.map(getShape());
+    var dto =
+        ShapeDrawableDto.newBuilder()
+            .setId(getId().toString())
+            .setLayer(getLayer().name())
+            .setShape(shape)
+            .setUseAntiAliasing(getUseAntiAliasing());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setShapeDrawable(dto).build();
   }
 
   @Override

@@ -16,14 +16,13 @@ package net.rptools.maptool.client.swing;
 
 import java.awt.event.MouseAdapter;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -36,13 +35,7 @@ public class ImageCacheStatusBar extends JLabel {
   private static Icon imageCacheIcon;
 
   static {
-    try {
-      imageCacheIcon =
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/thumbnail-status.png"));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    imageCacheIcon = RessourceManager.getSmallIcon(Icons.STATUSBAR_IMAGE_CACHE);
   }
 
   public ImageCacheStatusBar() {

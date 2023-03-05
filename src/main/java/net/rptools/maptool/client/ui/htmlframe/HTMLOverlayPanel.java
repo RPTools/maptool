@@ -31,11 +31,11 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.Tool;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -236,7 +236,7 @@ public class HTMLOverlayPanel extends JFXPanel {
    * @param zOrder the zOrder of the overlay
    * @param html the HTML of the overlay
    */
-  public void showOverlay(String name, int zOrder, String html) {
+  public void showOverlay(String name, int zOrder, String html, Object frameValue) {
     getDropTarget().setActive(false); // disables drop on overlay, drop goes to map
     setVisible(true);
     Platform.runLater(
@@ -267,6 +267,9 @@ public class HTMLOverlayPanel extends JFXPanel {
             sortOverlays();
           }
           overlayManager.updateContents(html, true);
+          if (frameValue != null) {
+            overlayManager.setValue(frameValue);
+          }
         });
   }
 

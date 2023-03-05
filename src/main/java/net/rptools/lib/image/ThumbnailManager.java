@@ -17,13 +17,13 @@ package net.rptools.lib.image;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
 import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.commons.io.FileUtils;
 
 public class ThumbnailManager {
@@ -79,7 +79,7 @@ public class ThumbnailManager {
         new BufferedImage(imgSize.width, imgSize.height, ImageUtil.pickBestTransparency(image));
 
     Graphics2D g = thumbnailImage.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, imgSize.width, imgSize.height, null);
     g.dispose();
 

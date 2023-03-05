@@ -19,9 +19,6 @@ import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -34,19 +31,7 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
   protected Shape diamond;
   protected ZonePoint originPoint;
 
-  public DiamondTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-diamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public DiamondTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

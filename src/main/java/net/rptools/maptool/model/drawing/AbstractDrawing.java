@@ -34,10 +34,18 @@ import net.rptools.maptool.model.Zone;
  */
 public abstract class AbstractDrawing implements Drawable, ImageObserver {
   /** The unique identifier for this drawable. It is immutable. */
-  private final GUID id = new GUID();
+  private final GUID id;
 
   private String layer;
   private String name;
+
+  protected AbstractDrawing() {
+    this.id = new GUID();
+  }
+
+  protected AbstractDrawing(GUID id) {
+    this.id = id;
+  }
 
   /*
    * (non-Javadoc)

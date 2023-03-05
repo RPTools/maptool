@@ -14,12 +14,16 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.ConeTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /**
  * The cone template draws a highlight over all the squares effected from a specific spine. There
@@ -30,6 +34,12 @@ import net.rptools.maptool.model.ZonePoint;
  *     azhrei_fje $
  */
 public class ConeTemplate extends RadiusTemplate {
+
+  public ConeTemplate() {}
+
+  public ConeTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -333,5 +343,20 @@ public class ConeTemplate extends RadiusTemplate {
       }
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = ConeTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setDirection(getDirection().name());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setConeTemplate(dto).build();
   }
 }

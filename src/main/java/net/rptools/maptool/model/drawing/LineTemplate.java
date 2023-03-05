@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -26,8 +27,11 @@ import java.util.ListIterator;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineTemplateDto;
 
 /**
  * A drawing tool that will draw a line template between 2 vertices.
@@ -61,6 +65,12 @@ public class LineTemplate extends AbstractTemplate {
 
   /** Flag used to determine mouse position relative to vertex position */
   private boolean mouseSlopeGreater;
+
+  public LineTemplate() {}
+
+  public LineTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
@@ -456,5 +466,23 @@ public class LineTemplate extends AbstractTemplate {
       result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = LineTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setQuadrant(getQuadrant().name())
+        .setMouseSlopeGreater(isMouseSlopeGreater())
+        .setPathVertex(getPathVertex().toDto())
+        .setDoubleWide(isDoubleWide());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setLineTemplate(dto).build();
   }
 }

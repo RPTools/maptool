@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -62,31 +63,26 @@ import javax.swing.SwingWorker;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.tool.BoardTool;
-import net.rptools.maptool.client.tool.GridTool;
-import net.rptools.maptool.client.ui.AddResourceDialog;
+import net.rptools.maptool.client.tool.boardtool.BoardTool;
+import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ConnectToServerDialog;
-import net.rptools.maptool.client.ui.ConnectToServerDialogPreferences;
-import net.rptools.maptool.client.ui.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.ExportDialog;
-import net.rptools.maptool.client.ui.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.PreferencesDialog;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
-import net.rptools.maptool.client.ui.StartServerDialog;
-import net.rptools.maptool.client.ui.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
+import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
+import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
+import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
+import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialog;
+import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialogPreferences;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.FTPClient;
 import net.rptools.maptool.client.ui.io.FTPTransferObject;
@@ -94,8 +90,14 @@ import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
 import net.rptools.maptool.client.ui.io.LoadSaveImpl;
 import net.rptools.maptool.client.ui.io.ProgressBarList;
 import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
+import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
-import net.rptools.maptool.client.ui.token.TransferProgressDialog;
+import net.rptools.maptool.client.ui.preferencesdialog.PreferencesDialog;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialog;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.transferprogressdialog.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
@@ -662,7 +664,7 @@ public class AppActions {
       };
 
   public static final Action TOGGLE_FULLSCREEN_TOOLS =
-      new AdminClientAction() {
+      new DefaultClientAction() {
         {
           init("action.toggleFullScreenTools");
         }
@@ -1576,6 +1578,44 @@ public class AppActions {
         }
       };
 
+  /** This is the menu option turns the lumens overlay on and off. */
+  public static final Action TOGGLE_LUMENS_OVERLAY =
+      new ZoneAdminClientAction() {
+        {
+          init("action.showLumensOverlay");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isShowLumensOverlay();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setShowLumensOverlay(!AppState.isShowLumensOverlay());
+          MapTool.getFrame().refresh();
+        }
+      };
+
+  /** This is the menu option turns the lumens overlay on and off. */
+  public static final Action TOGGLE_SHOW_LIGHTS =
+      new ZoneAdminClientAction() {
+        {
+          init("action.showLights");
+        }
+
+        @Override
+        public boolean isSelected() {
+          return AppState.isShowLights();
+        }
+
+        @Override
+        protected void executeAction() {
+          AppState.setShowLights(!AppState.isShowLights());
+          MapTool.getFrame().refresh();
+        }
+      };
+
   /** Start entering text into the chat field */
   public static final String CHAT_COMMAND_ID = "action.sendChat";
 
@@ -1716,13 +1756,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showGrid");
-          try {
-            putValue(
-                Action.SMALL_ICON,
-                new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/grid.gif")));
-          } catch (IOException ioe) {
-            MapTool.showError("While retrieving built-in 'grid.gif' image", ioe);
-          }
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_GRIDS));
         }
 
         @Override
@@ -1916,13 +1950,7 @@ public class AppActions {
       new DefaultClientAction() {
         {
           init("action.showNames");
-          try {
-            putValue(
-                Action.SMALL_ICON,
-                new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/names.png")));
-          } catch (IOException ioe) {
-            MapTool.showError("While retrieving built-in 'names.png' image", ioe);
-          }
+          putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SHOW_TOKEN_NAMES));
         }
 
         @Override
@@ -2252,7 +2280,8 @@ public class AppActions {
                         serverProps.getPort(),
                         serverProps.getRPToolsName(),
                         "localhost",
-                        serverProps.getUseEasyConnect());
+                        serverProps.getUseEasyConnect(),
+                        serverProps.getUseWebRtc());
 
                 // Use the existing campaign
                 Campaign campaign = MapTool.getCampaign();
@@ -2342,6 +2371,7 @@ public class AppActions {
                   MapTool.showError("msg.error.failedConnect", ioe);
                   failed = true;
                 } catch (NoSuchAlgorithmException
+                    | InvalidAlgorithmParameterException
                     | InvalidKeySpecException
                     | NoSuchPaddingException
                     | InvalidKeyException
@@ -2423,7 +2453,8 @@ public class AppActions {
                           "",
                           dialog.getPort(),
                           prefs.getServerName(),
-                          dialog.getServer());
+                          dialog.getServer(),
+                          dialog.getUseWebRTC());
 
                   String password =
                       prefs.getUsePublicKey()
@@ -2666,7 +2697,7 @@ public class AppActions {
         if (t.getCause() instanceof AppState.FailedToAcquireLockException) {
           MapTool.showError("msg.error.failedLoadCampaignLock");
         } else {
-          MapTool.showError("msg.error.failedLoadCampaign", t.getCause());
+          MapTool.showError("msg.error.failedLoadCampaign", t);
         }
       }
     }
@@ -3267,29 +3298,6 @@ public class AppActions {
         @Override
         protected void executeAction() {
           new AddOnLibrariesDialog().show();
-          // TODO: CDW
-          /*JFileChooser chooser = new MapPreviewFileChooser();
-          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
-          chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
-          chooser.setFileFilter(AddOnLibraryImporter.getAddOnLibraryFileFilter());
-
-          if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-            File libFile = chooser.getSelectedFile();
-            try {
-              var addOnLibrary = new AddOnLibraryImporter().importFromFile(libFile);
-              var libraryManager = new LibraryManager();
-              String namespace = addOnLibrary.getNamespace().get();
-              if (libraryManager.addOnLibraryExists(addOnLibrary.getNamespace().get())) {
-                if (!MapTool.confirm(I18N.getText("library.error.addOnLibraryExists", namespace))) {
-                  return;
-                }
-                libraryManager.deregisterAddOnLibrary(namespace);
-              }
-              libraryManager.reregisterAddOnLibrary(addOnLibrary);
-            } catch (IOException | InterruptedException | ExecutionException ioException) {
-              MapTool.showError("library.import.ioError", ioException);
-            }
-          }*/
         }
       };
 
@@ -3550,17 +3558,9 @@ public class AppActions {
     public OpenUrlAction(String key) {
       // The init() method will load the "key", "key.accel", and "key.description".
       // The value of "key" will be used as the menu text, the accelerator is not used,
-      // and the description will be the destination URL. We also configure "key.icon"
-      // to be the value of SMALL_ICON. Only the Help menu uses these objects and
+      // and the description will be the destination URL. Only the Help menu uses these objects and
       // only the Help menu expects that field to be set...
       init(key);
-      try {
-        Image img = ImageUtil.getImage(I18N.getString(key + ".icon"));
-        img = ImageUtil.createCompatibleImage(img, 16, 16, null);
-        putValue(Action.SMALL_ICON, new ImageIcon(img));
-      } catch (Exception e) {
-        // Apparently the image is not available.
-      }
     }
 
     @Override

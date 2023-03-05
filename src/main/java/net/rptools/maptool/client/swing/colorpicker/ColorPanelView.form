@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.swing.colorpicker.ColorPanelView">
+  <grid id="c3ea9" binding="mainPanel" layout-manager="GridLayoutManager" row-count="4" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="10" y="10" width="242" height="250"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <grid id="8b858" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="colorPanel"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="33498" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="30" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="foregroundColor"/>
+            </properties>
+          </component>
+          <component id="a938" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                <preferred-size width="30" height="30"/>
+              </grid>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="backgroundColor"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="4008" layout-manager="GridLayoutManager" row-count="4" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="0">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="recentColors"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="6111a" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor4"/>
+            </properties>
+          </component>
+          <component id="57e12" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor0"/>
+            </properties>
+          </component>
+          <component id="54d1a" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor1"/>
+            </properties>
+          </component>
+          <component id="2af43" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor5"/>
+            </properties>
+          </component>
+          <component id="81349" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor2"/>
+            </properties>
+          </component>
+          <component id="d774" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor3"/>
+            </properties>
+          </component>
+          <component id="e27e" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor7"/>
+            </properties>
+          </component>
+          <component id="f8eb5" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor6"/>
+            </properties>
+          </component>
+          <component id="a6fab" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor8"/>
+            </properties>
+          </component>
+          <component id="6889e" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor9"/>
+            </properties>
+          </component>
+          <component id="81131" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor15"/>
+            </properties>
+          </component>
+          <component id="319c" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor10"/>
+            </properties>
+          </component>
+          <component id="7defb" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor11"/>
+            </properties>
+          </component>
+          <component id="5ac10" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor12"/>
+            </properties>
+          </component>
+          <component id="572a3" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor13"/>
+            </properties>
+          </component>
+          <component id="6db2c" class="net.rptools.maptool.client.swing.ColorWell">
+            <constraints>
+              <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <font swing-font="Panel.font"/>
+              <name value="recentColor14"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="7565c" layout-manager="GridLayoutManager" row-count="1" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="a5a0e" class="javax.swing.JToggleButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <alignmentY value="0.0"/>
+              <name value="toggleSnapToGrid"/>
+              <text value=""/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ColorPicker.tooltip.gridSnap"/>
+            </properties>
+          </component>
+          <component id="2f396" class="javax.swing.JToggleButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="toggleSquareCap"/>
+              <text value=""/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ColorPicker.tooltip.lineType"/>
+            </properties>
+          </component>
+          <component id="491cb" class="javax.swing.JToggleButton">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="toggleErase"/>
+              <text value=""/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ColorPicker.tooltip.eraser"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="9d798" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="5e5e9" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="penWidthLabel"/>
+              <text value=""/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ColorPicker.tooltip.penWidth"/>
+            </properties>
+          </component>
+          <component id="9caba" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="opacityLabel"/>
+              <text value=""/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ColorPicker.tooltip.opacity"/>
+            </properties>
+          </component>
+          <component id="ab3ee" class="javax.swing.JSpinner">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="opacity"/>
+            </properties>
+          </component>
+          <component id="e6a47" class="javax.swing.JSpinner">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <name value="penWidth"/>
+            </properties>
+          </component>
+          <hspacer id="29bcb">
+            <constraints>
+              <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>

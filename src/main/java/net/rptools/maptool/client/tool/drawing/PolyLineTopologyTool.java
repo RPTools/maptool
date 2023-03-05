@@ -18,9 +18,6 @@ import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -31,19 +28,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class PolyLineTopologyTool extends PolygonTopologyTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolyLineTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-free.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolyLineTopologyTool() {}
 
   @Override
   public String getTooltip() {

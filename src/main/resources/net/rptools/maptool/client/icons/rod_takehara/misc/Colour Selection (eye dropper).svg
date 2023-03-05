@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,0,-19)">
+        <g id="Colour-Selection--eye-dropper-" serif:id="Colour Selection (eye dropper)" transform="matrix(1,0,0,1,-120.667,19)">
+            <rect x="120.667" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(0.942809,0.942809,-0.942809,0.942809,74.0513,-60.8927)">
+                <circle cx="65.5" cy="3.5" r="1.5" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(0.942809,0.942809,-0.989949,0.989949,74.2163,-61.0577)">
+                <rect x="64" y="3.5" width="3" height="2.5" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(0.942809,0.942809,-0.707107,0.707107,72.5193,-59.3606)">
+                <path d="M64,5L67,5L67,13L65.5,15L64,13L64,5ZM64.75,6L66.25,6C66.25,6 66.25,12.586 66.25,12.586C66.25,12.586 65.5,13.586 65.5,13.586C65.5,13.586 64.75,12.586 64.75,12.586L64.75,6Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(0.989949,0.989949,-1.41421,1.41421,72.9671,-65.9838)">
+                <rect x="63" y="5" width="5" height="1" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>

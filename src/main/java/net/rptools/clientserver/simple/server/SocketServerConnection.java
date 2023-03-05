@@ -19,12 +19,13 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** @author drice */
 public class SocketServerConnection extends AbstractServerConnection {
 
-  private static final Logger log = Logger.getLogger(SocketServerConnection.class);
+  private static final Logger log = LogManager.getLogger(SocketServerConnection.class);
   private final int port;
   private ServerSocket socket;
   private ListeningThread listeningThread;

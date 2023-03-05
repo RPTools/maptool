@@ -14,19 +14,22 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.LookupEntryDto;
+import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.parser.ParserException;
 
 public class LookupTable {
 
   private static ExpressionParser expressionParser = new ExpressionParser();
 
-  private List<LookupEntry> entryList;
+  private List<LookupEntry> entryList = new ArrayList<>();
   private String name;
   private String defaultRoll;
   private MD5Key tableImage;
@@ -47,7 +50,7 @@ public class LookupTable {
     pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
 
     if (table.entryList != null) {
-      getInternalEntryList().addAll(table.entryList);
+      entryList.addAll(table.entryList);
     }
   }
 
@@ -56,11 +59,11 @@ public class LookupTable {
   }
 
   public void clearEntries() {
-    getInternalEntryList().clear();
+    entryList.clear();
   }
 
   public void addEntry(int min, int max, String result, MD5Key imageId) {
-    getInternalEntryList().add(new LookupEntry(min, max, result, imageId));
+    entryList.add(new LookupEntry(min, max, result, imageId));
   }
 
   public LookupEntry getLookup() throws ParserException {
@@ -137,7 +140,7 @@ public class LookupTable {
 
       tableResult = constrainRoll(tableResult);
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (tableResult >= entry.min && tableResult <= entry.max) {
           retEntry = entry;
         }
@@ -173,7 +176,7 @@ public class LookupTable {
     int minmin = Integer.MAX_VALUE;
     int maxmax = Integer.MIN_VALUE;
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (entry.min < minmin) {
         minmin = entry.min;
       }
@@ -194,7 +197,7 @@ public class LookupTable {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      List<LookupEntry> le = getInternalEntryList();
+      List<LookupEntry> le = entryList;
       LookupEntry entry;
       int len = le.size();
       List unpicked = new ArrayList<Integer>();
@@ -224,7 +227,7 @@ public class LookupTable {
       Integer min = null;
       Integer max = null;
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (min == null || entry.min < min) {
           min = entry.min;
         }
@@ -237,16 +240,9 @@ public class LookupTable {
     }
   }
 
-  private List<LookupEntry> getInternalEntryList() {
-    if (entryList == null) {
-      entryList = new ArrayList<>();
-    }
-    return entryList;
-  }
-
   /** Sets the picked flag on each table entry to false. */
   public void reset() {
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
@@ -269,7 +265,7 @@ public class LookupTable {
         entriesToReset.stream()
             .map(Integer::parseInt)
             .collect(Collectors.toCollection(HashSet::new));
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (int i = 0; i < curList.size(); i++) {
       LookupEntry entry = curList.get(i);
@@ -287,7 +283,7 @@ public class LookupTable {
    * @return List of LookupEntrys
    */
   public List<LookupEntry> getEntryList() {
-    return Collections.unmodifiableList(getInternalEntryList());
+    return Collections.unmodifiableList(entryList);
   }
 
   /**
@@ -342,7 +338,7 @@ public class LookupTable {
    */
   public int getPicksLeft() {
     int count = 0;
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (!entry.picked) {
         count++;
       }
@@ -354,7 +350,7 @@ public class LookupTable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
 
       if (entry.min == entry.max) {
         builder.append(entry.min);
@@ -381,11 +377,19 @@ public class LookupTable {
     /** @Deprecated here to prevent xstream from breaking b24-b25 */
     private String result;
 
-    public LookupEntry(int min, int max, String result, MD5Key imageId) {
+    public LookupEntry(int min, int max, String value, MD5Key imageId) {
       this.min = min;
       this.max = max;
-      this.value = result;
+      this.value = value;
       this.imageId = imageId;
+    }
+
+    private Object readResolve() {
+      if (picked == null) {
+        picked = false;
+      }
+
+      return this;
     }
 
     public MD5Key getImageId() {
@@ -415,6 +419,31 @@ public class LookupTable {
         result = null;
       }
       return value;
+    }
+
+    public static LookupEntry fromDto(LookupEntryDto dto) {
+      var entry =
+          new LookupEntry(
+              dto.getMin(),
+              dto.getMax(),
+              dto.hasValue() ? dto.getValue().getValue() : null,
+              dto.hasImageId() ? new MD5Key(dto.getImageId().getValue()) : null);
+      entry.picked = dto.getPicked();
+      return entry;
+    }
+
+    public LookupEntryDto toDto() {
+      var dto = LookupEntryDto.newBuilder();
+      dto.setMin(min);
+      dto.setMax(max);
+      dto.setPicked(picked);
+      if (value != null) {
+        dto.setValue(StringValue.of(value));
+      }
+      if (imageId != null) {
+        dto.setImageId(StringValue.of(imageId.toString()));
+      }
+      return dto.build();
     }
   }
 
@@ -478,5 +507,50 @@ public class LookupTable {
    */
   public void setAllowLookup(Boolean value) {
     allowLookup = value;
+  }
+
+  private Object readResolve() {
+    if (visible == null) {
+      visible = true;
+    }
+    if (pickOnce == null) {
+      pickOnce = false;
+    }
+    if (allowLookup == null) {
+      allowLookup = true;
+    }
+    if (entryList == null) {
+      entryList = new ArrayList<>();
+    }
+    return this;
+  }
+
+  public static LookupTable fromDto(LookupTableDto dto) {
+    var table = new LookupTable();
+    table.name = dto.getName();
+    table.entryList =
+        dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
+    table.defaultRoll = dto.getDefaultRoll();
+    table.tableImage = dto.hasTableImage() ? new MD5Key(dto.getTableImage().getValue()) : null;
+    table.setVisible(dto.getVisible());
+    table.setAllowLookup(dto.getAllowLookup());
+    table.setPickOnce(dto.getPickOnce());
+    return table;
+  }
+
+  public LookupTableDto toDto() {
+    var dto = LookupTableDto.newBuilder();
+    dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
+    dto.setName(name);
+    if (defaultRoll != null) {
+      dto.setDefaultRoll(defaultRoll);
+    }
+    if (tableImage != null) {
+      dto.setTableImage(StringValue.of(tableImage.toString()));
+    }
+    dto.setVisible(visible);
+    dto.setAllowLookup(allowLookup);
+    dto.setPickOnce(pickOnce);
+    return dto.build();
   }
 }

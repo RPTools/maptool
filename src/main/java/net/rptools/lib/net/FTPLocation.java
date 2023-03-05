@@ -20,6 +20,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URL;
 import javax.imageio.ImageWriter;
+import net.rptools.maptool.server.proto.FtpLocationDto;
+import net.rptools.maptool.server.proto.LocationDto;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.StringUtils;
 
@@ -105,5 +107,19 @@ public class FTPLocation implements Location {
       builder.append(";type=i");
     }
     return builder.toString();
+  }
+
+  public static FTPLocation fromDto(FtpLocationDto dto) {
+    return new FTPLocation(
+        dto.getUserName(), null, dto.getHostName(), dto.getPath(), dto.getBinary());
+  }
+
+  public LocationDto toDto() {
+    var dto = FtpLocationDto.newBuilder();
+    dto.setUserName(username);
+    dto.setHostName(hostname);
+    dto.setPath(path);
+    dto.setBinary(binary);
+    return LocationDto.newBuilder().setFtpLocation(dto).build();
   }
 }

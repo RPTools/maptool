@@ -15,23 +15,12 @@
 package net.rptools.maptool.server;
 
 import java.awt.geom.Area;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Set;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.InitiativeList;
-import net.rptools.maptool.model.Label;
-import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.Pointer;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -41,134 +30,57 @@ import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 
 public interface ServerCommand {
-  public enum COMMAND {
-    // @formatter:off
-    bootPlayer,
-    setCampaign,
-    setCampaignName,
-    getZone,
-    putZone,
-    removeZone,
-    putAsset,
-    getAsset,
-    removeAsset,
-    putToken,
-    editToken,
-    removeToken,
-    removeTokens,
-    updateTokenProperty,
-    draw,
-    updateDrawing,
-    clearAllDrawings,
-    setZoneGridSize,
-    message,
-    execLink,
-    execFunction,
-    undoDraw,
-    showPointer,
-    movePointer,
-    hidePointer,
-    startTokenMove,
-    stopTokenMove,
-    toggleTokenMoveWaypoint,
-    updateTokenMove,
-    setZoneVisibility,
-    enforceZoneView,
-    setZoneHasFoW,
-    exposeFoW,
-    hideFoW,
-    setFoW,
-    putLabel,
-    removeLabel,
-    sendTokensToBack,
-    bringTokensToFront,
-    enforceZone,
-    setServerPolicy,
-    addTopology,
-    removeTopology,
-    renameZone,
-    changeZoneDispName,
-    heartbeat,
-    updateCampaign,
-    updateInitiative,
-    updateTokenInitiative,
-    setVisionType,
-    updateCampaignMacros,
-    updateGmMacros,
-    setTokenLocation, // NOTE: This is to support third party token placement and shouldn't be
-    // depended on for general purpose token movement
-    setLiveTypingLabel, // Experimental
-    enforceNotification, // Override toggle button to show typing notifications
-    exposePCArea,
-    setBoard,
-    updateExposedAreaMeta,
-    clearExposedArea,
-    restoreZoneView, // Jamz: New command to restore player's view and let GM temporarily center and
-    removeAddOnLibrary,
-    removeAllAddOnLibraries,
-    addAddOnLibrary,
-    updateDataStore,
-    updateData,
-    updateDataNamespace,
-    removeDataStore,
-    removeDataNamespace,
-    removeData
+  void bootPlayer(String player);
 
-    // scale a player's view
-    // @formatter:on
-  };
+  void setZoneHasFoW(GUID zoneGUID, boolean hasFog);
 
-  public void bootPlayer(String player);
+  void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void setZoneHasFoW(GUID zoneGUID, boolean hasFog);
+  void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
+  void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
-  public void hideFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
-
-  public void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
-
-  public default void addTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+  default void addTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
     for (var topologyType : topologyTypes) {
       addTopology(zoneGUID, area, topologyType);
     }
   }
 
-  public void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
+  void addTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
 
-  public default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
+  default void removeTopology(GUID zoneGUID, Area area, Zone.TopologyTypeSet topologyTypes) {
     for (var topologyType : topologyTypes) {
       removeTopology(zoneGUID, area, topologyType);
     }
   }
 
-  public void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
+  void removeTopology(GUID zoneGUID, Area area, Zone.TopologyType topologyType);
 
-  public void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
+  void enforceZoneView(GUID zoneGUID, int x, int y, double scale, int width, int height);
 
-  public void restoreZoneView(GUID zoneGUID);
+  void restoreZoneView(GUID zoneGUID);
 
-  public void setCampaign(Campaign campaign);
+  void setCampaign(Campaign campaign);
 
-  public void setCampaignName(String name);
+  void setCampaignName(String name);
 
-  public void getZone(GUID zoneGUID);
+  void getZone(GUID zoneGUID);
 
-  public void putZone(Zone zone);
+  void putZone(Zone zone);
 
-  public void removeZone(GUID zoneGUID);
+  void removeZone(GUID zoneGUID);
 
-  public void setZoneVisibility(GUID zoneGUID, boolean visible);
+  void setZoneVisibility(GUID zoneGUID, boolean visible);
 
-  public void putAsset(Asset asset);
+  void putAsset(Asset asset);
 
-  public void getAsset(MD5Key assetID);
+  void getAsset(MD5Key assetID);
 
-  public void removeAsset(MD5Key assetID);
+  void removeAsset(MD5Key assetID);
 
-  public void editToken(GUID zoneGUID, Token token);
+  void editToken(GUID zoneGUID, Token token);
 
-  public void putToken(GUID zoneGUID, Token token);
+  void putToken(GUID zoneGUID, Token token);
 
   /**
    * Removes a token from a zone.
@@ -176,7 +88,7 @@ public interface ServerCommand {
    * @param zoneGUID the ID of the zone
    * @param tokenGUID the ID of the token
    */
-  public void removeToken(GUID zoneGUID, GUID tokenGUID);
+  void removeToken(GUID zoneGUID, GUID tokenGUID);
 
   /**
    * Removes a list of tokens from a zone.
@@ -184,92 +96,85 @@ public interface ServerCommand {
    * @param zoneGUID the ID of the zone
    * @param tokenGUIDs the list of IDs of the tokens
    */
-  public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
+  void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs);
 
-  public void updateTokenProperty(
-      GUID zoneGUID, GUID tokenGUID, Token.Update update, Object[] parameters);
+  void putLabel(GUID zoneGUID, Label label);
 
-  public void updateTokenProperty(Token token, Token.Update update, Object... parameters);
+  void removeLabel(GUID zoneGUID, GUID labelGUID);
 
-  public void putLabel(GUID zoneGUID, Label label);
+  void draw(GUID zoneGUID, Pen pen, Drawable drawable);
 
-  public void removeLabel(GUID zoneGUID, GUID labelGUID);
+  void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);
 
-  public void draw(GUID zoneGUID, Pen pen, Drawable drawable);
+  void undoDraw(GUID zoneGUID, GUID drawableGUID);
 
-  public void updateDrawing(GUID zoneGUID, Pen pen, DrawnElement drawnElement);
+  void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color);
 
-  public void undoDraw(GUID zoneGUID, GUID drawableGUID);
+  void message(TextMessage message);
 
-  public void setZoneGridSize(GUID zoneGUID, int xOffset, int yOffset, int size, int color);
+  void execFunction(String target, String source, String functionName, List<Object> args);
 
-  public void message(TextMessage message);
+  void execLink(String link, String target, String source);
 
-  public void execFunction(String target, String source, String functionName, List<Object> args);
+  void showPointer(String player, Pointer pointer);
 
-  public void execLink(String link, String target, String source);
+  void hidePointer(String player);
 
-  public void showPointer(String player, Pointer pointer);
+  void movePointer(String player, int x, int y);
 
-  public void hidePointer(String player);
+  void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList);
 
-  public void movePointer(String player, int x, int y);
+  void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y);
 
-  public void startTokenMove(String playerId, GUID zoneGUID, GUID tokenGUID, Set<GUID> tokenList);
+  void stopTokenMove(GUID zoneGUID, GUID tokenGUID);
 
-  public void updateTokenMove(GUID zoneGUID, GUID tokenGUID, int x, int y);
+  void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp);
 
-  public void stopTokenMove(GUID zoneGUID, GUID tokenGUID);
+  void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet);
 
-  public void toggleTokenMoveWaypoint(GUID zoneGUID, GUID tokenGUID, ZonePoint cp);
+  void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet);
 
-  public void sendTokensToBack(GUID zoneGUID, Set<GUID> tokenSet);
+  void clearAllDrawings(GUID zoneGUID, Zone.Layer layer);
 
-  public void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet);
+  void enforceZone(GUID zoneGUID);
 
-  public void clearAllDrawings(GUID zoneGUID, Zone.Layer layer);
+  void setServerPolicy(ServerPolicy policy);
 
-  public void enforceZone(GUID zoneGUID);
+  void renameZone(GUID zoneGUID, String name);
 
-  public void setServerPolicy(ServerPolicy policy);
+  void changeZoneDispName(GUID zoneGUID, String name);
 
-  public void renameZone(GUID zoneGUID, String name);
+  void heartbeat(String data);
 
-  public void changeZoneDispName(GUID zoneGUID, String name);
+  void updateCampaign(CampaignProperties properties);
 
-  public void heartbeat(String data);
+  void updateInitiative(InitiativeList list, Boolean ownerPermission);
 
-  public void updateCampaign(CampaignProperties properties);
+  void updateTokenInitiative(GUID zone, GUID token, Boolean hold, String state, Integer index);
 
-  public void updateInitiative(InitiativeList list, Boolean ownerPermission);
+  void setVisionType(GUID zoneGUID, VisionType visionType);
 
-  public void updateTokenInitiative(
-      GUID zone, GUID token, Boolean hold, String state, Integer index);
+  void updateCampaignMacros(List<MacroButtonProperties> properties);
 
-  public void setVisionType(GUID zoneGUID, VisionType visionType);
+  void updateGmMacros(List<MacroButtonProperties> properties);
 
-  public void updateCampaignMacros(List<MacroButtonProperties> properties);
+  void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
 
-  public void updateGmMacros(List<MacroButtonProperties> properties);
+  void setLiveTypingLabel(String name, boolean show);
 
-  public void setBoard(GUID zoneGUID, MD5Key mapAsset, int X, int Y);
+  void enforceNotification(Boolean enforce);
 
-  public void setLiveTypingLabel(String name, boolean show);
+  void exposePCArea(GUID zoneGUID);
 
-  public void enforceNotification(Boolean enforce);
+  void updateExposedAreaMeta(GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
 
-  public void exposePCArea(GUID zoneGUID);
+  void clearExposedArea(GUID zoneGUID, boolean globalOnly);
 
-  public void updateExposedAreaMeta(
-      GUID zoneGUID, GUID tokenExposedAreaGUID, ExposedAreaMetaData meta);
+  void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries);
 
-  public void clearExposedArea(GUID zoneGUID, boolean globalOnly);
+  void removeAddOnLibrary(List<String> namespaces);
 
-  public void addAddOnLibrary(List<TransferableAddOnLibrary> addOnLibraries);
-
-  public void removeAddOnLibrary(List<String> namespaces);
-
-  public void removeAllAddOnLibraries();
+  void removeAllAddOnLibraries();
 
   void updateDataStore(DataStoreDto dataStore);
 
@@ -282,4 +187,45 @@ public interface ServerCommand {
   void removeDataNamespace(String type, String namespace);
 
   void removeData(String type, String namespace, String name);
+
+  void updateTokenProperty(Token token, Token.Update update, int value);
+
+  void updateTokenProperty(Token token, Token.Update update, String value1, String value2);
+
+  void updateTokenProperty(
+      Token token, Token.Update update, List<MacroButtonProperties> workingMacros, boolean b);
+
+  void updateTokenProperty(Token token, Token.Update update);
+
+  void updateTokenProperty(Token token, Token.Update update, MacroButtonProperties value);
+
+  void updateTokenProperty(Token token, Token.Update update, String value);
+
+  void updateTokenProperty(Token token, Token.Update update, LightSource value);
+
+  void updateTokenProperty(Token token, Token.Update update, LightSource value1, String value2);
+
+  void updateTokenProperty(Token token, Token.Update update, int value1, int value2);
+
+  void updateTokenProperty(Token token, Token.Update update, boolean value);
+
+  void updateTokenProperty(Token token, Token.Update update, double value1, double value2);
+
+  void updateTokenProperty(Token token, Token.Update update, double value1, int value2, int value3);
+
+  void updateTokenProperty(Token token, Token.Update update, Grid grid, TokenFootprint footprint);
+
+  void updateTokenProperty(Token token, Token.Update update, List<String> values);
+
+  void updateTokenProperty(Token token, Token.Update update, double value);
+
+  void updateTokenProperty(
+      Token token, Token.Update update, boolean value1, int value2, int value3);
+
+  void updateTokenProperty(
+      Token token, Token.Update update, Zone.TopologyType topologyType, Area area);
+
+  void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
+
+  void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
 }

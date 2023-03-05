@@ -14,14 +14,16 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /**
  * Represents a piece of solid topology.
@@ -55,7 +57,7 @@ public class AreaIsland implements AreaContainer {
 
   @Override
   public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
-    if (!meta.area.contains(point)) {
+    if (!meta.contains(point)) {
       // Point not contained within this island, so nothing to return.
       return null;
     }
@@ -81,12 +83,15 @@ public class AreaIsland implements AreaContainer {
   ////
   // AREA CONTAINER
   public Area getBounds() {
-    return meta.area;
+    return meta.getBounds();
   }
 
   @Override
-  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
-      GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
-    return meta.getFacingSegments(geometryFactory, origin, !frontSegments);
+  public List<LineString> getVisionBlockingBoundarySegments(
+      GeometryFactory geometryFactory,
+      Coordinate origin,
+      boolean frontSegments,
+      PreparedGeometry vision) {
+    return meta.getFacingSegments(geometryFactory, origin, !frontSegments, vision);
   }
 }

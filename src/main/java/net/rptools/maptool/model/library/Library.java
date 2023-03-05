@@ -203,4 +203,10 @@ public interface Library {
    * @return the {@link Asset} for the library license file if it has one.
    */
   CompletableFuture<Optional<Asset>> getLicenseAsset();
+
+  /**
+   * Clean up any resources used by the library, This should be called when the library is no longer
+   * needed.
+   */
+  void cleanup();
 }

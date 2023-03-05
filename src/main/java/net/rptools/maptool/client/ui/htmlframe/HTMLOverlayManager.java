@@ -85,6 +85,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private final Map<String, String> macroCallbacks = new HashMap<>();
 
   HTMLOverlayManager(String name, int zOrder) {
+    super("overlay", name);
     addActionListener(this); // add the action listeners for form events
     this.name = name;
     this.zOrder = zOrder;
@@ -191,7 +192,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     if (element == null) {
       return HTMLOverlayPanel.mousePassResult.BLOCK;
     } else {
-      String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
+      String pe = ((String) element.eval(SCRIPT_GET_POINTERMAP)).trim();
       if ("blockopaque".equals(pe)) return HTMLOverlayPanel.mousePassResult.CHECK_OPACITY;
       if ("block".equals(pe)) return HTMLOverlayPanel.mousePassResult.BLOCK;
       return HTMLOverlayPanel.mousePassResult.PASS;

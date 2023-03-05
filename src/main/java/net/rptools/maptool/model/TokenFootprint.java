@@ -17,7 +17,10 @@ package net.rptools.maptool.model;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
+import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TokenFootPrintDto;
 
 /**
  * This class represents the set of cells a token occupies based on its size. Each token is assumed
@@ -45,6 +48,27 @@ public class TokenFootprint {
     this.isDefault = isDefault;
     this.scale = scale;
     cellSet.addAll(Arrays.asList(points));
+  }
+
+  public static TokenFootprint fromDto(TokenFootPrintDto dto) {
+    var footPrint = new TokenFootprint();
+    footPrint.cellSet.addAll(
+        dto.getCellSetList().stream().map(p -> Mapper.map(p)).collect(Collectors.toList()));
+    footPrint.name = dto.getName();
+    footPrint.id = GUID.valueOf(dto.getId());
+    footPrint.isDefault = dto.getIsDefault();
+    footPrint.scale = dto.getScale();
+    return footPrint;
+  }
+
+  public TokenFootPrintDto toDto() {
+    var dto = TokenFootPrintDto.newBuilder();
+    dto.addAllCellSet(cellSet.stream().map(Mapper::map).collect(Collectors.toList()));
+    dto.setName(name);
+    dto.setId(id.toString());
+    dto.setIsDefault(isDefault);
+    dto.setScale(scale);
+    return dto.build();
   }
 
   @Override

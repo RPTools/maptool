@@ -14,9 +14,11 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.TextMessageDto;
 
 public class TextMessage {
   // Not an enum so that it can be hessian serialized
@@ -195,5 +197,25 @@ public class TextMessage {
 
   public boolean isWhisper() {
     return channel == Channel.WHISPER;
+  }
+
+  public static TextMessage fromDto(TextMessageDto dto) {
+    return new TextMessage(
+        dto.getChannel(),
+        dto.hasTarget() ? dto.getTarget().getValue() : null,
+        dto.getSource(),
+        dto.getMessage(),
+        dto.getTransformList());
+  }
+
+  public TextMessageDto toDto() {
+    var dto = TextMessageDto.newBuilder().setChannel(channel).setSource(source).setMessage(message);
+    if (target != null) {
+      dto.setTarget(StringValue.of(target));
+    }
+    if (transform != null) {
+      dto.addAllTransform(transform);
+    }
+    return dto.build();
   }
 }

@@ -14,12 +14,14 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.List;
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 public interface AreaContainer {
   public Area getBounds();
@@ -47,10 +49,13 @@ public interface AreaContainer {
    * @param origin The point from which visibility is calculated.
    * @param frontSegments If `true`, only front-facing boundary segments are returned. Otherwise,
    *     only back-facing boundary segments are returned. Due to winding order, back-facing and
-   *     front-facing are interpretted differently for oceans and islands.
+   *     front-facing are interpreted differently for oceans and islands.
    * @return A list of segments, which together represent the complete set of boundary faces that
    *     block vision.
    */
-  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
-      GeometryFactory geometryFactory, Point origin, boolean frontSegments);
+  public List<LineString> getVisionBlockingBoundarySegments(
+      GeometryFactory geometryFactory,
+      Coordinate origin,
+      boolean frontSegments,
+      PreparedGeometry vision);
 }

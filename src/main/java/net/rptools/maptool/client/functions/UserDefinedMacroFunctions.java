@@ -237,12 +237,16 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     return userDefinedFunctions.containsKey(name);
   }
 
+  /** Clears any user defined macros. */
+  public void clearUserDefinedFunctions() {
+    userDefinedFunctions.clear();
+  }
+
   /**
-   * Clears any previously mapped UDFs and handles the {@value #ON_LOAD_CAMPAIGN_CALLBACK} macro
-   * event. Suppresses chat output on the called macros.
+   * Handles the {@value #ON_LOAD_CAMPAIGN_CALLBACK} macro event. Suppresses chat output on the
+   * called macros.
    */
   public void handleCampaignLoadMacroEvent() {
-    userDefinedFunctions.clear();
     List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_LOAD_CAMPAIGN_CALLBACK);
     String prefix = ON_LOAD_CAMPAIGN_CALLBACK + "@";
     for (Token handler : libTokens) {
@@ -378,6 +382,9 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       } else {
         // token macro
         try {
+          if (macroLocation.length() <= 4) {
+            return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);
+          }
           var lib = new LibraryManager().getLibrary(macroLocation.substring(4));
           if (lib.isEmpty()) {
             return I18N.getText("msg.error.udf.tooltip.loading", theDef.macroName);

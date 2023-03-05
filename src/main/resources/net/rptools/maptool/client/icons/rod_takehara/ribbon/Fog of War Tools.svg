@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,0,-114)">
+        <g id="Fog-of-War-Tools" serif:id="Fog of War Tools" transform="matrix(1,0,0,1,-90,114)">
+            <rect x="90" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(1.02286,0,0,1.02286,90.2641,-113.883)">
+                <path d="M4.941,118.165C5.318,116.496 6.811,115.249 8.593,115.249C10.659,115.249 12.337,116.927 12.337,118.993C12.337,119.081 12.334,119.168 12.328,119.254C13.577,119.337 14.566,120.378 14.566,121.648C14.566,122.972 13.491,124.048 12.167,124.048C12.111,124.048 12.055,124.046 12,124.042L12,124.048L4.733,124.048L4.733,124.039C4.659,124.045 4.584,124.048 4.509,124.048C2.877,124.048 1.552,122.723 1.552,121.091C1.552,119.459 2.877,118.133 4.509,118.133C4.655,118.133 4.8,118.144 4.941,118.165Z" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.EventQueue;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,16 +31,19 @@ import javax.swing.tree.TreePath;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.server.ServerPolicy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
+public class TokenPanelTreeModel implements TreeModel {
 
   private static final Logger log = LogManager.getLogger(TokenPanelTreeModel.class);
 
@@ -118,6 +122,8 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     filterList.add(new ObjectFilter());
     filterList.add(new BackgroundFilter());
     filterList.add(new LightSourceFilter());
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
@@ -134,15 +140,8 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
    * @param zone the Zone to set.
    */
   public void setZone(Zone zone) {
-    if (zone != null) {
-      zone.removeModelChangeListener(this);
-    }
     this.zone = zone;
     update();
-
-    if (zone != null) {
-      zone.addModelChangeListener(this);
-    }
   }
 
   public Object getChild(Object parent, int index) {
@@ -434,9 +433,23 @@ public class TokenPanelTreeModel implements TreeModel, ModelChangeListener {
     }
   }
 
-  ////
-  // MODEL CHANGE LISTENER
-  public void modelChanged(ModelChangeEvent event) {
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    update();
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    update();
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    update();
+  }
+
+  @Subscribe
+  private void onTokensEdited(TokenEdited event) {
     update();
   }
 

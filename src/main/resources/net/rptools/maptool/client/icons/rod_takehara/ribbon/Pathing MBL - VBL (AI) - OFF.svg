@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-57,-19)">
+        <g id="Pathing-MBL---VBL--AI----OFF" serif:id="Pathing MBL - VBL (AI) - OFF" transform="matrix(-1,0,0,1,145,19)">
+            <rect x="72" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(6.42409e-17,1.04913,-0.579672,3.54947e-17,93.4325,-37.211)">
+                <rect x="43.094" y="26.623" width="1.906" height="6.9" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(6.42409e-17,1.04913,-0.579672,3.54947e-17,101.433,-37.211)">
+                <rect x="43.094" y="26.623" width="1.906" height="6.9" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1.22465e-16,2,-1,6.12323e-17,86,-8)">
+                <path d="M6.5,7L6.5,9L5,6L6.5,3L6.5,5L11,5L11,7L6.5,7Z" style="fill:rgb(219,88,96);"/>
+            </g>
+        </g>
+    </g>
+</svg>

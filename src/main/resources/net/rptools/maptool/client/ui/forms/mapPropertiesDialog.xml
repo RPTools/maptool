@@ -24,8 +24,8 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">M:\Temp\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\mapPropertiesDialog.xml</at>
-   <at name="path">net\rptools\maptool\client\ui\forms\mapPropertiesDialog.xml</at>
+   <at name="id">C:\Users\tkunze\Source\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\mapPropertiesDialog.xml</at>
+   <at name="path">main\resources\net\rptools\maptool\client\ui\forms\mapPropertiesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
    <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -47,7 +47,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1030185697</at>
+        <at name="id">embedded.272431544</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:NONE,LEFT:MIN(100DLU;PREF):NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,LEFT:PREF:GROW(1.0)</at>
         <at name="components">
@@ -96,8 +96,8 @@
                    </at>
                   </object>
                  </at>
-                 <at name="name"></at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
+                 <at name="name"/>
                  <at name="text">Label.name</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -105,7 +105,7 @@
                   </object>
                  </at>
                  <at name="toolTipText">MapPropertiesDialog.label.Name.tooltip</at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -159,8 +159,8 @@
                  </at>
                  <at name="columns">30</at>
                  <at name="name">name</at>
-                 <at name="width">1332</at>
-                 <at name="height">20</at>
+                 <at name="width">624</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -212,8 +212,8 @@
                    </at>
                   </object>
                  </at>
-                 <at name="name"></at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
+                 <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.playerMapAlias</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
@@ -221,7 +221,7 @@
                   </object>
                  </at>
                  <at name="toolTipText">MapPropertiesDialog.label.playerMapAlias.tooltip</at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -275,8 +275,8 @@
                  </at>
                  <at name="columns">30</at>
                  <at name="name">playerMapAlias</at>
-                 <at name="width">1332</at>
-                 <at name="height">20</at>
+                 <at name="width">624</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -328,7 +328,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.cell.type</at>
                  <at name="fill">
@@ -336,7 +336,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -388,7 +388,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.cell.dist</at>
                  <at name="fill">
@@ -396,7 +396,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -450,8 +450,8 @@
                  </at>
                  <at name="columns">5</at>
                  <at name="name">distance</at>
-                 <at name="width">116</at>
-                 <at name="height">20</at>
+                 <at name="width">120</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -503,7 +503,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">Label.lights</at>
                  <at name="fill">
@@ -512,7 +512,7 @@
                   </object>
                  </at>
                  <at name="toolTipText">MapPropertiesDialog.label.lights.tooltip</at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -565,13 +565,13 @@
                   </object>
                  </at>
                  <at name="name">visionType</at>
-                 <at name="width">116</at>
+                 <at name="width">120</at>
                  <at name="items">
                   <object classname="com.jeta.forms.store.properties.ItemsProperty">
                    <at name="name">items</at>
                   </object>
                  </at>
-                 <at name="height">20</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -596,7 +596,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.1467883135</at>
+             <at name="id">embedded.306953169</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -653,8 +653,8 @@
                        </object>
                       </at>
                       <at name="name">squareRadio</at>
-                      <at name="width">15</at>
-                      <at name="height">15</at>
+                      <at name="width">17</at>
+                      <at name="height">17</at>
                      </object>
                     </at>
                    </object>
@@ -706,17 +706,8 @@
                         </at>
                        </object>
                       </at>
-                      <at name="icon">
-                       <object classname="com.jeta.forms.store.properties.IconProperty">
-                        <at name="embedded">false</at>
-                        <at name="path">net\rptools\maptool\client\image\gridSquare.png</at>
-                        <at name="description">gridSquare.png</at>
-                        <at name="width">16</at>
-                        <at name="height">16</at>
-                       </object>
-                      </at>
+                      <at name="name">squareIcon</at>
                       <at name="width">16</at>
-                      <at name="name"/>
                       <at name="height">16</at>
                      </object>
                     </at>
@@ -824,7 +815,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.1187475688</at>
+             <at name="id">embedded.431965743</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -881,8 +872,8 @@
                        </object>
                       </at>
                       <at name="name">hexVertRadio</at>
-                      <at name="width">15</at>
-                      <at name="height">15</at>
+                      <at name="width">17</at>
+                      <at name="height">17</at>
                      </object>
                     </at>
                    </object>
@@ -934,17 +925,8 @@
                         </at>
                        </object>
                       </at>
-                      <at name="icon">
-                       <object classname="com.jeta.forms.store.properties.IconProperty">
-                        <at name="embedded">false</at>
-                        <at name="path">net\rptools\maptool\client\image\gridVerticalHex.png</at>
-                        <at name="description">gridVerticalHex.png</at>
-                        <at name="width">16</at>
-                        <at name="height">16</at>
-                       </object>
-                      </at>
+                      <at name="name">hexVertIcon</at>
                       <at name="width">16</at>
-                      <at name="name"/>
                       <at name="height">16</at>
                      </object>
                     </at>
@@ -1052,7 +1034,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.955461089</at>
+             <at name="id">embedded.1607527845</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1109,8 +1091,8 @@
                        </object>
                       </at>
                       <at name="name">hexHoriRadio</at>
-                      <at name="width">15</at>
-                      <at name="height">15</at>
+                      <at name="width">17</at>
+                      <at name="height">17</at>
                      </object>
                     </at>
                    </object>
@@ -1162,17 +1144,8 @@
                         </at>
                        </object>
                       </at>
-                      <at name="icon">
-                       <object classname="com.jeta.forms.store.properties.IconProperty">
-                        <at name="embedded">false</at>
-                        <at name="path">net\rptools\maptool\client\image\gridHorizontalHex.png</at>
-                        <at name="description">gridHorizontalHex.png</at>
-                        <at name="width">16</at>
-                        <at name="height">16</at>
-                       </object>
-                      </at>
+                      <at name="name">hexHoriIcon</at>
                       <at name="width">16</at>
-                      <at name="name"/>
                       <at name="height">16</at>
                      </object>
                     </at>
@@ -1280,7 +1253,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.960277452</at>
+             <at name="id">embedded.1432443575</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1337,8 +1310,8 @@
                        </object>
                       </at>
                       <at name="name">noGridRadio</at>
-                      <at name="width">15</at>
-                      <at name="height">15</at>
+                      <at name="width">17</at>
+                      <at name="height">17</at>
                      </object>
                     </at>
                    </object>
@@ -1390,17 +1363,8 @@
                         </at>
                        </object>
                       </at>
-                      <at name="icon">
-                       <object classname="com.jeta.forms.store.properties.IconProperty">
-                        <at name="embedded">false</at>
-                        <at name="path">net\rptools\lib\image\icons\cross.png</at>
-                        <at name="description">cross.png</at>
-                        <at name="width">16</at>
-                        <at name="height">16</at>
-                       </object>
-                      </at>
+                      <at name="name">noGridIcon</at>
                       <at name="width">16</at>
-                      <at name="name"/>
                       <at name="toolTipText">MapPropertiesDialog.image.nogrid</at>
                       <at name="height">16</at>
                      </object>
@@ -1509,7 +1473,7 @@
               </at>
               <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
              </super>
-             <at name="id">embedded.1546001274</at>
+             <at name="id">embedded.627230806</at>
              <at name="rowspecs">CENTER:DEFAULT:NONE</at>
              <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
              <at name="components">
@@ -1566,8 +1530,8 @@
                        </object>
                       </at>
                       <at name="name">isoRadio</at>
-                      <at name="width">15</at>
-                      <at name="height">15</at>
+                      <at name="width">17</at>
+                      <at name="height">17</at>
                      </object>
                     </at>
                    </object>
@@ -1619,17 +1583,8 @@
                         </at>
                        </object>
                       </at>
-                      <at name="icon">
-                       <object classname="com.jeta.forms.store.properties.IconProperty">
-                        <at name="embedded">false</at>
-                        <at name="path">net\rptools\maptool\client\image\gridIsometric.png</at>
-                        <at name="description">gridIsometric.png</at>
-                        <at name="width">16</at>
-                        <at name="height">16</at>
-                       </object>
-                      </at>
+                      <at name="name">isoIcon</at>
                       <at name="width">16</at>
-                      <at name="name"/>
                       <at name="height">16</at>
                      </object>
                     </at>
@@ -1764,7 +1719,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.cell.pixels</at>
                  <at name="fill">
@@ -1772,7 +1727,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -1826,8 +1781,8 @@
                  </at>
                  <at name="columns">5</at>
                  <at name="name">pixelsPerCell</at>
-                 <at name="width">116</at>
-                 <at name="height">20</at>
+                 <at name="width">120</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -1879,7 +1834,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.vision.dist</at>
                  <at name="fill">
@@ -1887,7 +1842,7 @@
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -1941,8 +1896,8 @@
                  </at>
                  <at name="columns">5</at>
                  <at name="name">defaultVision</at>
-                 <at name="width">116</at>
-                 <at name="height">20</at>
+                 <at name="width">120</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -1994,7 +1949,7 @@
                    </at>
                   </object>
                  </at>
-                 <at name="width">207</at>
+                 <at name="width">257</at>
                  <at name="name"/>
                  <at name="text">MapPropertiesDialog.label.cell.ai</at>
                  <at name="fill">
@@ -2003,7 +1958,7 @@
                   </object>
                  </at>
                  <at name="toolTipText">MapPropertiesDialog.label.cell.ai.tooltip</at>
-                 <at name="height">14</at>
+                 <at name="height">17</at>
                 </object>
                </at>
               </object>
@@ -2056,13 +2011,13 @@
                   </object>
                  </at>
                  <at name="name">aStarRoundingOptionsComboBox</at>
-                 <at name="width">116</at>
+                 <at name="width">120</at>
                  <at name="items">
                   <object classname="com.jeta.forms.store.properties.ItemsProperty">
                    <at name="name">items</at>
                   </object>
                  </at>
-                 <at name="height">20</at>
+                 <at name="height">23</at>
                 </object>
                </at>
               </object>
@@ -2211,7 +2166,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.906307103</at>
+        <at name="id">embedded.1966218461</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
@@ -2262,9 +2217,9 @@
                  </at>
                  <at name="actionCommand">OK</at>
                  <at name="name">okButton</at>
-                 <at name="width">79</at>
+                 <at name="width">91</at>
                  <at name="text">Button.ok</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -2318,9 +2273,9 @@
                  </at>
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
-                 <at name="width">99</at>
+                 <at name="width">117</at>
                  <at name="text">Button.cancel</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -2427,7 +2382,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.592756009</at>
+        <at name="id">embedded.186678333</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:GROW(1.0)</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
@@ -2477,14 +2432,14 @@
                   </object>
                  </at>
                  <at name="name">mapPreviewPanel</at>
-                 <at name="width">69</at>
+                 <at name="width">87</at>
                  <at name="text">Preview Panel</at>
                  <at name="fill">
                   <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
                    <at name="name">fill</at>
                   </object>
                  </at>
-                 <at name="height">323</at>
+                 <at name="height">345</at>
                 </object>
                </at>
               </object>
@@ -2538,9 +2493,9 @@
                  </at>
                  <at name="actionCommand">Background</at>
                  <at name="name">backgroundButton</at>
-                 <at name="width">125</at>
+                 <at name="width">151</at>
                  <at name="text">Button.background</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -2594,9 +2549,9 @@
                  </at>
                  <at name="actionCommand">JButton</at>
                  <at name="name">mapButton</at>
-                 <at name="width">125</at>
+                 <at name="width">151</at>
                  <at name="text">Button.map</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -2650,9 +2605,9 @@
                  </at>
                  <at name="actionCommand">JButton</at>
                  <at name="name">fogButton</at>
-                 <at name="width">125</at>
+                 <at name="width">151</at>
                  <at name="text">Button.fog</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>

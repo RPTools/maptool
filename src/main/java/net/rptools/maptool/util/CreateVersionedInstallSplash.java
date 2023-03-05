@@ -14,8 +14,7 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.BufferedWriter;
 import java.io.File;
@@ -38,6 +37,8 @@ import javafx.stage.StageStyle;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import net.rptools.maptool.client.swing.SplashScreen;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -45,8 +46,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 
 public class CreateVersionedInstallSplash extends Application {
-  private static String resourceImage =
-      "net/rptools/maptool/client/image/maptool_splash_template.png";
+  private static String resourceImage = null;
   private static String webOutputPath;
   private static String versionText = "Dev-Build";
   private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
@@ -100,8 +100,11 @@ public class CreateVersionedInstallSplash extends Application {
   }
 
   public static BufferedImage createLaunchSplash(String versionText) {
-    final ImageIcon splashIcon =
-        new ImageIcon(SplashScreen.class.getClassLoader().getResource(resourceImage));
+    Image splashIcon = RessourceManager.getImage(Images.MAPTOOL_SPLASH);
+    if (resourceImage != null) {
+      splashIcon =
+          new ImageIcon(SplashScreen.class.getClassLoader().getResource(resourceImage)).getImage();
+    }
     final Color versionColor = Color.rgb(3, 78, 149, 1); // Color.rgb(27, 85, 139, 1)
 
     final int imgWidth = 490;
@@ -119,7 +122,7 @@ public class CreateVersionedInstallSplash extends Application {
     rh.put(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
 
     g2d.setRenderingHints(rh);
-    g2d.drawImage(splashIcon.getImage(), 0, 0, null);
+    g2d.drawImage(splashIcon, 0, 0, null);
 
     // Adding glow twice to make it more pronounced...
     g2d.drawImage(

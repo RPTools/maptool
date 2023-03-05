@@ -65,10 +65,15 @@ public class getInfoFunction extends AbstractFunction {
     sysInfoProvider = new MapToolSysInfoProvider();
   }
 
-  // the following is here mostly for testing purpose, until we find a better way to inject
+  // region the following is here mostly for testing purpose, until we find a better way to inject
   protected void setSysInfoProvider(SysInfoProvider sysInfoProvider) {
     this.sysInfoProvider = sysInfoProvider;
   }
+
+  protected void resetSysInfoProvider() {
+    sysInfoProvider = new MapToolSysInfoProvider();
+  }
+  // endregion
 
   /**
    * Gets the instance of getInfoFunction.
@@ -133,6 +138,7 @@ public class getInfoFunction extends AbstractFunction {
 
     String visionType = zone.getVisionType().name();
     minfo.addProperty("vision type", visionType);
+    minfo.addProperty("vision distance", zone.getTokenVisionDistance());
 
     JsonObject ginfo = new JsonObject();
 
@@ -179,6 +185,9 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.addProperty("timeInMs", System.currentTimeMillis());
     cinfo.addProperty("timeDate", getTimeDate());
     cinfo.addProperty("isoTimeDate", getIsoTimeDate());
+    cinfo.addProperty("isHosting", MapTool.isHostingServer());
+    cinfo.addProperty("isPersonalServer", MapTool.isPersonalServer());
+    cinfo.addProperty("userLanguage", MapTool.getLanguage());
 
     JsonObject dialogs = new JsonObject();
     Set<String> dialogNames = HTMLDialog.getDialogNames();
@@ -318,6 +327,7 @@ public class getInfoFunction extends AbstractFunction {
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
         linfo.addProperty("type", ls.getType().toString());
+        linfo.addProperty("scale", ls.isScaleWithToken());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
         // lights.add(light);

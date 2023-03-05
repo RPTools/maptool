@@ -16,10 +16,7 @@ package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.util.Set;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
@@ -30,19 +27,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class DiamondExposeTool extends DiamondTool {
   private static final long serialVersionUID = 2577704127916955192L;
 
-  public DiamondExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-diamond.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public DiamondExposeTool() {}
 
   @Override
   public boolean isAvailable() {

@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.model.campaign;
 
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.library.LibraryManager;
@@ -29,7 +32,10 @@ public class CampaignManager {
    * campaign is about to be loaded, sent from the server, or a new campaign is created.
    */
   public void clearCampaignData() {
+    MapTool.getFrame().getOverlayPanel().removeAllOverlays();
+    JSScriptEngine.resetContexts();
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
+    UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();
   }
 }

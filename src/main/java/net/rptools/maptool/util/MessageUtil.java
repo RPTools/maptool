@@ -15,35 +15,55 @@
 package net.rptools.maptool.util;
 
 import java.awt.Color;
+import javax.swing.UIManager;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
+import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeColor;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 
 public class MessageUtil {
-  static final String CSS_EMIT = ".emit { font-weight: bold; font-style: italic }";
-  static final String CSS_AVASMG_TD = ".ava-msg td { padding: 0px }";
-  static final String CSS_AVAMSG_AVATAR = ".ava-msg .avatar { width: 40px; text-align: center }";
-  static final String CSS_AVAMSG_MESSAGE =
-      ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }";
-  static final String CSS_EMOTE_MESSAGE = ".emote .message { border-left-color: #7AC07A }";
-  static final String CSS_SAY_PREFIX = ".say .prefix, .say .trusted-prefix { font-weight: bold }";
-  static final String CSS_SELF = ".self { font-style: italic }";
-  static final String CSS_SYSTEM = ".system { color: blue; font-style: italic }";
-  static final String CSS_WHISPER = ".whisper { color: blue }";
 
   public static String getMessageCss() {
-    return CSS_EMIT
-        + CSS_AVASMG_TD
-        + CSS_AVAMSG_AVATAR
-        + CSS_AVAMSG_MESSAGE
-        + CSS_EMOTE_MESSAGE
-        + CSS_SAY_PREFIX
-        + CSS_SELF
-        + CSS_SYSTEM
-        + CSS_WHISPER;
+    if (ThemeSupport.shouldUseThemeColorsForChat()) {
+      var gray = ThemeSupport.getThemeColorHexString(ThemeColor.GREY);
+      var purple = ThemeSupport.getThemeColorHexString(ThemeColor.PURPLE);
+      var blue = ThemeSupport.getThemeColorHexString(ThemeColor.BLUE);
+      return ".emit { font-weight: bold; font-style: italic }"
+          .concat(".ava-msg td { padding: 0px }")
+          .concat(".ava-msg .avatar { width: 40px; text-align: center }")
+          .concat(
+              ".ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px "
+                  + "solid ")
+          .concat(gray)
+          .concat("}")
+          .concat(".emote .message { border-left-color: ")
+          .concat(purple)
+          .concat(" }")
+          .concat(".say .prefix, .say .trusted-prefix { font-weight: bold }")
+          .concat(".self { font-style: italic }")
+          .concat(".system { color: ")
+          .concat(blue)
+          .concat("; font-style: italic }")
+          .concat(".whisper { color: ")
+          .concat(blue)
+          .concat(" }");
+    } else {
+      return """
+          .emit { font-weight: bold; font-style: italic }
+          .ava-msg td { padding: 0px }
+          .ava-msg .avatar { width: 40px; text-align: center }
+          .ava-msg .message { padding-left: 5px; margin-right: 5px; border-left: 3px solid silver }
+          .emote .message { border-left-color: #7AC07A }
+          .say .prefix, .say .trusted-prefix { font-weight: bold }
+          .self { font-style: italic }
+          .system { color: blue; font-style: italic }
+          .whisper { color: blue }
+          """;
+    }
   }
 
   public static String getFormattedEmit(String msg) {
@@ -159,11 +179,28 @@ public class MessageUtil {
     return sb.toString();
   }
 
-  private static String applyChatColor(String str) {
+  public static String getChatColorHex() {
+    if (MapTool.getFrame() == null || MapTool.getFrame().getCommandPanel() == null) {
+      return "";
+    }
+
     Color color = MapTool.getFrame().getCommandPanel().getTextColorWell().getColor();
     if (color == null) {
+      return "";
+    }
+    return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
+  }
+
+  public static String getDefaultForegroundHex() {
+    var color = UIManager.getColor("Panel.foreground");
+    return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
+  }
+
+  private static String applyChatColor(String str) {
+    var color = getChatColorHex();
+    if (color.isEmpty()) {
       return str;
     }
-    return String.format("<span style='color:#%06X'>%s</span>", (color.getRGB() & 0xFFFFFF), str);
+    return String.format("<span style='color:" + color + "'>%s</span>", str);
   }
 }

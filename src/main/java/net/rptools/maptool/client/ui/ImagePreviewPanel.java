@@ -19,7 +19,7 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
 import javax.swing.JComponent;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 
 @SuppressWarnings("serial")
 public class ImagePreviewPanel extends JComponent {

@@ -1,0 +1,34 @@
+name: Refactoring
+description: Suggest a refactoring to improve the codebase
+title: "[Refactoring]: "
+labels: ["code maintenance"]
+body:
+  - type: markdown
+    attributes:
+      value: Thanks for taking the time to make a suggestion! Please fill out this form as completely and specifically as possible.
+  - type: textarea
+    attributes:
+      label: Describe the problem
+      description: A concise description of a problem in the codebase.
+      placeholder: E.g., a critical piece of code is duplicated many times.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: The improvement you'd like to see
+      description: Explanation of how exactly you want the codebase to be changed.
+      placeholder: E.g., adding a new utility class would allow us to reduce the code duplication.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Expected Benefits
+      description: Explanation of why this suggestion is actually an improvement.
+      placeholder: E.g., deduplicating the code will allow us to make changes more easily without introducing discrepancies.
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Additional Context
+      description: Add any other context about the problem here.
+      placeholder: E.g., improving this part of the code will be useful as part of a larger change that is in the works.

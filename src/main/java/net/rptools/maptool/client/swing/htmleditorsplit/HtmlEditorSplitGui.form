@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplitGui">
+  <grid id="27dc6" binding="rootPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="0" left="0" bottom="0" right="0"/>
+    <constraints>
+      <xy x="20" y="20" width="500" height="400"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <tabbedpane id="297f1" binding="tabPanel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <preferred-size width="200" height="200"/>
+          </grid>
+        </constraints>
+        <properties>
+          <name value=""/>
+          <tabPlacement value="3"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="d2e47" binding="htmlTab" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="2" left="2" bottom="6" right="2"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.hero.html"/>
+            </constraints>
+            <properties>
+              <name value=""/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="fe9a4" class="javafx.embed.swing.JFXPanel" binding="jfxPanel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+            </children>
+          </grid>
+          <grid id="2ed87" binding="textTab" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="4" right="0"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.hero.text"/>
+            </constraints>
+            <properties>
+              <name value=""/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="1396b" class="org.fife.rsta.ui.CollapsibleSectionPanel" binding="sectionPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value=""/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <scrollpane id="be0cb" class="org.fife.ui.rtextarea.RTextScrollPane" binding="textScrollPane">
+                    <constraints border-constraint="Center"/>
+                    <properties>
+                      <foldIndicatorEnabled value="true"/>
+                      <iconRowHeaderEnabled value="true"/>
+                      <lineNumbersEnabled value="true"/>
+                    </properties>
+                    <border type="none"/>
+                    <children>
+                      <component id="d7e53" class="org.fife.ui.rsyntaxtextarea.RSyntaxTextArea" binding="sourceTextArea">
+                        <constraints/>
+                        <properties>
+                          <codeFoldingEnabled value="true"/>
+                          <lineWrap value="true"/>
+                          <markOccurrences value="true"/>
+                          <name value=""/>
+                          <selectionEnd value="0"/>
+                          <selectionStart value="0"/>
+                          <syntaxEditingStyle value="text/html"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </scrollpane>
+                </children>
+              </grid>
+            </children>
+          </grid>
+        </children>
+      </tabbedpane>
+    </children>
+  </grid>
+</form>

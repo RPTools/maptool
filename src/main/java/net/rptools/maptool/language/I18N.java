@@ -170,6 +170,11 @@ public class I18N {
    * @return the String found with mnemonics removed, or the input key if not found
    */
   public static String getText(String key) {
+    if (key == null || key.isBlank()) {
+      // No benefit to doing a lookup
+      return key;
+    }
+
     String value = getString(key);
     if (value == null) {
       log.debug("Cannot find key '" + key + "' in properties file.");

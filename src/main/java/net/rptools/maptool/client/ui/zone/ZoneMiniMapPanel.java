@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
@@ -27,17 +28,18 @@ import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
+import net.rptools.maptool.client.events.ZoneActivated;
+import net.rptools.maptool.client.swing.ImageBorder;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.zones.FogChanged;
 import net.rptools.maptool.util.ImageManager;
 
 /** */
-public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
+public class ZoneMiniMapPanel extends JPanel {
 
   private static final int SIZE_WIDTH = 125;
   private static final int SIZE_HEIGHT = 100;
@@ -50,6 +52,8 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
   public ZoneMiniMapPanel() {
 
     addMouseListener(new MouseHandler());
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   /*
@@ -154,19 +158,9 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
     setSize(getPreferredSize());
   }
 
-  ////
-  // Zone Listener
-  // TODO: Add this as an AppEventListener
-  public void zoneAdded(Zone zone) {}
-
-  public void zoneActivated(Zone zone) {
-
-    if (this.zone != null) {
-      this.zone.removeModelChangeListener(this);
-    }
-
-    this.zone = zone;
-    this.zone.addModelChangeListener(this);
+  @Subscribe
+  private void onZoneActivated(ZoneActivated event) {
+    this.zone = event.zone();
 
     flush();
     resize();
@@ -175,13 +169,14 @@ public class ZoneMiniMapPanel extends JPanel implements ModelChangeListener {
     repaint();
   }
 
-  ////
-  // ModelChangeListener
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.getEvent() == Zone.Event.FOG_CHANGED) {
-      flush();
-      repaint();
+  @Subscribe
+  private void onFogChanged(FogChanged event) {
+    if (event.zone() != this.zone) {
+      return;
     }
+
+    flush();
+    repaint();
   }
 
   ////

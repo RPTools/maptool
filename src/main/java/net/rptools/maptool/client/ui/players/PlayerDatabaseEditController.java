@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.players;
 
 import java.net.URL;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -301,7 +302,8 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
           } catch (NoSuchAlgorithmException
               | InvalidKeySpecException
               | NoSuchPaddingException
-              | InvalidKeyException e) {
+              | InvalidKeyException
+              | InvalidAlgorithmParameterException e) {
             isValidPk = false;
             break;
           }

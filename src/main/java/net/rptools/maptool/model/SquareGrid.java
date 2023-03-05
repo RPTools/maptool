@@ -31,37 +31,29 @@ import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.server.proto.GridDto;
+import net.rptools.maptool.server.proto.SquareGridDto;
 
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
-  private static BufferedImage pathHighlight;
-  private static BufferedImage pathHighlightAlt;
+  private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
+  private static BufferedImage pathHighlightAlt =
+      RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
 
   private static List<TokenFootprint> footprintList;
-
-  static {
-    try {
-      pathHighlight =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/whiteBorder.png");
-      pathHighlightAlt =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/grid-square-red.png");
-
-    } catch (IOException ioe) {
-      MapTool.showError("SquareGrid.error.pathhighlightingNotLoaded", ioe);
-    }
-  }
 
   // @formatter:off
   private static final GridCapabilities CAPABILITIES =
@@ -151,6 +143,11 @@ public class SquareGrid extends Grid {
         actionMap.remove(key);
       }
     }
+  }
+
+  @Override
+  protected void fillDto(GridDto.Builder dto) {
+    dto.setSquareGrid(SquareGridDto.newBuilder());
   }
 
   @Override

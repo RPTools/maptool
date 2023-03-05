@@ -94,7 +94,8 @@ public class TokenSightFunctions extends AbstractFunction {
         return "[]";
       }
       ZoneRenderer zoneRenderer = token.getZoneRenderer();
-      Area tokensVisibleArea = zoneRenderer.getZoneView().getVisibleArea(token);
+      Area tokensVisibleArea =
+          zoneRenderer.getZoneView().getVisibleArea(token, zoneRenderer.getPlayerView());
       if (tokensVisibleArea == null) {
         return "[]";
       }

@@ -25,7 +25,6 @@ import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.text.AttributedCharacterIterator;
 import java.text.AttributedString;
 import java.text.BreakIterator;
@@ -36,12 +35,13 @@ import java.util.stream.Collectors;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.*;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -68,6 +68,7 @@ import org.apache.logging.log4j.Logger;
 public class PointerTool extends DefaultTool {
   private static final long serialVersionUID = 8606021718606275084L;
   private static final Logger log = LogManager.getLogger(PointerTool.class);
+  private BufferedImage panelTexture = RessourceManager.getImage(Images.TEXTURE_PANEL);
 
   private boolean isShowingTokenStackPopup;
   private boolean isShowingPointer;
@@ -94,7 +95,6 @@ public class PointerTool extends DefaultTool {
   private final TokenStackPanel tokenStackPanel = new TokenStackPanel();
   private final HTMLPanelRenderer htmlRenderer = new HTMLPanelRenderer();
   private final Font boldFont = AppStyle.labelFont.deriveFont(Font.BOLD);
-  private final LayerSelectionDialog layerSelectionDialog;
 
   private BufferedImage statSheet;
   private Token tokenOnStatSheet;
@@ -110,35 +110,22 @@ public class PointerTool extends DefaultTool {
 
   private String currentPointerName;
 
+  private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
+
   public PointerTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/pointer-blue.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
     htmlRenderer.setBackground(new Color(0, 0, 0, 200));
     htmlRenderer.setForeground(Color.black);
     htmlRenderer.setOpaque(false);
     htmlRenderer.addStyleSheetRule("body{color:black}");
     htmlRenderer.addStyleSheetRule(".title{font-size: 14pt}");
+  }
 
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> {
-              if (renderer != null) {
-                renderer.setActiveLayer(layer);
-                MapTool.getFrame().setLastSelectedLayer(layer);
-
-                if (layer != Layer.TOKEN) {
-                  MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
-                }
-              }
-            });
+  @Override
+  protected void selectedLayerChanged(Zone.Layer layer) {
+    super.selectedLayerChanged(layer);
+    if (layer != Layer.TOKEN) {
+      MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
+    }
   }
 
   @Override
@@ -146,12 +133,11 @@ public class PointerTool extends DefaultTool {
     super.attachTo(renderer);
 
     if (MapTool.getPlayer().isGM()) {
-      MapTool.getFrame().showControlPanel(layerSelectionDialog);
+      MapTool.getFrame().showControlPanel(getLayerSelectionDialog());
     }
     htmlRenderer.attach(renderer);
-    layerSelectionDialog.updateViewList();
 
-    if (MapTool.getFrame().getLastSelectedLayer() != Zone.Layer.TOKEN) {
+    if (renderer.getActiveLayer() != Zone.Layer.TOKEN) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
@@ -220,6 +206,13 @@ public class PointerTool extends DefaultTool {
     return "tool.pointer.tooltip";
   }
 
+  public void startTokenDrag(Token keyToken, Set<GUID> selectedTokens) {
+    savedTokenSelectionSet.push(new HashSet<>(renderer.getSelectedTokenSet()));
+    renderer.clearSelectedTokens();
+    renderer.selectTokens(selectedTokens);
+    startTokenDrag(keyToken);
+  }
+
   public void startTokenDrag(Token keyToken) {
     tokenBeingDragged = keyToken;
 
@@ -256,6 +249,10 @@ public class PointerTool extends DefaultTool {
     dragOffsetY = 0;
 
     exposeFoW(null);
+    if (!savedTokenSelectionSet.isEmpty()) {
+      renderer.clearSelectedTokens();
+      renderer.selectTokens(savedTokenSelectionSet.pop());
+    }
   }
 
   /**
@@ -1863,12 +1860,8 @@ public class PointerTool extends DefaultTool {
                     statSize.height);
             statsG.setPaint(
                 new TexturePaint(
-                    AppStyle.panelTexture,
-                    new Rectangle(
-                        0,
-                        0,
-                        AppStyle.panelTexture.getWidth(),
-                        AppStyle.panelTexture.getHeight())));
+                    panelTexture,
+                    new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);
@@ -1941,15 +1934,10 @@ public class PointerTool extends DefaultTool {
 
             statsG.setPaint(
                 new TexturePaint(
-                    AppStyle.panelTexture,
-                    new Rectangle(
-                        0,
-                        0,
-                        AppStyle.panelTexture.getWidth(),
-                        AppStyle.panelTexture.getHeight())));
+                    panelTexture,
+                    new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
-            statsG.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);
@@ -2026,9 +2014,8 @@ public class PointerTool extends DefaultTool {
       // g.setComposite(composite);
       g.setPaint(
           new TexturePaint(
-              AppStyle.panelTexture,
-              new Rectangle(
-                  0, 0, AppStyle.panelTexture.getWidth(), AppStyle.panelTexture.getHeight())));
+              panelTexture,
+              new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
       g.fillRect(location.x, location.y, size.width, size.height);
 
       // Content
@@ -2045,8 +2032,11 @@ public class PointerTool extends DefaultTool {
   }
 
   private String createHoverNote(Token marker) {
-    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMNotes());
-    boolean showNotes = !StringUtil.isEmpty(marker.getNotes());
+    var notes = marker.getNotes();
+    var gmNotes = marker.getGMNotes();
+
+    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
+    boolean showNotes = !StringUtil.isEmpty(notes);
 
     StringBuilder builder = new StringBuilder();
 
@@ -2055,22 +2045,37 @@ public class PointerTool extends DefaultTool {
     }
     if (showGMNotes || showNotes) {
       builder.append("<b><span class='title'>").append(marker.getName());
-      if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(marker.getGMName())) {
+      if (MapTool.getPlayer().isGM()
+          && !StringUtil.isEmpty(marker.getGMName())
+          && !marker.getName().equals(marker.getGMName())) {
         builder.append(" (").append(marker.getGMName()).append(")");
       }
       builder.append("</span></b><br>");
     }
     if (showNotes) {
-      builder.append(marker.getNotes());
+      if (!notes.startsWith("<html")) {
+        notes = notes.replaceAll("\n", "<br>");
+      }
+      if (showGMNotes) {
+        notes = notes.replaceAll("</html>", "");
+        notes = notes.replaceAll("</body>", "");
+      }
+      builder.append(notes);
       // add a gap between player and gmNotes
       if (showGMNotes) {
-        builder.append("\n\n");
+        builder.append("<br><br>");
       }
     }
     if (showGMNotes) {
-      builder.append("<b><span class='title'>GM Notes");
-      builder.append("</span></b><br>");
-      builder.append(marker.getGMNotes());
+      if (showNotes) {
+        builder.append("<b><span class='title'>GM Notes</span></b><br>");
+        gmNotes = gmNotes.replaceAll("<html[^>]*>", "");
+        gmNotes = gmNotes.replaceAll("<body[^>]*>", "");
+      }
+      if (!gmNotes.startsWith("<html")) {
+        gmNotes = gmNotes.replaceAll("\n", "<br>");
+      }
+      builder.append(gmNotes);
     }
     if (marker.getPortraitImage() != null) {
       BufferedImage image = ImageManager.getImageAndWait(marker.getPortraitImage());
@@ -2089,8 +2094,7 @@ public class PointerTool extends DefaultTool {
           .append(imgSize.height)
           .append("></tr></table>");
     }
-    String notes = builder.toString();
-    notes = notes.replaceAll("\n", "<br>");
-    return notes;
+    String hoverText = builder.toString();
+    return hoverText;
   }
 }

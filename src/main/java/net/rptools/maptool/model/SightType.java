@@ -15,6 +15,8 @@
 package net.rptools.maptool.model;
 
 import java.awt.geom.Area;
+import net.rptools.maptool.server.proto.ShapeTypeDto;
+import net.rptools.maptool.server.proto.SightTypeDto;
 
 public class SightType {
   private String name;
@@ -135,5 +137,33 @@ public class SightType {
   public Area getVisionShape(Token token, Zone zone) {
     return zone.getGrid()
         .getShapedArea(getShape(), token, getDistance(), getArc(), getOffset(), scaleWithToken);
+  }
+
+  public static SightType fromDto(SightTypeDto dto) {
+    var sightType = new SightType();
+    sightType.name = dto.getName();
+    sightType.multiplier = dto.getMultiplier();
+    sightType.personalLightSource =
+        dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null;
+    sightType.shape = ShapeType.valueOf(dto.getShape().name());
+    sightType.arc = dto.getArc();
+    sightType.distance = dto.getDistance();
+    sightType.offset = dto.getOffset();
+    sightType.scaleWithToken = dto.getScaleWithToken();
+    return sightType;
+  }
+
+  public SightTypeDto toDto() {
+    var dto = SightTypeDto.newBuilder();
+    dto.setName(name);
+    dto.setMultiplier(multiplier);
+    if (personalLightSource != null) dto.setPersonalLightSource(personalLightSource.toDto());
+    if (shape == null) shape = ShapeType.CIRCLE;
+    dto.setShape(ShapeTypeDto.valueOf(shape.name()));
+    dto.setArc(arc);
+    dto.setDistance(distance);
+    dto.setOffset(offset);
+    dto.setScaleWithToken(scaleWithToken);
+    return dto.build();
   }
 }

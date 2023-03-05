@@ -23,17 +23,17 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-java@v1
         with:
-          java-version: "16"
+          java-version: "17"
       - uses: axel-op/googlejavaformat-action@v3
         with:
-          args: "--dry-run --skip-sorting-imports --replace"
+          args: "--dry-run --skip-sorting-imports"
   build:
     name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
     runs-on:  ${{ matrix.os }}
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '16' ]
+        java: [ '17' ]
       fail-fast: false
     steps:
       - name: Git checkout

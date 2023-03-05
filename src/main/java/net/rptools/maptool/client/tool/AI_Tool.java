@@ -15,9 +15,6 @@
 package net.rptools.maptool.client.tool;
 
 import java.awt.event.ActionEvent;
-import java.io.IOException;
-import javax.swing.ImageIcon;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 
@@ -25,17 +22,6 @@ import net.rptools.maptool.client.MapTool;
 public class AI_Tool extends DefaultTool {
 
   public AI_Tool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/ai-blue-off.png")));
-      setSelectedIcon(
-          new ImageIcon(
-              ImageUtil.getImage("net/rptools/maptool/client/image/tool/ai-blue-green.png")));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-
     // Server policy is not available yet but that's ok, we have it saved as a preference which
     // is OK at this stage of initialization.
     setSelected(AppPreferences.isUsingAstarPathfinding());

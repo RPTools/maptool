@@ -1,0 +1,379 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "MessageTypeProtos";
+
+import "google/protobuf/wrappers.proto";
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+import "data_transfer_objects.proto";
+import "drawing_dto.proto";
+import "gamedata.proto";
+
+message AddTopologyMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  TopologyTypeDto type = 3;
+}
+
+message BootPlayerMsg {
+  string player_name = 1;
+}
+
+message BringTokensToFrontMsg {
+  string zone_guid = 1;
+  repeated string token_guids = 2;
+}
+
+message ChangeZoneDisplayNameMsg {
+  string zone_guid = 1;
+  string name = 2;
+}
+
+message ClearAllDrawingsMsg {
+  string zone_guid = 1;
+  string layer = 2;
+}
+
+message ClearExposedAreaMsg {
+  string zone_guid = 1;
+  bool global_only = 2;
+}
+
+message DrawMsg {
+  string zone_guid = 1;
+  PenDto pen = 2;
+  DrawableDto drawable = 3;
+}
+
+message EditTokenMsg {
+  string zone_guid = 1;
+  TokenDto token = 2;
+}
+
+message PutTokenMsg {
+  string zone_guid = 1;
+  TokenDto token = 2;
+}
+
+message EnforceNotificationMsg {
+  bool enforce = 1;
+}
+
+message EnforceZoneMsg {
+  string zone_guid = 1;
+}
+
+message EnforceZoneViewMsg {
+  string zone_guid = 1;
+  int32 x = 2;
+  int32 y = 3;
+  double scale = 4;
+  int32 gm_width = 5;
+  int32 gm_height = 6;
+}
+
+message ExecFunctionMsg {
+  string target = 1;
+  string source = 2;
+  string function_name = 3;
+  repeated ScriptTypeDto argument = 4;
+}
+
+message ExecLinkMsg {
+  string link = 1;
+  string target = 2;
+  string source = 3;
+}
+
+message ExposeFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string token_guid = 3;
+}
+
+message ExposePcAreaMsg {
+  string zone_guid = 1;
+}
+
+message GetAssetMsg {
+  string asset_id = 1;
+}
+
+message GetZoneMsg {
+  string zone_guid = 1;
+}
+
+message HeartbeatMsg {
+  string data = 1;
+}
+
+message HideFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string token_guid = 3;
+}
+
+message HidePointerMsg {
+  string player = 1;
+}
+
+message MessageMsg {
+  TextMessageDto message = 1;
+}
+
+message MovePointerMsg {
+  string player = 1;
+  int32 x = 2;
+  int32 y = 3;
+}
+
+message PlayerConnectedMsg {
+  PlayerDto player = 1;
+}
+
+message PlayerDisconnectedMsg {
+  PlayerDto player = 1;
+}
+
+message PutAssetMsg {
+  AssetDto asset = 1;
+}
+
+message PutLabelMsg {
+  string zone_guid = 1;
+  LabelDto label = 2;
+}
+
+message PutZoneMsg {
+  ZoneDto zone = 1;
+}
+
+message RemoveAssetMsg {
+  string asset_id = 1;
+}
+
+message RemoveLabelMsg {
+  string zone_guid = 1;
+  string label_guid = 2;
+}
+
+message RemoveTokenMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+}
+
+message RemoveTokensMsg {
+  string zone_guid = 1;
+  repeated string token_guid = 2;
+}
+
+message RemoveTopologyMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  TopologyTypeDto type = 3;
+}
+
+message RemoveZoneMsg {
+  string zone_guid = 1;
+}
+
+message RenameZoneMsg {
+  string zone_guid = 1;
+  string name = 2;
+}
+
+message RestoreZoneViewMsg {
+  string zone_guid = 1;
+}
+
+message SendTokensToBackMsg {
+  string zone_guid = 1;
+  repeated string token_guids = 2;
+}
+
+message SetBoardMsg {
+  string zone_guid = 1;
+  IntPointDto point = 2;
+  string asset_id = 3;
+}
+
+message SetCampaignMsg {
+  CampaignDto campaign = 1;
+}
+
+message SetCampaignNameMsg {
+  string name = 1;
+}
+
+message SetFowMsg {
+  string zone_guid = 1;
+  AreaDto area = 2;
+  repeated string selected_tokens = 3;
+}
+
+message SetLiveTypingLabelMsg {
+  string player_name = 1;
+  bool typing = 2;
+}
+
+message SetServerPolicyMsg {
+  ServerPolicyDto policy = 1;
+}
+
+message SetTokenLocationMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+  IntPointDto location = 3;
+}
+
+message SetVisionTypeMsg {
+  string zone_guid = 1;
+  ZoneDto.VisionTypeDto vision = 2;
+}
+
+message SetZoneGridSizeMsg {
+  string zone_guid = 1;
+  int32 x_offset = 2;
+  int32 y_offset = 3;
+  int32 size = 4;
+  int32 color = 5;
+}
+
+message SetZoneHasFowMsg {
+  string zone_guid = 1;
+  bool has_fow = 2;
+}
+
+message SetZoneVisibilityMsg {
+  string zone_guid = 1;
+  bool is_visible = 2;
+}
+
+message ShowPointerMsg {
+  string player = 1;
+  PointerDto pointer = 2;
+}
+
+message StartAssetTransferMsg {
+  AssetTransferHeaderDto header = 1;
+}
+
+message StartTokenMoveMsg {
+  string player_id = 1;
+  string zone_guid = 2;
+  string key_token_id = 3;
+  repeated  string selected_tokens = 4;
+}
+
+message StopTokenMoveMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+}
+
+message ToggleTokenMoveWaypointMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+  IntPointDto point = 3;
+}
+
+message UndoDrawMsg {
+  string zone_guid = 1;
+  string drawable_guid = 2;
+}
+
+message UpdateAssetTransferMsg {
+  AssetChunkDto chunk = 1;
+}
+
+message UpdateCampaignMsg {
+  CampaignPropertiesDto properties = 1;
+}
+
+message UpdateCampaignMacrosMsg {
+  repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message UpdateDrawingMsg {
+  string zone_guid = 1;
+  PenDto pen = 2;
+  DrawnElementDto drawing = 3;
+}
+
+message UpdateExposedAreaMetaMsg {
+  string zone_guid = 1;
+  google.protobuf.StringValue token_guid = 2;
+  AreaDto area = 3;
+}
+
+message UpdateGmMacrosMsg {
+  repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message UpdateInitiativeMsg {
+  InitiativeListDto list = 1;
+  google.protobuf.BoolValue owner_permission = 2;
+}
+
+message UpdateTokenInitiativeMsg {
+  string zone_guid = 1;
+  string token_guid = 2;
+  bool is_holding = 3;
+  google.protobuf.StringValue state = 4;
+  int32 index = 5;
+}
+
+message UpdateTokenMoveMsg {
+  string zone_guid = 1;
+  string key_token_id = 2;
+  IntPointDto point = 3;
+}
+
+message UpdateTokenPropertyMsg {
+ string zone_guid = 1;
+ string token_guid = 2;
+ TokenUpdateDto property = 3;
+ repeated TokenPropertyValueDto values = 4;
+}
+
+message RemoveAddOnLibraryMsg {
+  repeated  string namespaces = 1;
+}
+message RemoveAllAddOnLibrariesMsg { /* empty */ }
+
+message AddAddOnLibraryMsg {
+  repeated TransferableAddOnLibraryDto add_ons = 1;
+}
+
+message UpdateDataStoreMsg {
+  DataStoreDto store = 1;
+}
+
+message UpdateDataMsg {
+  string type = 1;
+  string namespace = 2;
+  GameDataValueDto value = 3;
+}
+
+message UpdateDataNamespaceMsg {
+  GameDataDto data = 1;
+}
+
+message RemoveDataStoreMsg { /* empty */ }
+
+message RemoveDataNamespaceMsg {
+  string type = 1;
+  string namespace = 2;
+}
+
+message RemoveDataMsg {
+  string type = 1;
+  string namespace = 2;
+  string name = 3;
+}

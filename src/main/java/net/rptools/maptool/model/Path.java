@@ -21,10 +21,23 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.client.walker.NaiveWalker;
+import net.rptools.maptool.server.proto.PathDto;
+import net.rptools.maptool.server.proto.drawing.IntPointDto;
 
 public class Path<T extends AbstractPoint> {
   private final List<T> cellList = new LinkedList<T>();
   private final List<T> waypointList = new LinkedList<T>();
+
+  protected Object readResolve() {
+    // If any AStarCellPoints could not be converted to CellPoint, we get `null`s in these lists.
+    // In such a case, the path is meaningless so we just clear it.
+    if (cellList.contains(null) || waypointList.contains(null)) {
+      cellList.clear();
+      waypointList.clear();
+    }
+
+    return this;
+  }
 
   public void addPathCell(T point) {
     cellList.add(point);
@@ -258,5 +271,34 @@ public class Path<T extends AbstractPoint> {
       */
     }
     return path;
+  }
+
+  public static Path fromDto(PathDto dto) {
+    if (dto.getPointType() == PathDto.PointType.CELL_POINT) {
+      final var path = new Path<CellPoint>();
+      dto.getCellsList().forEach(p -> path.addPathCell(new CellPoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.addWayPoint(new CellPoint(p.getX(), p.getY())));
+      return path;
+    } else {
+      final var path = new Path<ZonePoint>();
+      dto.getCellsList().forEach(p -> path.addPathCell(new ZonePoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.addWayPoint(new ZonePoint(p.getX(), p.getY())));
+      return path;
+    }
+  }
+
+  public PathDto toDto() {
+    var cellPath = getCellPath();
+    if (cellPath.size() == 0) return null;
+
+    var dto = PathDto.newBuilder();
+
+    if (cellPath.get(0) instanceof CellPoint) dto.setPointType(PathDto.PointType.CELL_POINT);
+    else dto.setPointType(PathDto.PointType.ZONE_POINT);
+
+    cellPath.forEach(p -> dto.addCells(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+    getWayPointList().forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+
+    return dto.build();
   }
 }

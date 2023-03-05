@@ -324,11 +324,18 @@ public class AssetLoader {
         }
       }
 
-      // Last resort, ask the MT server
-      // We can drop off the end of this runnable because it'll background load the
-      // image from the server
       // System.out.println("Got " + id + " from MT");
-      MapTool.serverCommand().getAsset(id);
+      // Last resort, ask the MT server
+      final var serverCommand = MapTool.serverCommand();
+      if (serverCommand != null) {
+        // We can drop off the end of this runnable because it'll background load the
+        // image from the server
+        serverCommand.getAsset(id);
+      } else {
+        // This could be too early in the loading process for a server command to be set.
+        AssetManager.putAsset(Asset.createBrokenImageAsset(id));
+        completeRequest(id);
+      }
     }
   }
 }

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
@@ -25,9 +26,8 @@ import java.util.List;
 import javax.swing.JPanel;
 import javax.swing.Scrollable;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AreaGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroupPopupMenu;
@@ -35,14 +35,10 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 
 @SuppressWarnings("serial")
-public abstract class AbstractMacroPanel extends JPanel
-    implements Scrollable, MouseListener, ModelChangeListener, AppEventListener {
+public abstract class AbstractMacroPanel extends JPanel implements Scrollable, MouseListener {
   private String panelClass = "";
   private GUID tokenId = null;
 
@@ -188,19 +184,8 @@ public abstract class AbstractMacroPanel extends JPanel
 
   public void mouseExited(MouseEvent event) {}
 
-  // currently only used for Impersonate/Selection panels to refresh when the token is removed or a
-  // macro changes
-  @Override
-  public void modelChanged(ModelChangeEvent event) {}
-
-  public void handleAppEvent(AppEvent event) {
-    Zone oldZone = (Zone) event.getOldValue();
-    Zone newZone = (Zone) event.getNewValue();
-
-    if (oldZone != null) {
-      oldZone.removeModelChangeListener(this);
-    }
-    newZone.addModelChangeListener(this);
+  @Subscribe
+  void onZoneActivated(ZoneActivated event) {
     reset();
   }
 

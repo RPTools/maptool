@@ -57,7 +57,7 @@ public class CodeTimer {
       return;
     }
     int count = orderMap.size();
-    orderMap.put(id, count);
+    orderMap.putIfAbsent(id, count);
     Timer timer = timeMap.get(id);
     if (timer == null) {
       timer = new Timer();

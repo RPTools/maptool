@@ -38,8 +38,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
+import net.rptools.maptool.client.ui.ImageAssetPanel;
 import net.rptools.maptool.client.ui.lookuptable.EditLookupTablePanel.LookupTableTableModel;
-import net.rptools.maptool.client.ui.token.ImageAssetPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.LookupTable;
@@ -56,7 +56,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
   private boolean newTable = false;
 
   public EditLookupTablePanel() {
-    super("net/rptools/maptool/client/ui/forms/editLookupTablePanel.xml");
+    super(new EditLookupTablePanelView().$$$getRootComponent$$$());
     panelInit();
   }
 

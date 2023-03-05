@@ -83,7 +83,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key)
+  public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key)
       throws ExecutionException, InterruptedException {
     return CompletableFuture.completedFuture(null);
   }

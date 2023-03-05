@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import org.junit.jupiter.api.Test;
 
 public class ExportDialogTest {

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-38,-19)">
+        <g id="Alphabetic" transform="matrix(1,0,0,1,-259.667,19)">
+            <rect x="297.667" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(-3.19838e-16,-2,-1.33333,-2.93792e-17,310.667,24)">
+                <path d="M7,6.75L7,9L5,6L7,3L7,5.25L11,5.25L11,6.75L7,6.75Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1,0,0,1,265.562,-20.5193)">
+                <text x="40.863px" y="27.5px" style="font-family:'ADAM.CGPRO', 'ADAM.CG PRO';font-size:8px;fill:rgb(110,110,110);">A</text>
+                <text x="40.823px" y="35.5px" style="font-family:'ADAM.CGPRO', 'ADAM.CG PRO';font-size:8px;fill:rgb(110,110,110);">Z</text>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -18,13 +18,10 @@ import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -53,23 +50,7 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
-  public LineCellTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-cell-line.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
-  }
+  public LineCellTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool Methods
@@ -81,7 +62,7 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
     return "tool.LineCellTemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     // No reason to create new instructions

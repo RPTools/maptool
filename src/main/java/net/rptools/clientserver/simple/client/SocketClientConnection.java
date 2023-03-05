@@ -51,9 +51,9 @@ public class SocketClientConnection extends AbstractConnection implements Client
 
   private void initialize(Socket socket) throws IOException {
     this.socket = socket;
-    this.send = new SendThread(this, new DataOutputStream(socket.getOutputStream()));
+    this.send = new SendThread(this, new BufferedOutputStream(socket.getOutputStream()));
+    this.receive = new ReceiveThread(this, socket.getInputStream());
     this.send.start();
-    this.receive = new ReceiveThread(this, new DataInputStream(socket.getInputStream()));
     this.receive.start();
   }
 
@@ -116,7 +116,7 @@ public class SocketClientConnection extends AbstractConnection implements Client
     public SendThread(SocketClientConnection conn, OutputStream out) {
       setName("SocketClientConnection.SendThread");
       this.conn = conn;
-      this.out = new BufferedOutputStream(out, 1024);
+      this.out = out;
     }
 
     public void requestStop() {
@@ -152,6 +152,7 @@ public class SocketClientConnection extends AbstractConnection implements Client
           }
         }
       } catch (IOException e) {
+        log.error(e);
         fireDisconnect();
       }
     }
@@ -180,11 +181,13 @@ public class SocketClientConnection extends AbstractConnection implements Client
       while (!stopRequested && conn.isAlive()) {
         try {
           byte[] message = conn.readMessage(in);
-          conn.dispatchMessage(conn.id, message);
+          conn.dispatchCompressedMessage(conn.id, message);
         } catch (IOException e) {
+          log.error(e);
           fireDisconnect();
           break;
         } catch (Throwable t) {
+          log.error(t);
           // don't let anything kill this thread via exception
           t.printStackTrace();
         }

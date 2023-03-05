@@ -86,6 +86,25 @@ public class AddOnLibraryImporter {
   }
 
   /**
+   * Returns if the asset in the file is an add-on..
+   *
+   * @param filename The name of the file to check.
+   * @return {@code true} if this is contains an add-on.
+   */
+  public static boolean isAssetFileAddonLibrary(String filename) {
+    try (var zip = new ZipFile(new File(filename))) {
+      ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
+      if (entry == null) {
+        return false;
+      } else {
+        return true;
+      }
+    } catch (IOException ioe) {
+      return false;
+    }
+  }
+
+  /**
    * Imports the add-on library from the specified asset.
    *
    * @param asset the asset to use for import.
@@ -121,7 +140,9 @@ public class AddOnLibraryImporter {
         throw new IOException(I18N.getText("library.error.addOn.noConfigFile", file.getPath()));
       }
       var builder = AddOnLibraryDto.newBuilder();
-      JsonFormat.parser().merge(new InputStreamReader(zip.getInputStream(entry)), builder);
+      JsonFormat.parser()
+          .ignoringUnknownFields()
+          .merge(new InputStreamReader(zip.getInputStream(entry)), builder);
 
       // MT MacroScript properties
       var pathAssetMap = processAssets(builder.getNamespace(), zip);
@@ -129,6 +150,7 @@ public class AddOnLibraryImporter {
       ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILE);
       if (mtsPropsZipEntry != null) {
         JsonFormat.parser()
+            .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(mtsPropsZipEntry)), mtsPropBuilder);
       }
 
@@ -137,6 +159,7 @@ public class AddOnLibraryImporter {
       ZipEntry eventsZipEntry = zip.getEntry(EVENT_PROPERTY_FILE);
       if (eventsZipEntry != null) {
         JsonFormat.parser()
+            .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
       var addOnLib = builder.build();
@@ -189,7 +212,8 @@ public class AddOnLibraryImporter {
    * @param asset the {@link Asset} to add.
    */
   private void addAsset(Asset asset) {
-    if (!AssetManager.hasAsset(asset)) {
+    if (!AssetManager.hasAsset(asset)
+        || AssetManager.getAsset(asset.getMD5Key()).getData().length == 0) {
       AssetManager.putAsset(asset);
     }
   }

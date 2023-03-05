@@ -14,18 +14,17 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.io.IOException;
 import java.util.EnumMap;
 import java.util.Map;
 import javax.swing.Box;
-import javax.swing.ImageIcon;
 import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -50,51 +49,47 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
     modeButtons = new EnumMap<>(Zone.TopologyType.class);
 
-    try {
-      var initiallySelectedTypes = AppPreferences.getTopologyTypes();
-      createAndAddModeButton(
-          Zone.TopologyType.WALL_VBL,
-          "net/rptools/maptool/client/image/tool/wall-vbl-only.png",
-          "net/rptools/maptool/client/image/tool/wall-vbl-only-off.png",
-          "tools.topology_mode_selection.vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.HILL_VBL,
-          "net/rptools/maptool/client/image/tool/hill-vbl-only.png",
-          "net/rptools/maptool/client/image/tool/hill-vbl-only-off.png",
-          "tools.topology_mode_selection.hill_vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.PIT_VBL,
-          "net/rptools/maptool/client/image/tool/pit-vbl-only.png",
-          "net/rptools/maptool/client/image/tool/pit-vbl-only-off.png",
-          "tools.topology_mode_selection.pit_vbl.tooltip",
-          initiallySelectedTypes);
-      createAndAddModeButton(
-          Zone.TopologyType.MBL,
-          "net/rptools/maptool/client/image/tool/mbl-only.png",
-          "net/rptools/maptool/client/image/tool/mbl-only-off.png",
-          "tools.topology_mode_selection.mbl.tooltip",
-          initiallySelectedTypes);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    var initiallySelectedTypes = AppPreferences.getTopologyTypes();
+    createAndAddModeButton(
+        Zone.TopologyType.WALL_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
+        "tools.topology_mode_selection.vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.HILL_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
+        "tools.topology_mode_selection.hill_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.PIT_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
+        "tools.topology_mode_selection.pit_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.MBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
+        "tools.topology_mode_selection.mbl.tooltip",
+        initiallySelectedTypes);
 
     this.add(Box.createHorizontalStrut(5));
   }
 
   private void createAndAddModeButton(
       Zone.TopologyType type,
-      String imageFileOn,
-      String imageFileOff,
+      final Icons icon,
+      final Icons offIcon,
       String toolTipKey,
-      Zone.TopologyTypeSet initiallySelectedTypes)
-      throws IOException {
+      Zone.TopologyTypeSet initiallySelectedTypes) {
     final var button = new JToggleButton();
-    if (imageFileOff != null && !imageFileOff.isEmpty())
-      button.setIcon(new ImageIcon(ImageUtil.getImage(imageFileOff)));
+
+    button.setIcon(RessourceManager.getBigIcon(offIcon));
+    button.setSelectedIcon(RessourceManager.getBigIcon(icon));
+
     button.setToolTipText(I18N.getText(toolTipKey));
-    button.setSelectedIcon(new ImageIcon(ImageUtil.getImage(imageFileOn)));
     button.setSelected(initiallySelectedTypes.contains(type));
     this.add(button);
     modeButtons.put(type, button);

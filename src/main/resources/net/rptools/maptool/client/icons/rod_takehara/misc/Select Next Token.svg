@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-114,0)">
+        <g id="Select-Next-Token" serif:id="Select Next Token" transform="matrix(1,0,0,1,-271.667,0)">
+            <rect x="385.667" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(1,0,0,1,252.667,0)">
+                <path d="M144.847,13.847C143.743,14.576 142.421,15 141,15C137.137,15 134,11.863 134,8C134,4.137 137.137,1 141,1C143.972,1 146.514,2.856 147.529,5.471L143.661,9.339C143.055,8.529 142.088,8.004 141,8.004C139.167,8.004 137.679,9.492 137.679,11.325L137.679,11.737C138.563,12.523 139.726,13 141,13C141.866,13 142.681,12.779 143.391,12.391L144.847,13.847ZM141,4C141.916,4 142.66,4.744 142.66,5.66C142.66,6.577 141.916,7.321 141,7.321C140.084,7.321 139.34,6.577 139.34,5.66C139.34,4.744 140.084,4 141,4Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(6.99798e-17,-1.14286,1,6.12323e-17,388.667,149.857)">
+                <path d="M121.5,8L125,12L118,12L121.5,8Z" style="fill:rgb(56,159,214);"/>
+            </g>
+        </g>
+    </g>
+</svg>

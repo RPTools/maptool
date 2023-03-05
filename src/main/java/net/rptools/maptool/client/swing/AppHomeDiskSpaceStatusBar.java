@@ -16,13 +16,12 @@ package net.rptools.maptool.client.swing;
 
 import java.awt.event.MouseAdapter;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 import javax.swing.Icon;
-import javax.swing.ImageIcon;
 import javax.swing.JLabel;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -35,12 +34,7 @@ public class AppHomeDiskSpaceStatusBar extends JLabel {
   private static Icon diskSpaceIcon;
 
   static {
-    try {
-      diskSpaceIcon =
-          new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/disk-space.png"));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    diskSpaceIcon = RessourceManager.getSmallIcon(Icons.STATUSBAR_FREE_SPACE);
   }
 
   public AppHomeDiskSpaceStatusBar() {

@@ -96,4 +96,9 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
   public String clientId() {
     return MapTool.getClientId();
   }
+
+  @HostAccess.Export
+  public String userLanguage() {
+    return MapTool.getLanguage();
+  }
 }

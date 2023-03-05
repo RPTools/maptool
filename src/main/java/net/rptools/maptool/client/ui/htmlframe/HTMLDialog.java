@@ -22,10 +22,10 @@ import java.awt.event.WindowEvent;
 import java.math.BigDecimal;
 import java.util.*;
 import javax.swing.*;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -175,7 +175,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean scrollBar, boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager(this, "dialog5", this.name));
     } else {
       panel = new HTMLPanel(this, scrollBar);
     }

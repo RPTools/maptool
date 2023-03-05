@@ -35,7 +35,8 @@ import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class that implements the DataStore interface. */
 public class MemoryDataStore implements DataStore {
@@ -50,7 +51,7 @@ public class MemoryDataStore implements DataStore {
       Collections.synchronizedMap(new HashMap<>());
 
   /** Class for logging. */
-  private static final Logger log = Logger.getLogger(MemoryDataStore.class);
+  private static final Logger log = LogManager.getLogger(MemoryDataStore.class);
 
   /** Creates a new MemoryDataStore. */
   MemoryDataStore() {}

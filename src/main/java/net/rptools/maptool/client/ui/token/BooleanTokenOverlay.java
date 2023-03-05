@@ -18,6 +18,7 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.FunctionUtil;
 
 /**
@@ -47,8 +48,8 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, java.lang.Object)
+   * @see AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, java.lang.Object)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
@@ -78,4 +79,57 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
    *     will be off for partial token painting.
    */
   public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds);
+
+  public static BooleanTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    switch (dto.getType()) {
+      case X -> {
+        return XTokenOverlay.fromDto(dto);
+      }
+      case YIELD -> {
+        return YieldTokenOverlay.fromDto(dto);
+      }
+      case O -> {
+        return OTokenOverlay.fromDto(dto);
+      }
+      case COLOR_DOT -> {
+        return ColorDotTokenOverlay.fromDto(dto);
+      }
+      case DIAMOND -> {
+        return DiamondTokenOverlay.fromDto(dto);
+      }
+      case TRIANGLE -> {
+        return TriangleTokenOverlay.fromDto(dto);
+      }
+      case CROSS -> {
+        return CrossTokenOverlay.fromDto(dto);
+      }
+      case FLOW_COLOR_DOT -> {
+        return FlowColorDotTokenOverlay.fromDto(dto);
+      }
+      case FLOW_DIAMOND -> {
+        return FlowDiamondTokenOverlay.fromDto(dto);
+      }
+      case FLOW_COLOR_SQUARE -> {
+        return FlowColorSquareTokenOverlay.fromDto(dto);
+      }
+      case FLOW_YIELD -> {
+        return FlowYieldTokenOverlay.fromDto(dto);
+      }
+      case SHADED -> {
+        return ShadedTokenOverlay.fromDto(dto);
+      }
+      case IMAGE -> {
+        return ImageTokenOverlay.fromDto(dto);
+      }
+      case FLOW_IMAGE -> {
+        return FlowImageTokenOverlay.fromDto(dto);
+      }
+      case CORNER_IMAGE -> {
+        return CornerImageTokenOverlay.fromDto(dto);
+      }
+    }
+    return null;
+  }
+
+  public abstract BooleanTokenOverlayDto toDto();
 }

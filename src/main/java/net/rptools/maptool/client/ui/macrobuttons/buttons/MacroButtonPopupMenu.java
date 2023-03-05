@@ -29,7 +29,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MacroButtonDialog;
+import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroButtonDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;

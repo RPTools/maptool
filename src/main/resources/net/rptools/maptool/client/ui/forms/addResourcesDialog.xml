@@ -24,8 +24,8 @@
     </at>
     <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
    </super>
-   <at name="id">C:\Users\Asus\IdeaProjects\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\addResourcesDialog.xml</at>
-   <at name="path">resources\net\rptools\maptool\client\ui\forms\addResourcesDialog.xml</at>
+   <at name="id">C:\Users\tkunze\Source\maptool\src\main\resources\net\rptools\maptool\client\ui\forms\addResourcesDialog.xml</at>
+   <at name="path">main\resources\net\rptools\maptool\client\ui\forms\addResourcesDialog.xml</at>
    <at name="rowspecs">CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:20DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
    <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
    <at name="components">
@@ -47,7 +47,7 @@
          </at>
          <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
         </super>
-        <at name="id">embedded.1378354276</at>
+        <at name="id">embedded.1320039023</at>
         <at name="rowspecs">CENTER:DEFAULT:NONE</at>
         <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
         <at name="components">
@@ -98,9 +98,9 @@
                  </at>
                  <at name="actionCommand">Install &gt;&gt;</at>
                  <at name="name">installButton</at>
-                 <at name="width">80</at>
+                 <at name="width">117</at>
                  <at name="text">Button.install</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -154,9 +154,9 @@
                  </at>
                  <at name="actionCommand">Cancel</at>
                  <at name="name">cancelButton</at>
-                 <at name="width">80</at>
+                 <at name="width">117</at>
                  <at name="text">Button.cancel</at>
-                 <at name="height">22</at>
+                 <at name="height">25</at>
                 </object>
                </at>
               </object>
@@ -326,13 +326,13 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
+                   <at name="title"></at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
-                     <at name="path">net\rptools\maptool\client\image\folder.png</at>
                      <at name="description">folder.png</at>
-                     <at name="width">16</at>
-                     <at name="height">16</at>
+                     <at name="width">0</at>
+                     <at name="height">0</at>
                     </object>
                    </at>
                    <at name="form">
@@ -351,7 +351,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.599444955</at>
+                     <at name="id">embedded.1912879387</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:20DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -404,7 +404,7 @@
                               <at name="name">localDirectoryButton</at>
                               <at name="width">44</at>
                               <at name="text">...</at>
-                              <at name="height">22</at>
+                              <at name="height">25</at>
                              </object>
                             </at>
                            </object>
@@ -456,7 +456,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">780</at>
+                              <at name="width">1044</at>
                               <at name="name"/>
                               <at name="text">AddResourcesDialog.label.localdirectory</at>
                               <at name="fill">
@@ -471,7 +471,7 @@
                                 <at name="size">14</at>
                                </object>
                               </at>
-                              <at name="height">17</at>
+                              <at name="height">19</at>
                              </object>
                             </at>
                            </object>
@@ -523,7 +523,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">29</at>
+                              <at name="width">55</at>
                               <at name="name"/>
                               <at name="text">Label.path</at>
                               <at name="fill">
@@ -538,7 +538,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -592,8 +592,8 @@
                               </at>
                               <at name="columns">30</at>
                               <at name="name">@localDirectory</at>
-                              <at name="width">731</at>
-                              <at name="height">20</at>
+                              <at name="width">969</at>
+                              <at name="height">23</at>
                              </object>
                             </at>
                            </object>
@@ -645,7 +645,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">731</at>
+                              <at name="width">969</at>
                               <at name="name"/>
                               <at name="text">AddResourcesDialog.label.example</at>
                               <at name="fill">
@@ -660,7 +660,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -686,6 +686,11 @@
                           </object>
                          </at>
                          <at name="name"/>
+                         <at name="fill">
+                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                           <at name="name">fill</at>
+                          </object>
+                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
@@ -766,13 +771,13 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
+                   <at name="title"></at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
-                     <at name="path">net\rptools\maptool\client\image\download.png</at>
                      <at name="description">download.png</at>
-                     <at name="width">16</at>
-                     <at name="height">16</at>
+                     <at name="width">0</at>
+                     <at name="height">0</at>
                     </object>
                    </at>
                    <at name="form">
@@ -791,7 +796,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.1455971712</at>
+                     <at name="id">embedded.2098682589</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:20DLU:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -841,8 +846,8 @@
                                </object>
                               </at>
                               <at name="name">@url</at>
-                              <at name="width">789</at>
-                              <at name="height">20</at>
+                              <at name="width">1029</at>
+                              <at name="height">23</at>
                              </object>
                             </at>
                            </object>
@@ -894,7 +899,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">789</at>
+                              <at name="width">1029</at>
                               <at name="name"/>
                               <at name="text">(e.g. http://myhost.com/cmpgn_images.zip)</at>
                               <at name="fill">
@@ -909,7 +914,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -961,7 +966,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">844</at>
+                              <at name="width">1108</at>
                               <at name="name"/>
                               <at name="text">Label.url</at>
                               <at name="fill">
@@ -976,7 +981,7 @@
                                 <at name="size">14</at>
                                </object>
                               </at>
-                              <at name="height">17</at>
+                              <at name="height">19</at>
                              </object>
                             </at>
                            </object>
@@ -1028,7 +1033,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">35</at>
+                              <at name="width">59</at>
                               <at name="name"/>
                               <at name="text">Label.url2</at>
                               <at name="fill">
@@ -1043,7 +1048,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -1095,7 +1100,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">35</at>
+                              <at name="width">59</at>
                               <at name="name"/>
                               <at name="text">Label.name</at>
                               <at name="fill">
@@ -1110,7 +1115,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -1163,8 +1168,8 @@
                                </object>
                               </at>
                               <at name="name">@urlName</at>
-                              <at name="width">789</at>
-                              <at name="height">20</at>
+                              <at name="width">1029</at>
+                              <at name="height">23</at>
                              </object>
                             </at>
                            </object>
@@ -1216,7 +1221,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">789</at>
+                              <at name="width">1029</at>
                               <at name="name"/>
                               <at name="text">(e.g. My Campaign Images)</at>
                               <at name="fill">
@@ -1231,7 +1236,7 @@
                                 <at name="size">11</at>
                                </object>
                               </at>
-                              <at name="height">14</at>
+                              <at name="height">15</at>
                              </object>
                             </at>
                            </object>
@@ -1257,6 +1262,11 @@
                           </object>
                          </at>
                          <at name="name"/>
+                         <at name="fill">
+                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                           <at name="name">fill</at>
+                          </object>
+                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
@@ -1346,13 +1356,13 @@
                  <at name="value">
                   <object classname="com.jeta.forms.store.properties.TabProperty">
                    <at name="name">tab</at>
+                   <at name="title"></at>
                    <at name="icon">
                     <object classname="com.jeta.forms.store.properties.IconProperty">
                      <at name="embedded">false</at>
-                     <at name="path">net\rptools\maptool\client\image\rptools_icon.png</at>
                      <at name="description">rptools_icon.png</at>
-                     <at name="width">16</at>
-                     <at name="height">16</at>
+                     <at name="width">0</at>
+                     <at name="height">0</at>
                     </object>
                    </at>
                    <at name="form">
@@ -1371,7 +1381,7 @@
                       </at>
                       <at name="componentclass">com.jeta.forms.gui.form.FormComponent</at>
                      </super>
-                     <at name="id">embedded.582924818</at>
+                     <at name="id">embedded.1688972619</at>
                      <at name="rowspecs">CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,CENTER:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),CENTER:DEFAULT:NONE</at>
                      <at name="colspecs">FILL:DEFAULT:NONE,FILL:DEFAULT:GROW(1.0),FILL:DEFAULT:NONE</at>
                      <at name="components">
@@ -1420,7 +1430,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="width">844</at>
+                              <at name="width">1108</at>
                               <at name="name"/>
                               <at name="text">Label.library</at>
                               <at name="fill">
@@ -1435,7 +1445,7 @@
                                 <at name="size">14</at>
                                </object>
                               </at>
-                              <at name="height">17</at>
+                              <at name="height">19</at>
                              </object>
                             </at>
                            </object>
@@ -1503,7 +1513,7 @@
                               <at name="scrollableTracksViewportHeight">true</at>
                               <at name="scrollableTracksViewportWidth">true</at>
                               <at name="name">@rptoolsList</at>
-                              <at name="width">842</at>
+                              <at name="width">1106</at>
                               <at name="items">
                                <object classname="com.jeta.forms.store.properties.ItemsProperty">
                                 <at name="name">items</at>
@@ -1536,7 +1546,7 @@
                                 </at>
                                </object>
                               </at>
-                              <at name="height">305</at>
+                              <at name="height">529</at>
                              </object>
                             </at>
                            </object>
@@ -1562,6 +1572,11 @@
                           </object>
                          </at>
                          <at name="name"/>
+                         <at name="fill">
+                          <object classname="com.jeta.forms.store.properties.effects.PaintProperty">
+                           <at name="name">fill</at>
+                          </object>
+                         </at>
                          <at name="scollBars">
                           <object classname="com.jeta.forms.store.properties.ScrollBarsProperty">
                            <at name="name">scollBars</at>
@@ -1639,9 +1654,9 @@
               </at>
              </object>
             </at>
-            <at name="width">941</at>
+            <at name="width">1189</at>
             <at name="tabCount">3</at>
-            <at name="height">431</at>
+            <at name="height">657</at>
            </object>
           </at>
          </object>

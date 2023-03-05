@@ -107,7 +107,7 @@ public class AssetDataValue implements DataValue {
     if (undefined) {
       throw InvalidDataOperation.createUndefined(name);
     } else {
-      throw InvalidDataOperation.createInvalidConversion(DataType.ASSET, DataType.DOUBLE);
+      return asset.toString();
     }
   }
 

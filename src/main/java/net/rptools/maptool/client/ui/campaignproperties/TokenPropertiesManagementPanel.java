@@ -44,7 +44,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   private String editingType;
 
   public TokenPropertiesManagementPanel() {
-    super("net/rptools/maptool/client/ui/forms/tokenPropertiesManagementPanel.xml");
+    super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
 
     panelInit();
   }
@@ -138,7 +138,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .setText(type != null ? compileTokenProperties(tokenTypeMap.get(type)) : "");
   }
 
-  private void update() {
+  void update() {
 
     // Pull the old one out and put the new one in (rename)
     List<TokenProperty> current;

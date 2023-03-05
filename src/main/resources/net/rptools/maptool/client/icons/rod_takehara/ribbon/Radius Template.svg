@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
+    <g transform="matrix(1,0,0,1,0,-95)">
+        <g id="Radius-Template" serif:id="Radius Template" transform="matrix(1,0,0,1,-90,95)">
+            <rect x="90" y="0" width="16" height="16" style="fill:none;"/>
+            <clipPath id="_clip1">
+                <rect x="90" y="0" width="16" height="16"/>
+            </clipPath>
+            <g clip-path="url(#_clip1)">
+                <g transform="matrix(1,0,0,1,90.7171,-92.494)">
+                    <circle cx="7.283" cy="100.494" r="6.331" style="fill:none;stroke:rgb(110,110,110);stroke-width:2px;"/>
+                </g>
+                <g transform="matrix(1.03846,0,0,1.0786,89.7291,-100.826)">
+                    <rect x="7.044" y="98.113" width="1.89" height="5.55" style="fill:rgb(56,159,214);"/>
+                </g>
+                <g transform="matrix(6.35874e-17,1.03846,-1.0786,6.60454e-17,206.844,-0.304385)">
+                    <rect x="7.044" y="98.113" width="1.89" height="5.55" style="fill:rgb(56,159,214);"/>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

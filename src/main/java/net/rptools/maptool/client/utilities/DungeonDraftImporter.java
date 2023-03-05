@@ -29,9 +29,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.MapPropertiesDialog;
+import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -89,7 +90,7 @@ public class DungeonDraftImporter {
 
   /** Asset to use to represent Light sources. */
   private static final Asset lightSourceAsset =
-      Asset.createImageAsset("LightSource", AppStyle.lightSourceIcon);
+      Asset.createImageAsset("LightSource", RessourceManager.getImage(Images.LIGHT_SOURCE));
 
   static {
     AssetManager.putAsset(lightSourceAsset);
@@ -166,8 +167,8 @@ public class DungeonDraftImporter {
     dialog.forceGridType(GridFactory.SQUARE);
     dialog.forceMap(asset);
     dialog.setVisible(true);
-    if (dialog.getStatus() == MapPropertiesDialog.Status.OK) {
-      MapTool.addZone(zone);
+    if (dialog.getStatus() != MapPropertiesDialog.Status.OK) {
+      return;
     }
 
     /**
@@ -245,6 +246,9 @@ public class DungeonDraftImporter {
     if (lights != null && lights.size() > 0) {
       placeLights(zone, lights, pixelsPerCell);
     }
+
+    // If everything has been successful, we can add the zone to the campaign.
+    MapTool.addZone(zone);
   }
 
   /**
