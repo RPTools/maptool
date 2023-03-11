@@ -609,7 +609,7 @@ public class Token implements Cloneable {
 
   public String getGMNotes() {
     if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
-      return gmNotes;
+      return toHtml(gmNotes);
     } else {
       return "";
     }
@@ -2048,7 +2048,22 @@ public class Token implements Cloneable {
 
   /** @return Getter for notes */
   public String getNotes() {
-    return notes;
+    return toHtml(notes);
+  }
+
+  /** convert string to html */
+  private String toHtml(String input) {
+    if (input != null && !input.startsWith("<html")) {
+      input = input.replaceAll("\n\n", "<p>");
+      input = input.replaceAll("\n", "\n<br>\n");
+      return "<html dir=\"ltr\">\n"
+          + " <head></head>\n"
+          + " <body contenteditable=\"true\">\n"
+          + input
+          + " </body>\n"
+          + "</html>";
+    }
+    return input;
   }
 
   /** @param aNotes Setter for notes */
