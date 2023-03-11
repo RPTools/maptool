@@ -16,7 +16,7 @@ buildscript {
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "4.1.1"
-    id "com.diffplug.spotless" version "5.14.3"
+    id "com.diffplug.spotless" version "6.16.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.12.7'
     id "com.google.protobuf" version "0.8.19"
@@ -105,7 +105,7 @@ spotless {
         toggleOffOn()
 
         // Now using the Google Java style guide
-        googleJavaFormat()
+        googleJavaFormat("1.11.0")
     }
 
     format 'misc', {
