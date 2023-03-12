@@ -70,7 +70,7 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.blockUntrustedMacro(functionName);
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
       final var zr = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 0);
-      return zr.getZone().getPlayerAlias();
+      return zr.getZone().getDisplayName();
 
     } else if (functionName.equalsIgnoreCase("setCurrentMap")) {
       FunctionUtil.blockUntrustedMacro(functionName);
@@ -116,21 +116,25 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
       String mapName = parameters.get(0).toString();
       String newMapDisplayName = parameters.get(1).toString();
+
       Zone zone = FunctionUtil.getZoneRenderer(functionName, mapName).getZone();
-      String oldName = zone.getPlayerAlias();
-      zone.setPlayerAlias(newMapDisplayName);
-      if (oldName.equals(newMapDisplayName)) {
-        return zone.getPlayerAlias();
+      if (newMapDisplayName.equals(zone.getDisplayName())) {
+        // The name is the same, so nothing to do.
+        return newMapDisplayName;
       }
+
+      final var nameChangeAccepted = zone.setPlayerAlias(newMapDisplayName);
+      if (!nameChangeAccepted) {
+        throw new ParserException(
+            I18N.getText("macro.function.map.duplicateDisplay", functionName));
+      }
+
       MapTool.serverCommand().changeZoneDispName(zone.getId(), newMapDisplayName);
       if (zone == MapTool.getFrame().getCurrentZoneRenderer().getZone()) {
         MapTool.getFrame().setCurrentZoneRenderer(MapTool.getFrame().getCurrentZoneRenderer());
       }
-      if (oldName.equals(zone.getPlayerAlias())) {
-        throw new ParserException(
-            I18N.getText("macro.function.map.duplicateDisplay", functionName));
-      }
-      return zone.getPlayerAlias();
+
+      return zone.getDisplayName();
 
     } else if ("copyMap".equalsIgnoreCase(functionName)) {
       FunctionUtil.blockUntrustedMacro(functionName);
@@ -175,7 +179,7 @@ public class MapFunctions extends AbstractFunction {
       List<String> mapNames = new LinkedList<>();
       for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
         if (allMaps || zr.getZone().isVisible()) {
-          mapNames.add(zr.getZone().getPlayerAlias());
+          mapNames.add(zr.getZone().getDisplayName());
         }
       }
 
@@ -188,7 +192,7 @@ public class MapFunctions extends AbstractFunction {
       FunctionUtil.blockUntrustedMacro(functionName);
 
       for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-        if (zr.getZone().getPlayerAlias().equals(displayName)) {
+        if (displayName.equals(zr.getZone().getDisplayName())) {
           return zr.getZone().getName();
         }
       }
