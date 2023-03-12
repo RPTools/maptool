@@ -20,13 +20,14 @@ jobs:
   formatting:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-java@v1
+      - name: Git checkout
+        uses: actions/checkout@v2
+      - name: Set up JDK
+        uses: actions/setup-java@v1
         with:
           java-version: "17"
-      - uses: axel-op/googlejavaformat-action@v3
-        with:
-          args: "--dry-run --skip-sorting-imports"
+      - name: spotlessCheck
+        run: ./gradlew spotlessCheck
   build:
     name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
     runs-on:  ${{ matrix.os }}

@@ -1,0 +1,5 @@
+caseName,macro,link,data
+no slashes in macro name,macro://jukebox_playAllClient@lib:bizland5e/all/Impersonated?281_Escape_from_Shadow.mp3,macro://jukebox_playAllClient@lib:bizland5e/all/Impersonated?,281_Escape_from_Shadow.mp3
+slashes in macro name,macro://jukebox/playAllClient@lib:bizland5e/all/Impersonated?281_Escape_from_Shadow.mp3,macro://jukebox/playAllClient@lib:bizland5e/all/Impersonated?,281_Escape_from_Shadow.mp3
+spaces before the protocol, macro://macroName@lib:token/all/Impersonated?val,macro://macroName@lib:token/all/Impersonated?,val
+minimal match,:////?,:////?,""
