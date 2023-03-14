@@ -1178,10 +1178,6 @@ public class Topology_Functions extends AbstractFunction {
     double[] moveTo = null;
 
     for (double[] currentElement : areaPoints) {
-      // 2 decimals is precise enough, we will deal in .5 pixels mostly.
-      currentElement[1] = Math.floor(currentElement[1] * 100) / 100;
-      currentElement[2] = Math.floor(currentElement[2] * 100) / 100;
-
       // Make the lines
       if (currentElement[0] == PathIterator.SEG_MOVETO) {
         if (defaultPos == null) {
