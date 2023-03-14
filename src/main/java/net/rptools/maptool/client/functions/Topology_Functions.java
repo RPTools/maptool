@@ -732,8 +732,8 @@ public class Topology_Functions extends AbstractFunction {
           I18N.getText("macro.function.json.getInvalidEndIndex", funcname, 2, points.size()));
     }
     // Optional Parameters
-    int fill = getJSONint(topologyObject, "fill", funcname);
-    int close = getJSONint(topologyObject, "close", funcname);
+    boolean close = 0 != getJSONint(topologyObject, "close", funcname);
+    boolean fill = close && 0 != getJSONint(topologyObject, "fill", funcname);
     double r = getJSONdouble(topologyObject, "r", funcname);
     double facing = getJSONdouble(topologyObject, "facing", funcname);
     float t = (float) getJSONdouble(topologyObject, "thickness", funcname);
@@ -745,63 +745,43 @@ public class Topology_Functions extends AbstractFunction {
 
     Area area = null;
 
-    if (close == 0) {
-      // User requests for polygon to not be closed, so a Path is used
-      Path2D path = new Path2D.Double();
-      double lastX = 0;
-      double lastY = 0;
+    Path2D path = new Path2D.Double();
+    double lastX = 0;
+    double lastY = 0;
 
-      for (int i = 0; i < points.size(); i++) {
-        JsonObject point = points.get(i).getAsJsonObject();
+    String[] requiredPointParms = {"x", "y"};
+    for (int i = 0; i < points.size(); i++) {
+      JsonObject point = points.get(i).getAsJsonObject();
 
-        String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
-        }
-
-        double x = getJSONdouble(point, "x", funcname);
-        double y = getJSONdouble(point, "y", funcname);
-
-        if (path.getCurrentPoint() == null) {
-          path.moveTo(x, y);
-        } else if (!(lastX == x && lastY == y)) {
-          path.lineTo(x, y);
-          lastX = x;
-          lastY = y;
-        }
+      if (!jsonKeysExist(point, requiredPointParms, funcname)) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
       }
+
+      double x = getJSONdouble(point, "x", funcname);
+      double y = getJSONdouble(point, "y", funcname);
+
+      if (path.getCurrentPoint() == null) {
+        path.moveTo(x, y);
+      } else if (!(lastX == x && lastY == y)) {
+        path.lineTo(x, y);
+        lastX = x;
+        lastY = y;
+      }
+    }
+
+    if (close) {
+      path.closePath();
+    }
+    if (fill) {
+      area = new Area(path);
+    } else {
+      // A strokedShape will not be filled in and have a defined thickness.
       BasicStroke stroke =
           new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
       area = new Area(stroke.createStrokedShape(path));
-    } else {
-      // User requests for polygon to be closed, so a Polygon is used which is automatically
-      // closed
-      Polygon poly = new Polygon();
-
-      for (int i = 0; i < points.size(); i++) {
-        JsonObject point = points.get(i).getAsJsonObject();
-
-        String requiredPointParms[] = {"x", "y"};
-        if (!jsonKeysExist(point, requiredPointParms, funcname)) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentKeyTypeI", funcname, "{x,y}"));
-        }
-
-        int x = getJSONint(point, "x", funcname);
-        int y = getJSONint(point, "y", funcname);
-
-        poly.addPoint(x, y);
-      }
-      // A strokedShape will not be filled in and have a defined thickness.
-      if (fill == 0) {
-        BasicStroke stroke =
-            new BasicStroke(Math.max(t, 0f), BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER);
-        area = new Area(stroke.createStrokedShape(poly));
-      } else {
-        area = new Area(poly);
-      }
     }
+
     AffineTransform atArea = new AffineTransform();
     applyTranslate(funcname, atArea, topologyObject, paramTranslate);
 
