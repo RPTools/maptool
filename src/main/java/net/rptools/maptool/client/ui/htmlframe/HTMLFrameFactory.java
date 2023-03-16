@@ -18,6 +18,7 @@ import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -198,6 +199,15 @@ public class HTMLFrameFactory {
     public Listener() {
       new MapToolEventBus().getMainEventBus().register(this);
       currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    }
+
+    @Subscribe
+    private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+      if (event.zone() != currentZone) {
+        return;
+      }
+
+      selectedListChanged();
     }
 
     @Subscribe
