@@ -4091,6 +4091,7 @@ public class ZoneRenderer extends JComponent
     private int offsetX;
     /** Pixel distance (y) from keyToken's origin. */
     private int offsetY;
+
     private RenderPathWorker renderPathTask;
     private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
 
