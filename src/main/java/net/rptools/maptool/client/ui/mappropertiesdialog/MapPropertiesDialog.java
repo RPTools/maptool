@@ -192,7 +192,6 @@ public class MapPropertiesDialog extends JDialog {
     TextureChooserPanel textureChooserPanel =
         new TextureChooserPanel(paintChooser, model, "mapPropertiesTextureChooser");
     paintChooser.addPaintChooser(textureChooserPanel);
-    paintChooser.setPreferredSize(new Dimension(450, 400));
     mapSelectorDialog = new MapSelectorDialog();
     getRootPane().setDefaultButton(getOKButton());
   }
@@ -423,6 +422,7 @@ public class MapPropertiesDialog extends JDialog {
     getMapButton()
         .addActionListener(
             e -> {
+              mapSelectorDialog.pack();
               Asset asset = mapSelectorDialog.chooseAsset();
               if (asset == null) {
                 return;
@@ -584,7 +584,6 @@ public class MapPropertiesDialog extends JDialog {
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
       this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
-      setSize(500, 400);
     }
 
     @Override
