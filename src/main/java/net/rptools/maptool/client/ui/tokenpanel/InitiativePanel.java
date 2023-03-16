@@ -872,9 +872,7 @@ public class InitiativePanel extends JPanel
                   return;
                 }
 
-                renderer.clearSelectedTokens();
-                renderer.centerOn(token);
-                renderer.updateAfterSelection();
+                renderer.centerOnAndSetSelected(token);
                 renderer.maybeForcePlayersView();
               }
             });
