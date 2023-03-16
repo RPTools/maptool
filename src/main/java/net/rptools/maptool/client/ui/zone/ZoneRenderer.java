@@ -1960,7 +1960,7 @@ public class ZoneRenderer extends JComponent
     loadingProgress =
         String.format(
             " Loading Map '%s' - %d/%d Loaded %d/%d Cached",
-            zone.getPlayerAlias(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
+            zone.getDisplayName(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
     isLoaded = loaded;
     if (isLoaded) {
       // Notify the token tree that it should update
