@@ -17,11 +17,13 @@ package net.rptools.maptool.util;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
+import net.rptools.maptool.client.functions.StringFunctions;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -53,6 +55,24 @@ public class FunctionUtil {
   private static final String KEY_UNKNOWN_TOKEN = "macro.function.general.unknownToken";
   private static final String KEY_UNKNOWN_TOKEN_ON_MAP = "macro.function.general.unknownTokenOnMap";
   private static final String KEY_NO_IMPERSONATED = "macro.function.general.noImpersonated";
+
+  /**
+   * Collects results into a string list or JSON array.
+   *
+   * @param delim The delimiter to use for the string list, or "json" to create a JSON array.
+   * @param results The results to combine into a list.
+   * @return The string list of all results, or a JSON array of the same.
+   */
+  public static Object delimitedResult(String delim, List<String> results) {
+    if ("json".equals(delim)) {
+      JsonArray jarr = new JsonArray();
+      results.forEach(m -> jarr.add(new JsonPrimitive(m)));
+      return jarr;
+    } else {
+      return StringFunctions.getInstance().join(results, delim);
+    }
+  }
+
   /**
    * Checks if the number of <code>parameters</code> is within given bounds (inclusive). Throws a
    * <code>ParserException</code> if the check fails.
@@ -127,6 +147,23 @@ public class FunctionUtil {
   }
 
   /**
+   * Gets the ZoneRender with the given name, throwing a ParserException if it does not exist.
+   *
+   * @param functionName the function name (used for generating exception messages).
+   * @param mapName the name of the map
+   * @return the ZoneRenderer.
+   * @throws ParserException if the map cannot be found
+   */
+  public static ZoneRenderer getZoneRenderer(String functionName, String mapName)
+      throws ParserException {
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
+    if (zoneRenderer == null) {
+      throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, mapName));
+    }
+    return zoneRenderer;
+  }
+
+  /**
    * Gets the ZoneRender from the specified index or returns the current ZoneRender. This method
    * will check the list size before trying to retrieve the token so it is safe to use for functions
    * that have the map as a optional argument.
@@ -146,12 +183,13 @@ public class FunctionUtil {
     if (map == null) {
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     } else {
-      zoneRenderer = MapTool.getFrame().getZoneRenderer(map);
-      if (zoneRenderer == null) {
-        throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
-      }
+      zoneRenderer = getZoneRenderer(functionName, map);
     }
-    return zoneRenderer;
+    if (zoneRenderer == null) {
+      throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
+    }
+
+    return getZoneRenderer(functionName, map);
   }
 
   /**

@@ -38,6 +38,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -230,9 +231,7 @@ public class AppActions {
             }
             // Move to chosen token
             if (chosenOne != null) {
-              renderer.clearSelectedTokens();
-              renderer.centerOn(chosenOne);
-              renderer.updateAfterSelection();
+              renderer.centerOnAndSetSelected(chosenOne);
             }
           }
         }
@@ -938,8 +937,10 @@ public class AppActions {
     }
     if (!tokensToRemove.isEmpty()) {
       MapTool.serverCommand().removeTokens(zone.getId(), tokensToRemove);
-      MapTool.getFrame().getCurrentZoneRenderer().clearSelectedTokens();
-      MapTool.getFrame().getCurrentZoneRenderer().updateAfterSelection();
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getSelectionModel()
+          .replaceSelection(Collections.emptyList());
       if (copy) {
         keepIdsOnPaste = true; // pasted tokens should have same ids as cut ones
       }

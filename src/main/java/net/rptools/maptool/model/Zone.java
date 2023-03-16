@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -368,12 +369,25 @@ public class Zone {
   }
 
   /** @return name of the zone */
-  public String getName() {
+  public @Nonnull String getName() {
     return name;
   }
 
-  public String getPlayerAlias() {
+  /** @return The zone's player alias, if set. Otherwise {@code null}. */
+  public @Nullable String getPlayerAlias() {
     return playerAlias;
+  }
+
+  /**
+   * Get the name of the map to show to players.
+   *
+   * <p>If a player alias is set, that will be used as the display name. Otherwise the name is used
+   * as the display name.
+   *
+   * @return The name of the map that should be shown to players.
+   */
+  public @Nonnull String getDisplayName() {
+    return Objects.requireNonNullElse(playerAlias, name);
   }
 
   public void setName(String name) {
@@ -399,7 +413,7 @@ public class Zone {
   @Override
   public String toString() {
     if (!MapTool.getPlayer().isGM()) {
-      return playerAlias != null ? playerAlias : name;
+      return getDisplayName();
     } else if (playerAlias == null || name.equals(playerAlias)) {
       return name;
     } else {
@@ -2051,6 +2065,12 @@ public class Zone {
   ////
   // Backward compatibility
   protected Object readResolve() {
+    if ("".equals(playerAlias) || name.equals(playerAlias)) {
+      // Don't keep redundant player aliases around. The display name will default to the name if
+      // no player alias is set.
+      playerAlias = null;
+    }
+
     // 1.3b76 -> 1.3b77
     // adding the exposed area for Individual FOW
     if (exposedAreaMeta == null) {
