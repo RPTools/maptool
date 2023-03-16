@@ -4085,15 +4085,20 @@ public class ZoneRenderer extends JComponent
     private final String playerId;
     private ZoneWalker walker;
     private final Token token;
+
     private Path<ZonePoint> gridlessPath;
     /** Pixel distance (x) from keyToken's origin. */
     private int offsetX;
     /** Pixel distance (y) from keyToken's origin. */
     private int offsetY;
-    // private boolean restrictMovement = true;
     private RenderPathWorker renderPathTask;
     private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
 
+    /**
+     * @param playerId The ID of the player performing the movement.
+     * @param tokenGUID The ID of the leader token, i.e., the token that will pathfind.
+     * @param selectionList The IDs of all tokens being moved.
+     */
     public SelectionSet(String playerId, GUID tokenGUID, Set<GUID> selectionList) {
       selectionSet.addAll(selectionList);
       keyToken = tokenGUID;
@@ -4168,20 +4173,16 @@ public class ZoneRenderer extends JComponent
           renderPathTask.cancel(true);
         }
 
-        boolean restictMovement = MapTool.getServerPolicy().isUsingAstarPathfinding();
+        boolean restrictMovement =
+            MapTool.getServerPolicy().isUsingAstarPathfinding() && !token.isStamp();
 
         Set<TerrainModifierOperation> terrainModifiersIgnored = token.getTerrainModifiersIgnored();
-
-        // Skip AI Pathfinding if not on the token layer...
-        if (!ZoneRenderer.this.getActiveLayer().equals(Layer.TOKEN)) {
-          restictMovement = false;
-        }
 
         renderPathTask =
             new RenderPathWorker(
                 walker,
                 point,
-                restictMovement,
+                restrictMovement,
                 terrainModifiersIgnored,
                 token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
