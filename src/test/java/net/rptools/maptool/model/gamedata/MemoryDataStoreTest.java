@@ -14,19 +14,18 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.rptools.maptool.model.gamedata.data.DataType;
-import net.rptools.maptool.model.gamedata.data.DataValueFactory;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
-
-import static org.junit.jupiter.api.Assertions.*;
+import net.rptools.maptool.model.gamedata.data.DataType;
+import net.rptools.maptool.model.gamedata.data.DataValueFactory;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 
 class MemoryDataStoreTest {
 
