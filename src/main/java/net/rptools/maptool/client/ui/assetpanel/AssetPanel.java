@@ -141,6 +141,7 @@ public class AssetPanel extends JComponent {
     imagePanel.setShowCaptions(true);
     imagePanel.setSelectionMode(SelectionMode.SINGLE);
     imagePanel.setFont(new Font("Helvetica", 0, 10)); // XXX Overrides TinyLAF?
+    imagePanel.setVisibleRowCount(2);
 
     imagePanel.addMouseWheelListener(
         e -> {
@@ -183,8 +184,8 @@ public class AssetPanel extends JComponent {
     imagePanelProgressBar.setVisible(false);
 
     panel.add(BorderLayout.NORTH, createFilterPanel());
-    panel.add(BorderLayout.NORTH, createFilterPanel());
     panel.add(BorderLayout.WEST, getThumbnailPreviewSlider());
+
     panel.add(BorderLayout.CENTER, new JScrollPane(imagePanel));
     panel.add(BorderLayout.SOUTH, imagePanelProgressBar);
 

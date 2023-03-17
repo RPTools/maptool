@@ -110,8 +110,6 @@ public class PointerTool extends DefaultTool {
 
   private String currentPointerName;
 
-  private final Stack<Set<GUID>> savedTokenSelectionSet = new Stack<>();
-
   public PointerTool() {
     htmlRenderer.setBackground(new Color(0, 0, 0, 200));
     htmlRenderer.setForeground(Color.black);
@@ -206,14 +204,7 @@ public class PointerTool extends DefaultTool {
     return "tool.pointer.tooltip";
   }
 
-  public void startTokenDrag(Token keyToken, Set<GUID> selectedTokens) {
-    savedTokenSelectionSet.push(new HashSet<>(renderer.getSelectedTokenSet()));
-    renderer.clearSelectedTokens();
-    renderer.selectTokens(selectedTokens);
-    startTokenDrag(keyToken);
-  }
-
-  public void startTokenDrag(Token keyToken) {
+  public void startTokenDrag(Token keyToken, Set<GUID> tokens) {
     tokenBeingDragged = keyToken;
 
     Player p = MapTool.getPlayer();
@@ -225,16 +216,13 @@ public class PointerTool extends DefaultTool {
     }
 
     renderer.addMoveSelectionSet(
-        p.getName(),
-        tokenBeingDragged.getId(),
-        renderer.getOwnedTokens(renderer.getSelectedTokenSet()),
-        false);
+        p.getName(), tokenBeingDragged.getId(), renderer.getOwnedTokens(tokens));
     MapTool.serverCommand()
         .startTokenMove(
             p.getName(),
             renderer.getZone().getId(),
             tokenBeingDragged.getId(),
-            renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
+            renderer.getOwnedTokens(tokens));
 
     isDraggingToken = true;
   }
@@ -249,10 +237,6 @@ public class PointerTool extends DefaultTool {
     dragOffsetY = 0;
 
     exposeFoW(null);
-    if (!savedTokenSelectionSet.isEmpty()) {
-      renderer.clearSelectedTokens();
-      renderer.selectTokens(savedTokenSelectionSet.pop());
-    }
   }
 
   /**
@@ -367,17 +351,19 @@ public class PointerTool extends DefaultTool {
       if (token == null || !AppUtil.playerOwns(token)) {
         return;
       }
-      renderer.clearSelectedTokens();
-      boolean selected = renderer.selectToken(token.getId());
-      renderer.updateAfterSelection();
 
-      if (selected) {
+      final var selectionModel = renderer.getSelectionModel();
+      final var wasNotAlreadySelected = !selectionModel.isSelected(token.getId());
+      // Only this token should be selected going forward.
+      renderer.getSelectionModel().replaceSelection(Collections.singletonList(token.getId()));
+
+      if (wasNotAlreadySelected) {
         Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
         if (!(tool instanceof PointerTool)) {
           return;
         }
         tokenUnderMouse = token;
-        ((PointerTool) tool).startTokenDrag(token);
+        ((PointerTool) tool).startTokenDrag(token, Collections.singleton(token.getId()));
       }
     }
 
@@ -489,9 +475,8 @@ public class PointerTool extends DefaultTool {
       List<Token> tokenList = renderer.getTokenStackAt(mouseX, mouseY);
       if (tokenList != null) {
         // Stack
-        renderer.clearSelectedTokens();
+        renderer.getSelectionModel().replaceSelection(Collections.emptyList());
         showTokenStackPopup(tokenList, e.getX(), e.getY());
-        renderer.updateAfterSelection();
       } else {
         // Single
         Token token = renderer.getTokenAt(e.getX(), e.getY());
@@ -506,24 +491,23 @@ public class PointerTool extends DefaultTool {
     }
     // SELECTION
     Token token = renderer.getTokenAt(e.getX(), e.getY());
+    final var selectionModel = renderer.getSelectionModel();
     if (token != null && !isDraggingToken && SwingUtilities.isLeftMouseButton(e)) {
       // Don't select if it's already being moved by someone
       isNewTokenSelected = false;
       if (!renderer.isTokenMoving(token)) {
+        final var isSelected = selectionModel.isSelected(token.getId());
         if (SwingUtil.isShiftDown(e)) {
           // if shift, we invert the selection of the token
-          if (renderer.getSelectedTokenSet().contains(token.getId())) {
-            renderer.deselectToken(token.getId());
+          if (isSelected) {
+            selectionModel.removeTokensFromSelection(Collections.singletonList(token.getId()));
           } else {
-            renderer.selectToken(token.getId());
+            selectionModel.addTokensToSelection(Collections.singletonList(token.getId()));
           }
-          renderer.updateAfterSelection();
-        } else if (!renderer.getSelectedTokenSet().contains(token.getId())) {
+        } else if (!isSelected) {
           // if not shift and click on non-selected token, switch selection to the token
           isNewTokenSelected = true;
-          renderer.clearSelectedTokens();
-          renderer.selectToken(token.getId());
-          renderer.updateAfterSelection();
+          selectionModel.replaceSelection(Collections.singletonList(token.getId()));
         }
         // ZonePoint dragged to
         ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
@@ -592,15 +576,16 @@ public class PointerTool extends DefaultTool {
           repaint();
         }
         // SELECTION BOUND BOX
+        final var selectionModel = renderer.getSelectionModel();
         if (isDrawingSelectionBox) {
           isDrawingSelectionBox = false;
 
+          final var tokens = renderer.getTokenIdsInBounds(selectionBoundBox);
           if (!SwingUtil.isShiftDown(e)) {
-            renderer.clearSelectedTokens();
+            selectionModel.replaceSelection(tokens);
+          } else {
+            selectionModel.addTokensToSelection(tokens);
           }
-          renderer.selectTokens(selectionBoundBox);
-          renderer.updateAfterSelection();
-
           selectionBoundBox = null;
           return;
         }
@@ -610,13 +595,14 @@ public class PointerTool extends DefaultTool {
           stopTokenDrag();
         } else {
           // IF SELECTING MULTIPLE, SELECT SINGLE TOKEN
-          if (SwingUtilities.isLeftMouseButton(e) && !SwingUtil.isShiftDown(e)) {
+          if (!SwingUtil.isShiftDown(e)) {
             Token token = renderer.getTokenAt(e.getX(), e.getY());
-            // Only if it isn't already being moved
-            if (renderer.isSubsetSelected(token) && !renderer.isTokenMoving(token)) {
-              renderer.clearSelectedTokens();
-              renderer.selectToken(token.getId());
-              renderer.updateAfterSelection();
+            // Mouse down already selected the token. Now let's enforce it being the only one.
+            // ... but only if it isn't being moved at the same time.
+            if (token != null
+                && selectionModel.isSelected(token.getId())
+                && !renderer.isTokenMoving(token)) {
+              selectionModel.replaceSelection(Collections.singletonList(token.getId()));
             }
           }
         }
@@ -638,37 +624,29 @@ public class PointerTool extends DefaultTool {
 
     // POPUP MENU
     if (SwingUtilities.isRightMouseButton(e) && !isDraggingToken && !isDraggingMap()) {
-      if (tokenUnderMouse != null
-          && !renderer.getSelectedTokenSet().contains(tokenUnderMouse.getId())) {
+      final var selectionModel = renderer.getSelectionModel();
+      if (tokenUnderMouse != null && !selectionModel.isSelected(tokenUnderMouse.getId())) {
         if (!SwingUtil.isShiftDown(e)) {
-          renderer.clearSelectedTokens();
+          selectionModel.replaceSelection(Collections.singletonList(tokenUnderMouse.getId()));
+        } else {
+          selectionModel.addTokensToSelection(Collections.singletonList(tokenUnderMouse.getId()));
         }
-        renderer.selectToken(tokenUnderMouse.getId());
-        renderer.updateAfterSelection();
         isNewTokenSelected = false;
       }
-      if (tokenUnderMouse != null && !renderer.getSelectedTokenSet().isEmpty()) {
+      final var selectedTokens = renderer.getSelectedTokenSet();
+      if (tokenUnderMouse != null && !selectedTokens.isEmpty()) {
         if (tokenUnderMouse.isStamp()) {
-          new StampPopupMenu(
-                  renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
+          new StampPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         } else if (AppUtil.playerOwns(tokenUnderMouse)) {
-          // FIXME Every once in awhile we get a report on the forum of the following
-          // exception:
-          // java.awt.IllegalComponentStateException: component must be showing on the
-          // screen to
+          // FIXME Every once in awhile we get a report on the forum of the following exception:
+          // java.awt.IllegalComponentStateException: component must be showing on the screen to
           // determine its location
-          // It's thrown as a result of the showPopup() call on the next line. For the
-          // life of me, I
-          // can't figure out why the
-          // "renderer" component might not be "showing on the screen"??? Maybe it has
-          // something to
-          // do with a dual-monitor
-          // configuration? Or a monitor added after Java was started and then MT dragged
-          // to that
-          // monitor?
-          new TokenPopupMenu(
-                  renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
+          // It's thrown as a result of the showPopup() call on the next line. For the life of me, I
+          // can't figure out why the "renderer" component might not be "showing on the screen"???
+          // Maybe it has something to do with a dual-monitor configuration? Or a monitor added
+          // after Java was started and then MT dragged to that monitor?
+          new TokenPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         }
         return;
@@ -830,10 +808,10 @@ public class PointerTool extends DefaultTool {
       if (!isDraggingToken && renderer.isTokenMoving(tokenUnderMouse)) {
         return;
       }
-      if (isNewTokenSelected && !renderer.isOnlyTokenSelected(tokenUnderMouse)) {
-        renderer.clearSelectedTokens();
-        renderer.selectToken(tokenUnderMouse.getId());
-        renderer.updateAfterSelection();
+      if (isNewTokenSelected) {
+        renderer
+            .getSelectionModel()
+            .replaceSelection(Collections.singletonList(tokenUnderMouse.getId()));
       }
       isNewTokenSelected = false;
 
@@ -855,7 +833,7 @@ public class PointerTool extends DefaultTool {
             }
           }
         }
-        startTokenDrag(tokenUnderMouse);
+        startTokenDrag(tokenUnderMouse, selectedTokenSet);
         isDraggingToken = true;
         if (AppPreferences.getHideMousePointerWhileDragging()) SwingUtil.hidePointer(renderer);
       }
@@ -1403,7 +1381,7 @@ public class PointerTool extends DefaultTool {
       // Note these are zone space coordinates
       dragStartX = keyToken.getX();
       dragStartY = keyToken.getY();
-      startTokenDrag(keyToken);
+      startTokenDrag(keyToken, selectedTokenSet);
     }
     if (!isMovingWithKeys) {
       dragOffsetX = 0;
@@ -2035,8 +2013,13 @@ public class PointerTool extends DefaultTool {
     var notes = marker.getNotes();
     var gmNotes = marker.getGMNotes();
 
-    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
-    boolean showNotes = !StringUtil.isEmpty(notes);
+    var notesWithoutTags =
+        Optional.ofNullable(notes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
+    var gmNotesWithoutTags =
+        Optional.ofNullable(gmNotes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
+
+    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotesWithoutTags);
+    boolean showNotes = !StringUtil.isEmpty(notesWithoutTags);
 
     StringBuilder builder = new StringBuilder();
 
@@ -2053,9 +2036,6 @@ public class PointerTool extends DefaultTool {
       builder.append("</span></b><br>");
     }
     if (showNotes) {
-      if (!notes.startsWith("<html")) {
-        notes = notes.replaceAll("\n", "<br>");
-      }
       if (showGMNotes) {
         notes = notes.replaceAll("</html>", "");
         notes = notes.replaceAll("</body>", "");
@@ -2071,9 +2051,6 @@ public class PointerTool extends DefaultTool {
         builder.append("<b><span class='title'>GM Notes</span></b><br>");
         gmNotes = gmNotes.replaceAll("<html[^>]*>", "");
         gmNotes = gmNotes.replaceAll("<body[^>]*>", "");
-      }
-      if (!gmNotes.startsWith("<html")) {
-        gmNotes = gmNotes.replaceAll("\n", "<br>");
       }
       builder.append(gmNotes);
     }
