@@ -14,11 +14,17 @@
  */
 package net.rptools.maptool.util;
 
+import com.vladsch.flexmark.ext.gfm.strikethrough.StrikethroughExtension;
+import com.vladsch.flexmark.ext.tables.TablesExtension;
+import com.vladsch.flexmark.html.HtmlRenderer;
+import com.vladsch.flexmark.parser.Parser;
+import com.vladsch.flexmark.util.data.MutableDataSet;
 import java.text.NumberFormat;
 import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /** @author Tylere */
 public class StringUtil {
@@ -273,5 +279,37 @@ public class StringUtil {
     }
     return Arrays.asList(
         line.substring(start, end), line.substring(Math.min(end + 1, line.length())));
+  }
+
+  public static String plaintextToHtml(String plainText) {
+
+    plainText = plainText.replaceAll("\n\n", "<p>");
+    plainText = plainText.replaceAll("\n", "\n<br>\n");
+    return plainText;
+  }
+
+  private static Parser markDownParser;
+  private static HtmlRenderer htmlRenderer;
+
+  public static String markDownToHtml(String markdown) {
+    if (markDownParser == null) {
+      var options = new MutableDataSet();
+      options.set(
+          Parser.EXTENSIONS,
+          Arrays.asList(TablesExtension.create(), StrikethroughExtension.create()));
+      markDownParser = Parser.builder(options).build();
+      htmlRenderer = HtmlRenderer.builder(options).build();
+    }
+    var document = markDownParser.parse(markdown);
+    return htmlRenderer.render(document);
+  }
+
+  public static String htmlize(String input, String type) {
+    return switch (type) {
+      case SyntaxConstants.SYNTAX_STYLE_NONE -> plaintextToHtml(input);
+      case SyntaxConstants.SYNTAX_STYLE_HTML -> input;
+      case SyntaxConstants.SYNTAX_STYLE_MARKDOWN -> markDownToHtml(input);
+      default -> input;
+    };
   }
 }
