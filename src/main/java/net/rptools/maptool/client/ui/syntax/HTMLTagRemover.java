@@ -24,7 +24,9 @@ public class HTMLTagRemover {
   private static final ConcurrentMap<String, String> htmlCache = new ConcurrentHashMap<>();
 
   String remove(String htmlString) {
-    if (htmlString == null) return null;
+    if (htmlString == null) {
+      return null;
+    }
     return htmlCache.computeIfAbsent(htmlString, s -> s.replaceAll(HTML_TAG_REGEX, ""));
   }
 }
