@@ -330,6 +330,7 @@ public class HtmlEditorSplitGui {
       tabPanel.setEnabledAt(1, false);
     }
     sourceTextArea.setSyntaxEditingStyle(style);
+    textTypeComboBox.setSelectedItem(style);
   }
 
   public String getTextStyle() {
