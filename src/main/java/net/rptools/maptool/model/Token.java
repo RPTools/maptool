@@ -2517,7 +2517,7 @@ public class Token implements Cloneable {
     }
 
     if (gmNotesType == null) {
-      notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+      gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
     return this;
