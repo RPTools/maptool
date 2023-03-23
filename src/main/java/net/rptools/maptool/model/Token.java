@@ -2913,6 +2913,8 @@ public class Token implements Cloneable {
     token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
     token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
     token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.notesType = dto.getNotesType();
+    token.gmNotesType = dto.getGmNotesType();
 
     dto.getStateMap()
         .forEach(
@@ -3036,9 +3038,11 @@ public class Token implements Cloneable {
     if (notes != null) {
       dto.setNotes(StringValue.of(notes));
     }
+    dto.setNotesType(notesType);
     if (gmNotes != null) {
       dto.setGmNotes(StringValue.of(gmNotes));
     }
+    dto.setGmNotesType(gmNotesType);
     if (gmName != null) {
       dto.setGmName(StringValue.of(gmName));
     }
