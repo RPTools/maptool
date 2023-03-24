@@ -24,7 +24,6 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
@@ -307,7 +306,7 @@ public class StringUtil {
   }
 
   public static String htmlize(String input, String type) {
-    if(StringUtils.isEmpty(input)) {
+    if (StringUtils.isEmpty(input)) {
       return "";
     }
 
