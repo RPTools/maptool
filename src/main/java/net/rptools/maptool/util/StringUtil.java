@@ -24,6 +24,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /** @author Tylere */
@@ -305,6 +307,10 @@ public class StringUtil {
   }
 
   public static String htmlize(String input, String type) {
+    if(StringUtils.isEmpty(input)) {
+      return "";
+    }
+
     return switch (type) {
       case SyntaxConstants.SYNTAX_STYLE_NONE -> plaintextToHtml(input);
       case SyntaxConstants.SYNTAX_STYLE_HTML -> input;
