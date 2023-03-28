@@ -189,7 +189,7 @@ public class FunctionUtil {
       throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
     }
 
-    return getZoneRenderer(functionName, map);
+    return zoneRenderer;
   }
 
   /**
