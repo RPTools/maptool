@@ -394,20 +394,11 @@ public class Zone {
     this.name = name;
   }
 
-  public boolean setPlayerAlias(String playerAlias) {
-    List<ZoneRenderer> rendererList =
-        new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
-    for (ZoneRenderer z : rendererList) {
-      if (z.getZone().getPlayerAlias() != null
-          && z.getZone().getPlayerAlias().equals(playerAlias)) {
-        return false;
-      }
-    }
+  public void setPlayerAlias(String playerAlias) {
     this.playerAlias =
         playerAlias == null || playerAlias.equals("") || playerAlias.equals(name)
             ? null
             : playerAlias;
-    return true;
   }
 
   @Override
