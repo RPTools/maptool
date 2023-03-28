@@ -17,7 +17,9 @@ package net.rptools.maptool.server;
 import static net.rptools.maptool.server.proto.Message.MessageTypeCase.HEARTBEAT_MSG;
 
 import java.awt.geom.Area;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
@@ -26,6 +28,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -623,7 +626,10 @@ public class ServerMessageHandler implements MessageHandler {
       var msg = StartAssetTransferMsg.newBuilder().setHeader(producer.getHeader().toDto());
       server
           .getConnection()
-          .sendMessage(id, Message.newBuilder().setStartAssetTransferMsg(msg).build());
+          .sendMessage(
+              id,
+              MapToolConstants.Channel.IMAGE,
+              Message.newBuilder().setStartAssetTransferMsg(msg).build());
       server.addAssetProducer(id, producer);
 
     } catch (IllegalArgumentException iae) {
