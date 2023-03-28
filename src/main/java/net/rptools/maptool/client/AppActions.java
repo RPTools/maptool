@@ -1051,8 +1051,9 @@ public class AppActions {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (!tokenList.isEmpty()) {
-      if (tokenCopySet != null)
+      if (tokenCopySet != null) {
         tokenCopySet.clear(); // Just to help out the garbage collector a little bit
+      }
 
       Token topLeft = tokenList.get(0);
       tokenCopySet = new HashSet<Token>();
@@ -1191,8 +1192,7 @@ public class AppActions {
                     token.getX() + gridCopiedFrom.getOffsetX(),
                     token.getY() + gridCopiedFrom.getOffsetY()));
         ZonePoint zp = grid.convert(cp);
-        tokenOffset =
-            new ZonePoint(zp.x - gridCopiedFrom.getOffsetX(), zp.y - gridCopiedFrom.getOffsetY());
+        tokenOffset = new ZonePoint(zp.x - grid.getOffsetX(), zp.y - grid.getOffsetY());
       } else {
         // For gridless sources, gridless destinations, or tokens that are not SnapToGrid: just use
         // the pixel offsets
