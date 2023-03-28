@@ -211,7 +211,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // NOTES
     getGMNotesEditor().setText(token.getGMNotes());
+    getGMNotesEditor().setTextType(token.getGmNotesType());
     getPlayerNotesEditor().setText(token.getNotes());
+    getPlayerNotesEditor().setTextType(token.getNotesType());
 
     // TYPE
     getTypeCombo().setSelectedItem(token.getType());
@@ -686,7 +688,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // NOTES
     token.setGMNotes(getGMNotesEditor().getText());
+    token.setGmNotesType(getGMNotesEditor().getTextType());
     token.setNotes(getPlayerNotesEditor().getText());
+    token.setNotesType(getPlayerNotesEditor().getTextType());
 
     // SIZE
     token.setSnapToScale(getSizeCombo().getSelectedIndex() != 0);

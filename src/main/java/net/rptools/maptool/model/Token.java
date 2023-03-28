@@ -62,6 +62,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /**
  * This object represents the placeable objects on a map. For example an icon that represents a
@@ -338,7 +339,10 @@ public class Token implements Cloneable {
   /** The notes that are displayed for this token. */
   private String notes;
 
+  private String notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+
   private String gmNotes;
+  private String gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
 
   private String gmName;
 
@@ -426,8 +430,10 @@ public class Token implements Cloneable {
 
     name = token.name;
     notes = token.notes;
+    notesType = token.notesType;
     gmName = token.gmName;
     gmNotes = token.gmNotes;
+    gmNotesType = token.gmNotesType;
     label = token.label;
 
     isFlippedX = token.isFlippedX;
@@ -609,7 +615,7 @@ public class Token implements Cloneable {
 
   public String getGMNotes() {
     if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
-      return toHtml(gmNotes);
+      return gmNotes;
     } else {
       return "";
     }
@@ -617,6 +623,14 @@ public class Token implements Cloneable {
 
   public void setGMNotes(String notes) {
     gmNotes = notes;
+  }
+
+  public String getGmNotesType() {
+    return gmNotesType;
+  }
+
+  public void setGmNotesType(String type) {
+    gmNotesType = type;
   }
 
   public String getGMName() {
@@ -2048,27 +2062,20 @@ public class Token implements Cloneable {
 
   /** @return Getter for notes */
   public String getNotes() {
-    return toHtml(notes);
-  }
-
-  /** convert string to html */
-  private String toHtml(String input) {
-    if (input != null && !input.startsWith("<html")) {
-      input = input.replaceAll("\n\n", "<p>");
-      input = input.replaceAll("\n", "\n<br>\n");
-      return "<html dir=\"ltr\">\n"
-          + " <head></head>\n"
-          + " <body contenteditable=\"true\">\n"
-          + input
-          + " </body>\n"
-          + "</html>";
-    }
-    return input;
+    return notes;
   }
 
   /** @param aNotes Setter for notes */
   public void setNotes(String aNotes) {
     notes = aNotes;
+  }
+
+  public String getNotesType() {
+    return notesType;
+  }
+
+  public void setNotesType(String type) {
+    notesType = type;
   }
 
   public boolean isFlippedY() {
@@ -2505,6 +2512,14 @@ public class Token implements Cloneable {
       lastPath = null;
     }
 
+    if (notesType == null) {
+      notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+    }
+
+    if (gmNotesType == null) {
+      gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+    }
+
     return this;
   }
 
@@ -2898,6 +2913,8 @@ public class Token implements Cloneable {
     token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
     token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
     token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.notesType = dto.getNotesType();
+    token.gmNotesType = dto.getGmNotesType();
 
     dto.getStateMap()
         .forEach(
@@ -3021,9 +3038,11 @@ public class Token implements Cloneable {
     if (notes != null) {
       dto.setNotes(StringValue.of(notes));
     }
+    dto.setNotesType(notesType);
     if (gmNotes != null) {
       dto.setGmNotes(StringValue.of(gmNotes));
     }
+    dto.setGmNotesType(gmNotesType);
     if (gmName != null) {
       dto.setGmName(StringValue.of(gmName));
     }

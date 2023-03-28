@@ -2010,16 +2010,11 @@ public class PointerTool extends DefaultTool {
   }
 
   private String createHoverNote(Token marker) {
-    var notes = marker.getNotes();
-    var gmNotes = marker.getGMNotes();
+    var notes = StringUtil.htmlize(marker.getNotes(), marker.getNotesType());
+    var gmNotes = StringUtil.htmlize(marker.getGMNotes(), marker.getGmNotesType());
 
-    var notesWithoutTags =
-        Optional.ofNullable(notes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
-    var gmNotesWithoutTags =
-        Optional.ofNullable(gmNotes).map(s -> s.replaceAll("<[^>]*>", "")).orElse(null);
-
-    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotesWithoutTags);
-    boolean showNotes = !StringUtil.isEmpty(notesWithoutTags);
+    boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
+    boolean showNotes = !StringUtil.isEmpty(notes);
 
     StringBuilder builder = new StringBuilder();
 
@@ -2036,10 +2031,6 @@ public class PointerTool extends DefaultTool {
       builder.append("</span></b><br>");
     }
     if (showNotes) {
-      if (showGMNotes) {
-        notes = notes.replaceAll("</html>", "");
-        notes = notes.replaceAll("</body>", "");
-      }
       builder.append(notes);
       // add a gap between player and gmNotes
       if (showGMNotes) {
@@ -2049,8 +2040,6 @@ public class PointerTool extends DefaultTool {
     if (showGMNotes) {
       if (showNotes) {
         builder.append("<b><span class='title'>GM Notes</span></b><br>");
-        gmNotes = gmNotes.replaceAll("<html[^>]*>", "");
-        gmNotes = gmNotes.replaceAll("<body[^>]*>", "");
       }
       builder.append(gmNotes);
     }
