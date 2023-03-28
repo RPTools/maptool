@@ -263,13 +263,13 @@ public class TokenPropertiesDialog {
         panel4.add(button4, new GridConstraints(15, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel7 = new JPanel();
         panel7.setLayout(new GridLayoutManager(1, 1, new Insets(4, 4, 4, 4), -1, -1));
-        panel7.setVisible(false);
+        panel7.setVisible(true);
         tabPanel.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.tab.state"), panel7);
         final JScrollPane scrollPane1 = new JScrollPane();
         scrollPane1.setHorizontalScrollBarPolicy(31);
         panel7.add(scrollPane1, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JPanel panel8 = new JPanel();
-        panel8.setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
+        panel8.setLayout(new BorderLayout(0, 0));
         panel8.setName("statesPanel");
         scrollPane1.setViewportView(panel8);
         final JPanel panel9 = new JPanel();
@@ -307,7 +307,7 @@ public class TokenPropertiesDialog {
         panel10.add(spacer4, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final JPanel panel11 = new JPanel();
         panel11.setLayout(new GridLayoutManager(7, 10, new Insets(4, 4, 4, 4), -1, -1));
-        panel11.setVisible(true);
+        panel11.setVisible(false);
         tabPanel.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.tab.config"), panel11);
         final JLabel label11 = new JLabel();
         this.$$$loadLabelText$$$(label11, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.label.shape"));
