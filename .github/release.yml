@@ -2,6 +2,7 @@ changelog:
   exclude:
     labels:
       - repo-admin
+      - ignore-for-release-note
     authors:
       - rptools-automation
   categories:
@@ -17,6 +18,9 @@ changelog:
     - title: Bug Fixes 🩹		
       labels:
         - bug
+    - title: Code Maintenance 🔧 
+      labels:
+        - code-maintenance
     - title: Other Changes 💬	
       labels:
         - "*"
