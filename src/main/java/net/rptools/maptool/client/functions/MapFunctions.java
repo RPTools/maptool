@@ -122,12 +122,7 @@ public class MapFunctions extends AbstractFunction {
         // The name is the same, so nothing to do.
         return newMapDisplayName;
       }
-
-      final var nameChangeAccepted = zone.setPlayerAlias(newMapDisplayName);
-      if (!nameChangeAccepted) {
-        throw new ParserException(
-            I18N.getText("macro.function.map.duplicateDisplay", functionName));
-      }
+      zone.setPlayerAlias(newMapDisplayName);
 
       MapTool.serverCommand().changeZoneDispName(zone.getId(), newMapDisplayName);
       if (zone == MapTool.getFrame().getCurrentZoneRenderer().getZone()) {
