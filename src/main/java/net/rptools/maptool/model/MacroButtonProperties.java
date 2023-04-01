@@ -24,7 +24,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -172,7 +172,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     setAutoExecute(true);
     setIncludeLabel(false);
     setApplyToTokens(false);
-    setFontColorKey("");
+    setFontColorKey("default");
     setFontSize("");
     setMinWidth("");
     setMaxWidth("");
@@ -712,7 +712,11 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public void setFontColorKey(String fontColorKey) {
-    if (MapToolUtil.getColor(fontColorKey) != null) this.fontColorKey = fontColorKey;
+    this.fontColorKey =
+        switch (fontColorKey) {
+          case "", "default" -> "default";
+          default -> MapToolUtil.getColor(fontColorKey) != null ? fontColorKey : "default";
+        };
   }
 
   public String getFontSize() {
@@ -1105,6 +1109,8 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (compareApplyToSelectedTokens == null) compareApplyToSelectedTokens = true;
     if (allowPlayerEdits == null)
       allowPlayerEdits = AppPreferences.getAllowPlayerMacroEditsDefault();
+    if (macroUUID == null) macroUUID = getMacroUUID();
+    if (displayHotKey == null) displayHotKey = true;
     return this;
   }
 

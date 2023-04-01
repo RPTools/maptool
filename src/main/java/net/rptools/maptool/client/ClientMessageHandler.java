@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -59,13 +60,18 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneAdded;
+import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by the clients to receive server commands sent through {@link
@@ -74,7 +80,7 @@ import org.apache.log4j.Logger;
  * @author drice
  */
 public class ClientMessageHandler implements MessageHandler {
-  private static final Logger log = Logger.getLogger(ClientMessageHandler.class);
+  private static final Logger log = LogManager.getLogger(ClientMessageHandler.class);
 
   public ClientMessageHandler() {}
 
@@ -83,7 +89,7 @@ public class ClientMessageHandler implements MessageHandler {
     try {
       var msg = Message.parseFrom(message);
       var msgType = msg.getMessageTypeCase();
-      log.info(id + ": p got: " + msgType);
+      log.info(id + " got: " + msgType);
 
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> handle(msg.getAddTopologyMsg());
@@ -155,7 +161,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_TOKEN_MOVE_MSG -> handle(msg.getUpdateTokenMoveMsg());
         default -> log.warn(msgType + "not handled.");
       }
-
+      log.info(id + " handled: " + msgType);
     } catch (Exception e) {
       log.error(e);
     }
@@ -311,7 +317,7 @@ public class ClientMessageHandler implements MessageHandler {
               msg.getSelectedTokensList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
           var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-          renderer.addMoveSelectionSet(playerId, keyToken, selectedSet, true);
+          renderer.addMoveSelectionSet(playerId, keyToken, selectedSet);
         });
   }
 
@@ -664,8 +670,14 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
+          final var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
+          final var zone = renderer.getZone();
           MapTool.getCampaign().removeZone(zoneGUID);
-          MapTool.getFrame().removeZoneRenderer(MapTool.getFrame().getZoneRenderer(zoneGUID));
+          MapTool.getFrame().removeZoneRenderer(renderer);
+
+          // Now we have fire off adding the tokens in the zone
+          new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+          new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
         });
   }
 
@@ -729,8 +741,10 @@ public class ClientMessageHandler implements MessageHandler {
           if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {
             MapTool.getFrame().setCurrentZoneRenderer(renderer);
           }
-          MapTool.getEventDispatcher()
-              .fireEvent(MapTool.ZoneEvent.Added, MapTool.getCampaign(), null, zone);
+
+          new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+          // Now we have fire off adding the tokens in the zone
+          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
         });
   }
 

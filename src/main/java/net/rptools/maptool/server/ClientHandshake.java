@@ -30,9 +30,7 @@ import java.util.concurrent.ExecutionException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.lib.MD5Key;
@@ -44,7 +42,6 @@ import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
@@ -52,18 +49,8 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
-import net.rptools.maptool.server.proto.AuthTypeEnum;
-import net.rptools.maptool.server.proto.ClientAuthMsg;
-import net.rptools.maptool.server.proto.ClientInitMsg;
-import net.rptools.maptool.server.proto.ConnectionSuccessfulMsg;
-import net.rptools.maptool.server.proto.HandshakeMsg;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
-import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
-import net.rptools.maptool.server.proto.PublicKeyAddedMsg;
-import net.rptools.maptool.server.proto.PublicKeyUploadMsg;
-import net.rptools.maptool.server.proto.RequestPublicKeyMsg;
-import net.rptools.maptool.server.proto.RoleDto;
-import net.rptools.maptool.server.proto.UseAuthTypeMsg;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
@@ -143,7 +130,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   private void sendMessage(HandshakeMsg message) {
     var msgType = message.getMessageTypeCase();
-    log.info(connection.getId() + " :send: " + msgType);
+    log.info(connection.getId() + " sent: " + msgType);
     connection.sendMessage(message.toByteArray());
   }
 
@@ -153,7 +140,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      log.info(id + " :got: " + msgType);
+      log.info(id + " got: " + msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
@@ -338,11 +325,30 @@ public class ClientHandshake implements Handshake, MessageHandler {
             throw new IOException(e.getCause());
           }
         }
+        if (!policy.isUseIndividualViews()) {
+          MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(false);
+          log.info("No individual views, disabling FoW buttons");
+        }
         var libraryManager = new LibraryManager();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {
-          Asset asset = AssetManager.getAsset(new MD5Key(library.getMd5Hash()));
-          AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-          libraryManager.registerAddOnLibrary(addOnLibrary);
+          var md5key = new MD5Key(library.getMd5Hash());
+          AssetManager.getAssetAsynchronously(
+              md5key,
+              a -> {
+                Asset asset = AssetManager.getAsset(a);
+                try {
+                  var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
+                } catch (IOException e) {
+                  SwingUtilities.invokeLater(
+                      () -> {
+                        MapTool.showError(
+                            I18N.getText(
+                                "library.import.error", library.getDetails().getNamespace()),
+                            e);
+                      });
+                }
+              });
         }
       }
     }

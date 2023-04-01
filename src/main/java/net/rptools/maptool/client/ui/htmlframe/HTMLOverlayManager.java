@@ -85,6 +85,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private final Map<String, String> macroCallbacks = new HashMap<>();
 
   HTMLOverlayManager(String name, int zOrder) {
+    super("overlay", name);
     addActionListener(this); // add the action listeners for form events
     this.name = name;
     this.zOrder = zOrder;

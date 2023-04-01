@@ -18,23 +18,24 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
-import java.awt.EventQueue;
+import java.awt.*;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.functions.exceptions.*;
+import net.rptools.maptool.client.functions.exceptions.AbortFunctionException;
+import net.rptools.maptool.client.functions.exceptions.AssertFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.ObservableList;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -65,8 +66,18 @@ public class MacroLinkFunction extends AbstractFunction {
   /** Singleton instance of the MacroLinkFunction class. */
   private static final MacroLinkFunction instance = new MacroLinkFunction();
 
-  private static final Pattern AUTOEXEC_PATTERN =
-      Pattern.compile("([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+  /** Moving all the patterns together to ensure that we don't forget any */
+  static final Pattern AUTOEXEC_PATTERN =
+      Pattern.compile("([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
+  static final Pattern TOOLTIP_PATTERN =
+      Pattern.compile("([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+  /** Pattern to distinguish a link (group 1) from its data (group 2). */
+  public static final Pattern LINK_DATA_PATTERN =
+      Pattern.compile("((?s)[^:]*://.*/[^/]*/[^?]*\\?)(.*)?");
+
+  static final Pattern MACROLINK_PATTERN =
+      Pattern.compile("(?s)([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
 
   /**
    * Gets and instance of the MacroLinkFunction class.
@@ -279,10 +290,6 @@ public class MacroLinkFunction extends AbstractFunction {
     return args.toString();
   }
 
-  /** Pattern to distinguish a link (group 1) from its data (group 2). */
-  public static final Pattern LINK_DATA_PATTERN =
-      Pattern.compile("((?s)[^:]*://[^/]*/[^/]*/[^?]*\\?)(.*)?");
-
   /**
    * Returns the link data as a json element.
    *
@@ -301,9 +308,6 @@ public class MacroLinkFunction extends AbstractFunction {
       return JSONMacroFunctions.getInstance().asJsonElement(decodedLinkData);
     }
   }
-
-  private static final Pattern TOOLTIP_PATTERN =
-      Pattern.compile("([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?");
 
   /**
    * Gets a string that describes the macro link.
@@ -377,9 +381,6 @@ public class MacroLinkFunction extends AbstractFunction {
     runMacroLink(link, false);
   }
 
-  private static final Pattern macroLink =
-      Pattern.compile("(?s)([^:]*)://([^/]*)/([^/]*)/([^?]*)(?:\\?(.*))?");
-
   /**
    * Runs the macro specified by the link.
    *
@@ -391,7 +392,7 @@ public class MacroLinkFunction extends AbstractFunction {
     if (link == null || link.length() == 0) {
       return;
     }
-    Matcher m = macroLink.matcher(link);
+    Matcher m = MACROLINK_PATTERN.matcher(link);
 
     if (m.matches() && m.group(1).equalsIgnoreCase("macro")) {
       OutputTo outputTo;
@@ -584,7 +585,7 @@ public class MacroLinkFunction extends AbstractFunction {
   }
 
   private static void doWhisper(String message, Token token, String playerName) {
-    ObservableList<Player> playerList = MapTool.getPlayerList();
+    List<Player> playerList = MapTool.getPlayerList();
     List<String> players = new ArrayList<>();
     for (int count = 0; count < playerList.size(); count++) {
       Player p = playerList.get(count);

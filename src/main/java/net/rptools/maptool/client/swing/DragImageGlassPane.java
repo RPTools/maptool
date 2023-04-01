@@ -20,7 +20,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
-import net.rptools.lib.swing.SwingUtil;
 
 public class DragImageGlassPane extends JPanel {
   private static final int DEFAULT_MAX_SIZE = 75;

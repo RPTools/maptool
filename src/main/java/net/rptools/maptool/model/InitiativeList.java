@@ -135,7 +135,12 @@ public class InitiativeList implements Serializable {
    * @return The token initiative data for the passed index.
    */
   public TokenInitiative getTokenInitiative(int index) {
-    return index < tokens.size() && index >= 0 ? tokens.get(index) : null;
+    if (index < tokens.size() && index >= 0) {
+      return tokens.get(index);
+    } else {
+      LOGGER.error("getTokenInitiative: index = " + index + ", size = " + tokens.size());
+      return null;
+    }
   }
 
   /**

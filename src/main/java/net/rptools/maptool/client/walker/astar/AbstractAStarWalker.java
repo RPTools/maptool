@@ -33,6 +33,7 @@ import java.util.Queue;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
@@ -43,7 +44,6 @@ import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.ConvexHull;
-import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
@@ -69,7 +69,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private Area fowExposedArea = new Area();
   private double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
-  private ShapeReader shapeReader = new ShapeReader(geometryFactory);
   private PreparedGeometry vblGeometry = null;
   private PreparedGeometry fowExposedAreaGeometry = null;
   // private long avgRetrieveTime;
@@ -184,27 +183,46 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     Area newFowExposedArea = new Area();
     final var zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     if (zoneRenderer != null) {
+      final var zoneView = zoneRenderer.getZoneView();
+
+      var mbl = zoneView.getTopology(Zone.TopologyType.MBL);
+      if (tokenMbl != null) {
+        mbl = new Area(mbl);
+        mbl.subtract(tokenMbl);
+      }
+
       if (MapTool.getServerPolicy().getVblBlocksMove()) {
-        var vbl = zoneRenderer.getZoneView().getTopologyTree().getArea();
-        var hillVbl = zoneRenderer.getZoneView().getHillVblTree().getArea();
-        var pitVbl = zoneRenderer.getZoneView().getPitVblTree().getArea();
-        newVbl.add(vbl);
+        var wallVbl = zoneView.getTopology(Zone.TopologyType.WALL_VBL);
+        var hillVbl = zoneView.getTopology(Zone.TopologyType.HILL_VBL);
+        var pitVbl = zoneView.getTopology(Zone.TopologyType.PIT_VBL);
+
+        // A token's topology should not be used to block itself!
+        if (tokenWallVbl != null) {
+          wallVbl = new Area(wallVbl);
+          wallVbl.subtract(tokenWallVbl);
+        }
+        if (tokenHillVbl != null) {
+          hillVbl = new Area(hillVbl);
+          hillVbl.subtract(tokenHillVbl);
+        }
+        if (tokenPitVbl != null) {
+          pitVbl = new Area(pitVbl);
+          pitVbl.subtract(tokenPitVbl);
+        }
+
+        newVbl.add(wallVbl);
         newVbl.add(hillVbl);
         newVbl.add(pitVbl);
 
-        if (tokenVBL != null) {
-          newVbl.subtract(tokenVBL);
-        }
-
         // Finally, add the Move Blocking Layer!
-        newVbl.add(zone.getTopologyTerrain());
+        newVbl.add(mbl);
       } else {
-        newVbl = zone.getTopologyTerrain();
+        newVbl = mbl;
       }
 
       newFowExposedArea =
           zoneRenderer.getZone().hasFog()
-              ? zoneRenderer.getZone().getExposedArea(zoneRenderer.getPlayerView())
+              ? zoneView.getExposedArea(zoneRenderer.getPlayerView())
               : null;
     }
 
@@ -218,8 +236,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.vblGeometry = null;
       } else {
         try {
-          var vblGeometry =
-              shapeReader.read(new ReverseShapePathIterator(vbl.getPathIterator(null)));
+          var vblGeometry = GeometryUtil.toJts(vbl);
 
           // polygons
           if (!vblGeometry.isValid()) {
@@ -246,8 +263,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
-          var fowExposedAreaGeometry =
-              shapeReader.read(new ReverseShapePathIterator(fowExposedArea.getPathIterator(null)));
+          var fowExposedAreaGeometry = GeometryUtil.toJts(fowExposedArea);
 
           // polygons
           if (!fowExposedAreaGeometry.isValid()) {

@@ -18,7 +18,6 @@ import com.google.protobuf.util.JsonFormat;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileInputStream;
@@ -43,10 +42,11 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -544,9 +544,7 @@ public class PersistenceUtil {
 
     BufferedImage thumb = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
     Graphics2D g = thumb.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g.setRenderingHint(
-        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 
@@ -558,9 +556,7 @@ public class PersistenceUtil {
             Math.min(image.getHeight(), MapTool.getThumbnailSize().height));
     BufferedImage thumbLarge = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
     g = thumbLarge.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g.setRenderingHint(
-        RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 

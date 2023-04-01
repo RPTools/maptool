@@ -14,30 +14,37 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.util.Collections;
 import java.util.List;
 import javax.swing.*;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.SelectionModel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
-import net.rptools.maptool.model.ModelChangeEvent;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.tokens.TokenMacroChanged;
+import net.rptools.maptool.model.tokens.TokenPanelChanged;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensRemoved;
 
 public class ImpersonatePanel extends AbstractMacroPanel {
   private boolean currentlyImpersonating = false;
 
   public ImpersonatePanel() {
     setPanelClass("ImpersonatePanel");
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public void init() {
@@ -123,7 +130,7 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     removeAll();
     MapTool.getFrame()
         .getFrame(MTFrame.IMPERSONATED)
-        .setFrameIcon(new ImageIcon(AppStyle.impersonatePanelImage));
+        .setFrameIcon(RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS));
     MapTool.getFrame()
         .setFrameTitle(
             MTFrame.IMPERSONATED, I18N.getString(MTFrame.IMPERSONATED.getPropertyName()));
@@ -148,17 +155,35 @@ public class ImpersonatePanel extends AbstractMacroPanel {
     }
   }
 
-  @Override
-  @SuppressWarnings("unchecked")
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Event.TOKEN_MACRO_CHANGED
-        || event.eventType == Event.TOKEN_REMOVED
-        || event.eventType == Event.TOKEN_PANEL_CHANGED
-        || event.eventType == Event.TOKEN_EDITED) {
-      // Only resets if the impersonated token is among those changed/deleted
-      if (isImpersonatedAmongList(event.getTokensAsList())) {
-        reset();
-      }
+  @Subscribe
+  private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+    reset();
+  }
+
+  @Subscribe
+  private void onTokenMacroChanged(TokenMacroChanged event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokenPanelChanged(TokenPanelChanged event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    resetIfAnyImpersonated(event.tokens());
+  }
+
+  @Subscribe
+  private void onTokensEdited(TokenEdited event) {
+    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+  }
+
+  private void resetIfAnyImpersonated(List<Token> tokens) {
+    // Only resets if the impersonated token is among those changed/deleted
+    if (isImpersonatedAmongList(tokens)) {
+      reset();
     }
   }
 
@@ -187,9 +212,8 @@ public class ImpersonatePanel extends AbstractMacroPanel {
    */
   @Deprecated
   public void addCancelButton() {
-    ImageIcon i = new ImageIcon(AppStyle.cancelButton);
     JButton button =
-        new JButton("Cancel Impersonation", i) {
+        new JButton("Cancel Impersonation", RessourceManager.getSmallIcon(Icons.ACTION_CANCEL)) {
           @Override
           public Insets getInsets() {
             return new Insets(3, 3, 3, 3);

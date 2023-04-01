@@ -37,7 +37,7 @@ public class HTMLPanelRenderer extends JTextPane {
     setDoubleBuffered(false);
 
     styleSheet = ((HTMLDocument) getDocument()).getStyleSheet();
-    styleSheet.addRule("body { font-family: sans-serif; font-size: 11pt}");
+    styleSheet.addRule("body { color: black; font-family: sans-serif; font-size: 11pt}");
     rendererPane.add(this);
     Document document = getDocument();
 

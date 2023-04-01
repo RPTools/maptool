@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.FormLayout;
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -47,6 +45,7 @@ import javax.swing.JPanel;
 import javax.swing.JSeparator;
 import javax.swing.JSlider;
 import javax.swing.KeyStroke;
+import net.miginfocom.swing.MigLayout;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -443,8 +442,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
             new JCheckBoxMenuItem(
                 standardColorActionConstructor.newInstance(
                     this, getRenderer(), selectedTokenSet, bgColor, displayName));
-        item.setBackground(bgColor);
-        item.setForeground(fgColor);
 
         if (bgColor.equals(selectedColor)) {
           item.setSelected(true);
@@ -754,18 +751,13 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     public void actionPerformed(ActionEvent e) {
       String name = (String) getValue(NAME);
       JSlider slider = new JSlider(0, 100);
-      JPanel labelPanel = new JPanel(new FormLayout("pref", "pref 2px:grow pref"));
-      labelPanel.add(
-          new JLabel(name + ":"),
-          new CellConstraints(1, 1, CellConstraints.RIGHT, CellConstraints.TOP));
-      JCheckBox hide = new JCheckBox("Hide");
+      JCheckBox hide = new JCheckBox(I18N.getText("EditTokenDialog.checkbox.state.hide"));
       hide.putClientProperty("JSlider", slider);
       hide.addChangeListener(
           e1 -> {
             JSlider js = (JSlider) ((JCheckBox) e1.getSource()).getClientProperty("JSlider");
             js.setEnabled(!((JCheckBox) e1.getSource()).isSelected());
           });
-      labelPanel.add(hide, new CellConstraints(1, 3, CellConstraints.RIGHT, CellConstraints.TOP));
       slider.setPaintLabels(true);
       slider.setPaintTicks(true);
       slider.setMajorTickSpacing(20);
@@ -784,9 +776,12 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
                         .doubleValue()
                     * 100));
       }
-      JPanel barPanel = new JPanel(new FormLayout("right:pref 2px pref", "pref"));
-      barPanel.add(labelPanel, new CellConstraints(1, 1));
-      barPanel.add(slider, new CellConstraints(3, 1));
+
+      JPanel barPanel = new JPanel(new MigLayout("wrap 2"));
+      barPanel.add(new JLabel(name + ":"));
+      barPanel.add(slider, "span 1 2");
+      barPanel.add(hide);
+
       if (JOptionPane.showOptionDialog(
               MapTool.getFrame(),
               barPanel,

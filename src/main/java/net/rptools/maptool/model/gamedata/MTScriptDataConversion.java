@@ -14,9 +14,13 @@
  */
 package net.rptools.maptool.model.gamedata;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import java.math.BigDecimal;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.gamedata.data.DataType;
 import net.rptools.maptool.model.gamedata.data.DataValue;
+import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 
 /** Class for converting between GameData and MT Macro Script types. */
 public class MTScriptDataConversion {
@@ -64,5 +68,65 @@ public class MTScriptDataConversion {
     } else {
       return convertToMTScriptType(value);
     }
+  }
+
+  /**
+   * Converts a MT Script type to a DataValue. For Asset types the asset handle is returned.
+   *
+   * @param name The name of the value.
+   * @param value The value to convert.
+   * @return A DataValue from the given value.
+   */
+  public DataValue parseMTScriptString(String name, Object value) {
+    if (value == null) {
+      return DataValueFactory.undefined(name);
+    }
+
+    if (value instanceof String strval) {
+      if (strval.isEmpty()) {
+        return DataValueFactory.undefined(name);
+      }
+      if (strval.trim().startsWith("{") || strval.trim().startsWith("[")) {
+        try {
+          JsonObject jobj = JsonParser.parseString(strval).getAsJsonObject();
+          if (jobj.isJsonArray()) {
+            return DataValueFactory.fromJsonArray(name, jobj.getAsJsonArray());
+          } else if (jobj.isJsonObject()) {
+            return DataValueFactory.fromJsonObject(name, jobj);
+          }
+        } catch (Exception e) {
+          // Ignore
+        }
+      }
+      if (strval.startsWith("asset://")) {
+        return DataValueFactory.fromAsset(name, new MD5Key(strval.substring("asset://".length())));
+      }
+
+      if (strval.equalsIgnoreCase("true") || strval.equalsIgnoreCase("false")) {
+        return DataValueFactory.fromBoolean(name, strval.equalsIgnoreCase("true"));
+      }
+    }
+
+    if (value instanceof Number nval) {
+      if (nval.longValue() == nval.doubleValue()) {
+        return DataValueFactory.fromLong(name, nval.longValue());
+      } else {
+        return DataValueFactory.fromDouble(name, nval.doubleValue());
+      }
+    }
+
+    if (value instanceof Boolean bval) {
+      return DataValueFactory.fromBoolean(name, bval);
+    }
+
+    if (value instanceof JsonObject jo) {
+      if (jo.isJsonArray()) {
+        return DataValueFactory.fromJsonArray(name, jo.getAsJsonArray());
+      } else if (jo.isJsonObject()) {
+        return DataValueFactory.fromJsonObject(name, jo);
+      }
+    }
+
+    return DataValueFactory.fromString(name, value.toString());
   }
 }

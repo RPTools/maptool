@@ -50,3 +50,4 @@ build-resources/rptools-keystore
 /report.html
 /output.xml
 /lib/jide/
+/local.properties

@@ -25,13 +25,14 @@ import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.ServerConfig;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
 public class WebRTCClientConnection extends AbstractConnection
     implements ClientConnection, PeerConnectionObserver, RTCDataChannelObserver {
-  private static final Logger log = Logger.getLogger(WebRTCClientConnection.class);
+  private static final Logger log = LogManager.getLogger(WebRTCClientConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private final ServerConfig config;
@@ -162,15 +163,37 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private void init() {
-    RTCIceServer iceServer = new RTCIceServer();
-    iceServer.urls.add("stun:stun.l.google.com:19302");
-    iceServer.urls.add("stun:stun1.l.google.com:19302");
-    iceServer.urls.add("stun:stun2.l.google.com:19302");
-    iceServer.urls.add("stun:stun3.l.google.com:19302");
-    iceServer.urls.add("stun:stun4.l.google.com:19302");
-
     rtcConfig = new RTCConfiguration();
-    rtcConfig.iceServers.add(iceServer);
+
+    var googleStun = new RTCIceServer();
+    googleStun.urls.add("stun:stun.l.google.com:19302");
+    googleStun.urls.add("stun:stun1.l.google.com:19302");
+    googleStun.urls.add("stun:stun2.l.google.com:19302");
+    googleStun.urls.add("stun:stun3.l.google.com:19302");
+    googleStun.urls.add("stun:stun4.l.google.com:19302");
+    rtcConfig.iceServers.add(googleStun);
+
+    var openRelayStun = new RTCIceServer();
+    openRelayStun.urls.add("stun:openrelay.metered.ca:80");
+    rtcConfig.iceServers.add(openRelayStun);
+
+    var openRelayTurn = new RTCIceServer();
+    openRelayTurn.urls.add("turn:openrelay.metered.ca:80");
+    openRelayTurn.username = "openrelayproject";
+    openRelayTurn.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn);
+
+    var openRelayTurn2 = new RTCIceServer();
+    openRelayTurn2.urls.add("turn:openrelay.metered.ca:443");
+    openRelayTurn2.username = "openrelayproject";
+    openRelayTurn2.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn2);
+
+    var openRelayTurn3 = new RTCIceServer();
+    openRelayTurn3.urls.add("turn:openrelay.metered.ca:443?transport=tcp");
+    openRelayTurn3.username = "openrelayproject";
+    openRelayTurn3.password = "openrelayproject";
+    rtcConfig.iceServers.add(openRelayTurn3);
   }
 
   @Override
@@ -253,7 +276,7 @@ public class WebRTCClientConnection extends AbstractConnection
 
   private void onLogin(LoginMessageDto message) {
     if (!message.success) {
-      MapTool.showError("Player already taken!");
+      MapTool.showError("Handshake.msg.playerAlreadyConnected");
       return;
     }
 
@@ -467,7 +490,7 @@ public class WebRTCClientConnection extends AbstractConnection
     }
 
     var message = readMessage(channelBuffer.data);
-    if (message != null) dispatchMessage(id, message);
+    if (message != null) dispatchCompressedMessage(id, message);
   }
 
   private void fireDisconnectAsync() {

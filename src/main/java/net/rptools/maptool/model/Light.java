@@ -15,106 +15,87 @@
 package net.rptools.maptool.model;
 
 import java.awt.geom.Area;
+import java.io.Serial;
+import java.io.Serializable;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.server.proto.LightDto;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
 
-public class Light {
-  private DrawablePaint paint;
-  private double facingOffset;
-  private double radius;
-  private double arcAngle;
-  private ShapeType shape;
-  private boolean isGM;
-  private boolean ownerOnly;
-
-  public Light() {
-    // For serialization
-  }
+public class Light implements Serializable {
+  private final @Nonnull ShapeType shape;
+  private final double facingOffset;
+  private final double radius;
+  private final double arcAngle;
+  private final @Nullable DrawablePaint paint;
+  private final int lumens;
+  private final boolean isGM;
+  private final boolean ownerOnly;
 
   public Light(
-      ShapeType shape, double facingOffset, double radius, double arcAngle, DrawablePaint paint) {
-    this.facingOffset = facingOffset;
-    this.shape = shape;
-    this.radius = radius;
-    this.arcAngle = arcAngle;
-    this.paint = paint;
-    this.isGM = false;
-    this.ownerOnly = false;
-
-    if (arcAngle == 0) {
-      this.arcAngle = 90;
-    }
-  }
-
-  public Light(
-      ShapeType shape,
+      @Nonnull ShapeType shape,
       double facingOffset,
       double radius,
       double arcAngle,
-      DrawablePaint paint,
+      @Nullable DrawablePaint paint,
+      int lumens,
       boolean isGM,
       boolean owner) {
-    this.facingOffset = facingOffset;
     this.shape = shape;
+    this.facingOffset = facingOffset;
     this.radius = radius;
-    this.arcAngle = arcAngle;
+    this.arcAngle = (arcAngle == 0) ? 90 : arcAngle;
     this.paint = paint;
+    this.lumens = lumens;
     this.isGM = isGM;
     this.ownerOnly = owner;
-    if (arcAngle == 0) {
-      this.arcAngle = 90;
-    }
   }
 
-  public DrawablePaint getPaint() {
+  @SuppressWarnings("ConstantConditions")
+  @Serial
+  private @Nonnull Object readResolve() {
+    // Rather than modifying the current object, we'll create a replacement that is definitely
+    // initialized properly.
+    return new Light(
+        shape == null ? ShapeType.CIRCLE : shape,
+        facingOffset,
+        radius,
+        arcAngle,
+        paint,
+        lumens == 0 ? 100 : lumens,
+        isGM,
+        ownerOnly);
+  }
+
+  public @Nullable DrawablePaint getPaint() {
     return paint;
   }
 
-  public void setPaint(DrawablePaint paint) {
-    this.paint = paint;
+  public int getLumens() {
+    return lumens;
   }
 
   public double getFacingOffset() {
     return facingOffset;
   }
 
-  public void setFacingOffset(double facingOffset) {
-    this.facingOffset = facingOffset;
-  }
-
   public double getRadius() {
     return radius;
-  }
-
-  public void setRadius(double radius) {
-    this.radius = radius;
   }
 
   public double getArcAngle() {
     return arcAngle;
   }
 
-  public void setArcAngle(double arcAngle) {
-    this.arcAngle = arcAngle;
-  }
-
-  public ShapeType getShape() {
+  public @Nonnull ShapeType getShape() {
     return shape;
   }
 
-  public void setShape(ShapeType shape) {
-    this.shape = shape;
-  }
-
-  public Area getArea(Token token, Zone zone, boolean scaleWithToken) {
+  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, boolean scaleWithToken) {
     return zone.getGrid()
         .getShapedArea(
             getShape(), token, getRadius(), getArcAngle(), (int) getFacingOffset(), scaleWithToken);
-  }
-
-  public void setGM(boolean b) {
-    isGM = b;
   }
 
   public boolean isGM() {
@@ -125,33 +106,30 @@ public class Light {
     return ownerOnly;
   }
 
-  public void setOwnerOnly(boolean owner) {
-    ownerOnly = owner;
+  public static @Nonnull Light fromDto(@Nonnull LightDto dto) {
+    return new Light(
+        ShapeType.valueOf(dto.getShape().name()),
+        dto.getFacingOffset(),
+        dto.getRadius(),
+        dto.getArcAngle(),
+        dto.hasPaint() ? DrawablePaint.fromDto(dto.getPaint()) : null,
+        dto.getLumens(),
+        dto.getIsGm(),
+        dto.getOwnerOnly());
   }
 
-  public static Light fromDto(LightDto dto) {
-    var light = new Light();
-    light.paint = dto.hasPaint() ? DrawablePaint.fromDto(dto.getPaint()) : null;
-    light.facingOffset = dto.getFacingOffset();
-    light.radius = dto.getRadius();
-    light.arcAngle = dto.getArcAngle();
-    light.shape = ShapeType.valueOf(dto.getShape().name());
-    light.isGM = dto.getIsGm();
-    light.ownerOnly = dto.getOwnerOnly();
-    return light;
-  }
-
-  public LightDto toDto() {
+  public @Nonnull LightDto toDto() {
     var dto = LightDto.newBuilder();
-    if (paint != null) dto.setPaint(paint.toDto());
+    if (paint != null) {
+      dto.setPaint(paint.toDto());
+    }
     dto.setFacingOffset(facingOffset);
     dto.setRadius(radius);
     dto.setArcAngle(arcAngle);
-    // default shape is circle
-    if (shape == null) shape = ShapeType.CIRCLE;
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
     dto.setIsGm(isGM);
     dto.setOwnerOnly(ownerOnly);
+    dto.setLumens(lumens);
     return dto.build();
   }
 }

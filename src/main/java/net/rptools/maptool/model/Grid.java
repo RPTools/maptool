@@ -42,8 +42,9 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.GridChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -499,10 +500,8 @@ public abstract class Grid implements Cloneable {
   }
 
   private void fireGridChanged() {
-    if (zone != null) {
-      gridShapeCache.clear();
-      zone.fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
-    }
+    gridShapeCache.clear();
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
   }
 
   /**
@@ -937,7 +936,11 @@ public abstract class Grid implements Cloneable {
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
-    grid.cellShape = Mapper.map(dto.getCellShape());
+    if (dto.hasCellShape()) {
+      grid.cellShape = Mapper.map(dto.getCellShape());
+    } else {
+      grid.cellShape = null;
+    }
     return grid;
   }
 
@@ -947,9 +950,11 @@ public abstract class Grid implements Cloneable {
     var dto = GridDto.newBuilder();
     fillDto(dto);
     dto.setOffsetX(offsetX);
-    dto.setOffsetX(offsetY);
+    dto.setOffsetY(offsetY);
     dto.setSize(size);
-    dto.setCellShape(Mapper.map(cellShape));
+    if (cellShape != null) {
+      dto.setCellShape(Mapper.map(cellShape));
+    }
     return dto.build();
   }
 

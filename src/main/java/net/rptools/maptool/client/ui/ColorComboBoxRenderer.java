@@ -26,6 +26,16 @@ import net.rptools.maptool.language.I18N;
 public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
   private static final long serialVersionUID = -8994115147056186827L;
 
+  public static final String DEFAULT_COLOR_NAME = "Default";
+
+  /** Color to use for rendering the default color foreground. */
+  private final Color defaultForeground;
+  /** Color to use for rendering the default color background. */
+  private final Color defaultBackground;
+
+  /** The name to use for the default color. */
+  private final String defaultName;
+
   /**
    * Selects a black or white text color for the given background color. The function tries to
    * optimize readability by computing the gray value of the background color. Black is used only if
@@ -47,9 +57,13 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
   }
 
   /** Creates a new label with an opaque background. */
-  public ColorComboBoxRenderer() {
+  public ColorComboBoxRenderer(
+      String defaultName, Color defaultForeground, Color defaultBackground) {
     super();
     setOpaque(true);
+    this.defaultForeground = defaultForeground;
+    this.defaultBackground = defaultBackground;
+    this.defaultName = defaultName;
   }
 
   // @Override
@@ -66,7 +80,15 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
     Color fgColor;
     Color bgColor;
 
-    if (isSelected && !cellHasFocus) {
+    if (defaultName.equals(name)) {
+      if (isSelected & !cellHasFocus) {
+        fgColor = defaultForeground;
+        bgColor = defaultBackground;
+      } else {
+        fgColor = defaultBackground;
+        bgColor = defaultForeground;
+      }
+    } else if (isSelected && !cellHasFocus) {
       fgColor = list.getSelectionForeground();
       bgColor = list.getSelectionBackground();
     } else {

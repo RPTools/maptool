@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -52,17 +53,17 @@ import net.rptools.maptool.server.proto.TokenPropertyListDto;
 public class CampaignProperties {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
-  private final Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
-  private final List<String> remoteRepositoryList = new ArrayList<>();
-  private final Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
-  private final Map<String, LookupTable> lookupTableMap = new HashMap<>();
-  private final Map<String, SightType> sightTypeMap = new HashMap<>();
+  private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
+  private List<String> remoteRepositoryList = new ArrayList<>();
+  private Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
+  private Map<String, LookupTable> lookupTableMap = new HashMap<>();
+  private Map<String, SightType> sightTypeMap = new HashMap<>();
 
   private String defaultSightType;
 
-  private final Map<String, BooleanTokenOverlay> tokenStates = new LinkedHashMap<>();
-  private final Map<String, BarTokenOverlay> tokenBars = new LinkedHashMap<>();
-  private final Map<String, String> characterSheets = new HashMap<>();
+  private Map<String, BooleanTokenOverlay> tokenStates = new LinkedHashMap<>();
+  private Map<String, BarTokenOverlay> tokenBars = new LinkedHashMap<>();
+  private Map<String, String> characterSheets = new HashMap<>();
 
   /** Flag indicating that owners have special permissions */
   private boolean initiativeOwnerPermissions = AppPreferences.getInitOwnerPermissions();
@@ -76,9 +77,7 @@ public class CampaignProperties {
   /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
   private boolean initiativePanelButtonsDisabled = false;
 
-  public CampaignProperties() {
-    init();
-  }
+  public CampaignProperties() {}
 
   public CampaignProperties(CampaignProperties properties) {
     for (Entry<String, List<TokenProperty>> entry : properties.tokenTypeMap.entrySet()) {
@@ -94,18 +93,11 @@ public class CampaignProperties {
     // TODO: This doesn't feel right, should we deep copy, or does this do that automatically ?
     lightSourcesMap.putAll(properties.lightSourcesMap);
 
-    // TODO: fix for when old campaigns have been loaded into b33+
-    if (properties.tokenStates.isEmpty()) {
-      properties.initTokenStatesMap();
-    }
     for (BooleanTokenOverlay overlay : properties.tokenStates.values()) {
       overlay = (BooleanTokenOverlay) overlay.clone();
       tokenStates.put(overlay.getName(), overlay);
     } // endfor
 
-    if (properties.tokenBars.isEmpty()) {
-      properties.initTokenBarsMap();
-    }
     for (BarTokenOverlay overlay : properties.tokenBars.values()) {
       overlay = (BarTokenOverlay) overlay.clone();
       tokenBars.put(overlay.getName(), overlay);
@@ -116,9 +108,6 @@ public class CampaignProperties {
     initiativeUseReverseSort = properties.initiativeUseReverseSort;
     initiativePanelButtonsDisabled = properties.initiativePanelButtonsDisabled;
 
-    if (properties.characterSheets.isEmpty()) {
-      properties.initCharacterSheetsMap();
-    }
     for (String type : properties.characterSheets.keySet()) {
       characterSheets.put(type, properties.characterSheets.get(type));
     }
@@ -141,16 +130,10 @@ public class CampaignProperties {
   }
 
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
-    if (tokenTypeMap.isEmpty()) {
-      initTokenTypeMap();
-    }
     return tokenTypeMap;
   }
 
   public Map<String, SightType> getSightTypeMap() {
-    if (sightTypeMap.isEmpty()) {
-      initSightTypeMap();
-    }
     return sightTypeMap;
   }
 
@@ -181,9 +164,6 @@ public class CampaignProperties {
   }
 
   public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
-    if (lightSourcesMap.isEmpty()) {
-      initLightSourcesMap();
-    }
     return lightSourcesMap;
   }
 
@@ -203,9 +183,6 @@ public class CampaignProperties {
   }
 
   public Map<String, BooleanTokenOverlay> getTokenStatesMap() {
-    if (tokenStates.isEmpty()) {
-      initTokenStatesMap();
-    }
     return tokenStates;
   }
 
@@ -215,9 +192,6 @@ public class CampaignProperties {
   }
 
   public Map<String, BarTokenOverlay> getTokenBarsMap() {
-    if (tokenBars.isEmpty()) {
-      initTokenBarsMap();
-    }
     return tokenBars;
   }
 
@@ -226,7 +200,7 @@ public class CampaignProperties {
     tokenBars.putAll(map);
   }
 
-  private void init() {
+  public void initDefaultProperties() {
     initLightSourcesMap();
     initTokenTypeMap();
     initSightTypeMap();
@@ -414,7 +388,6 @@ public class CampaignProperties {
    * @return a Map of the characterSheets
    */
   public Map<String, String> getCharacterSheets() {
-    if (characterSheets.isEmpty()) initCharacterSheetsMap();
     return characterSheets;
   }
 
@@ -422,6 +395,34 @@ public class CampaignProperties {
   public void setCharacterSheets(Map<String, String> characterSheets) {
     this.characterSheets.clear();
     this.characterSheets.putAll(characterSheets);
+  }
+
+  protected Object readResolve() {
+    if (tokenTypeMap == null) {
+      tokenTypeMap = new HashMap<>();
+    }
+    if (remoteRepositoryList == null) {
+      remoteRepositoryList = new ArrayList<>();
+    }
+    if (lightSourcesMap == null) {
+      lightSourcesMap = new TreeMap<>();
+    }
+    if (lookupTableMap == null) {
+      lookupTableMap = new HashMap<>();
+    }
+    if (sightTypeMap == null) {
+      sightTypeMap = new HashMap<>();
+    }
+    if (tokenStates == null) {
+      tokenStates = new LinkedHashMap<>();
+    }
+    if (tokenBars == null) {
+      tokenBars = new LinkedHashMap<>();
+    }
+    if (characterSheets == null) {
+      characterSheets = new HashMap<>();
+    }
+    return this;
   }
 
   public static CampaignProperties fromDto(CampaignPropertiesDto dto) {
@@ -434,7 +435,9 @@ public class CampaignProperties {
                 v.getPropertiesList().stream()
                     .map(TokenProperty::fromDto)
                     .collect(Collectors.toList())));
-    props.defaultSightType = dto.getDefaultSightType();
+    if (dto.hasDefaultSightType()) {
+      props.defaultSightType = dto.getDefaultSightType().getValue();
+    }
     dto.getTokenStatesList()
         .forEach(
             s -> {
@@ -490,7 +493,9 @@ public class CampaignProperties {
                     .addAllProperties(
                         v.stream().map(TokenProperty::toDto).collect(Collectors.toList()))
                     .build()));
-    dto.setDefaultSightType(defaultSightType);
+    if (defaultSightType != null) {
+      dto.setDefaultSightType(StringValue.of(defaultSightType));
+    }
     dto.addAllTokenStates(
         tokenStates.values().stream().map(BooleanTokenOverlay::toDto).collect(Collectors.toList()));
     dto.addAllTokenBars(

@@ -29,7 +29,7 @@ public class LookupTable {
 
   private static ExpressionParser expressionParser = new ExpressionParser();
 
-  private List<LookupEntry> entryList;
+  private List<LookupEntry> entryList = new ArrayList<>();
   private String name;
   private String defaultRoll;
   private MD5Key tableImage;
@@ -50,7 +50,7 @@ public class LookupTable {
     pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
 
     if (table.entryList != null) {
-      getInternalEntryList().addAll(table.entryList);
+      entryList.addAll(table.entryList);
     }
   }
 
@@ -59,11 +59,11 @@ public class LookupTable {
   }
 
   public void clearEntries() {
-    getInternalEntryList().clear();
+    entryList.clear();
   }
 
   public void addEntry(int min, int max, String result, MD5Key imageId) {
-    getInternalEntryList().add(new LookupEntry(min, max, result, imageId));
+    entryList.add(new LookupEntry(min, max, result, imageId));
   }
 
   public LookupEntry getLookup() throws ParserException {
@@ -140,7 +140,7 @@ public class LookupTable {
 
       tableResult = constrainRoll(tableResult);
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (tableResult >= entry.min && tableResult <= entry.max) {
           retEntry = entry;
         }
@@ -176,7 +176,7 @@ public class LookupTable {
     int minmin = Integer.MAX_VALUE;
     int maxmax = Integer.MIN_VALUE;
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (entry.min < minmin) {
         minmin = entry.min;
       }
@@ -197,7 +197,7 @@ public class LookupTable {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      List<LookupEntry> le = getInternalEntryList();
+      List<LookupEntry> le = entryList;
       LookupEntry entry;
       int len = le.size();
       List unpicked = new ArrayList<Integer>();
@@ -227,7 +227,7 @@ public class LookupTable {
       Integer min = null;
       Integer max = null;
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (min == null || entry.min < min) {
           min = entry.min;
         }
@@ -240,16 +240,9 @@ public class LookupTable {
     }
   }
 
-  private List<LookupEntry> getInternalEntryList() {
-    if (entryList == null) {
-      entryList = new ArrayList<>();
-    }
-    return entryList;
-  }
-
   /** Sets the picked flag on each table entry to false. */
   public void reset() {
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
@@ -272,7 +265,7 @@ public class LookupTable {
         entriesToReset.stream()
             .map(Integer::parseInt)
             .collect(Collectors.toCollection(HashSet::new));
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (int i = 0; i < curList.size(); i++) {
       LookupEntry entry = curList.get(i);
@@ -290,7 +283,7 @@ public class LookupTable {
    * @return List of LookupEntrys
    */
   public List<LookupEntry> getEntryList() {
-    return Collections.unmodifiableList(getInternalEntryList());
+    return Collections.unmodifiableList(entryList);
   }
 
   /**
@@ -345,7 +338,7 @@ public class LookupTable {
    */
   public int getPicksLeft() {
     int count = 0;
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (!entry.picked) {
         count++;
       }
@@ -357,7 +350,7 @@ public class LookupTable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
 
       if (entry.min == entry.max) {
         builder.append(entry.min);
@@ -514,6 +507,22 @@ public class LookupTable {
    */
   public void setAllowLookup(Boolean value) {
     allowLookup = value;
+  }
+
+  private Object readResolve() {
+    if (visible == null) {
+      visible = true;
+    }
+    if (pickOnce == null) {
+      pickOnce = false;
+    }
+    if (allowLookup == null) {
+      allowLookup = true;
+    }
+    if (entryList == null) {
+      entryList = new ArrayList<>();
+    }
+    return this;
   }
 
   public static LookupTable fromDto(LookupTableDto dto) {

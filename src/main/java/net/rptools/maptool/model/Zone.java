@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -31,6 +32,7 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -43,6 +45,22 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.tokens.TokenMacroChanged;
+import net.rptools.maptool.model.tokens.TokenPanelChanged;
+import net.rptools.maptool.model.zones.BoardChanged;
+import net.rptools.maptool.model.zones.DrawableAdded;
+import net.rptools.maptool.model.zones.DrawableRemoved;
+import net.rptools.maptool.model.zones.FogChanged;
+import net.rptools.maptool.model.zones.GridChanged;
+import net.rptools.maptool.model.zones.InitiativeListChanged;
+import net.rptools.maptool.model.zones.LabelAdded;
+import net.rptools.maptool.model.zones.LabelChanged;
+import net.rptools.maptool.model.zones.LabelRemoved;
+import net.rptools.maptool.model.zones.TokenEdited;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.TopologyChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
@@ -57,7 +75,7 @@ import org.apache.logging.log4j.Logger;
  * {@link #imported()}, {@link #optimize()}, and {@link #readResolve()} to ensure they are properly
  * initialized for maximum compatibility.
  */
-public class Zone extends BaseModel {
+public class Zone {
 
   private static final Logger log = LogManager.getLogger(Zone.class);
 
@@ -77,26 +95,6 @@ public class Zone extends BaseModel {
     public String toString() {
       return displayName;
     }
-  }
-
-  /** Event types for the listeners. */
-  public enum Event {
-    TOKEN_ADDED,
-    TOKEN_REMOVED,
-    TOKEN_CHANGED,
-    GRID_CHANGED,
-    DRAWABLE_ADDED,
-    DRAWABLE_REMOVED,
-    FOG_CHANGED,
-    LABEL_ADDED,
-    LABEL_REMOVED,
-    LABEL_CHANGED,
-    TOPOLOGY_CHANGED,
-    INITIATIVE_LIST_CHANGED,
-    BOARD_CHANGED,
-    TOKEN_EDITED, // the token was edited
-    TOKEN_MACRO_CHANGED, // a token macro changed
-    TOKEN_PANEL_CHANGED // the panel appearance changed
   }
 
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
@@ -240,10 +238,10 @@ public class Zone extends BaseModel {
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
   private TopologyTypeSet topologyTypes = null; // get default from AppPreferences
 
-  private List<DrawnElement> drawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
-  private List<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> drawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
+  private LinkedList<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
   /** Map each token GUID to the corresponding token. */
@@ -263,13 +261,19 @@ public class Zone extends BaseModel {
   private DrawablePaint fogPaint;
   private transient UndoPerZone undo;
 
-  /** The VBL topology of the zone. Does not include token VBL. */
+  /**
+   * The Wall VBL topology of the zone. Does not include token Wall VBL. Should really be called
+   * wallVbl.
+   */
   private Area topology = new Area();
 
+  /** The Hill VBL topology of the zone. Does not include token Hill VBL. */
   private Area hillVbl = new Area();
+
+  /** The Pit VBL topology of the zone. Does not include token Pit VBL. */
   private Area pitVbl = new Area();
 
-  // New topology to hold Movement Blocking Only
+  /** The MBL topology of the zone. Does not include token MBL. Should really be called mbl. */
   private Area topologyTerrain = new Area();
 
   // The 'board' layer, at the very bottom of the layer stack.
@@ -310,7 +314,6 @@ public class Zone extends BaseModel {
     // TODO: Was this needed?
     // setGrid(new SquareGrid());
     undo = new UndoPerZone(this); // registers as ModelChangeListener for drawables...
-    addModelChangeListener(undo);
   }
 
   public void setBackgroundPaint(DrawablePaint paint) {
@@ -365,34 +368,48 @@ public class Zone extends BaseModel {
     fogPaint = paint;
   }
 
-  @Override
-  public String toString() {
-    return name;
-  }
-
   /** @return name of the zone */
-  public String getName() {
+  public @Nonnull String getName() {
     return name;
   }
 
-  public String getPlayerAlias() {
-    return playerAlias == null ? name : playerAlias;
+  /** @return The zone's player alias, if set. Otherwise {@code null}. */
+  public @Nullable String getPlayerAlias() {
+    return playerAlias;
+  }
+
+  /**
+   * Get the name of the map to show to players.
+   *
+   * <p>If a player alias is set, that will be used as the display name. Otherwise the name is used
+   * as the display name.
+   *
+   * @return The name of the map that should be shown to players.
+   */
+  public @Nonnull String getDisplayName() {
+    return Objects.requireNonNullElse(playerAlias, name);
   }
 
   public void setName(String name) {
     this.name = name;
   }
 
-  public boolean setPlayerAlias(String playerAlias) {
-    List<ZoneRenderer> rendererList =
-        new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
-    for (ZoneRenderer z : rendererList) {
-      if (z.getZone().getPlayerAlias().equals(playerAlias)) {
-        return false;
-      }
+  public void setPlayerAlias(String playerAlias) {
+    this.playerAlias =
+        playerAlias == null || playerAlias.equals("") || playerAlias.equals(name)
+            ? null
+            : playerAlias;
+  }
+
+  @Override
+  public String toString() {
+    if (!MapTool.getPlayer().isGM()) {
+      return getDisplayName();
+    } else if (playerAlias == null || name.equals(playerAlias)) {
+      return name;
+    } else {
+      return playerAlias + " (" + name + ")";
     }
-    this.playerAlias = playerAlias.equals("") || playerAlias.equals(name) ? null : playerAlias;
-    return true;
   }
 
   public MD5Key getMapAssetId() {
@@ -432,13 +449,16 @@ public class Zone extends BaseModel {
    * @param keepIds Should the token ids stay the same.
    */
   public Zone(Zone zone, boolean keepIds) {
+    if (keepIds) {
+      this.id = zone.getId();
+    }
+
     backgroundPaint = zone.backgroundPaint;
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
     visionType = zone.visionType;
 
     undo = new UndoPerZone(this); // Undo/redo manager isn't copied
-    addModelChangeListener(undo);
     setName(zone.getName());
 
     try {
@@ -614,8 +634,7 @@ public class Zone extends BaseModel {
   public void setGrid(Grid grid) {
     this.grid = grid;
     grid.setZone(this);
-    // tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE * grid.getSize() / unitsPerCell;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(this));
   }
 
   public Grid getGrid() {
@@ -648,14 +667,14 @@ public class Zone extends BaseModel {
     boardPosition.x = position.x;
     boardPosition.y = position.y;
     setBoardChanged(true);
-    fireModelChangeEvent(new ModelChangeEvent(mapAsset, Event.BOARD_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(int newX, int newY) {
     boardPosition.x = newX;
     boardPosition.y = newY;
     setBoardChanged(true);
-    fireModelChangeEvent(new ModelChangeEvent(mapAsset, Event.BOARD_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new BoardChanged(this, mapAsset, boardPosition));
   }
 
   public void setBoard(Point position, MD5Key asset) {
@@ -708,7 +727,7 @@ public class Zone extends BaseModel {
 
   public void setHasFog(boolean flag) {
     hasFog = flag;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -734,9 +753,8 @@ public class Zone extends BaseModel {
     }
     if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
       Area combined = new Area(exposedArea);
-      List<Token> toks = view.getTokens(); // only owned and HasSight tokens are returned
-      if (toks != null && !toks.isEmpty()) {
-        for (Token tok : toks) {
+      if (view.isUsingTokenView()) {
+        for (Token tok : view.getTokens()) { // only owned and HasSight tokens are returned
           ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
           if (meta != null) {
             combined.add(meta.getExposedAreaHistory());
@@ -800,11 +818,9 @@ public class Zone extends BaseModel {
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
     if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
-      List<Token> toks = view.getTokens();
-
       // Jamz: Lets change the logic a bit looking for ownerships
-      if (toks != null && !toks.isEmpty()) {
-        for (Token tok : toks) {
+      if (view.isUsingTokenView()) {
+        for (Token tok : view.getTokens()) {
           if (!AppUtil.playerOwns(tok)) {
             continue;
           }
@@ -838,10 +854,9 @@ public class Zone extends BaseModel {
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
     if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
-      List<Token> toks = view.getTokens();
-      if (toks != null && !toks.isEmpty()) {
+      if (view.isUsingTokenView()) {
         // Should this use FindTokenFunctions.OwnedFilter and zone.getTokenList()?
-        for (Token tok : toks) {
+        for (Token tok : view.getTokens()) {
           if (!AppUtil.playerOwns(tok)) {
             continue;
           }
@@ -856,6 +871,15 @@ public class Zone extends BaseModel {
     // return combined.intersects(tokenSize);
   }
 
+  public Area getTopology(TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> topology;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> topologyTerrain;
+    };
+  }
+
   /**
    * Add the area to the topology, and fire the event TOPOLOGY_CHANGED
    *
@@ -865,14 +889,14 @@ public class Zone extends BaseModel {
   public void addTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.add(area);
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new TopologyChanged(this));
   }
 
   public void addTopology(Area area) {
@@ -890,14 +914,14 @@ public class Zone extends BaseModel {
   public void removeTopology(Area area, TopologyType topologyType) {
     var topology =
         switch (topologyType) {
-          case WALL_VBL -> getTopology();
-          case HILL_VBL -> getHillVbl();
-          case PIT_VBL -> getPitVbl();
-          case MBL -> getTopologyTerrain();
+          case WALL_VBL -> this.topology;
+          case HILL_VBL -> hillVbl;
+          case PIT_VBL -> pitVbl;
+          case MBL -> topologyTerrain;
         };
     topology.subtract(area);
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new TopologyChanged(this));
   }
 
   public void removeTopology(Area area) {
@@ -907,26 +931,9 @@ public class Zone extends BaseModel {
   }
 
   /** Fire the event TOPOLOGY_CHANGED. */
+  // TODO Remove this in favour of firing from token as it own its topology.
   public void tokenTopologyChanged() {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOPOLOGY_CHANGED));
-  }
-
-  /** @return the topology of the zone */
-  public Area getTopology() {
-    return topology;
-  }
-
-  public Area getHillVbl() {
-    return hillVbl;
-  }
-
-  public Area getPitVbl() {
-    return pitVbl;
-  }
-
-  /** @return the terrain topology of the zone */
-  public Area getTopologyTerrain() {
-    return topologyTerrain;
+    new MapToolEventBus().getMainEventBus().post(new TopologyChanged(this));
   }
 
   /**
@@ -935,7 +942,9 @@ public class Zone extends BaseModel {
    * @param token the token that changed
    */
   public void tokenChanged(Token token) {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+    new MapToolEventBus()
+        .getMainEventBus()
+        .post(new TokensChanged(this, Collections.singletonList(token)));
   }
 
   /**
@@ -944,7 +953,7 @@ public class Zone extends BaseModel {
    * @param token the token that had its macro changed
    */
   public void tokenMacroChanged(Token token) {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_MACRO_CHANGED, token));
+    new MapToolEventBus().getMainEventBus().post(new TokenMacroChanged(token));
   }
 
   /**
@@ -953,7 +962,7 @@ public class Zone extends BaseModel {
    * @param token the token that had its panel appearance changed
    */
   public void tokenPanelChanged(Token token) {
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_PANEL_CHANGED, token));
+    new MapToolEventBus().getMainEventBus().post(new TokenPanelChanged(token));
   }
 
   /**
@@ -966,7 +975,7 @@ public class Zone extends BaseModel {
     if (!globalOnly) {
       exposedAreaMeta.clear();
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -990,7 +999,7 @@ public class Zone extends BaseModel {
       }
     }
 
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -1022,12 +1031,12 @@ public class Zone extends BaseModel {
           zr.getZoneView().flush();
         }
         putToken(tok);
-        fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+        new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
         return; // FJE Added so that TEA isn't added to the GEA, below.
       }
     }
     exposedArea.add(area);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -1078,7 +1087,7 @@ public class Zone extends BaseModel {
       // Not using IF so add the EA to the GEA instead of a TEA.
       exposedArea.add(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -1116,7 +1125,7 @@ public class Zone extends BaseModel {
       exposedArea.reset();
       exposedArea.add(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   public void hideArea(Area area, Set<GUID> selectedToks) {
@@ -1153,7 +1162,7 @@ public class Zone extends BaseModel {
     } else {
       exposedArea.subtract(area);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   public long getCreationTime() {
@@ -1176,14 +1185,13 @@ public class Zone extends BaseModel {
   public Area getExposedArea(PlayerView view) {
     Area combined = new Area(exposedArea);
 
-    List<Token> toks = view.getTokens();
     // Don't need to worry about StrictTokenOwnership since the PlayerView only contains tokens we
     // own by calling
     // AppUtil.playerOwns()
-    if (toks == null || toks.isEmpty()) {
+    if (!view.isUsingTokenView()) {
       return combined;
     }
-    for (Token tok : toks) {
+    for (Token tok : view.getTokens()) {
       // Don't need this IF statement; see
       // net.rptools.maptool.client.ui.zone.ZoneRenderer.getPlayerView(Role)
       // if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
@@ -1261,9 +1269,9 @@ public class Zone extends BaseModel {
     labels.put(label.getId(), label);
 
     if (newLabel) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_ADDED, label));
+      new MapToolEventBus().getMainEventBus().post(new LabelAdded(label));
     } else {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_CHANGED, label));
+      new MapToolEventBus().getMainEventBus().post(new LabelChanged(label));
     }
   }
 
@@ -1274,7 +1282,7 @@ public class Zone extends BaseModel {
   public void removeLabel(GUID labelId) {
     Label label = labels.remove(labelId);
     if (label != null) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.LABEL_REMOVED, label));
+      new MapToolEventBus().getMainEventBus().post(new LabelRemoved(label));
     }
   }
 
@@ -1296,7 +1304,7 @@ public class Zone extends BaseModel {
       default:
         drawables.add(drawnElement);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+    new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
   public void updateDrawable(DrawnElement drawnElement, Pen pen) {
@@ -1309,7 +1317,7 @@ public class Zone extends BaseModel {
     } else {
       updatePen(drawables, drawnElement, pen);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+    new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
   private void updatePen(List<DrawnElement> elementList, DrawnElement drawnElement, Pen pen) {
@@ -1326,18 +1334,18 @@ public class Zone extends BaseModel {
     // items that are drawn first are at the "back"
     switch (drawnElement.getDrawable().getLayer()) {
       case OBJECT:
-        ((LinkedList<DrawnElement>) objectDrawables).addFirst(drawnElement);
+        objectDrawables.addFirst(drawnElement);
         break;
       case BACKGROUND:
-        ((LinkedList<DrawnElement>) backgroundDrawables).addFirst(drawnElement);
+        backgroundDrawables.addFirst(drawnElement);
         break;
       case GM:
-        ((LinkedList<DrawnElement>) gmDrawables).addFirst(drawnElement);
+        gmDrawables.addFirst(drawnElement);
         break;
       default:
-        ((LinkedList<DrawnElement>) drawables).addFirst(drawnElement);
+        drawables.addFirst(drawnElement);
     }
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_ADDED, drawnElement));
+    new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
   public List<DrawnElement> getDrawnElements() {
@@ -1385,7 +1393,7 @@ public class Zone extends BaseModel {
       DrawnElement drawable = i.next();
       if (drawable.getDrawable().getId().equals(drawableId)) {
         i.remove();
-        fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_REMOVED, drawable));
+        new MapToolEventBus().getMainEventBus().post(new DrawableRemoved(this, drawable));
         return;
       }
       if (drawable.getDrawable() instanceof DrawablesGroup) {
@@ -1397,7 +1405,7 @@ public class Zone extends BaseModel {
 
   public void clearDrawables(List<DrawnElement> drawableList) {
     for (DrawnElement drawable : drawableList) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.DRAWABLE_REMOVED, drawable));
+      new MapToolEventBus().getMainEventBus().post(new DrawableRemoved(this, drawable));
     }
     drawableList.clear();
     undo.clear(); // clears the *entire* undo queue, but finer grained control isn't available
@@ -1445,9 +1453,13 @@ public class Zone extends BaseModel {
     tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
     if (newToken) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, token));
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new TokensAdded(this, Collections.singletonList(token)));
     } else {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, token));
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new TokensChanged(this, Collections.singletonList(token)));
     }
   }
 
@@ -1458,7 +1470,7 @@ public class Zone extends BaseModel {
    */
   public void editToken(Token token) {
     putToken(token);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_EDITED, token));
+    new MapToolEventBus().getMainEventBus().post(new TokenEdited(this, token));
   }
   /**
    * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
@@ -1491,10 +1503,10 @@ public class Zone extends BaseModel {
     tokenOrderedList.sort(TOKEN_Z_ORDER_COMPARATOR);
 
     if (!addedTokens.isEmpty()) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_ADDED, addedTokens));
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(this, addedTokens));
     }
     if (!changedTokens.isEmpty()) {
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_CHANGED, changedTokens));
+      new MapToolEventBus().getMainEventBus().post(new TokensChanged(this, changedTokens));
     }
   }
 
@@ -1507,7 +1519,9 @@ public class Zone extends BaseModel {
     Token token = tokenMap.remove(id);
     if (token != null) {
       tokenOrderedList.remove(token);
-      fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, token));
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new TokensRemoved(this, Collections.singletonList(token)));
     }
   }
 
@@ -1527,7 +1541,7 @@ public class Zone extends BaseModel {
         }
       }
       if (!removedTokens.isEmpty()) {
-        fireModelChangeEvent(new ModelChangeEvent(this, Event.TOKEN_REMOVED, removedTokens));
+        new MapToolEventBus().getMainEventBus().post(new TokensRemoved(this, removedTokens));
       }
     }
   }
@@ -1755,8 +1769,8 @@ public class Zone extends BaseModel {
     return getTokensFiltered(Token::isAlwaysVisible);
   }
 
-  public List<Token> getTokensWithVBL() {
-    return getTokensFiltered(Token::hasVBL);
+  public List<Token> getTokensWithTopology(TopologyType topologyType) {
+    return getTokensFiltered(token -> token.hasTopology(topologyType));
   }
 
   public List<Token> getTokensWithTerrainModifiers() {
@@ -1977,7 +1991,7 @@ public class Zone extends BaseModel {
   /** @param initiativeList Setter for the initiativeList */
   public void setInitiativeList(InitiativeList initiativeList) {
     this.initiativeList = initiativeList;
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.INITIATIVE_LIST_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new InitiativeListChanged(initiativeList));
   }
 
   public void optimize() {
@@ -2041,9 +2055,12 @@ public class Zone extends BaseModel {
 
   ////
   // Backward compatibility
-  @Override
   protected Object readResolve() {
-    super.readResolve();
+    if ("".equals(playerAlias) || name.equals(playerAlias)) {
+      // Don't keep redundant player aliases around. The display name will default to the name if
+      // no player alias is set.
+      playerAlias = null;
+    }
 
     // 1.3b76 -> 1.3b77
     // adding the exposed area for Individual FOW
@@ -2113,6 +2130,18 @@ public class Zone extends BaseModel {
     if (aStarRounding == null) {
       aStarRounding = AStarRoundingOptions.NONE;
     }
+
+    if (tokenSelection == null) {
+      tokenSelection = TokenSelection.ALL;
+    }
+
+    // Classes that extend Abstract template have a zone id so we need to make sure to update it
+    for (DrawnElement de : drawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(id);
+      }
+    }
+
     return this;
   }
 
@@ -2151,7 +2180,7 @@ public class Zone extends BaseModel {
       exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
     }
     exposedAreaMeta.put(tokenExposedAreaGUID, meta);
-    fireModelChangeEvent(new ModelChangeEvent(this, Event.FOG_CHANGED));
+    new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
   }
 
   /**
@@ -2192,19 +2221,19 @@ public class Zone extends BaseModel {
     zone.drawables =
         dto.getDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.gmDrawables =
         dto.getGmDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.objectDrawables =
         dto.getObjectDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     zone.backgroundDrawables =
         dto.getBackgroundDrawablesList().stream()
             .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toList());
+            .collect(Collectors.toCollection(LinkedList::new));
     dto.getLabelsList().stream()
         .map(d -> Label.fromDto(d))
         .forEach(l -> zone.labels.put(l.getId(), l));
@@ -2242,6 +2271,12 @@ public class Zone extends BaseModel {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
+    // Classes that extend Abstract template have a zone id so we need to make sure to update it
+    for (DrawnElement de : zone.drawables) {
+      if (de.getDrawable() instanceof AbstractTemplate at) {
+        at.setZoneId(zone.id);
+      }
+    }
     return zone;
   }
 
@@ -2263,9 +2298,10 @@ public class Zone extends BaseModel {
               .collect(Collectors.toList()));
     }
     dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllDrawables(
+    dto.addAllGmDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllObjectDrawables(
+        objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+    dto.addAllBackgroundDrawables(
         backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
@@ -2280,7 +2316,11 @@ public class Zone extends BaseModel {
     dto.setExposedArea(Mapper.map(exposedArea));
     dto.setHasFog(hasFog);
     dto.setTopology(Mapper.map(topology));
-    dto.setFogPaint(fogPaint.toDto());
+    if (fogPaint == null) { // Account for old campaigns without fog paint
+      dto.setFogPaint(DEFAULT_FOG.toDto());
+    } else {
+      dto.setFogPaint(fogPaint.toDto());
+    }
     dto.setHillVbl(Mapper.map(hillVbl));
     dto.setPitVbl(Mapper.map(pitVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));

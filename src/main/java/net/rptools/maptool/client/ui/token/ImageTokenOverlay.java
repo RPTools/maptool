@@ -17,7 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.*;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -39,7 +39,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 
   /** Needed for serialization */
   public ImageTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, null);
+    this(DEFAULT_STATE_NAME, null);
   }
 
   /**
@@ -53,7 +53,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     assetId = anAssetId;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ImageTokenOverlay(getName(), assetId);
@@ -68,8 +68,8 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {

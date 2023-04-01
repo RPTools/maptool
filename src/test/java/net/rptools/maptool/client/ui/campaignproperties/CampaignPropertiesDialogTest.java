@@ -17,8 +17,10 @@ package net.rptools.maptool.client.ui.campaignproperties;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.language.I18N;
 import org.junit.jupiter.api.Test;
@@ -26,48 +28,58 @@ import org.junit.jupiter.api.Test;
 public class CampaignPropertiesDialogTest {
 
   @Test
-  public void importPredefinedButton() {
-    CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(null);
+  public void importPredefinedButton() throws InterruptedException, InvocationTargetException {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(null);
 
-    JButton button = cpd.getImportPredefinedButton();
+          JButton button = cpd.getImportPredefinedButton();
 
-    assertEquals(button.getText(), I18N.getText("CampaignPropertiesDialog.button.import"));
+          assertEquals(button.getText(), I18N.getText("CampaignPropertiesDialog.button.import"));
+        });
   }
 
   @Test
-  public void predefinedPropertiesComboBox_noFiles() {
-    CampaignPropertiesDialog cpd =
-        new CampaignPropertiesDialog(null) {
-          @Override
-          protected File[] getPredefinedPropertyFiles(File propertyDir) {
-            return null;
-          }
-        };
+  public void predefinedPropertiesComboBox_noFiles()
+      throws InterruptedException, InvocationTargetException {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          CampaignPropertiesDialog cpd =
+              new CampaignPropertiesDialog(null) {
+                @Override
+                protected File[] getPredefinedPropertyFiles(File propertyDir) {
+                  return null;
+                }
+              };
 
-    JComboBox<String> comboBox = cpd.getPredefinedPropertiesComboBox();
+          JComboBox<String> comboBox = cpd.getPredefinedPropertiesComboBox();
 
-    assertEquals(comboBox.getModel().getSize(), 0);
+          assertEquals(comboBox.getModel().getSize(), 0);
+        });
   }
 
   @Test
-  public void predefinedPropertiesComboBox_twoFiles() {
+  public void predefinedPropertiesComboBox_twoFiles()
+      throws InterruptedException, InvocationTargetException {
+    SwingUtilities.invokeAndWait(
+        () -> {
+          String one = new String("a" + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+          String two = new String("b" + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
 
-    String one = new String("a" + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
-    String two = new String("b" + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+          CampaignPropertiesDialog cpd =
+              new CampaignPropertiesDialog(null) {
+                @Override
+                protected File[] getPredefinedPropertyFiles(File propertyDir) {
 
-    CampaignPropertiesDialog cpd =
-        new CampaignPropertiesDialog(null) {
-          @Override
-          protected File[] getPredefinedPropertyFiles(File propertyDir) {
+                  return new File[] {new File(one), new File(two)};
+                }
+              };
 
-            return new File[] {new File(one), new File(two)};
-          }
-        };
+          JComboBox<String> comboBox = cpd.getPredefinedPropertiesComboBox();
 
-    JComboBox<String> comboBox = cpd.getPredefinedPropertiesComboBox();
-
-    assertEquals(comboBox.getModel().getSize(), 2);
-    assertEquals(comboBox.getModel().getElementAt(0), "a");
-    assertEquals(comboBox.getModel().getElementAt(1), "b");
+          assertEquals(comboBox.getModel().getSize(), 2);
+          assertEquals(comboBox.getModel().getElementAt(0), "a");
+          assertEquals(comboBox.getModel().getElementAt(1), "b");
+        });
   }
 }

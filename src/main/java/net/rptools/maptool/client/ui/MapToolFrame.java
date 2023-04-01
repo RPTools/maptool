@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
@@ -37,19 +38,13 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.AboutDialog;
-import net.rptools.lib.swing.ColorPicker;
-import net.rptools.lib.swing.PositionalLayout;
-import net.rptools.lib.swing.SwingUtil;
-import net.rptools.lib.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
-import net.rptools.maptool.client.MapTool.ZoneEvent;
+import net.rptools.maptool.client.events.ZoneActivated;
+import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.swing.AboutDialog;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
 import net.rptools.maptool.client.swing.CoordinateStatusBar;
@@ -58,12 +53,18 @@ import net.rptools.maptool.client.swing.GlassPane;
 import net.rptools.maptool.client.swing.ImageCacheStatusBar;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
+import net.rptools.maptool.client.swing.PositionalLayout;
 import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
 import net.rptools.maptool.client.swing.StatusPanel;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.TopologyModeSelectionPanel;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
+import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
+import net.rptools.maptool.client.swing.preference.WindowPreferences;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.tool.Tool;
+import net.rptools.maptool.client.tool.Toolbox;
 import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
@@ -74,9 +75,14 @@ import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
 import net.rptools.maptool.client.ui.drawpanel.DrawablesPanel;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayPanel;
 import net.rptools.maptool.client.ui.lookuptable.LookupTablePanel;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.*;
-import net.rptools.maptool.client.ui.token.EditTokenDialog;
+import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.token.edit.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
@@ -84,6 +90,7 @@ import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -97,7 +104,6 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.tokens.TokenEventBusBridge;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
 import org.apache.logging.log4j.LogManager;
@@ -105,14 +111,10 @@ import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
 
 /** */
-public class MapToolFrame extends DefaultDockableHolder
-    implements WindowListener, AppEventListener {
+public class MapToolFrame extends DefaultDockableHolder implements WindowListener {
   private static final Logger log = LogManager.getLogger(MapToolFrame.class);
   private static final String INITIAL_LAYOUT_XML = "net/rptools/maptool/client/ui/ilayout.xml";
-  private static final String MAPTOOL_LOGO_IMAGE =
-      "net/rptools/maptool/client/image/maptool-logo.png";
   private static final String CREDITS_HTML = "net/rptools/maptool/client/credits.html";
-  private static final String MINILOGO_IMAGE = "net/rptools/maptool/client/image/minilogo.png";
   private static final long serialVersionUID = 3905523813025329458L;
   private static final String DOCKING_PROFILE_NAME = "maptoolDocking";
 
@@ -173,7 +175,6 @@ public class MapToolFrame extends DefaultDockableHolder
   private Timer chatTimer;
   private long chatNotifyDuration;
   private final ChatNotificationTimers chatTyperTimers;
-  private final ChatTyperObserver chatTyperObserver;
   private GUID PreRemoveRenderGUID = null;
 
   private final GlassPane glassPane;
@@ -198,19 +199,18 @@ public class MapToolFrame extends DefaultDockableHolder
   private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
-      new MTFileFilter("cmpgn", I18N.getText("file.ext.cmpgn"));
-  private final FileFilter mapFilter = new MTFileFilter("rpmap", I18N.getText("file.ext.rpmap"));
+      new MTFileFilter(I18N.getText("file.ext.cmpgn"), "cmpgn");
+  private final FileFilter mapFilter = new MTFileFilter(I18N.getText("file.ext.rpmap"), "rpmap");
   private final FileFilter propertiesFilter =
-      new MTFileFilter("mtprops", I18N.getText("file.ext.mtprops"));
+      new MTFileFilter(I18N.getText("file.ext.mtprops"), "mtprops");
   private final FileFilter macroFilter =
-      new MTFileFilter("mtmacro", I18N.getText("file.ext.mtmacro"));
+      new MTFileFilter(I18N.getText("file.ext.mtmacro"), "mtmacro");
   private final FileFilter macroSetFilter =
-      new MTFileFilter("mtmacset", I18N.getText("file.ext.mtmacset"));
+      new MTFileFilter(I18N.getText("file.ext.mtmacset"), "mtmacset");
   private final FileFilter tableFilter =
-      new MTFileFilter("mttable", I18N.getText("file.ext.mttable"));
-
+      new MTFileFilter(I18N.getText("file.ext.mttable"), "mttable");
   private final FileFilter dungeonDraftFilter =
-      new MTFileFilter("dd2vtt", I18N.getText("file.ext.dungeondraft"));
+      new MTFileFilter(I18N.getText("file.ext.dungeondraft"), "dd2vtt", "df2vtt", "uvtt");
   private EditTokenDialog tokenPropertiesDialog;
 
   private final CampaignPanel campaignPanel = new CampaignPanel();
@@ -294,18 +294,8 @@ public class MapToolFrame extends DefaultDockableHolder
     public void keyPressed(KeyEvent e) {}
   }
 
-  private class ChatTyperObserver implements Observer {
-    public void update(Observable o, Object arg) {
-      SwingUtilities.invokeLater(
-          () -> {
-            chatTypingPanel.invalidate();
-            chatTypingPanel.repaint();
-          });
-    }
-  }
-
-  public static class ChatNotificationTimers extends Observable {
-    private final LinkedMap chatTypingNotificationTimers;
+  public class ChatNotificationTimers {
+    private final LinkedMap<String, Long> chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
       if (AppPreferences.getTypingNotificationDuration() == 0) {
@@ -315,9 +305,13 @@ public class MapToolFrame extends DefaultDockableHolder
         MapTool.getFrame().getChatTimer().start();
         MapTool.getFrame().getChatTypingPanel().setVisible(true);
         chatTypingNotificationTimers.put(playerName, System.currentTimeMillis());
-        setChanged();
-        notifyObservers();
+        updatePanel();
       }
+    }
+
+    private void updatePanel() {
+      chatTypingPanel.invalidate();
+      chatTypingPanel.repaint();
     }
 
     private void turnOffUpdates() {
@@ -328,16 +322,15 @@ public class MapToolFrame extends DefaultDockableHolder
     public synchronized void removeChatTyper(final String playerName) {
       chatTypingNotificationTimers.remove(playerName);
       if (chatTypingNotificationTimers.isEmpty()) turnOffUpdates();
-      setChanged();
-      notifyObservers();
+      updatePanel();
     }
 
-    public synchronized LinkedMap getChatTypers() {
-      return new LinkedMap(chatTypingNotificationTimers);
+    public synchronized LinkedMap<String, Long> getChatTypers() {
+      return new LinkedMap<>(chatTypingNotificationTimers);
     }
 
     public ChatNotificationTimers() {
-      chatTypingNotificationTimers = new LinkedMap();
+      chatTypingNotificationTimers = new LinkedMap<>();
     }
   }
 
@@ -353,13 +346,7 @@ public class MapToolFrame extends DefaultDockableHolder
     SwingUtil.centerOnScreen(this);
     setFocusTraversalPolicy(new MapToolFocusTraversalPolicy());
 
-    try {
-      setIconImage(ImageUtil.getImage(MINILOGO_IMAGE));
-    } catch (IOException ioe) {
-      String msg = I18N.getText("msg.error.loadingIconImage");
-      log.error(msg, ioe);
-      System.err.println(msg);
-    }
+    setIconImage(RessourceManager.getImage(Images.MAPTOOL_LOGO_MINI));
     // Notify duration
     initializeNotifyDuration();
 
@@ -368,7 +355,7 @@ public class MapToolFrame extends DefaultDockableHolder
     assetPanel = createAssetPanel();
     connectionPanel = createConnectionPanel();
     toolbox = new Toolbox();
-    initiativePanel = createInitiativePanel();
+    initiativePanel = new InitiativePanel();
     overlayPanel = new HTMLOverlayPanel();
 
     zoneRendererList = new CopyOnWriteArrayList<ZoneRenderer>();
@@ -386,7 +373,7 @@ public class MapToolFrame extends DefaultDockableHolder
       credits = new String(FileUtil.loadResource(CREDITS_HTML), StandardCharsets.UTF_8);
       version = MapTool.getVersion();
       credits = credits.replace("%VERSION%", version);
-      logo = ImageUtil.getImage(MAPTOOL_LOGO_IMAGE);
+      logo = RessourceManager.getImage(Images.MAPTOOL_LOGO);
     } catch (Exception ioe) {
       log.error(I18N.getText("msg.error.credits"), ioe);
       ioe.printStackTrace();
@@ -418,7 +405,6 @@ public class MapToolFrame extends DefaultDockableHolder
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
     commandPanel = new CommandPanel();
-    MapTool.getMessageList().addObserver(commandPanel);
 
     rendererBorderPanel = new JPanel(new GridLayout());
     rendererBorderPanel.setBorder(BorderFactory.createLineBorder(Color.darkGray));
@@ -456,11 +442,7 @@ public class MapToolFrame extends DefaultDockableHolder
     if (!AppUtil.MAC_OS_X) removeWindowsF10();
     else registerForMacOSXEvents();
 
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
-
-    // Add the Event Dispatcher to EventBus bridging classes
-    MapTool.getEventDispatcher()
-        .addListener(TokenEventBusBridge.getInstance(), ZoneEvent.Added, ZoneEvent.Removed);
+    new MapToolEventBus().getMainEventBus().register(this);
 
     restorePreferences();
     updateKeyStrokes();
@@ -469,9 +451,7 @@ public class MapToolFrame extends DefaultDockableHolder
     configureDocking();
 
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
-    chatTyperObserver = new ChatTyperObserver();
     chatTyperTimers = new ChatNotificationTimers();
-    chatTyperTimers.addObserver(chatTyperObserver);
     chatTimer = getChatTimer();
     setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
   }
@@ -639,36 +619,43 @@ public class MapToolFrame extends DefaultDockableHolder
     frameMap.put(
         MTFrame.CONNECTIONS,
         createDockingFrame(
-            MTFrame.CONNECTIONS, connectionPanel, new ImageIcon(AppStyle.connectionsImage)));
+            MTFrame.CONNECTIONS,
+            connectionPanel,
+            RessourceManager.getSmallIcon(Icons.WINDOW_CONNECTIONS)));
     frameMap.put(
         MTFrame.TOKEN_TREE,
         createDockingFrame(
             MTFrame.TOKEN_TREE,
             new JScrollPane(createTokenTreePanel()),
-            new ImageIcon(AppStyle.mapExplorerImage)));
+            RessourceManager.getSmallIcon(Icons.WINDOW_MAP_EXPLORER)));
     frameMap.put(
         MTFrame.IMAGE_EXPLORER,
         createDockingFrame(
-            MTFrame.IMAGE_EXPLORER, assetPanel, new ImageIcon(AppStyle.resourceLibraryImage)));
+            MTFrame.IMAGE_EXPLORER,
+            assetPanel,
+            RessourceManager.getSmallIcon(Icons.WINDOW_LIBRARY)));
     frameMap.put(
         MTFrame.DRAW_TREE,
         createDockingFrame(
             MTFrame.DRAW_TREE,
             new JScrollPane(createDrawTreePanel()),
-            new ImageIcon(AppStyle.mapExplorerImage)));
+            RessourceManager.getSmallIcon(Icons.WINDOW_DRAW_EXPLORER)));
     frameMap.put(
         MTFrame.CHAT,
-        createDockingFrame(MTFrame.CHAT, commandPanel, new ImageIcon(AppStyle.chatPanelImage)));
+        createDockingFrame(
+            MTFrame.CHAT, commandPanel, RessourceManager.getSmallIcon(Icons.WINDOW_CHAT)));
     frameMap.put(
         MTFrame.LOOKUP_TABLES,
         createDockingFrame(
             MTFrame.LOOKUP_TABLES,
             getLookupTablePanel(),
-            new ImageIcon(AppStyle.tablesPanelImage)));
+            RessourceManager.getSmallIcon(Icons.WINDOW_TABLES)));
     frameMap.put(
         MTFrame.INITIATIVE,
         createDockingFrame(
-            MTFrame.INITIATIVE, initiativePanel, new ImageIcon(AppStyle.initiativePanelImage)));
+            MTFrame.INITIATIVE,
+            initiativePanel,
+            RessourceManager.getSmallIcon(Icons.WINDOW_INITIATIVE)));
 
     JScrollPane campaign = scrollPaneFactory(campaignPanel);
     JScrollPane gm = scrollPaneFactory(gmPanel);
@@ -681,20 +668,29 @@ public class MapToolFrame extends DefaultDockableHolder
     JScrollPane impersonate = scrollPaneFactory(impersonatePanel);
     frameMap.put(
         MTFrame.GLOBAL,
-        createDockingFrame(MTFrame.GLOBAL, global, new ImageIcon(AppStyle.globalPanelImage)));
+        createDockingFrame(
+            MTFrame.GLOBAL, global, RessourceManager.getSmallIcon(Icons.WINDOW_GLOBAL_MACROS)));
     frameMap.put(
         MTFrame.CAMPAIGN,
-        createDockingFrame(MTFrame.CAMPAIGN, campaign, new ImageIcon(AppStyle.campaignPanelImage)));
+        createDockingFrame(
+            MTFrame.CAMPAIGN,
+            campaign,
+            RessourceManager.getSmallIcon(Icons.WINDOW_CAMPAIGN_MACROS)));
     frameMap.put(
-        MTFrame.GM, createDockingFrame(MTFrame.GM, gm, new ImageIcon(AppStyle.campaignPanelImage)));
+        MTFrame.GM,
+        createDockingFrame(MTFrame.GM, gm, RessourceManager.getSmallIcon(Icons.WINDOW_GM_MACROS)));
     frameMap.put(
         MTFrame.SELECTION,
         createDockingFrame(
-            MTFrame.SELECTION, selection, new ImageIcon(AppStyle.selectionPanelImage)));
+            MTFrame.SELECTION,
+            selection,
+            RessourceManager.getSmallIcon(Icons.WINDOW_SELECTED_TOKEN)));
     frameMap.put(
         MTFrame.IMPERSONATED,
         createDockingFrame(
-            MTFrame.IMPERSONATED, impersonate, new ImageIcon(AppStyle.impersonatePanelImage)));
+            MTFrame.IMPERSONATED,
+            impersonate,
+            RessourceManager.getSmallIcon(Icons.WINDOW_IMPERSONATED_MACROS)));
   }
 
   private JScrollPane scrollPaneFactory(JPanel panel) {
@@ -771,25 +767,28 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
+  /** Accepts 1 or more file extensions */
   private static class MTFileFilter extends FileFilter {
-    private final String extension;
+    private final String[] extensions;
     private final String description;
 
-    MTFileFilter(String exten, String desc) {
+    MTFileFilter(String desc, String... extens) {
       super();
-      extension = exten;
+      extensions = extens;
       description = desc;
     }
 
-    // Accept directories and files matching extension
+    /** Accept directories and files matching any of the provided extensions */
     @Override
     public boolean accept(File f) {
       if (f.isDirectory()) {
         return true;
       }
-      String ext = getExtension(f);
-      if (ext != null) {
-        return ext.equals(extension);
+      String fext = getExtension(f);
+      for (String ext : extensions) {
+        if (fext != null && fext.equals(ext)) {
+          return true;
+        }
       }
       return false;
     }
@@ -820,9 +819,9 @@ public class MapToolFrame extends DefaultDockableHolder
   }
 
   /**
-   * Returns the {@link FileFilter} for dungeondraft VTT export files.
+   * Returns the {@link FileFilter} for Univerasl VTT export files.
    *
-   * @return the {@link FileFilter} for dungeondraft VTT export files.
+   * @return the {@link FileFilter} for Universal VTT export files.
    */
   public FileFilter getDungeonDraftFilter() {
     return dungeonDraftFilter;
@@ -951,14 +950,6 @@ public class MapToolFrame extends DefaultDockableHolder
     return coordinateStatusBar;
   }
 
-  public Layer getLastSelectedLayer() {
-    return lastSelectedLayer;
-  }
-
-  public void setLastSelectedLayer(Layer lastSelectedLayer) {
-    this.lastSelectedLayer = lastSelectedLayer;
-  }
-
   public void hideControlPanel() {
     if (visibleControlPanel != null) {
       if (zoneRendererPanel != null) {
@@ -1035,7 +1026,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
   public JLabel getChatActionLabel() {
     if (chatActionLabel == null) {
-      chatActionLabel = new JLabel(new ImageIcon(AppStyle.chatImage));
+      chatActionLabel = new JLabel(RessourceManager.getSmallIcon(Icons.CHAT_NOTIFICATION));
       chatActionLabel.setSize(chatActionLabel.getPreferredSize());
       chatActionLabel.setVisible(false);
       chatActionLabel.addMouseListener(
@@ -1188,11 +1179,6 @@ public class MapToolFrame extends DefaultDockableHolder
             }
           }
         });
-    // Add Zone Change event
-    MapTool.getEventDispatcher()
-        .addListener(
-            event -> drawPanelTreeModel.setZone((Zone) event.getNewValue()),
-            MapTool.ZoneEvent.Activated);
     return splitPane;
   }
 
@@ -1234,11 +1220,7 @@ public class MapToolFrame extends DefaultDockableHolder
 
               if (row instanceof Token && e.getClickCount() == 2) {
                 Token token = (Token) row;
-                getCurrentZoneRenderer().clearSelectedTokens();
-                // Pick an appropriate tool
-                // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
-                getCurrentZoneRenderer().centerOn(token);
-                getCurrentZoneRenderer().updateAfterSelection();
+                getCurrentZoneRenderer().centerOnAndSetSelected(token);
               }
             }
             if (SwingUtilities.isRightMouseButton(e)) {
@@ -1282,10 +1264,6 @@ public class MapToolFrame extends DefaultDockableHolder
             }
           }
         });
-    MapTool.getEventDispatcher()
-        .addListener(
-            event -> tokenPanelTreeModel.setZone((Zone) event.getNewValue()),
-            MapTool.ZoneEvent.Activated);
     return tree;
   }
 
@@ -1320,14 +1298,6 @@ public class MapToolFrame extends DefaultDockableHolder
   private ClientConnectionPanel createConnectionPanel() {
     ClientConnectionPanel panel = new ClientConnectionPanel();
     return panel;
-  }
-
-  private InitiativePanel createInitiativePanel() {
-    MapTool.getEventDispatcher()
-        .addListener(
-            event -> initiativePanel.setZone((Zone) event.getNewValue()),
-            MapTool.ZoneEvent.Activated);
-    return new InitiativePanel();
   }
 
   private AssetPanel createAssetPanel() {
@@ -1580,8 +1550,13 @@ public class MapToolFrame extends DefaultDockableHolder
 
     if (renderer != null) {
       // Previous zone must be passed for the listeners to be properly removed. Fix #1670.
-      MapTool.getEventDispatcher()
-          .fireEvent(MapTool.ZoneEvent.Activated, this, oldZone, renderer.getZone());
+
+      final var eventBus = new MapToolEventBus().getMainEventBus();
+      if (oldZone != null) {
+        eventBus.post(new ZoneDeactivated(oldZone));
+      }
+      eventBus.post(new ZoneActivated(renderer.getZone()));
+
       renderer.requestFocusInWindow();
       // Updates the VBL/MBL button. Fixes #1642.
       TopologyModeSelectionPanel.getInstance().setMode(renderer.getZone().getTopologyTypes());
@@ -1603,25 +1578,13 @@ public class MapToolFrame extends DefaultDockableHolder
     String campaignName = " - [" + MapTool.getCampaign().getName() + "]";
     String versionString =
         MapTool.getVersion().equals("unspecified") ? "Development" : "v" + MapTool.getVersion();
-    setTitle(
-        AppConstants.APP_NAME
-            + " "
-            + versionString
-            + " - "
-            + MapTool.getPlayer()
-            + campaignName
-            + (renderer != null
-                ? " - "
-                    + (((renderer.getZone().getPlayerAlias() != null)
-                            && !MapTool.getPlayer().isGM())
-                        ? renderer.getZone().getPlayerAlias()
-                        : (renderer.getZone().getPlayerAlias().equals(renderer.getZone().getName())
-                            ? renderer.getZone().getName()
-                            : renderer.getZone().getPlayerAlias()
-                                + " ("
-                                + renderer.getZone().getName()
-                                + ")"))
-                : ""));
+    var title =
+        AppConstants.APP_NAME + " " + versionString + " - " + MapTool.getPlayer() + campaignName;
+
+    if (renderer != null) {
+      title += "-" + renderer.getZone().toString();
+    }
+    setTitle(title);
   }
 
   /**
@@ -1749,12 +1712,7 @@ public class MapToolFrame extends DefaultDockableHolder
     fullsZoneButton.setVisible(MapTool.getFrame().getToolbarPanel().getMapselect().isVisible());
     fullScreenToolPanel.add(fullsZoneButton);
 
-    var initiativeButton =
-        new JButton(
-            new ImageIcon(
-                getClass()
-                    .getClassLoader()
-                    .getResource("net/rptools/maptool/client/image/arrow_menu.png")));
+    JButton initiativeButton = new JButton(RessourceManager.getBigIcon(Icons.WINDOW_INITIATIVE));
 
     initiativeButton.addActionListener(
         (e) -> {
@@ -1864,12 +1822,18 @@ public class MapToolFrame extends DefaultDockableHolder
     }
   }
 
-  // APP EVENT LISTENER
-  public void handleAppEvent(AppEvent evt) {
-    if (evt.getId() != MapTool.ZoneEvent.Activated) {
-      return;
+  @Subscribe
+  void onZoneActivated(ZoneActivated event) {
+    final var zone = event.zone();
+
+    if (drawPanelTreeModel != null) {
+      drawPanelTreeModel.setZone(zone);
     }
-    final Zone zone = (Zone) evt.getNewValue();
+    if (tokenPanelTreeModel != null) {
+      tokenPanelTreeModel.setZone(zone);
+    }
+    initiativePanel.setZone(zone);
+
     // AssetAvailableListener listener = new AssetAvailableListener() {
     // public void assetAvailable(net.rptools.lib.MD5Key key) {
     // ZoneRenderer renderer = getCurrentZoneRenderer();
@@ -1951,8 +1915,10 @@ public class MapToolFrame extends DefaultDockableHolder
      */
     try {
       List<String> mtFrameNames = Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
-      Collection<String> namesToSave = getDockingManager().getAllFrames();
-      namesToSave.removeAll(mtFrameNames);
+      List<String> namesToSave =
+          getDockingManager().getAllFrames().stream()
+              .filter(frame -> !mtFrameNames.contains(frame))
+              .toList();
 
       Path path = Paths.get(AppUtil.getAppHome("config").getAbsolutePath() + "/frames.dat");
       Files.writeString(path, String.join("\0", namesToSave), StandardCharsets.UTF_8);

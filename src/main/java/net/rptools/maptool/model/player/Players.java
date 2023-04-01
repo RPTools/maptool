@@ -191,10 +191,20 @@ public class Players {
   private PlayerInfo getPlayerInfo(String name) {
     try {
       var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      if (!playerDatabase.isPlayerRegistered(name)) {
+      if (!playerDatabase.playerExists(name)) {
         return null;
       }
-      Player player = playerDatabase.getPlayer(name);
+      Player player;
+      if (playerDatabase instanceof DefaultPlayerDatabase dpdb) {
+        player =
+            dpdb.getAllPlayers().stream()
+                .filter(p -> p.getName().equals(name))
+                .findFirst()
+                .orElse(dpdb.getPlayer(name));
+      } else {
+        player = playerDatabase.getPlayer(name);
+      }
+
       Role role = player.getRole();
       boolean supportsBlocking = playerDatabase.supportsDisabling();
       String blockedReason = "";

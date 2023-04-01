@@ -45,6 +45,8 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
@@ -407,6 +409,13 @@ public class TransferableHelper extends TransferHandler {
           // will strip out anything in the List that isn't an Asset anyway...
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
+        } else if (AddOnLibraryImporter.isAddOnLibrary(url.getPath())) {
+          Asset temp = AssetManager.createAsset(url, Type.MTLIB);
+          if (temp != null) { // `null' means no image available
+            assets.add(temp);
+          } else if (log.isInfoEnabled()) {
+            log.info("Invalid MTLib for " + url);
+          }
         } else {
           // Get the MediaType so we can use it when creating the Asset later
           MediaType mediaType = Asset.getMediaType(url);
@@ -417,9 +426,11 @@ public class TransferableHelper extends TransferHandler {
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
           } else {
             Asset temp = AssetManager.createAsset(url);
-            if (temp != null) // `null' means no image available
-            assets.add(temp);
-            else if (log.isInfoEnabled()) log.info("No image available for " + url);
+            if (temp != null) { // `null' means no image available
+              assets.add(temp);
+            } else if (log.isInfoEnabled()) {
+              log.info("No image available for " + url);
+            }
           }
         }
       }
@@ -608,11 +619,32 @@ public class TransferableHelper extends TransferHandler {
       // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
         if (working instanceof Asset asset) {
-          Token token = new Token(asset.getName(), asset.getMD5Key());
-          // token.setName(MapToolUtil.nextTokenId(zone, token));
-          tokens.add(token);
-          // A token from an image asset needs additional configuration.
-          configureTokens.add(true);
+          if (asset.getType() == Type.MTLIB) {
+            if (MapTool.getPlayer().isGM()) {
+              try {
+                var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showInformation(
+                          I18N.getText("library.imported", addOnLibrary.getNamespace().join()));
+                    });
+              } catch (IOException e) {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showError(I18N.getText("library.import.error", asset.getName()), e);
+                    });
+              }
+            } else {
+              MapTool.showError(I18N.getText("library.import.error.notGM"));
+            }
+          } else {
+            Token token = new Token(asset.getName(), asset.getMD5Key());
+            // token.setName(MapToolUtil.nextTokenId(zone, token));
+            tokens.add(token);
+            // A token from an image asset needs additional configuration.
+            configureTokens.add(true);
+          }
         } else if (working instanceof Token) {
           Token token = new Token((Token) working);
           // token.setName(MapToolUtil.nextTokenId(zone, token));

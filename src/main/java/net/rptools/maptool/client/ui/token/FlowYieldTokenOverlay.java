@@ -31,7 +31,7 @@ public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
   public FlowYieldTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, -1);
+    this(DEFAULT_STATE_NAME, Color.RED, -1);
   }
 
   /**
@@ -46,7 +46,7 @@ public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
     super(aName, aColor, aGrid);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowYieldTokenOverlay(getName(), getColor(), getGrid());
@@ -60,10 +60,7 @@ public class FlowYieldTokenOverlay extends FlowColorDotTokenOverlay {
     return overlay;
   }
 
-  /**
-   * @see net.rptools.maptool.client.ui.token.FlowColorDotTokenOverlay#getShape(java.awt.Rectangle,
-   *     net.rptools.maptool.model.Token)
-   */
+  /** @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token) */
   @Override
   protected Shape getShape(Rectangle bounds, Token token) {
     Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());

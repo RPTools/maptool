@@ -18,12 +18,8 @@ import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Paint;
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -46,23 +42,7 @@ public class BurstTemplateTool extends RadiusTemplateTool {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** Set the icon for the base tool. */
-  public BurstTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-burst.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      MapTool.showError("Cannot read image 'temp-blue-burst.png'", ioe);
-    } // endtry
-  }
+  public BurstTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool methods
@@ -110,13 +90,13 @@ public class BurstTemplateTool extends RadiusTemplateTool {
     return super.getRadiusAtMouse(e);
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.bursttemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.bursttemplate.instructions";

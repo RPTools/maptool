@@ -1,0 +1,2270 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.preferencesdialog.PreferencesDialogView">
+  <grid id="3f87d" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
+    <constraints>
+      <xy x="10" y="10" width="1006" height="721"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="2ee94" class="javax.swing.JButton">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="OK"/>
+          <name value="okButton"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.ok"/>
+        </properties>
+      </component>
+      <tabbedpane id="ed01d">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="TabPane"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="aa829" layout-manager="GridLayoutManager" row-count="1" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.tab.interactions"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <grid id="b641a" layout-manager="GridLayoutManager" row-count="16" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.tokens">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="4208b" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.snap"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.snap.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="bbd3f" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Tokens start with snap to grid"/>
+                      <name value="tokensStartSnapToGridCheckBox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="acebf" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.visible"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.visible.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="d37fc" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="New tokens are visible to players"/>
+                      <name value="newTokensVisibleCheckBox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="5d7b" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.duplicate"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.duplicate.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="c824" class="javax.swing.JComboBox">
+                    <constraints>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="comboBoxChanged"/>
+                      <name value="duplicateTokenCombo"/>
+                    </properties>
+                  </component>
+                  <component id="509ab" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.numbering"/>
+                    </properties>
+                  </component>
+                  <component id="ba60d" class="javax.swing.JComboBox">
+                    <constraints>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="comboBoxChanged"/>
+                      <name value="showNumberingCombo"/>
+                    </properties>
+                  </component>
+                  <component id="a961b" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.naming"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.naming.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="85202" class="javax.swing.JComboBox">
+                    <constraints>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="comboBoxChanged"/>
+                      <name value="tokenNamingCombo"/>
+                    </properties>
+                  </component>
+                  <component id="b1212" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.free"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.free.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="3d924" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Start tokens in freesize"/>
+                      <name value="tokensStartFreeSize"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="ea27c" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.dialog"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.dialog.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="26576" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Show token creation dialog"/>
+                      <name value="showDialogOnNewToken"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="2972" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="a2589" class="javax.swing.JTextField">
+                    <constraints>
+                      <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <columns value="5"/>
+                      <name value="statsheetPortraitSize"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="17252" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.delete"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.delete.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="e8333" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Warn when tokens are deleted"/>
+                      <name value="tokensPopupWarningWhenDeletedCheckBox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="8152c" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Show statsheet on mouseover"/>
+                      <name value="showStatSheet"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="5b821" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet.mouse"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet.mouse.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="e774c" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Show statsheet on mouseover"/>
+                      <name value="forceFacingArrow"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="6966d" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.portrait.mouse"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.portrait.mouse.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="c4bab" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Show statsheet on mouseover"/>
+                      <name value="showPortrait"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="69755" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet.shift"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.statsheet.shift.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="22191" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="Show statsheet on mouseover"/>
+                      <name value="showStatSheetModifier"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="bf608" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="13" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.drag.snap"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.drag.snap.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="88d43" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="13" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="tokensSnapWhileDragging"/>
+                      <text value="&#9;"/>
+                    </properties>
+                  </component>
+                  <component id="c0cdd" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.arrow"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.arrow.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="82a88" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="14" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.drag.hide"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.drag.hide.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="2dbc6" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="14" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="hideMousePointerWhileDragging"/>
+                      <text value="&#9;"/>
+                    </properties>
+                  </component>
+                  <vspacer id="a9eb4">
+                    <constraints>
+                      <grid row="15" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                </children>
+              </grid>
+              <grid id="f38d9" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="77f3" layout-manager="GridLayoutManager" row-count="9" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.maps">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="19279" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.fow"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.fow.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="b7e61" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="New maps have fog of war"/>
+                          <name value="newMapsHaveFOWCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="b80b1" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.visible"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.visible.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="1fcfa" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="New maps are visible to players"/>
+                          <name value="newMapsVisibleCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="fdc38" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="b4716" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="comboBoxChanged"/>
+                          <name value="defaultGridTypeCombo"/>
+                        </properties>
+                      </component>
+                      <component id="bfc1b" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid.new"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid.new.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="eee04" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="defaultGridSize"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="3a7d4" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.units"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.units.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="3237b" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="defaultUnitsPerCell"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="83d76" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.vision"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.vision.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="5481d" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="defaultVisionDistance"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="206ad" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.label.metric"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.metric.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="564da" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="comboBoxChanged"/>
+                          <name value="movementMetric"/>
+                        </properties>
+                      </component>
+                      <component id="e60f1" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.light"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.light.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="dbd3e" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="comboBoxChanged"/>
+                          <name value="defaultVisionType"/>
+                        </properties>
+                      </component>
+                      <component id="a5b0f" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.sortType"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.sortType.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="565ed" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="comboBoxChanged"/>
+                          <name value="mapSortType"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="7e8e" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.objects">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="4d40e" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.snap"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.snap.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="7cd08" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Stamps start Snap to Grid"/>
+                          <name value="stampsStartSnapToGrid"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="c8a26" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.free"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.free.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="72471" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Stamps start Freesize"/>
+                          <name value="stampsStartFreeSize"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <vspacer id="cad97">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                </children>
+              </grid>
+              <grid id="200d1" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="4" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="c6367" layout-manager="GridLayoutManager" row-count="9" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="panel.Chat">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="b0aef" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.avatar"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.avatar.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="fe4da" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Show avatar on each chat line"/>
+                          <name value="showChatAvatar"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="106f9" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Insert smilies"/>
+                          <name value="showSmiliesCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="a60e4" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.smilies"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.smilies.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="93d80" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.rolls"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.rolls.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="fe0b1" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Use tooltips for inline rolls"/>
+                          <name value="toolTipInlineRolls"/>
+                          <text value=""/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.checkbox.chat.rolls.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="59b91" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.trusted.background"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.trusted.background.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="b21c6" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.trusted.foreground"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.trusted.foreground.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="377a5" class="net.rptools.maptool.client.swing.ColorWell">
+                        <constraints>
+                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <font swing-font="Panel.font"/>
+                          <name value="trustedOuputBackground"/>
+                        </properties>
+                      </component>
+                      <component id="e3e7" class="net.rptools.maptool.client.swing.ColorWell">
+                        <constraints>
+                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <font swing-font="Panel.font"/>
+                          <name value="trustedOuputForeground"/>
+                        </properties>
+                      </component>
+                      <component id="999a4" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.duration"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.duration.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="43f" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.color"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.color.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="50f21" class="net.rptools.maptool.client.swing.ColorWell">
+                        <constraints>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <font swing-font="Panel.font"/>
+                          <name value="chatNotificationColor"/>
+                        </properties>
+                      </component>
+                      <component id="76a2e" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.background"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.type.background.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="31149" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Typing Notification Background"/>
+                          <name value="chatNotificationShowBackground"/>
+                          <text value="&#9;"/>
+                        </properties>
+                      </component>
+                      <component id="e9897" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="typingNotificationDuration"/>
+                        </properties>
+                      </component>
+                      <component id="91c31" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macrolinks"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macrolinks.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="7908e" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Use tooltips for inline rolls"/>
+                          <name value="suppressToolTipsMacroLinks"/>
+                          <text value=""/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preference.checkbox.chat.macrolinks.tooltip"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="3197c" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.facing">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="a3b77" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.facing.edge"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.facing.edge.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="240b6" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Tokens can face edges."/>
+                          <name value="facingFaceEdges"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="369e9" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.facing.vertices"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.facing.vertices.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="4fdaa" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Tokens can face vertices."/>
+                          <name value="facingFaceVertices"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <vspacer id="407d3">
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                  <grid id="4f0b7" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.backgrounds">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="15843" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.snap"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.background.snap.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="32fa7" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Backgrounds start Snap to Grid"/>
+                          <name value="backgroundsStartSnapToGrid"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="5a1be" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.objects.free"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.background.free.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="beabe" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Backgrounds start Freesize"/>
+                          <name value="backgroundsStartFreeSize"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="f8e61" layout-manager="GridLayoutManager" row-count="4" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.accessibility"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="9b2c0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.size"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.size.tooltip"/>
+                </properties>
+              </component>
+              <component id="2f928" class="javax.swing.JTextField">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <columns value="4"/>
+                  <name value="fontSize"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="df5a8" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.delay"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.delay.tooltip"/>
+                </properties>
+              </component>
+              <component id="3c1d7" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.delay.dismiss"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.delay.dismiss.tooltip"/>
+                </properties>
+              </component>
+              <component id="387f7" class="javax.swing.JTextField">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <columns value="4"/>
+                  <name value="toolTipInitialDelay"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <vspacer id="f517b">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <hspacer id="20d6e">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <component id="434ae" class="javax.swing.JTextField">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <columns value="4"/>
+                  <name value="toolTipDismissDelay"/>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="70c12" layout-manager="GridLayoutManager" row-count="1" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.application"/>
+            </constraints>
+            <properties>
+              <visible value="true"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="aba93" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="4" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="c02b4" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.performance">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="c348d" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Fill selection box"/>
+                          <name value="fillSelectionCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="fde5f" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillselection"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillselection.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="c0c50" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="frameRateCapTextField"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="3347e" class="javax.swing.JComboBox">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="comboBoxChanged"/>
+                          <name value="renderPerformanceComboBox"/>
+                        </properties>
+                      </component>
+                      <component id="fd9c6" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.render"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.render.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="37278" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.cap"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.cap.tooltip"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="91b3d" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.initiative.defaults">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="c5a04" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hidenpc"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hidenpc.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="bd817" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Hide NPCs from players on new maps"/>
+                          <name value="hideNPCs"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="a0189" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.owner"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.owner.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="4eadb" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Give owners Permission in new campaigns"/>
+                          <name value="ownerPermission"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="85ffb" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.lock"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.lock.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="8517c" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Lock Player Movement in new campaigns"/>
+                          <name value="lockMovement"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="260cd" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.msg"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.msg.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="e6d97" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Lock Player Movement in new campaigns"/>
+                          <name value="showInitGainMessage"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="58760" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.client">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="b13f1" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <horizontalAlignment value="2"/>
+                          <name value="defaultUsername"/>
+                          <text value=""/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.default.username.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="e59e" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.default.username"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.default.username.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="ab14" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitview"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitview.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="1a746" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Fit GM view"/>
+                          <name value="fitGMView"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="cbd77" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.macropanels">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="4a19c" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.macros.edit"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.macros.edit.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="baa87" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Default: Allow Players to Edit Macros"/>
+                          <name value="allowPlayerMacroEditsDefault"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="d929a" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.macropermissions">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="d601d" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.macros.permissions"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.macros.permissions.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="243e4" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Default: Allow Players to Edit Macros"/>
+                          <name value="allowExternalMacroAccessCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <grid id="8bca9" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.upnp">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="4fd0d" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="upnpDiscoveryTimeoutTextField"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="b7da0" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.upnp.timeout"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.upnp.timeout.tooltip"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <vspacer id="2d390">
+                    <constraints>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                  <vspacer id="eff99">
+                    <constraints>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                </children>
+              </grid>
+              <grid id="b7224" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <grid id="392e4" layout-manager="GridLayoutManager" row-count="5" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.save">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="88fa9" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="b7478" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="autoSaveSpinner"/>
+                        </properties>
+                      </component>
+                      <component id="39c56" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.save.reminder"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.save.reminder.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="4ae81" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Save reminder on close"/>
+                          <horizontalTextPosition value="2"/>
+                          <name value="saveReminderCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="8dd23" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave.chat"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave.chat.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="55822" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="chatAutosaveTime"/>
+                        </properties>
+                      </component>
+                      <component id="6fc7a" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave.chat.filename"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.autosave.chat.filename.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="8b850" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="chatFilenameFormat"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="f0a14" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.directory.sync"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.directory.sync.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="7e25" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="4" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <editable value="false"/>
+                          <horizontalAlignment value="2"/>
+                          <name value="fileSyncPath"/>
+                          <text value=""/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.directory.sync.set"/>
+                        </properties>
+                      </component>
+                      <component id="f7161" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="fileSyncPathButton"/>
+                          <text value="..."/>
+                        </properties>
+                      </component>
+                      <component id="1206c" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.minute"/>
+                        </properties>
+                      </component>
+                      <component id="b9c09" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.minute"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <vspacer id="66fca">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                  <grid id="82652" layout-manager="GridLayoutManager" row-count="11" column-count="4" same-size-horizontally="false" same-size-vertically="true" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.map">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="aa16a" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.width"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.width.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="90c86" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="haloLineWidthSpinner"/>
+                        </properties>
+                      </component>
+                      <component id="90187" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="haloOverlayOpacitySpinner"/>
+                        </properties>
+                      </component>
+                      <component id="dd922" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.opacity"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.opacity.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="aa580" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoexpose"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoexpose.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="895c1" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Auto-expose Fog"/>
+                          <name value="autoRevealVisionOnGMMoveCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="fc122" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.aura.opacity"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.aura.opacity.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="2f359" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.opacity"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.opacity.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="23c5a" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="auraOverlayOpacitySpinner"/>
+                        </properties>
+                      </component>
+                      <component id="b0224" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="lumensOverlayOpacitySpinner"/>
+                        </properties>
+                      </component>
+                      <component id="3124" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.opacity"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.opacity.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="fce51" class="javax.swing.JSpinner">
+                        <constraints>
+                          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="fogOverlayOpacitySpinner"/>
+                        </properties>
+                      </component>
+                      <component id="5a4f" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.color"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.halo.color.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="bb03c" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Use halo color for vision"/>
+                          <name value="useHaloColorAsVisionOverlayCheckBox"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <component id="62a92" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapvisibilitywarning"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapvisibilitywarning.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="7196b" class="javax.swing.JCheckBox">
+                        <constraints>
+                          <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="Auto-expose Fog"/>
+                          <name value="mapVisibilityWarning"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <hspacer id="6d88d">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </hspacer>
+                      <grid id="bc4e4" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                        <margin top="0" left="0" bottom="0" right="0"/>
+                        <constraints>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="invisible"/>
+                          <visible value="false"/>
+                        </properties>
+                        <border type="none"/>
+                        <children/>
+                      </grid>
+                      <component id="e7e54" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.borderThickness"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.borderThickness.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="61dcd" class="javax.swing.JSpinner" binding="spinner1" default-binding="true">
+                        <constraints>
+                          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="lumensOverlayBorderThicknessSpinner"/>
+                        </properties>
+                      </component>
+                      <component id="42248" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.startEnabled"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lumens.startEnabled.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="8d9c8" class="javax.swing.JCheckBox" binding="checkBox1" default-binding="true">
+                        <constraints>
+                          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="lumensOverlayShowByDefaultCheckBox"/>
+                          <text value=""/>
+                          <toolTipText value=""/>
+                        </properties>
+                      </component>
+                      <component id="425b6" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lights.startEnabled"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.lights.startEnabled.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="c4943" class="javax.swing.JCheckBox" binding="checkBox2" default-binding="true">
+                        <constraints>
+                          <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="lightsShowByDefaultCheckBox"/>
+                          <text value=""/>
+                          <toolTipText value=""/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                </children>
+              </grid>
+            </children>
+          </grid>
+          <grid id="70384" layout-manager="GridLayoutManager" row-count="5" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.sounds"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="d675b" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Play system sounds"/>
+                  <name value="playSystemSounds"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="da3c4" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.system"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.system.tooltip"/>
+                </properties>
+              </component>
+              <component id="4c14b" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Only when window not focused"/>
+                  <name value="soundsOnlyWhenNotFocused"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="63b74" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.syrinscape"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.syrinscape.tooltip"/>
+                </properties>
+              </component>
+              <component id="9c242" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="syrinscapeActive"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="f8c8a" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Play streams"/>
+                  <name value="playStreams"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="828c0" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.stream"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.stream.tooltip"/>
+                </properties>
+              </component>
+              <component id="3b040" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.focus"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.sound.focus.tooltip"/>
+                </properties>
+              </component>
+              <component id="20525" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="Only when window not focused"/>
+                  <name value="playStreams"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <hspacer id="87fa8">
+                <constraints>
+                  <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <vspacer id="714b6">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+            </children>
+          </grid>
+          <grid id="684f9" layout-manager="GridLayoutManager" row-count="7" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.themes"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <scrollpane id="154f3">
+                <constraints>
+                  <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="7c67d" class="javax.swing.JList">
+                    <constraints/>
+                    <properties>
+                      <name value="themeList"/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+              <component id="c9f51" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="3" row-span="6" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="themeImage"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="d25e7" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.useThemeForChat"/>
+                </properties>
+              </component>
+              <component id="12da2" class="javax.swing.JCheckBox">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="useThemeForChat"/>
+                  <text value=""/>
+                </properties>
+              </component>
+              <component id="91655" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.theme.macroeditor"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.macroeditor.tooltip"/>
+                </properties>
+              </component>
+              <component id="4860b" class="javax.swing.JComboBox">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="comboBoxChanged"/>
+                  <model>
+                    <item value="Default"/>
+                  </model>
+                  <name value="macroEditorThemeCombo"/>
+                </properties>
+              </component>
+              <component id="e8ea3" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.icontheme"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.icontheme.tooltip"/>
+                </properties>
+              </component>
+              <component id="74e7" class="javax.swing.JComboBox">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="comboBoxChanged"/>
+                  <model>
+                    <item value="Default"/>
+                  </model>
+                  <name value="iconThemeCombo"/>
+                </properties>
+              </component>
+              <vspacer id="bcd92">
+                <constraints>
+                  <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <hspacer id="9cfb8">
+                <constraints>
+                  <grid row="6" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </hspacer>
+              <component id="7dfba" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.filterTheme"/>
+                </properties>
+              </component>
+              <component id="128d" class="javax.swing.JComboBox">
+                <constraints>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <actionCommand value="comboBoxChanged"/>
+                  <model>
+                    <item value="Default"/>
+                  </model>
+                  <name value="themeFilterCombo"/>
+                </properties>
+              </component>
+              <component id="5fa5d" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.currentTheme"/>
+                </properties>
+              </component>
+              <component id="8ad55" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="currentThemeName"/>
+                  <text value=""/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="20d25" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.auth"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="3cb69" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.auth.publicKey"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.auth.publicKey.tooltip"/>
+                </properties>
+              </component>
+              <scrollpane id="21968">
+                <constraints>
+                  <grid row="0" column="2" row-span="2" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none"/>
+                <children>
+                  <component id="408c" class="javax.swing.JTextArea">
+                    <constraints/>
+                    <properties>
+                      <editable value="false"/>
+                      <name value="publicKeyTextArea"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+              <vspacer id="1a3e">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <component id="e6721" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="copyKey"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.auth.copyKey"/>
+                </properties>
+              </component>
+              <component id="d4fc0" class="javax.swing.JButton">
+                <constraints>
+                  <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="regeneratePublicKey"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.auth.regenKey"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="d083" layout-manager="GridLayoutManager" row-count="6" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.startup"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="1dbec" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.jvm">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="a0e2a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.heap"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.heap.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="81e0d" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.min"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.min.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="c563f" class="javax.swing.JTextField">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <horizontalAlignment value="4"/>
+                      <name value="jvmXmxTextField"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
+                      <text value="4G"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.language.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="ccdf2" class="javax.swing.JTextField">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <horizontalAlignment value="4"/>
+                      <name value="jvmXmsTextField"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
+                      <text value="4G"/>
+                      <toolTipText value="Oracle recommends setting the minimum heap size (-Xms) equal to the maximum heap size (-Xmx) to minimize garbage collections."/>
+                    </properties>
+                  </component>
+                  <component id="d0d82" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.stack"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.jvm.stack.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="8bb5a" class="javax.swing.JTextField">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <horizontalAlignment value="4"/>
+                      <name value="jvmXssTextField"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
+                      <text value="4M"/>
+                      <toolTipText value="Thread stacks are memory areas allocated for each Java thread for their internal use. This is where the thread stores its local execution state."/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="7d6e1" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.advanced">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="402df" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <name value="jvmDirect3dCheckbox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="1601e" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <name value="jvmOpenGLCheckbox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                  <component id="87f36" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.advanced.direct3d"/>
+                    </properties>
+                  </component>
+                  <component id="f844f" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.advanced.opengl"/>
+                    </properties>
+                  </component>
+                  <component id="28540" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.advanced.javafx"/>
+                    </properties>
+                  </component>
+                  <component id="87c34" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <enabled value="false"/>
+                      <name value="jvmInitAwtCheckbox"/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="64613" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.language.override">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="43739" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text value="Language"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.language.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="a78f" class="javax.swing.JComboBox">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="comboBoxChanged"/>
+                      <enabled value="false"/>
+                      <model>
+                        <item value="English"/>
+                      </model>
+                      <name value="jvmLanguageOverideComboBox"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="91892" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.options">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="e2a2e" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.options.directory"/>
+                    </properties>
+                  </component>
+                  <component id="93ded" class="javax.swing.JTextField">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <editable value="false"/>
+                      <horizontalAlignment value="2"/>
+                      <name value="dataDirTextField"/>
+                      <selectionEnd value="14"/>
+                      <selectionStart value="14"/>
+                      <text value=".maptool-nerps"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.options.directory.tooltip"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <grid id="261e4" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints>
+                  <grid row="0" column="2" row-span="5" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.startup.label.info">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="bde4e" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="startupInfoLabel"/>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="startup.preferences.info"/>
+                    </properties>
+                  </component>
+                </children>
+              </grid>
+              <vspacer id="23f1f">
+                <constraints>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <vspacer id="9203f">
+                <constraints>
+                  <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+            </children>
+          </grid>
+        </children>
+      </tabbedpane>
+      <vspacer id="1de9c">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+    </children>
+  </grid>
+</form>

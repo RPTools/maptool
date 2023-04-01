@@ -30,9 +30,9 @@ import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
+import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -167,6 +167,7 @@ public class Campaign {
    * @param campaign The campaign to copy from.
    */
   public Campaign(Campaign campaign) {
+    id = campaign.getId();
     name = campaign.getName();
 
     /*
@@ -725,6 +726,10 @@ public class Campaign {
     return campaignExportDialog;
   }
 
+  public void initDefault() {
+    campaignProperties.initDefaultProperties();
+  }
+
   public static Campaign fromDto(CampaignDto dto) {
     var campaign = new Campaign();
     campaign.id = GUID.valueOf(dto.getId());
@@ -739,10 +744,13 @@ public class Campaign {
     campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
     campaign.macroButtonProperties =
         dto.getMacroButtonPropertiesList().stream()
-            .map(p -> MacroButtonProperties.fromDto(p))
+            .map(MacroButtonProperties::fromDto)
             .collect(Collectors.toList());
-    var zoneList =
-        dto.getZonesList().stream().map(z -> Zone.fromDto(z)).collect(Collectors.toList());
+    campaign.gmMacroButtonProperties =
+        dto.getGmMacroButtonPropertiesList().stream()
+            .map(MacroButtonProperties::fromDto)
+            .collect(Collectors.toList());
+    var zoneList = dto.getZonesList().stream().map(Zone::fromDto).toList();
     zoneList.forEach(z -> campaign.zones.put(z.getId(), z));
     return campaign;
   }
@@ -762,8 +770,17 @@ public class Campaign {
     dto.setMacroButtonLastIndex(macroButtonLastIndex);
     dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
     dto.addAllMacroButtonProperties(
-        macroButtonProperties.stream().map(p -> p.toDto()).collect(Collectors.toList()));
-    dto.addAllZones(zones.values().stream().map(z -> z.toDto()).collect(Collectors.toList()));
+        macroButtonProperties.stream()
+            .map(MacroButtonProperties::toDto)
+            .collect(Collectors.toList()));
+    dto.addAllZones(zones.values().stream().map(Zone::toDto).collect(Collectors.toList()));
+    // gmMacroButtonProperties is null if you are loading an old campaign file < 1.5.6
+    if (gmMacroButtonProperties != null) {
+      dto.addAllGmMacroButtonProperties(
+          gmMacroButtonProperties.stream()
+              .map(MacroButtonProperties::toDto)
+              .collect(Collectors.toList()));
+    }
     return dto.build();
   }
 }

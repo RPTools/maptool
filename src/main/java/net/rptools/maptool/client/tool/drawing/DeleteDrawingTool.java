@@ -14,41 +14,33 @@
  */
 package net.rptools.maptool.client.tool.drawing;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.io.IOException;
 import java.io.Serial;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.tool.DefaultTool;
-import net.rptools.maptool.client.tool.LayerSelectionDialog;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
 /** Tool for deleting drawings. */
-public class DeleteDrawingTool extends DefaultTool
-    implements ZoneOverlay, MouseListener, AppEventListener {
+public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, MouseListener {
 
   @Serial private static final long serialVersionUID = -8846217296437736953L;
-
-  private static final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Layer[] {Layer.TOKEN, Layer.GM, Layer.OBJECT, Layer.BACKGROUND},
-          layer -> selectedLayer = layer);
 
   private static final Set<GUID> selectedDrawings = new HashSet<>();
   private static final DrawPanelPopupMenu.DeleteDrawingAction deleteAction =
@@ -57,12 +49,7 @@ public class DeleteDrawingTool extends DefaultTool
   private static Layer selectedLayer = Layer.TOKEN;
 
   public DeleteDrawingTool() {
-    try {
-      setIcon(new ImageIcon(ImageUtil.getImage("net/rptools/maptool/client/image/delete.png")));
-      MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   @Override
@@ -83,11 +70,10 @@ public class DeleteDrawingTool extends DefaultTool
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
-    if (MapTool.getPlayer().isGM()) {
-      MapTool.getFrame().showControlPanel(layerSelectionDialog);
-    }
-
     super.attachTo(renderer);
+    if (MapTool.getPlayer().isGM()) {
+      MapTool.getFrame().showControlPanel(getLayerSelectionDialog());
+    }
   }
 
   @Override
@@ -148,10 +134,8 @@ public class DeleteDrawingTool extends DefaultTool
     AppStyle.selectedBorder.paintAround(g, x, y, w, h);
   }
 
-  @Override
-  public void handleAppEvent(AppEvent event) {
-    if (event.getId() != MapTool.ZoneEvent.Activated) return;
-
+  @Subscribe
+  void onZoneActivated(ZoneActivated event) {
     selectedDrawings.clear();
   }
 }
