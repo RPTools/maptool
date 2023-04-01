@@ -72,6 +72,7 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.zones.*;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
@@ -1965,6 +1966,19 @@ public class ZoneRenderer extends JComponent
     if (isLoaded) {
       // Notify the token tree that it should update
       MapTool.getFrame().updateTokenTree();
+
+      // If we're in a server send a message to GM that we're done loading
+      if (MapTool.getConnection() != null) {
+        String mesg =
+            MessageUtil.getFormattedSystemMsg(
+                I18N.getText(
+                    "msg.info.playerFinishedLoadingZone",
+                    MapTool.getPlayer().getName(),
+                    zone.getDisplayName()));
+
+        TextMessage msg = TextMessage.gm(null, mesg);
+        MapTool.addMessage(msg);
+      }
     }
     return !isLoaded;
   }
