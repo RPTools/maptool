@@ -352,6 +352,8 @@ message TokenDto {
   map<string, string> speech = 62;
   HeroLabDataDto hero_lab_data = 63;
   bool allow_uri_access = 64;
+  string notes_type = 68;
+  string gm_notes_type = 69;
 }
 
 message PathDto {

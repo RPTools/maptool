@@ -15,19 +15,11 @@
 package net.rptools.maptool.client;
 
 import com.jidesoft.docking.DockableFrame;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.UnknownHostException;
@@ -37,42 +29,22 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBoxMenuItem;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JOptionPane;
-import javax.swing.JTextPane;
-import javax.swing.KeyStroke;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.tool.boardtool.BoardTool;
 import net.rptools.maptool.client.tool.gridtool.GridTool;
-import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.ConnectionStatusPanel;
-import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
-import net.rptools.maptool.client.ui.StaticMessageDialog;
-import net.rptools.maptool.client.ui.SysInfoDialog;
 import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
 import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
@@ -85,12 +57,8 @@ import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialog
 import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
-import net.rptools.maptool.client.ui.io.FTPClient;
-import net.rptools.maptool.client.ui.io.FTPTransferObject;
+import net.rptools.maptool.client.ui.io.*;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
-import net.rptools.maptool.client.ui.io.LoadSaveImpl;
-import net.rptools.maptool.client.ui.io.ProgressBarList;
-import net.rptools.maptool.client.ui.io.UpdateRepoDialog;
 import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
 import net.rptools.maptool.client.ui.preferencesdialog.PreferencesDialog;
@@ -103,43 +71,19 @@ import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Asset;
-import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.Campaign;
-import net.rptools.maptool.model.CampaignFactory;
-import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.ExposedAreaMetaData;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Grid;
-import net.rptools.maptool.model.LookupTable;
-import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
-import net.rptools.maptool.model.ZoneFactory;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.PasswordDatabaseException;
-import net.rptools.maptool.model.player.PasswordFilePlayerDatabase;
-import net.rptools.maptool.model.player.PersistedPlayerDatabase;
-import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.*;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.PlayerDatabase;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
-import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.MessageUtil;
-import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.PersistenceUtil;
+import net.rptools.maptool.util.*;
 import net.rptools.maptool.util.PersistenceUtil.PersistedCampaign;
 import net.rptools.maptool.util.PersistenceUtil.PersistedMap;
-import net.rptools.maptool.util.UPnPUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -1051,8 +995,9 @@ public class AppActions {
     // Only cut if some tokens are selected. Don't want to accidentally
     // lose what might already be in the clipboard.
     if (!tokenList.isEmpty()) {
-      if (tokenCopySet != null)
+      if (tokenCopySet != null) {
         tokenCopySet.clear(); // Just to help out the garbage collector a little bit
+      }
 
       Token topLeft = tokenList.get(0);
       tokenCopySet = new HashSet<Token>();
@@ -1191,8 +1136,7 @@ public class AppActions {
                     token.getX() + gridCopiedFrom.getOffsetX(),
                     token.getY() + gridCopiedFrom.getOffsetY()));
         ZonePoint zp = grid.convert(cp);
-        tokenOffset =
-            new ZonePoint(zp.x - gridCopiedFrom.getOffsetX(), zp.y - gridCopiedFrom.getOffsetY());
+        tokenOffset = new ZonePoint(zp.x - grid.getOffsetX(), zp.y - grid.getOffsetY());
       } else {
         // For gridless sources, gridless destinations, or tokens that are not SnapToGrid: just use
         // the pixel offsets
@@ -2532,6 +2476,8 @@ public class AppActions {
     MapTool.stopServer();
     MapTool.disconnect();
     MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
+    MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
+
     try {
       MapTool.startPersonalServer(campaign);
     } catch (IOException
