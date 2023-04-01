@@ -38,6 +38,7 @@ public class MapToolScriptAutoComplete {
   private static final String I18N_SHORT_DESCRIPTION = ".description";
   private static final String I18N_SUMMARY = ".summary";
   private static final String I18N_PLACEHOLDER_TEXT = "TBD";
+  private static final HTMLTagRemover htmlTagRemover = new HTMLTagRemover();
 
   DefaultCompletionProvider provider =
       new DefaultCompletionProvider() {
@@ -50,7 +51,11 @@ public class MapToolScriptAutoComplete {
   public MapToolScriptAutoComplete() {
     for (String macro : MapTool.getParser().listAllMacroFunctions().keySet())
       provider.addCompletion(
-          new BasicCompletion(provider, macro, getShortDescription(macro), getSummary(macro)));
+          new BasicCompletion(
+              provider,
+              macro,
+              htmlTagRemover.remove(getShortDescription(macro)),
+              getSummary(macro)));
 
     // Add UDFs
     UserDefinedMacroFunctions udfManager = UserDefinedMacroFunctions.getInstance();
@@ -62,7 +67,7 @@ public class MapToolScriptAutoComplete {
           new BasicCompletion(
               provider,
               udf,
-              udfManager.getFunctionDescription(udf),
+              htmlTagRemover.remove(udfManager.getFunctionDescription(udf)),
               (StringUtils.isBlank(udfSummary)) ? null : udfSummary));
     }
 
@@ -70,19 +75,28 @@ public class MapToolScriptAutoComplete {
     for (String dataType : MapToolScriptSyntax.DATA_TYPES)
       provider.addCompletion(
           new BasicCompletion(
-              provider, dataType, getShortDescription(dataType), getSummary(dataType)));
+              provider,
+              dataType,
+              htmlTagRemover.remove(getShortDescription(dataType)),
+              getSummary(dataType)));
 
     // Add "Roll Options" as Reserved word
     for (String reservedWord : MapToolScriptSyntax.RESERVED_WORDS)
       provider.addCompletion(
           new BasicCompletion(
-              provider, reservedWord, getShortDescription(reservedWord), getSummary(reservedWord)));
+              provider,
+              reservedWord,
+              htmlTagRemover.remove(getShortDescription(reservedWord)),
+              getSummary(reservedWord)));
 
     // Add "Events" as Reserved Word 2
     for (String reservedWord : MapToolScriptSyntax.RESERVED_WORDS_2)
       provider.addCompletion(
           new BasicCompletion(
-              provider, reservedWord, getShortDescription(reservedWord), getSummary(reservedWord)));
+              provider,
+              reservedWord,
+              htmlTagRemover.remove(getShortDescription(reservedWord)),
+              getSummary(reservedWord)));
 
     for (Function function : MapToolExpressionParser.getMacroFunctions()) {
       if (function instanceof DefinesSpecialVariables) {
@@ -91,7 +105,7 @@ public class MapToolScriptAutoComplete {
               new BasicCompletion(
                   provider,
                   specialVariable,
-                  getShortDescription(specialVariable),
+                  htmlTagRemover.remove(getShortDescription(specialVariable)),
                   getSummary(specialVariable)));
         }
       }
@@ -162,10 +176,8 @@ public class MapToolScriptAutoComplete {
     // if there is no shortDesc try if one of the functions has one
     if (shortDesc == null) {
       for (Function function : MapToolExpressionParser.getMacroFunctions()) {
-        if (function instanceof AdditionalFunctionDescription) {
-          final AdditionalFunctionDescription functionExtended =
-              (AdditionalFunctionDescription) function;
-          // try if the function has a summary for this macro
+        if (function instanceof AdditionalFunctionDescription functionExtended) {
+          // try if the function has a shortDesc for this macro
           final String shortDescExtended = functionExtended.getFunctionDescription(macro);
           if (shortDescExtended != null) {
             return shortDescExtended;
@@ -185,9 +197,7 @@ public class MapToolScriptAutoComplete {
     // if there is no summary try if one of the functions has one
     if (summary == null) {
       for (final Function function : MapToolExpressionParser.getMacroFunctions()) {
-        if (function instanceof AdditionalFunctionDescription) {
-          final AdditionalFunctionDescription functionExtended =
-              (AdditionalFunctionDescription) function;
+        if (function instanceof AdditionalFunctionDescription functionExtended) {
           // try if the function has a summary for this macro
           final String summaryExtended = functionExtended.getFunctionSummary(macro);
           if (summaryExtended != null) {
