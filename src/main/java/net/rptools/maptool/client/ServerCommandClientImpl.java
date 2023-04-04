@@ -35,6 +35,7 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerMessageHandler;
@@ -786,6 +787,16 @@ public class ServerCommandClientImpl implements ServerCommand {
         update,
         TokenPropertyValueDto.newBuilder().setStringValue(value).build(),
         TokenPropertyValueDto.newBuilder().setDoubleValue(value2.doubleValue()).build());
+  }
+
+  @Override
+  public void updatePlayerStatus(Player player) {
+    var msg =
+        UpdatePlayerStatusMsg.newBuilder()
+            .setPlayer(player.getName())
+            .setZoneGuid(player.getZoneId().toString())
+            .setLoaded(player.getLoaded());
+    makeServerCall(Message.newBuilder().setUpdatePlayerStatusMsg(msg).build());
   }
 
   /**

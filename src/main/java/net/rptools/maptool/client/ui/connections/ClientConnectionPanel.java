@@ -32,6 +32,7 @@ import javax.swing.ListSelectionModel;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.events.ServerStopped;
 import net.rptools.maptool.client.swing.PopupListener;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -81,6 +82,7 @@ public class ClientConnectionPanel extends JPanel {
     listModel = new DefaultListModel<>();
     list.setModel(listModel);
     list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    list.setCellRenderer(new PlayerListCellRenderer());
 
     list.addMouseListener(createPopupListener());
 
@@ -108,6 +110,14 @@ public class ClientConnectionPanel extends JPanel {
   @Subscribe
   private void onPlayerConnected(PlayerConnected event) {
     listModel.addElement(event.player());
+  }
+
+  @Subscribe
+  private void onPlayerStatusChanged(PlayerStatusChanged event) {
+    var index = listModel.indexOf(event.player());
+    if (index != -1) {
+      listModel.set(index, event.player());
+    }
   }
 
   @Subscribe

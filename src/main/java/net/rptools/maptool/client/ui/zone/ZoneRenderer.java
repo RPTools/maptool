@@ -40,6 +40,7 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
@@ -72,7 +73,6 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.zones.*;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
@@ -1966,21 +1966,19 @@ public class ZoneRenderer extends JComponent
     if (isLoaded) {
       // Notify the token tree that it should update
       MapTool.getFrame().updateTokenTree();
-
-      // If we're in a server send a message to GM that we're done loading
-      if (MapTool.getConnection() != null) {
-        String mesg =
-            MessageUtil.getFormattedSystemMsg(
-                I18N.getText(
-                    "msg.info.playerFinishedLoadingZone",
-                    MapTool.getPlayer().getName(),
-                    zone.getDisplayName()));
-
-        TextMessage msg = TextMessage.gm(null, mesg);
-        MapTool.addMessage(msg);
-      }
+      updatePlayerStatus();
     }
     return !isLoaded;
+  }
+
+  private void updatePlayerStatus() {
+    var player = MapTool.getPlayer();
+    player.setZoneId(zone.getId());
+    player.setLoaded(true);
+
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.post(new PlayerStatusChanged(player));
+    MapTool.serverCommand().updatePlayerStatus(player);
   }
 
   protected void renderDrawableOverlay(

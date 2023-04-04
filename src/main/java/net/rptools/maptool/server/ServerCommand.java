@@ -28,6 +28,7 @@ import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.player.Player;
 
 public interface ServerCommand {
   void bootPlayer(String player);
@@ -228,4 +229,6 @@ public interface ServerCommand {
   void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
 
   void updateTokenProperty(Token token, Token.Update update, String value, BigDecimal value2);
+
+  void updatePlayerStatus(Player player);
 }

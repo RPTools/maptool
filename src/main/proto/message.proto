@@ -88,5 +88,6 @@ message Message {
     RemoveDataStoreMsg remove_data_store_msg = 71;
     RemoveDataNamespaceMsg remove_data_namespace_msg = 72;
     RemoveDataMsg remove_data_msg = 73;
+    UpdatePlayerStatusMsg update_player_status_msg = 74;
   }
 }
