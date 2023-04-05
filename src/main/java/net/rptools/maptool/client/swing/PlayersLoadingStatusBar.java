@@ -27,6 +27,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.player.Player;
 
 /** */
 public class PlayersLoadingStatusBar extends JLabel {
@@ -49,7 +50,29 @@ public class PlayersLoadingStatusBar extends JLabel {
     var total = players.size();
     var loaded = players.stream().filter(x -> x.getLoaded()).count();
 
-    String tooltip = I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total);
+    var sb =
+        new StringBuilder(I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total));
+    
+    var self = MapTool.getPlayer();
+
+    for (Player player : players) {
+      // The Player in the list is a seperate entity to the one from MapTool.getPlayer()
+      // So it doesn't have the correct status data. 
+      if(player.getName().equals(self.getName())){
+        player = self;
+      }
+      var zone =
+          player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+
+      var text =
+          I18N.getText(
+              player.getLoaded() ? "connections.playerIsInZone" : "connections.playerIsLoadingZone",
+              player.toString(),
+              zone == null ? null : zone.getDisplayName());
+      sb.append("\n");
+      sb.append(text);
+    }
+
     String text = loaded + "/" + total;
 
     if (total == loaded) {
@@ -58,7 +81,7 @@ public class PlayersLoadingStatusBar extends JLabel {
       setIcon(loadingIcon);
     }
     this.setText(text);
-    this.setToolTipText(tooltip);
+    this.setToolTipText(sb.toString());
   }
 
   /*
