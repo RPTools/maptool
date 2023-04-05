@@ -54,6 +54,7 @@ import net.rptools.maptool.client.swing.GlassPane;
 import net.rptools.maptool.client.swing.ImageCacheStatusBar;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
+import net.rptools.maptool.client.swing.PlayersLoadingStatusBar;
 import net.rptools.maptool.client.swing.PositionalLayout;
 import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
@@ -167,6 +168,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private AssetCacheStatusBar assetCacheStatusBar;
   private ImageCacheStatusBar imageCacheStatusBar;
   private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
+  private PlayersLoadingStatusBar playersLoadingStatusBar;
   private ZoomStatusBar zoomStatusBar;
   private JLabel chatActionLabel;
   private boolean fullScreenToolsShown;
@@ -389,6 +391,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     statusPanel.addPanel(getAppHomeDiskSpaceStatusBar());
     statusPanel.addPanel(getCoordinateStatusBar());
     statusPanel.addPanel(getZoomStatusBar());
+    statusPanel.addPanel(getPlayersLoadingStatusBar());
     statusPanel.addPanel(MemoryStatusBar.getInstance());
     // statusPanel.addPanel(progressBar);
     statusPanel.addPanel(connectionStatusPanel);
@@ -914,6 +917,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel.revalidate();
     zoneRendererPanel.repaint();
     visibleControlPanel = layoutPanel;
+  }
+
+  public PlayersLoadingStatusBar getPlayersLoadingStatusBar() {
+    if (playersLoadingStatusBar == null) {
+      playersLoadingStatusBar = new PlayersLoadingStatusBar();
+    }
+    return playersLoadingStatusBar;
   }
 
   public ZoomStatusBar getZoomStatusBar() {

@@ -130,6 +130,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, IMAGE_DIR + "asset-status.png");
           put(Icons.STATUSBAR_FREE_SPACE, IMAGE_DIR + "disk-space.png");
           put(Icons.STATUSBAR_IMAGE_CACHE, IMAGE_DIR + "thumbnail-status.png");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, IMAGE_DIR + "currentIndicator.png");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, IMAGE_DIR + "loading.png");
           put(Icons.STATUSBAR_RECEIVE_OFF, IMAGE_DIR + "activityOff.png");
           put(Icons.STATUSBAR_RECEIVE_ON, IMAGE_DIR + "receiveOn.png");
           put(Icons.STATUSBAR_SERVER_CONNECTED, IMAGE_DIR + "computer_on.png");
@@ -318,6 +320,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_FREE_SPACE, ROD_ICONS + "bottom/Free Space.svg");
           put(Icons.STATUSBAR_IMAGE_CACHE, ROD_ICONS + "bottom/Image Thumbs Cache.svg");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, ROD_ICONS + "misc/Select All Tokens.svg");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_RECEIVE_OFF, ROD_ICONS + "bottom/Receive Data - Inactive.svg");
           put(Icons.STATUSBAR_RECEIVE_ON, ROD_ICONS + "bottom/Receive Data - Active.svg");
           put(Icons.STATUSBAR_SERVER_CONNECTED, ROD_ICONS + "bottom/Server Status - Connected.svg");
