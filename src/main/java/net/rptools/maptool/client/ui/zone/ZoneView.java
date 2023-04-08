@@ -550,60 +550,33 @@ public class ZoneView {
       final var illuminationKey = illuminationKeyFromView(view);
       final var baseIllumination = getIllumination(illuminationKey);
 
-      final var extraLights = new ArrayList<ContributedLight>();
+      final var extraLights = new ArrayList<LitArea>();
       getTokensForView(view)
           .forEach(
               token -> {
                 final var personalLights = getPersonalTokenContributions(token);
-                extraLights.addAll(personalLights);
+                extraLights.addAll(Lists.transform(personalLights, ContributedLight::litArea));
               });
 
-      // Now fold the extra lights into the lumens levels.
-      final var lumensLevels =
-          new ArrayList<>(
-              baseIllumination.getLumensLevels().stream()
-                  .map(
-                      ll ->
-                          new LumensLevel(
-                              ll.lumensStrength(),
-                              new Area(ll.lightArea()),
-                              new Area(ll.darknessArea())))
-                  .toList());
-      for (final var extraLitArea : extraLights) {
-        final var isDarkness = extraLitArea.litArea().lumens() < 0;
-        final var lumensStrength = Math.abs(extraLitArea.litArea().lumens());
-        final var area = extraLitArea.litArea().area();
-
-        final var index =
-            Collections.binarySearch(
-                Lists.transform(lumensLevels, LumensLevel::lumensStrength), lumensStrength);
-        final LumensLevel level;
-        if (index >= 0) {
-          // Already a lumens level. Add onto it.
-          level = lumensLevels.get(index);
-        } else {
-          final var insertionPoint = -index - 1;
-          level = new LumensLevel(lumensStrength, new Area(), new Area());
-          lumensLevels.add(insertionPoint, level);
-        }
-        (isDarkness ? level.darknessArea() : level.lightArea()).add(area);
-      }
-
-      illumination = new Illumination(lumensLevels);
+      illumination = baseIllumination.withExtraLights(extraLights);
       illuminationsPerView.put(view, illumination);
     }
-
     return illumination;
   }
 
   /**
-   * Gets the various areas associated with each level of lumens.
+   * Gets the areas dominated by each level of lumens.
    *
-   * @return The areas associated with each lumens value, arranged from weak to strong.
+   * <p>The various levels have completely disjoint areas. If an area is covered by both strong and
+   * weak lumens, only the strong lumens will be represented in the result.
+   *
+   * @param view
+   * @return The various lumens levels, with any stronger lumens areas being subtracted from weaker
+   *     lumens areas.
    */
-  public List<LumensLevel> getLumensLevels(PlayerView view) {
+  public List<LumensLevel> getDisjointObscuredLumensLevels(PlayerView view) {
     final var illumination = getIllumination(view);
-    return illumination.getLumensLevels();
+    return illumination.getDisjointObscuredLumensLevels();
   }
 
   /**
