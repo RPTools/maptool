@@ -644,10 +644,7 @@ public class ThemeSupport {
       return new ImageIcon();
     } else {
       var imageLocation = IMAGE_PATH + themeDetails.imagePath;
-      log.info(
-          "Retrieving resource for theme name={} from location={}",
-          themeName,
-          themeDetails.imagePath);
+      log.info("Retrieving resource for theme name={} from location={}", themeName, imageLocation);
       var imageURL = ThemeSupport.class.getResource(imageLocation);
       if (imageURL == null) {
         log.warn(
@@ -655,9 +652,7 @@ public class ThemeSupport {
         return new ImageIcon();
       }
       var imageIcon =
-          new ImageIcon(
-              ThemeSupport.class.getResource(IMAGE_PATH + themeDetails.imagePath),
-              themeDetails.name);
+          new ImageIcon(ThemeSupport.class.getResource(imageLocation), themeDetails.name);
       if (dimension != null && dimension.width > 0 && dimension.height > 0) {
         imageIcon.setImage(
             imageIcon
