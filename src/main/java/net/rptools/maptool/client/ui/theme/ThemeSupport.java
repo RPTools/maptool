@@ -651,8 +651,7 @@ public class ThemeSupport {
             "Failed to retrieve resource for theme name={} from url={}, using empty ImageIcon");
         return new ImageIcon();
       }
-      var imageIcon =
-          new ImageIcon(ThemeSupport.class.getResource(imageLocation), themeDetails.name);
+      var imageIcon = new ImageIcon(imageURL, themeDetails.name);
       if (dimension != null && dimension.width > 0 && dimension.height > 0) {
         imageIcon.setImage(
             imageIcon
