@@ -19,18 +19,14 @@ import com.formdev.flatlaf.FlatLaf;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Image;
+import java.awt.*;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import javax.swing.ImageIcon;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
+import javax.swing.*;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.themes.AahLAF;
@@ -38,9 +34,13 @@ import net.rptools.maptool.client.ui.themes.AahLAF_LP;
 import net.rptools.maptool.client.ui.themes.AahLAF_SP;
 import net.rptools.maptool.client.ui.themes.AahLAF_VLP;
 import net.rptools.maptool.events.MapToolEventBus;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class used to implement Theme support for MapTool. */
 public class ThemeSupport {
+
+  private static final Logger log = LogManager.getLogger(ThemeSupport.class);
 
   public enum ThemeColor {
     RED(
@@ -643,6 +643,17 @@ public class ThemeSupport {
         || themeDetails.imagePath.isEmpty()) {
       return new ImageIcon();
     } else {
+      var imageLocation = IMAGE_PATH + themeDetails.imagePath;
+      log.info(
+          "Retrieving resource for theme name={} from location={}",
+          themeName,
+          themeDetails.imagePath);
+      var imageURL = ThemeSupport.class.getResource(imageLocation);
+      if (imageURL == null) {
+        log.warn(
+            "Failed to retrieve resource for theme name={} from url={}, using empty ImageIcon");
+        return new ImageIcon();
+      }
       var imageIcon =
           new ImageIcon(
               ThemeSupport.class.getResource(IMAGE_PATH + themeDetails.imagePath),
