@@ -748,7 +748,7 @@ public class ZoneView {
             Area lightArea = lightSource.getArea(token, zone, light);
             lightArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
             lightArea.intersect(visibleArea);
-            lightList.add(new DrawableLight(light.getPaint(), visibleArea, light.getLumens()));
+            lightList.add(new DrawableLight(light.getPaint(), lightArea, light.getLumens()));
           }
         }
       }
