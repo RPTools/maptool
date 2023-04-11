@@ -261,7 +261,8 @@ public class MapPropertiesDialogView {
                 $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
             }
             bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
-        } catch (Exception e) {
+        }
+        catch (Exception e) {
             bundle = ResourceBundle.getBundle(path);
         }
         return bundle.getString(key);
