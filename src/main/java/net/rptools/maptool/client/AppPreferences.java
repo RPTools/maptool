@@ -84,6 +84,9 @@ public class AppPreferences {
   private static final String KEY_AURA_OVERLAY_OPACITY = "auraOverlayOpacity";
   private static final int DEFAULT_AURA_OVERLAY_OPACITY = 60;
 
+  private static final String KEY_LIGHT_OVERLAY_OPACITY = "lightOverlayOpacity";
+  private static final int DEFAULT_LIGHT_OVERLAY_OPACITY = 60;
+
   private static final String KEY_LUMENS_OVERLAY_OPACITY = "lumensOverlayOpacity";
   private static final int DEFAULT_LUMENS_OVERLAY_OPACITY = 120;
 
@@ -344,6 +347,15 @@ public class AppPreferences {
 
   public static int getAuraOverlayOpacity() {
     int value = prefs.getInt(KEY_AURA_OVERLAY_OPACITY, DEFAULT_AURA_OVERLAY_OPACITY);
+    return range0to255(value);
+  }
+
+  public static void setLightOverlayOpacity(int size) {
+    prefs.putInt(KEY_LIGHT_OVERLAY_OPACITY, range0to255(size));
+  }
+
+  public static int getLightOverlayOpacity() {
+    int value = prefs.getInt(KEY_LIGHT_OVERLAY_OPACITY, DEFAULT_LIGHT_OVERLAY_OPACITY);
     return range0to255(value);
   }
 

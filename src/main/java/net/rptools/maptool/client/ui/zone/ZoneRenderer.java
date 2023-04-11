@@ -1433,14 +1433,26 @@ public class ZoneRenderer extends JComponent
     if (AppState.isShowLights()) {
       // Lighting enabled.
       timer.start("renderLights:renderLightOverlay");
+      final var overlayBlending =
+          switch (zone.getLightingStyle()) {
+            case OVERTOP -> AlphaComposite.SrcOver.derive(
+                AppPreferences.getLightOverlayOpacity() / 255.f);
+            case ENVIRONMENTAL -> LightingComposite.OverlaidLights;
+          };
+      final var overlayFillColor =
+          switch (zone.getLightingStyle()) {
+            case OVERTOP -> new Color(0, 0, 0, 0);
+            case ENVIRONMENTAL -> Color.black;
+          };
+
       renderLightOverlay(
           g,
           LightingComposite.BlendedLights,
-          LightingComposite.OverlaidLights,
+          overlayBlending,
           view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
           Color.black,
-          Color.black);
+          overlayFillColor);
       timer.stop("renderLights:renderLightOverlay");
     }
 

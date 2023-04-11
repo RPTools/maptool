@@ -158,6 +158,7 @@ public class MapPropertiesDialog extends JDialog {
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
     initVisionTypeCombo();
+    initLightingStyleCombo();
     initAStarRoundingOptionsComboBox();
 
     initIsometricRadio();
@@ -268,6 +269,10 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("visionType");
   }
 
+  public JComboBox<Zone.LightingStyle> getLightingStyleCombo() {
+    return formPanel.getComboBox("lightingStyle");
+  }
+
   public JComboBox getAStarRoundingOptionsComboBox() {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
@@ -290,6 +295,7 @@ public class MapPropertiesDialog extends JDialog {
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
+    getLightingStyleCombo().setSelectedItem(zone.getLightingStyle());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
 
     gridOffsetX = zone.getGrid().getOffsetX();
@@ -311,6 +317,7 @@ public class MapPropertiesDialog extends JDialog {
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
 
     zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
@@ -525,6 +532,15 @@ public class MapPropertiesDialog extends JDialog {
   private void initAStarRoundingOptionsComboBox() {
     getAStarRoundingOptionsComboBox()
         .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
+  }
+
+  private void initLightingStyleCombo() {
+    DefaultComboBoxModel<Zone.LightingStyle> model = new DefaultComboBoxModel<>();
+    for (Zone.LightingStyle vt : Zone.LightingStyle.values()) {
+      model.addElement(vt);
+    }
+    model.setSelectedItem(Zone.LightingStyle.OVERTOP);
+    getLightingStyleCombo().setModel(model);
   }
 
   public String getZoneName() {

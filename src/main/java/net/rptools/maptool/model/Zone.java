@@ -97,6 +97,25 @@ public class Zone {
     }
   }
 
+  /** How lights should be rendered into the zone. */
+  public enum LightingStyle {
+    /** Lights are to be rendered as part of the map's environment, approximation illumination. */
+    ENVIRONMENTAL(),
+    /** Lights are to be alpha-composited on top of the map. */
+    OVERTOP();
+
+    private final String displayName;
+
+    LightingStyle() {
+      displayName = I18N.getString("lightingStyle." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
   /** The type of layer (TOKEN, GM, OBJECT or BACKGROUND). */
   public enum Layer {
     TOKEN(),
@@ -298,6 +317,8 @@ public class Zone {
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
   private VisionType visionType = VisionType.OFF;
 
+  private LightingStyle lightingStyle = LightingStyle.OVERTOP;
+
   private TokenSelection tokenSelection = TokenSelection.ALL;
 
   // These are transitionary properties, very soon the width and height won't matter
@@ -345,6 +366,14 @@ public class Zone {
 
   public void setVisionType(VisionType visionType) {
     this.visionType = visionType;
+  }
+
+  public LightingStyle getLightingStyle() {
+    return lightingStyle;
+  }
+
+  public void setLightingStyle(LightingStyle lightingStyle) {
+    this.lightingStyle = lightingStyle;
   }
 
   public TokenSelection getTokenSelection() {
@@ -2091,6 +2120,9 @@ public class Zone {
       } else {
         visionType = VisionType.OFF;
       }
+    }
+    if (lightingStyle == null) {
+      lightingStyle = LightingStyle.OVERTOP;
     }
     // Look for the bizarre z-ordering disappearing trick
     boolean foundZero = false;

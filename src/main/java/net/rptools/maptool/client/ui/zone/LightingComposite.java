@@ -33,8 +33,9 @@ public class LightingComposite implements Composite {
   /**
    * Used to blend lights together to give an additive effect.
    *
-   * <p>To use to good effect, the initial image should be black and then lights should be added to
-   * it one-by-one.
+   * <p>To use to good effect, the initial image should be black (when used together with {@link
+   * #OverlaidLights}) or clear (when used with {@link java.awt.AlphaComposite}) and then lights
+   * should be added to it one-by-one.
    */
   public static final Composite BlendedLights = new LightingComposite(new ScreenBlender());
 
@@ -138,8 +139,8 @@ public class LightingComposite implements Composite {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the bottom alpha around.
-        int resultPixel = dstPixel & (0xFF << 24);
+        // This keeps the light alpha around.
+        int resultPixel = srcPixel & (0xFF << 24);
 
         for (int shift = 0; shift < 24; shift += 8) {
           final var dstC = (dstPixel >>> shift) & 0xFF;
