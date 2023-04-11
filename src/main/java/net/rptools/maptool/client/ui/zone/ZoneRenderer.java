@@ -1437,7 +1437,7 @@ public class ZoneRenderer extends JComponent
           g,
           LightingComposite.BlendedLights,
           LightingComposite.OverlaidLights,
-          LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+          view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
           Color.black,
           Color.black);
