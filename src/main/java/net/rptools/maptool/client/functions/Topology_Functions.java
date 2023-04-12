@@ -354,20 +354,18 @@ public class Topology_Functions extends AbstractFunction {
       if (token == null) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.unknownToken",
-                "getTokenVBL",
-                parameters.get(0).toString()));
+                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
       }
     } else if (parameters.size() == 0) {
       MapToolVariableResolver res = (MapToolVariableResolver) resolver;
       token = res.getTokenInContext();
       if (token == null) {
         throw new ParserException(
-            I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+            I18N.getText("macro.function.general.noImpersonated", functionName));
       }
     } else {
       throw new ParserException(
-          I18N.getText("macro.function.general.tooManyParam", "getTokenVBL", 1, parameters.size()));
+          I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
     }
 
     JsonArray allShapes = new JsonArray();
@@ -437,7 +435,7 @@ public class Topology_Functions extends AbstractFunction {
     }
     if (token == null) {
       throw new ParserException(
-          I18N.getText("macro.function.general.noImpersonated", "getTokenVBL"));
+          I18N.getText("macro.function.general.noImpersonated", functionName));
     }
 
     Area tokenTopology = new Area();
@@ -525,9 +523,7 @@ public class Topology_Functions extends AbstractFunction {
       if (token == null) {
         throw new ParserException(
             I18N.getText(
-                "macro.function.general.unknownToken",
-                "getTokenVBL",
-                parameters.get(0).toString()));
+                "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
       }
     } else {
       MapToolVariableResolver res = (MapToolVariableResolver) resolver;
