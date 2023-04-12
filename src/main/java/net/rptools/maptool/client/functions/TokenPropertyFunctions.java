@@ -57,7 +57,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
   private TokenPropertyFunctions() {
     super(
         0,
-        4,
+        5,
         "getPropertyNames",
         "getAllPropertyNames",
         "getPropertyNamesRaw",
