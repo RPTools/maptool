@@ -91,10 +91,10 @@ public class AppPreferences {
   private static final int DEFAULT_LUMENS_OVERLAY_BORDER_THICKNESS = 5;
 
   private static final String KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT = "lumensOverlayShowByDefault";
-  private static final boolean DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT = true;
+  private static final boolean DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT = false;
 
   private static final String KEY_LIGHTS_SHOW_BY_DEFAULT = "lightsShowByDefault";
-  private static final boolean DEFAULT_LIGHTS_SHOW_BY_DEFAULT = false;
+  private static final boolean DEFAULT_LIGHTS_SHOW_BY_DEFAULT = true;
 
   private static final String KEY_FOG_OVERLAY_OPACITY = "fogOverlayOpacity";
   private static final int DEFAULT_FOG_OVERLAY_OPACITY = 100;
