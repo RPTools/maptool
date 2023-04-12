@@ -178,9 +178,9 @@ public class LightingComposite implements Composite {
    * <p>The behaviour is actually is very similar to overlay, but where the value at the transition
    * point is always greater than the bottom component (in overlay it can be greater than or less
    * than the bottom component). The relation can be best seen when {@link
-   * #MAX_DARKNESS_BOOST_PER_128} is set to 1. It also has a much looser relation to the soft light
-   * blend mode, which inspired the idea of constraining the increase of dark components by some
-   * multiple.
+   * #MAX_DARKNESS_BOOST_PER_128} is set to 128. It also has a much looser relation to the soft
+   * light blend mode, which inspired the idea of constraining the increase of dark components by
+   * some multiple.
    *
    * <p>Special cases:
    *
@@ -192,7 +192,7 @@ public class LightingComposite implements Composite {
    * </ul>
    */
   private static final class ConstrainedBrightenBlender implements Blender {
-    private static final int MAX_DARKNESS_BOOST_PER_128 = 192;
+    private static final int MAX_DARKNESS_BOOST_PER_128 = 128;
 
     public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
