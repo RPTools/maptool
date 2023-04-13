@@ -3,14 +3,14 @@
   <grid id="775b6" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="625" height="366"/>
+      <xy x="10" y="10" width="813" height="401"/>
     </constraints>
     <properties>
       <name value="root"/>
     </properties>
     <border type="none"/>
     <children>
-      <grid id="aa2a3" layout-manager="GridLayoutManager" row-count="9" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="aa2a3" layout-manager="GridLayoutManager" row-count="10" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -89,6 +89,15 @@
             <properties>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.lights"/>
               <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.lights.tooltip"/>
+            </properties>
+          </component>
+          <component id="5b2db" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.lightingStyle"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.lightingStyle.tooltip"/>
             </properties>
           </component>
           <grid id="b63a7" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
@@ -321,9 +330,19 @@
               <name value="visionType"/>
             </properties>
           </component>
+          <component id="22476" class="javax.swing.JComboBox">
+            <constraints>
+              <grid row="8" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="comboBoxChanged"/>
+              <model/>
+              <name value="lightingStyle"/>
+            </properties>
+          </component>
           <vspacer id="fe121">
             <constraints>
-              <grid row="8" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+              <grid row="9" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
             </constraints>
           </vspacer>
         </children>
