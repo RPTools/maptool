@@ -17,6 +17,8 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonObject;
 import java.awt.Rectangle;
 import java.util.List;
+
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
@@ -35,7 +37,7 @@ public class ZoomFunctions extends AbstractFunction {
   private static final String EQUALS = "=";
 
   private ZoomFunctions() {
-    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter");
+    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter", "setZoomLock");
   }
 
   public static ZoomFunctions getInstance() {
@@ -81,6 +83,12 @@ public class ZoomFunctions extends AbstractFunction {
           args.size() > 0 ? FunctionUtil.paramAsBoolean(functionName, args, 0, true) : true;
       String delim = args.size() > 1 ? args.get(1).toString() : ",";
       return getViewCenter(pixels, delim);
+    }
+    if ("setZoomLock".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+      Boolean zoom = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
+      AppState.setZoomLocked(zoom);
+      return "";
     }
     return null;
   }
