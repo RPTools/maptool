@@ -17,13 +17,13 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonObject;
 import java.awt.Rectangle;
 import java.util.List;
-
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -37,7 +37,7 @@ public class ZoomFunctions extends AbstractFunction {
   private static final String EQUALS = "=";
 
   private ZoomFunctions() {
-    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter", "setZoomLock");
+    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter", "setZoomLock", "setMoveLock");
   }
 
   public static ZoomFunctions getInstance() {
@@ -88,6 +88,14 @@ public class ZoomFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 1, 1);
       Boolean zoom = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
       AppState.setZoomLocked(zoom);
+      return "";
+    }
+    if ("setMoveLock".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, args, 1, 1);
+      Boolean lockmove = FunctionUtil.paramAsBoolean(functionName, args, 0, true);
+      ServerPolicy policy = MapTool.getServerPolicy();
+      policy.setIsMovementLocked(lockmove);
+      MapTool.updateServerPolicy(policy);
       return "";
     }
     return null;
