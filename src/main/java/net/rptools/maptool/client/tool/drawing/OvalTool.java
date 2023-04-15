@@ -20,11 +20,9 @@ import java.awt.Rectangle;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Ellipse2D;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
@@ -39,19 +37,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
   protected Rectangle oval;
   private ZonePoint originPoint;
 
-  public OvalTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/draw-blue-circle.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public OvalTool() {}
 
   @Override
   public String getTooltip() {
@@ -159,7 +145,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
     }
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#resetTool() */
+  /** @see Tool#resetTool() */
   @Override
   protected void resetTool() {
 

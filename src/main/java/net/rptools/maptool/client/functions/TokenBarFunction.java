@@ -110,8 +110,7 @@ public class TokenBarFunction extends AbstractFunction {
    * @return If the bar visible or not
    */
   public static BigDecimal setVisible(Token token, String bar, boolean show) {
-    BigDecimal value = show ? BigDecimal.ONE : null;
-    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, value);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, bar, show);
     return show ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 

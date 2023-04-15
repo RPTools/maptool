@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.Point;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.Collections;
@@ -22,7 +21,10 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import javax.annotation.Nullable;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /**
  * Represents a hole in the topology.
@@ -55,18 +57,21 @@ public class AreaOcean implements AreaContainer {
   }
 
   @Override
-  public List<VisibleAreaSegment> getVisionBlockingBoundarySegements(
-      GeometryFactory geometryFactory, Point origin, boolean frontSegments) {
+  public List<LineString> getVisionBlockingBoundarySegments(
+      GeometryFactory geometryFactory,
+      Coordinate origin,
+      boolean frontSegments,
+      PreparedGeometry vision) {
     if (meta == null) {
       return Collections.emptyList();
     }
 
-    return meta.getFacingSegments(geometryFactory, origin, frontSegments);
+    return meta.getFacingSegments(geometryFactory, origin, frontSegments, vision);
   }
 
   @Override
   public @Nullable AreaContainer getDeepestContainerAt(Point2D point) {
-    if (meta != null && !meta.area.contains(point)) {
+    if (meta != null && !meta.contains(point)) {
       // Point not contained within this ocean, so nothing to return.
       return null;
     }
@@ -92,6 +97,6 @@ public class AreaOcean implements AreaContainer {
 
   @Override
   public Area getBounds() {
-    return meta != null ? meta.area : null;
+    return meta != null ? meta.getBounds() : null;
   }
 }

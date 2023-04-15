@@ -40,11 +40,13 @@ message ClientInitMsg {
 message UseAuthTypeMsg {
   AuthTypeEnum auth_type = 1;
   bytes salt = 2;
+  bytes iv = 4;
   repeated bytes challenge = 3;
 }
 
 message ClientAuthMsg {
   bytes challenge_response = 1;
+  bytes iv = 2;
 }
 
 message ConnectionSuccessfulMsg {

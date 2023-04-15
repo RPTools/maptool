@@ -222,7 +222,8 @@ public interface ServerCommand {
   void updateTokenProperty(
       Token token, Token.Update update, boolean value1, int value2, int value3);
 
-  void updateTokenProperty(Token token, Token.Update update, Area area);
+  void updateTokenProperty(
+      Token token, Token.Update update, Zone.TopologyType topologyType, Area area);
 
   void updateTokenProperty(Token token, Token.Update update, String value1, boolean value2);
 

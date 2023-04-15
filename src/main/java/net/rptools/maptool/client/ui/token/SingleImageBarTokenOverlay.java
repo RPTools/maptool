@@ -21,7 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -38,7 +38,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
 
   /** Needed for serialization */
   public SingleImageBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, null);
+    this(DEFAULT_STATE_NAME, null);
   }
 
   /**
@@ -52,7 +52,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
     assetId = theAssetId;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /** @see AbstractTokenOverlay#clone() */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new SingleImageBarTokenOverlay(getName(), assetId);
@@ -69,8 +69,8 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -149,7 +149,8 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
 
   public BarTokenOverlayDto toDto() {
     var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
-    dto.setAssetIds(0, assetId.toString());
+    dto.addAssetIds(assetId.toString());
+    setSideDto(dto);
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.SINGLE_IMAGE).build();
   }
 }

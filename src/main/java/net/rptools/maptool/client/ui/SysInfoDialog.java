@@ -18,8 +18,9 @@ import java.awt.*;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
 import net.rptools.maptool.util.SysInfoProvider;
@@ -80,8 +81,8 @@ public class SysInfoDialog {
 
   public static void createAndShowGUI(String title) {
     if (frame != null) {
-      frame
-          .dispose(); // This is so that the memory characteristics are queried each time this frame
+      frame.dispose();
+      // This is so that the memory characteristics are queried each time this frame
       // is displayed.
       frame = null;
     }
@@ -90,12 +91,7 @@ public class SysInfoDialog {
 
     SysInfoDialog sysInfoDialog = new SysInfoDialog();
     frame.setContentPane(sysInfoDialog.createContentPane());
-    try {
-      Image img = ImageUtil.getImage("net/rptools/maptool/client/image/maptool_icon.png");
-      frame.setIconImage(img);
-    } catch (Exception ex) {
-      MapTool.showError("While retrieving MapTool logo image?!", ex);
-    }
+    frame.setIconImage(RessourceManager.getSmallIcon(Icons.MAPTOOL).getImage());
     frame.setSize(550, 640);
     frame.setLocationByPlatform(true);
     frame.setVisible(true);

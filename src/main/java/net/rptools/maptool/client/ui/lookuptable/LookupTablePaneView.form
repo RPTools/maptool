@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.lookuptable.LookupTablePaneView">
+  <grid id="33eea" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
+    <constraints>
+      <xy x="10" y="10" width="670" height="123"/>
+    </constraints>
+    <properties>
+      <name value="mainForm"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <component id="c5119" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="7" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="imagePanel"/>
+          <text value="imagePanel"/>
+        </properties>
+      </component>
+      <component id="50719" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="New"/>
+          <name value="newButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditLookupTablePanel.create.tooltip"/>
+        </properties>
+      </component>
+      <component id="a0159" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Edit"/>
+          <name value="editButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditLookupTablePanel.edit.tooltip"/>
+        </properties>
+      </component>
+      <component id="7f8ac" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Delete"/>
+          <name value="deleteButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditLookupTablePanel.delete.tooltip"/>
+        </properties>
+      </component>
+      <component id="78b5" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Duplicate"/>
+          <name value="duplicateButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditLookupTablePanel.duplicate.tooltip"/>
+        </properties>
+      </component>
+      <component id="40533" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Import"/>
+          <name value="importButton"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.import"/>
+        </properties>
+      </component>
+      <component id="4ae4b" class="javax.swing.JButton">
+        <constraints>
+          <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Export"/>
+          <name value="exportButton"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.export"/>
+        </properties>
+      </component>
+      <hspacer id="f338">
+        <constraints>
+          <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <vspacer id="e553d">
+        <constraints>
+          <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+    </children>
+  </grid>
+</form>

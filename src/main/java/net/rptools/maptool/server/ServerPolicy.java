@@ -20,9 +20,8 @@ import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.StartServerDialogPreferences;
+import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.server.proto.ServerPolicyDto;
 import net.rptools.maptool.server.proto.WalkerMetricDto;
@@ -288,9 +287,8 @@ public class ServerPolicy {
     sinfo.addProperty(
         "personal server", MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO);
 
-    sinfo.addProperty("useWebRTC", AppState.useWebRTC() ? BigDecimal.ONE : BigDecimal.ZERO);
-
     StartServerDialogPreferences prefs = new StartServerDialogPreferences();
+    sinfo.addProperty("useWebRTC", prefs.getUseWebRtc() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty(
         "usePasswordFile", prefs.getUsePasswordFile() ? BigDecimal.ONE : BigDecimal.ZERO);
     sinfo.addProperty("server name", prefs.getRPToolsName());

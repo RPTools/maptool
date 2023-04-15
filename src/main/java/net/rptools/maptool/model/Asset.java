@@ -16,10 +16,12 @@ package net.rptools.maptool.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
+import com.google.protobuf.ByteString;
 import com.thoughtworks.xstream.annotations.XStreamAlias;
 import com.thoughtworks.xstream.annotations.XStreamConverter;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
@@ -33,6 +35,7 @@ import javax.imageio.stream.ImageInputStream;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.server.proto.AssetDto;
 import net.rptools.maptool.server.proto.AssetDtoType;
 import org.apache.commons.io.FilenameUtils;
@@ -133,6 +136,17 @@ public final class Asset {
      * @return the {@code Type}.
      */
     public static Type fromMediaType(MediaType mediaType) {
+      return fromMediaType(mediaType, "");
+    }
+
+    /**
+     * Gets the {@code Type} based on the {@link MediaType}.
+     *
+     * @param mediaType the {@link MediaType} to get the {@code Type} for.
+     * @param filename the filename of the media being checked.
+     * @return the {@code Type}.
+     */
+    public static Type fromMediaType(MediaType mediaType, String filename) {
       String contentType = mediaType.getType();
 
       String subType = mediaType.getSubtype();
@@ -151,6 +165,15 @@ public final class Asset {
           case "json" -> Type.JSON;
           case "javascript" -> Type.JAVASCRIPT;
           case "xml" -> Type.XML;
+          case "zip" -> {
+            if (filename != null && !filename.isEmpty()) {
+              if (AddOnLibraryImporter.isAssetFileAddonLibrary(filename)) {
+                yield Type.MTLIB;
+              }
+            }
+            yield Type.INVALID;
+          }
+
           default -> Type.INVALID;
         };
         default -> Type.INVALID;
@@ -363,6 +386,21 @@ public final class Asset {
     var factory = Type.fromMediaType(mediaType).getFactory();
     return factory.apply(name, data);
   }
+  /**
+   * Creates an Asset detecting the type.
+   *
+   * @param name the name of the asset.
+   * @param data the data for the asset.
+   * @param file the file for the asset (or null if no file).
+   * @return the newly created asset.
+   * @throws IOException if there is an error.
+   */
+  public static Asset createAssetDetectType(String name, byte[] data, File file)
+      throws IOException {
+    MediaType mediaType = getMediaType(name, data);
+    var factory = Type.fromMediaType(mediaType, file.getPath()).getFactory();
+    return factory.apply(name, data);
+  }
 
   /**
    * Creates a HTML {@code Asset}.
@@ -382,7 +420,7 @@ public final class Asset {
    * @param data the data for the {@code Asset}.
    * @return the MapTool Drop In Library {@code Asset}.
    */
-  private static Asset createMTLibAsset(String namespace, byte[] data) {
+  static Asset createMTLibAsset(String namespace, byte[] data) {
     return new Asset(null, namespace, data, Type.MTLIB, Type.MTLIB.getDefaultExtension(), false);
   }
 
@@ -754,22 +792,29 @@ public final class Asset {
   }
 
   public static Asset fromDto(AssetDto dto) {
+    var dtoData = dto.getData().toByteArray();
     var asset =
         new Asset(
             new MD5Key(dto.getMd5Key()),
             dto.getName(),
+            dtoData,
             dto.getExtension(),
             Asset.Type.valueOf(dto.getType().name()),
-            false);
+            dtoData.length == 0);
     return asset;
   }
 
   public AssetDto toDto() {
-    return AssetDto.newBuilder()
-        .setMd5Key(getMD5Key().toString())
-        .setName(getName())
-        .setExtension(getExtension())
-        .setType(AssetDtoType.valueOf(getType().name()))
-        .build();
+    var builder =
+        AssetDto.newBuilder()
+            .setMd5Key(getMD5Key().toString())
+            .setName(getName())
+            .setExtension(getExtension())
+            .setType(AssetDtoType.valueOf(getType().name()));
+
+    if (getData() != null) {
+      builder.setData(ByteString.copyFrom(data));
+    }
+    return builder.build();
   }
 }

@@ -26,11 +26,11 @@ import java.awt.event.ActionEvent;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Stream;
-import javax.swing.ImageIcon;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -202,7 +202,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    */
   public void addHTMLPanel(boolean isHTML5) {
     if (isHTML5) {
-      panel = new HTMLJFXPanel(this, new HTMLWebViewManager());
+      panel = new HTMLJFXPanel(this, new HTMLWebViewManager(this, "frame5", this.name));
     } else {
       panel = new HTMLPanel(this, true);
     }
@@ -219,7 +219,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
    * @param isHTML5 whether the frame is HTML5 (JavaFx)
    */
   private HTMLFrame(String name, int width, int height, boolean isHTML5) {
-    super(name, new ImageIcon(AppStyle.chatPanelImage));
+    super(name, RessourceManager.getSmallIcon(Icons.WINDOW_HTML));
     this.name = name;
     this.isHTML5 = isHTML5;
     width = width < 100 ? 400 : width;
@@ -367,11 +367,15 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
           "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
       frameProperties.addProperty("height", frame.getHeight());
       frameProperties.addProperty("width", frame.getWidth());
-      // The x & y are screen coordinates.
-      frameProperties.addProperty("undocked_x", dc.getUndockedBounds().getX());
-      frameProperties.addProperty("undocked_y", dc.getUndockedBounds().getY());
-      frameProperties.addProperty("undocked_h", dc.getUndockedBounds().getHeight());
-      frameProperties.addProperty("undocked_w", dc.getUndockedBounds().getWidth());
+      final var undockedBounds = dc.getUndockedBounds();
+      // A frame docked prior to a Restore Layout will lose its undocked bounds, causing NPE here.
+      if (undockedBounds != null) {
+        // The x & y are screen coordinates.
+        frameProperties.addProperty("undocked_x", undockedBounds.getX());
+        frameProperties.addProperty("undocked_y", undockedBounds.getY());
+        frameProperties.addProperty("undocked_h", undockedBounds.getHeight());
+        frameProperties.addProperty("undocked_w", undockedBounds.getWidth());
+      }
       // Many of the Frame/DockContext attributes shown in the JIDE javadocs don't seem to
       // get updated.  Docked height never changes but docked width does and matches Frame
       // width.  AutoHide Height/Width never change.

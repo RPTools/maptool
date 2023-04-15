@@ -23,7 +23,7 @@ import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -40,7 +40,7 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
 
   /** Needed for serialization */
   public MultipleImageBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, null);
+    this(DEFAULT_STATE_NAME, null);
   }
 
   /**
@@ -54,7 +54,7 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     assetIds = theAssetIds;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /** @see AbstractTokenOverlay#clone() */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new MultipleImageBarTokenOverlay(getName(), assetIds);
@@ -71,8 +71,8 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -120,11 +120,13 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     bar.fillFrom(dto.getCommon());
     bar.assetIds =
         dto.getAssetIdsList().stream().map(a -> new MD5Key(a)).toArray(size -> new MD5Key[size]);
+    bar.setIncrements(bar.assetIds.length);
     return bar;
   }
 
   public BarTokenOverlayDto toDto() {
     var dto = BarTokenOverlayDto.newBuilder().setCommon(getCommonDto());
+    setSideDto(dto);
     dto.addAllAssetIds(
         Arrays.asList(assetIds).stream().map(a -> a.toString()).collect(Collectors.toList()));
     return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.MULTIPLE_IMAGE).build();

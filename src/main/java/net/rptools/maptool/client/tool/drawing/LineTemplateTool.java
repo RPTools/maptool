@@ -20,14 +20,11 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -58,22 +55,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
   public LineTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-vertex-line.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
     AppState.addPropertyChangeListener(AppState.USE_DOUBLE_WIDE_PROP_NAME, this);
   }
 
@@ -87,7 +69,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
     return "tool.linetemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.linetemplate.instructions";

@@ -41,6 +41,8 @@ import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -51,6 +53,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
   private final LinkedBlockingQueue<MD5Key> assetRetrieveQueue = new LinkedBlockingQueue<MD5Key>();
+  private static final Logger log = LogManager.getLogger(ServerCommandClientImpl.class);
 
   public ServerCommandClientImpl() {
     movementUpdateQueue.start();
@@ -73,13 +76,14 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setCampaign(Campaign campaign) {
+    var msg = SetCampaignMsg.newBuilder();
     try {
       campaign.setBeingSerialized(true);
-      var msg = SetCampaignMsg.newBuilder().setCampaign(campaign.toDto());
-      makeServerCall(Message.newBuilder().setSetCampaignMsg(msg).build());
+      msg.setCampaign(campaign.toDto());
     } finally {
       campaign.setBeingSerialized(false);
     }
+    makeServerCall(Message.newBuilder().setSetCampaignMsg(msg).build());
   }
 
   public void setCampaignName(String name) {
@@ -621,11 +625,17 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   @Override
   public void updateTokenProperty(Token token, Token.Update update, String value1, String value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setStringValue(value1).build(),
-        TokenPropertyValueDto.newBuilder().setStringValue(value2).build());
+    var value1Dto = TokenPropertyValueDto.newBuilder();
+    if (value1 != null) {
+      value1Dto.setStringValue(value1);
+    }
+
+    var value2Dto = TokenPropertyValueDto.newBuilder();
+    if (value2 != null) {
+      value2Dto.setStringValue(value2);
+    }
+
+    updateTokenProperty(token, update, value1Dto.build(), value2Dto.build());
   }
 
   @Override
@@ -750,9 +760,13 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   @Override
-  public void updateTokenProperty(Token token, Token.Update update, Area area) {
+  public void updateTokenProperty(
+      Token token, Token.Update update, Zone.TopologyType topologyType, Area area) {
     updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setArea(Mapper.map(area)).build());
+        token,
+        update,
+        TokenPropertyValueDto.newBuilder().setTopologyType(topologyType.name()).build(),
+        TokenPropertyValueDto.newBuilder().setArea(Mapper.map(area)).build());
   }
 
   @Override

@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.token.dialog.create.NewTokenDialogView">
+  <grid id="4830d" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
+    <constraints>
+      <xy x="10" y="10" width="505" height="335"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="3c210" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
+        </properties>
+      </component>
+      <component id="e3136" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.gmname"/>
+        </properties>
+      </component>
+      <component id="66c41" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="dialog.NewToken.type"/>
+        </properties>
+      </component>
+      <component id="8f847" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <columns value="30"/>
+          <name value="@name"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="da774" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <columns value="30"/>
+          <name value="@gmName"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <grid id="dadfe" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="94c57" class="javax.swing.JRadioButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="NPC"/>
+              <name value="@type.NPC"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Token.Type.NPC"/>
+            </properties>
+          </component>
+          <component id="2f06a" class="javax.swing.JRadioButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="PC"/>
+              <name value="@type.PC"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Token.Type.PC"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <grid id="41e98" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="6f54e" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="OK"/>
+              <name value="okButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.ok"/>
+            </properties>
+          </component>
+          <component id="44d17" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="Cancel"/>
+              <name value="cancelButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.cancel"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <component id="d55df" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="6" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font swing-font="Panel.font"/>
+          <horizontalAlignment value="0"/>
+          <icon value="net/rptools/maptool/client/image/hero-lab-token.png"/>
+          <iconTextGap value="0"/>
+          <name value="tokenIcon"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="faec6" class="javax.swing.JCheckBox">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <actionCommand value="Show this dialog"/>
+          <name value="showDialogCheckbox"/>
+          <selected value="true"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="dialog.NewToken.show"/>
+        </properties>
+      </component>
+      <component id="fa0d7" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="dialog.NewToken.visible"/>
+        </properties>
+      </component>
+      <component id="7338c" class="javax.swing.JCheckBox">
+        <constraints>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@visible"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <component id="31d3b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.speechName"/>
+        </properties>
+      </component>
+      <component id="a9610" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <columns value="30"/>
+          <name value="@speechName"/>
+          <text value=""/>
+        </properties>
+      </component>
+      <vspacer id="5cc15">
+        <constraints>
+          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+    </children>
+  </grid>
+  <buttonGroups>
+    <group name="buttonGroup1">
+      <member id="94c57"/>
+      <member id="2f06a"/>
+    </group>
+  </buttonGroups>
+</form>

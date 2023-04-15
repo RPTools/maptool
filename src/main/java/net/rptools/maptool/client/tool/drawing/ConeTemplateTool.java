@@ -15,12 +15,8 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.event.MouseEvent;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.ConeTemplate;
@@ -42,23 +38,7 @@ public class ConeTemplateTool extends RadiusTemplateTool {
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  /** Add the icon to the toggle button. */
-  public ConeTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-cone.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      MapTool.showError("Cannot read image 'temp-blue-cone.png'", ioe);
-    } // endtry
-  }
+  public ConeTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool Methods
@@ -70,13 +50,13 @@ public class ConeTemplateTool extends RadiusTemplateTool {
     return new ConeTemplate();
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /** @see Tool#getTooltip() */
   @Override
   public String getTooltip() {
     return "tool.cone.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /** @see Tool#getInstructions() */
   @Override
   public String getInstructions() {
     return "tool.cone.instructions";

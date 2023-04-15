@@ -47,12 +47,9 @@ import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.tool.FacingTool;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.tool.StampTool;
+import net.rptools.maptool.client.tool.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Direction;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Light;
@@ -471,7 +468,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token.hasLightSource(lightSource)) {
           token.removeLightSource(lightSource);
         } else {
-          token.addLightSource(lightSource, Direction.CENTER);
+          token.addLightSource(lightSource);
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
 
@@ -939,10 +936,13 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
+      if (selectedTokenSet.isEmpty()) {
+        selectedTokenSet.addAll(renderer.getSelectedTokenSet());
+      }
       if (tool instanceof PointerTool) {
-        ((PointerTool) tool).startTokenDrag(tokenUnderMouse);
+        ((PointerTool) tool).startTokenDrag(tokenUnderMouse, selectedTokenSet);
       } else if (tool instanceof StampTool) {
-        ((StampTool) tool).startTokenDrag(tokenUnderMouse);
+        ((StampTool) tool).startTokenDrag(tokenUnderMouse, selectedTokenSet);
       }
     }
   }

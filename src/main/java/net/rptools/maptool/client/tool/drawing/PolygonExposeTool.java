@@ -18,10 +18,7 @@ import java.awt.Polygon;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.util.Set;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
@@ -34,19 +31,7 @@ import net.rptools.maptool.model.drawing.Pen;
 public class PolygonExposeTool extends PolygonTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258132466219627316L;
 
-  public PolygonExposeTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/fog-blue-poly.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public PolygonExposeTool() {}
 
   @Override
   public boolean isAvailable() {

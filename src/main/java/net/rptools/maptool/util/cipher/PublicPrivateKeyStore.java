@@ -16,6 +16,7 @@ package net.rptools.maptool.util.cipher;
 
 import java.io.File;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.KeyPair;
 import java.security.NoSuchAlgorithmException;
@@ -38,7 +39,7 @@ public class PublicPrivateKeyStore {
    *
    * @return the keys.
    */
-  public CompletableFuture<CipherUtil> getKeys() {
+  public CompletableFuture<CipherUtil.Key> getKeys() {
 
     return CompletableFuture.supplyAsync(
         () -> {
@@ -51,6 +52,7 @@ public class PublicPrivateKeyStore {
             return CipherUtil.fromPublicPrivatePair(PUBLIC_KEY_FILE, PRIVATE_KEY_FILE);
           } catch (NoSuchAlgorithmException
               | IOException
+              | InvalidAlgorithmParameterException
               | InvalidKeySpecException
               | NoSuchPaddingException
               | InvalidKeyException e) {
@@ -65,7 +67,7 @@ public class PublicPrivateKeyStore {
    *
    * @return the newly generated keys.
    */
-  public CompletableFuture<CipherUtil> regenerateKeys() {
+  public CompletableFuture<CipherUtil.Key> regenerateKeys() {
     return CompletableFuture.supplyAsync(
         () -> {
           try {
@@ -75,6 +77,7 @@ public class PublicPrivateKeyStore {
             return CipherUtil.fromPublicPrivatePair(PUBLIC_KEY_FILE, PRIVATE_KEY_FILE);
           } catch (IOException
               | NoSuchAlgorithmException
+              | InvalidAlgorithmParameterException
               | InvalidKeySpecException
               | NoSuchPaddingException
               | InvalidKeyException e) {

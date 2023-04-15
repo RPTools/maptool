@@ -18,9 +18,6 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -35,19 +32,7 @@ public class OvalTopologyTool extends AbstractDrawingTool implements MouseMotion
   protected Oval oval;
   private ZonePoint originPoint;
 
-  public OvalTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-oval.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public OvalTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

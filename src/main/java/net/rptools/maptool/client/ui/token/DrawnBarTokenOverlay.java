@@ -52,8 +52,8 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -81,7 +81,7 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /** @see AbstractTokenOverlay#clone() */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new DrawnBarTokenOverlay(getName(), barColor, thickness);
@@ -134,6 +134,7 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     dto.setCommon(getCommonDto());
     dto.setThickness(thickness);
     dto.setColor(barColor.getRGB());
+    setSideDto(dto);
     return dto;
   }
 

@@ -33,7 +33,7 @@ public class AssetTransferHandler implements ConsumerListener {
     try {
       assetData = FileUtils.readFileToByteArray(data);
 
-      Asset asset = Asset.createAssetDetectType(name, assetData);
+      Asset asset = Asset.createAssetDetectType(name, assetData, data);
       if (!asset.getMD5Key().equals(id)) {
         MapTool.showError("Received an invalid image: " + id);
         return;

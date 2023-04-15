@@ -32,7 +32,10 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   protected final Zone zone;
   protected boolean restrictMovement = false;
   protected Set<TerrainModifierOperation> terrainModifiersIgnored;
-  protected Area tokenVBL;
+  protected Area tokenWallVbl;
+  protected Area tokenHillVbl;
+  protected Area tokenPitVbl;
+  protected Area tokenMbl;
   protected RenderPathWorker renderPathWorker;
 
   public AbstractZoneWalker(Zone zone) {
@@ -71,7 +74,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
   public CellPoint replaceLastWaypoint(CellPoint point) {
     return replaceLastWaypoint(
-        point, false, Collections.singleton(TerrainModifierOperation.NONE), null);
+        point, false, Collections.singleton(TerrainModifierOperation.NONE), null, null, null, null);
   }
 
   @Override
@@ -79,11 +82,17 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       CellPoint point,
       boolean restrictMovement,
       Set<TerrainModifierOperation> terrainModifiersIgnored,
-      Area tokenVBL) {
+      Area tokenWallVbl,
+      Area tokenHillVbl,
+      Area tokenPitVbl,
+      Area tokenMbl) {
 
     this.restrictMovement = restrictMovement;
     this.terrainModifiersIgnored = terrainModifiersIgnored;
-    this.tokenVBL = tokenVBL;
+    this.tokenWallVbl = tokenWallVbl;
+    this.tokenHillVbl = tokenHillVbl;
+    this.tokenPitVbl = tokenPitVbl;
+    this.tokenMbl = tokenMbl;
 
     if (partialPaths.isEmpty()) {
       return null;

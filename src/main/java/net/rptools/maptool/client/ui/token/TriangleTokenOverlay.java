@@ -48,7 +48,7 @@ public class TriangleTokenOverlay extends XTokenOverlay {
     super(aName, aColor, aWidth);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /** @see BooleanTokenOverlay#clone() */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new TriangleTokenOverlay(getName(), getColor(), getWidth());
@@ -63,8 +63,8 @@ public class TriangleTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.XTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle)
+   * @see XTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {

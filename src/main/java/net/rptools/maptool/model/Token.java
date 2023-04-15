@@ -38,17 +38,18 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
@@ -61,6 +62,7 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /**
  * This object represents the placeable objects on a map. For example an icon that represents a
@@ -68,7 +70,7 @@ import org.apache.logging.log4j.Logger;
  */
 
 // Lee: made tokens cloneable
-public class Token extends BaseModel implements Cloneable {
+public class Token implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
@@ -92,7 +94,7 @@ public class Token extends BaseModel implements Cloneable {
   public static final String LIB_TOKEN_PREFIX = "lib:";
 
   private boolean beingImpersonated = false;
-  private GUID exposedAreaGUID;
+  private GUID exposedAreaGUID = new GUID();
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -199,7 +201,7 @@ public class Token extends BaseModel implements Cloneable {
     setTerrainModifier,
     setTerrainModifierOperation,
     setTerrainModifiersIgnored,
-    setVBL,
+    setTopology,
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
@@ -212,7 +214,8 @@ public class Token extends BaseModel implements Cloneable {
     flipX,
     flipY,
     flipIso,
-    setSpeechName
+    setSpeechName,
+    removeFacing
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -248,21 +251,23 @@ public class Token extends BaseModel implements Cloneable {
   private double scaleX = 1;
   private double scaleY = 1;
 
-  private final Map<String, GUID> sizeMap = new HashMap<>();
+  private Map<String, GUID> sizeMap = new HashMap<>();
 
   private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
   // floating
 
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
-
   private int vblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
   private Area vbl;
+  private Area hillVbl;
+  private Area pitVbl;
+  private Area mbl;
 
-  private String name;
+  private String name = "";
   private Set<String> ownerList = new HashSet<>();
 
   private int ownerType;
@@ -270,9 +275,9 @@ public class Token extends BaseModel implements Cloneable {
   private static final int OWNER_TYPE_ALL = 1;
   private static final int OWNER_TYPE_LIST = 0;
 
-  private String tokenShape;
-  private String tokenType;
-  private String layer;
+  private String tokenShape = TokenShape.SQUARE.toString();
+  private String tokenType = Type.NPC.toString();
+  private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
   private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
@@ -295,7 +300,7 @@ public class Token extends BaseModel implements Cloneable {
     NONE(), // Default, no terrain modifications to pathfinding cost
     MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
     ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had VBL
+    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
     FREE(); // Any cell with a token of this type in it has ALL movement costs removed
 
     private final String displayName;
@@ -313,7 +318,7 @@ public class Token extends BaseModel implements Cloneable {
   // Jamz: modifies A* cost of other tokens
   private double terrainModifier = 0.0d;
   private TerrainModifierOperation terrainModifierOperation = TerrainModifierOperation.NONE;
-  private final Set<TerrainModifierOperation> terrainModifiersIgnored =
+  private Set<TerrainModifierOperation> terrainModifiersIgnored =
       new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
 
   private boolean isFlippedX;
@@ -334,7 +339,10 @@ public class Token extends BaseModel implements Cloneable {
   /** The notes that are displayed for this token. */
   private String notes;
 
+  private String notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+
   private String gmNotes;
+  private String gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
 
   private String gmName;
 
@@ -416,11 +424,16 @@ public class Token extends BaseModel implements Cloneable {
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
+    hillVbl = token.hillVbl;
+    pitVbl = token.pitVbl;
+    mbl = token.mbl;
 
     name = token.name;
     notes = token.notes;
+    notesType = token.notesType;
     gmName = token.gmName;
     gmNotes = token.gmNotes;
+    gmNotesType = token.gmNotesType;
     label = token.label;
 
     isFlippedX = token.isFlippedX;
@@ -482,10 +495,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public Token() {}
-
-  public Token(MD5Key assetID) {
-    this("", assetID);
-  }
 
   public Token(String name, MD5Key assetId) {
     this.name = name;
@@ -616,6 +625,14 @@ public class Token extends BaseModel implements Cloneable {
     gmNotes = notes;
   }
 
+  public String getGmNotesType() {
+    return gmNotesType;
+  }
+
+  public void setGmNotesType(String type) {
+    gmNotesType = type;
+  }
+
   public String getGMName() {
     if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
@@ -657,7 +674,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public float getTokenOpacity() {
-    if (tokenOpacity <= 0.0f) {
+    if (tokenOpacity < 0.0f) {
       tokenOpacity = 1.0f;
     }
 
@@ -684,8 +701,8 @@ public class Token extends BaseModel implements Cloneable {
     if (alpha > 1.0f) {
       alpha = 1.0f;
     }
-    if (alpha <= 0.0f) {
-      alpha = 0.05f;
+    if (alpha < 0.0f) {
+      alpha = 0.0f;
     }
 
     tokenOpacity = alpha;
@@ -791,11 +808,9 @@ public class Token extends BaseModel implements Cloneable {
 
   public TokenShape getShape() {
     try {
-      return tokenShape != null ? TokenShape.valueOf(tokenShape) : TokenShape.SQUARE; // TODO:
-      // make
-      // this
-      // a psf
+      return TokenShape.valueOf(tokenShape);
     } catch (IllegalArgumentException iae) {
+      tokenShape = TokenShape.SQUARE.name();
       return TokenShape.SQUARE;
     }
   }
@@ -806,8 +821,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public Type getType() {
     try {
-      // TODO: make this a psf
-      return tokenType != null ? Type.valueOf(tokenType) : Type.NPC;
+      return Type.valueOf(tokenType);
     } catch (IllegalArgumentException iae) {
       tokenType = Type.NPC.name();
       return Type.NPC;
@@ -829,7 +843,7 @@ public class Token extends BaseModel implements Cloneable {
   public Zone.Layer getLayer() {
     try {
       if (actualLayer == null) {
-        actualLayer = layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.TOKEN;
+        actualLayer = Zone.Layer.valueOf(layer);
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
@@ -907,8 +921,8 @@ public class Token extends BaseModel implements Cloneable {
     return imageTableName;
   }
 
-  public void addLightSource(LightSource source, Direction direction) {
-    lightSourceList.add(new AttachedLightSource(source, direction));
+  public void addLightSource(LightSource source) {
+    lightSourceList.add(new AttachedLightSource(source));
   }
 
   public void removeLightSourceType(LightSource.Type lightType) {
@@ -1353,40 +1367,83 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the VBL of the token. If vbl null, set vblAplphaSensitivity to -1.
+   * Return the area of the token for the requested type of topology.
    *
-   * @param vbl the VBL to set.
+   * @param topologyType The type of topology to return.
+   * @return the current topology of the token.
    */
-  public void setVBL(Area vbl) {
-    this.vbl = vbl;
-    if (vbl == null) {
+  public Area getTopology(Zone.TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> vbl;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> mbl;
+    };
+  }
+
+  /**
+   * Transform the token's topology according to the token's scale, position, rotation and flipping.
+   *
+   * @param topologyType The type of topology to transform.
+   * @return the transformed topology for the token
+   */
+  public Area getTransformedTopology(Zone.TopologyType topologyType) {
+    return getTransformedTopology(getTopology(topologyType));
+  }
+
+  /**
+   * Set the topology of the given type for the token.
+   *
+   * <p>If no topology remains on the token, set {@link #vblColorSensitivity} to -1.
+   *
+   * @param topologyType The type of topology to set.
+   * @param topology the topology area to set.
+   */
+  public void setTopology(Zone.TopologyType topologyType, @Nullable Area topology) {
+    switch (topologyType) {
+      case WALL_VBL -> vbl = topology;
+      case HILL_VBL -> hillVbl = topology;
+      case PIT_VBL -> pitVbl = topology;
+      case MBL -> mbl = topology;
+    }
+    ;
+
+    if (!hasAnyTopology()) {
       vblColorSensitivity = -1;
     }
   }
 
   /**
-   * Return the vbl area of the token
+   * Return the existence of the requested type of topology.
    *
-   * @return the current VBL of the token
+   * @param topologyType The type of topology to check for.
+   * @return true if the token has the given type of topology.
    */
-  public Area getVBL() {
-    return vbl;
-  }
-
-  public Area getTransformedVBL() {
-    return getTransformedVBL(vbl);
+  public boolean hasTopology(Zone.TopologyType topologyType) {
+    return getTopology(topologyType) != null;
   }
 
   /**
-   * This method returns the vbl stored on the token with AffineTransformations applied for scale,
-   * position, rotation, &amp; flipping.
+   * Return the existence of any type of topology.
    *
-   * @param areaToTransform transformations to apply to the VBL
-   * @return the transformed VBL for the token
+   * @return true if the token has any kind of topology.
+   */
+  public boolean hasAnyTopology() {
+    return Arrays.stream(Zone.TopologyType.values())
+        .map(this::getTopology)
+        .anyMatch(Objects::nonNull);
+  }
+
+  /**
+   * This method transforms an area (meant to be one of the token's topologies) with
+   * AffineTransformations applied for scale, position, rotation, &amp; flipping.
+   *
+   * @param areaToTransform The area to apply transformations tos.
+   * @return the transformed area for the token
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedVBL(Area areaToTransform) {
+  public Area getTransformedTopology(Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
@@ -1455,15 +1512,6 @@ public class Token extends BaseModel implements Cloneable {
     return new Area(atArea.createTransformedShape(areaToTransform));
   }
 
-  /**
-   * Return the existence of the token's VBL
-   *
-   * @return true if the token's vbl is not null, and false otherwise
-   */
-  public boolean hasVBL() {
-    return vbl != null;
-  }
-
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
     this.isAlwaysVisible = isAlwaysVisible;
   }
@@ -1473,7 +1521,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getName() {
-    return name != null ? name : "";
+    return name;
   }
 
   public Rectangle getBounds(Zone zone) {
@@ -1685,9 +1733,19 @@ public class Token extends BaseModel implements Cloneable {
    * @return The original value of the state, if any.
    */
   public Object setState(String aState, Object aValue) {
+    // the GUI sends null to mean remove a state/bar
     if (aValue == null) {
       return state.remove(aState);
     }
+    // setBarVisible sends a boolean to show/hide a bar
+    if (aValue instanceof Boolean) {
+      if ((Boolean) aValue) {
+        return state.put(aState, aValue);
+      } else {
+        return state.remove(aState);
+      }
+    }
+    // Either enable a state or set the value of a bar
     return state.put(aState, aValue);
   }
 
@@ -2010,6 +2068,14 @@ public class Token extends BaseModel implements Cloneable {
   /** @param aNotes Setter for notes */
   public void setNotes(String aNotes) {
     notes = aNotes;
+  }
+
+  public String getNotesType() {
+    return notesType;
+  }
+
+  public void setNotesType(String type) {
+    notesType = type;
   }
 
   public boolean isFlippedY() {
@@ -2370,9 +2436,7 @@ public class Token extends BaseModel implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
-  @Override
   protected Object readResolve() {
-    super.readResolve();
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
@@ -2431,6 +2495,29 @@ public class Token extends BaseModel implements Cloneable {
     }
     if (speechName == null) {
       speechName = "";
+    }
+    if (terrainModifiersIgnored == null) {
+      terrainModifiersIgnored =
+          new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
+    }
+    if (terrainModifierOperation == null) {
+      terrainModifierOperation = TerrainModifierOperation.NONE;
+    }
+    if (sizeMap == null) {
+      sizeMap = new HashMap<>();
+    }
+
+    // Check to make sure lastPath has valid data
+    if (lastPath != null && lastPath.getCellPath().isEmpty()) {
+      lastPath = null;
+    }
+
+    if (notesType == null) {
+      notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+    }
+
+    if (gmNotesType == null) {
+      gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
     return this;
@@ -2494,7 +2581,7 @@ public class Token extends BaseModel implements Cloneable {
         else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        stateValue = parameters.get(1);
+        stateValue = parameters.get(0);
         if (stateValue.hasBoolValue()) setAllStates(stateValue.getBoolValue());
         else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
@@ -2553,6 +2640,9 @@ public class Token extends BaseModel implements Cloneable {
         }
         setFacing(parameters.get(0).getIntValue());
         break;
+      case removeFacing:
+        setFacing(null);
+        break;
       case clearAllOwners:
         clearAllOwners();
         panelLookChanged = true;
@@ -2603,7 +2693,8 @@ public class Token extends BaseModel implements Cloneable {
         setY(parameters.get(1).getIntValue());
         break;
       case setHaloColor:
-        setHaloColor(new Color(parameters.get(0).getIntValue(), true));
+        setHaloColor(
+            parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
         break;
       case setLabel:
         setLabel(parameters.get(0).getStringValue());
@@ -2644,22 +2735,35 @@ public class Token extends BaseModel implements Cloneable {
                 .map(TerrainModifierOperation::valueOf)
                 .collect(Collectors.toSet()));
         break;
-      case setVBL:
-        setVBL(Mapper.map(parameters.get(0).getArea()));
-        if (!hasVBL()) { // if VBL removed
-          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+      case setTopology:
+        {
+          final var topologyType = Zone.TopologyType.valueOf(parameters.get(0).getTopologyType());
+          setTopology(topologyType, Mapper.map(parameters.get(1).getArea()));
+          if (!hasTopology(topologyType)) { // if topology removed
+            zone.tokenTopologyChanged(); // if token lost topology, TOKEN_CHANGED won't update
+            // topology
+          }
+          break;
         }
-        break;
       case setImageAsset:
         setImageAsset(
-            parameters.get(0).getStringValue(), new MD5Key(parameters.get(1).getStringValue()));
+            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
+            new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
-        setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setPortraitImage(null);
+        }
         break;
       case setCharsheetImage:
-        setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setCharsheetImage(null);
+        }
         break;
       case setLayout:
         setSizeScale(parameters.get(0).getDoubleValue());
@@ -2679,9 +2783,7 @@ public class Token extends BaseModel implements Cloneable {
         break;
       case addLightSource:
         lightChanged = true;
-        addLightSource(
-            LightSource.fromDto(parameters.get(0).getLightSource()),
-            Direction.valueOf(parameters.get(1).getStringValue()));
+        addLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
         break;
       case setHasSight:
         if (hasLightSources()) {
@@ -2737,8 +2839,7 @@ public class Token extends BaseModel implements Cloneable {
     var token = new Token();
     token.id = GUID.valueOf(dto.getId());
     token.beingImpersonated = dto.getBeingImpersonated();
-    token.exposedAreaGUID =
-        dto.hasExposedAreaGuid() ? GUID.valueOf(dto.getExposedAreaGuid().getValue()) : null;
+    token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
     var assetMap = dto.getImageAssetMapMap();
     for (var key : assetMap.keySet()) {
       var nullKey = key.equals("") ? null : key;
@@ -2770,6 +2871,9 @@ public class Token extends BaseModel implements Cloneable {
     token.alwaysVisibleTolerance = dto.getAlwaysVisibleTolerance();
     token.isAlwaysVisible = dto.getIsAlwaysVisible();
     token.vbl = dto.hasVbl() ? Mapper.map(dto.getVbl()) : null;
+    token.hillVbl = dto.hasHillVbl() ? Mapper.map(dto.getHillVbl()) : null;
+    token.pitVbl = dto.hasPitVbl() ? Mapper.map(dto.getPitVbl()) : null;
+    token.mbl = dto.hasMbl() ? Mapper.map(dto.getMbl()) : null;
     token.name = dto.getName();
     token.ownerList.addAll(dto.getOwnerListList());
     token.ownerType = dto.getOwnerType();
@@ -2809,6 +2913,8 @@ public class Token extends BaseModel implements Cloneable {
     token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
     token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
     token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.notesType = dto.getNotesType();
+    token.gmNotesType = dto.getGmNotesType();
 
     dto.getStateMap()
         .forEach(
@@ -2837,9 +2943,7 @@ public class Token extends BaseModel implements Cloneable {
     var dto = TokenDto.newBuilder();
     dto.setId(id.toString());
     dto.setBeingImpersonated(beingImpersonated);
-    if (exposedAreaGUID != null) {
-      dto.setExposedAreaGuid(StringValue.of(exposedAreaGUID.toString()));
-    }
+    dto.setExposedAreaGuid(exposedAreaGUID.toString());
     for (var key : imageAssetMap.keySet()) {
       var notNullKey = key == null ? "" : key;
       dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
@@ -2874,6 +2978,15 @@ public class Token extends BaseModel implements Cloneable {
     dto.setIsAlwaysVisible(isAlwaysVisible);
     if (vbl != null) {
       dto.setVbl(Mapper.map(vbl));
+    }
+    if (hillVbl != null) {
+      dto.setHillVbl(Mapper.map(hillVbl));
+    }
+    if (pitVbl != null) {
+      dto.setPitVbl(Mapper.map(pitVbl));
+    }
+    if (mbl != null) {
+      dto.setMbl(Mapper.map(mbl));
     }
     dto.setName(name);
     dto.addAllOwnerList(ownerList);
@@ -2925,20 +3038,21 @@ public class Token extends BaseModel implements Cloneable {
     if (notes != null) {
       dto.setNotes(StringValue.of(notes));
     }
+    dto.setNotesType(notesType);
     if (gmNotes != null) {
       dto.setGmNotes(StringValue.of(gmNotes));
     }
+    dto.setGmNotesType(gmNotesType);
     if (gmName != null) {
       dto.setGmName(StringValue.of(gmName));
     }
     state.forEach(
         (key, state) -> {
-          if (Boolean.class.equals(state.getClass())) {
-            var value = (boolean) state;
-            dto.putState(key, TokenDto.State.newBuilder().setBoolValue(value).build());
-          } else if (BigDecimal.class.equals(state.getClass())) {
-            var value = ((BigDecimal) state).doubleValue();
-            dto.putState(key, TokenDto.State.newBuilder().setDoubleValue(value).build());
+          if (state instanceof Boolean bstate) {
+            dto.putState(key, TokenDto.State.newBuilder().setBoolValue(bstate).build());
+          } else if (state instanceof Number nstate) {
+            dto.putState(
+                key, TokenDto.State.newBuilder().setDoubleValue(nstate.doubleValue()).build());
           } else {
             log.warn("unknown state type:" + state.getClass());
           }

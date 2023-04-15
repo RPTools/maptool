@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.List;
 import javax.script.*;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.MacroJavaScriptBridge;
 import net.rptools.maptool.client.script.javascript.api.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.parser.ParserException;
@@ -34,6 +35,7 @@ public class JSScriptEngine {
   private static final JSScriptEngine jsScriptEngine = new JSScriptEngine();
   private static final Logger log = LogManager.getLogger(JSScriptEngine.class);
   private static final Map<String, JSContext> contexts = new HashMap<String, JSContext>();
+  private static final Map<String, JSContext> addOnContexts = new HashMap<String, JSContext>();
   private static final Stack<JSContext> contextStack = new Stack<>();
 
   public static JSContext getCurrentContext() {
@@ -41,10 +43,10 @@ public class JSScriptEngine {
   }
 
   public static boolean inTrustedContext() {
-    if (jsScriptEngine.contextStack.empty()) {
+    if (JSScriptEngine.contextStack.empty()) {
       return false;
     }
-    return jsScriptEngine.contextStack.peek().isTrusted;
+    return JSScriptEngine.contextStack.peek().trusted();
   }
 
   private void registerAPIObject(Value bindings, MapToolJSAPIInterface apiObj) {
@@ -57,6 +59,7 @@ public class JSScriptEngine {
     habuilder.allowAccessAnnotatedBy(HostAccess.Export.class);
     habuilder.allowArrayAccess(true);
     habuilder.allowListAccess(true);
+    habuilder.allowMapAccess(true);
     habuilder.targetTypeMapping(
         Value.class, Object.class, (v) -> v.hasArrayElements(), (v) -> v.as(List.class));
 
@@ -89,7 +92,7 @@ public class JSScriptEngine {
       return;
     }
     JSContext c = contexts.get(name);
-    if (c == null || c.isTrusted) {
+    if (c == null || c.trusted()) {
       throw new ParserException(I18N.getText("macro.function.general.noPermJS", name));
     }
     contexts.remove(name);
@@ -99,6 +102,29 @@ public class JSScriptEngine {
   public static void resetContexts() {
     JSMacro.clear();
     contexts.clear();
+    addOnContexts.clear();
+  }
+
+  public static JSContext registerAddOnContext(String name) {
+    JSContext c = new JSContext(true, jsScriptEngine.makeContext(), name);
+    addOnContexts.put(name, c);
+    return c;
+  }
+
+  public static void removeAddOnContext(String name) {
+    addOnContexts.remove(name);
+  }
+
+  public static boolean hasContext(String name) {
+    return contexts.containsKey(name);
+  }
+
+  public static boolean hasAddOnContext(String name) {
+    return addOnContexts.containsKey(name);
+  }
+
+  public static Set<JSContext> getContexts() {
+    return new HashSet<>(contexts.values());
   }
 
   public Context makeContext() {
@@ -128,23 +154,37 @@ public class JSScriptEngine {
 
   public Value evalScript(String contextName, String script)
       throws ScriptException, ParserException {
+    return evalScript(contextName, script, MapTool.getParser().isMacroTrusted());
+  }
+
+  public Value evalScript(String contextName, String script, boolean trusted)
+      throws ScriptException, ParserException {
     if (contextName == null) {
       return evalAnonymous(script);
     }
     JSContext jc = contexts.get(contextName);
     if (jc == null) {
-      jc =
-          registerContext(
-              contextName,
-              MapTool.getParser().isMacroTrusted(),
-              MapTool.getParser().isMacroTrusted());
+      jc = registerContext(contextName, trusted, trusted);
     }
-    if (jc.isTrusted && !MapTool.getParser().isMacroTrusted()) {
-      throw new ParserException(I18N.getText("macro.function.general.noPermJS", contextName));
+
+    return evalScript(jc, script, trusted);
+  }
+
+  public Value evalAddOnScript(String contextName, String script, boolean trusted)
+      throws ScriptException, ParserException {
+    JSContext jc = addOnContexts.get(contextName);
+    return evalScript(jc, script, trusted);
+  }
+
+  public Value evalScript(JSContext context, String script, boolean trusted)
+      throws ScriptException, ParserException {
+
+    if (context.trusted() && !trusted) {
+      throw new ParserException(I18N.getText("macro.function.general.noPermJS", context.name()));
     }
-    contextStack.push(jc);
+    contextStack.push(context);
     try {
-      return jc.context.eval("js", script);
+      return context.context().eval("js", script);
     } finally {
       contextStack.pop();
     }
@@ -152,8 +192,12 @@ public class JSScriptEngine {
 
   public Object applyFunction(JSAPIRegisteredMacro macro, Object[] args) {
     contextStack.push(macro.context);
+    Object[] modifiedArgs = new Object[args.length];
+    for (int i = 0; i < args.length; i++) {
+      modifiedArgs[i] = MacroJavaScriptBridge.getInstance().HostObjectToJavaScriptType(args[i]);
+    }
     try {
-      return macro.callable.apply(args);
+      return macro.callable.apply(modifiedArgs);
     } finally {
       contextStack.pop();
     }
