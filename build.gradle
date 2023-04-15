@@ -474,7 +474,7 @@ task uberJar(type: Jar) {
     zip64 = true
     description = 'Create uber jar for native installers'
 
-    baseName project.name + '-' + tagVersion
+    archiveBaseName = project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
 
