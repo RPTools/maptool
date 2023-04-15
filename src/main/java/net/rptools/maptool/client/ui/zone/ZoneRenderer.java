@@ -618,8 +618,7 @@ public class ZoneRenderer extends JComponent
   /**
    * Remove the token from: {@link #tokenLocationCache}, {@link #flipImageMap}, {@link
    * #flipIsoImageMap}, {@link #labelRenderingCache}. Set the {@link #visibleScreenArea}, {@link
-   * #tokenStackMap}, {@link #drawableLights}, {@link #drawableAuras} to null. Flush the token from
-   * the zoneView.
+   * #tokenStackMap} to null. Flush the token from {@link #zoneView}.
    *
    * @param token the token to flush
    */
@@ -638,9 +637,6 @@ public class ZoneRenderer extends JComponent
 
     // This could also be smarter
     tokenStackMap = null;
-
-    drawableLights = null;
-    drawableAuras = null;
 
     zoneView.flush(token);
   }
@@ -668,20 +664,13 @@ public class ZoneRenderer extends JComponent
     flushDrawableRenderer();
     flipImageMap.clear();
     flipIsoImageMap.clear();
-    drawableLights = null;
-    drawableAuras = null;
     zoneView.flushFog();
 
     isLoaded = false;
   }
 
-  /**
-   * Set the {@link #drawableLights} and {@link #drawableAuras} to null, flush the zoneView, and
-   * repaint.
-   */
+  /** Flush the {@link #zoneView} and repaint. */
   public void flushLight() {
-    drawableLights = null;
-    drawableAuras = null;
     zoneView.flush();
     repaintDebouncer.dispatch();
   }
@@ -1045,12 +1034,10 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * This method clears {@link #drawableLights}, {@link #drawableAuras}, {@link #visibleScreenArea},
-   * and {@link #lastView}. It also flushes the {@link #zoneView}.
+   * This method clears {@link #visibleScreenArea} and {@link #lastView}. It also flushes the {@link
+   * #zoneView}.
    */
   public void invalidateCurrentViewCache() {
-    drawableLights = null;
-    drawableAuras = null;
     visibleScreenArea = null;
     lastView = null;
   }
@@ -1423,12 +1410,8 @@ public class ZoneRenderer extends JComponent
   private void renderLights(Graphics2D g, PlayerView view) {
     // Collect and organize lights
     timer.start("renderLights:getLights");
-    if (drawableLights == null) {
-      timer.start("renderLights:populateCache");
-      drawableLights = new ArrayList<>(zoneView.getDrawableLights(view));
-      timer.stop("renderLights:populateCache");
-    }
-    timer.start("renderLights:filterLights");
+    final var drawableLights = zoneView.getDrawableLights(view);
+    timer.stop("renderLights:getLights");
 
     if (AppState.isShowLights()) {
       // Lighting enabled.
@@ -1482,14 +1465,8 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  /** Caches the lights to be drawn as returned ZoneView. */
-  private List<DrawableLight> drawableLights;
-  /** Holds the auras from lightSourceMap after they have been combined. */
-  private List<DrawableLight> drawableAuras;
-
   /**
-   * Get the list of auras from lightSourceMap, combine them, store them in drawableAuras, and draw
-   * them.
+   * Render the auras.
    *
    * @param g the Graphics2D object.
    * @param view the player view.
@@ -1497,9 +1474,7 @@ public class ZoneRenderer extends JComponent
   private void renderAuras(Graphics2D g, PlayerView view) {
     // Setup
     timer.start("renderAuras:getAuras");
-    if (drawableAuras == null) {
-      drawableAuras = new ArrayList<>(zoneView.getDrawableAuras());
-    }
+    final var drawableAuras = zoneView.getDrawableAuras();
     timer.stop("renderAuras:getAuras");
 
     timer.start("renderAuras:renderAuraOverlay");
