@@ -158,6 +158,7 @@ public class MapPropertiesDialog extends JDialog {
     initPixelsPerCellTextField();
     initDefaultVisionTextField();
     initVisionTypeCombo();
+    initLightingStyleCombo();
     initAStarRoundingOptionsComboBox();
 
     initIsometricRadio();
@@ -192,7 +193,6 @@ public class MapPropertiesDialog extends JDialog {
     TextureChooserPanel textureChooserPanel =
         new TextureChooserPanel(paintChooser, model, "mapPropertiesTextureChooser");
     paintChooser.addPaintChooser(textureChooserPanel);
-    paintChooser.setPreferredSize(new Dimension(450, 400));
     mapSelectorDialog = new MapSelectorDialog();
     getRootPane().setDefaultButton(getOKButton());
   }
@@ -269,6 +269,10 @@ public class MapPropertiesDialog extends JDialog {
     return formPanel.getComboBox("visionType");
   }
 
+  public JComboBox<Zone.LightingStyle> getLightingStyleCombo() {
+    return formPanel.getComboBox("lightingStyle");
+  }
+
   public JComboBox getAStarRoundingOptionsComboBox() {
     return formPanel.getComboBox("aStarRoundingOptionsComboBox");
   }
@@ -291,6 +295,7 @@ public class MapPropertiesDialog extends JDialog {
     getSquareRadio().setSelected(zone.getGrid() instanceof SquareGrid);
     getNoGridRadio().setSelected(zone.getGrid() instanceof GridlessGrid);
     getVisionTypeCombo().setSelectedItem(zone.getVisionType());
+    getLightingStyleCombo().setSelectedItem(zone.getLightingStyle());
     getAStarRoundingOptionsComboBox().setSelectedItem(zone.getAStarRounding());
 
     gridOffsetX = zone.getGrid().getOffsetX();
@@ -312,6 +317,7 @@ public class MapPropertiesDialog extends JDialog {
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
 
     zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
 
@@ -423,6 +429,7 @@ public class MapPropertiesDialog extends JDialog {
     getMapButton()
         .addActionListener(
             e -> {
+              mapSelectorDialog.pack();
               Asset asset = mapSelectorDialog.chooseAsset();
               if (asset == null) {
                 return;
@@ -527,6 +534,15 @@ public class MapPropertiesDialog extends JDialog {
         .setModel(new DefaultComboBoxModel<>(Zone.AStarRoundingOptions.values()));
   }
 
+  private void initLightingStyleCombo() {
+    DefaultComboBoxModel<Zone.LightingStyle> model = new DefaultComboBoxModel<>();
+    for (Zone.LightingStyle vt : Zone.LightingStyle.values()) {
+      model.addElement(vt);
+    }
+    model.setSelectedItem(Zone.LightingStyle.OVERTOP);
+    getLightingStyleCombo().setModel(model);
+  }
+
   public String getZoneName() {
     return getNameTextField().getText();
   }
@@ -584,7 +600,6 @@ public class MapPropertiesDialog extends JDialog {
       add(BorderLayout.CENTER, createImageExplorerPanel());
       add(BorderLayout.SOUTH, createButtonBar());
       this.setTitle(I18N.getText("MapPropertiesDialog.label.image"));
-      setSize(500, 400);
     }
 
     @Override

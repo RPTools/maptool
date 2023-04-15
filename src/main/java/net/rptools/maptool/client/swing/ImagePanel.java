@@ -44,6 +44,7 @@ public class ImagePanel extends JComponent
 
   private ImagePanelModel model;
 
+  private int visibleRowCount = 0;
   private int gridSize = 50;
   private final Dimension gridPadding = new Dimension(9, 11);
   private final int captionPadding = 5;
@@ -101,6 +102,22 @@ public class ImagePanel extends JComponent
         g.dispose();
       }
     }
+  }
+
+  private int getItemWidth() {
+    return gridSize + gridPadding.width;
+  }
+
+  private int getItemHeight() {
+    return gridSize + gridPadding.height + (showCaptions ? fontHeight + captionPadding : 0);
+  }
+
+  public void setVisibleRowCount(int visibleRowCount) {
+    this.visibleRowCount = Math.max(0, visibleRowCount);
+  }
+
+  public int getVisibleRowCount() {
+    return this.visibleRowCount;
   }
 
   public void setGridSize(int size) {
@@ -207,8 +224,10 @@ public class ImagePanel extends JComponent
     }
     imageBoundsMap.clear();
 
-    int x = gridPadding.width;
-    int y = gridPadding.height;
+    int itemsPerRow = calculateItemsPerRow();
+    int itemWidth = getItemWidth();
+    int itemHeight = getItemHeight();
+
     int numToProcess = model.getImageCount();
     String timerField = null;
     if (timer.isEnabled()) {
@@ -216,13 +235,17 @@ public class ImagePanel extends JComponent
       timer.start(timerField);
     }
     for (int i = 0; i < numToProcess; i++) {
+      int row = i / itemsPerRow;
+      int column = i % itemsPerRow;
+
+      int x = gridPadding.width + column * itemWidth;
+      int y = gridPadding.height + row * itemHeight;
+
       Image image;
 
       Rectangle bounds = new Rectangle(x, y, gridSize, gridSize);
       imageBoundsMap.put(
-          new Rectangle(
-              x, y, gridSize, gridSize + (showCaptions ? captionPadding + fontHeight : 0)),
-          i);
+          new Rectangle(x, y, itemWidth - gridPadding.width, itemHeight - gridPadding.height), i);
 
       // Background
       Paint paint = model.getBackground(i);
@@ -303,15 +326,6 @@ public class ImagePanel extends JComponent
           g.setRenderingHints(savedRenderingHints);
         }
       }
-      // Line wrap
-      x += gridSize + gridPadding.width;
-      if ((x + gridSize) > (size.width - gridPadding.width)) {
-        x = gridPadding.width;
-        y += gridSize + gridPadding.height;
-        if (showCaptions) {
-          y += fontHeight;
-        }
-      }
     }
     g.setFont(savedFont);
     if (timer.isEnabled()) {
@@ -378,6 +392,14 @@ public class ImagePanel extends JComponent
     return new Dimension(width, height);
   }
 
+  private int calculateItemsPerRow() {
+    if (getItemWidth() <= 0) {
+      return 1;
+    }
+
+    return Math.max(1, getWidth() / getItemWidth());
+  }
+
   @Override
   public Dimension getPreferredSize() {
     if (model == null || model.getImageCount() == 0) {
@@ -387,14 +409,13 @@ public class ImagePanel extends JComponent
     ensureFontHeight(null);
     int width = getWidth();
 
-    int itemWidth = gridSize + gridPadding.width;
-    int itemHeight =
-        gridSize + gridPadding.height + (showCaptions ? fontHeight + captionPadding : 0);
+    int itemWidth = getItemWidth();
+    int itemHeight = getItemHeight();
     int rowCount;
-    if (width < gridSize + gridPadding.width * 2) {
+    if (width < itemWidth + gridPadding.width) {
       rowCount = model.getImageCount();
     } else {
-      int itemsPerRow = width / itemWidth;
+      int itemsPerRow = calculateItemsPerRow();
       rowCount = (int) Math.ceil(model.getImageCount() / (float) itemsPerRow);
     }
     int height = rowCount * itemHeight;
@@ -403,7 +424,11 @@ public class ImagePanel extends JComponent
 
   @Override
   public Dimension getMinimumSize() {
-    return getPreferredSize();
+    ensureFontHeight(null);
+
+    int width = getItemWidth() + gridPadding.width;
+    int height = getItemHeight();
+    return new Dimension(width, height);
   }
 
   protected int getImageIndexAt(int x, int y) {
@@ -428,13 +453,21 @@ public class ImagePanel extends JComponent
   // SCROLLABLE
   @Override
   public Dimension getPreferredScrollableViewportSize() {
-    return getPreferredSize();
+    if (visibleRowCount <= 0) {
+      return getPreferredSize();
+    }
+
+    ensureFontHeight(null);
+
+    int width = 3 * getItemWidth() + gridPadding.width;
+    int height = visibleRowCount * getItemHeight();
+    return new Dimension(width, height);
   }
 
   @Override
   public int getScrollableBlockIncrement(Rectangle visibleRect, int orientation, int direction) {
     ensureFontHeight(null);
-    return ((gridSize + gridPadding.height * 2) + (showCaptions ? fontHeight + captionPadding : 0));
+    return getItemHeight() + gridPadding.height;
   }
 
   @Override

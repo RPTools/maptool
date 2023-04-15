@@ -52,7 +52,6 @@ import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
 import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
 import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
 import net.rptools.maptool.client.ui.Scale;
-import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -106,6 +105,8 @@ public class ZoneRenderer extends JComponent
 
   /** The ZoneView constructed from the zone. */
   private final ZoneView zoneView;
+  /** Manages the selected tokens on the zone. */
+  private final SelectionModel selectionModel;
 
   private Scale zoneScale;
   private final DrawableRenderer backgroundDrawableRenderer = new PartitionedDrawableRenderer();
@@ -115,15 +116,9 @@ public class ZoneRenderer extends JComponent
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
-  private Set<GUID> selectedTokenSet = new LinkedHashSet<GUID>();
-  private boolean keepSelectedTokenSet = false;
-  private final List<Set<GUID>> selectedTokenSetHistory = new ArrayList<Set<GUID>>();
   private final List<LabelLocation> labelLocationList = new LinkedList<LabelLocation>();
   private Map<Token, Set<Token>> tokenStackMap;
   private final Map<GUID, SelectionSet> selectionSetMap = new HashMap<GUID, SelectionSet>();
-  // private final Map<Token, TokenLocation> tokenLocationCache = Collections.synchronizedMap(new
-  // HashMap<Token,
-  // TokenLocation>());
   private final Map<Token, TokenLocation> tokenLocationCache = new HashMap<Token, TokenLocation>();
   private final List<TokenLocation> markerLocationList = new ArrayList<TokenLocation>();
   private GeneralPath facingArrow;
@@ -189,6 +184,7 @@ public class ZoneRenderer extends JComponent
     setFocusable(true);
     setZoneScale(new Scale());
     zoneView = new ZoneView(zone);
+    selectionModel = new SelectionModel(zone);
 
     // add(MapTool.getFrame().getFxPanel(), PositionalLayout.Position.NW);
 
@@ -249,7 +245,7 @@ public class ZoneRenderer extends JComponent
    *
    * @param token the token to center on
    */
-  public void centerOn(Token token) {
+  public void centerOnAndSetSelected(Token token) {
     if (token == null) {
       return;
     }
@@ -260,7 +256,7 @@ public class ZoneRenderer extends JComponent
         .getToolbox()
         .setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
 
-    selectToken(token.getId());
+    selectionModel.replaceSelection(Collections.singletonList(token.getId()));
     requestFocusInWindow();
   }
 
@@ -270,25 +266,6 @@ public class ZoneRenderer extends JComponent
 
   public boolean isPathShowing(Token token) {
     return showPathList.contains(token);
-  }
-
-  public void clearShowPaths() {
-    showPathList.clear();
-    // [PNICHOLS04] This call is unnecessary, because we are in a method that is
-    // only called once (from clearSelectedTokens), and the caller requires a
-    // repaint after we return.
-    // repaintDebouncer.dispatch();
-  }
-
-  /**
-   * Resets the token panels, fire onTokenSelection, repaints. The impersonation panel is only reset
-   * if no token is currently impersonated.
-   */
-  public void updateAfterSelection() {
-    MapTool.getFrame().getSelectionPanel().reset();
-    MapTool.getFrame().getImpersonatePanel().resetIfNotImpersonating();
-    HTMLFrameFactory.selectedListChanged();
-    repaintDebouncer.dispatch();
   }
 
   public Scale getZoneScale() {
@@ -341,14 +318,8 @@ public class ZoneRenderer extends JComponent
     return false;
   }
 
-  public void addMoveSelectionSet(
-      String playerId, GUID keyToken, Set<GUID> tokenList, boolean clearLocalSelected) {
+  public void addMoveSelectionSet(String playerId, GUID keyToken, Set<GUID> tokenList) {
     // I'm not supposed to be moving a token when someone else is already moving it
-    if (clearLocalSelected) {
-      for (GUID guid : tokenList) {
-        selectedTokenSet.remove(guid);
-      }
-    }
     selectionSetMap.put(keyToken, new SelectionSet(playerId, keyToken, tokenList));
     repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
@@ -679,6 +650,10 @@ public class ZoneRenderer extends JComponent
     return zoneView;
   }
 
+  public SelectionModel getSelectionModel() {
+    return selectionModel;
+  }
+
   /** Clear internal caches and backbuffers */
   public void flush() {
     if (zone.getBackgroundPaint() instanceof DrawableTexturePaint) {
@@ -908,7 +883,7 @@ public class ZoneRenderer extends JComponent
    */
   public PlayerView getPlayerView(Player.Role role, boolean selected) {
     List<Token> selectedTokens = null;
-    if (selected && getSelectedTokenSet() != null && !getSelectedTokenSet().isEmpty()) {
+    if (selected && selectionModel.isAnyTokenSelected()) {
       selectedTokens = getSelectedTokensList();
       selectedTokens.removeIf(token -> !token.getHasSight() || !AppUtil.playerOwns(token));
     }
@@ -1458,14 +1433,26 @@ public class ZoneRenderer extends JComponent
     if (AppState.isShowLights()) {
       // Lighting enabled.
       timer.start("renderLights:renderLightOverlay");
+      final var overlayBlending =
+          switch (zone.getLightingStyle()) {
+            case OVERTOP -> AlphaComposite.SrcOver.derive(
+                AppPreferences.getLightOverlayOpacity() / 255.f);
+            case ENVIRONMENTAL -> LightingComposite.OverlaidLights;
+          };
+      final var overlayFillColor =
+          switch (zone.getLightingStyle()) {
+            case OVERTOP -> new Color(0, 0, 0, 0);
+            case ENVIRONMENTAL -> Color.black;
+          };
+
       renderLightOverlay(
           g,
           LightingComposite.BlendedLights,
-          LightingComposite.OverlaidLights,
-          LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+          overlayBlending,
+          view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
           Color.black,
-          Color.black);
+          overlayFillColor);
       timer.stop("renderLights:renderLightOverlay");
     }
 
@@ -1527,24 +1514,6 @@ public class ZoneRenderer extends JComponent
     timer.stop("renderAuras:renderAuraOverlay");
   }
 
-  private void addLitAreaToLumensOverlay(
-      Graphics2D overlayG, Area area, float shade, float opacity) {
-    overlayG.setPaint(new Color(shade, shade, shade, opacity));
-
-    timer.start("renderLumensOverlay:drawLights:fillArea");
-    overlayG.fill(area);
-    timer.stop("renderLumensOverlay:drawLights:fillArea");
-
-    final var borderThickness = AppPreferences.getLumensOverlayBorderThickness();
-    if (borderThickness > 0) {
-      timer.start("renderLumensOverlay:drawLights:drawArea");
-      overlayG.setStroke(new BasicStroke((float) borderThickness));
-      overlayG.setPaint(Color.black);
-      overlayG.draw(area);
-      timer.stop("renderLumensOverlay:drawLights:drawArea");
-    }
-  }
-
   private void renderLumensOverlay(
       Graphics2D g,
       PlayerView view,
@@ -1552,7 +1521,7 @@ public class ZoneRenderer extends JComponent
       float overlayOpacity) {
     g = (Graphics2D) g.create();
 
-    final var lumensLevels = zoneView.getLumensLevels(view);
+    final var disjointLumensLevels = zoneView.getDisjointObscuredLumensLevels(view);
 
     timer.start("renderLumensOverlay:allocateBuffer");
     try (final var bufferHandle = tempBufferPool.acquire()) {
@@ -1560,13 +1529,14 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLumensOverlay:allocateBuffer");
 
       Graphics2D newG = lumensOverlay.createGraphics();
+      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
       SwingUtil.useAntiAliasing(newG);
 
       // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
       newG.setPaint(
           zone.getVisionType() == Zone.VisionType.NIGHT
-              ? new Color(0, 0, 0, overlayOpacity)
-              : new Color(1.f, 1.f, 1.f, 0.f));
+              ? new Color(0.f, 0.f, 0.f, 1.f)
+              : new Color(0.f, 0.f, 0.f, 0.f));
       newG.fillRect(0, 0, lumensOverlay.getWidth(), lumensOverlay.getHeight());
 
       if (clipStyle != null && visibleScreenArea != null) {
@@ -1589,11 +1559,10 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLumensOverlay:setTransform");
 
       timer.start("renderLumensOverlay:drawLumens");
-      // Lumens are ordered to be weak to strong. That works for us as well will draw the stronger
+      // Lumens are ordered to be weak to strong. That works for us as we will draw the stronger
       // areas overtop the weaker areas using `AlphaComposite.Src` to make sure the stronger one
       // "wins".
-      newG.setComposite(AlphaComposite.Src);
-      for (final var lumensLevel : lumensLevels) {
+      for (final var lumensLevel : disjointLumensLevels) {
         final var lumensStrength = lumensLevel.lumensStrength();
 
         // Light is weaker than darkness, so do it first.
@@ -1612,15 +1581,36 @@ public class ZoneRenderer extends JComponent
           lightShade *= lightShade;
           lightOpacity = 1.f;
         }
-        addLitAreaToLumensOverlay(newG, lumensLevel.lightArea(), lightShade, lightOpacity);
 
-        addLitAreaToLumensOverlay(newG, lumensLevel.darknessArea(), 0, 1.f);
+        timer.start("renderLumensOverlay:drawLights:fillArea");
+        newG.setPaint(new Color(lightShade, lightShade, lightShade, lightOpacity));
+        newG.fill(lumensLevel.lightArea());
+
+        newG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
+        newG.fill(lumensLevel.darknessArea());
+        timer.stop("renderLumensOverlay:drawLights:fillArea");
       }
+
+      // Now draw borders around each region if configured.
+      final var borderThickness = AppPreferences.getLumensOverlayBorderThickness();
+      if (borderThickness > 0) {
+        newG.setStroke(
+            new BasicStroke(
+                (float) borderThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        newG.setComposite(AlphaComposite.SrcOver);
+        newG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
+        for (final var lumensLevel : disjointLumensLevels) {
+          timer.start("renderLumensOverlay:drawLights:drawArea");
+          newG.draw(lumensLevel.lightArea());
+          newG.draw(lumensLevel.darknessArea());
+          timer.stop("renderLumensOverlay:drawLights:drawArea");
+        }
+      }
+
       timer.stop("renderLumensOverlay:drawLumens");
       newG.dispose();
 
       timer.start("renderLumensOverlay:drawBuffer");
-      g.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
       g.drawImage(lumensOverlay, null, 0, 0);
       timer.stop("renderLumensOverlay:drawBuffer");
     }
@@ -1985,7 +1975,7 @@ public class ZoneRenderer extends JComponent
     loadingProgress =
         String.format(
             " Loading Map '%s' - %d/%d Loaded %d/%d Cached",
-            zone.getPlayerAlias(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
+            zone.getDisplayName(), downloadCount, assetSet.size(), cacheCount, assetSet.size());
     isLoaded = loaded;
     if (isLoaded) {
       // Notify the token tree that it should update
@@ -2827,13 +2817,7 @@ public class ZoneRenderer extends JComponent
    */
   public void setActiveLayer(Zone.Layer layer) {
     activeLayer = layer;
-
-    if (!keepSelectedTokenSet && !selectedTokenSet.isEmpty()) {
-      selectedTokenSet.clear();
-      updateAfterSelection();
-    }
-    keepSelectedTokenSet = false; // Always reset it back, temp boolean only
-
+    selectionModel.replaceSelection(Collections.emptyList());
     repaintDebouncer.dispatch();
   }
 
@@ -3487,6 +3471,12 @@ public class ZoneRenderer extends JComponent
     }
     timer.start("tokenlist-12");
     boolean useIF = MapTool.getServerPolicy().isUseIndividualFOW();
+
+    final var movingTokens = new HashSet<GUID>();
+    for (final var selectionSet : selectionSetMap.values()) {
+      movingTokens.addAll(selectionSet.getTokens());
+    }
+
     // Selection and labels
     for (Token token : tokenPostProcessing) {
       TokenLocation location = tokenLocationCache.get(token);
@@ -3502,7 +3492,9 @@ public class ZoneRenderer extends JComponent
       }
       Rectangle footprintBounds = token.getBounds(zone);
 
-      boolean isSelected = selectedTokenSet.contains(token.getId());
+      // Count moving tokens as "selected" so that a border is drawn around them.
+      boolean isSelected =
+          selectionModel.isSelected(token.getId()) || movingTokens.contains(token.getId());
       if (isSelected) {
         ScreenPoint sp = ScreenPoint.fromZonePoint(this, footprintBounds.x, footprintBounds.y);
         double width = footprintBounds.width * getScale();
@@ -3731,11 +3723,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public Set<GUID> getSelectedTokenSet() {
-    return selectedTokenSet;
-  }
-
-  public void setKeepSelectedTokenSet(boolean keep) {
-    this.keepSelectedTokenSet = keep;
+    return selectionModel.getSelectedTokenIds();
   }
 
   /**
@@ -3759,16 +3747,17 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * A convenience method to get selected tokens ordered by name
+   * A convenience method to get selected tokens that actually exist.
    *
    * @return List of tokens
    */
   public List<Token> getSelectedTokensList() {
     List<Token> tokenList = new ArrayList<Token>();
 
-    for (GUID g : selectedTokenSet) {
-      if (zone.getToken(g) != null) {
-        tokenList.add(zone.getToken(g));
+    for (GUID g : selectionModel.getSelectedTokenIds()) {
+      final var token = zone.getToken(g);
+      if (token != null) {
+        tokenList.add(token);
       }
     }
     // Commented out to preserve selection order
@@ -3798,159 +3787,35 @@ public class ZoneRenderer extends JComponent
   }
 
   /**
-   * Removes a token from the selected set.
-   *
-   * @param tokenGUID the token to remove from the selection
-   */
-  public void deselectToken(GUID tokenGUID) {
-    addToSelectionHistory(selectedTokenSet);
-    selectedTokenSet.remove(tokenGUID);
-    // flushFog = true; // could call flushFog() but also clears visibleScreenArea and I don't know
-    // if we want
-    // that...
-  }
-
-  /**
-   * Adds a token from the selected set, if token is selectable.
-   *
-   * @param tokenGUID the token to add to the selection
-   * @return false if nothing was done because the token wasn't selectable, true otherwise
-   */
-  public boolean selectToken(GUID tokenGUID) {
-    if (!isTokenSelectable(tokenGUID)) {
-      return false;
-    }
-    addToSelectionHistory(selectedTokenSet);
-    selectedTokenSet.add(tokenGUID);
-    return true;
-  }
-
-  /**
-   * Add tokens to the selection.
-   *
-   * @param tokens the collection of tokens to add
-   */
-  public void selectTokens(Collection<GUID> tokens) {
-    for (GUID tokenGUID : tokens) {
-      if (!isTokenSelectable(tokenGUID)) {
-        continue;
-      }
-      selectedTokenSet.add(tokenGUID);
-    }
-    addToSelectionHistory(selectedTokenSet);
-  }
-
-  /**
    * Selects the tokens inside a selection rectangle.
    *
    * @param rect the selection rectangle
    */
-  public void selectTokens(Rectangle rect) {
-    List<GUID> selectedList = new LinkedList<GUID>();
+  public List<GUID> getTokenIdsInBounds(Rectangle rect) {
+    final var tokens = new ArrayList<GUID>();
     for (TokenLocation location : getTokenLocations(getActiveLayer())) {
       if (rect.intersects(location.bounds.getBounds())) {
-        selectedList.add(location.token.getId());
+        tokens.add(location.token.getId());
       }
     }
-    selectTokens(selectedList);
-  }
-
-  /** Clears the set of selected tokens. */
-  public void clearSelectedTokens() {
-    addToSelectionHistory(selectedTokenSet);
-    clearShowPaths();
-    selectedTokenSet.clear();
-  }
-
-  /**
-   * Returns true if the given token is the only one selected, and the selection is valid.
-   *
-   * @param token the token
-   * @return true if the selectedTokenSet size is 1 and contains the token, false otherwise
-   */
-  public boolean isOnlyTokenSelected(Token token) {
-    return selectedTokenSet.size() == 1
-        && token != null
-        && selectedTokenSet.contains(token.getId())
-        && isTokenSelectable(token.getId());
-  }
-
-  /**
-   * Returns true if the given token is selected, there is more than one token selected, and the
-   * token can be selected.
-   *
-   * @param token the token
-   * @return true if the selectedTokenSet size is greater than 1 and contains the token, false
-   *     otherwise
-   */
-  public boolean isSubsetSelected(Token token) {
-    return selectedTokenSet.size() > 1
-        && token != null
-        && selectedTokenSet.contains(token.getId())
-        && isTokenSelectable(token.getId());
-  }
-
-  /**
-   * Reverts the token selection. If the previous selection is empty, keeps reverting until it is
-   * non-empty. Fires onTokenSelection events.
-   */
-  public void undoSelectToken() {
-
-    while (selectedTokenSetHistory.size() > 0) {
-
-      selectedTokenSet = selectedTokenSetHistory.remove(0);
-
-      // user may have deleted some of the tokens that are contained in the selection history.
-      // There could also be tokens in another than the current layer which we don't want to go
-      // back to.
-      // find them and filter them otherwise the selectionSet will have orphaned GUIDs and
-      // they will cause NPE
-      Set<GUID> invalidTokenSet = new HashSet<GUID>();
-      for (GUID guid : selectedTokenSet) {
-        Token token = zone.getToken(guid);
-        if (token == null || token.getLayer() != getActiveLayer()) {
-          invalidTokenSet.add(guid);
-        }
-      }
-      selectedTokenSet.removeAll(invalidTokenSet);
-
-      if (!selectedTokenSet.isEmpty()) break;
-    }
-    // TODO: if selection history is empty, notify the selection panel to
-    // disable the undo button.
-    updateAfterSelection();
-  }
-
-  private void addToSelectionHistory(Set<GUID> selectionSet) {
-    // don't add empty selections to history
-    if (selectionSet.size() == 0) {
-      return;
-    }
-    Set<GUID> history = new HashSet<GUID>(selectionSet);
-    selectedTokenSetHistory.add(0, history);
-
-    // limit the history to a certain size
-    if (selectedTokenSetHistory.size() > 20) {
-      selectedTokenSetHistory.subList(20, selectedTokenSetHistory.size() - 1).clear();
-    }
+    return tokens;
   }
 
   public void cycleSelectedToken(int direction) {
     List<Token> visibleTokens = getTokensOnScreen();
-    Set<GUID> selectedTokenSet = getSelectedTokenSet();
     int newSelection = 0;
 
     if (visibleTokens.size() == 0) {
       return;
     }
-    if (selectedTokenSet.size() > 0) {
+    if (selectionModel.isAnyTokenSelected()) {
       // Find the first selected token on the screen
       for (int i = 0; i < visibleTokens.size(); i++) {
         Token token = visibleTokens.get(i);
         if (!isTokenSelectable(token.getId())) {
           continue;
         }
-        if (getSelectedTokenSet().contains(token.getId())) {
+        if (selectionModel.isSelected(token.getId())) {
           newSelection = i;
           break;
         }
@@ -3966,26 +3831,8 @@ public class ZoneRenderer extends JComponent
     }
 
     // Make the selection
-    clearSelectedTokens();
-    selectToken(visibleTokens.get(newSelection).getId());
-    updateAfterSelection();
-  }
-
-  /**
-   * Convenience function to check if a player owns all the tokens in the selection set
-   *
-   * @return true if every token in selectedTokenSet is owned by the player
-   */
-  public boolean playerOwnsAllSelected() {
-    if (selectedTokenSet.isEmpty()) {
-      return false;
-    }
-    for (GUID tokenGUID : selectedTokenSet) {
-      if (!AppUtil.playerOwns(zone.getToken(tokenGUID))) {
-        return false;
-      }
-    }
-    return true;
+    selectionModel.replaceSelection(
+        Collections.singletonList(visibleTokens.get(newSelection).getId()));
   }
 
   public Area getTokenBounds(Token token) {
@@ -4253,15 +4100,21 @@ public class ZoneRenderer extends JComponent
     private final String playerId;
     private ZoneWalker walker;
     private final Token token;
+
     private Path<ZonePoint> gridlessPath;
     /** Pixel distance (x) from keyToken's origin. */
     private int offsetX;
     /** Pixel distance (y) from keyToken's origin. */
     private int offsetY;
-    // private boolean restrictMovement = true;
+
     private RenderPathWorker renderPathTask;
     private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
 
+    /**
+     * @param playerId The ID of the player performing the movement.
+     * @param tokenGUID The ID of the leader token, i.e., the token that will pathfind.
+     * @param selectionList The IDs of all tokens being moved.
+     */
     public SelectionSet(String playerId, GUID tokenGUID, Set<GUID> selectionList) {
       selectionSet.addAll(selectionList);
       keyToken = tokenGUID;
@@ -4336,20 +4189,16 @@ public class ZoneRenderer extends JComponent
           renderPathTask.cancel(true);
         }
 
-        boolean restictMovement = MapTool.getServerPolicy().isUsingAstarPathfinding();
+        boolean restrictMovement =
+            MapTool.getServerPolicy().isUsingAstarPathfinding() && !token.isStamp();
 
         Set<TerrainModifierOperation> terrainModifiersIgnored = token.getTerrainModifiersIgnored();
-
-        // Skip AI Pathfinding if not on the token layer...
-        if (!ZoneRenderer.this.getActiveLayer().equals(Layer.TOKEN)) {
-          restictMovement = false;
-        }
 
         renderPathTask =
             new RenderPathWorker(
                 walker,
                 point,
-                restictMovement,
+                restrictMovement,
                 terrainModifiersIgnored,
                 token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
@@ -4684,8 +4533,7 @@ public class ZoneRenderer extends JComponent
       selectThese.add(token.getId());
     }
     // For convenience, select them
-    clearSelectedTokens();
-    selectTokens(selectThese);
+    selectionModel.replaceSelection(selectThese);
 
     if (!isGM) {
       String msg = I18N.getText("Token.dropped.byPlayer", zone.getName(), MapTool.getPlayer());
@@ -4700,7 +4548,6 @@ public class ZoneRenderer extends JComponent
     AppActions.copyTokens(tokens);
     AppActions.updateActions();
     requestFocusInWindow();
-    updateAfterSelection();
   }
 
   /**
@@ -4773,6 +4620,16 @@ public class ZoneRenderer extends JComponent
    */
   @Override
   public void dropActionChanged(DropTargetDragEvent dtde) {}
+
+  @Subscribe
+  private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+
+    showPathList.clear();
+    repaintDebouncer.dispatch();
+  }
 
   @Subscribe
   private void onTokensAdded(TokensAdded event) {

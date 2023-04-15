@@ -1220,11 +1220,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
               if (row instanceof Token && e.getClickCount() == 2) {
                 Token token = (Token) row;
-                getCurrentZoneRenderer().clearSelectedTokens();
-                // Pick an appropriate tool
-                // Jamz: why not just call .centerOn(Token token), now we have one place to fix...
-                getCurrentZoneRenderer().centerOn(token);
-                getCurrentZoneRenderer().updateAfterSelection();
+                getCurrentZoneRenderer().centerOnAndSetSelected(token);
               }
             }
             if (SwingUtilities.isRightMouseButton(e)) {
@@ -1725,6 +1721,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
         });
 
     initiativeButton.setBorder(btn.getBorder());
+    initiativeButton.setToolTipText(I18N.getText("tools.initiative.tooltip"));
     fullScreenToolPanel.add(initiativeButton);
 
     // set buttons to uniform size

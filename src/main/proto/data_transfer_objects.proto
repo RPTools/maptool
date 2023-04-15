@@ -49,8 +49,8 @@ message CampaignDto {
 
 message LookupTableDto {
   repeated LookupEntryDto entries = 1;
-  string name = 2;
-  string default_roll = 3;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue default_roll = 3;
   google.protobuf.StringValue table_image = 4;
   bool visible = 5;
   bool allow_lookup = 6;
@@ -352,6 +352,8 @@ message TokenDto {
   map<string, string> speech = 62;
   HeroLabDataDto hero_lab_data = 63;
   bool allow_uri_access = 64;
+  string notes_type = 68;
+  string gm_notes_type = 69;
 }
 
 message PathDto {

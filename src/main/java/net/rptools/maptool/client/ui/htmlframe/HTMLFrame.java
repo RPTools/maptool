@@ -367,11 +367,15 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
           "autohide", FunctionUtil.getDecimalForBoolean(frame.isAutohide()));
       frameProperties.addProperty("height", frame.getHeight());
       frameProperties.addProperty("width", frame.getWidth());
-      // The x & y are screen coordinates.
-      frameProperties.addProperty("undocked_x", dc.getUndockedBounds().getX());
-      frameProperties.addProperty("undocked_y", dc.getUndockedBounds().getY());
-      frameProperties.addProperty("undocked_h", dc.getUndockedBounds().getHeight());
-      frameProperties.addProperty("undocked_w", dc.getUndockedBounds().getWidth());
+      final var undockedBounds = dc.getUndockedBounds();
+      // A frame docked prior to a Restore Layout will lose its undocked bounds, causing NPE here.
+      if (undockedBounds != null) {
+        // The x & y are screen coordinates.
+        frameProperties.addProperty("undocked_x", undockedBounds.getX());
+        frameProperties.addProperty("undocked_y", undockedBounds.getY());
+        frameProperties.addProperty("undocked_h", undockedBounds.getHeight());
+        frameProperties.addProperty("undocked_w", undockedBounds.getWidth());
+      }
       // Many of the Frame/DockContext attributes shown in the JIDE javadocs don't seem to
       // get updated.  Docked height never changes but docked width does and matches Frame
       // width.  AutoHide Height/Width never change.

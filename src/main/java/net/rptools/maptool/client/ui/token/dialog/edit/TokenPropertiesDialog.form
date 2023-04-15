@@ -884,7 +884,7 @@
                 </constraints>
                 <properties>
                   <majorTickSpacing value="10"/>
-                  <minimum value="5"/>
+                  <minimum value="0"/>
                   <minorTickSpacing value="5"/>
                   <name value="tokenOpacitySlider"/>
                   <orientation value="1"/>

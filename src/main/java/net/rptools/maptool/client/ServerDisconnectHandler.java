@@ -45,7 +45,7 @@ public class ServerDisconnectHandler implements DisconnectHandler {
       MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
       MapTool.getFrame().getAssetPanel().enableAssets();
       new CampaignManager().clearCampaignData();
-
+      MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
       try {
         MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
       } catch (IOException
