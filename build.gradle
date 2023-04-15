@@ -451,7 +451,7 @@ dependencies {
     implementation 'javax.ws.rs:javax.ws.rs-api:2.1.1'
 
     // HTML Parsing
-    implementation 'org.jsoup:jsoup:1.14.3'
+    implementation 'org.jsoup:jsoup:1.15.4'
     // eventbus
     implementation 'com.google.guava:guava:31.1-jre'
     // compression of messages between client and server
