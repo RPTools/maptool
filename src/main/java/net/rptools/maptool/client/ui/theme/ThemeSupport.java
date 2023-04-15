@@ -504,8 +504,11 @@ public class ThemeSupport {
    * @throws UnsupportedLookAndFeelException if the look and feel is not supported.
    */
   public static void loadTheme()
-      throws NoSuchMethodException, InvocationTargetException, InstantiationException,
-          IllegalAccessException, UnsupportedLookAndFeelException {
+      throws NoSuchMethodException,
+          InvocationTargetException,
+          InstantiationException,
+          IllegalAccessException,
+          UnsupportedLookAndFeelException {
     JsonObject theme = readTheme();
 
     String themeName = theme.getAsJsonPrimitive("theme").getAsString();

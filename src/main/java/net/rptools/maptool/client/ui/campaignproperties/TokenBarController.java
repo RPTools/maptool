@@ -521,12 +521,16 @@ public class TokenBarController
         .setEnabled(hasName && hasUniqueUpdateName && selectedBar != null && hasShow && hasImages);
   }
 
-  /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+   */
   public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
-  /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+   */
   public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
@@ -772,12 +776,16 @@ public class TokenBarController
     return to;
   }
 
-  /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
+  /**
+   * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+   */
   public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
   }
 
-  /** @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent) */
+  /**
+   * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+   */
   public void stateChanged(ChangeEvent e) {
     if (e.getSource() == formPanel.getComponent(TESTER)) {
       renderer.value = ((JSlider) formPanel.getComponent(TESTER)).getValue() / 100.0;
@@ -787,7 +795,9 @@ public class TokenBarController
     }
   }
 
-  /** @param names Setter for names */
+  /**
+   * @param names Setter for names
+   */
   public void setNames(Set<String> names) {
     this.names = names;
   }

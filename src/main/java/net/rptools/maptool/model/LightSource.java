@@ -168,7 +168,9 @@ public class LightSource implements Comparable<LightSource>, Serializable {
     lightList.remove(source);
   }
 
-  /** @return the lights belonging to this LightSource. */
+  /**
+   * @return the lights belonging to this LightSource.
+   */
   public @Nonnull List<Light> getLightList() {
     return Collections.unmodifiableList(lightList);
   }

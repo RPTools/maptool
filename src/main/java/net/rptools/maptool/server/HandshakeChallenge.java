@@ -43,8 +43,12 @@ public class HandshakeChallenge {
 
   static HandshakeChallenge createSymmetricChallenge(
       String username, String password, CipherUtil.Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, AssertionError,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
           InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
@@ -54,8 +58,12 @@ public class HandshakeChallenge {
 
   static HandshakeChallenge createAsymmetricChallenge(
       String username, String password, CipherUtil.Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, AssertionError,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
           InvalidAlgorithmParameterException {
     if (!key.asymmetric()) {
       throw new AssertionError("Expected Asymmetric algorithm without IV, got Symmetric algorithm");
@@ -65,8 +73,12 @@ public class HandshakeChallenge {
 
   private static HandshakeChallenge createChallenge(
       String username, String password, CipherUtil.Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          InvalidAlgorithmParameterException {
     Cipher encryptor;
     if (key.asymmetric()) {
       encryptor = CipherUtil.createAsymmetricEncryptor(key);
@@ -87,8 +99,12 @@ public class HandshakeChallenge {
 
   static HandshakeChallenge fromSymmetricChallengeBytes(
       String username, byte[] challenge, CipherUtil.Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, AssertionError,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
           InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
@@ -98,8 +114,12 @@ public class HandshakeChallenge {
 
   static HandshakeChallenge fromAsymmetricChallengeBytes(
       String username, byte[] challenge, CipherUtil.Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, AssertionError,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
           InvalidAlgorithmParameterException {
     if (!key.asymmetric()) {
       throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
@@ -109,8 +129,12 @@ public class HandshakeChallenge {
 
   private static HandshakeChallenge fromChallengeBytes(
       String username, byte[] challenge, CipherUtil.Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          InvalidAlgorithmParameterException {
     Cipher decryptor;
     if (key.asymmetric()) {
       decryptor = CipherUtil.createAsymmetricDecryptor(key);
@@ -142,8 +166,12 @@ public class HandshakeChallenge {
   }
 
   public byte[] getExpectedResponse(byte[] iv)
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     Cipher encryptor = CipherUtil.createSymmetricEncryptor(key, iv);
     return encryptor.doFinal(expectedResponse);
   }

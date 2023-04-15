@@ -91,7 +91,9 @@ public class HTMLPane extends JEditorPane {
     ToolTipManager.sharedInstance().registerComponent(this);
   }
 
-  /** @return the rule for the body tag */
+  /**
+   * @return the rule for the body tag
+   */
   public String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }

@@ -27,7 +27,9 @@ import net.rptools.maptool.model.drawing.Cross;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.GraphicsUtil;
 
-/** @author CoveredInFish */
+/**
+ * @author CoveredInFish
+ */
 public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 

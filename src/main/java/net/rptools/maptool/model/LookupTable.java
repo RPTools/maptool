@@ -374,7 +374,9 @@ public class LookupTable {
 
     private MD5Key imageId;
 
-    /** @Deprecated here to prevent xstream from breaking b24-b25 */
+    /**
+     * @Deprecated here to prevent xstream from breaking b24-b25
+     */
     private String result;
 
     public LookupEntry(int min, int max, String value, MD5Key imageId) {

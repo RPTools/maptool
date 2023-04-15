@@ -46,7 +46,9 @@ public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
     super(aName, aColor, aGrid);
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowDiamondTokenOverlay(getName(), getColor(), getGrid());
@@ -60,7 +62,9 @@ public class FlowDiamondTokenOverlay extends FlowColorDotTokenOverlay {
     return overlay;
   }
 
-  /** @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token) */
+  /**
+   * @see FlowColorDotTokenOverlay#getShape(java.awt.Rectangle, net.rptools.maptool.model.Token)
+   */
   @Override
   protected Shape getShape(Rectangle bounds, Token token) {
     Rectangle2D r = getFlow().getStateBounds2D(bounds, token, getName());

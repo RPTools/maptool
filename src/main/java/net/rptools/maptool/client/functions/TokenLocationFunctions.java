@@ -74,7 +74,9 @@ public class TokenLocationFunctions extends AbstractFunction {
         "moveTokenFromMap");
   }
 
-  /** @return instance of TokenLocationFunctions. */
+  /**
+   * @return instance of TokenLocationFunctions.
+   */
   public static TokenLocationFunctions getInstance() {
     return instance;
   }

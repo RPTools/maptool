@@ -54,7 +54,9 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
     if (aCorner != null) corner = aCorner;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ColorDotTokenOverlay(getName(), getColor(), getCorner());
@@ -110,7 +112,9 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
     }
   }
 
-  /** @return Getter for corner */
+  /**
+   * @return Getter for corner
+   */
   public Quadrant getCorner() {
     return corner;
   }

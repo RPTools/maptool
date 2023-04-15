@@ -20,7 +20,9 @@ import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 
-/** @author Jay */
+/**
+ * @author Jay
+ */
 public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   /** Background color of the bar. */
@@ -44,12 +46,16 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     this(DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
   }
 
-  /** @return Getter for bgColor */
+  /**
+   * @return Getter for bgColor
+   */
   public Color getBgColor() {
     return bgColor;
   }
 
-  /** @param bgColor Setter for bgColor */
+  /**
+   * @param bgColor Setter for bgColor
+   */
   public void setBgColor(Color bgColor) {
     this.bgColor = bgColor;
   }
@@ -93,7 +99,9 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay =

@@ -741,7 +741,9 @@ public class MapTool {
     return serverCommand;
   }
 
-  /** @return the server, or null if player is a client. */
+  /**
+   * @return the server, or null if player is a client.
+   */
   public static MapToolServer getServer() {
     return server;
   }
@@ -1155,7 +1157,10 @@ public class MapTool {
   }
 
   public static void startPersonalServer(Campaign campaign)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
+      throws IOException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          ExecutionException,
           InterruptedException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
 

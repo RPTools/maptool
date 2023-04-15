@@ -26,7 +26,9 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 public class LoadSaveImpl {
   private static final Logger log = LogManager.getLogger(LoadSaveImpl.class);
 

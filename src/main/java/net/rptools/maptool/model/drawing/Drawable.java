@@ -25,7 +25,9 @@ import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import org.apache.logging.log4j.LogManager;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public interface Drawable {
 
   void draw(Graphics2D g, Pen pen);

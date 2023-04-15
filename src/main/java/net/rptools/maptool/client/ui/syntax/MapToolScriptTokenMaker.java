@@ -480,7 +480,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     if (zzReader != null) zzReader.close();
   }
 
-  /** @return the current lexical state. */
+  /**
+   * @return the current lexical state.
+   */
   public final int yystate() {
     return zzLexicalState;
   }
@@ -494,7 +496,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     zzLexicalState = newState;
   }
 
-  /** @return the text matched by the current regular expression. */
+  /**
+   * @return the text matched by the current regular expression.
+   */
   public final String yytext() {
     return new String(zzBuffer, zzStartRead, zzMarkedPos - zzStartRead);
   }
@@ -511,7 +515,9 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
     return zzBuffer[zzStartRead + pos];
   }
 
-  /** @return the length of the matched text region. */
+  /**
+   * @return the length of the matched text region.
+   */
   public final int yylength() {
     return zzMarkedPos - zzStartRead;
   }

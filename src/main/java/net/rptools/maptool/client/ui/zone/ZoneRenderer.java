@@ -645,7 +645,9 @@ public class ZoneRenderer extends JComponent
     zoneView.flush(token);
   }
 
-  /** @return the ZoneView */
+  /**
+   * @return the ZoneView
+   */
   public ZoneView getZoneView() {
     return zoneView;
   }
@@ -692,7 +694,9 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
-  /** @return the Zone */
+  /**
+   * @return the Zone
+   */
   public Zone getZone() {
     return zone;
   }
@@ -4121,7 +4125,9 @@ public class ZoneRenderer extends JComponent
       }
     }
 
-    /** @return path computation. */
+    /**
+     * @return path computation.
+     */
     public Path<ZonePoint> getGridlessPath() {
       return gridlessPath;
     }

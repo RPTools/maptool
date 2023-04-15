@@ -94,7 +94,9 @@ public class DrawnLabel extends AbstractDrawing {
   @Override
   protected void drawBackground(Graphics2D g) {}
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     return bounds;
   }
