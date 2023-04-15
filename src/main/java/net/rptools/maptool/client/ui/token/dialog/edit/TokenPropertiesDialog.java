@@ -453,7 +453,7 @@ public class TokenPropertiesDialog {
         panel11.add(spacer8, new GridConstraints(0, 9, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null, 0, false));
         final JSlider slider1 = new JSlider();
         slider1.setMajorTickSpacing(10);
-        slider1.setMinimum(5);
+        slider1.setMinimum(0);
         slider1.setMinorTickSpacing(5);
         slider1.setName("tokenOpacitySlider");
         slider1.setOrientation(1);

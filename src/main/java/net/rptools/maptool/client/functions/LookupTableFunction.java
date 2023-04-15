@@ -309,7 +309,7 @@ public class LookupTableFunction extends AbstractFunction {
       entryDetails.addProperty("min", entry.getMin());
       entryDetails.addProperty("max", entry.getMax());
       entryDetails.addProperty("value", entry.getValue());
-      entryDetails.addProperty("picked", entry.getPicked() == null ? false : entry.getPicked());
+      entryDetails.addProperty("picked", entry.getPicked());
 
       MD5Key imageId = entry.getImageId();
       if (imageId != null) {
