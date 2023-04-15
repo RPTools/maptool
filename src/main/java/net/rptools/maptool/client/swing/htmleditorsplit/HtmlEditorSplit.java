@@ -52,6 +52,14 @@ public class HtmlEditorSplit extends JPanel {
     gui.setText(text);
   }
 
+  public String getTextType() {
+    return gui.getTextStyle();
+  }
+
+  public void setTextType(String type) {
+    gui.setTextStyle(type);
+  }
+
   public String getSelectedText() {
     return gui.getSelectedText();
   }

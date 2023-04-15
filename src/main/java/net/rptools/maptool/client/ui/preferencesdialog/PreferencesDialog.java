@@ -97,6 +97,7 @@ public class PreferencesDialog extends JDialog {
   private final JSpinner haloLineWidthSpinner;
   private final JSpinner haloOverlayOpacitySpinner;
   private final JSpinner auraOverlayOpacitySpinner;
+  private final JSpinner lightOverlayOpacitySpinner;
   private final JSpinner lumensOverlayOpacitySpinner;
   private final JSpinner lumensOverlayBorderThicknessSpinner;
   private final JCheckBox lumensOverlayShowByDefaultCheckBox;
@@ -336,6 +337,7 @@ public class PreferencesDialog extends JDialog {
     haloLineWidthSpinner = panel.getSpinner("haloLineWidthSpinner");
     haloOverlayOpacitySpinner = panel.getSpinner("haloOverlayOpacitySpinner");
     auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
+    lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
     lumensOverlayOpacitySpinner = panel.getSpinner("lumensOverlayOpacitySpinner");
     lumensOverlayBorderThicknessSpinner = panel.getSpinner("lumensOverlayBorderThicknessSpinner");
     lumensOverlayShowByDefaultCheckBox = panel.getCheckBox("lumensOverlayShowByDefaultCheckBox");
@@ -710,6 +712,14 @@ public class PreferencesDialog extends JDialog {
           @Override
           protected void storeSpinnerValue(int value) {
             AppPreferences.setAuraOverlayOpacity(value);
+            MapTool.getFrame().refresh();
+          }
+        });
+    lightOverlayOpacitySpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setLightOverlayOpacity(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1103,6 +1113,8 @@ public class PreferencesDialog extends JDialog {
         new SpinnerNumberModel(AppPreferences.getHaloOverlayOpacity(), 0, 255, 1));
     auraOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getAuraOverlayOpacity(), 0, 255, 1));
+    lightOverlayOpacitySpinner.setModel(
+        new SpinnerNumberModel(AppPreferences.getLightOverlayOpacity(), 0, 255, 1));
     lumensOverlayOpacitySpinner.setModel(
         new SpinnerNumberModel(AppPreferences.getLumensOverlayOpacity(), 0, 255, 1));
     lumensOverlayBorderThicknessSpinner.setModel(

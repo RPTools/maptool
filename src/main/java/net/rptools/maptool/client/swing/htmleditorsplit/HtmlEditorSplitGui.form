@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplitGui">
-  <grid id="27dc6" binding="rootPanel" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="27dc6" binding="rootPanel" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="20" y="20" width="500" height="400"/>
@@ -10,7 +10,7 @@
     <children>
       <tabbedpane id="297f1" binding="tabPanel">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+          <grid row="1" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
             <preferred-size width="200" height="200"/>
           </grid>
         </constraints>
@@ -20,24 +20,6 @@
         </properties>
         <border type="none"/>
         <children>
-          <grid id="d2e47" binding="htmlTab" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-            <margin top="2" left="2" bottom="6" right="2"/>
-            <constraints>
-              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.hero.html"/>
-            </constraints>
-            <properties>
-              <name value=""/>
-            </properties>
-            <border type="none"/>
-            <children>
-              <component id="fe9a4" class="javafx.embed.swing.JFXPanel" binding="jfxPanel">
-                <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-                </constraints>
-                <properties/>
-              </component>
-            </children>
-          </grid>
           <grid id="2ed87" binding="textTab" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="0" left="0" bottom="4" right="0"/>
             <constraints>
@@ -60,9 +42,9 @@
                   <scrollpane id="be0cb" class="org.fife.ui.rtextarea.RTextScrollPane" binding="textScrollPane">
                     <constraints border-constraint="Center"/>
                     <properties>
-                      <foldIndicatorEnabled value="true"/>
-                      <iconRowHeaderEnabled value="true"/>
-                      <lineNumbersEnabled value="true"/>
+                      <foldIndicatorEnabled value="false"/>
+                      <iconRowHeaderEnabled value="false"/>
+                      <lineNumbersEnabled value="false"/>
                     </properties>
                     <border type="none"/>
                     <children>
@@ -85,8 +67,47 @@
               </grid>
             </children>
           </grid>
+          <grid id="d2e47" binding="htmlTab" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="2" left="2" bottom="6" right="2"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.hero.html"/>
+            </constraints>
+            <properties>
+              <name value=""/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <component id="fe9a4" class="javafx.embed.swing.JFXPanel" binding="jfxPanel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties/>
+              </component>
+            </children>
+          </grid>
         </children>
       </tabbedpane>
+      <component id="acc4b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Text type"/>
+        </properties>
+      </component>
+      <component id="bfcb9" class="javax.swing.JComboBox" binding="textTypeComboBox">
+        <constraints>
+          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <model/>
+        </properties>
+      </component>
+      <hspacer id="c4cdb">
+        <constraints>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
     </children>
   </grid>
 </form>
