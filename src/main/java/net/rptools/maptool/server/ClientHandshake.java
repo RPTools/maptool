@@ -30,9 +30,7 @@ import java.util.concurrent.ExecutionException;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.JDialog;
-import javax.swing.JOptionPane;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.lib.MD5Key;
@@ -51,18 +49,8 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
-import net.rptools.maptool.server.proto.AuthTypeEnum;
-import net.rptools.maptool.server.proto.ClientAuthMsg;
-import net.rptools.maptool.server.proto.ClientInitMsg;
-import net.rptools.maptool.server.proto.ConnectionSuccessfulMsg;
-import net.rptools.maptool.server.proto.HandshakeMsg;
+import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
-import net.rptools.maptool.server.proto.HandshakeResponseCodeMsg;
-import net.rptools.maptool.server.proto.PublicKeyAddedMsg;
-import net.rptools.maptool.server.proto.PublicKeyUploadMsg;
-import net.rptools.maptool.server.proto.RequestPublicKeyMsg;
-import net.rptools.maptool.server.proto.RoleDto;
-import net.rptools.maptool.server.proto.UseAuthTypeMsg;
 import net.rptools.maptool.util.cipher.CipherUtil;
 import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
@@ -336,6 +324,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
             log.error(I18N.getText("data.error.importGameData"), e);
             throw new IOException(e.getCause());
           }
+        }
+        if (!policy.isUseIndividualViews()) {
+          MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(false);
+          log.info("No individual views, disabling FoW buttons");
         }
         var libraryManager = new LibraryManager();
         for (var library : connectionSuccessfulMsg.getAddOnLibraryListDto().getLibrariesList()) {

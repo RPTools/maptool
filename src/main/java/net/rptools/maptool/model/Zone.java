@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -88,6 +89,25 @@ public class Zone {
 
     VisionType() {
       displayName = I18N.getString("visionType." + name());
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
+  /** How lights should be rendered into the zone. */
+  public enum LightingStyle {
+    /** Lights are to be rendered as part of the map's environment, approximation illumination. */
+    ENVIRONMENTAL(),
+    /** Lights are to be alpha-composited on top of the map. */
+    OVERTOP();
+
+    private final String displayName;
+
+    LightingStyle() {
+      displayName = I18N.getString("lightingStyle." + name());
     }
 
     @Override
@@ -297,6 +317,8 @@ public class Zone {
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
   private VisionType visionType = VisionType.OFF;
 
+  private LightingStyle lightingStyle = LightingStyle.OVERTOP;
+
   private TokenSelection tokenSelection = TokenSelection.ALL;
 
   // These are transitionary properties, very soon the width and height won't matter
@@ -346,6 +368,14 @@ public class Zone {
     this.visionType = visionType;
   }
 
+  public LightingStyle getLightingStyle() {
+    return lightingStyle;
+  }
+
+  public void setLightingStyle(LightingStyle lightingStyle) {
+    this.lightingStyle = lightingStyle;
+  }
+
   public TokenSelection getTokenSelection() {
     return tokenSelection;
   }
@@ -368,38 +398,42 @@ public class Zone {
   }
 
   /** @return name of the zone */
-  public String getName() {
+  public @Nonnull String getName() {
     return name;
   }
 
-  public String getPlayerAlias() {
+  /** @return The zone's player alias, if set. Otherwise {@code null}. */
+  public @Nullable String getPlayerAlias() {
     return playerAlias;
+  }
+
+  /**
+   * Get the name of the map to show to players.
+   *
+   * <p>If a player alias is set, that will be used as the display name. Otherwise the name is used
+   * as the display name.
+   *
+   * @return The name of the map that should be shown to players.
+   */
+  public @Nonnull String getDisplayName() {
+    return Objects.requireNonNullElse(playerAlias, name);
   }
 
   public void setName(String name) {
     this.name = name;
   }
 
-  public boolean setPlayerAlias(String playerAlias) {
-    List<ZoneRenderer> rendererList =
-        new LinkedList<ZoneRenderer>(MapTool.getFrame().getZoneRenderers());
-    for (ZoneRenderer z : rendererList) {
-      if (z.getZone().getPlayerAlias() != null
-          && z.getZone().getPlayerAlias().equals(playerAlias)) {
-        return false;
-      }
-    }
+  public void setPlayerAlias(String playerAlias) {
     this.playerAlias =
         playerAlias == null || playerAlias.equals("") || playerAlias.equals(name)
             ? null
             : playerAlias;
-    return true;
   }
 
   @Override
   public String toString() {
     if (!MapTool.getPlayer().isGM()) {
-      return playerAlias != null ? playerAlias : name;
+      return getDisplayName();
     } else if (playerAlias == null || name.equals(playerAlias)) {
       return name;
     } else {
@@ -2051,6 +2085,12 @@ public class Zone {
   ////
   // Backward compatibility
   protected Object readResolve() {
+    if ("".equals(playerAlias) || name.equals(playerAlias)) {
+      // Don't keep redundant player aliases around. The display name will default to the name if
+      // no player alias is set.
+      playerAlias = null;
+    }
+
     // 1.3b76 -> 1.3b77
     // adding the exposed area for Individual FOW
     if (exposedAreaMeta == null) {
@@ -2080,6 +2120,9 @@ public class Zone {
       } else {
         visionType = VisionType.OFF;
       }
+    }
+    if (lightingStyle == null) {
+      lightingStyle = LightingStyle.OVERTOP;
     }
     // Look for the bizarre z-ordering disappearing trick
     boolean foundZero = false;
