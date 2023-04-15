@@ -105,7 +105,7 @@ spotless {
         toggleOffOn()
 
         // Now using the Google Java style guide
-        googleJavaFormat("1.11.0")
+        googleJavaFormat("1.16.0")
     }
 
     format 'misc', {
