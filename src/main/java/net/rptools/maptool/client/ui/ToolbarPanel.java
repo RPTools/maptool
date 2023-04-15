@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.*;
+import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
 import javax.swing.plaf.basic.BasicToolBarUI;
@@ -484,6 +485,14 @@ public class ToolbarPanel extends JToolBar {
       SwingUtilities.getRoot(this).setVisible(visible);
     } else {
       super.setVisible(visible);
+    }
+  }
+
+  public void setTokenSelectionGroupEnabled(boolean enabled) {
+    Enumeration<AbstractButton> enumeration = tokenSelectionbuttonGroup.getElements();
+    while (enumeration.hasMoreElements()) {
+      AbstractButton button = enumeration.nextElement();
+      button.setEnabled(enabled);
     }
   }
 
