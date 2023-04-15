@@ -674,7 +674,7 @@ public class Token implements Cloneable {
   }
 
   public float getTokenOpacity() {
-    if (tokenOpacity <= 0.0f) {
+    if (tokenOpacity < 0.0f) {
       tokenOpacity = 1.0f;
     }
 
@@ -701,8 +701,8 @@ public class Token implements Cloneable {
     if (alpha > 1.0f) {
       alpha = 1.0f;
     }
-    if (alpha <= 0.0f) {
-      alpha = 0.05f;
+    if (alpha < 0.0f) {
+      alpha = 0.0f;
     }
 
     tokenOpacity = alpha;
