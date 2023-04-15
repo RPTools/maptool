@@ -4981,7 +4981,7 @@
                                    <at name="width">29</at>
                                    <at name="majorTickSpacing">20</at>
                                    <at name="minorTickSpacing">5</at>
-                                   <at name="minimum">5</at>
+                                   <at name="minimum">0</at>
                                    <at name="value">100</at>
                                    <at name="height">109</at>
                                   </object>

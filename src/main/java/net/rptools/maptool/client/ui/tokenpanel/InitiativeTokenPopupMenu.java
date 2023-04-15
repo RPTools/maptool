@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.tokenpanel;
 
 import java.awt.event.ActionEvent;
+import java.util.Collections;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -199,10 +200,10 @@ public class InitiativeTokenPopupMenu extends TokenPopupMenu {
         @Override
         public void actionPerformed(ActionEvent e) {
           Token token = tokenInitiativeUnderMouse.getToken();
-          getRenderer().centerOn(new ZonePoint(token.getX(), token.getY()));
-          getRenderer().clearSelectedTokens();
-          getRenderer().selectToken(token.getId());
-          getRenderer().updateAfterSelection();
+          final var renderer = getRenderer();
+          final var selectionModel = renderer.getSelectionModel();
+          renderer.centerOn(new ZonePoint(token.getX(), token.getY()));
+          selectionModel.replaceSelection(Collections.singletonList(token.getId()));
         }
       };
 }
