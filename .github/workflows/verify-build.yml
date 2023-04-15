@@ -16,6 +16,9 @@ on:
       - develop
       - feature*
       - release*
+  merge_group:
+    branches:
+      - develop
 jobs:
   formatting:
     runs-on: ubuntu-latest
