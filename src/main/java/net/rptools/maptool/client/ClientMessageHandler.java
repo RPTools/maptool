@@ -317,7 +317,7 @@ public class ClientMessageHandler implements MessageHandler {
               msg.getSelectedTokensList().stream().map(GUID::valueOf).collect(Collectors.toSet());
 
           var renderer = MapTool.getFrame().getZoneRenderer(zoneGUID);
-          renderer.addMoveSelectionSet(playerId, keyToken, selectedSet, true);
+          renderer.addMoveSelectionSet(playerId, keyToken, selectedSet);
         });
   }
 

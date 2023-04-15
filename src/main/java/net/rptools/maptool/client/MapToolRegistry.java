@@ -89,6 +89,13 @@ public class MapToolRegistry {
     Request request = new Request.Builder().url(requestUrl).build();
 
     try (Response response = client.newCall(request).execute()) {
+
+      // Check if we got an actual response. If we did not, just do an early return,
+      // the server isn't real.
+      if (response.body().string().isEmpty()) {
+        return new SeverConnectionDetails();
+      }
+
       JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
       SeverConnectionDetails details = new SeverConnectionDetails();
 

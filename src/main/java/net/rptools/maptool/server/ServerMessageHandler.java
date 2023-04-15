@@ -17,7 +17,9 @@ package net.rptools.maptool.server;
 import static net.rptools.maptool.server.proto.Message.MessageTypeCase.HEARTBEAT_MSG;
 
 import java.awt.geom.Area;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
@@ -26,6 +28,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -33,7 +36,9 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
@@ -458,8 +463,8 @@ public class ServerMessageHandler implements MessageHandler {
     server.getCampaign().putZone(zone);
 
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
-    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
+    new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
   }
 
   private void handle(PutLabelMsg msg) {
@@ -623,7 +628,10 @@ public class ServerMessageHandler implements MessageHandler {
       var msg = StartAssetTransferMsg.newBuilder().setHeader(producer.getHeader().toDto());
       server
           .getConnection()
-          .sendMessage(id, Message.newBuilder().setStartAssetTransferMsg(msg).build());
+          .sendMessage(
+              id,
+              MapToolConstants.Channel.IMAGE,
+              Message.newBuilder().setStartAssetTransferMsg(msg).build());
       server.addAssetProducer(id, producer);
 
     } catch (IllegalArgumentException iae) {
