@@ -28,7 +28,7 @@ jobs:
       - name: Set up JDK
         uses: actions/setup-java@v1
         with:
-          java-version: "17"
+          java-version: "20"
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
   build:
@@ -37,7 +37,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '17' ]
+        java: [ '20' ]
       fail-fast: false
     steps:
       - name: Git checkout
