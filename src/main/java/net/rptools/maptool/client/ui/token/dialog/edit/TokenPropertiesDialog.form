@@ -46,6 +46,7 @@
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -64,6 +65,7 @@
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -95,7 +97,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.vbl"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -139,6 +141,7 @@
                     <properties>
                       <name value="mblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movembltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="e2975" class="javax.swing.JToggleButton">
@@ -148,6 +151,7 @@
                     <properties>
                       <name value="wallVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movevbltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="9e8c7" class="javax.swing.JToggleButton">
@@ -157,6 +161,7 @@
                     <properties>
                       <name value="hillVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movehbltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="d415c" class="javax.swing.JToggleButton">
@@ -166,6 +171,7 @@
                     <properties>
                       <name value="pitVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movepbltoggle.tooltip"/>
                     </properties>
                   </component>
                 </children>
@@ -404,6 +410,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblToMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movetomap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -415,6 +422,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblFromMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movefrommap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -426,7 +434,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.state"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
