@@ -32,8 +32,8 @@ apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 17
-targetCompatibility = 17
+sourceCompatibility = 20
+targetCompatibility = 20
 
 
 // Used by gradle assemble & run tasks
@@ -230,7 +230,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_windows_hotspot_17.0.1_12.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20%2B36/OpenJDK20U-debugimage_x64_windows_hotspot_20_36.zip');
             }
         }
 
@@ -241,7 +241,7 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_mac_hotspot_17.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20%2B36/OpenJDK20U-jdk_x64_mac_hotspot_20_36.tar.gz');
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
@@ -267,7 +267,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin17-binaries/releases/download/jdk-17.0.1%2B12/OpenJDK17U-jdk_x64_linux_hotspot_17.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20%2B36/OpenJDK20U-jre_x64_linux_hotspot_20_36.tar.gz');
             }
         }
     }
