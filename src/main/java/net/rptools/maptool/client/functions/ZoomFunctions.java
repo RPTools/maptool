@@ -36,7 +36,7 @@ public class ZoomFunctions extends AbstractFunction {
   private static final String EQUALS = "=";
 
   private ZoomFunctions() {
-    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter","setZoomLock");
+    super(0, 6, "getZoom", "setZoom", "getViewArea", "setViewArea", "getViewCenter", "setZoomLock");
   }
 
   public static ZoomFunctions getInstance() {
