@@ -291,7 +291,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * DefaultTool Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.DefaultTool#mouseMoved(java.awt.event.MouseEvent) */
+  /**
+   * @see net.rptools.maptool.client.tool.DefaultTool#mouseMoved(java.awt.event.MouseEvent)
+   */
   @Override
   public void mouseMoved(MouseEvent e) {
     super.mouseMoved(e);
@@ -350,7 +352,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     return pen;
   }
 
-  /** @see Tool#detachFrom(net.rptools.maptool.client.ui.zone.ZoneRenderer) */
+  /**
+   * @see Tool#detachFrom(net.rptools.maptool.client.ui.zone.ZoneRenderer)
+   */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
@@ -358,7 +362,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     renderer.repaint();
   }
 
-  /** @see Tool#attachTo(net.rptools.maptool.client.ui.zone.ZoneRenderer) */
+  /**
+   * @see Tool#attachTo(net.rptools.maptool.client.ui.zone.ZoneRenderer)
+   */
   @Override
   protected void attachTo(ZoneRenderer renderer) {
     template.setZoneId(renderer.getZone().getId());
@@ -366,13 +372,17 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     super.attachTo(renderer);
   }
 
-  /** @see Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.radiustemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.radiustemplate.instructions";
@@ -382,7 +392,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    * MouseListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+   */
   @Override
   public void mousePressed(MouseEvent e) {
     super.mousePressed(e);
@@ -410,7 +422,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     }
   }
 
-  /** @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+   */
   @Override
   public void mouseEntered(MouseEvent e) {
     super.mouseEntered(e);
@@ -418,7 +432,9 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     renderer.repaint();
   }
 
-  /** @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+   */
   @Override
   public void mouseExited(MouseEvent e) {
     super.mouseExited(e);

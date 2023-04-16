@@ -33,7 +33,9 @@ public class LocalPlayer extends Player {
     setPasswordSalt(CipherUtil.createSalt());
   }
 
-  /** @return the effective role of the local player, taking into account Show As Player. */
+  /**
+   * @return the effective role of the local player, taking into account Show As Player.
+   */
   public Role getEffectiveRole() {
     if (isGM() && AppState.isShowAsPlayer()) {
       return Role.PLAYER;
@@ -61,7 +63,9 @@ public class LocalPlayer extends Player {
     return plainTextPassword;
   }
 
-  /** @return whether the player is a GM using GM view. */
+  /**
+   * @return whether the player is a GM using GM view.
+   */
   public boolean isEffectiveGM() {
     return isGM() && !AppState.isShowAsPlayer();
   }

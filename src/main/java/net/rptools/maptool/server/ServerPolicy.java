@@ -194,12 +194,16 @@ public class ServerPolicy {
     useIndividualFOW = flag;
   }
 
-  /** @return the includeOwnedNPCs */
+  /**
+   * @return the includeOwnedNPCs
+   */
   public boolean isIncludeOwnedNPCs() {
     return includeOwnedNPCs;
   }
 
-  /** @param includeOwnedNPCs the includeOwnedNPCs to set */
+  /**
+   * @param includeOwnedNPCs the includeOwnedNPCs to set
+   */
   public void setIncludeOwnedNPCs(boolean includeOwnedNPCs) {
     this.includeOwnedNPCs = includeOwnedNPCs;
   }

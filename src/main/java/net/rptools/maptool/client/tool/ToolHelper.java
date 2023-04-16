@@ -30,7 +30,9 @@ import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.util.GraphicsUtil;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ToolHelper {
 
   private static AbstractAction deleteTokenAction =

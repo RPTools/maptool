@@ -240,7 +240,9 @@ public abstract class Grid implements Cloneable {
     return 0;
   }
 
-  /** @return the difference in pixels between the center of a cell and its converted zonepoint. */
+  /**
+   * @return the difference in pixels between the center of a cell and its converted zonepoint.
+   */
   public abstract Point2D.Double getCenterOffset();
 
   /**
@@ -290,12 +292,16 @@ public abstract class Grid implements Cloneable {
     fireGridChanged();
   }
 
-  /** @return The x component of the grid's offset. */
+  /**
+   * @return The x component of the grid's offset.
+   */
   public int getOffsetX() {
     return offsetX;
   }
 
-  /** @return The y component of the grid's offset */
+  /**
+   * @return The y component of the grid's offset
+   */
   public int getOffsetY() {
     return offsetY;
   }

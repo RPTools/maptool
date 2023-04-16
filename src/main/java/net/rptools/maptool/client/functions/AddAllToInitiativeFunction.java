@@ -43,12 +43,16 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final AddAllToInitiativeFunction instance = new AddAllToInitiativeFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static AddAllToInitiativeFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)

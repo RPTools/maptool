@@ -36,7 +36,9 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
           InvalidKeyException {
     byte[] salt = CipherUtil.createSalt();
     this.playerPassword = CipherUtil.fromSharedKey(playerPassword, salt);

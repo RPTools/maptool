@@ -148,7 +148,9 @@ public class BlastTemplate extends ConeTemplate {
     adjustRectangle();
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
+   */
   @Override
   public int getDistance(int x, int y) {
     return Math.max(x, y);
@@ -158,13 +160,17 @@ public class BlastTemplate extends ConeTemplate {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
+   */
   @Override
   protected void draw(Graphics2D g) {
     renderer.draw(g);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
+   */
   @Override
   protected void drawBackground(Graphics2D g) {
     Composite old = g.getComposite();

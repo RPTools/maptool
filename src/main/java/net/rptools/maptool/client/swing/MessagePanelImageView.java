@@ -130,7 +130,9 @@ public class MessagePanelImageView extends View {
     return (String) getElement().getAttributes().getAttribute(HTML.Attribute.ALT);
   }
 
-  /** @return a URL for the image source, or null if it could not be determined. */
+  /**
+   * @return a URL for the image source, or null if it could not be determined.
+   */
   public URL getImageURL() {
     String src = (String) getElement().getAttributes().getAttribute(HTML.Attribute.SRC);
     if (src == null) {
@@ -145,17 +147,23 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** @return the icon to use if the image couldn't be found. */
+  /**
+   * @return the icon to use if the image couldn't be found.
+   */
   public Icon getNoImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(MISSING_IMAGE);
   }
 
-  /** @return the icon to use while in the process of loading the image. */
+  /**
+   * @return the icon to use while in the process of loading the image.
+   */
   public Icon getLoadingImageIcon() {
     return (Icon) UIManager.getLookAndFeelDefaults().get(PENDING_IMAGE);
   }
 
-  /** @return the image to render. */
+  /**
+   * @return the image to render.
+   */
   public Image getImage() {
     sync();
     return imageCache.get(getImageURL(), imageObserver);
@@ -179,7 +187,9 @@ public class MessagePanelImageView extends View {
     }
   }
 
-  /** @return true if the image should be loaded when first asked for. */
+  /**
+   * @return true if the image should be loaded when first asked for.
+   */
   public boolean getLoadsSynchronously() {
     return ((state & SYNC_LOAD_FLAG) != 0);
   }

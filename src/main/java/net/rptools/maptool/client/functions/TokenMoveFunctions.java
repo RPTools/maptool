@@ -54,7 +54,9 @@ import net.rptools.parser.function.AbstractFunction;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author Joe.Frazier */
+/**
+ * @author Joe.Frazier
+ */
 public class TokenMoveFunctions extends AbstractFunction {
 
   /** macro name to call for the onTokenMove event */

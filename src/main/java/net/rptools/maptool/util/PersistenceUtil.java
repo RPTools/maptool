@@ -78,7 +78,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class PersistenceUtil {
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 

@@ -195,7 +195,9 @@ public class TwoToneTextPane extends JTextPane {
     /** The view factory used by the editor kit */
     private ViewFactory defaultViewFactory = new TwoToneStyledViewFactory();
 
-    /** @see javax.swing.text.StyledEditorKit#getViewFactory() */
+    /**
+     * @see javax.swing.text.StyledEditorKit#getViewFactory()
+     */
     public ViewFactory getViewFactory() {
       return defaultViewFactory;
     }
@@ -214,7 +216,9 @@ public class TwoToneTextPane extends JTextPane {
    */
   class TwoToneStyledViewFactory implements ViewFactory {
 
-    /** @see javax.swing.text.ViewFactory#create(javax.swing.text.Element) */
+    /**
+     * @see javax.swing.text.ViewFactory#create(javax.swing.text.Element)
+     */
     public View create(Element elem) {
       String kind = elem.getName();
       if (kind != null) {
@@ -338,7 +342,9 @@ public class TwoToneTextPane extends JTextPane {
       return width;
     }
 
-    /** @see javax.swing.text.GlyphView.GlyphPainter#getHeight(javax.swing.text.GlyphView) */
+    /**
+     * @see javax.swing.text.GlyphView.GlyphPainter#getHeight(javax.swing.text.GlyphView)
+     */
     public float getHeight(GlyphView v) {
       sync(v);
       return metrics.getHeight() + VERTICAL_OFFSET;

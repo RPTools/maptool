@@ -39,7 +39,9 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(FTPClient.class);
