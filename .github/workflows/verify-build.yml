@@ -48,7 +48,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: ${{ matrix.java }}
-          distribution: ${{ matrix.java }}
+          distribution: ${{ matrix.distribution }}
       - name: Cache Gradle
         uses: actions/cache@v3
         with:
