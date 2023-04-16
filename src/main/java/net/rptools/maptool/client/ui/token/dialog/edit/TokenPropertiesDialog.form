@@ -410,6 +410,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblToMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movetomap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -421,6 +422,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblFromMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movefrommap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>

@@ -255,12 +255,14 @@ public class TokenPropertiesDialog {
         panel4.add(button2, new GridConstraints(13, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JButton button3 = new JButton();
         button3.setActionCommand("Clear VBL");
+        button3.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.button.movetomap.tooltip"));
         button3.setName("transferVblToMap");
         this.$$$loadButtonText$$$(button3, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.tomap"));
         button3.setVisible(true);
         panel4.add(button3, new GridConstraints(14, 0, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, false));
         final JButton button4 = new JButton();
         button4.setActionCommand("Clear VBL");
+        button4.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.button.movefrommap.tooltip"));
         button4.setName("transferVblFromMap");
         this.$$$loadButtonText$$$(button4, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "EditTokenDialog.button.vbl.frommap"));
         button4.setVisible(true);
