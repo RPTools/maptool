@@ -63,19 +63,25 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.linetemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.linetemplate.instructions";
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new LineTemplate();
@@ -250,7 +256,9 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   public void propertyChange(PropertyChangeEvent aEvt) {
     ((LineTemplate) template).setDoubleWide((Boolean) aEvt.getNewValue());
   }

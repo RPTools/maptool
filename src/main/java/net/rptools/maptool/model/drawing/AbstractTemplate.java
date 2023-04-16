@@ -331,13 +331,17 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
+   */
   @Override
   protected void draw(Graphics2D g) {
     paint(g, true, false);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
+   */
   @Override
   protected void drawBackground(Graphics2D g) {
 

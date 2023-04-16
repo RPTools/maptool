@@ -53,7 +53,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     assetId = anAssetId;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ImageTokenOverlay(getName(), assetId);
@@ -95,7 +97,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for assetId */
+  /**
+   * @return Getter for assetId
+   */
   public MD5Key getAssetId() {
     return assetId;
   }

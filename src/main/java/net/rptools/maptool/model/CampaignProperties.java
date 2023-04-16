@@ -345,22 +345,30 @@ public class CampaignProperties {
     return set;
   }
 
-  /** @return Getter for initiativeOwnerPermissions */
+  /**
+   * @return Getter for initiativeOwnerPermissions
+   */
   public boolean isInitiativeOwnerPermissions() {
     return initiativeOwnerPermissions;
   }
 
-  /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
+  /**
+   * @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions
+   */
   public void setInitiativeOwnerPermissions(boolean initiativeOwnerPermissions) {
     this.initiativeOwnerPermissions = initiativeOwnerPermissions;
   }
 
-  /** @return Getter for initiativeMovementLock */
+  /**
+   * @return Getter for initiativeMovementLock
+   */
   public boolean isInitiativeMovementLock() {
     return initiativeMovementLock;
   }
 
-  /** @param initiativeMovementLock Setter for initiativeMovementLock */
+  /**
+   * @param initiativeMovementLock Setter for initiativeMovementLock
+   */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     this.initiativeMovementLock = initiativeMovementLock;
   }
@@ -391,7 +399,9 @@ public class CampaignProperties {
     return characterSheets;
   }
 
-  /** @param characterSheets Setter for characterSheets */
+  /**
+   * @param characterSheets Setter for characterSheets
+   */
   public void setCharacterSheets(Map<String, String> characterSheets) {
     this.characterSheets.clear();
     this.characterSheets.putAll(characterSheets);

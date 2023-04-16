@@ -221,7 +221,9 @@ public class RadiusCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     if (getZoneId() == null) {
       // This avoids a NPE when loading up a campaign
@@ -268,7 +270,9 @@ public class RadiusCellTemplate extends AbstractTemplate {
     r.width = r.height = (getRadius() * 2 + 1) * gridSize;
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     super.setRadius(squares);

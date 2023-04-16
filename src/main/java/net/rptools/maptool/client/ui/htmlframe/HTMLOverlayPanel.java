@@ -110,7 +110,9 @@ public class HTMLOverlayPanel extends JFXPanel {
     this.setScene(scene);
   }
 
-  /** @return a cloned set of the overlays. */
+  /**
+   * @return a cloned set of the overlays.
+   */
   public ConcurrentSkipListSet<HTMLOverlayManager> getOverlays() {
     return overlays.clone();
   }
@@ -174,7 +176,9 @@ public class HTMLOverlayPanel extends JFXPanel {
     return true;
   }
 
-  /** @return whether all overlay WebViews have the default cursor. */
+  /**
+   * @return whether all overlay WebViews have the default cursor.
+   */
   public boolean areWebViewCursorsDefault() {
     for (HTMLOverlayManager overlay : overlays) {
       if (overlay.isVisible()) {

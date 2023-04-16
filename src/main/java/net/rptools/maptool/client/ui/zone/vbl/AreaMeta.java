@@ -46,7 +46,9 @@ public class AreaMeta {
     return new Area(area);
   }
 
-  /** @return true if this object does not have any edges. */
+  /**
+   * @return true if this object does not have any edges.
+   */
   public boolean isEmpty() {
     // Note: vertices is a closed loop, so we can only have edges if we have at least 3 points with
     // which to form a line.

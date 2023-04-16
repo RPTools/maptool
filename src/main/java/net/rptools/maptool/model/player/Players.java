@@ -518,8 +518,11 @@ public class Players {
    * @throws InvalidKeyException if there is an error hashing the password.
    */
   public void commitChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.commitChanges();
     }
@@ -535,8 +538,11 @@ public class Players {
    * @throws InvalidKeyException i
    */
   public void rollbackChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.rollbackChanges();
     }

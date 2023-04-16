@@ -257,7 +257,9 @@ public class ConeTemplate extends RadiusTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
       // How does this happen ?! Anyway, try to use the current zone (since that's what we're

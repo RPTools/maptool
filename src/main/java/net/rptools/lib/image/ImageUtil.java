@@ -43,7 +43,9 @@ import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ImageUtil {
   private static final Logger log = LogManager.getLogger();
 

@@ -44,19 +44,25 @@ public class ConeTemplateTool extends RadiusTemplateTool {
    * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new ConeTemplate();
   }
 
-  /** @see Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.cone.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.cone.instructions";
