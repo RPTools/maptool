@@ -16,7 +16,7 @@ buildscript {
 plugins {
     id "application"
     id "org.ajoberstar.grgit" version "5.0.0"
-    id "com.diffplug.spotless" version "6.16.0"
+    id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.12.7'
     id "com.google.protobuf" version "0.8.19"
@@ -558,3 +558,4 @@ task createWrapper(type: Wrapper) {
 
 // Configure current release tag in Sentry.io properties
 processResources.dependsOn configSentryRelease
+configSentryRelease.dependsOn 'spotlessCheck'
