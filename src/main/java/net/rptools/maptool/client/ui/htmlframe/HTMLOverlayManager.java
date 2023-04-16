@@ -96,7 +96,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     super.setupWebView(webView);
   }
 
-  /** @return the zOrder of the overlay. */
+  /**
+   * @return the zOrder of the overlay.
+   */
   public int getZOrder() {
     return zOrder;
   }
@@ -110,7 +112,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     this.zOrder = zOrder;
   }
 
-  /** @return the name of the overlay. */
+  /**
+   * @return the name of the overlay.
+   */
   public String getName() {
     return name;
   }
@@ -153,7 +157,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     }
   }
 
-  /** @return the rule for an invisible body. */
+  /**
+   * @return the rule for an invisible body.
+   */
   @Override
   String getCSSRule() {
     return String.format(CSS_BODY, AppPreferences.getFontSize())

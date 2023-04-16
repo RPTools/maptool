@@ -164,7 +164,9 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
     return true;
   }
 
-  /** @see Tool#resetTool() */
+  /**
+   * @see Tool#resetTool()
+   */
   @Override
   protected void resetTool() {
     if (line != null) {

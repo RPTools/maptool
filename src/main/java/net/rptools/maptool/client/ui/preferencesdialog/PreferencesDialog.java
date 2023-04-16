@@ -1248,7 +1248,9 @@ public class PreferencesDialog extends JDialog {
     return model;
   }
 
-  /** @author frank */
+  /**
+   * @author frank
+   */
   private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
     JTextField comp;
@@ -1285,7 +1287,9 @@ public class PreferencesDialog extends JDialog {
     protected abstract void storeNumericValue(T value);
   }
 
-  /** @author frank */
+  /**
+   * @author frank
+   */
   private abstract static class ChangeListenerProxy implements ChangeListener {
 
     @Override

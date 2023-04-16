@@ -664,22 +664,30 @@ public class Campaign {
     return assetSet;
   }
 
-  /** @return Getter for initiativeOwnerPermissions */
+  /**
+   * @return Getter for initiativeOwnerPermissions
+   */
   public boolean isInitiativeOwnerPermissions() {
     return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
-  /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
+  /**
+   * @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions
+   */
   public void setInitiativeOwnerPermissions(boolean initiativeOwnerPermissions) {
     campaignProperties.setInitiativeOwnerPermissions(initiativeOwnerPermissions);
   }
 
-  /** @return Getter for initiativeMovementLock */
+  /**
+   * @return Getter for initiativeMovementLock
+   */
   public boolean isInitiativeMovementLock() {
     return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
-  /** @param initiativeMovementLock Setter for initiativeMovementLock */
+  /**
+   * @param initiativeMovementLock Setter for initiativeMovementLock
+   */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     campaignProperties.setInitiativeMovementLock(initiativeMovementLock);
   }
@@ -700,7 +708,9 @@ public class Campaign {
     campaignProperties.setInitiativePanelButtonsDisabled(disabled);
   }
 
-  /** @return Getter for characterSheets */
+  /**
+   * @return Getter for characterSheets
+   */
   public Map<String, String> getCharacterSheets() {
     return getCampaignProperties().getCharacterSheets();
   }

@@ -180,7 +180,9 @@ public class UndoPerZone {
       MapTool.serverCommand().undoDraw(zone.getId(), drawable.getId());
     }
 
-    /** @see javax.swing.undo.UndoableEdit#redo() */
+    /**
+     * @see javax.swing.undo.UndoableEdit#redo()
+     */
     @Override
     public void redo() throws CannotRedoException {
       super.redo();

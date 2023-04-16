@@ -198,12 +198,16 @@ public class CommandPanel extends JPanel {
     }
   }
 
-  /** @return whether the current identity is a token. */
+  /**
+   * @return whether the current identity is a token.
+   */
   public boolean isImpersonatingToken() {
     return getCurrentIdentity().validToken();
   }
 
-  /** @return whether the global identity is a token. */
+  /**
+   * @return whether the global identity is a token.
+   */
   public boolean isGlobalImpersonatingToken() {
     return globalIdentity.validToken();
   }
@@ -385,7 +389,9 @@ public class CommandPanel extends JPanel {
       }
     }
 
-    /** @return a string representing the identity. */
+    /**
+     * @return a string representing the identity.
+     */
     public String getIdentity() {
       if (identityName == null) {
         if (identityGUID == null) return MapTool.getPlayer().getName();
@@ -394,27 +400,37 @@ public class CommandPanel extends JPanel {
       return identityName;
     }
 
-    /** @return a string for the character label of the identity. */
+    /**
+     * @return a string for the character label of the identity.
+     */
     public String getCharacterLabel() {
       return hasName() ? identityName : "";
     }
 
-    /** @return the GUID of the identity. */
+    /**
+     * @return the GUID of the identity.
+     */
     public GUID getIdentityGUID() {
       return identityGUID;
     }
 
-    /** @return the token of the identity. */
+    /**
+     * @return the token of the identity.
+     */
     public Token getToken() {
       return FindTokenFunctions.findToken(identityGUID, null);
     }
 
-    /** @return whether the identity has a name. */
+    /**
+     * @return whether the identity has a name.
+     */
     public boolean hasName() {
       return identityName != null;
     }
 
-    /** @return whether the token can still be found on the current map. */
+    /**
+     * @return whether the token can still be found on the current map.
+     */
     public boolean validToken() {
       if (identityGUID == null) {
         return false;

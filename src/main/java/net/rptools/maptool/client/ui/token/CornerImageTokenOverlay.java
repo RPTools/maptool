@@ -48,7 +48,9 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     corner = aCorner;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new CornerImageTokenOverlay(getName(), getAssetId(), corner);
@@ -62,7 +64,9 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     return overlay;
   }
 
-  /** @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token) */
+  /**
+   * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
+   */
   @Override
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
     int x = (bounds.width + 1) / 2;
@@ -83,7 +87,9 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     return new Rectangle(x, y, bounds.width / 2, bounds.height / 2);
   }
 
-  /** @return Getter for corner */
+  /**
+   * @return Getter for corner
+   */
   public Quadrant getCorner() {
     return corner;
   }

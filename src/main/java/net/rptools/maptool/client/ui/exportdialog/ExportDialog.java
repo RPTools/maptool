@@ -196,7 +196,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       form.getRadioButton(this.toString()).addActionListener(listener);
     }
 
-    /** @return which of the buttons in the Type group is selected */
+    /**
+     * @return which of the buttons in the Type group is selected
+     */
     public static ExportRadioButtons getType() {
       if (ExportRadioButtons.TYPE_CURRENT_VIEW.isChecked()) {
         return TYPE_CURRENT_VIEW;
@@ -206,7 +208,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       return null;
     }
 
-    /** @return which of the buttons in the View group is selected */
+    /**
+     * @return which of the buttons in the View group is selected
+     */
     public static ExportRadioButtons getView() {
       if (ExportRadioButtons.VIEW_GM.isChecked()) {
         return VIEW_GM;
@@ -216,7 +220,9 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       return null;
     }
 
-    /** @return which of the buttons in the Layers group is selected */
+    /**
+     * @return which of the buttons in the Layers group is selected
+     */
     public static ExportRadioButtons getLayers() {
       if (ExportRadioButtons.LAYERS_CURRENT.isChecked()) {
         return LAYERS_CURRENT;

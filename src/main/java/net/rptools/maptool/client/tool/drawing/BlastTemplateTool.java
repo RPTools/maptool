@@ -37,19 +37,25 @@ public class BlastTemplateTool extends BurstTemplateTool {
    * Overridden RadiusTemplateTool methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.BurstTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.BurstTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new BlastTemplate();
   }
 
-  /** @see Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.blasttemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.blasttemplate.instructions";

@@ -40,13 +40,17 @@ public class WallTemplate extends LineTemplate {
     setPathVertex(new ZonePoint(0, 0));
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#getRadius() */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#getRadius()
+   */
   @Override
   public int getRadius() {
     return getPath() == null ? 0 : getPath().size();
   }
 
-  /** @see net.rptools.maptool.model.drawing.LineTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.LineTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     // Do nothing, calculated from path length
@@ -63,7 +67,9 @@ public class WallTemplate extends LineTemplate {
     v.y = vertex.y;
   }
 
-  /** @see net.rptools.maptool.model.drawing.LineTemplate#calcPath() */
+  /**
+   * @see net.rptools.maptool.model.drawing.LineTemplate#calcPath()
+   */
   @Override
   protected List<CellPoint> calcPath() {
     return getPath(); // Do nothing, path is set by tool.

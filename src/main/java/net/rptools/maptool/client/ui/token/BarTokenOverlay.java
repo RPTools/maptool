@@ -51,7 +51,9 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** @param name Name of the new bar. */
+  /**
+   * @param name Name of the new bar.
+   */
   public BarTokenOverlay(String name) {
     super(name);
   }
@@ -60,12 +62,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @return Getter for increments */
+  /**
+   * @return Getter for increments
+   */
   public int getIncrements() {
     return increments;
   }
 
-  /** @param increments Setter for increments */
+  /**
+   * @param increments Setter for increments
+   */
   public void setIncrements(int increments) {
     this.increments = increments;
   }
@@ -98,12 +104,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     return (int) Math.ceil(value * (increments - 1));
   }
 
-  /** @return Getter for side */
+  /**
+   * @return Getter for side
+   */
   public Side getSide() {
     return side;
   }
 
-  /** @param side Setter for side */
+  /**
+   * @param side Setter for side
+   */
   public void setSide(Side side) {
     this.side = side;
   }
