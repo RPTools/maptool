@@ -309,7 +309,7 @@ dependencies {
     implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
 
     // ftp client
-    implementation 'commons-net:commons-net:3.8.0'
+    implementation 'commons-net:commons-net:3.9.0'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.4'
 
