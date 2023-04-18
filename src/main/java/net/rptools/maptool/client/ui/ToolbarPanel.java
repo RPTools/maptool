@@ -18,7 +18,6 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicToolBarUI;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -49,24 +48,24 @@ public class ToolbarPanel extends JToolBar {
   private final JToggleButton templateButton;
   private final JToggleButton fogButton;
   private final JToggleButton topologyButton;
-  private final Component horizontalSpacer;
+  /**
+   * The last component prior to the option panel. This is used to find the index at which to
+   * reinsert the option panel when the fullscreen tools are hidden.
+   */
+  private final Component optionPanelSeparator;
+
   private final JPanel optionPanel;
   private final Toolbox toolbox;
   private final JButton mapselect;
 
   public ToolbarPanel(Toolbox tbox) {
     setRollover(true);
+    setFloatable(false);
+
+    add(Box.createHorizontalStrut(5));
 
     toolbox = tbox;
     optionPanel = new JPanel(new CardLayout());
-
-    final JSeparator vertSplit = new JSeparator(JSeparator.VERTICAL);
-    final Component vertSpacer = Box.createHorizontalStrut(10);
-
-    final JSeparator horizontalSplit = new JSeparator(JSeparator.HORIZONTAL);
-    horizontalSplit.setVisible(false);
-    horizontalSpacer = Box.createVerticalStrut(10);
-    horizontalSpacer.setVisible(false);
 
     pointerGroupButton = createPointerGroupButton();
     add(pointerGroupButton);
@@ -99,10 +98,7 @@ public class ToolbarPanel extends JToolBar {
             I18N.getText("tools.topo.tooltip"));
     add(topologyButton);
 
-    add(vertSplit);
-    add(horizontalSplit);
-    add(vertSpacer);
-    add(horizontalSpacer);
+    optionPanelSeparator = addSeparator(this, 21);
 
     add(optionPanel);
 
@@ -133,9 +129,7 @@ public class ToolbarPanel extends JToolBar {
     add(jslider);
     // End slider
 
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
+    addSeparator(this, 21);
 
     // Jamz: Adding new Token Selection option buttons
     // Default selected button created with reference to set selection true
@@ -166,9 +160,7 @@ public class ToolbarPanel extends JToolBar {
             I18N.getText("tools.token.fow.npc.tooltip"),
             TokenSelection.NPC));
 
-    add(Box.createHorizontalStrut(10));
-    add(new JSeparator(JSeparator.VERTICAL));
-    add(Box.createHorizontalStrut(10));
+    addSeparator(this, 21);
 
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
@@ -177,23 +169,13 @@ public class ToolbarPanel extends JToolBar {
     mapselect = createZoneSelectionButton();
     add(mapselect);
 
+    add(Box.createHorizontalStrut(5));
+
     // Non visible tools
     tbox.createTool(GridTool.class);
     tbox.createTool(BoardTool.class);
     tbox.createTool(FacingTool.class);
     tbox.createTool(StampTool.class);
-
-    addPropertyChangeListener(
-        "orientation",
-        evt -> {
-          int orientation = (Integer) evt.getNewValue();
-
-          horizontalSplit.setVisible(orientation == JToolBar.VERTICAL);
-          horizontalSpacer.setVisible(orientation == JToolBar.VERTICAL);
-
-          vertSplit.setVisible(orientation == JToolBar.HORIZONTAL);
-          vertSpacer.setVisible(orientation == JToolBar.HORIZONTAL);
-        });
   }
 
   public JPanel getOptionPanel() {
@@ -221,7 +203,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   public int getOptionsPanelIndex() {
-    return getComponentIndex(horizontalSpacer) + 1;
+    return getComponentIndex(optionPanelSeparator) + 1;
   }
 
   public JButton getMapselect() {
@@ -387,13 +369,25 @@ public class ToolbarPanel extends JToolBar {
         .add(HollowDiamondTopologyTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW));
 
-    // Add with space to separate mode button group from shape button group.
-    panel.add(Box.createHorizontalStrut(10));
+    // Add with separator to separate mode button group from shape button group.
+    addSeparator(panel, 11);
 
     final var topologyModeSelectionPanel = new TopologyModeSelectionPanel();
     panel.add(topologyModeSelectionPanel);
 
     return panel;
+  }
+
+  private static Component addSeparator(JToolBar toolBar, final int size) {
+    final var sep =
+        new JToolBar.Separator() {
+          @Override
+          public Dimension getPreferredSize() {
+            return new Dimension(size, super.getPreferredSize().height);
+          }
+        };
+    toolBar.add(sep);
+    return sep;
   }
 
   private JToggleButton createButton(
@@ -465,29 +459,6 @@ public class ToolbarPanel extends JToolBar {
     return button;
   }
 
-  /**
-   * Return the current floating status of the ToolbarPanel.
-   *
-   * @return true if floating, false otherwise
-   */
-  private boolean isFloating() {
-    return getUI() instanceof BasicToolBarUI && ((BasicToolBarUI) ui).isFloating();
-  }
-
-  /**
-   * Show or hide the ToolbarPanel, even if it is floating.
-   *
-   * @param visible should the ToolbarPanel be visible or not
-   */
-  @Override
-  public void setVisible(boolean visible) {
-    if (isFloating()) {
-      SwingUtilities.getRoot(this).setVisible(visible);
-    } else {
-      super.setVisible(visible);
-    }
-  }
-
   public void setTokenSelectionGroupEnabled(boolean enabled) {
     Enumeration<AbstractButton> enumeration = tokenSelectionbuttonGroup.getElements();
     while (enumeration.hasMoreElements()) {
@@ -506,9 +477,6 @@ public class ToolbarPanel extends JToolBar {
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-
-      ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public Tool add(Class<? extends Tool> toolClass) {
@@ -544,9 +512,6 @@ public class ToolbarPanel extends JToolBar {
       setRollover(true);
       setBorder(null);
       setBorderPainted(false);
-
-      ToolbarPanel.this.addPropertyChangeListener(
-          "orientation", evt -> setOrientation((Integer) evt.getNewValue()));
     }
 
     public Tool add(Class<? extends Tool> toolClass) {
