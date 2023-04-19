@@ -490,6 +490,10 @@ message ZoneDto {
     DAY = 1;
     NIGHT = 2;
   }
+  enum LightingStyleDto {
+      ENVIRONMENTAL = 0;
+      OVERTOP = 1;
+  }
   enum AStarRoundingOptionsDto {
     NONE = 0;
     CELL_UNIT = 1;
@@ -529,9 +533,10 @@ message ZoneDto {
   google.protobuf.StringValue player_alias = 32;
   bool is_visible = 33;
   VisionTypeDto vision_type = 34;
-  TokenSelectionDto token_selection = 35;
-  int32 height = 36;
-  int32 width = 37;
+  LightingStyleDto lighting_style = 35;
+  TokenSelectionDto token_selection = 36;
+  int32 height = 37;
+  int32 width = 38;
 }
 
 message InitiativeListDto {
