@@ -157,27 +157,42 @@ public class ImpersonatePanel extends AbstractMacroPanel {
 
   @Subscribe
   private void onSelectionChanged(SelectionModel.SelectionChanged event) {
-    reset();
+    SwingUtilities.invokeLater(
+        () -> {
+          reset();
+        });
   }
 
   @Subscribe
   private void onTokenMacroChanged(TokenMacroChanged event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokenPanelChanged(TokenPanelChanged event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokensRemoved(TokensRemoved event) {
-    resetIfAnyImpersonated(event.tokens());
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(event.tokens());
+        });
   }
 
   @Subscribe
   private void onTokensEdited(TokenEdited event) {
-    resetIfAnyImpersonated(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfAnyImpersonated(Collections.singletonList(event.token()));
+        });
   }
 
   private void resetIfAnyImpersonated(List<Token> tokens) {
