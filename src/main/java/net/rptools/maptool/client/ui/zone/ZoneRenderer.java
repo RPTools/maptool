@@ -40,7 +40,7 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.events.PlayerStatusChanged;
+import net.rptools.maptool.client.events.ZoneLoaded;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
@@ -1966,19 +1966,10 @@ public class ZoneRenderer extends JComponent
     if (isLoaded) {
       // Notify the token tree that it should update
       MapTool.getFrame().updateTokenTree();
-      updatePlayerStatus();
+
+      new MapToolEventBus().getMainEventBus().post(new ZoneLoaded(zone));
     }
     return !isLoaded;
-  }
-
-  private void updatePlayerStatus() {
-    var player = MapTool.getPlayer();
-    player.setZoneId(zone.getId());
-    player.setLoaded(true);
-
-    var eventBus = new MapToolEventBus().getMainEventBus();
-    eventBus.post(new PlayerStatusChanged(player));
-    MapTool.serverCommand().updatePlayerStatus(player);
   }
 
   protected void renderDrawableOverlay(

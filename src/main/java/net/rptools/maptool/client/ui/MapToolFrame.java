@@ -42,9 +42,9 @@ import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
-import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.events.ZoneLoading;
 import net.rptools.maptool.client.swing.AboutDialog;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
@@ -1523,21 +1523,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   /**
-   * Changes the player status to loading given Zone and dispatches event and messages to server
-   *
-   * @param zone Zone that the player started to load
-   */
-  private void updatePlayerStatus(Zone zone) {
-    var player = MapTool.getPlayer();
-    player.setZoneId(zone.getId());
-    player.setLoaded(false);
-
-    var eventBus = new MapToolEventBus().getMainEventBus();
-    eventBus.post(new PlayerStatusChanged(player));
-    MapTool.serverCommand().updatePlayerStatus(player);
-  }
-
-  /**
    * Set the current ZoneRenderer
    *
    * @param renderer the ZoneRenderer
@@ -1545,7 +1530,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public void setCurrentZoneRenderer(ZoneRenderer renderer) {
     // Flush first so that the new zone renderer can inject the newly needed images
     if (renderer != null) {
-      updatePlayerStatus(renderer.getZone());
+      new MapToolEventBus().getMainEventBus().post(new ZoneLoading(renderer.getZone()));
+
       ImageManager.flush(renderer.getZone().getAllAssetIds());
     } else {
       ImageManager.flush();

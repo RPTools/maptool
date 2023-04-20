@@ -52,13 +52,13 @@ public class PlayersLoadingStatusBar extends JLabel {
 
     var sb =
         new StringBuilder(I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total));
-    
+
     var self = MapTool.getPlayer();
 
     for (Player player : players) {
       // The Player in the list is a seperate entity to the one from MapTool.getPlayer()
-      // So it doesn't have the correct status data. 
-      if(player.getName().equals(self.getName())){
+      // So it doesn't have the correct status data.
+      if (player.getName().equals(self.getName())) {
         player = self;
       }
       var zone =
