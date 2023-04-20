@@ -2300,6 +2300,7 @@ public class Zone {
     zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
     zone.isVisible = dto.getIsVisible();
     zone.visionType = VisionType.valueOf(dto.getVisionType().name());
+    zone.lightingStyle = LightingStyle.valueOf(dto.getLightingStyle().name());
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
@@ -2369,6 +2370,7 @@ public class Zone {
     }
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
+    dto.setLightingStyle(ZoneDto.LightingStyleDto.valueOf(lightingStyle.name()));
     dto.setTokenSelection(ZoneDto.TokenSelectionDto.valueOf(tokenSelection.name()));
     dto.setHeight(height);
     dto.setWidth(width);
