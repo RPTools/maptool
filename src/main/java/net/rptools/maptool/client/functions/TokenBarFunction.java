@@ -25,7 +25,9 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
-/** @author Jay */
+/**
+ * @author Jay
+ */
 public class TokenBarFunction extends AbstractFunction {
 
   /** Support get and set bar on tokens */
@@ -36,12 +38,16 @@ public class TokenBarFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final TokenBarFunction instance = new TokenBarFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static TokenBarFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)

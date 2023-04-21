@@ -49,8 +49,11 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void addPlayerSharedPassword(String name, Role role, String password)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException;
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException;
 
   /**
    * Adds a new player to the database with multiple public asymmetric key. If the player already
@@ -67,8 +70,12 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void addPlayerAsymmetricKey(String name, Role role, Set<String> publicKeyStrings)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, PasswordDatabaseException,
-          NoSuchPaddingException, InvalidKeyException, InvalidAlgorithmParameterException;
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException;
 
   /**
    * Sets the shared password for the specified player. If the player does not exist then a {@link
@@ -85,8 +92,11 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void setSharedPassword(String name, String password)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException;
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException;
 
   /**
    * Sets the asymmetric keys for the player. This will remove any shared password keys for the
@@ -102,8 +112,12 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void setAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException;
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException;
 
   /**
    * Adds the keys to the existing keys for the specified player. This will remove any shared key
@@ -120,8 +134,12 @@ public interface PersistedPlayerDatabase {
    * @throws IllegalStateException If there is an error hashing the password.
    */
   void addAsymmetricKeys(String name, Set<String> keys)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException, InvalidAlgorithmParameterException;
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException;
 
   /**
    * Returns if the specified player is persisted or not. Persisted players include those that are
@@ -172,8 +190,11 @@ public interface PersistedPlayerDatabase {
    * @throws InvalidKeyException if there is an error hashing the password.
    */
   void commitChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException;
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException;
 
   /**
    * Rolls back any pending changes that haven't been written to the file.
@@ -185,6 +206,9 @@ public interface PersistedPlayerDatabase {
    * @throws InvalidKeyException i
    */
   void rollbackChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException;
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException;
 }

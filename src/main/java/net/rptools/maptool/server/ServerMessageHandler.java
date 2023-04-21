@@ -36,7 +36,9 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
+import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
@@ -466,8 +468,8 @@ public class ServerMessageHandler implements MessageHandler {
     server.getCampaign().putZone(zone);
 
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
-    new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
+    new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
   }
 
   private void handle(PutLabelMsg msg) {

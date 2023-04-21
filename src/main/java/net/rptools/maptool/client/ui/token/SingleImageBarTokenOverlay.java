@@ -52,7 +52,9 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
     assetId = theAssetId;
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new SingleImageBarTokenOverlay(getName(), assetId);
@@ -130,12 +132,16 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for assetId */
+  /**
+   * @return Getter for assetId
+   */
   public MD5Key getAssetId() {
     return assetId;
   }
 
-  /** @param topAssetId Setter for assetId */
+  /**
+   * @param topAssetId Setter for assetId
+   */
   public void setAssetId(MD5Key topAssetId) {
     this.assetId = topAssetId;
   }

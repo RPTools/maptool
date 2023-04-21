@@ -33,8 +33,9 @@ public class LightingComposite implements Composite {
   /**
    * Used to blend lights together to give an additive effect.
    *
-   * <p>To use to good effect, the initial image should be black and then lights should be added to
-   * it one-by-one.
+   * <p>To use to good effect, the initial image should be black (when used together with {@link
+   * #OverlaidLights}) or clear (when used with {@link java.awt.AlphaComposite}) and then lights
+   * should be added to it one-by-one.
    */
   public static final Composite BlendedLights = new LightingComposite(new ScreenBlender());
 
@@ -138,8 +139,8 @@ public class LightingComposite implements Composite {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the bottom alpha around.
-        int resultPixel = dstPixel & (0xFF << 24);
+        // This keeps the light alpha around.
+        int resultPixel = srcPixel & (0xFF << 24);
 
         for (int shift = 0; shift < 24; shift += 8) {
           final var dstC = (dstPixel >>> shift) & 0xFF;
@@ -178,9 +179,9 @@ public class LightingComposite implements Composite {
    * <p>The behaviour is actually is very similar to overlay, but where the value at the transition
    * point is always greater than the bottom component (in overlay it can be greater than or less
    * than the bottom component). The relation can be best seen when {@link
-   * #MAX_DARKNESS_BOOST_PER_128} is set to 1. It also has a much looser relation to the soft light
-   * blend mode, which inspired the idea of constraining the increase of dark components by some
-   * multiple.
+   * #MAX_DARKNESS_BOOST_PER_128} is set to 128. It also has a much looser relation to the soft
+   * light blend mode, which inspired the idea of constraining the increase of dark components by
+   * some multiple.
    *
    * <p>Special cases:
    *
@@ -192,7 +193,7 @@ public class LightingComposite implements Composite {
    * </ul>
    */
   private static final class ConstrainedBrightenBlender implements Blender {
-    private static final int MAX_DARKNESS_BOOST_PER_128 = 192;
+    private static final int MAX_DARKNESS_BOOST_PER_128 = 128;
 
     public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
       for (int x = 0; x < samples; ++x) {

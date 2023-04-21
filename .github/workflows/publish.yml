@@ -15,7 +15,8 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '17' ]
+        java: [ '20' ]
+        distribution: ['temurin']
       fail-fast: false
     steps:
       #       ____          _  __     __   ___        ____                __
@@ -25,14 +26,14 @@ jobs:
       #   /_____/ \__,_//_//_/ \__,_/   \____/\/  /_/     \__,_/ \___//_/|_| \__,_/ \__, / \___/
       #                                                                            /____/
     - name: Git checkout
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
     - name: Set up JDK
-      uses: actions/setup-java@v2
+      uses: actions/setup-java@v3
       with:
-        distribution: 'adopt'
+        distribution: 'temurin'
         java-version: ${{ matrix.java }}
     - name: Cache Gradle
-      uses: actions/cache@v1
+      uses: actions/cache@v3
       # Cache only seems to work on ubuntu right now...
       if: matrix.os == 'ubuntu-latest'
       with:

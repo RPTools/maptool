@@ -250,9 +250,15 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(UseAuthTypeMsg useAuthTypeMsg)
-      throws ExecutionException, InterruptedException, IllegalBlockSizeException,
-          BadPaddingException, NoSuchPaddingException, NoSuchAlgorithmException,
-          InvalidKeyException, InvalidKeySpecException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          InvalidKeySpecException,
+          InvalidAlgorithmParameterException {
 
     var clientAuthMsg = ClientAuthMsg.newBuilder();
 

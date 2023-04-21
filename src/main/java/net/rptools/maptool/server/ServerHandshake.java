@@ -313,9 +313,15 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(ClientAuthMsg clientAuthMessage)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
-          InterruptedException, NoSuchPaddingException, IllegalBlockSizeException,
-          NoSuchAlgorithmException, BadPaddingException, InvalidKeyException,
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     byte[] response = clientAuthMessage.getChallengeResponse().toByteArray();
     if (handshakeChallenges.length > 1) {
@@ -374,9 +380,14 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void handle(ClientInitMsg clientInitMsg)
-      throws ExecutionException, InterruptedException, NoSuchPaddingException,
-          IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     var server = MapTool.getServer();
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
       setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
@@ -453,8 +464,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
 
     SecureRandom rnd = new SecureRandom();
@@ -486,8 +501,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendRoleSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String[] password = new String[2];
     password[GM_CHALLENGE] = new PasswordGenerator().getPassword();
@@ -534,9 +553,14 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private State sendAsymmetricKeyAuthType()
-      throws ExecutionException, InterruptedException, NoSuchPaddingException,
-          IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     handshakeChallenges = new HandshakeChallenge[1];
     if (!playerDatabase.hasPublicKey(player, playerPublicKeyMD5).join()) {
       if (useEasyConnect) {

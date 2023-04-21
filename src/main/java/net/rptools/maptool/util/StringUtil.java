@@ -27,7 +27,9 @@ import java.util.List;
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
-/** @author Tylere */
+/**
+ * @author Tylere
+ */
 public class StringUtil {
   private static NumberFormat nf = NumberFormat.getNumberInstance();
   private static final int MIN_FRACTION_DIGITS = 0;

@@ -20,7 +20,9 @@ import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class AppStyle {
 
   public static ImageBorder border = RessourceManager.getBorder(Borders.GRAY2);

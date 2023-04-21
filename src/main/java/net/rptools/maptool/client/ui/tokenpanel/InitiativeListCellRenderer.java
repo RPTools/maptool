@@ -225,7 +225,9 @@ public class InitiativeListCellRenderer extends JPanel
    */
   public class NameLabel extends JLabel {
 
-    /** @see javax.swing.JComponent#paintComponent(java.awt.Graphics) */
+    /**
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
     @Override
     protected void paintComponent(Graphics g) {
       boolean initStateSecondLine = panel.isInitStateSecondLine() && panel.isShowInitState();
@@ -235,7 +237,9 @@ public class InitiativeListCellRenderer extends JPanel
       super.paintComponent(g);
     }
 
-    /** @see javax.swing.JComponent#getPreferredSize() */
+    /**
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
     @Override
     public Dimension getPreferredSize() {
       boolean initStateSecondLine = panel.isInitStateSecondLine() && panel.isShowInitState();
@@ -315,13 +319,17 @@ public class InitiativeListCellRenderer extends JPanel
       return bi;
     }
 
-    /** @see javax.swing.ImageIcon#getIconHeight() */
+    /**
+     * @see javax.swing.ImageIcon#getIconHeight()
+     */
     @Override
     public int getIconHeight() {
       return panel.isShowTokenStates() ? ICON_SIZE : textTokenSize;
     }
 
-    /** @see javax.swing.ImageIcon#getIconWidth() */
+    /**
+     * @see javax.swing.ImageIcon#getIconWidth()
+     */
     @Override
     public int getIconWidth() {
       return panel.isShowTokenStates() ? ICON_SIZE : textTokenSize;

@@ -28,7 +28,9 @@ import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class LineSegment extends AbstractDrawing {
   private final List<Point> points = new ArrayList<Point>();
   private Float width;

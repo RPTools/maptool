@@ -48,7 +48,9 @@ public class UIBuilder extends JDialog {
 
   private static final Logger log = LogManager.getLogger(UIBuilder.class);
 
-  /** @author crash */
+  /**
+   * @author crash
+   */
   public static class TreeModel extends DefaultTreeModel {
     /**
      * @param root the top-level node for the tree

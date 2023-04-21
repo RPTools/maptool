@@ -42,7 +42,9 @@ import net.rptools.maptool.transfer.AssetTransferManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class MapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;

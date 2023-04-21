@@ -22,7 +22,9 @@ import net.rptools.clientserver.simple.client.SocketClientConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class SocketServerConnection extends AbstractServerConnection {
 
   private static final Logger log = LogManager.getLogger(SocketServerConnection.class);

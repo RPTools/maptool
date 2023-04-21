@@ -21,7 +21,9 @@ import java.io.IOException;
 import javax.swing.border.Border;
 import net.rptools.lib.image.ImageUtil;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ImageBorder implements Border {
   private BufferedImage topRight;
   private BufferedImage top;

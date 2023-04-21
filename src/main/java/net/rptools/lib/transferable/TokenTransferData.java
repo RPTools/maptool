@@ -129,62 +129,86 @@ public class TokenTransferData extends HashMap<String, Object> implements Serial
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @return Getter for isVisible */
+  /**
+   * @return Getter for isVisible
+   */
   public boolean isVisible() {
     return isVisible;
   }
 
-  /** @param aIsVisible Setter for isVisible */
+  /**
+   * @param aIsVisible Setter for isVisible
+   */
   public void setVisible(boolean aIsVisible) {
     isVisible = aIsVisible;
   }
 
-  /** @return Getter for name */
+  /**
+   * @return Getter for name
+   */
   public String getName() {
     return name;
   }
 
-  /** @param aName Setter for name */
+  /**
+   * @param aName Setter for name
+   */
   public void setName(String aName) {
     name = aName;
   }
 
-  /** @return Getter for players */
+  /**
+   * @return Getter for players
+   */
   public Set<String> getPlayers() {
     return players;
   }
 
-  /** @param aPlayers Setter for players */
+  /**
+   * @param aPlayers Setter for players
+   */
   public void setPlayers(Set<String> aPlayers) {
     players = aPlayers;
   }
 
-  /** @return Getter for token */
+  /**
+   * @return Getter for token
+   */
   public ImageIcon getToken() {
     return token;
   }
 
-  /** @param aToken Setter for token */
+  /**
+   * @param aToken Setter for token
+   */
   public void setToken(ImageIcon aToken) {
     token = aToken;
   }
 
-  /** @return Getter for facing */
+  /**
+   * @return Getter for facing
+   */
   public Integer getFacing() {
     return facing;
   }
 
-  /** @param aFacing Setter for facing */
+  /**
+   * @param aFacing Setter for facing
+   */
   public void setFacing(Integer aFacing) {
     facing = aFacing;
   }
 
-  /** @return Getter for location */
+  /**
+   * @return Getter for location
+   */
   public Point getLocation() {
     return location;
   }
 
-  /** @param aLocation Setter for location */
+  /**
+   * @param aLocation Setter for location
+   */
   public void setLocation(Point aLocation) {
     location = aLocation;
   }

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -28,7 +29,14 @@ public class ServerFunctions extends AbstractFunction {
 
   /** Creates a new {@code PlayerFunctions} object. */
   public ServerFunctions() {
-    super(0, 0, "server.isServer", "server.isHosting", "server.isPersonal");
+    super(
+        0,
+        1,
+        "server.isServer",
+        "server.isHosting",
+        "server.isPersonal",
+        "setMoveLock",
+        "getMoveLock");
   }
 
   @Override
@@ -43,6 +51,24 @@ public class ServerFunctions extends AbstractFunction {
           : BigDecimal.ZERO;
       case "server.ishosting" -> MapTool.isHostingServer() ? BigDecimal.ONE : BigDecimal.ZERO;
       case "server.ispersonal" -> MapTool.isPersonalServer() ? BigDecimal.ONE : BigDecimal.ZERO;
+      case "getmovelock" -> MapTool.getServerPolicy().isMovementLocked();
+      case "setmovelock" -> {
+        if (parameters.size() == 1) {
+          BigDecimal ml = (BigDecimal) parameters.get(0);
+          if (ml.intValue() == 0 || ml.intValue() == 1) {
+            ServerPolicy policy = MapTool.getServerPolicy();
+            policy.setIsMovementLocked(ml.intValue() != 0);
+            MapTool.updateServerPolicy(policy);
+          } else {
+            throw new ParserException(
+                I18N.getText("macro.function.general.argumentTypeInvalid", "setmovelock"));
+          }
+        } else {
+          throw new ParserException(
+              I18N.getText("macro.function.general.argumentTypeInvalid", "setmovelock"));
+        }
+        yield "";
+      }
       default -> throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
     };

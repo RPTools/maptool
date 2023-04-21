@@ -679,30 +679,40 @@ public class TransferableHelper extends TransferHandler {
     return tokens != null;
   }
 
-  /** @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent) */
+  /**
+   * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+   */
   @Override
   public int getSourceActions(JComponent c) {
     return NONE;
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<Token> getTokens() {
     return tokens;
   }
 
-  /** @param tokens Setter for tokens */
+  /**
+   * @param tokens Setter for tokens
+   */
   public void setTokens(List<Token> tokens) {
     // This doesn't appear to be called from anywhere; this class simply makes assignments
     // to the instance member variable. Remove this method?
     this.tokens = tokens;
   }
 
-  /** @return Getter for configureTokens */
+  /**
+   * @return Getter for configureTokens
+   */
   public List<Boolean> getConfigureTokens() {
     return configureTokens;
   }
 
-  /** @param configureTokens Setter for configureTokens */
+  /**
+   * @param configureTokens Setter for configureTokens
+   */
   public void setConfigureTokens(List<Boolean> configureTokens) {
     this.configureTokens = configureTokens;
   }

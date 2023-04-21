@@ -19,7 +19,9 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.server.proto.PlayerDto;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class Player {
 
   public enum Role {
@@ -100,12 +102,16 @@ public class Player {
     return getRole() == Role.GM;
   }
 
-  /** @return Returns the name. */
+  /**
+   * @return Returns the name.
+   */
   public String getName() {
     return name;
   }
 
-  /** @param name The name to set. */
+  /**
+   * @param name The name to set.
+   */
   public void setName(String name) {
     this.name = name;
   }
@@ -114,7 +120,9 @@ public class Player {
     return password;
   }
 
-  /** @return Returns the role. */
+  /**
+   * @return Returns the role.
+   */
   public Role getRole() {
     if (actualRole == null) {
       actualRole = Role.valueOf(role);

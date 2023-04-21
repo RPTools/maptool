@@ -49,8 +49,8 @@ message CampaignDto {
 
 message LookupTableDto {
   repeated LookupEntryDto entries = 1;
-  string name = 2;
-  string default_roll = 3;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue default_roll = 3;
   google.protobuf.StringValue table_image = 4;
   bool visible = 5;
   bool allow_lookup = 6;

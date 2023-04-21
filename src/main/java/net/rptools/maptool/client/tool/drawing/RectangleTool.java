@@ -28,7 +28,9 @@ import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class RectangleTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 

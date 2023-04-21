@@ -20,7 +20,9 @@ import javax.swing.KeyStroke;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 
-/** @author tylere */
+/**
+ * @author tylere
+ */
 public class MacroButtonHotKeyManager {
 
   // Changing and adding more hotkeys should work smoothly, however hotkeys[0]

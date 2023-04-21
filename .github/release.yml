@@ -21,6 +21,9 @@ changelog:
     - title: Code Maintenance 🔧 
       labels:
         - code-maintenance
+    - title: Dependency Updates
+      labels:
+        - dependencies
     - title: Other Changes 💬	
       labels:
         - "*"

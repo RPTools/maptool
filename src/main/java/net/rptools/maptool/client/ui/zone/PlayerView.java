@@ -49,7 +49,9 @@ public class PlayerView {
     return tokens;
   }
 
-  /** @return true if the view is for some tokens only, false if the view is global */
+  /**
+   * @return true if the view is for some tokens only, false if the view is global
+   */
   public boolean isUsingTokenView() {
     return tokens != null;
   }
