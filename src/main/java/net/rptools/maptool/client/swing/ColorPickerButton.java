@@ -25,7 +25,9 @@ import javax.swing.JComponent;
 import javax.swing.border.BevelBorder;
 import net.rptools.maptool.client.MapTool;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ColorPickerButton extends JComponent {
 
   private Color color;

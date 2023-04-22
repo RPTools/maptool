@@ -25,7 +25,9 @@ import net.rptools.maptool.language.I18N;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author frank */
+/**
+ * @author frank
+ */
 public class ChatAutoSave {
   private static Logger log = LogManager.getLogger(ChatAutoSave.class);
   private static final ChatAutoSave self = new ChatAutoSave();

@@ -160,14 +160,18 @@ public class LineCellTemplate extends AbstractTemplate {
     } // endfor
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint)
+   */
   @Override
   public void setVertex(ZonePoint vertex) {
     clearPath();
     super.setVertex(vertex);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     if (squares == getRadius()) {
@@ -370,12 +374,16 @@ public class LineCellTemplate extends AbstractTemplate {
     mouseSlopeGreater = aMouseSlopeGreater;
   }
 
-  /** @return Getter for path */
+  /**
+   * @return Getter for path
+   */
   public List<CellPoint> getPath() {
     return path;
   }
 
-  /** @param path Setter for the path to set */
+  /**
+   * @param path Setter for the path to set
+   */
   public void setPath(List<CellPoint> path) {
     this.path = path;
   }
@@ -384,7 +392,9 @@ public class LineCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     // Get all of the numbers needed for the calculation
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {

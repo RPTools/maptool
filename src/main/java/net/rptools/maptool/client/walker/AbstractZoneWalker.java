@@ -197,7 +197,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     return true;
   }
 
-  /** @see java.lang.Object#toString() */
+  /**
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder("Path: ");
@@ -229,7 +231,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       }
     }
 
-    /** @see java.lang.Object#toString() */
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
       StringBuilder s = new StringBuilder("PartialPath([");

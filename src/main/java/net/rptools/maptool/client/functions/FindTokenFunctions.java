@@ -300,7 +300,9 @@ public class FindTokenFunctions extends AbstractFunction {
         "getVisibleTokenNames");
   }
 
-  /** @return the instance. */
+  /**
+   * @return the instance.
+   */
   public static FindTokenFunctions getInstance() {
     return instance;
   }

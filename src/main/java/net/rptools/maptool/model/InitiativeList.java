@@ -263,12 +263,16 @@ public class InitiativeList implements Serializable {
     return currentIndex < 0 ? null : getTokenInitiative(currentIndex);
   }
 
-  /** @return Getter for current */
+  /**
+   * @return Getter for current
+   */
   public int getCurrent() {
     return current;
   }
 
-  /** @param aCurrent Setter for the current to set */
+  /**
+   * @param aCurrent Setter for the current to set
+   */
   public void setCurrent(int aCurrent) {
     if (current == aCurrent) return;
     startUnitOfWork();
@@ -329,12 +333,16 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for round */
+  /**
+   * @return Getter for round
+   */
   public int getRound() {
     return round;
   }
 
-  /** @param aRound Setter for the round to set */
+  /**
+   * @param aRound Setter for the round to set
+   */
   public void setRound(int aRound) {
     if (round == aRound) return;
     startUnitOfWork();
@@ -525,13 +533,17 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for zone */
+  /**
+   * @return Getter for zone
+   */
   public Zone getZone() {
     if (zone == null && zoneId != null) zone = MapTool.getCampaign().getZone(zoneId);
     return zone;
   }
 
-  /** @return Getter for pcs */
+  /**
+   * @return Getter for pcs
+   */
   private PropertyChangeSupport getPCS() {
     if (pcs == null) pcs = new PropertyChangeSupport(this);
     return pcs;
@@ -598,7 +610,9 @@ public class InitiativeList implements Serializable {
         .updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
   }
 
-  /** @param aZone Setter for the zone */
+  /**
+   * @param aZone Setter for the zone
+   */
   public void setZone(Zone aZone) {
     zone = aZone;
     if (aZone != null) {
@@ -608,12 +622,16 @@ public class InitiativeList implements Serializable {
     } // endif
   }
 
-  /** @return Getter for hideNPC */
+  /**
+   * @return Getter for hideNPC
+   */
   public boolean isHideNPC() {
     return hideNPC;
   }
 
-  /** @param hide Setter for hideNPC */
+  /**
+   * @param hide Setter for hideNPC
+   */
   public void setHideNPC(boolean hide) {
     if (hide == hideNPC) return;
     startUnitOfWork();
@@ -623,7 +641,9 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<TokenInitiative> getTokens() {
     return Collections.unmodifiableList(tokens);
   }
@@ -854,22 +874,30 @@ public class InitiativeList implements Serializable {
      * Instance Methods
      *-------------------------------------------------------------------------------------------*/
 
-    /** @return Getter for token */
+    /**
+     * @return Getter for token
+     */
     public Token getToken() {
       return getZone().getToken(id);
     }
 
-    /** @return Getter for id */
+    /**
+     * @return Getter for id
+     */
     public GUID getId() {
       return id;
     }
 
-    /** @param id Setter for the id to set */
+    /**
+     * @param id Setter for the id to set
+     */
     public void setId(GUID id) {
       this.id = id;
     }
 
-    /** @return Getter for holding */
+    /**
+     * @return Getter for holding
+     */
     public boolean isHolding() {
       return holding;
     }
@@ -888,7 +916,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for state */
+    /**
+     * @return Getter for state
+     */
     public String getState() {
       return state;
     }
@@ -907,7 +937,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for displayIcon */
+    /**
+     * @return Getter for displayIcon
+     */
     public Icon getDisplayIcon() {
       return displayIcon;
     }

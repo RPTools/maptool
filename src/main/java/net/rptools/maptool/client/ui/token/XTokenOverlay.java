@@ -82,7 +82,9 @@ public class XTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new XTokenOverlay(getName(), getColor(), getWidth());

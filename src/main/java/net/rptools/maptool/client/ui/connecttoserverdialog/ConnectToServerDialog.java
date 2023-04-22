@@ -48,7 +48,9 @@ import net.tsc.servicediscovery.AnnouncementListener;
 import net.tsc.servicediscovery.ServiceFinder;
 import yasb.Binder;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>
     implements AnnouncementListener {
   private static ServiceFinder finder;

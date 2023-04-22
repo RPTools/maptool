@@ -97,32 +97,45 @@ public class CipherUtil {
   ;
 
   public static CipherUtil.Key fromPublicPrivatePair(File publicKeyFile, File privateKeyFile)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws IOException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     KeyPair keyPair = readKeyPair(publicKeyFile, privateKeyFile);
     return CipherUtil.fromPublicPrivatePair(keyPair.getPublic(), keyPair.getPrivate());
   }
 
   public static CipherUtil.Key fromPublicPrivatePair(PublicKey publicKey, PrivateKey privateKey)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     return new Key(publicKey, privateKey);
   }
 
   public static CipherUtil.Key fromPublicKeyString(String pk)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     return new Key(CipherUtil.decodePublicKeyString(pk), null);
   }
 
   public static CipherUtil.Key fromSharedKey(String pass, byte[] salt)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
           InvalidKeyException {
     return createKey(pass, salt);
   }
 
   public static CipherUtil.Key fromSharedKeyNewSalt(String pass)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
           InvalidKeyException {
     byte[] salt = createSalt();
     return fromSharedKey(pass, salt);
@@ -144,7 +157,9 @@ public class CipherUtil {
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
   public static Cipher createSymmetricDecryptor(Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       throw new AssertionError("Expected symmetric key, got asymmetric");
@@ -166,7 +181,9 @@ public class CipherUtil {
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
   public static Cipher createAsymmetricDecryptor(Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (!key.asymmetric()) {
       throw new AssertionError("Expected asymmetric key, got symmetric");
@@ -189,7 +206,9 @@ public class CipherUtil {
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
   public static Cipher createSymmetricEncryptor(Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       throw new AssertionError("Expected symmetric key, got asymmetric");
@@ -211,7 +230,9 @@ public class CipherUtil {
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
   public static Cipher createAsymmetricEncryptor(Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (!key.asymmetric()) {
       throw new AssertionError("Expected asymmetric key, got symmetric");
@@ -235,7 +256,9 @@ public class CipherUtil {
    * @throws InvalidKeyException if there are problems with the supplied key.
    */
   private static Cipher createCipher(int encryptMode, Key key, byte[] iv)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (key.asymmetric()) {
       Cipher cipher = Cipher.getInstance(ASYNC_KEY_ALGORITHM);

@@ -41,7 +41,9 @@ import net.sbbi.upnp.messages.UPNPResponseException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author Phil Wright */
+/**
+ * @author Phil Wright
+ */
 public class UPnPUtil {
   private static final Logger log = LogManager.getLogger(UPnPUtil.class);
   private static Map<InternetGatewayDevice, NetworkInterface> igds;

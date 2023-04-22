@@ -24,7 +24,9 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Rectangle;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class RectangleTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 

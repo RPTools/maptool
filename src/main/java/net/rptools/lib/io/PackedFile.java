@@ -784,7 +784,9 @@ public class PackedFile implements AutoCloseable {
     return paths;
   }
 
-  /** @return Getter for file */
+  /**
+   * @return Getter for file
+   */
   public File getPackedFile() {
     return file;
   }

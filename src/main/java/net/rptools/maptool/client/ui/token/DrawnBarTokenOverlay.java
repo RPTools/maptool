@@ -81,7 +81,9 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new DrawnBarTokenOverlay(getName(), barColor, thickness);
@@ -97,22 +99,30 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     return overlay;
   }
 
-  /** @return Getter for barColor */
+  /**
+   * @return Getter for barColor
+   */
   public Color getBarColor() {
     return barColor;
   }
 
-  /** @param barColor Setter for barColor */
+  /**
+   * @param barColor Setter for barColor
+   */
   public void setBarColor(Color barColor) {
     this.barColor = barColor;
   }
 
-  /** @return Getter for thickness */
+  /**
+   * @return Getter for thickness
+   */
   public int getThickness() {
     return thickness;
   }
 
-  /** @param thickness Setter for thickness */
+  /**
+   * @param thickness Setter for thickness
+   */
   public void setThickness(int thickness) {
     this.thickness = thickness;
   }
