@@ -38,6 +38,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -291,7 +292,7 @@ public class Token implements Cloneable {
   private transient Color visionOverlayColor;
 
   // Jamz: allow token alpha channel modification
-  private float tokenOpacity = 1.0f;
+  private @Nonnull Float tokenOpacity = 1.0f;
 
   private String speechName = "";
 
@@ -673,31 +674,19 @@ public class Token implements Cloneable {
     return haloColor;
   }
 
+  /**
+   * @return The token opacity, in the range [0.0f, 1.0f].
+   */
   public float getTokenOpacity() {
-    if (tokenOpacity < 0.0f) {
-      tokenOpacity = 1.0f;
-    }
-
     return tokenOpacity;
   }
 
   /**
-   * Set the token opacity from a string trimmed to [0.05f, 1.0f]
-   *
-   * @param alpha the String of the opacity value.
-   * @return the float of the opacity
-   */
-  public float setTokenOpacity(String alpha) {
-    return setTokenOpacity(Float.parseFloat(alpha));
-  }
-
-  /**
-   * Set the token opacity from a float trimmed to [0.05f, 1.0f]
+   * Set the token opacity from a float trimmed to [0.0f, 1.0f]
    *
    * @param alpha the float of the opacity.
-   * @return the float of the opacity trimmed.
    */
-  public float setTokenOpacity(float alpha) {
+  public void setTokenOpacity(float alpha) {
     if (alpha > 1.0f) {
       alpha = 1.0f;
     }
@@ -706,8 +695,6 @@ public class Token implements Cloneable {
     }
 
     tokenOpacity = alpha;
-
-    return tokenOpacity;
   }
 
   /**
@@ -2548,6 +2535,12 @@ public class Token implements Cloneable {
       gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
+    // Pre 1.13
+    if (tokenOpacity == null) {
+      tokenOpacity = 1.f;
+    }
+    tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+
     return this;
   }
 
@@ -2754,7 +2747,7 @@ public class Token implements Cloneable {
         setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
       case setTokenOpacity:
-        setTokenOpacity(parameters.get(0).getStringValue());
+        setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifier:
         setTerrainModifier(parameters.get(0).getDoubleValue());

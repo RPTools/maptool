@@ -760,9 +760,12 @@ public class ClientMessageHandler implements MessageHandler {
   }
 
   private void handle(PutAssetMsg msg) {
-    AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
-    MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
-    MapTool.getFrame().refresh();
+    EventQueue.invokeLater(
+        () -> {
+          AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
+          MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
+          MapTool.getFrame().refresh();
+        });
   }
 
   private void handle(PlayerDisconnectedMsg msg) {
@@ -979,14 +982,17 @@ public class ClientMessageHandler implements MessageHandler {
   }
 
   private void handle(AddTopologyMsg addTopologyMsg) {
-    var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
-    var area = Mapper.map(addTopologyMsg.getArea());
-    var topologyType = Zone.TopologyType.valueOf(addTopologyMsg.getType().name());
+    EventQueue.invokeLater(
+        () -> {
+          var zoneGUID = GUID.valueOf(addTopologyMsg.getZoneGuid());
+          var area = Mapper.map(addTopologyMsg.getArea());
+          var topologyType = Zone.TopologyType.valueOf(addTopologyMsg.getType().name());
 
-    var zone = MapTool.getCampaign().getZone(zoneGUID);
-    zone.addTopology(area, topologyType);
+          var zone = MapTool.getCampaign().getZone(zoneGUID);
+          zone.addTopology(area, topologyType);
 
-    MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
+          MapTool.getFrame().getZoneRenderer(zoneGUID).repaint();
+        });
   }
 
   private void handle(BootPlayerMsg bootPlayerMsg) {

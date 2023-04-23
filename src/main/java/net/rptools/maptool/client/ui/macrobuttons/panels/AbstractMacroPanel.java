@@ -188,7 +188,10 @@ public abstract class AbstractMacroPanel extends JPanel implements Scrollable, M
 
   @Subscribe
   void onZoneActivated(ZoneActivated event) {
-    reset();
+    SwingUtilities.invokeLater(
+        () -> {
+          reset();
+        });
   }
 
   public static void clearHotkeys(AbstractMacroPanel panel) {

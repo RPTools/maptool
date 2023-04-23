@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.Illumination.LumensLevel;
@@ -777,29 +776,23 @@ public class ZoneView {
    * explicit flush should go away or at least be reduced.
    */
   public void flush() {
-    SwingUtilities.invokeLater(
-        () -> {
-          // Recalculate everything.
-          illuminationModels.clear();
+    // Recalculate everything.
+    illuminationModels.clear();
 
-          contributedPersonalLightsByToken.clear();
-          tokenVisibleAreaCache.clear();
+    contributedPersonalLightsByToken.clear();
+    tokenVisibleAreaCache.clear();
 
-          tokenVisionCachePerView.clear();
-          illuminationsPerView.clear();
-          exposedAreaMap.clear();
-          visibleAreaMap.clear();
+    tokenVisionCachePerView.clear();
+    illuminationsPerView.clear();
+    exposedAreaMap.clear();
+    visibleAreaMap.clear();
 
-          drawableLights.clear();
-          drawableAuras = null;
-        });
+    drawableLights.clear();
+    drawableAuras = null;
   }
 
   public void flushFog() {
-    SwingUtilities.invokeLater(
-        () -> {
-          exposedAreaMap.clear();
-        });
+    exposedAreaMap.clear();
   }
 
   /**
@@ -810,38 +803,35 @@ public class ZoneView {
    * @param token the token to flush.
    */
   public void flush(Token token) {
-    SwingUtilities.invokeLater(
-        () -> {
-          for (final var cache : tokenVisionCachePerView.values()) {
-            cache.remove(token.getId());
-          }
-          tokenVisibleAreaCache.remove(token.getId());
+    for (final var cache : tokenVisionCachePerView.values()) {
+      cache.remove(token.getId());
+    }
+    tokenVisibleAreaCache.remove(token.getId());
 
-          // TODO Split logic for light and sight, since the sight portion is entirely duplicated.
-          final var modelsWithToken =
-              illuminationModels.values().stream()
-                  .filter(model -> model.hasToken(token.getId()))
-                  .toList();
-          if (!modelsWithToken.isEmpty() || token.hasLightSources()) {
-            modelsWithToken.forEach(model -> model.removeToken(token.getId()));
-            contributedPersonalLightsByToken.remove(token.getId());
-            tokenVisionCachePerView.clear();
-            illuminationsPerView.clear();
-            exposedAreaMap.clear();
-            visibleAreaMap.clear();
-            // TODO Could we instead only clear those views that include the token?
-            drawableLights.clear();
-            drawableAuras = null;
-          } else if (token.getHasSight()) {
-            contributedPersonalLightsByToken.remove(token.getId());
-            // TODO Could we instead only clear those views that include the token?
-            illuminationsPerView.clear();
-            exposedAreaMap.clear();
-            visibleAreaMap.clear();
-            drawableLights.clear();
-            drawableAuras = null;
-          }
-        });
+    // TODO Split logic for light and sight, since the sight portion is entirely duplicated.
+    final var modelsWithToken =
+        illuminationModels.values().stream()
+            .filter(model -> model.hasToken(token.getId()))
+            .toList();
+    if (!modelsWithToken.isEmpty() || token.hasLightSources()) {
+      modelsWithToken.forEach(model -> model.removeToken(token.getId()));
+      contributedPersonalLightsByToken.remove(token.getId());
+      tokenVisionCachePerView.clear();
+      illuminationsPerView.clear();
+      exposedAreaMap.clear();
+      visibleAreaMap.clear();
+      // TODO Could we instead only clear those views that include the token?
+      drawableLights.clear();
+      drawableAuras = null;
+    } else if (token.getHasSight()) {
+      contributedPersonalLightsByToken.remove(token.getId());
+      // TODO Could we instead only clear those views that include the token?
+      illuminationsPerView.clear();
+      exposedAreaMap.clear();
+      visibleAreaMap.clear();
+      drawableLights.clear();
+      drawableAuras = null;
+    }
   }
 
   /**

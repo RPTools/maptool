@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.macrobuttons.panels;
 import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DockableFrame;
 import java.util.*;
+import javax.swing.SwingUtilities;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -112,32 +113,46 @@ public class SelectionPanel extends AbstractMacroPanel {
       MapTool.getProfilingNoteFrame().addText(results);
       if (log.isDebugEnabled()) log.debug(results);
     }
-    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   @Subscribe
   private void onSelectionChanged(SelectionModel.SelectionChanged event) {
-    reset();
+    SwingUtilities.invokeLater(
+        () -> {
+          reset();
+        });
   }
 
   @Subscribe
   private void onTokenMacroChanged(TokenMacroChanged event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokenPanelChanged(TokenPanelChanged event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokensRemoved(TokensRemoved event) {
-    resetIfSelected(event.tokens());
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(event.tokens());
+        });
   }
 
   @Subscribe
   private void onTokenEdited(TokenEdited event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   private void resetIfSelected(List<Token> tokenList) {
