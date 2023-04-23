@@ -187,7 +187,9 @@ public abstract class Tool extends JToggleButton implements ActionListener, KeyL
 
     private static final long serialVersionUID = -514197544905143826L;
 
-    /** @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent) */
+    /**
+     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
+     */
     public void actionPerformed(ActionEvent e) {
       // This should probably go somewhere else like MapToolFrame...
       // but it was just too easy to plop down here to resist =)

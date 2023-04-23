@@ -83,12 +83,16 @@ public class InitiativeListModel extends AbstractListModel<TokenInitiative>
     fireContentsChanged(this, 0, getSize() - 1);
   }
 
-  /** @return Getter for list */
+  /**
+   * @return Getter for list
+   */
   public InitiativeList getList() {
     return list;
   }
 
-  /** @param theList Setter for the list to set */
+  /**
+   * @param theList Setter for the list to set
+   */
   public void setList(InitiativeList theList) {
 
     // Remove the old list
@@ -137,7 +141,9 @@ public class InitiativeListModel extends AbstractListModel<TokenInitiative>
    * PropertyChangeEvent Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   @SuppressWarnings("unchecked")
   public void propertyChange(PropertyChangeEvent evt) {
 

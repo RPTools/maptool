@@ -57,7 +57,9 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
     grid = aGrid;
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowColorDotTokenOverlay(getName(), getColor(), grid);
@@ -117,7 +119,9 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
     return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
   }
 
-  /** @return Getter for grid */
+  /**
+   * @return Getter for grid
+   */
   public int getGrid() {
     return grid;
   }

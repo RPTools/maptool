@@ -54,7 +54,9 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     assetIds = theAssetIds;
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new MultipleImageBarTokenOverlay(getName(), assetIds);
@@ -105,12 +107,16 @@ public class MultipleImageBarTokenOverlay extends BarTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for bottomAssetId */
+  /**
+   * @return Getter for bottomAssetId
+   */
   public MD5Key[] getAssetIds() {
     return assetIds;
   }
 
-  /** @param theAssetIds Setter for bottomAssetId */
+  /**
+   * @param theAssetIds Setter for bottomAssetId
+   */
   public void setAssetIds(MD5Key[] theAssetIds) {
     this.assetIds = theAssetIds;
   }

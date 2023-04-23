@@ -31,7 +31,9 @@ import net.rptools.maptool.server.proto.SetCampaignMsg;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class MapToolServerConnection
     implements ServerObserver, HandshakeProvider, HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);

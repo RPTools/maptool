@@ -184,12 +184,16 @@ public abstract class HexGrid extends Grid {
     return new Rectangle(zp.x, zp.y, w, h);
   }
 
-  /** @return Distance from the center to edge of a hex */
+  /**
+   * @return Distance from the center to edge of a hex
+   */
   public double getVRadius() {
     return minorRadius;
   }
 
-  /** @return Distance from the center to vertex of a hex */
+  /**
+   * @return Distance from the center to vertex of a hex
+   */
   public double getURadius() {
     return edgeLength / 2 + edgeProjection;
   }

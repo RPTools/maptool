@@ -29,7 +29,9 @@ import net.rptools.maptool.server.proto.Message;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class MapToolConnection {
 
   /** Instance used for log messages. */

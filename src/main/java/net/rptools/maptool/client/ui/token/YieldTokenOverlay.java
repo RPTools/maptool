@@ -48,7 +48,9 @@ public class YieldTokenOverlay extends XTokenOverlay {
     super(aName, aColor, aWidth);
   }
 
-  /** @see BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new YieldTokenOverlay(getName(), getColor(), getWidth());
