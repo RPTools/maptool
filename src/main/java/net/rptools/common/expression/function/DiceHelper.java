@@ -125,7 +125,8 @@ public class DiceHelper {
 
     for (int i = 0; i < values.length; i++) {
       int roll;
-      while ((roll = runData.randomInt(sides)) < lowerBound) ;
+      while ((roll = runData.randomInt(sides)) < lowerBound)
+        ;
 
       values[i] = roll;
     }
