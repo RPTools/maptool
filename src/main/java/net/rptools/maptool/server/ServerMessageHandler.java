@@ -255,6 +255,11 @@ public class ServerMessageHandler implements MessageHandler {
           handle(msg.getUpdateExposedAreaMetaMsg());
           sendToClients(id, msg);
         }
+        case UPDATE_PLAYER_STATUS_MSG -> {
+          handle(id, msg.getUpdatePlayerStatusMsg());
+          sendToClients(id, msg);
+        }
+
         default -> log.warn(msgType + "not handled.");
       }
       log.info("from " + id + " handled: " + msgType);
@@ -689,6 +694,16 @@ public class ServerMessageHandler implements MessageHandler {
   private void handle(BootPlayerMsg bootPlayerMsg) {
     // And just to be sure, remove them from the server
     server.releaseClientConnection(server.getConnectionId(bootPlayerMsg.getPlayerName()));
+  }
+
+  private void handle(String id, UpdatePlayerStatusMsg updatePlayerStatusMsg) {
+    var playerName = updatePlayerStatusMsg.getPlayer();
+    var zoneId =
+        updatePlayerStatusMsg.getZoneGuid().equals("")
+            ? null
+            : GUID.valueOf(updatePlayerStatusMsg.getZoneGuid());
+    var loaded = updatePlayerStatusMsg.getLoaded();
+    server.updatePlayerStatus(playerName, zoneId, loaded);
   }
 
   private void sendToClients(String excludedId, Message message) {

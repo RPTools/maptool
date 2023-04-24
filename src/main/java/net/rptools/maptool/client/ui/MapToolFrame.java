@@ -44,6 +44,7 @@ import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.events.ZoneLoading;
 import net.rptools.maptool.client.swing.AboutDialog;
 import net.rptools.maptool.client.swing.AppHomeDiskSpaceStatusBar;
 import net.rptools.maptool.client.swing.AssetCacheStatusBar;
@@ -53,6 +54,7 @@ import net.rptools.maptool.client.swing.GlassPane;
 import net.rptools.maptool.client.swing.ImageCacheStatusBar;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
 import net.rptools.maptool.client.swing.MemoryStatusBar;
+import net.rptools.maptool.client.swing.PlayersLoadingStatusBar;
 import net.rptools.maptool.client.swing.PositionalLayout;
 import net.rptools.maptool.client.swing.ProgressStatusBar;
 import net.rptools.maptool.client.swing.SpacerStatusBar;
@@ -166,6 +168,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private AssetCacheStatusBar assetCacheStatusBar;
   private ImageCacheStatusBar imageCacheStatusBar;
   private AppHomeDiskSpaceStatusBar appHomeDiskSpaceStatusBar;
+  private PlayersLoadingStatusBar playersLoadingStatusBar;
   private ZoomStatusBar zoomStatusBar;
   private JLabel chatActionLabel;
   private boolean fullScreenToolsShown;
@@ -388,6 +391,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     statusPanel.addPanel(getAppHomeDiskSpaceStatusBar());
     statusPanel.addPanel(getCoordinateStatusBar());
     statusPanel.addPanel(getZoomStatusBar());
+    statusPanel.addPanel(getPlayersLoadingStatusBar());
     statusPanel.addPanel(MemoryStatusBar.getInstance());
     // statusPanel.addPanel(progressBar);
     statusPanel.addPanel(connectionStatusPanel);
@@ -913,6 +917,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     zoneRendererPanel.revalidate();
     zoneRendererPanel.repaint();
     visibleControlPanel = layoutPanel;
+  }
+
+  public PlayersLoadingStatusBar getPlayersLoadingStatusBar() {
+    if (playersLoadingStatusBar == null) {
+      playersLoadingStatusBar = new PlayersLoadingStatusBar();
+    }
+    return playersLoadingStatusBar;
   }
 
   public ZoomStatusBar getZoomStatusBar() {
@@ -1521,6 +1532,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public void setCurrentZoneRenderer(ZoneRenderer renderer) {
     // Flush first so that the new zone renderer can inject the newly needed images
     if (renderer != null) {
+      new MapToolEventBus().getMainEventBus().post(new ZoneLoading(renderer.getZone()));
+
       ImageManager.flush(renderer.getZone().getAllAssetIds());
     } else {
       ImageManager.flush();

@@ -443,6 +443,8 @@ message TextMessageDto {
 message PlayerDto {
   string name = 1;
   string role = 2;
+  string zone_guid = 3;
+  bool loaded = 4;
 }
 
 enum AssetDtoType {

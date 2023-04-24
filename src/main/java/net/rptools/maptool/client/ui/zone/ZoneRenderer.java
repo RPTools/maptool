@@ -40,6 +40,7 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.ZoneLoaded;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
@@ -1959,6 +1960,8 @@ public class ZoneRenderer extends JComponent
     if (isLoaded) {
       // Notify the token tree that it should update
       MapTool.getFrame().updateTokenTree();
+
+      new MapToolEventBus().getMainEventBus().post(new ZoneLoaded(zone));
     }
     return !isLoaded;
   }

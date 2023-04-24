@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -159,6 +160,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_GM_MACROS_MSG -> handle(msg.getUpdateGmMacrosMsg());
         case UPDATE_EXPOSED_AREA_META_MSG -> handle(msg.getUpdateExposedAreaMetaMsg());
         case UPDATE_TOKEN_MOVE_MSG -> handle(msg.getUpdateTokenMoveMsg());
+        case UPDATE_PLAYER_STATUS_MSG -> handle(msg.getUpdatePlayerStatusMsg());
         default -> log.warn(msgType + "not handled.");
       }
       log.info(id + " handled: " + msgType);
@@ -1004,5 +1006,28 @@ public class ClientMessageHandler implements MessageHandler {
             AppActions.disconnectFromServer();
             MapTool.showInformation("You have been booted from the server.");
           });
+  }
+
+  private void handle(UpdatePlayerStatusMsg updatePlayerStatusMsg) {
+    var playerName = updatePlayerStatusMsg.getPlayer();
+    var zoneGUID = GUID.valueOf(updatePlayerStatusMsg.getZoneGuid());
+    var loaded = updatePlayerStatusMsg.getLoaded();
+
+    Player player =
+        MapTool.getPlayerList().stream()
+            .filter(x -> x.getName().equals(playerName))
+            .findFirst()
+            .orElse(null);
+
+    if (player == null) {
+      log.info("UpdatePlayerStatusMsg failed. No player with name: '" + playerName + "'");
+      return;
+    }
+
+    player.setZoneId(zoneGUID);
+    player.setLoaded(loaded);
+
+    final var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.post(new PlayerStatusChanged(player));
   }
 }
