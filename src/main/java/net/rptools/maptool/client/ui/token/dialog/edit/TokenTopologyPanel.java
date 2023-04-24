@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.edit;
+package net.rptools.maptool.client.ui.token.dialog.edit;
 
 import java.awt.Color;
 import java.awt.Cursor;
