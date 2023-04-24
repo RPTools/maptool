@@ -349,7 +349,7 @@ dependencies {
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
 
     // utils for handling reflection
-    implementation 'org.reflections:reflections:0.9.11'
+    implementation 'org.reflections:reflections:0.10.2'
 
     // find running instances in LAN
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
