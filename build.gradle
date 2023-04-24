@@ -298,7 +298,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
     // For Twelvemonkey SVG
-    implementation 'org.apache.xmlgraphics:batik-all:1.14'
+    implementation 'org.apache.xmlgraphics:batik-all:1.16'
 
 
     // For Sentry bug reporting
