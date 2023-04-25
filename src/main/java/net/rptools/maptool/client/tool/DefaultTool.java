@@ -56,9 +56,7 @@ public abstract class DefaultTool extends Tool
   protected int mouseY;
 
   // This is to manage overflowing of map move events (keep things snappy)
-  private long lastMoveRedraw;
   private int mapDX, mapDY;
-  private static final int REDRAW_DELAY = 25; // millis
 
   // TBD
   private boolean isTouchScreen = false;
@@ -294,16 +292,9 @@ public abstract class DefaultTool extends Tool
 
       setDragStart(mX, mY);
 
-      long now = System.currentTimeMillis();
-      if (now - lastMoveRedraw > REDRAW_DELAY) {
-        // TODO: does it matter to capture the last map move in the series ?
-        // TODO: This should probably be genericized and put into ZoneRenderer to prevent over
-        // zealous repainting
-        renderer.moveViewBy(mapDX, mapDY);
-        mapDX = 0;
-        mapDY = 0;
-        lastMoveRedraw = now;
-      }
+      renderer.moveViewBy(mapDX, mapDY);
+      mapDX = 0;
+      mapDY = 0;
     }
   }
 
