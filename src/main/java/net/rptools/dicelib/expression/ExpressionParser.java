@@ -14,7 +14,6 @@
  */
 package net.rptools.dicelib.expression;
 
-import net.rptools.dicelib.expression.function.*;
 import net.rptools.dicelib.expression.function.ArsMagicaStress;
 import net.rptools.dicelib.expression.function.CountSuccessDice;
 import net.rptools.dicelib.expression.function.DropHighestRoll;
