@@ -19,7 +19,7 @@ import com.jayway.jsonpath.*;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import java.math.BigDecimal;
 import java.util.*;
-import net.rptools.common.expression.ExpressionParser;
+import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
