@@ -14,16 +14,19 @@
  */
 package net.rptools.common.expression.function;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
-import junit.framework.TestCase;
 import net.rptools.common.expression.RunData;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.EvaluationException;
 import net.rptools.parser.function.ParameterException;
+import org.junit.jupiter.api.Test;
 
-public class DropRollTest extends TestCase {
+public class DropRollTest {
+  @Test
   public void testEvaluateRoll() throws ParserException, EvaluationException, ParameterException {
 
     Parser p = new Parser();

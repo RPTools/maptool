@@ -14,12 +14,16 @@
  */
 package net.rptools.common.expression;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 import java.util.ArrayList;
 import java.util.List;
-import junit.framework.TestCase;
+import org.junit.jupiter.api.Test;
 
-public class RunDataTest extends TestCase {
+public class RunDataTest {
 
+  @Test
   public void testRandomIntInt() {
     RunData runData = new RunData(null);
 
@@ -29,15 +33,17 @@ public class RunDataTest extends TestCase {
     }
   }
 
+  @Test
   public void testRandomIntIntInt() {
     RunData runData = new RunData(null);
 
     for (int i = 0; i < 10000; i++) {
       int value = runData.randomInt(10, 20);
-      assertTrue(String.format("Value outside range: %s", value), 10 <= value && value <= 20);
+      assertTrue(10 <= value && value <= 20, String.format("Value outside range: %s", value));
     }
   }
 
+  @Test
   public void testParentChild() {
     List<Integer> allRolls = new ArrayList<>();
     RunData parent = new RunData(null);

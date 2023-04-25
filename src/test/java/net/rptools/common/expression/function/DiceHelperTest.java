@@ -14,11 +14,15 @@
  */
 package net.rptools.common.expression.function;
 
-import junit.framework.TestCase;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.fail;
+
 import net.rptools.common.expression.RunData;
 import net.rptools.parser.function.EvaluationException;
+import org.junit.jupiter.api.Test;
 
-public class DiceHelperTest extends TestCase {
+public class DiceHelperTest {
+  @Test
   public void testRollDice() throws Exception {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
@@ -26,6 +30,7 @@ public class DiceHelperTest extends TestCase {
     assertEquals(42, DiceHelper.rollDice(10, 6));
   }
 
+  @Test
   public void testKeepDice() throws Exception {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
@@ -33,6 +38,7 @@ public class DiceHelperTest extends TestCase {
     assertEquals(28, DiceHelper.keepDice(10, 6, 5));
   }
 
+  @Test
   public void testDropDice() throws Exception {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
@@ -40,6 +46,7 @@ public class DiceHelperTest extends TestCase {
     assertEquals(28, DiceHelper.dropDice(10, 6, 5));
   }
 
+  @Test
   public void testRerollDice() throws Exception {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
@@ -47,6 +54,7 @@ public class DiceHelperTest extends TestCase {
     assertEquals(50, DiceHelper.rerollDice(10, 6, 2));
   }
 
+  @Test
   public void testExplodeDice() throws Exception {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
@@ -54,13 +62,14 @@ public class DiceHelperTest extends TestCase {
     assertEquals(23, DiceHelper.explodeDice(4, 6));
   }
 
+  @Test
   public void testExplodeDice_Exception() throws Exception {
     try {
       RunData.setCurrent(new RunData(null));
       RunData.setSeed(102312L);
 
       assertEquals(23, DiceHelper.explodeDice(4, 1));
-      fail();
+      fail("Expected EvaluationException");
     } catch (EvaluationException e) {
     }
   }

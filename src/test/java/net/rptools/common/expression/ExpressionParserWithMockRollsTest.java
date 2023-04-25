@@ -14,16 +14,18 @@
  */
 package net.rptools.common.expression;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import java.math.BigDecimal;
-import junit.framework.TestCase;
 import net.rptools.parser.ParserException;
-import org.junit.After;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 
 /**
  * An alternative test suite that evaluates dice expressions against specific known roll sequences.
  * Uses {@link RunDataMockForTesting}.
  */
-public class ExpressionParserWithMockRollsTest extends TestCase {
+public class ExpressionParserWithMockRollsTest {
   /**
    * Helper method to initialize the RunData with the given rolls
    *
@@ -35,11 +37,12 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
   }
 
   /** Clear the RunData after each test, in case we leave a mock instance as Current. */
-  @After
+  @AfterEach
   public void clearRunData() {
     RunData.setCurrent(null);
   }
 
+  @Test
   public void testEvaluate_ShadowRun4NonGlich25() throws ParserException {
     int[] rolls = {2, 5};
     setUpMockRunData(rolls);
@@ -47,6 +50,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 0  Results: 2 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun4GremlinGlich25() throws ParserException {
     int[] rolls = {2, 5};
     setUpMockRunData(rolls);
@@ -54,6 +58,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 0 *Gremlin Glitch*  Results: 2 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun4CriticalGremlinGlich22() throws ParserException {
     int[] rolls = {2, 2};
     setUpMockRunData(rolls);
@@ -61,6 +66,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 0 *Critical Gremlin Glitch*  Results: 2 2 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun4Glitch15() throws ParserException {
     int[] rolls = {1, 5};
     setUpMockRunData(rolls);
@@ -68,6 +74,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 1 *Glitch*  Results: 1 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun4CriticalGlitch12() throws ParserException {
     int[] rolls = {1, 2};
     setUpMockRunData(rolls);
@@ -75,6 +82,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 1 *Critical Glitch*  Results: 1 2 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun4CriticalGlitch11() throws ParserException {
     int[] rolls = {1, 1};
     setUpMockRunData(rolls);
@@ -82,6 +90,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5NonGlich25() throws ParserException {
     int[] rolls = {2, 5};
     setUpMockRunData(rolls);
@@ -89,6 +98,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 0  Results: 2 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5NonGlitch15() throws ParserException {
     int[] rolls = {1, 5};
     setUpMockRunData(rolls);
@@ -96,6 +106,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 1  Results: 1 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5CriticalGlitch11() throws ParserException {
     int[] rolls = {1, 1};
     setUpMockRunData(rolls);
@@ -103,6 +114,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5CriticalGremlinGlitch12() throws ParserException {
     int[] rolls = {1, 2};
     setUpMockRunData(rolls);
@@ -110,6 +122,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 1 *Critical Gremlin Glitch*  Results: 1 2 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5GremlinGlitch15() throws ParserException {
     int[] rolls = {1, 5};
     setUpMockRunData(rolls);
@@ -117,6 +130,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 1 *Gremlin Glitch*  Results: 1 5 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5CriticalNonGremlinGlitch11() throws ParserException {
     int[] rolls = {1, 1};
     setUpMockRunData(rolls);
@@ -125,6 +139,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 0 Ones: 2 *Critical Glitch*  Results: 1 1 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5Glitch61Exploding1() throws ParserException {
     int[] rolls = {6, 1, 1};
     setUpMockRunData(rolls);
@@ -132,6 +147,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 1 Ones: 2 *Glitch*  Results: 6 1 1 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ShadowRun5Glitch66Exploding6611() throws ParserException {
     int[] rolls = {6, 6, 6, 6, 1, 1};
     setUpMockRunData(rolls);
@@ -140,6 +156,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Hits: 4 Ones: 2 *Glitch*  Results: 6 6 6 6 1 1 ", result.getValue());
   }
 
+  @Test
   public void testEvaluate_ExplodeWithMockRunData() throws ParserException {
     int[] rolls = {3, 6, 6, 2}; // explode both sixes
     setUpMockRunData(rolls);
@@ -147,6 +164,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(17), result.getValue());
   }
 
+  @Test
   public void testEvaluate_DropWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // drop 2 and 1
     setUpMockRunData(rolls);
@@ -154,6 +172,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(21), result.getValue());
   }
 
+  @Test
   public void testEvaluate_KeepWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // keep the sixes and the 5
     setUpMockRunData(rolls);
@@ -161,6 +180,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(17), result.getValue());
   }
 
+  @Test
   public void testEvaluate_KeepLowestWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // keep the 1 and 2
     setUpMockRunData(rolls);
@@ -168,6 +188,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(3), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RerollOnceAndKeepWithMockRunData() throws ParserException {
     int[] rolls = {4, 2, 1}; // the 2 will be re-rolled, and the 1 will be kept
     RunDataMockForTesting mockRD = new RunDataMockForTesting(new Result(""), rolls);
@@ -176,6 +197,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(5), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RerollOnceAndChooseWithMockRunData() throws ParserException {
     int[] rolls = {4, 2, 1}; // the 2 will be re-rolled, but still kept as it is higher than the 1
     RunDataMockForTesting mockRD = new RunDataMockForTesting(new Result(""), rolls);
@@ -184,6 +206,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(6), result.getValue());
   }
 
+  @Test
   public void testEvaluate_CountSuccessesWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // count the 5 and 6s
     setUpMockRunData(rolls);
@@ -191,6 +214,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(3), result.getValue());
   }
 
+  @Test
   public void testEvaluate_ExplodingSuccessesWithMockRunData() throws ParserException {
     int[] rolls = {5, 4, 6, 1, 6, 6, 5};
     setUpMockRunData(rolls);
@@ -198,6 +222,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Dice: 5, 4, 7, 17, Successes: 1", result.getValue());
   }
 
+  @Test
   public void testEvaluate_OpenWithMockRunData() throws ParserException {
     int[] rolls = {5, 6, 4, 6, 6, 2, 3};
     setUpMockRunData(rolls);
@@ -205,6 +230,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals("Dice: 5, 10, 14, 3, Maximum: 14", result.getValue());
   }
 
+  @Test
   public void testEvaluate_DropHighWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // drop 6s and 5
     setUpMockRunData(rolls);
@@ -212,6 +238,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(7), result.getValue());
   }
 
+  @Test
   public void testEvaluate_KeepLowWithMockRunData() throws ParserException {
     int[] rolls = {6, 2, 5, 4, 1, 6}; // keep the 1 and 2
     setUpMockRunData(rolls);
@@ -219,6 +246,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(3), result.getValue());
   }
 
+  @Test
   public void testEvaluate_FudgeRollWithMockRunData() throws ParserException {
     int[] rolls = {1, 2, 2, 3}; // fudge dice are weird - they're shifted d3s to equal -1, 0, 1
     setUpMockRunData(rolls);
@@ -226,6 +254,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(BigDecimal.ZERO, result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollWithUpperWithMockRunData() throws ParserException {
     int[] rolls = {6, 16, 18, 15, 14}; // 16, 18 bounded to 15
     setUpMockRunData(rolls);
@@ -233,6 +262,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(65), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollWithLowerWithMockRunData() throws ParserException {
     int[] rolls = {13, 7, 6, 8, 2}; // 6, 2 bounded to 7
     setUpMockRunData(rolls);
@@ -240,6 +270,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(42), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollAddWithUpperWithMockRunData() throws ParserException {
     int[] rolls = {17, 4, 20, 15, 16}; // adds to 22, 9, 25, 20, 21. Then 22, 25 bounded to 21.
     setUpMockRunData(rolls);
@@ -247,6 +278,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(92), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollAddWithLowerWithMockRunData() throws ParserException {
     int[] rolls = {13, 6, 7, 4, 8}; // adds to 16, 9, 10, 7, 11. Then 9, 7 bounded to 10.
     setUpMockRunData(rolls);
@@ -254,6 +286,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(57), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollSubWithUpperWithMockRunData() throws ParserException {
     int[] rolls = {16, 7, 19, 15, 17}; // subs to 12, 3, 15, 11, 13. Then 15, 13 bounded to 12.
     setUpMockRunData(rolls);
@@ -261,6 +294,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(50), result.getValue());
   }
 
+  @Test
   public void testEvaluate_RollSubWithLowerWithMockRunData() throws ParserException {
     int[] rolls = {13, 12, 18, 5, 11}; // subs to 6, 5, 11, -2, 4. Then -2, 4 bounded to 5.
     setUpMockRunData(rolls);
@@ -268,6 +302,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     assertEquals(new BigDecimal(32), result.getValue());
   }
 
+  @Test
   public void testEvaluate_arsMagicaStress() throws ParserException {
     int[] rolls = {3, 7, 5, 2, 3, 2, 8, 9, 4, 7};
     setUpMockRunData(rolls);
@@ -300,6 +335,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     }
   }
 
+  @Test
   public void testEvaluate_arsMagicaStressNoBotch() throws ParserException {
     int[] rolls = {10, 3, 2};
     setUpMockRunData(rolls);
@@ -349,6 +385,7 @@ public class ExpressionParserWithMockRollsTest extends TestCase {
     }
   }
 
+  @Test
   public void testEvaluate_arsMagicaStressBotch() throws ParserException {
     int[] rolls = {10, 10, 1};
     setUpMockRunData(rolls);
