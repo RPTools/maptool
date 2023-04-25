@@ -321,8 +321,6 @@ dependencies {
     implementation 'com.github.RPTools:maptool-resources:1.6.0'
     // parser for macros
     implementation 'com.github.RPTools:parser:1.8.3'
-    // dice expressions
-    implementation 'net.rptools.dicelib:dicelib:1.8.6'
 
     // Currently hosted on nerps.net/repo
     implementation group: 'com.jidesoft', name: 'jide-common', version: '3.7.9'
