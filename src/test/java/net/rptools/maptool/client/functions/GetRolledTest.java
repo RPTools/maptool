@@ -49,13 +49,13 @@ public class GetRolledTest {
           "[r: macro.return = json.set('', 'priors', priors, 'rolls_1', rolls_1, 'rolls_2', rolls_2, 'all_rolls', getRolled())]");
 
   @BeforeAll
-  private static void setUp() {
+  public static void setUp() {
     parser = MapTool.getParser();
     parser.enterContext("test", "test", true);
   }
 
   @AfterEach
-  private void resetParser() {
+  public void resetParser() {
     parser.clearRolls();
   }
 
