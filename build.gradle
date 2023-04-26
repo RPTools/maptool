@@ -306,7 +306,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.7'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.9.0'
 
     // ftp client
     implementation 'commons-net:commons-net:3.9.0'
