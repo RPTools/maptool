@@ -14,12 +14,12 @@
  */
 package net.rptools.maptool.client;
 
-import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicLong;
+import javax.annotation.Nonnull;
 
 /**
  * Manages throttling rapid successive attempts to execute a task.
@@ -42,9 +42,6 @@ public class DebounceExecutor {
           .setNameFormat("debounce-executor-%d")
           .build();
 
-  /** The time, in milliseconds, during which to throttle subsequent requests to run the task. */
-  private final long delay;
-
   /**
    * A {@link ScheduledExecutorService} that will be used to run the debounced task when the delay
    * elapses.
@@ -52,26 +49,14 @@ public class DebounceExecutor {
   private final ScheduledExecutorService executor =
       Executors.newSingleThreadScheduledExecutor(threadFactory);
 
-  /** A {@link ScheduledFuture} that represents the debounced task. */
-  private ScheduledFuture<?> future;
-
-  /**
-   * The synchronization lock used during the critical section for determining how to dispose of any
-   * single request.
-   */
-  private final Object syncLock = new Object();
+  /** The time, in milliseconds, during which to throttle subsequent requests to run the task. */
+  private final long delay;
 
   /** A {@link Runnable} representing the task to be managed. */
   private final Runnable task;
 
-  /**
-   * A {@link long} indicating the time, in milliseconds, when the task last entered a pending
-   * state.
-   */
-  private long taskPendingSince = -1;
-
-  /** A reference to the logging service. */
-  // private static final Logger log = LogManager.getLogger(DebounceExecutor.class);
+  /** A {@link long} indicating the time, in milliseconds, when the task was last scheduled for. */
+  private final AtomicLong taskScheduledTime = new AtomicLong(-1);
 
   /**
    * Initializes a new instance of the {@link DebounceExecutor} class.
@@ -85,32 +70,34 @@ public class DebounceExecutor {
    *     executing the <i>task</i> and throttle subsequent requests.
    * @param task The task to be executed after the <i>delay</i> elapses.
    */
-  public DebounceExecutor(long delay, Runnable task) {
+  public DebounceExecutor(long delay, @Nonnull Runnable task) {
     this.delay = delay;
     this.task = task;
   }
 
   /** Dispatches a task to be executed by this {@link DebounceExecutor} instance. */
   public void dispatch() {
-    if (this.task == null) {
-      // log.info("Exited debouncer because of a null task.");
-      return;
-    }
     if (this.delay < 1) {
       this.task.run();
       return;
     }
-    synchronized (syncLock) {
-      long now = (new Date()).getTime();
-      if (this.taskPendingSince == -1 || now - this.taskPendingSince >= this.delay) {
-        this.taskPendingSince = now;
-        this.future = this.executor.schedule(this.task, this.delay, TimeUnit.MILLISECONDS);
-      } /* else {
-          log.info(
-                String.format(
-                      "Task execution was debounced. (now: %d; taskPendingSince: %d; delay: %d; now - taskPendingSince: %d)",
-                      now, this.taskPendingSince, this.delay, now - this.taskPendingSince));
-        } */
+
+    /*
+     * There are three time windows we need to account for.
+     * 1. The scheduled time has not yet passed, so we consider the execution redundant.
+     * 2. The scheduled time has passed, but not by much. So we can run the task with a small delay.
+     * 3. The scheduled time has long passed, so we can run the task right away.
+     */
+
+    final var taskScheduledTime = this.taskScheduledTime.get();
+    final var now = System.currentTimeMillis();
+    if (now >= taskScheduledTime) {
+      // This request is not redundant, so we need to schedule it.
+      final var nextTargetTime = Math.max(now, taskScheduledTime + this.delay);
+      // If this check fails, that means someone beat us to the punch and our task is now redundant.
+      if (this.taskScheduledTime.compareAndSet(taskScheduledTime, nextTargetTime)) {
+        this.executor.schedule(this.task, nextTargetTime - now, TimeUnit.MILLISECONDS);
+      }
     }
   }
 }
