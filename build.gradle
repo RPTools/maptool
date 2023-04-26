@@ -377,8 +377,8 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.8.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.27'
-    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.27'
+    implementation 'org.apache.pdfbox:pdfbox:2.0.28'
+    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.28'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.70'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
