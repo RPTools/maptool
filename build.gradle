@@ -364,11 +364,11 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.19'
 
     // themes
-    implementation 'com.formdev:flatlaf:3.1'
-    implementation 'com.formdev:flatlaf-intellij-themes:3.1'
-    implementation 'com.formdev:flatlaf-extras:3.1'
+    implementation 'com.formdev:flatlaf:3.1.1'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.1.1'
+    implementation 'com.formdev:flatlaf-extras:3.1.1'
     implementation 'com.formdev:svgSalamander:1.1.3'
-    implementation 'com.formdev:flatlaf-jide-oss:3.1'
+    implementation 'com.formdev:flatlaf-jide-oss:3.1.1'
 
     // JS support for macros
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
