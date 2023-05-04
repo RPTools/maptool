@@ -70,4 +70,6 @@ public class AppConstants {
       (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
   public static final String THEME_CONFIG_FILE =
       AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
+
+  public static final String INTERNAL_MAP_HTML_OVERLAY_NAME = "Internal Map Overlay";
 }

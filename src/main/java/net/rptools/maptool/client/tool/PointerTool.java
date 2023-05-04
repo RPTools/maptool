@@ -36,6 +36,8 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.StartHoverOverToken;
+import net.rptools.maptool.client.events.StopHoverOverToken;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -45,6 +47,7 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
@@ -447,6 +450,7 @@ public class PointerTool extends DefaultTool {
       hoverTokenNotes = null;
       markerUnderMouse = renderer.getMarkerAt(e.getX(), e.getY());
       repaint();
+      new MapToolEventBus().getMainEventBus().post(new StopHoverOverToken(getZone()));
     }
     if (isShowingTokenStackPopup) {
       if (tokenStackPanel.contains(e.getX(), e.getY())) {
@@ -572,6 +576,9 @@ public class PointerTool extends DefaultTool {
           if (hoverTokenBounds == null) {
             // Uhhhh, where's the token ?
             isShowingHover = false;
+          } else {
+            new MapToolEventBus().getMainEventBus().post(new StartHoverOverToken(markerUnderMouse,
+                getZone()));
           }
           repaint();
         }
