@@ -576,9 +576,6 @@ public class PointerTool extends DefaultTool {
           if (hoverTokenBounds == null) {
             // Uhhhh, where's the token ?
             isShowingHover = false;
-          } else {
-            new MapToolEventBus().getMainEventBus().post(new StartHoverOverToken(markerUnderMouse,
-                getZone()));
           }
           repaint();
         }
@@ -1961,6 +1958,9 @@ public class PointerTool extends DefaultTool {
 
     // Hovers
     if (isShowingHover) {
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new StartHoverOverToken(markerUnderMouse, getZone()));
       // Anchor next to the token
       Dimension size =
           htmlRenderer.setText(
