@@ -450,7 +450,6 @@ public class PointerTool extends DefaultTool {
       hoverTokenNotes = null;
       markerUnderMouse = renderer.getMarkerAt(e.getX(), e.getY());
       repaint();
-      new MapToolEventBus().getMainEventBus().post(new StopHoverOverToken(getZone()));
     }
     if (isShowingTokenStackPopup) {
       if (tokenStackPanel.contains(e.getX(), e.getY())) {
@@ -1679,6 +1678,10 @@ public class PointerTool extends DefaultTool {
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
         tokenOnStatSheet = tokenUnderMouse;
+        new MapToolEventBus().getMainEventBus().post(new StopHoverOverToken(getZone()));
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(new StartHoverOverToken(markerUnderMouse, getZone()));
 
         BufferedImage image = null;
         Dimension imgSize = new Dimension(0, 0);
@@ -1958,9 +1961,6 @@ public class PointerTool extends DefaultTool {
 
     // Hovers
     if (isShowingHover) {
-      new MapToolEventBus()
-          .getMainEventBus()
-          .post(new StartHoverOverToken(markerUnderMouse, getZone()));
       // Anchor next to the token
       Dimension size =
           htmlRenderer.setText(
