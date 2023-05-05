@@ -88,6 +88,7 @@ import net.rptools.maptool.client.ui.token.dialog.edit.EditTokenDialog;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.tokenpanel.TokenPanelTreeModel;
+import net.rptools.maptool.client.ui.zone.MapOverlay;
 import net.rptools.maptool.client.ui.zone.PointerOverlay;
 import net.rptools.maptool.client.ui.zone.PointerToolOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneMiniMapPanel;
@@ -151,6 +152,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final JPanel zoneRendererPanel;
   /** Contains the overlays that should be displayed in front of everything else. */
   private final PointerToolOverlay pointerToolOverlay;
+
+  /** Overlay for UI elements on top of the map. */
+  private final ArrayList<MapOverlay> mapOverlays = new ArrayList<>();
 
   private JPanel visibleControlPanel;
   private FullScreenFrame fullScreenFrame;
@@ -420,6 +424,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
+
 
     // Put it all together
     setJMenuBar(menuBar);
@@ -2065,6 +2070,21 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public SelectionPanel getSelectionPanel() {
     return selectionPanel;
+  }
+
+
+  public List<MapOverlay> getMapOverlays() {
+    return new ArrayList<>(mapOverlays);
+  }
+
+  public void addMapOverlay(MapOverlay overlay) {
+    mapOverlays.add(overlay);
+    zoneRendererPanel.add(overlay, PositionalLayout.Position.CENTER, 0);
+  }
+
+  public void removeMapOverlay(MapOverlay overlay) {
+    mapOverlays.remove(overlay);
+    zoneRendererPanel.remove(overlay);
   }
 
   /** Reset the impersonatePanel and the selectionPanel. */

@@ -15,18 +15,26 @@
 package net.rptools.maptool.client.ui.sheet.stats;
 
 import com.google.common.eventbus.Subscribe;
-import net.rptools.maptool.client.events.StartHoverOverToken;
-import net.rptools.maptool.client.events.StopHoverOverToken;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.TokenHoverEnter;
+import net.rptools.maptool.client.events.TokenHoverExit;
+import net.rptools.maptool.client.ui.zone.MapOverlay;
 
-public class TokenHoverListener {
+public class StatSheetListener {
 
-  @Subscribe
-  public void onTokenHover(StartHoverOverToken event) {
-    System.out.println("TokenHoverListener.onTokenHover");
+  private static final MapOverlay overlay = new MapOverlay();
+
+  static {
+    MapTool.getFrame().addMapOverlay(overlay);
   }
 
   @Subscribe
-  public void onTokenHover(StopHoverOverToken event) {
-    System.out.println("TokenHoverListener.onTokenHover");
+  public void onHoverEnter(TokenHoverEnter event) {
+    System.out.println("TokenHoverListener.onHoverEnter");
+  }
+
+  @Subscribe
+  public void onHoverExit(TokenHoverExit event) {
+    System.out.println("TokenHoverListener.onHoverLeave");
   }
 }

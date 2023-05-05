@@ -36,8 +36,8 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
-import net.rptools.maptool.client.events.StartHoverOverToken;
-import net.rptools.maptool.client.events.StopHoverOverToken;
+import net.rptools.maptool.client.events.TokenHoverEnter;
+import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -709,12 +709,23 @@ public class PointerTool extends DefaultTool {
       handleDragToken(zp, zp.x - last.x, zp.y - last.y);
       return;
     }
+    var oldTokenUnderMouse = tokenUnderMouse;
     tokenUnderMouse = renderer.getTokenAt(mouseX, mouseY);
     keysDown = e.getModifiersEx();
     renderer.setMouseOver(tokenUnderMouse);
 
     if (tokenUnderMouse == null) {
       statSheet = null;
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
+      }
+    } else if (tokenUnderMouse != oldTokenUnderMouse) {
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
+      }
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new TokenHoverEnter(tokenUnderMouse, getZone()));
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {
@@ -1678,10 +1689,6 @@ public class PointerTool extends DefaultTool {
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
         tokenOnStatSheet = tokenUnderMouse;
-        new MapToolEventBus().getMainEventBus().post(new StopHoverOverToken(getZone()));
-        new MapToolEventBus()
-            .getMainEventBus()
-            .post(new StartHoverOverToken(markerUnderMouse, getZone()));
 
         BufferedImage image = null;
         Dimension imgSize = new Dimension(0, 0);

@@ -71,7 +71,7 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
-import net.rptools.maptool.client.ui.sheet.stats.TokenHoverListener;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
 import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -1383,7 +1383,7 @@ public class MapTool {
         .getOverlayPanel()
         .showOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME, Integer.MIN_VALUE, "", null);
 
-    new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
+    new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
   }
 
   /**

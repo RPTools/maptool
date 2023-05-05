@@ -16,4 +16,4 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.Zone;
 
-public record StopHoverOverToken(Zone zone) {}
+public record TokenHoverExit(Zone zone) {}
