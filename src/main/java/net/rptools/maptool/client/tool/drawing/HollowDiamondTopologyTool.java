@@ -48,12 +48,12 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
 
   @Override
   public String getInstructions() {
-    return "tool.recttopology.instructions";
+    return "tool.diamondtopology.instructions";
   }
 
   @Override
   public String getTooltip() {
-    return "tool.recttopologyhollow.tooltip";
+    return "tool.diamondtopologyhollow.tooltip";
   }
 
   @Override
