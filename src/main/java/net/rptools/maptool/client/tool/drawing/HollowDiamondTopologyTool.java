@@ -53,7 +53,7 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
 
   @Override
   public String getTooltip() {
-    return tool.diamondtopologyhollow.tooltip;
+    return "tool.isorectangletopologyhollow.tooltip";
   }
 
   @Override
