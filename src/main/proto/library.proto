@@ -20,6 +20,7 @@ message AddOnLibraryDto {
   bool allowsUriAccess = 26;
   string license_file = 27;
   string read_me_file = 28;
+  repeated AddOnStatSheets stat_sheets = 29;
 }
 
 message MTScriptPropertiesDto {
@@ -48,4 +49,14 @@ message AddOnLibraryEventsDto {
   }
   repeated Events events = 1;
   repeated Events legacy_events = 2;
+}
+
+message AddOnStatSheets {
+  string name = 1;
+  string description = 2;
+  string type = 3;
+  string entry = 4;
+  string width = 5;
+  string height = 6;
+  string namespace = 7;
 }

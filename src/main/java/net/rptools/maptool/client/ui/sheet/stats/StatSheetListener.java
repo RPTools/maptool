@@ -19,22 +19,45 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.client.ui.zone.MapOverlay;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 
 public class StatSheetListener {
 
-  private static final MapOverlay overlay = new MapOverlay();
+  private final MapOverlay overlay = new MapOverlay();
+  private StatSheet statSheet;
 
-  static {
+  private static final String SHEET_URL =
+      "lib://net.rptools.statSheetTest/sheets/stats/basic/index.html";
+  // private final String htmlString;
+
+  public StatSheetListener() {
     MapTool.getFrame().addMapOverlay(overlay);
+    overlay.setLayout(null);
   }
 
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
     System.out.println("TokenHoverListener.onHoverEnter");
+    if (statSheet == null) {
+      statSheet = new StatSheet();
+      overlay.add(statSheet);
+      var size = overlay.getSize();
+      int x = 0;
+      int y = (int) size.getHeight() - 200;
+      statSheet.setBounds(x, y, 200, 200);
+      statSheet.setContent(
+          new StatSheetManager().getStatSheetContent("net.rptools.statSheetTest", "Basic"));
+    }
+    statSheet.setVisible(true);
   }
 
   @Subscribe
   public void onHoverExit(TokenHoverExit event) {
     System.out.println("TokenHoverListener.onHoverLeave");
+    if (statSheet != null) {
+      statSheet.setVisible(false);
+      overlay.remove(statSheet);
+      statSheet = null;
+    }
   }
 }

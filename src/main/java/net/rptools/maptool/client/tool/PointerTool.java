@@ -723,9 +723,7 @@ public class PointerTool extends DefaultTool {
       if (oldTokenUnderMouse != null) {
         new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
       }
-      new MapToolEventBus()
-          .getMainEventBus()
-          .post(new TokenHoverEnter(tokenUnderMouse, getZone()));
+      new MapToolEventBus().getMainEventBus().post(new TokenHoverEnter(tokenUnderMouse, getZone()));
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {

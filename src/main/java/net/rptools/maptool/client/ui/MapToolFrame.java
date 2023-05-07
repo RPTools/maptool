@@ -425,7 +425,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     pointerToolOverlay = new PointerToolOverlay();
     zoneRendererPanel.add(pointerToolOverlay, PositionalLayout.Position.CENTER, 0);
 
-
     // Put it all together
     setJMenuBar(menuBar);
     add(BorderLayout.NORTH, toolbarPanel);
@@ -2071,7 +2070,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public SelectionPanel getSelectionPanel() {
     return selectionPanel;
   }
-
 
   public List<MapOverlay> getMapOverlays() {
     return new ArrayList<>(mapOverlays);

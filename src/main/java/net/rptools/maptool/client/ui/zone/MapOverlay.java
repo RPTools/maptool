@@ -15,14 +15,9 @@
 package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Component;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
 import java.awt.Point;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.tool.Tool;
 
 /** Transparent JPanel that displays the UI elements over the map. */
 public class MapOverlay extends JPanel {
