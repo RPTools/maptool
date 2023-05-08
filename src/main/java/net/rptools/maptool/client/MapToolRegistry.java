@@ -83,8 +83,20 @@ public class MapToolRegistry {
 
   public SeverConnectionDetails findInstance(String id) {
     OkHttpClient client = new OkHttpClient();
-    String requestUrl =
-        HttpUrl.parse(SERVER_DETAILS).newBuilder().addQueryParameter("name", id).build().toString();
+
+    String requestUrl;
+    try {
+      requestUrl =
+          HttpUrl.parse(SERVER_DETAILS)
+              .newBuilder()
+              .addQueryParameter("name", id)
+              .build()
+              .toString();
+    } catch (Exception e) {
+      log.error("Error building request url", e);
+      MapTool.showError("msg.error.fetchingRegistryInformation", e);
+      return new SeverConnectionDetails();
+    }
 
     Request request = new Request.Builder().url(requestUrl).build();
 
@@ -92,11 +104,13 @@ public class MapToolRegistry {
 
       // Check if we got an actual response. If we did not, just do an early return,
       // the server isn't real.
-      if (response.body().string().isEmpty()) {
+      var responseString = response.body().string();
+      if (responseString.isEmpty()) {
+        MapTool.showError("msg.error.fetchingRegistryInformation");
         return new SeverConnectionDetails();
       }
 
-      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
+      JsonObject json = JsonParser.parseString(responseString).getAsJsonObject();
       SeverConnectionDetails details = new SeverConnectionDetails();
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
@@ -114,8 +128,9 @@ public class MapToolRegistry {
 
       return details;
 
-    } catch (IOException | NullPointerException e) {
+    } catch (Exception e) {
       log.error("Error fetching instance from server registry", e);
+      MapTool.showError("msg.error.fetchingRegistryInformation", e);
       return new SeverConnectionDetails();
     }
   }
