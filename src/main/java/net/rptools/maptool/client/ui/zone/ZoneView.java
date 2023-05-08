@@ -114,7 +114,7 @@ public class ZoneView {
   private final Map<PlayerView, Area> exposedAreaMap = new HashMap<>();
 
   /** Map the PlayerView to its visible area. */
-  private final Map<PlayerView, VisibleAreaMeta> visibleAreaMap = new HashMap<>();
+  private final Map<PlayerView, Area> visibleAreaMap = new HashMap<>();
 
   // endregion
 
@@ -176,14 +176,22 @@ public class ZoneView {
   /**
    * Calculate the visible area of the view, cache it in visibleAreaMap, and return it
    *
+   * <p>The visible area is calculated for each token in the view. The token's visible area is its
+   * vision obstructed by topology and restricted to the illuminated portions of the map.
+   *
    * @param view the PlayerView
    * @return the visible area
    */
   public Area getVisibleArea(PlayerView view) {
-    calculateVisibleArea(view);
-    ZoneView.VisibleAreaMeta visible = visibleAreaMap.get(view);
-
-    return visible != null ? visible.visibleArea : new Area();
+    return visibleAreaMap.computeIfAbsent(
+        view,
+        view2 -> {
+          final var visibleArea = new Area();
+          getTokensForView(view2)
+              .map(token -> this.getVisibleArea(token, view2))
+              .forEach(visibleArea::add);
+          return visibleArea;
+        });
   }
 
   /**
@@ -834,24 +842,6 @@ public class ZoneView {
     }
   }
 
-  /**
-   * Construct the {@link #visibleAreaMap} entry for a player view.
-   *
-   * @param view the player view.
-   */
-  private void calculateVisibleArea(PlayerView view) {
-    if (visibleAreaMap.get(view) != null && !visibleAreaMap.get(view).visibleArea.isEmpty()) {
-      return;
-    }
-    // Cache it
-    final var visibleArea = new Area();
-    getTokensForView(view).map(token -> this.getVisibleArea(token, view)).forEach(visibleArea::add);
-
-    VisibleAreaMeta meta = new VisibleAreaMeta();
-    meta.visibleArea = visibleArea;
-    visibleAreaMap.put(view, meta);
-  }
-
   @Subscribe
   private void onTopologyChanged(TopologyChanged event) {
     if (event.zone() != this.zone) {
@@ -983,10 +973,5 @@ public class ZoneView {
     }
 
     return hasTopology;
-  }
-
-  /** Has a single field: the visibleArea area */
-  private static class VisibleAreaMeta {
-    Area visibleArea;
   }
 }
