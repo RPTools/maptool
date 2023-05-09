@@ -459,6 +459,10 @@ dependencies {
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:223.7571.182'
     // layout for forms created in code
     implementation 'com.miglayout:miglayout-swing:11.1'
+
+    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+
+
 }
 
 

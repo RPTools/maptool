@@ -14,84 +14,59 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
-import java.net.URI;
-import java.util.Optional;
+import com.github.mustachejava.DefaultMustacheFactory;
+import com.github.mustachejava.MustacheFactory;
+import java.io.IOException;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.util.HashMap;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
-import javafx.scene.Scene;
-import javafx.scene.layout.StackPane;
-import javafx.scene.web.WebView;
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.library.Library;
-import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.parser.ParserException;
+import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Tag;
 
-public class StatSheet extends JFXPanel {
+public class StatSheet {
 
   private static final Logger log = LogManager.getLogger(StatSheet.class);
   private static final String SHEET_URI =
       "lib://net.rptools.statSheetTest/sheets/stats/basic/index.html";
-  private final String htmlString;
 
-  private WebView webView;
+  public StatSheet() {}
 
-  public StatSheet() {
-    super();
-    var html = "<html><body><h1>Stat Sheet Not Found</h1></body></html>";
+  public void setContent(Token token, String content) {
+    MustacheFactory mf = new DefaultMustacheFactory();
+    var mustache = mf.compile(new StringReader(content), "sheet");
+    var output = new StringWriter();
+    var context = new HashMap<String, Object>();
+    context.put("name", token.getName());
+    context.put("gmName", token.getGMName());
     try {
-      URI uri = new URI(SHEET_URI);
-      Optional<Library> library = new LibraryManager().getLibrary(uri.toURL()).get();
-      if (library.isEmpty()) {
-        throw new ParserException(
-            I18N.getText("macro.function.html5.invalidURI", uri.toURL().toExternalForm()));
-      }
-
-      var str = library.get().readAsString(uri.toURL()).get();
-
-      var document = Jsoup.parse(str);
-      var head = document.select("head").first();
-      if (head != null) {
-        String baseURL = uri.toURL().toExternalForm().replaceFirst("\\?.*", "");
-        baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
-        var baseElement = new Element(Tag.valueOf("base"), "").attr("href", baseURL);
-        if (head.children().isEmpty()) {
-          head.appendChild(baseElement);
-        } else {
-          head.child(0).before(baseElement);
-        }
-
-        html = document.html();
-      }
-    } catch (Exception e) {
-      log.error("Error loading stat sheet", e);
+      mustache.execute(output, context).flush();
+    } catch (IOException e) {
+      e.printStackTrace(); // TODO: CDW
     }
 
-    htmlString = html;
-
-    Platform.runLater(this::setupScene);
-  }
-
-  private void setupScene() {
-    StackPane root = new StackPane(); // VBox would create empty space at bottom on resize
-    webView = new WebView();
-    root.getChildren().add(webView);
-    setScene(new Scene(root));
-    setVisible(true);
-  }
-
-  public void setContent(String content) {
     Platform.runLater(
         () -> {
-          webView.getEngine().loadContent(content);
+          var overlay =
+              MapTool.getFrame()
+                  .getOverlayPanel()
+                  .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
+          System.out.println(output); // TODO: CDW
+          overlay.updateContents(output.toString(), true);
         });
   }
 
-  public String getHtmlString() {
-    return htmlString;
+  public void clearContent() {
+    Platform.runLater(
+        () -> {
+          var overlay =
+              MapTool.getFrame()
+                  .getOverlayPanel()
+                  .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
+          overlay.updateContents("", true);
+        });
   }
 }
