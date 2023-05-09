@@ -1525,7 +1525,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_LUMENS_OVERLAY =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLumensOverlay");
         }
@@ -1544,7 +1544,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_SHOW_LIGHTS =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLights");
         }
