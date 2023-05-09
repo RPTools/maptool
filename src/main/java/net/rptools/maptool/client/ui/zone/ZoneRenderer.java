@@ -1509,15 +1509,16 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLumensOverlay:allocateBuffer");
 
       Graphics2D newG = lumensOverlay.createGraphics();
-      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
-      SwingUtil.useAntiAliasing(newG);
-
       // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
+      newG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
       newG.setPaint(
           zone.getVisionType() == Zone.VisionType.NIGHT
               ? new Color(0.f, 0.f, 0.f, 1.f)
               : new Color(0.f, 0.f, 0.f, 0.f));
       newG.fillRect(0, 0, lumensOverlay.getWidth(), lumensOverlay.getHeight());
+
+      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
+      SwingUtil.useAntiAliasing(newG);
 
       if (clipStyle != null && visibleScreenArea != null) {
         timer.start("renderLumensOverlay:setClip");
