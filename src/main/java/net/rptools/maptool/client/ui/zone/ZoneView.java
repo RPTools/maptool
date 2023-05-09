@@ -445,8 +445,10 @@ public class ZoneView {
     return new ZoneView.IlluminationKey(
         view.isUsingTokenView()
             ? view.getTokens().stream()
+                .filter(Token::getHasSight)
                 .map(Token::getSightType)
                 .map(sightName -> MapTool.getCampaign().getSightType(sightName))
+                .filter(Objects::nonNull)
                 .map(SightType::getMultiplier)
                 .max(Double::compare)
                 .orElse(1.0)

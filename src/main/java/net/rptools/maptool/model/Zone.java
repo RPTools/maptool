@@ -494,6 +494,7 @@ public class Zone {
     mapAsset = zone.mapAsset;
     fogPaint = zone.fogPaint;
     visionType = zone.visionType;
+    lightingStyle = zone.lightingStyle;
 
     undo = new UndoPerZone(this); // Undo/redo manager isn't copied
     setName(zone.getName());

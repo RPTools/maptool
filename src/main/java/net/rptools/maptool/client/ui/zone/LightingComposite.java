@@ -106,6 +106,23 @@ public class LightingComposite implements Composite {
     public void dispose() {}
   }
 
+  /**
+   * Renormalizes a product of bytes by magically dividing by 255.
+   *
+   * <p>This is very non-obvious, but is described well in this course sheet: <a
+   * href="https://docs.google.com/document/d/1tNrMWShq55rfltcZxAx1N-6f82Dt7MWLDHm-5GQVEnE/edit">Dividing
+   * by 255</a>.
+   *
+   * <p>The SWAR technique of multiplying in parallel is inapplicable to our operations, so that is
+   * not represented anywhere.
+   *
+   * @param x The result of a byte product, in the range 0 .. 0xFFFF.
+   * @return The normalized value of x, in the range 0 .. 0xFF.
+   */
+  private static int renormalize(int x) {
+    return (x + (x >>> 8)) >>> 8;
+  }
+
   public interface Blender {
     /**
      * Blend source and destination pixels for a row of pixels.
@@ -139,17 +156,15 @@ public class LightingComposite implements Composite {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the light alpha around.
-        int resultPixel = srcPixel & (0xFF << 24);
-
+        int resultPixel = 0;
         for (int shift = 0; shift < 24; shift += 8) {
           final var dstC = (dstPixel >>> shift) & 0xFF;
           final var srcC = (srcPixel >>> shift) & 0xFF;
 
-          final var resultC = dstC + srcC - (dstC * srcC) / 255;
-
-          resultPixel |= (resultC << shift);
+          resultPixel |= (renormalize((255 - srcC) * dstC) << shift);
         }
+        // This keeps the light alpha around instead of the base.
+        resultPixel += srcPixel;
 
         outPixels[x] = resultPixel;
       }
@@ -161,15 +176,13 @@ public class LightingComposite implements Composite {
    * components by no more than some multiple of the component.
    *
    * <p>When the bottom component ({@code dstC}) is low, the result is between the bottom component
-   * and a multiple of the bottom component controlled by {@link #MAX_DARKNESS_BOOST_PER_128}. The
-   * exact result is determined by using the top component ({@code srcC}) to interpolate between the
-   * two bounds.
+   * and twice the bottom component. The exact result is determined by using the top component
+   * ({@code srcC}) to interpolate between the two bounds.
    *
    * <p>When the bottom component is high, the result is between the bottom component and 255, again
    * using the top component to interpolate between the two.
    *
-   * <p>The transition point from low to high depends on the value of {@link
-   * #MAX_DARKNESS_BOOST_PER_128} - the higher that value, the lower the transition point.
+   * <p>The transition point from low to high is at 0.5 (or 128 as an int).
    *
    * <p>When viewed as a function of the bottom component, this blend mode is built from two linear
    * pieces. The first piece has a slope no less than 1, and the second piece has a slope no greater
@@ -178,10 +191,8 @@ public class LightingComposite implements Composite {
    *
    * <p>The behaviour is actually is very similar to overlay, but where the value at the transition
    * point is always greater than the bottom component (in overlay it can be greater than or less
-   * than the bottom component). The relation can be best seen when {@link
-   * #MAX_DARKNESS_BOOST_PER_128} is set to 128. It also has a much looser relation to the soft
-   * light blend mode, which inspired the idea of constraining the increase of dark components by
-   * some multiple.
+   * than the bottom component). It also has a much looser relation to the soft light blend mode,
+   * which inspired the idea of constraining the increase of dark components by some multiple.
    *
    * <p>Special cases:
    *
@@ -193,25 +204,23 @@ public class LightingComposite implements Composite {
    * </ul>
    */
   private static final class ConstrainedBrightenBlender implements Blender {
-    private static final int MAX_DARKNESS_BOOST_PER_128 = 128;
-
     public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the bottom alpha around.
-        int resultPixel = dstPixel & (0xFF << 24);
-
+        int resultPixel = 0;
         for (int shift = 0; shift < 24; shift += 8) {
           final var dstC = (dstPixel >>> shift) & 0xFF;
           final var srcC = (srcPixel >>> shift) & 0xFF;
 
-          final var resultC =
-              dstC + srcC * Math.min(MAX_DARKNESS_BOOST_PER_128 * dstC / 128, 255 - dstC) / 255;
+          // dstPart is the minimum of dstC and 255 - dstC.
+          final var dstPart = dstC + (dstC >>> 7) * (255 - 2 * dstC);
 
-          resultPixel |= (resultC << shift);
+          resultPixel |= (renormalize(srcC * dstPart) << shift);
         }
+        // This deliberately keeps the bottom alpha around.
+        resultPixel += dstPixel;
 
         outPixels[x] = resultPixel;
       }
