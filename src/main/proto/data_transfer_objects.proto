@@ -422,6 +422,7 @@ message HeroLabDataDto {
   bool is_minion = 11;
   google.protobuf.StringValue portfolio_path = 12;
   map<string, string> hero_image_assets = 13;
+  google.protobuf.StringValue portfolio_file = 14;
 }
 
 message ScriptTypeDto {
