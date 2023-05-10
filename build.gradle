@@ -460,7 +460,7 @@ dependencies {
     // layout for forms created in code
     implementation 'com.miglayout:miglayout-swing:11.1'
 
-    implementation 'com.github.spullara.mustache.java:compiler:0.9.10'
+    implementation 'com.github.jknack:handlebars:4.3.1'
 
 
 }

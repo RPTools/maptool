@@ -14,16 +14,15 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
-import com.github.mustachejava.DefaultMustacheFactory;
-import com.github.mustachejava.MustacheFactory;
+import com.github.jknack.handlebars.Context;
+import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import java.io.IOException;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.util.HashMap;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -36,27 +35,24 @@ public class StatSheet {
   public StatSheet() {}
 
   public void setContent(Token token, String content) {
-    MustacheFactory mf = new DefaultMustacheFactory();
-    var mustache = mf.compile(new StringReader(content), "sheet");
-    var output = new StringWriter();
-    var context = new HashMap<String, Object>();
-    context.put("name", token.getName());
-    context.put("gmName", token.getGMName());
+    Handlebars handlebars = new Handlebars();
     try {
-      mustache.execute(output, context).flush();
+      var template = handlebars.compileInline(content);
+      var statSheetContext = new StatSheetContext(token, MapTool.getPlayer());
+      var context =
+          Context.newBuilder(statSheetContext).resolver(JavaBeanValueResolver.INSTANCE).build();
+      var output = template.apply(context);
+      Platform.runLater(
+          () -> {
+            var overlay =
+                MapTool.getFrame()
+                    .getOverlayPanel()
+                    .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
+            overlay.updateContents(output.toString(), true);
+          });
     } catch (IOException e) {
-      e.printStackTrace(); // TODO: CDW
+      MapTool.showError("msg.error.renderingStatSheet", e);
     }
-
-    Platform.runLater(
-        () -> {
-          var overlay =
-              MapTool.getFrame()
-                  .getOverlayPanel()
-                  .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
-          System.out.println(output); // TODO: CDW
-          overlay.updateContents(output.toString(), true);
-        });
   }
 
   public void clearContent() {
