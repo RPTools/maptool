@@ -151,10 +151,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();
     for (MacroButtonProperties macro : macroList) {
       group = macro.getGroup();
-      group =
-          (group == null || group.isEmpty()
-              ? " General"
-              : group); // leading space makes it come first
+      group = (group.isEmpty() ? " General" : group); // leading space makes it come first
       JMenu submenu = groups.get(group);
       if (submenu == null) {
         submenu = new JMenu(group);

@@ -1982,9 +1982,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.clear();
     }
     for (MacroButtonProperties macro : newMacroList) {
-      if (macro.getLabel() == null
-          || macro.getLabel().trim().length() == 0
-          || macro.getCommand().trim().length() == 0) {
+      if (macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
