@@ -23,12 +23,9 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="b6995" class="javax.swing.JTextArea">
+          <component id="25e4a" class="javax.swing.JTable" binding="propertiesTable" custom-create="true">
             <constraints/>
-            <properties>
-              <name value="tokenProperties"/>
-              <text value=""/>
-            </properties>
+            <properties/>
           </component>
         </children>
       </scrollpane>
@@ -115,9 +112,9 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <actionCommand value="Update"/>
-              <name value="updateButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.update"/>
+              <actionCommand value="AddProperty"/>
+              <name value="propertyAddButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
             </properties>
           </component>
           <component id="7a102" class="javax.swing.JButton">
@@ -125,9 +122,9 @@
               <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <actionCommand value="Revert"/>
-              <name value="revertButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.revert"/>
+              <actionCommand value="DeleteProperty"/>
+              <name value="propertyDeleteButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.delete"/>
             </properties>
           </component>
         </children>

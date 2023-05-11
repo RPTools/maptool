@@ -24,12 +24,7 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import javax.swing.AbstractListModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -51,7 +46,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public void copyCampaignToUI(CampaignProperties campaignProperties) {
 
-    tokenTypeMap = new HashMap<String, List<TokenProperty>>(campaignProperties.getTokenTypeMap());
+    tokenTypeMap = new HashMap<>();
+    campaignProperties
+        .getTokenTypeMap()
+        .forEach(
+            (k, v) ->
+                tokenTypeMap.put(k, new ArrayList<>(v.stream().map(TokenProperty::new).toList())));
 
     updateTypeList();
   }
@@ -78,20 +78,20 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JButton) getComponent("newButton");
   }
 
-  public JButton getUpdateButton() {
-    return (JButton) getComponent("updateButton");
+  public JButton getPropertyAddButton() {
+    return (JButton) getComponent("propertyAddButton");
   }
 
-  public JButton getRevertButton() {
-    return (JButton) getComponent("revertButton");
+  public JButton getPropertyDeleteButton() {
+    return (JButton) getComponent("propertyDeleteButton");
   }
 
-  public JTextArea getTokenPropertiesArea() {
-    return (JTextArea) getComponent("tokenProperties");
+  public JTable getTokenPropertiesTable() {
+    return (JTable) getComponent("propertiesTable");
   }
 
-  public void initUpdateButton() {
-    getUpdateButton().addActionListener(e -> update());
+  public TokenPropertiesTableModel getTokenPropertiesTableModel() {
+    return (TokenPropertiesTableModel) getTokenPropertiesTable().getModel();
   }
 
   public void initNewButton() {
@@ -106,8 +106,26 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                     }));
   }
 
-  public void initRevertButton() {
-    getRevertButton().addActionListener(e -> bind(editingType));
+  public void initPropertyAddButton() {
+    getPropertyAddButton()
+        .addActionListener(
+            e ->
+                EventQueue.invokeLater(
+                    () -> {
+                      var model = getTokenPropertiesTableModel();
+                      model.addProperty();
+                    }));
+  }
+
+  public void initPropertyDeleteButton() {
+    getPropertyDeleteButton()
+        .addActionListener(
+            e ->
+                EventQueue.invokeLater(
+                    () -> {
+                      var model = getTokenPropertiesTableModel();
+                      model.deleteProperty(getTokenPropertiesTable().getSelectedRow());
+                    }));
   }
 
   public void initTypeList() {
@@ -134,25 +152,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
     getTokenTypeName().setText(type != null ? type : "");
     getTokenTypeName().setEditable(!CampaignProperties.DEFAULT_TOKEN_PROPERTY_TYPE.equals(type));
-    getTokenPropertiesArea()
-        .setText(type != null ? compileTokenProperties(tokenTypeMap.get(type)) : "");
-  }
-
-  void update() {
-
-    // Pull the old one out and put the new one in (rename)
-    List<TokenProperty> current;
-    try {
-      // If an exception occurs here, the GUI goes back into editing of the text.
-      current = parseTokenProperties(getTokenPropertiesArea().getText());
-
-      tokenTypeMap.remove(editingType);
-      tokenTypeMap.put(getTokenTypeName().getText().trim(), current);
-      reset();
-      updateTypeList();
-    } catch (IllegalArgumentException e) {
-      // Don't need to do anything here...
-    }
+    var model = getTokenPropertiesTableModel();
+    model.setPropertyType(type);
   }
 
   private void reset() {
@@ -161,8 +162,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   private void updateTypeList() {
-
     getTokenTypeList().setModel(new TypeListModel());
+    getTokenPropertiesTableModel().setPropertyTypeMap(tokenTypeMap);
   }
 
   private String compileTokenProperties(List<TokenProperty> propertyList) {

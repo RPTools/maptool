@@ -128,11 +128,6 @@ public class CampaignPropertiesDialog extends JDialog {
     getRootPane().setDefaultButton(getOKButton());
   }
 
-  // need to access update button action in token properties panel
-  public void tokenPropertiesDialogUpdate() {
-    tokenPropertiesPanel.update();
-  }
-
   private void initTokenPropertiesDialog(AbeillePanel panel) {
     tokenPropertiesPanel = new TokenPropertiesManagementPanel();
     panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
@@ -198,7 +193,6 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void accept() {
     try {
-      tokenPropertiesDialogUpdate(); // update token properties for the forgetful
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
       status = Status.OK;
