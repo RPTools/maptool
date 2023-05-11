@@ -156,17 +156,26 @@ public class LightingComposite implements Composite {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        int resultPixel = 0;
-        for (int shift = 0; shift < 24; shift += 8) {
-          final var dstC = (dstPixel >>> shift) & 0xFF;
-          final var srcC = (srcPixel >>> shift) & 0xFF;
+        final int resultR, resultG, resultB;
 
-          resultPixel |= (renormalize((255 - srcC) * dstC) << shift);
+        {
+          final var dstC = (dstPixel >>> 16) & 0xFF;
+          final var srcC = (srcPixel >>> 16) & 0xFF;
+          resultR = renormalize((255 - srcC) * dstC);
         }
-        // This keeps the light alpha around instead of the base.
-        resultPixel += srcPixel;
+        {
+          final var dstC = (dstPixel >>> 8) & 0xFF;
+          final var srcC = (srcPixel >>> 8) & 0xFF;
+          resultG = renormalize((255 - srcC) * dstC);
+        }
+        {
+          final var dstC = dstPixel & 0xFF;
+          final var srcC = srcPixel & 0xFF;
+          resultB = renormalize((255 - srcC) * dstC);
+        }
 
-        outPixels[x] = resultPixel;
+        // This keeps the light alpha around instead of the base.
+        outPixels[x] = srcPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }
@@ -209,20 +218,26 @@ public class LightingComposite implements Composite {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        int resultPixel = 0;
-        for (int shift = 0; shift < 24; shift += 8) {
-          final var dstC = (dstPixel >>> shift) & 0xFF;
-          final var srcC = (srcPixel >>> shift) & 0xFF;
+        final int resultR, resultG, resultB;
 
-          // dstPart is the minimum of dstC and 255 - dstC.
-          final var dstPart = dstC + (dstC >>> 7) * (255 - 2 * dstC);
-
-          resultPixel |= (renormalize(srcC * dstPart) << shift);
+        {
+          final var dstC = (dstPixel >>> 16) & 0xFF;
+          final var srcC = (srcPixel >>> 16) & 0xFF;
+          resultR = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
         }
-        // This deliberately keeps the bottom alpha around.
-        resultPixel += dstPixel;
+        {
+          final var dstC = (dstPixel >>> 8) & 0xFF;
+          final var srcC = (srcPixel >>> 8) & 0xFF;
+          resultG = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
+        }
+        {
+          final var dstC = dstPixel & 0xFF;
+          final var srcC = srcPixel & 0xFF;
+          resultB = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
+        }
 
-        outPixels[x] = resultPixel;
+        // This deliberately keeps the bottom alpha around.
+        outPixels[x] = dstPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }
