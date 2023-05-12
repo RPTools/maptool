@@ -90,7 +90,7 @@ public class ClientMessageHandler implements MessageHandler {
     try {
       var msg = Message.parseFrom(message);
       var msgType = msg.getMessageTypeCase();
-      log.info(id + " got: " + msgType);
+      log.debug(id + " got: " + msgType);
 
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> handle(msg.getAddTopologyMsg());
@@ -163,7 +163,7 @@ public class ClientMessageHandler implements MessageHandler {
         case UPDATE_PLAYER_STATUS_MSG -> handle(msg.getUpdatePlayerStatusMsg());
         default -> log.warn(msgType + "not handled.");
       }
-      log.info(id + " handled: " + msgType);
+      log.debug(id + " handled: " + msgType);
     } catch (Exception e) {
       log.error(e);
     }
@@ -1020,7 +1020,7 @@ public class ClientMessageHandler implements MessageHandler {
             .orElse(null);
 
     if (player == null) {
-      log.info("UpdatePlayerStatusMsg failed. No player with name: '" + playerName + "'");
+      log.warn("UpdatePlayerStatusMsg failed. No player with name: '" + playerName + "'");
       return;
     }
 

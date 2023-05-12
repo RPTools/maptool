@@ -135,7 +135,7 @@ public class MapToolServerConnection
   }
 
   public void sendMessage(String id, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " sent to "
             + id
@@ -145,7 +145,7 @@ public class MapToolServerConnection
   }
 
   public void sendMessage(String id, Object channel, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " sent to "
             + id
@@ -158,12 +158,12 @@ public class MapToolServerConnection
   }
 
   public void broadcastMessage(Message message) {
-    log.info(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
+    log.debug(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
     connection.broadcastMessage(message.toByteArray());
   }
 
   public void broadcastMessage(String[] exclude, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " broadcast: "
             + message.getMessageTypeCase()
