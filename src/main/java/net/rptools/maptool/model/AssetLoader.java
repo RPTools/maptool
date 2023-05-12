@@ -134,19 +134,13 @@ public class AssetLoader {
       }
       indexMap = parseIndex(decode(index));
     } catch (MalformedURLException e) {
-      if (log.isDebugEnabled()) {
-        log.error("Invalid repository URL: " + repository, e);
-      }
+      log.warn("Invalid repository URL: " + repository, e);
       status = RepoState.BAD_URL;
     } catch (IOException e) {
-      if (log.isDebugEnabled()) {
-        log.error("I/O error retrieving/saving index for '" + repository + "'", e);
-      }
+      log.error("I/O error retrieving/saving index for '" + repository + "'", e);
       status = RepoState.UNAVAILABLE;
     } catch (Throwable t) {
-      if (log.isDebugEnabled()) {
-        log.error("Could not retrieve index for '" + repository + "'", t);
-      }
+      log.error("Could not retrieve index for '" + repository + "'", t);
       status = RepoState.UNAVAILABLE;
     }
     repositoryStateMap.put(repository, status);
