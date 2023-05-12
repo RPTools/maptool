@@ -1721,7 +1721,7 @@ public class PointerTool extends DefaultTool {
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
         if (AppPreferences.getShowStatSheet()) {
           CodeTimer timer = new CodeTimer("statSheet");
-          timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+          timer.setEnabled(AppState.isCollectProfilingData());
           timer.setThreshold(5);
           timer.start("allProps");
           for (TokenProperty property :
@@ -1749,10 +1749,9 @@ public class PointerTool extends DefaultTool {
             }
           }
           timer.stop("allProps");
-          if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
+          if (timer.isEnabled()) {
             String results = timer.toString();
             MapTool.getProfilingNoteFrame().addText(results);
-            log.debug(results);
           }
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {

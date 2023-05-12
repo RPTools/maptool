@@ -79,7 +79,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     }
     // Set up a code timer to get some performance data
     timer = new CodeTimer("selectionpanel");
-    timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+    timer.setEnabled(AppState.isCollectProfilingData());
     timer.setThreshold(10);
 
     timer.start("painting");
@@ -108,10 +108,8 @@ public class SelectionPanel extends AbstractMacroPanel {
     }
     timer.stop("painting");
 
-    if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
-      String results = timer.toString();
-      MapTool.getProfilingNoteFrame().addText(results);
-      log.debug(results);
+    if (timer.isEnabled()) {
+      MapTool.getProfilingNoteFrame().addText(timer.toString());
     }
   }
 

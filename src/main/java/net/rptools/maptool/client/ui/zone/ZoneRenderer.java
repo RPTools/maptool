@@ -410,7 +410,7 @@ public class ZoneRenderer extends JComponent
     // Lee: check only matters for snap-to-grid
     if (stg) {
       CodeTimer moveTimer = new CodeTimer("ZoneRenderer.commitMoveSelectionSet");
-      moveTimer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+      moveTimer.setEnabled(AppState.isCollectProfilingData());
       moveTimer.setThreshold(1);
 
       moveTimer.start("setup");
@@ -539,9 +539,7 @@ public class ZoneRenderer extends JComponent
       moveTimer.stop("updateTokenTree");
 
       if (moveTimer.isEnabled()) {
-        String results = moveTimer.toString();
-        MapTool.getProfilingNoteFrame().addText(results);
-        log.debug(results);
+        MapTool.getProfilingNoteFrame().addText(moveTimer.toString());
         moveTimer.clear();
       }
     } else {
@@ -795,7 +793,7 @@ public class ZoneRenderer extends JComponent
     if (timer == null) {
       timer = new CodeTimer("ZoneRenderer.renderZone");
     }
-    timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+    timer.setEnabled(AppState.isCollectProfilingData());
     timer.clear();
     timer.setThreshold(10);
     timer.start("paintComponent");
@@ -840,9 +838,7 @@ public class ZoneRenderer extends JComponent
 
     timer.stop("paintComponent");
     if (timer.isEnabled()) {
-      String results = timer.toString();
-      MapTool.getProfilingNoteFrame().addText(results);
-      log.debug(results);
+      MapTool.getProfilingNoteFrame().addText(timer.toString());
       timer.clear();
     }
   }
@@ -1383,10 +1379,6 @@ public class ZoneRenderer extends JComponent
     for (ItemRenderer renderer : itemRenderList) {
       renderer.render(g);
     }
-  }
-
-  public CodeTimer getCodeTimer() {
-    return timer;
   }
 
   private enum LightOverlayClipStyle {
