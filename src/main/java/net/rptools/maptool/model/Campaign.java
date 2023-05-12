@@ -15,18 +15,10 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.BoolValue;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
@@ -103,6 +95,9 @@ public class Campaign {
 
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
+
+  public record RenamePropertyType(@Nonnull String from, @Nonnull String to) {}
+  ;
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
@@ -792,5 +787,60 @@ public class Campaign {
               .collect(Collectors.toList()));
     }
     return dto.build();
+  }
+
+  /**
+   * Perform a series of rename operations on the token types.
+   *
+   * @param rename List of rename operations to perform in order.
+   */
+  public void renameTokenTypes(@Nonnull List<RenamePropertyType> rename) {
+    var working = new ArrayList<>(rename);
+    rename.forEach(
+        r -> {
+          compressRenames(r, working);
+        });
+    rename.forEach(
+        r -> {
+          renameTokenTypes(r.from, r.to);
+        });
+  }
+
+  /**
+   * This method ensures that only a single rename occurs, e.g. if we have the renames A -> B B -> C
+   *
+   * <p>We transform this into A -> C B -> C
+   *
+   * @param rename the renaming operation to apply.
+   * @param working the queued renaming operations.
+   */
+  private void compressRenames(RenamePropertyType rename, ArrayList<RenamePropertyType> working) {
+    for (int i = 0; i < working.size(); i++) {
+      var w = working.get(i);
+      if (w.to.equals(rename.from)) {
+        working.set(i, new RenamePropertyType(w.from, rename.to));
+      }
+    }
+    // Finally, add the rename operation to the end of the list
+    working.add(rename);
+  }
+
+  /**
+   * Renames the token types on existing tokens in the campaign.
+   *
+   * @param oldName the token type to rename from.
+   * @param newName the token type to rename to.
+   */
+  public void renameTokenTypes(@Nonnull String oldName, @Nonnull String newName) {
+    for (Zone zone : getZones()) {
+      zone.getTokens()
+          .forEach(
+              t -> {
+                if (oldName.equals(t.getPropertyType())) {
+                  t.setPropertyType(newName);
+                  zone.putToken(t);
+                }
+              });
+    }
   }
 }

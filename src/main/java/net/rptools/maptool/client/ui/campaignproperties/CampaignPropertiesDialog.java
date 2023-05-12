@@ -39,6 +39,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -193,6 +194,17 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void accept() {
     try {
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+      tokenPropertiesPanel
+          .getRenameTypes()
+          .forEach(
+              (o, n) -> {
+                campaign.renameTokenTypes(o, n);
+                System.out.println("Renaming " + o + " to " + n);
+              });
+      MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
       status = Status.OK;

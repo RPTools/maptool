@@ -14,16 +14,12 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 import javax.swing.*;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
@@ -37,6 +33,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   private Map<String, List<TokenProperty>> tokenTypeMap;
   private String editingType;
+
+  private Map<String, String> renameTypes = new TreeMap<>();
 
   public TokenPropertiesManagementPanel() {
     super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
@@ -74,8 +72,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JTextField) getComponent("tokenTypeName");
   }
 
-  public JButton getNewButton() {
-    return (JButton) getComponent("newButton");
+  public JButton getTypeAddButton() {
+    return (JButton) getComponent("typeAddButton");
+  }
+
+  public JButton getTypeDeleteButton() {
+    return (JButton) getComponent("typeDeleteButton");
   }
 
   public JButton getPropertyAddButton() {
@@ -94,38 +96,143 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (TokenPropertiesTableModel) getTokenPropertiesTable().getModel();
   }
 
-  public void initNewButton() {
-    getNewButton()
+  public void initTypeAddButton() {
+    getTypeAddButton()
         .addActionListener(
             e ->
                 EventQueue.invokeLater(
                     () -> {
-                      // This will force a reset
-                      getTokenTypeList().getSelectionModel().clearSelection();
-                      reset();
+                      // First find a unique name, there are so few entries we don't have to worry
+                      // about being fancy
+                      int seq = 1;
+                      String name =
+                          I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                      while (tokenTypeMap.containsKey(name)) {
+                        seq++;
+                        name =
+                            I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                      }
+
+                      var newName =
+                          (String)
+                              JOptionPane.showInputDialog(
+                                  this,
+                                  I18N.getText("campaignPropertiesDialog.newTokenTypeName"),
+                                  I18N.getText("campaignPropertiesDialog.newTokenTypeTitle"),
+                                  JOptionPane.PLAIN_MESSAGE,
+                                  null,
+                                  null,
+                                  name);
+                      if (newName != null) {
+                        tokenTypeMap.put(newName, new LinkedList<>());
+                        updateTypeList();
+                        getTokenTypeList().setSelectedValue(newName, true);
+                      }
                     }));
+  }
+
+  public void initTypeDeleteButton() {
+    var button = getTypeDeleteButton();
+    button.addActionListener(
+        e -> {
+          var type = (String) getTokenTypeList().getSelectedValue();
+          if (type != null) {
+            JPanel renameToPanel = new JPanel();
+            // renameToPanel.setLayout(new BoxLayout(renameToPanel, BoxLayout.PAGE_AXIS));
+            JComboBox<String> types =
+                new JComboBox<>(
+                    tokenTypeMap.keySet().stream()
+                        .filter(t -> !t.equals(type))
+                        .map(String::toString)
+                        .toArray(String[]::new));
+            renameToPanel.add(
+                new JLabel(I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteMessage")));
+            renameToPanel.add(types);
+            int option =
+                JOptionPane.showConfirmDialog(
+                    this,
+                    renameToPanel,
+                    I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteTitle", type),
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+              var newType = (String) types.getSelectedItem();
+              if (newType != null) {
+                renameTypes.put(type, newType);
+                tokenTypeMap.remove(type);
+                updateTypeList();
+              }
+            }
+          }
+        });
+    button.setEnabled(false);
   }
 
   public void initPropertyAddButton() {
-    getPropertyAddButton()
-        .addActionListener(
-            e ->
-                EventQueue.invokeLater(
-                    () -> {
-                      var model = getTokenPropertiesTableModel();
-                      model.addProperty();
-                    }));
+    var button = getPropertyAddButton();
+    button.addActionListener(
+        e ->
+            EventQueue.invokeLater(
+                () -> {
+                  var model = getTokenPropertiesTableModel();
+                  model.addProperty();
+                }));
+    button.setEnabled(false);
   }
 
   public void initPropertyDeleteButton() {
-    getPropertyDeleteButton()
-        .addActionListener(
-            e ->
-                EventQueue.invokeLater(
-                    () -> {
-                      var model = getTokenPropertiesTableModel();
-                      model.deleteProperty(getTokenPropertiesTable().getSelectedRow());
-                    }));
+    var button = getPropertyDeleteButton();
+    button.addActionListener(
+        e ->
+            EventQueue.invokeLater(
+                () -> {
+                  var model = getTokenPropertiesTableModel();
+                  model.deleteProperty(getTokenPropertiesTable().getSelectedRow());
+                }));
+    button.setEnabled(false);
+  }
+
+  public void initPropertyTableSelectionListener() {
+    getTokenPropertiesTable()
+        .getSelectionModel()
+        .addListSelectionListener(
+            e -> {
+              if (e.getValueIsAdjusting()) {
+                return;
+              }
+
+              var button = getPropertyDeleteButton();
+              button.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
+            });
+  }
+
+  public void initTokenTypeName() {
+    var field = getTokenTypeName();
+    field.setEditable(false);
+    field.addActionListener(
+        event -> {
+          int option =
+              JOptionPane.showConfirmDialog(
+                  this,
+                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeWarning"),
+                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeTitle"),
+                  JOptionPane.OK_CANCEL_OPTION,
+                  JOptionPane.WARNING_MESSAGE);
+          if (option == JOptionPane.OK_OPTION) {
+            var ttList = getTokenTypeList();
+            var oldName = (String) ttList.getSelectedValue();
+            var newName = field.getText();
+            tokenTypeMap.put(newName, tokenTypeMap.remove(oldName));
+            ttList.setSelectedValue(newName, true);
+            updateExistingTokenTypes(oldName, newName);
+          }
+        });
+  }
+
+  private void updateExistingTokenTypes(String oldName, String newName) {
+    if (oldName == null || newName == null || oldName.equals(newName)) {
+      return;
+    }
+    renameTypes.put(oldName, newName);
   }
 
   public void initTypeList() {
@@ -139,8 +246,15 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
               if (getTokenTypeList().getSelectedValue() == null) {
                 reset();
+                getPropertyAddButton().setEnabled(false);
+                getTypeDeleteButton().setEnabled(false);
+                getTokenTypeName().setEditable(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
+                getPropertyAddButton().setEnabled(true);
+                getTokenTypeName().setEditable(true);
+                // Can't delete the last one
+                getTypeDeleteButton().setEnabled(tokenTypeMap.size() > 1);
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
@@ -151,7 +265,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     editingType = type;
 
     getTokenTypeName().setText(type != null ? type : "");
-    getTokenTypeName().setEditable(!CampaignProperties.DEFAULT_TOKEN_PROPERTY_TYPE.equals(type));
     var model = getTokenPropertiesTableModel();
     model.setPropertyType(type);
   }
@@ -318,5 +431,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     public int getSize() {
       return tokenTypeMap.size();
     }
+  }
+
+  public Map<String, String> getRenameTypes() {
+    return renameTypes;
   }
 }
