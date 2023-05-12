@@ -663,12 +663,9 @@ public abstract class Grid implements Cloneable {
         }
       }
     }
-    if (log.isInfoEnabled()) {
-      log.info(
-          "Center region of size "
-              + regionToCheck.getSize()
-              + " contains neither 4+ closed spaces nor 6+ open spaces?!");
-    }
+    log.info(
+        "Center region of size {} contains neither 4+ closed spaces nor 6+ open spaces?!",
+        regionToCheck.getSize());
     return openSpace >= closedSpace;
   }
 
@@ -703,17 +700,11 @@ public abstract class Grid implements Cloneable {
         }
       }
     }
-
-    if (log.isInfoEnabled()) {
-      log.info(
-          "Center region of size "
-              + regionToCheck.getSize()
-              + " contains neither "
-              + (9 - tolerance)
-              + "+ closed spaces nor "
-              + tolerance
-              + "+ open spaces?!");
-    }
+    log.info(
+        "Center region of size {} contains neither {}+ closed spaces nor {}+ open spaces?!",
+        regionToCheck.getSize(),
+        9 - tolerance,
+        tolerance);
     return openSpace >= closedSpace;
   }
 

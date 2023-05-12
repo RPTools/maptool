@@ -1752,7 +1752,7 @@ public class PointerTool extends DefaultTool {
           if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
             String results = timer.toString();
             MapTool.getProfilingNoteFrame().addText(results);
-            if (log.isDebugEnabled()) log.debug(results);
+            log.debug(results);
           }
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {

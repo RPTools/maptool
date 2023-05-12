@@ -111,7 +111,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
       String results = timer.toString();
       MapTool.getProfilingNoteFrame().addText(results);
-      if (log.isDebugEnabled()) log.debug(results);
+      log.debug(results);
     }
   }
 

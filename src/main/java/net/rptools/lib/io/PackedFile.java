@@ -402,7 +402,7 @@ public class PackedFile implements AutoCloseable {
       IOUtils.closeQuietly(zout);
       saveTimer.stop("cleanup");
 
-      if (log.isDebugEnabled()) log.debug(saveTimer);
+      log.debug(saveTimer);
       saveTimer = null;
     }
   }
@@ -729,8 +729,7 @@ public class PackedFile implements AutoCloseable {
     InputStream in = zipFile.getInputStream(entry);
     if (in == null) throw new FileNotFoundException(path);
     String type = FileUtil.getContentType(in);
-    if (log.isDebugEnabled() && type != null)
-      log.debug("FileUtil.getContentType() returned " + type);
+    log.debug("FileUtil.getContentType() returned {}", type);
     return in;
   }
 

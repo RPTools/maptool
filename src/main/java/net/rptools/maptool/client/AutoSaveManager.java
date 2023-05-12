@@ -48,8 +48,7 @@ public class AutoSaveManager {
     if (autoSaveTimer == null) {
       autoSaveTimer = new Timer(1000, (Object) -> execute());
       autoSaveTimer.setRepeats(false);
-      if (log.isDebugEnabled())
-        log.debug("Logging level of 'DEBUG' sets timeout to seconds"); // $NON-NLS-1$
+      log.debug("Logging level of 'DEBUG' sets timeout to seconds"); // $NON-NLS-1$
       next(true);
     }
   }

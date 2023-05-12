@@ -1231,9 +1231,7 @@ public class AppPreferences {
         path = file.getCanonicalPath();
       } catch (IOException e) {
         // Probably pretty rare, but we want to know about it
-        if (log.isInfoEnabled()) {
-          log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
-        }
+        log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
         path = file.getPath();
       }
       // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on

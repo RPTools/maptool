@@ -124,7 +124,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log != null && log.isInfoEnabled()) {
+        if (log != null) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;

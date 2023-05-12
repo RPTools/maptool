@@ -541,9 +541,7 @@ public class ZoneRenderer extends JComponent
       if (moveTimer.isEnabled()) {
         String results = moveTimer.toString();
         MapTool.getProfilingNoteFrame().addText(results);
-        if (log.isDebugEnabled()) {
-          log.debug(results);
-        }
+        log.debug(results);
         moveTimer.clear();
       }
     } else {
@@ -844,9 +842,7 @@ public class ZoneRenderer extends JComponent
     if (timer.isEnabled()) {
       String results = timer.toString();
       MapTool.getProfilingNoteFrame().addText(results);
-      if (log.isDebugEnabled()) {
-        log.debug(results);
-      }
+      log.debug(results);
       timer.clear();
     }
   }
