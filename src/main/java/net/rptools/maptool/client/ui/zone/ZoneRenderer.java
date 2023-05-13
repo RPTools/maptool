@@ -153,9 +153,6 @@ public class ZoneRenderer extends JComponent
 
   private boolean autoResizeStamp = false;
 
-  /** Show blocked grid lines during AStar moving, for debugging... */
-  private boolean showAstarDebugging = false;
-
   /** Store previous view to restore to, eg after GM shows ctrl+shift+space pointer */
   private double previousScale;
 
@@ -2152,7 +2149,7 @@ public class ZoneRenderer extends JComponent
         }
 
         // Show current Blocked Movement directions for A*
-        if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
+        if (walker != null && DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
           Map<CellPoint, Set<CellPoint>> blockedMovesByTarget = walker.getBlockedMoves();
           // Color currentColor = g.getColor();
           for (var entry : blockedMovesByTarget.entrySet()) {
@@ -2723,7 +2720,7 @@ public class ZoneRenderer extends JComponent
     int textOffset = (int) (getScale() * 7 * fontScale); // 7 pixels at 100% zoom & grid size of 50
 
     String distanceText = NumberFormat.getInstance().format(distance);
-    if (log.isDebugEnabled() || showAstarDebugging) {
+    if (DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
       distanceText += " (" + NumberFormat.getInstance().format(distanceWithoutTerrain) + ")";
       fontSize = (int) (fontSize * 0.75);
     }

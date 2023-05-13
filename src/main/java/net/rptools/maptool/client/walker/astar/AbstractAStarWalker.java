@@ -34,9 +34,11 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.rptools.lib.GeometryUtil;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.walker.AbstractZoneWalker;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
@@ -60,11 +62,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private static final Logger log = LogManager.getLogger(AbstractAStarWalker.class);
+  // Manually set this in order to view H, G & F costs as rendered labels
+
   private final GeometryFactory geometryFactory = new GeometryFactory();
-  // private List<GUID> debugLabels;
   protected int crossX = 0;
   protected int crossY = 0;
-  private boolean debugCosts = false; // Manually set this to view H, G & F costs as rendered labels
   private Area vbl = new Area();
   private Area fowExposedArea = new Area();
   private double cell_cost = zone.getUnitsPerCell();
@@ -79,6 +81,13 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private Map<CellPoint, Map<CellPoint, Boolean>> vblBlockedMovesByGoal = new ConcurrentHashMap<>();
   private Map<CellPoint, Map<CellPoint, Boolean>> fowBlockedMovesByGoal = new ConcurrentHashMap<>();
   private final Map<CellPoint, List<TerrainModifier>> terrainCells = new HashMap<>();
+
+  /**
+   * The IDs of all debugging labels, so we can remove them again later. Only access this on the
+   * Swing thread _or else_. TODO Make this per-walker. Unfortunately we create new walkers all the
+   * time for each operation, so that isn't feasible right now.
+   */
+  private static final List<GUID> debugLabels = new ArrayList<>();
 
   public AbstractAStarWalker(Zone zone) {
     super(zone);
@@ -287,14 +296,13 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       this.vblBlockedMovesByGoal.clear();
     }
 
-    // Erase previous debug labels, this actually erases ALL labels! Use only when debugging!
+    // Erase previous debug labels.
     EventQueue.invokeLater(
         () -> {
-          if (!zone.getLabels().isEmpty() && debugCosts) {
-            for (Label label : zone.getLabels()) {
-              zone.removeLabel(label.getId());
-            }
+          for (GUID labelId : debugLabels) {
+            zone.removeLabel(labelId);
           }
+          debugLabels.clear();
         });
 
     // Timeout quicker for GM cause reasons
@@ -684,14 +692,12 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   protected void showDebugInfo(AStarCellPoint node) {
-    if (!log.isDebugEnabled() && !debugCosts) {
+    if (!DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
       return;
     }
 
     final int basis = zone.getGrid().getSize() / 10;
     final int xOffset = basis * (node.isOddStepOfOneTwoOneMovement ? 7 : 3);
-
-    // if (debugLabels == null) { debugLabels = new ArrayList<>(); }
 
     Rectangle cellBounds = zone.getGrid().getBounds(node.position);
     DecimalFormat f = new DecimalFormat("##.00");
@@ -730,15 +736,13 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     EventQueue.invokeLater(
         () -> {
+          // Track labels to delete later
+          debugLabels.addAll(
+              List.of(gScore.getId(), hScore.getId(), fScore.getId(), parent.getId()));
           zone.putLabel(gScore);
           zone.putLabel(hScore);
           zone.putLabel(fScore);
           zone.putLabel(parent);
         });
-
-    // Track labels to delete later
-    // debugLabels.add(gScore.getId());
-    // debugLabels.add(hScore.getId());
-    // debugLabels.add(fScore.getId());
   }
 }

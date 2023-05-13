@@ -33,6 +33,9 @@ public class PreferencesDialogView {
   private JSpinner spinner1;
   private JCheckBox checkBox1;
   private JCheckBox checkBox2;
+  private JPanel developerOptionToggles;
+  private JPanel developerTab;
+  private JLabel developerTabWarning;
 
   /* spotless:off */
 
@@ -1039,8 +1042,37 @@ public class PreferencesDialogView {
         panel26.add(spacer15, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
         final Spacer spacer16 = new Spacer();
         panel26.add(spacer16, new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        developerTab = new JPanel();
+        developerTab.setLayout(new GridLayoutManager(2, 1, new Insets(0, 0, 0, 0), -1, -1));
+        tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Preferences.tab.developer"), developerTab);
         final Spacer spacer17 = new Spacer();
-        mainPanel.add(spacer17, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        developerTab.add(spacer17, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
+        developerOptionToggles = new JPanel();
+        developerOptionToggles.setLayout(new GridBagLayout());
+        developerOptionToggles.setName("developerOptionToggles");
+        developerTab.add(developerOptionToggles, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH, 1, GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null, null, 0, true));
+        developerOptionToggles.setBorder(BorderFactory.createTitledBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5), "", TitledBorder.DEFAULT_JUSTIFICATION, TitledBorder.DEFAULT_POSITION, this.$$$getFont$$$("Dialog", Font.BOLD, 12, developerOptionToggles.getFont()), new Color(-13538620)));
+        developerTabWarning = new JLabel();
+        developerTabWarning.setForeground(new Color(-51200));
+        this.$$$loadLabelText$$$(developerTabWarning, this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Preferences.tab.developer.warning"));
+        developerTabWarning.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Preferences.developer.autoSaveMeasuredInSeconds.tooltip"));
+        GridBagConstraints gbc;
+        gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.gridwidth = 3;
+        gbc.anchor = GridBagConstraints.WEST;
+        gbc.insets = new Insets(6, 0, 6, 0);
+        developerOptionToggles.add(developerTabWarning, gbc);
+        final JPanel spacer18 = new JPanel();
+        gbc = new GridBagConstraints();
+        gbc.gridx = 2;
+        gbc.gridy = 1;
+        gbc.weightx = 1.0;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        developerOptionToggles.add(spacer18, gbc);
+        final Spacer spacer19 = new Spacer();
+        mainPanel.add(spacer19, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0, false));
     }
 
     /**

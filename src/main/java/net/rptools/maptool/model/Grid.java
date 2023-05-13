@@ -37,6 +37,7 @@ import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -908,8 +909,9 @@ public abstract class Grid implements Cloneable {
    */
   protected Area getGridAreaFromCache(int gridRadius) {
     // If not already in cache, create and cache it
-    // Or if debug is enabled recreate cache
-    if (log.isDebugEnabled() || !getGridShapeCache().containsKey(gridRadius)) {
+    // Or if the flag is enabled, recreate cache
+    if (DeveloperOptions.Toggle.IgnoreGridShapeCache.isEnabled()
+        || !getGridShapeCache().containsKey(gridRadius)) {
       createGridArea(gridRadius);
     }
 
