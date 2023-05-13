@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.table.AbstractTableModel;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TokenProperty;
 
 public class TokenPropertiesTableModel extends AbstractTableModel {
@@ -53,8 +54,8 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
       case 0 -> property.getName();
       case 1 -> property.getShortName();
       case 2 -> property.isShowOnStatSheet();
-      case 3 -> property.isGMOnly();
-      case 4 -> property.isOwnerOnly();
+      case 3 -> property.isGMOnly() & property.isShowOnStatSheet();
+      case 4 -> property.isOwnerOnly() & property.isShowOnStatSheet();
       case 5 -> property.getDefaultValue();
       default -> null;
     };
@@ -63,12 +64,12 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   @Override
   public String getColumnName(int column) {
     return switch (column) {
-      case 0 -> "Name";
-      case 1 -> "Short Name";
-      case 2 -> "On Stat Sheet";
-      case 3 -> "GM Only";
-      case 4 -> "Owner Only";
-      case 5 -> "Default Value";
+      case 0 -> I18N.getText("campaignPropertiesTable.column.name");
+      case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
+      case 2 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
+      case 3 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
       default -> null;
     };
   }
@@ -85,7 +86,13 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return true;
+    var properties = tokenTypeMap.get(tokenType);
+    var tokenProperty = properties.get(rowIndex);
+    return switch (columnIndex) {
+      case 3, 4 -> tokenProperty
+          .isShowOnStatSheet(); // GM, Owner only editable if show on stat sheet is set
+      default -> true;
+    };
   }
 
   @Override
@@ -95,7 +102,10 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     switch (columnIndex) {
       case 0 -> tokenProperty.setName((String) aValue);
       case 1 -> tokenProperty.setShortName((String) aValue);
-      case 2 -> tokenProperty.setShowOnStatSheet((Boolean) aValue);
+      case 2 -> {
+        tokenProperty.setShowOnStatSheet((Boolean) aValue);
+        fireTableRowsUpdated(rowIndex, rowIndex);
+      }
       case 3 -> tokenProperty.setGMOnly((Boolean) aValue);
       case 4 -> tokenProperty.setOwnerOnly((Boolean) aValue);
       case 5 -> tokenProperty.setDefaultValue((String) aValue);

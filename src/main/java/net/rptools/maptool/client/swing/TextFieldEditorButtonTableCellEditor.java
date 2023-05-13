@@ -18,10 +18,11 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroEditorDialog;
+import net.rptools.maptool.language.I18N;
 
 /**
- * Class that implements a Table Cell editor that allows editing either through text box or macro dialog if the
- * user clicks on the "..." button.
+ * Class that implements a Table Cell editor that allows editing either through text box or macro
+ * dialog if the user clicks on the "..." button.
  */
 public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
     implements TableCellEditor {
@@ -29,9 +30,7 @@ public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
   private JTextField textField = new JTextField();
   private JPanel panel = new JPanel(new GridBagLayout());
 
-  /**
-   * Creates a new <code>TextFieldEditorButtonTableCellEditor</code>.
-   */
+  /** Creates a new <code>TextFieldEditorButtonTableCellEditor</code>. */
   public TextFieldEditorButtonTableCellEditor() {
     textField.addActionListener(l -> fireEditingStopped());
     panel.add(textField);
@@ -47,7 +46,9 @@ public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
                         fireEditingCanceled();
                       }
                     })
-                .show("Default", textField.getText()));
+                .show(
+                    I18N.getText("campaignProperties.macroEditDialog.default.title"),
+                    textField.getText()));
     panel.add(button);
   }
 
