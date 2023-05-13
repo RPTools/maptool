@@ -24,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.function.Consumer;
+import javax.annotation.Nonnull;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -67,7 +69,7 @@ import org.fife.ui.rtextarea.SearchContext;
 import org.fife.ui.rtextarea.SearchEngine;
 import org.fife.ui.rtextarea.SearchResult;
 
-public class MacroButtonDialog extends JDialog implements SearchListener {
+public class MacroEditorDialog extends JDialog implements SearchListener {
 
   public static final String DEFAULT_COLOR_NAME = "default";
 
@@ -97,9 +99,43 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
 
   private static final Set<String> openMacroList = new HashSet<String>(4);
 
-  public MacroButtonDialog() {
+  private final boolean modal;
+  private final boolean editingMacroButton;
+
+  private final Consumer<String> callback;
+
+  /**
+   * Creates a non modal MacroEditorDialog for editing the macro text and properties of a macro
+   * button.
+   *
+   * @return the MacroEditorDialog.
+   */
+  public static MacroEditorDialog createMacroButtonDialog() {
+    return new MacroEditorDialog(false, true, null);
+  }
+
+  /**
+   * Creates a modal MacroEditorDialog for editing macros (or values that could potentially hold
+   * macros) that are not macro buttons.
+   *
+   * @param callback a callback to be called when the dialog is closed. The callback will be passed
+   *     the text unless the cancel button is pressed, in which case the callback will be passed
+   *     null.
+   * @return The MacroEditorDialog
+   */
+  public static MacroEditorDialog createModalDialog(@Nonnull Consumer<String> callback) {
+    return new MacroEditorDialog(true, false, callback);
+  }
+
+  private MacroEditorDialog(boolean isModal, boolean isMacroButton, Consumer<String> callback) {
     super(MapTool.getFrame(), "", true);
-    this.setModalityType(ModalityType.MODELESS);
+    if (!isModal) {
+      this.setModalityType(ModalityType.MODELESS);
+    }
+
+    modal = isModal;
+    editingMacroButton = isMacroButton;
+    this.callback = callback;
 
     panel = new AbeillePanel(new MacroButtonDialogView().$$$getRootComponent$$$());
     setContentPane(panel);
@@ -117,10 +153,22 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     initCommandTextArea();
     initSearchDialogs();
 
-    createMenuBar();
+    if (!modal) {
+      createMenuBar();
+    }
 
-    panel.getCheckBox("applyToTokensCheckBox").setEnabled(!isTokenMacro);
-    panel.getComboBox("hotKey").setEnabled(!isTokenMacro);
+    if (!editingMacroButton) {
+      // Only first table is useful if not editing macro buttons
+      JTabbedPane tabbedPane = (JTabbedPane) panel.getComponent("macroTabs");
+      int numberTabs = tabbedPane.getTabCount();
+      for (int i = numberTabs - 1; i > 0; i--) {
+        tabbedPane.setEnabledAt(i, false);
+        tabbedPane.remove(i);
+      }
+    }
+
+    panel.getCheckBox("applyToTokensCheckBox").setEnabled(!isTokenMacro && editingMacroButton);
+    panel.getComboBox("hotKey").setEnabled(!isTokenMacro && editingMacroButton);
     // can't get max-width to work, so temporarily disabling it.
     panel.getTextField("maxWidth").setEnabled(false);
     panel.getCheckBox("allowPlayerEditsCheckBox").setEnabled(MapTool.getPlayer().isGM());
@@ -135,8 +183,12 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
         new WindowAdapter() {
           @Override
           public void windowClosed(WindowEvent e) {
-            destroyMenuBar();
-            updateOpenMacroList(false);
+            if (!modal) {
+              destroyMenuBar();
+            }
+            if (editingMacroButton) {
+              updateOpenMacroList(false);
+            }
             // FJE fix for macOS pinwheel
             SwingUtilities.invokeLater(() -> dispose());
           }
@@ -265,11 +317,19 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
             properties.executeMacro();
           }
         });
+    if (modal) {
+      button.setVisible(false);
+      button.setEnabled(false);
+    }
   }
 
   private void installApplyButton() {
     JButton button = (JButton) panel.getButton("applyButton");
     button.addActionListener(e -> save(false));
+    if (modal) {
+      button.setVisible(false);
+      button.setEnabled(false);
+    }
   }
 
   private void installOKButton() {
@@ -294,7 +354,22 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     }
   }
 
+  public void show(String title, String text) {
+    if (editingMacroButton) {
+      throw new IllegalStateException("MacroDialog is in editing a macro button.");
+    }
+    setTitle(title);
+    getCommandTextArea().setText(text);
+    getCommandTextArea().setCaretPosition(0);
+    getCommandTextArea().discardAllEdits();
+    setVisible(true);
+  }
+
   public void show(MacroButton button) {
+    if (!editingMacroButton) {
+      throw new IllegalStateException("MacroDialog is not editing a macro button.");
+    }
+
     String id = button.getProperties().getMacroUUID();
 
     if (openMacroList.contains(id)) {
@@ -582,9 +657,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   }
 
   private class ShowFindDialogAction extends AppActions.DefaultClientAction {
-    MacroButtonDialog callingDialog;
+    MacroEditorDialog callingDialog;
 
-    public ShowFindDialogAction(MacroButtonDialog macroButtonDialog) {
+    public ShowFindDialogAction(MacroEditorDialog macroButtonDialog) {
       init("action.macroEditor.searchFind");
       callingDialog = macroButtonDialog;
     }
@@ -601,9 +676,9 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   }
 
   private class ShowReplaceDialogAction extends AppActions.DefaultClientAction {
-    MacroButtonDialog callingDialog;
+    MacroEditorDialog callingDialog;
 
-    public ShowReplaceDialogAction(MacroButtonDialog macroButtonDialog) {
+    public ShowReplaceDialogAction(MacroEditorDialog macroButtonDialog) {
       init("action.macroEditor.searchReplace");
       callingDialog = macroButtonDialog;
     }
@@ -632,7 +707,7 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
       if (replaceDialog.isVisible()) {
         replaceDialog.setVisible(false);
       }
-      GoToDialog dialog = new GoToDialog(MacroButtonDialog.this);
+      GoToDialog dialog = new GoToDialog(MacroEditorDialog.this);
       dialog.setMaxLineNumberAllowed(macroEditorRSyntaxTextArea.getLineCount());
       dialog.setVisible(true);
       int line = dialog.getLineNumber();
@@ -663,127 +738,134 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   // }
 
   private void save(boolean closeDialog) {
-    String hotKey = getHotKeyCombo().getSelectedItem().toString();
-    button.getHotKeyManager().assignKeyStroke(hotKey);
-    button.setColor(getColorComboBox().getSelectedItem().toString());
-    button.setText(this.button.getButtonText());
-    properties.setHotKey(hotKey);
-    properties.setColorKey(getColorComboBox().getSelectedItem().toString());
-    properties.setLabel(getLabelTextField().getText());
-    properties.setGroup(getGroupTextField().getText());
-    properties.setSortby(getSortbyTextField().getText());
-    properties.setCommand(getCommandTextArea().getText());
-    properties.setAutoExecute(getAutoExecuteCheckBox().isSelected());
-    properties.setIncludeLabel(getIncludeLabelCheckBox().isSelected());
-    properties.setApplyToTokens(getApplyToTokensCheckBox().isSelected());
-    properties.setFontColorKey(getFontColorComboBox().getSelectedItem().toString());
-    properties.setFontSize(getFontSizeComboBox().getSelectedItem().toString());
-    properties.setMinWidth(getMinWidthTextField().getText());
-    properties.setMaxWidth(getMaxWidthTextField().getText());
-    properties.setCompareGroup(getCompareGroupCheckBox().isSelected());
-    properties.setCompareSortPrefix(getCompareSortPrefixCheckBox().isSelected());
-    properties.setCompareCommand(getCompareCommandCheckBox().isSelected());
-    properties.setCompareIncludeLabel(getCompareIncludeLabelCheckBox().isSelected());
-    properties.setCompareAutoExecute(getCompareAutoExecuteCheckBox().isSelected());
-    properties.setCompareApplyToSelectedTokens(
-        getCompareApplyToSelectedTokensCheckBox().isSelected());
-    properties.setAllowPlayerEdits(getAllowPlayerEditsCheckBox().isSelected());
-    properties.setToolTip(getToolTipTextField().getText());
-    properties.setDisplayHotKey(getDisplayHotkeyCheckBox().isSelected());
+    if (button == null) {
+      if (callback != null) {
+        callback.accept(getCommandTextArea().getText());
+      }
+    } else {
+      String hotKey = getHotKeyCombo().getSelectedItem().toString();
+      button.getHotKeyManager().assignKeyStroke(hotKey);
+      button.setColor(getColorComboBox().getSelectedItem().toString());
+      button.setText(this.button.getButtonText());
+      properties.setHotKey(hotKey);
+      properties.setColorKey(getColorComboBox().getSelectedItem().toString());
+      properties.setLabel(getLabelTextField().getText());
+      properties.setGroup(getGroupTextField().getText());
+      properties.setSortby(getSortbyTextField().getText());
+      properties.setCommand(getCommandTextArea().getText());
+      properties.setAutoExecute(getAutoExecuteCheckBox().isSelected());
+      properties.setIncludeLabel(getIncludeLabelCheckBox().isSelected());
+      properties.setApplyToTokens(getApplyToTokensCheckBox().isSelected());
+      properties.setFontColorKey(getFontColorComboBox().getSelectedItem().toString());
+      properties.setFontSize(getFontSizeComboBox().getSelectedItem().toString());
+      properties.setMinWidth(getMinWidthTextField().getText());
+      properties.setMaxWidth(getMaxWidthTextField().getText());
+      properties.setCompareGroup(getCompareGroupCheckBox().isSelected());
+      properties.setCompareSortPrefix(getCompareSortPrefixCheckBox().isSelected());
+      properties.setCompareCommand(getCompareCommandCheckBox().isSelected());
+      properties.setCompareIncludeLabel(getCompareIncludeLabelCheckBox().isSelected());
+      properties.setCompareAutoExecute(getCompareAutoExecuteCheckBox().isSelected());
+      properties.setCompareApplyToSelectedTokens(
+          getCompareApplyToSelectedTokensCheckBox().isSelected());
+      properties.setAllowPlayerEdits(getAllowPlayerEditsCheckBox().isSelected());
+      properties.setToolTip(getToolTipTextField().getText());
+      properties.setDisplayHotKey(getDisplayHotkeyCheckBox().isSelected());
 
-    properties.save();
+      properties.save();
 
-    if (button.getPanelClass().equals("SelectionPanel")) {
-      if (MapTool.getFrame()
-          .getSelectionPanel()
-          .getCommonMacros()
-          .contains(button.getProperties())) {
-        boolean changeAllowPlayerEdits = false;
-        boolean endingAllowPlayerEdits = false;
-        if (startingAllowPlayerEdits) {
-          if (!properties.getAllowPlayerEdits()) {
-            boolean confirmDisallowPlayerEdits =
-                MapTool.confirm(I18N.getText("confirm.macro.disallowPlayerEdits"));
-            if (confirmDisallowPlayerEdits) {
-              changeAllowPlayerEdits = true;
-              endingAllowPlayerEdits = false;
-            } else {
-              properties.setAllowPlayerEdits(true);
+      if (button.getPanelClass().equals("SelectionPanel")) {
+        if (MapTool.getFrame()
+            .getSelectionPanel()
+            .getCommonMacros()
+            .contains(button.getProperties())) {
+          boolean changeAllowPlayerEdits = false;
+          boolean endingAllowPlayerEdits = false;
+          if (startingAllowPlayerEdits) {
+            if (!properties.getAllowPlayerEdits()) {
+              boolean confirmDisallowPlayerEdits =
+                  MapTool.confirm(I18N.getText("confirm.macro.disallowPlayerEdits"));
+              if (confirmDisallowPlayerEdits) {
+                changeAllowPlayerEdits = true;
+                endingAllowPlayerEdits = false;
+              } else {
+                properties.setAllowPlayerEdits(true);
+              }
+            }
+          } else {
+            if (properties.getAllowPlayerEdits()) {
+              boolean confirmAllowPlayerEdits =
+                  MapTool.confirm(I18N.getText("confirm.macro.allowPlayerEdits"));
+              if (confirmAllowPlayerEdits) {
+                changeAllowPlayerEdits = true;
+                endingAllowPlayerEdits = true;
+              } else {
+                properties.setAllowPlayerEdits(false);
+              }
             }
           }
-        } else {
-          if (properties.getAllowPlayerEdits()) {
-            boolean confirmAllowPlayerEdits =
-                MapTool.confirm(I18N.getText("confirm.macro.allowPlayerEdits"));
-            if (confirmAllowPlayerEdits) {
-              changeAllowPlayerEdits = true;
-              endingAllowPlayerEdits = true;
-            } else {
-              properties.setAllowPlayerEdits(false);
-            }
-          }
-        }
-        boolean trusted = true;
-        for (Token nextToken :
-            MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
-          trusted = AppUtil.playerOwns(nextToken);
-          boolean isGM = MapTool.getPlayer().isGM();
-          for (MacroButtonProperties nextMacro : nextToken.getMacroList(trusted)) {
-            if (isGM || nextMacro.getApplyToTokens()) {
-              if (nextMacro.hashCodeForComparison() == oldHashCode) {
-                nextMacro.setLabel(properties.getLabel());
-                if (properties.getCompareGroup() && startingCompareGroup) {
-                  nextMacro.setGroup(properties.getGroup());
+          boolean trusted = true;
+          for (Token nextToken :
+              MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList()) {
+            trusted = AppUtil.playerOwns(nextToken);
+            boolean isGM = MapTool.getPlayer().isGM();
+            for (MacroButtonProperties nextMacro : nextToken.getMacroList(trusted)) {
+              if (isGM || nextMacro.getApplyToTokens()) {
+                if (nextMacro.hashCodeForComparison() == oldHashCode) {
+                  nextMacro.setLabel(properties.getLabel());
+                  if (properties.getCompareGroup() && startingCompareGroup) {
+                    nextMacro.setGroup(properties.getGroup());
+                  }
+                  if (properties.getCompareSortPrefix() && startingCompareSortPrefix) {
+                    nextMacro.setSortby(properties.getSortby());
+                  }
+                  if (properties.getCompareCommand() && startingCompareCommand) {
+                    nextMacro.setCommand(properties.getCommand());
+                  }
+                  if (properties.getCompareAutoExecute() && startingCompareAutoExecute) {
+                    nextMacro.setAutoExecute(properties.getAutoExecute());
+                  }
+                  if (properties.getCompareIncludeLabel() && startingCompareIncludeLabel) {
+                    nextMacro.setIncludeLabel(properties.getIncludeLabel());
+                  }
+                  if (properties.getCompareApplyToSelectedTokens()
+                      && startingCompareApplyToSelectedTokens) {
+                    nextMacro.setApplyToTokens(properties.getApplyToTokens());
+                  }
+                  if (changeAllowPlayerEdits) {
+                    nextMacro.setAllowPlayerEdits(endingAllowPlayerEdits);
+                  }
+                  nextMacro.setCompareGroup(properties.getCompareGroup());
+                  nextMacro.setCompareSortPrefix(properties.getCompareSortPrefix());
+                  nextMacro.setCompareCommand(properties.getCompareCommand());
+                  nextMacro.setCompareAutoExecute(properties.getCompareAutoExecute());
+                  nextMacro.setCompareIncludeLabel(properties.getCompareIncludeLabel());
+                  nextMacro.setCompareApplyToSelectedTokens(
+                      properties.getCompareApplyToSelectedTokens());
+                  nextMacro.save();
                 }
-                if (properties.getCompareSortPrefix() && startingCompareSortPrefix) {
-                  nextMacro.setSortby(properties.getSortby());
-                }
-                if (properties.getCompareCommand() && startingCompareCommand) {
-                  nextMacro.setCommand(properties.getCommand());
-                }
-                if (properties.getCompareAutoExecute() && startingCompareAutoExecute) {
-                  nextMacro.setAutoExecute(properties.getAutoExecute());
-                }
-                if (properties.getCompareIncludeLabel() && startingCompareIncludeLabel) {
-                  nextMacro.setIncludeLabel(properties.getIncludeLabel());
-                }
-                if (properties.getCompareApplyToSelectedTokens()
-                    && startingCompareApplyToSelectedTokens) {
-                  nextMacro.setApplyToTokens(properties.getApplyToTokens());
-                }
-                if (changeAllowPlayerEdits) {
-                  nextMacro.setAllowPlayerEdits(endingAllowPlayerEdits);
-                }
-                nextMacro.setCompareGroup(properties.getCompareGroup());
-                nextMacro.setCompareSortPrefix(properties.getCompareSortPrefix());
-                nextMacro.setCompareCommand(properties.getCompareCommand());
-                nextMacro.setCompareAutoExecute(properties.getCompareAutoExecute());
-                nextMacro.setCompareIncludeLabel(properties.getCompareIncludeLabel());
-                nextMacro.setCompareApplyToSelectedTokens(
-                    properties.getCompareApplyToSelectedTokens());
-                nextMacro.save();
               }
             }
           }
         }
+        MapTool.getFrame().getSelectionPanel().reset();
       }
-      MapTool.getFrame().getSelectionPanel().reset();
-    }
-    if (button.getPanelClass().equals("CampaignPanel")) {
-      MapTool.serverCommand()
-          .updateCampaignMacros(MapTool.getCampaign().getMacroButtonPropertiesArray());
-      MapTool.getFrame().getCampaignPanel().reset();
-    }
+      if (button.getPanelClass().equals("CampaignPanel")) {
+        MapTool.serverCommand()
+            .updateCampaignMacros(MapTool.getCampaign().getMacroButtonPropertiesArray());
+        MapTool.getFrame().getCampaignPanel().reset();
+      }
 
-    if (button.getPanelClass().equals("GmPanel")) {
-      MapTool.serverCommand()
-          .updateGmMacros(MapTool.getCampaign().getGmMacroButtonPropertiesArray());
-      MapTool.getFrame().getGmPanel().reset();
+      if (button.getPanelClass().equals("GmPanel")) {
+        MapTool.serverCommand()
+            .updateGmMacros(MapTool.getCampaign().getGmMacroButtonPropertiesArray());
+        MapTool.getFrame().getGmPanel().reset();
+      }
     }
 
     if (closeDialog) {
-      // setVisible(false);
-      updateOpenMacroList(false);
+      if (editingMacroButton) {
+        updateOpenMacroList(false);
+      }
       dispose();
     } else {
       status.setText(SAVED);
@@ -791,9 +873,11 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
   }
 
   private void cancel() {
-    // setVisible(false);
-    updateOpenMacroList(false);
+    if (editingMacroButton) {
+      updateOpenMacroList(false);
+    }
     dispose();
+    callback.accept(null);
   }
 
   private JCheckBox getAutoExecuteCheckBox() {

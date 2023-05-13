@@ -21,6 +21,7 @@ import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 import javax.swing.*;
+import net.rptools.maptool.client.swing.TextFieldEditorButtonTableCellEditor;
 
 public class TokenPropertiesManagementPanelView {
   private JPanel mainPanel;
@@ -181,6 +182,7 @@ public class TokenPropertiesManagementPanelView {
         propertiesTable = new JTable();
         propertiesTable.setModel(new TokenPropertiesTableModel());
         propertiesTable.setName("propertiesTable");
+        propertiesTable.setDefaultEditor(TokenPropertiesTableModel.LargeEditableText.class, new TextFieldEditorButtonTableCellEditor());
     }
 
 

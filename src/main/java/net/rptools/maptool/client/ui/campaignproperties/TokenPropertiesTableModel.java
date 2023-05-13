@@ -22,6 +22,10 @@ import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.model.TokenProperty;
 
 public class TokenPropertiesTableModel extends AbstractTableModel {
+
+  public record LargeEditableText(String text) {}
+  ;
+
   @Serial private static final long serialVersionUID = 3256444702936019250L;
 
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
@@ -72,8 +76,9 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return switch (columnIndex) {
-      case 0, 1, 5 -> String.class;
+      case 0, 1 -> String.class;
       case 2, 3, 4 -> Boolean.class;
+      case 5 -> LargeEditableText.class;
       default -> null;
     };
   }
