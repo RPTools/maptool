@@ -209,6 +209,7 @@ public class MapTool {
     } else {
       msg = I18N.getText(msgKey) + "<br/>" + t.toString();
     }
+    msg = msg.replace("\n", "<br/>");
     return msg;
   }
 
