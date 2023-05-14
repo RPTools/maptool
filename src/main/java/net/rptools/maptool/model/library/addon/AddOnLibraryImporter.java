@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
+import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -54,6 +55,9 @@ public class AddOnLibraryImporter {
 
   /** The name of the file with event properties. */
   public static final String EVENT_PROPERTY_FILE = "events.json";
+
+  /** The name of the file with the stat sheets. */
+  public static final String STATS_SHEET_FILE = "stat_sheets.json";
 
   /**
    * Returns the {@link FileFilter} for add on library files.
@@ -162,6 +166,16 @@ public class AddOnLibraryImporter {
             .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(eventsZipEntry)), eventPropBuilder);
       }
+
+      // Stat Sheets
+      var statSheetsBuilder = AddOnStatSheetsDto.newBuilder();
+      ZipEntry statSheetEntry = zip.getEntry(STATS_SHEET_FILE);
+      if (statSheetEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(new InputStreamReader(zip.getInputStream(statSheetEntry)), statSheetsBuilder);
+      }
+
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
       var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
@@ -172,6 +186,7 @@ public class AddOnLibraryImporter {
           addOnLib,
           mtsPropBuilder.build(),
           eventPropBuilder.build(),
+          statSheetsBuilder.build(),
           pathAssetMap);
     }
   }

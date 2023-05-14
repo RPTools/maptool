@@ -27,7 +27,7 @@ public class StatSheetManager {
 
   public Set<StatSheet> getStatSheets(String propertyType) {
     return statSheets.keySet().stream()
-        .filter(s -> s.propertyType().equals(propertyType))
+        .filter(s -> s.propertyTypes().isEmpty() || s.propertyTypes().contains((propertyType)))
         .collect(Collectors.toSet());
   }
 

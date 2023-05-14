@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.sheet.stats;
 
 import java.net.URL;
+import java.util.Set;
 
 /**
  * Record for maintaining stat sheet details.
@@ -22,16 +23,9 @@ import java.net.URL;
  * @param name The name of the stat sheet.
  * @param description The description of the stat sheet.
  * @param entry The entry point for the stat sheet.
- * @param propertyType the Property Type that this stat sheet is for.
- * @param width The width of the stat sheet.
- * @param height The height of the stat sheet.
+ * @param propertyTypes The property types that this stat sheet belongs to, empty set = all property
+ *     types.
  * @param namespace The namespace of the add-on that provides the spreadsheet.
  */
 public record StatSheet(
-    String name,
-    String description,
-    URL entry,
-    String propertyType,
-    String width,
-    String height,
-    String namespace) {}
+    String name, String description, URL entry, Set<String> propertyTypes, String namespace) {}

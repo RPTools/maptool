@@ -48,9 +48,7 @@ import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.data.LibraryData;
-import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
-import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
-import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.model.library.proto.*;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.threads.ThreadExecutionHelper;
@@ -162,6 +160,7 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      AddOnStatSheetsDto statSheetsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
@@ -193,16 +192,14 @@ public class AddOnLibrary implements Library {
       descriptionMap.put(path, properties.getDescription());
     }
 
-    for (var s : dto.getStatSheetsList()) {
+    for (var s : statSheetsDto.getStatSheetsList()) {
       try {
         statSheets.add(
             new StatSheet(
                 s.getName(),
                 s.getDescription(),
                 new URI("lib://" + namespace + "/" + s.getEntry()).toURL(),
-                s.getType(),
-                s.getWidth(),
-                s.getHeight(),
+                new HashSet<>(s.getPropertyTypesList()),
                 namespace));
       } catch (Exception e) {
         logger.error(I18N.getText("library.error.addOn.sheet", namespace, s.getName()));
@@ -264,9 +261,10 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      AddOnStatSheetsDto statSheetsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
+    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap);
   }
 
   @Override
