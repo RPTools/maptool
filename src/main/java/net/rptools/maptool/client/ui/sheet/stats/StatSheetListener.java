@@ -19,16 +19,20 @@ import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 
+/**
+ * This class is used to listen for token hover events and display a stat sheet when the token is
+ * hovered over.
+ */
 public class StatSheetListener {
 
+  /** The stat sheet to display. */
   private StatSheet statSheet;
 
-  private static final String SHEET_URL =
-      "lib://net.rptools.statSheetTest/sheets/stats/basic/index.html";
-  // private final String htmlString;
-
-  public StatSheetListener() {}
-
+  /**
+   * Called when a token is hovered over.
+   *
+   * @param event The event that was fired.
+   */
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
     System.out.println("TokenHoverListener.onHoverEnter");
@@ -40,6 +44,11 @@ public class StatSheetListener {
     }
   }
 
+  /**
+   * Called when a token is no longer hovered over.
+   *
+   * @param event The event that was fired.
+   */
   @Subscribe
   public void onHoverExit(TokenHoverExit event) {
     System.out.println("TokenHoverListener.onHoverLeave");

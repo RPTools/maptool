@@ -96,6 +96,12 @@ public class Campaign {
   // DEPRECATED: as of 1.3b19 here to support old serialized versions
   // private Map<GUID, LightSource> lightSourceMap;
 
+  /**
+   * Record to hold the arguments for rename token type functionality.
+   *
+   * @param from the name to rename from.
+   * @param to the name to rename to.
+   */
   public record RenamePropertyType(@Nonnull String from, @Nonnull String to) {}
   ;
 

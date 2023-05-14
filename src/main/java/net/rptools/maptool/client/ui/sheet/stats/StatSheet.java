@@ -26,14 +26,23 @@ import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/** Class that represents a pop up stat sheet. */
 public class StatSheet {
 
+  /** Object for logging messages. */
   private static final Logger log = LogManager.getLogger(StatSheet.class);
+
+  // TODO: CDW temporary testing only.
   private static final String SHEET_URI =
       "lib://net.rptools.statSheetTest/sheets/stats/basic/index.html";
 
-  public StatSheet() {}
-
+  /**
+   * Sets the content for the stat sheet. The content is a HTML page that is rendered using the
+   * Handlebars template engine.
+   *
+   * @param token the token to render the stat sheet for.
+   * @param content the content of the stat sheet.
+   */
   public void setContent(Token token, String content) {
     Handlebars handlebars = new Handlebars();
     try {
@@ -55,6 +64,7 @@ public class StatSheet {
     }
   }
 
+  /** Clears the content of the stat sheet. */
   public void clearContent() {
     Platform.runLater(
         () -> {

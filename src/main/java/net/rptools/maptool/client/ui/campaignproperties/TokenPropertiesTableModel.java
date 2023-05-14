@@ -22,31 +22,50 @@ import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TokenProperty;
 
+/** Table model for the token properties type table. */
 public class TokenPropertiesTableModel extends AbstractTableModel {
 
+  /**
+   * Record to hold strings that can also be edited via the macro editor. The strings are "wrapped"
+   * in this class so we can register a cell editor for them.
+   */
   public record LargeEditableText(String text) {}
   ;
 
   @Serial private static final long serialVersionUID = 3256444702936019250L;
 
+  /**
+   * Copy of the token type map from the campaign properties. This is used to populate the table. We
+   * create an empty map to being with so that we don't get a null pointer exception when the table
+   * is first displayed.
+   */
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
+
+  /** The token type that is currently displayed in the table. */
   private String tokenType = "";
 
+  /**
+   * Set the token type to display in the table.
+   *
+   * @param propertyType the token type to display.
+   */
   public void setPropertyType(String propertyType) {
     tokenType = propertyType;
-    if (propertyType != null && !propertyType.isEmpty()) {}
     fireTableDataChanged();
   }
 
+  @Override
   public int getRowCount() {
     var properties = tokenTypeMap.get(tokenType);
     return properties == null ? 0 : properties.size();
   }
 
+  @Override
   public int getColumnCount() {
     return 6;
   }
 
+  @Override
   public Object getValueAt(int rowIndex, int columnIndex) {
     var properties = tokenTypeMap.get(tokenType);
     var property = properties.get(rowIndex);
@@ -112,6 +131,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     }
   }
 
+  /** Adds a new token property, with a generated name. */
   public void addProperty() {
     var properties = tokenTypeMap.get(tokenType);
     var prop = new TokenProperty("New");
@@ -119,12 +139,22 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     fireTableRowsInserted(properties.size() - 1, properties.size() - 1);
   }
 
+  /**
+   * Deletes the selected token property.
+   *
+   * @param selectedRow the selected row to delete.
+   */
   public void deleteProperty(int selectedRow) {
     var properties = tokenTypeMap.get(tokenType);
     properties.remove(selectedRow);
     fireTableRowsDeleted(selectedRow, selectedRow);
   }
 
+  /**
+   * Sets the token type map used to populate the table.
+   *
+   * @param tokenTypeMap the token type map.
+   */
   public void setPropertyTypeMap(Map<String, List<TokenProperty>> tokenTypeMap) {
     this.tokenTypeMap = tokenTypeMap;
   }

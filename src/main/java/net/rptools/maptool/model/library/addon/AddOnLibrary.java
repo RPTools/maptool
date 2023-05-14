@@ -568,6 +568,7 @@ public class AddOnLibrary implements Library {
         .join();
   }
 
+  /** Registers the stat sheets that this add-on defines. */
   private void registerSheets() {
     var statSheetManager = new StatSheetManager();
     statSheetManager.removeNamespace(namespace);

@@ -16,4 +16,9 @@ package net.rptools.maptool.client.events;
 
 import net.rptools.maptool.model.Zone;
 
+/**
+ * Event fired when the mouse exits a token.
+ *
+ * @param zone the zone for the event.
+ */
 public record TokenHoverExit(Zone zone) {}
