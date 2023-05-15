@@ -42,7 +42,9 @@ import java.util.regex.Pattern;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 import java.util.zip.ZipInputStream;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.AStarCellPointConverter;
+import net.rptools.maptool.model.ShapeType;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -508,6 +510,8 @@ public class FileUtil {
     XStream.setupDefaultSecurity(xStream);
     xStream.allowTypesByWildcard(new String[] {"net.rptools.**", "java.awt.**", "sun.awt.**"});
     xStream.registerConverter(new AStarCellPointConverter());
+    xStream.addImmutableType(ShapeType.class, true);
+    xStream.addImmutableType(BarTokenOverlay.Side.class, true);
     return xStream;
   }
 }
