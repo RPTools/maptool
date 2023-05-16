@@ -26,7 +26,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
-import java.io.Reader;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -211,7 +210,7 @@ public class FileUtil {
     String type = "";
     try {
       type = URLConnection.guessContentTypeFromStream(in);
-      if (log.isDebugEnabled()) log.debug("result from guessContentTypeFromStream() is " + type);
+      log.debug("result from guessContentTypeFromStream() is {}", type);
     } catch (IOException e) {
     }
     return type;
@@ -227,8 +226,7 @@ public class FileUtil {
   public static String getContentType(URL url) {
     String type = "";
     type = URLConnection.guessContentTypeFromName(url.getPath());
-    if (log.isDebugEnabled())
-      log.debug("result from guessContentTypeFromName(" + url.getPath() + ") is " + type);
+    log.debug("result from guessContentTypeFromName({}) is {}", url.getPath(), type);
     return type;
   }
 
@@ -258,30 +256,6 @@ public class FileUtil {
   public static BufferedReader getFileAsReader(File file) throws IOException {
     return new BufferedReader(
         new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8));
-  }
-
-  /**
-   * Given a URL this method determines the content type of the URL (if possible) and then returns a
-   * Reader with the appropriate character encoding.
-   *
-   * @param url the source of the data stream
-   * @return String representing the data
-   * @throws IOException in case of an I/O error
-   */
-  public static Reader getURLAsReader(URL url) throws IOException {
-    InputStreamReader isr = null;
-    URLConnection conn = null;
-    // We're assuming character here, but it could be bytes. Perhaps we should
-    // check the MIME type returned by the network server?
-    conn = url.openConnection();
-    if (log.isDebugEnabled()) {
-      String type = URLConnection.guessContentTypeFromName(url.getPath());
-      log.debug("result from guessContentTypeFromName(" + url.getPath() + ") is " + type);
-      type = getContentType(conn.getInputStream());
-      // Now make a guess and change 'encoding' to match the content type...
-    }
-    isr = new InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8);
-    return isr;
   }
 
   public static InputStream getFileAsInputStream(File file) throws IOException {

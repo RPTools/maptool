@@ -44,6 +44,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -275,8 +276,8 @@ public class PersistenceUtil {
     CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
     saveTimer = new CodeTimer("CampaignSave");
     saveTimer.setThreshold(5);
-    saveTimer.setEnabled(
-        log.isDebugEnabled()); // Don't bother keeping track if it won't be displayed...
+    // Don't bother keeping track if it won't be displayed...
+    saveTimer.setEnabled(AppState.isCollectProfilingData());
 
     // Strategy: save the file to a tmp location so that if there's a failure the original file
     // won't be touched. Then once we're finished, replace the old with the new.
@@ -351,8 +352,8 @@ public class PersistenceUtil {
         pakFile = null;
         tmpFile.delete(); // Delete the temporary file
         saveTimer.stop("OOM Close");
-        if (log.isDebugEnabled()) {
-          log.debug(saveTimer);
+        if (saveTimer.isEnabled()) {
+          MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
         }
         MapTool.showError("msg.error.failedSaveCampaignOOM");
         return;
@@ -395,8 +396,8 @@ public class PersistenceUtil {
     saveCampaignThumbnail(campaignFile.getName());
     saveTimer.stop("Thumbnail");
 
-    if (log.isDebugEnabled()) {
-      log.debug(saveTimer);
+    if (saveTimer.isEnabled()) {
+      MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
     }
   }
 

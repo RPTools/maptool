@@ -87,7 +87,7 @@ public class UPnPUtil {
           if (ni.isUp() && !ni.isLoopback() && !ni.isVirtual()) {
             int found = 0;
             try {
-              if (log.isInfoEnabled()) log.info("UPnP:  Trying interface " + ni.getDisplayName());
+              log.info("UPnP:  Trying interface {}", ni.getDisplayName());
               InternetGatewayDevice[] thisNI;
               showMessage(
                   ni.getDisplayName(), "Looking for gateway devices on " + ni.getDisplayName());
@@ -101,8 +101,7 @@ public class UPnPUtil {
               if (thisNI != null) {
                 for (InternetGatewayDevice igd : thisNI) {
                   found++;
-                  if (log.isInfoEnabled())
-                    log.info("UPnP:  Found IGD: " + igd.getIGDRootDevice().getModelName());
+                  log.info("UPnP:  Found IGD: {}", igd.getIGDRootDevice().getModelName());
                   if (igds.put(igd, ni) != null) {
                     // There was a previous mapping for this IGD! It's unlikely to have two NICs on
                     // the
@@ -112,8 +111,7 @@ public class UPnPUtil {
                     // user a choice.
                     // FIXME We SHOULD be using the "networking binding order" (Windows)
                     // or "network service order" on OSX.
-                    if (log.isInfoEnabled())
-                      log.info("UPnP:  This was not the first time this IGD was found!");
+                    log.info("UPnP:  This was not the first time this IGD was found!");
                   }
                 }
               }
@@ -122,8 +120,7 @@ public class UPnPUtil {
               // some IO Exception occurred during communication with device
               log.warn("While searching for internet gateway devices", ex);
             }
-            if (log.isInfoEnabled())
-              log.info("Found " + found + " IGDs on interface " + ni.getDisplayName());
+            log.info("Found {} IGDs on interface {}", found, ni.getDisplayName());
           }
         } catch (SocketException se) {
           continue;
@@ -160,8 +157,7 @@ public class UPnPUtil {
             for (InterfaceAddress ifAddr : ni.getInterfaceAddresses()) {
               if (ifAddr.getAddress() instanceof Inet4Address) {
                 localHostIP = ifAddr.getAddress().getHostAddress();
-                if (log.isInfoEnabled())
-                  log.info("IP address " + localHostIP + " on interface " + ni.getDisplayName());
+                log.info("IP address {} on interface {}", localHostIP, ni.getDisplayName());
               }
             }
             break;
@@ -169,14 +165,8 @@ public class UPnPUtil {
         boolean mapped = gd.addPortMapping("MapTool", null, port, port, localHostIP, 0, "TCP");
         if (mapped) {
           mappings.add(gd);
-          if (log.isInfoEnabled())
-            log.info(
-                "UPnP: Port "
-                    + port
-                    + " mapped on "
-                    + ni.getDisplayName()
-                    + " at address "
-                    + localHostIP);
+          log.info(
+              "UPnP: Port {} mapped on {} at address {}", port, ni.getDisplayName(), localHostIP);
         }
       } catch (UPNPResponseException respEx) {
         // oops the IGD did not like something !!
@@ -219,12 +209,10 @@ public class UPnPUtil {
           boolean unmapped = gd.deletePortMapping(null, port, "TCP");
           if (unmapped) {
             count++;
-            if (log.isInfoEnabled())
-              log.info("UPnP: Port unmapped from " + entry.getValue().getDisplayName());
+            log.info("UPnP: Port unmapped from {}", entry.getValue().getDisplayName());
             iter.remove();
           } else {
-            if (log.isInfoEnabled())
-              log.info("UPnP: Failed to unmap port from " + entry.getValue().getDisplayName());
+            log.info("UPnP: Failed to unmap port from {}", entry.getValue().getDisplayName());
           }
         }
       } catch (IOException e) {

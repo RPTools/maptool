@@ -52,6 +52,8 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
@@ -290,7 +292,7 @@ public class PackedFile implements AutoCloseable {
       return;
     }
     saveTimer = new CodeTimer("PackedFile.save");
-    saveTimer.setEnabled(log.isDebugEnabled());
+    saveTimer.setEnabled(AppState.isCollectProfilingData());
 
     // Create the new file
     File newFile = new File(tmpDir, new GUID() + ".pak");
@@ -402,8 +404,9 @@ public class PackedFile implements AutoCloseable {
       IOUtils.closeQuietly(zout);
       saveTimer.stop("cleanup");
 
-      if (log.isDebugEnabled()) log.debug(saveTimer);
-      saveTimer = null;
+      if (saveTimer.isEnabled()) {
+        MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
+      }
     }
   }
 
@@ -729,8 +732,7 @@ public class PackedFile implements AutoCloseable {
     InputStream in = zipFile.getInputStream(entry);
     if (in == null) throw new FileNotFoundException(path);
     String type = FileUtil.getContentType(in);
-    if (log.isDebugEnabled() && type != null)
-      log.debug("FileUtil.getContentType() returned " + type);
+    log.debug("FileUtil.getContentType() returned {}", type);
     return in;
   }
 

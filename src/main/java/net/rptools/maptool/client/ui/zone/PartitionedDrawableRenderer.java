@@ -28,6 +28,7 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -152,8 +153,8 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
         g.drawImage(chunk.image, x, y, null);
         timer.stop("render:DrawImage");
 
-        // DEBUG: Partition boundaries
-        if (log.isDebugEnabled()) { // Show partition boundaries
+        // DEBUG: Show partition boundaries
+        if (DeveloperOptions.Toggle.ShowPartitionDrawableBoundaries.isEnabled()) {
           if (!messageLogged) {
             messageLogged = true;
             log.debug(
