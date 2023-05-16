@@ -762,11 +762,14 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     try {
       MapToolMacroContext context =
           new MapToolMacroContext("ToolTip", token != null ? token.getName() : "", false, index);
-      if (log.isDebugEnabled()) {
+      if (token == null) {
         log.debug(
-            "Evaluating toolTip: "
-                + (token != null ? "for token " + token.getName() + "(" + token.getId() + ")" : "")
-                + "----------------------------------------------------------------------------------");
+            "Evaluating toolTip: ----------------------------------------------------------------------------------");
+      } else {
+        log.debug(
+            "Evaluating toolTip: for token {} ({})----------------------------------------------------------------------------------",
+            token.getName(),
+            token.getId());
       }
       return MapTool.getParser().parseLine(token, toolTip, context);
     } catch (ParserException pe) {
@@ -1093,6 +1096,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     }
     if (toolTip == null) {
       toolTip = "";
+    }
+    if (saveLocation == null) {
+      saveLocation = "";
     }
     return this;
   }

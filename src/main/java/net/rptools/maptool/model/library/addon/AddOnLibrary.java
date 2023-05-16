@@ -29,7 +29,9 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import javax.script.ScriptException;
+import javax.swing.SwingUtilities;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -49,9 +51,11 @@ import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.model.library.proto.*;
+import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
+import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
+import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
-import net.rptools.maptool.util.threads.ThreadExecutionHelper;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -587,13 +591,25 @@ public class AddOnLibrary implements Library {
    * @return a CompletableFuture that completes when the function MacroScript function has finished
    */
   private CompletableFuture<Void> callMTSFunction(String name) {
-    return new ThreadExecutionHelper<Void>()
-        .runOnSwingThread(
-            () -> {
-              var resolver = new MapToolVariableResolver(null);
+    if (SwingUtilities.isEventDispatchThread()) {
+      var resolver = new MapToolVariableResolver(null);
+      try {
+        MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
+      } catch (ParserException e) {
+        throw new CompletionException(e);
+      }
+    } else {
+      SwingUtilities.invokeLater(
+          () -> {
+            var resolver = new MapToolVariableResolver(null);
+            try {
               MapTool.getParser().runMacro(resolver, null, name + "@lib:" + namespace, "");
-              return null;
-            });
+            } catch (ParserException e) {
+              throw new CompletionException(e);
+            }
+          });
+    }
+    return CompletableFuture.completedFuture(null);
   }
 
   /**

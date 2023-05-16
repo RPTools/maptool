@@ -209,11 +209,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // ICON
     getTokenIconPanel().setImageId(token.getImageAssetId());
 
-    // NOTES
-    getGMNotesEditor().setText(token.getGMNotes());
+    // NOTES, GM NOTES. Due to the way things happen on different gui threads, the type must be set
+    // before the text
+    // otherwise the wrong values can get populated when the tab change listener fires.
     getGMNotesEditor().setTextType(token.getGmNotesType());
-    getPlayerNotesEditor().setText(token.getNotes());
+    getGMNotesEditor().setText(token.getGMNotes());
     getPlayerNotesEditor().setTextType(token.getNotesType());
+    getPlayerNotesEditor().setText(token.getNotes());
 
     // TYPE
     getTypeCombo().setSelectedItem(token.getType());

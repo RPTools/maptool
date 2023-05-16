@@ -44,6 +44,7 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -270,13 +271,12 @@ public class PersistenceUtil {
     return n;
   }
 
-  public static void saveCampaign(Campaign campaign, File campaignFile, String campaignVersion)
-      throws IOException {
+  public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
     CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
     saveTimer = new CodeTimer("CampaignSave");
     saveTimer.setThreshold(5);
-    saveTimer.setEnabled(
-        log.isDebugEnabled()); // Don't bother keeping track if it won't be displayed...
+    // Don't bother keeping track if it won't be displayed...
+    saveTimer.setEnabled(AppState.isCollectProfilingData());
 
     // Strategy: save the file to a tmp location so that if there's a failure the original file
     // won't be touched. Then once we're finished, replace the old with the new.
@@ -325,15 +325,9 @@ public class PersistenceUtil {
       try {
         saveTimer.start("Set content");
 
-        // If we are exporting the campaign, we will strip classes/fields that were added since the
-        // specified campaignVersion
-        if (campaignVersion != null) {
-          pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
-        } else {
-          pakFile.setContent(persistedCampaign);
-          pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
-          pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
-        }
+        pakFile.setContent(persistedCampaign);
+        pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
+        pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 
         saveTimer.stop("Set content");
         saveTimer.start("Save");
@@ -351,8 +345,8 @@ public class PersistenceUtil {
         pakFile = null;
         tmpFile.delete(); // Delete the temporary file
         saveTimer.stop("OOM Close");
-        if (log.isDebugEnabled()) {
-          log.debug(saveTimer);
+        if (saveTimer.isEnabled()) {
+          MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
         }
         MapTool.showError("msg.error.failedSaveCampaignOOM");
         return;
@@ -395,8 +389,8 @@ public class PersistenceUtil {
     saveCampaignThumbnail(campaignFile.getName());
     saveTimer.stop("Thumbnail");
 
-    if (log.isDebugEnabled()) {
-      log.debug(saveTimer);
+    if (saveTimer.isEnabled()) {
+      MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
     }
   }
 

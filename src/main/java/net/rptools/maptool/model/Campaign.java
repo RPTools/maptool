@@ -23,7 +23,6 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.ToolbarPanel;
-import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -54,14 +53,9 @@ public class Campaign {
 
   private String name; // the name of the campaign, to be displayed in the MapToolFrame title bar
 
-  @SuppressWarnings("unused")
-  private static transient ExportDialog exportInfo =
-      null; // transient so it is not written out; entire element ignore when reading
-
   private static ExportDialog exportDialog =
       ExportDialog
           .getInstance(); // this is the new export dialog (different name for upward compatibility)
-  private static CampaignExportDialog campaignExportDialog = CampaignExportDialog.getInstance();
 
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
@@ -362,12 +356,6 @@ public class Campaign {
   public Map<String, BarTokenOverlay> getTokenBarsMap() {
     return campaignProperties.getTokenBarsMap();
   }
-
-  /*
-   * public void setExportInfo(ExportInfo exportInfo) { this.exportInfo = exportInfo; }
-   *
-   * public ExportInfo getExportInfo() { return exportInfo; }
-   */
 
   public void setId(GUID id) {
     this.id = id;
@@ -731,10 +719,6 @@ public class Campaign {
     exportDialog = d;
     exportSettings = d.getExportSettings();
     exportLocation = d.getExportLocation();
-  }
-
-  public CampaignExportDialog getExportCampaignDialog() {
-    return campaignExportDialog;
   }
 
   public void initDefault() {

@@ -1846,16 +1846,11 @@ public class Token implements Cloneable {
       }
     }
     try {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "Evaluating property: '"
-                + key
-                + "' for token "
-                + getName()
-                + "("
-                + getId()
-                + ")----------------------------------------------------------------------------------");
-      }
+      log.debug(
+          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
+          key,
+          getName(),
+          getId());
       val = MapTool.getParser().parseLine(resolver, this, val.toString());
     } catch (ParserException pe) {
       log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
@@ -1906,9 +1901,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.put(prop.getIndex(), prop);
     }
     macroMap = null;
-    if (log.isDebugEnabled()) {
-      log.debug("Token.loadOldMacros() set up " + macroPropertiesMap.size() + " new macros.");
-    }
+    log.debug("Token.loadOldMacros() set up {} new macros.", macroPropertiesMap.size());
   }
 
   public int getMacroNextIndex() {
