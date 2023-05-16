@@ -271,8 +271,7 @@ public class PersistenceUtil {
     return n;
   }
 
-  public static void saveCampaign(Campaign campaign, File campaignFile, String campaignVersion)
-      throws IOException {
+  public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
     CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
     saveTimer = new CodeTimer("CampaignSave");
     saveTimer.setThreshold(5);
@@ -326,15 +325,9 @@ public class PersistenceUtil {
       try {
         saveTimer.start("Set content");
 
-        // If we are exporting the campaign, we will strip classes/fields that were added since the
-        // specified campaignVersion
-        if (campaignVersion != null) {
-          pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
-        } else {
-          pakFile.setContent(persistedCampaign);
-          pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
-          pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
-        }
+        pakFile.setContent(persistedCampaign);
+        pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
+        pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 
         saveTimer.stop("Set content");
         saveTimer.start("Save");
