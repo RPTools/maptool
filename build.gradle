@@ -287,7 +287,10 @@ repositories {
 // In this section you declare the dependencies for your production and test code
 dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.15.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
+    implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
