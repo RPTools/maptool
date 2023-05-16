@@ -1378,11 +1378,6 @@ public class MapTool {
         .getZone()
         .setTopologyTypes(AppPreferences.getTopologyTypes());
 
-    // Set up the HTML Map Overlay used internally by MapTool
-    MapTool.getFrame()
-        .getOverlayPanel()
-        .showOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME, Integer.MIN_VALUE, "", null);
-
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
   }
 

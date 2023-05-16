@@ -71,5 +71,12 @@ public class AppConstants {
   public static final String THEME_CONFIG_FILE =
       AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
 
-  public static final String INTERNAL_MAP_HTML_OVERLAY_NAME = "Internal Map Overlay";
+  /**
+   * MapTool internal frame/dialog/overlay prefix. These should only be managed by MapTool code not
+   * macros.
+   */
+  public static final String INTERNAL_FRAME_PREFIX = "MapTool-Internal:";
+
+  public static final String INTERNAL_MAP_HTML_OVERLAY_NAME =
+      INTERNAL_FRAME_PREFIX + "Internal Map Overlay";
 }

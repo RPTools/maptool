@@ -929,14 +929,24 @@ public class MapToolLineParser {
           }
           switch (outputTo) {
             case FRAME:
+              // Macros can not interact with internal frames/dialogs/overlays
+              if (HTMLFrameFactory.isInternalOnly(frameName)) {
+                throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
+              }
               HTMLFrameFactory.show(
                   frameName, FrameType.FRAME, false, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG:
+              if (HTMLFrameFactory.isInternalOnly(frameName)) {
+                throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
+              }
               HTMLFrameFactory.show(
                   frameName, FrameType.DIALOG, false, frameOpts, expressionBuilder.toString());
               break;
             case OVERLAY:
+              if (HTMLFrameFactory.isInternalOnly(frameName)) {
+                throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
+              }
               HTMLFrameFactory.show(
                   frameName, FrameType.OVERLAY, true, frameOpts, expressionBuilder.toString());
               break;
@@ -944,10 +954,16 @@ public class MapToolLineParser {
               builder.append(expressionBuilder);
               break;
             case FRAME5:
+              if (HTMLFrameFactory.isInternalOnly(frameName)) {
+                throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
+              }
               HTMLFrameFactory.show(
                   frameName, FrameType.FRAME, true, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG5:
+              if (HTMLFrameFactory.isInternalOnly(frameName)) {
+                throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
+              }
               HTMLFrameFactory.show(
                   frameName,
                   HTMLFrameFactory.FrameType.DIALOG,

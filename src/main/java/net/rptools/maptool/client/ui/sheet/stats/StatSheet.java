@@ -57,7 +57,14 @@ public class StatSheet {
                 MapTool.getFrame()
                     .getOverlayPanel()
                     .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
-            overlay.updateContents(output.toString(), true);
+            if (overlay != null) {
+              overlay.updateContents(output, true);
+            } else {
+              MapTool.getFrame()
+                  .getOverlayPanel()
+                  .showOverlay(
+                      AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME, Integer.MIN_VALUE, output, null);
+            }
           });
     } catch (IOException e) {
       MapTool.showError("msg.error.renderingStatSheet", e);
