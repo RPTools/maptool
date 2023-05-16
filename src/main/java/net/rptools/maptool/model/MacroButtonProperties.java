@@ -1097,6 +1097,9 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     if (toolTip == null) {
       toolTip = "";
     }
+    if (saveLocation == null) {
+      saveLocation = "";
+    }
     return this;
   }
 
