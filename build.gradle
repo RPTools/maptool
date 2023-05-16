@@ -15,20 +15,15 @@ buildscript {
 // Access Git info from build script
 plugins {
     id "application"
+    id "base"
+    id "java"
     id "org.ajoberstar.grgit" version "5.0.0"
     id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
     id "com.google.protobuf" version "0.8.19"
+    id 'io.github.file5.guidesigner' version '1.0.2'
 }
-
-// Apply the java plugin to add support for Java
-apply plugin: 'base'
-apply plugin: 'application'
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'com.diffplug.spotless'
-apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
