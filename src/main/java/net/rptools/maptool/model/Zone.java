@@ -601,7 +601,8 @@ public class Zone {
       }
     }
     // Set the initiative list using the newly create tokens.
-    // We also have to work around old campaign issues where there may be empty positions in the initiative list
+    // We also have to work around old campaign issues where there may be empty positions in the
+    // initiative list
     int newCurrent = -1;
     int oldCurrent = zone.initiativeList.getCurrent();
     if (saveInitiative.length > 0) {
