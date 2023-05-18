@@ -67,6 +67,7 @@ import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 import net.rptools.maptool.client.ui.ImageAssetPanel;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -80,6 +81,8 @@ import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -129,6 +132,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     setGmNotesEnabled(MapTool.getPlayer().isGM());
   }
 
+  public void initStatSheetComboBox() {
+    getStatSheetCombo().setRenderer(new StatSheetComboBoxRenderer());
+  }
+
   public void initTerrainModifierOperationComboBox() {
     getTerrainModifierOperationComboBox()
         .setModel(new DefaultComboBoxModel<>(TerrainModifierOperation.values()));
@@ -173,6 +180,21 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     setLibTokenPaneEnabled(token.isLibToken());
     validateLibTokenURIAccess(getNameField().getName());
+    var combo = getStatSheetCombo();
+    combo.removeAllItems();
+    // Default Entry
+    var defaultSS =
+        new StatSheet(null, I18N.getText("token.statSheet.useDefault"), null, Set.of(), null);
+    combo.addItem(defaultSS);
+    var ssManager = new StatSheetManager();
+    ssManager.getStatSheets(token.getPropertyType()).stream()
+        .sorted(Comparator.comparing(StatSheet::description))
+        .forEach(ss -> combo.addItem(ss));
+    if (token.usingDefaultStatSheet()) {
+      combo.setSelectedItem(defaultSS);
+    } else {
+      combo.setSelectedItem(new StatSheetManager().getStatSheet(token.getStatSheetId()));
+    }
     dialog.showDialog();
   }
 
@@ -520,6 +542,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JComboBox) getComponent("type");
   }
 
+  public JComboBox getStatSheetCombo() {
+    return (JComboBox) getComponent("statSheetComboBox");
+  }
+
   public void initTokenIconPanel() {
     getTokenIconPanel().setPreferredSize(new Dimension(100, 100));
     getTokenIconPanel().setMinimumSize(new Dimension(100, 100));
@@ -787,6 +813,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     // SHAPE
     token.setShape((Token.TokenShape) getShapeCombo().getSelectedItem());
+
+    // Stat Sheet
+    var ss = (StatSheet) getStatSheetCombo().getSelectedItem();
+    if (ss.name() == null && ss.namespace() == null) {
+      token.useDefaultStatSheet();
+    } else {
+      token.setStatSheetId(new StatSheetManager().getId(ss));
+    }
 
     // Macros
     token.setSpeechMap(((KeyValueTableModel) getSpeechTable().getModel()).getMap());

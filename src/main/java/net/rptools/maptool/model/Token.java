@@ -3113,4 +3113,18 @@ public class Token implements Cloneable {
   public void setStatSheetId(String statSheetId) {
     this.statSheetId = statSheetId;
   }
+
+  /**
+   * Returns if the token is using the default stat sheet for its token type.
+   *
+   * @return <code>true</code> if using the default stat sheet.
+   */
+  public boolean usingDefaultStatSheet() {
+    return statSheetId == null;
+  }
+
+  /** Use the default stat sheet for the tokens token type. */
+  public void useDefaultStatSheet() {
+    setStatSheetId(null);
+  }
 }

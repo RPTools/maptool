@@ -21,10 +21,10 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
@@ -41,20 +41,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   private Map<String, String> renameTypes = new TreeMap<>();
 
   CampaignProperties campaignProperties;
-
-  private static class StatSheetComboBoxRenderer extends BasicComboBoxRenderer {
-    @Override
-    public Component getListCellRendererComponent(
-        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
-      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-      if (value instanceof StatSheet ss) {
-        setText(ss.description());
-      }
-
-      return this;
-    }
-  }
 
   public TokenPropertiesManagementPanel() {
     super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
@@ -312,8 +298,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     ssManager.getStatSheets(propertyType).stream()
         .sorted(Comparator.comparing(StatSheet::description))
         .forEach(ss -> combo.addItem(ss));
-    combo.setSelectedItem(
-        ssManager.getStatSheet(campaignProperties.getTokenTypeDefaultStatSheetId(propertyType)));
+    combo.setSelectedItem(ssManager.getStatSheet(tokenTypeStatSheetMap.get(propertyType)));
   }
 
   public void initStatSheetDetails() {
@@ -325,11 +310,13 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     combo.setRenderer(new StatSheetComboBoxRenderer());
     combo.addActionListener(
         l -> {
-          var ss = (StatSheet) combo.getSelectedItem();
-          var tokenType = (String) getTokenTypeList().getSelectedValue();
-          if (ss != null && tokenType != null) {
-            var id = new StatSheetManager().getId(ss);
-            tokenTypeStatSheetMap.put(tokenType, new StatSheetManager().getId(ss));
+          if (getStatSheetComboBox().hasFocus()) { // Only if user has mad change
+            var ss = (StatSheet) combo.getSelectedItem();
+            var tokenType = (String) getTokenTypeList().getSelectedValue();
+            if (ss != null && tokenType != null) {
+              var id = new StatSheetManager().getId(ss);
+              tokenTypeStatSheetMap.put(tokenType, new StatSheetManager().getId(ss));
+            }
           }
         });
   }

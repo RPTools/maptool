@@ -88,6 +88,8 @@ public class CampaignProperties {
 
       tokenTypeMap.put(entry.getKey(), typeList);
     }
+    tokenTypeStatSheetMap.putAll(properties.tokenTypeStatSheetMap);
+
     remoteRepositoryList.addAll(properties.remoteRepositoryList);
 
     lookupTableMap.putAll(properties.lookupTableMap);
@@ -444,6 +446,10 @@ public class CampaignProperties {
     }
     if (characterSheets == null) {
       characterSheets = new HashMap<>();
+    }
+
+    if (tokenTypeStatSheetMap == null) {
+      tokenTypeStatSheetMap = new HashMap<>();
     }
     return this;
   }

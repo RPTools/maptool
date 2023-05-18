@@ -1083,13 +1083,11 @@ public class PreferencesDialogView {
         String resultName;
         if (fontName == null) {
             resultName = currentFont.getName();
-        }
-        else {
+        } else {
             Font testFont = new Font(fontName, Font.PLAIN, 10);
             if (testFont.canDisplay('a') && testFont.canDisplay('1')) {
                 resultName = fontName;
-            }
-            else {
+            } else {
                 resultName = currentFont.getName();
             }
         }
@@ -1110,8 +1108,7 @@ public class PreferencesDialogView {
                 $$$cachedGetBundleMethod$$$ = dynamicBundleClass.getMethod("getBundle", String.class, Class.class);
             }
             bundle = (ResourceBundle) $$$cachedGetBundleMethod$$$.invoke(null, path, thisClass);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             bundle = ResourceBundle.getBundle(path);
         }
         return bundle.getString(key);
