@@ -355,6 +355,7 @@ message TokenDto {
   bool allow_uri_access = 64;
   string notes_type = 68;
   string gm_notes_type = 69;
+  string stat_sheet_id = 70;
 }
 
 message PathDto {

@@ -54,6 +54,7 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -723,7 +724,14 @@ public class PointerTool extends DefaultTool {
       if (oldTokenUnderMouse != null) {
         new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
       }
-      new MapToolEventBus().getMainEventBus().post(new TokenHoverEnter(tokenUnderMouse, getZone()));
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(
+              new TokenHoverEnter(
+                  tokenUnderMouse,
+                  getZone(),
+                  SwingUtil.isShiftDown(keysDown),
+                  SwingUtil.isControlDown(keysDown)));
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {
@@ -1683,6 +1691,7 @@ public class PointerTool extends DefaultTool {
             renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
       if (AppPreferences.getPortraitSize() > 0
           && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
+          && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheetId())
           && (tokenOnStatSheet == null
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
@@ -1731,7 +1740,8 @@ public class PointerTool extends DefaultTool {
         Map<String, String> propertyMap = new LinkedHashMap<String, String>();
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
-        if (AppPreferences.getShowStatSheet()) {
+        if (AppPreferences.getShowStatSheet()
+            && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheetId())) {
           CodeTimer timer = new CodeTimer("statSheet");
           timer.setEnabled(AppState.isCollectProfilingData());
           timer.setThreshold(5);

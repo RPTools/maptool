@@ -22,5 +22,7 @@ import net.rptools.maptool.model.Zone;
  *
  * @param token the token that the mouse pointer is hovering over.
  * @param zone the zone that the token is in.
+ * @param shiftDown is the shift key down.
+ * @param controlDown is the control key down.
  */
-public record TokenHoverEnter(Token token, Zone zone) {}
+public record TokenHoverEnter(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}

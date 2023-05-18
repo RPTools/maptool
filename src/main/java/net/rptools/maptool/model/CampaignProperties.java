@@ -525,7 +525,7 @@ public class CampaignProperties {
     if (defaultSightType != null) {
       dto.setDefaultSightType(StringValue.of(defaultSightType));
     }
-tokenTypeStatSheetMap.forEach(dto::putTokenTypeStatSheet);
+    tokenTypeStatSheetMap.forEach(dto::putTokenTypeStatSheet);
     dto.addAllTokenStates(
         tokenStates.values().stream().map(BooleanTokenOverlay::toDto).collect(Collectors.toList()));
     dto.addAllTokenBars(

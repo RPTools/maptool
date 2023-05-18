@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.sheet.stats;
 
 import com.google.common.eventbus.Subscribe;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
@@ -36,11 +37,14 @@ public class StatSheetListener {
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
     System.out.println("TokenHoverListener.onHoverEnter");
-    var ssManager = new StatSheetManager();
-    if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getPropertyType())) {
-      statSheet = new StatSheet();
-      statSheet.setContent(
-          event.token(), ssManager.getStatSheetContent("net.rptools.statSheetTest", "Basic"));
+    if (AppPreferences.getShowStatSheet()
+        && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
+      var ssManager = new StatSheetManager();
+      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getPropertyType())) {
+        statSheet = new StatSheet();
+        statSheet.setContent(
+            event.token(), ssManager.getStatSheetContent(event.token().getStatSheetId()));
+      }
     }
   }
 

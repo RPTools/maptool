@@ -228,6 +228,7 @@ public class Campaign {
 
   /**
    * Returns the default Stat Sheet ID for the specified token property type.
+   *
    * @param tokenProperty the token property type to get the sheet ID for.
    * @return the ID of the Stat Sheet.
    */
@@ -237,6 +238,7 @@ public class Campaign {
 
   /**
    * Sets the default Stat Sheet ID for the specified token property type.
+   *
    * @param tokenProperty the token property type to set the sheet ID of.
    * @param sheetId the Stat Sheet ID.
    */

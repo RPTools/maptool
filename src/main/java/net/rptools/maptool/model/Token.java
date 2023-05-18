@@ -97,6 +97,8 @@ public class Token implements Cloneable {
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
 
+  private String statSheetId;
+
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
       new Gson().getAdapter(JsonObject.class);
@@ -2954,6 +2956,7 @@ public class Token implements Cloneable {
     token.speechMap.putAll(dto.getSpeechMap());
     token.heroLabData = dto.hasHeroLabData() ? HeroLabData.fromDto(dto.getHeroLabData()) : null;
     token.allowURIAccess = dto.getAllowUriAccess();
+    token.statSheetId = dto.getStatSheetId();
     return token;
   }
 
@@ -3082,6 +3085,32 @@ public class Token implements Cloneable {
       dto.setHeroLabData(heroLabData.toDto());
     }
     dto.setAllowUriAccess(allowURIAccess);
+    if (statSheetId != null) {
+      dto.setStatSheetId(statSheetId);
+    }
     return dto.build();
+  }
+
+  /**
+   * Returns the id of the Stat Sheet for this token. If no stat sheet is set, the default stat for
+   * the token type is returned.
+   *
+   * @return The id of the stat sheet for this token.
+   */
+  public String getStatSheetId() {
+    if (statSheetId == null) {
+      return MapTool.getCampaign().getTokenTypeDefaultSheetId(tokenType);
+    }
+    return statSheetId;
+  }
+
+  /**
+   * Sets the id of the stat sheet for this token. If null, the token will use the default stat
+   * sheet for the token type.
+   *
+   * @param statSheetId the id of the stat sheet for this token.
+   */
+  public void setStatSheetId(String statSheetId) {
+    this.statSheetId = statSheetId;
   }
 }

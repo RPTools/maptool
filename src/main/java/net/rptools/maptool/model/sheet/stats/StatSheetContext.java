@@ -14,11 +14,14 @@
  */
 package net.rptools.maptool.model.sheet.stats;
 
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 
@@ -56,14 +59,22 @@ public class StatSheetContext {
 
   private final MD5Key portraitAsset;
 
+  private final String portraitWidth;
+  private final String portraitHeight;
+
   private final List<Property> properties = new ArrayList<>();
 
   public StatSheetContext(Token token, Player player) {
 
     name = token.getName();
     gmName = player.isGM() ? token.getGMName() : null;
-    imageAsset = token.getImageAssetId();
-    portraitAsset = token.getPortraitImage();
+    if (AppPreferences.getShowPortrait()) {
+      imageAsset = token.getImageAssetId();
+      portraitAsset = token.getPortraitImage();
+    } else {
+      imageAsset = null;
+      portraitAsset = null;
+    }
     label = token.getLabel();
     MapTool.getCampaign()
         .getCampaignProperties()
@@ -83,6 +94,11 @@ public class StatSheetContext {
                     new Property(tp.getName(), token.getProperty(tp.getName()), tp.isGMOnly()));
               }
             });
+    var dim = new Dimension();
+    SwingUtil.constrainTo(dim, AppPreferences.getPortraitSize());
+    portraitWidth = String.valueOf(dim.width) + "px";
+    portraitHeight = String.valueOf(dim.height) + "px";
+
     System.out.println("StatSheetContext property count: " + properties.size());
   }
 
@@ -104,6 +120,14 @@ public class StatSheetContext {
 
   public String getLabel() {
     return label;
+  }
+
+  public String getPortraitWidth() {
+    return portraitWidth;
+  }
+
+  public String getPortraitHeight() {
+    return portraitHeight;
   }
 
   public List<Property> getProperties() {

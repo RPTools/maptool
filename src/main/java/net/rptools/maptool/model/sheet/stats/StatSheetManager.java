@@ -44,6 +44,12 @@ public class StatSheetManager {
     statSheets.put(LEGACY_STATSHEET, "");
   }
 
+  private String[] splitId(String id) {
+    var namespace = StringUtils.substringBeforeLast(id, ".");
+    var name = StringUtils.substringAfterLast(id, ".");
+    return new String[] {namespace, name};
+  }
+
   public boolean isLegacyStatSheet(String id) {
     return isLegacyStatSheet(getStatSheet(id));
   }
@@ -53,9 +59,11 @@ public class StatSheetManager {
   }
 
   public StatSheet getStatSheet(String id) {
-    var namespace = StringUtils.substringBeforeLast(id, ".");
-    var name = StringUtils.substringAfterLast(id, ".");
-    return getStatSheet(namespace, name);
+    var name = splitId(id);
+    if (name.length != 2) {
+      return null;
+    }
+    return getStatSheet(name[0], name[1]);
   }
 
   public String getId(String namespace, String name) {
@@ -90,5 +98,13 @@ public class StatSheetManager {
         .findFirst()
         .map(Map.Entry::getValue)
         .orElse(null);
+  }
+
+  public String getStatSheetContent(String id) {
+    var name = splitId(id);
+    if (name.length != 2) {
+      return null;
+    }
+    return getStatSheetContent(name[0], name[1]);
   }
 }
