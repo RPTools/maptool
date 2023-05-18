@@ -323,6 +323,15 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     var combo = getStatSheetComboBox();
     combo.setEnabled(false);
     combo.setRenderer(new StatSheetComboBoxRenderer());
+    combo.addActionListener(
+        l -> {
+          var ss = (StatSheet) combo.getSelectedItem();
+          var tokenType = (String) getTokenTypeList().getSelectedValue();
+          if (ss != null && tokenType != null) {
+            var id = new StatSheetManager().getId(ss);
+            tokenTypeStatSheetMap.put(tokenType, new StatSheetManager().getId(ss));
+          }
+        });
   }
 
   private void bind(String type) {

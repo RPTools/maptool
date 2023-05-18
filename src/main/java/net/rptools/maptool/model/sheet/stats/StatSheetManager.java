@@ -107,4 +107,8 @@ public class StatSheetManager {
     }
     return getStatSheetContent(name[0], name[1]);
   }
+
+  public String getId(StatSheet ss) {
+    return getId(ss.namespace(), ss.name());
+  }
 }

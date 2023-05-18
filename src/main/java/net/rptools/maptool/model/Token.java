@@ -3099,7 +3099,7 @@ public class Token implements Cloneable {
    */
   public String getStatSheetId() {
     if (statSheetId == null) {
-      return MapTool.getCampaign().getTokenTypeDefaultSheetId(tokenType);
+      return MapTool.getCampaign().getTokenTypeDefaultSheetId(propertyType);
     }
     return statSheetId;
   }

@@ -40,7 +40,7 @@ public class StatSheetListener {
     if (AppPreferences.getShowStatSheet()
         && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
-      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getPropertyType())) {
+      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheetId())) {
         statSheet = new StatSheet();
         statSheet.setContent(
             event.token(), ssManager.getStatSheetContent(event.token().getStatSheetId()));
