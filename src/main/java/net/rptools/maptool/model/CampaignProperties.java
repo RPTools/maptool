@@ -46,6 +46,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.server.proto.LightSourceListDto;
 import net.rptools.maptool.server.proto.TokenPropertyListDto;
@@ -54,6 +55,8 @@ public class CampaignProperties {
   public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
 
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
+
+  private Map<String, String> tokenTypeStatSheetMap = new HashMap<>();
   private List<String> remoteRepositoryList = new ArrayList<>();
   private Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
   private Map<String, LookupTable> lookupTableMap = new HashMap<>();
@@ -116,6 +119,8 @@ public class CampaignProperties {
   public void mergeInto(CampaignProperties properties) {
     // This will replace any dups
     properties.tokenTypeMap.putAll(tokenTypeMap);
+    properties.tokenTypeStatSheetMap.putAll(tokenTypeStatSheetMap);
+
     // Need to cull out dups
     for (String repo : properties.remoteRepositoryList) {
       if (!remoteRepositoryList.contains(repo)) {
@@ -131,6 +136,10 @@ public class CampaignProperties {
 
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
     return tokenTypeMap;
+  }
+
+  public String getStatSheetId(String propertyType) {
+    return tokenTypeStatSheetMap.getOrDefault(propertyType, StatSheetManager.LEGACY_STATSHEET_ID);
   }
 
   public Map<String, SightType> getSightTypeMap() {

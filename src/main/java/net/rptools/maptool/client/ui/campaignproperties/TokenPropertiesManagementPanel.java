@@ -21,6 +21,7 @@ import java.io.StringReader;
 import java.util.*;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -28,13 +29,32 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 
 public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignProperties> {
 
   private Map<String, List<TokenProperty>> tokenTypeMap;
+  private final Map<String, String> tokenTypeStatSheetMap = new HashMap<>();
   private String editingType;
 
   private Map<String, String> renameTypes = new TreeMap<>();
+
+  CampaignProperties campaignProperties;
+
+  private static class StatSheetComboBoxRenderer extends BasicComboBoxRenderer {
+    @Override
+    public Component getListCellRendererComponent(
+        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+      super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+
+      if (value instanceof StatSheet ss) {
+        setText(ss.description());
+      }
+
+      return this;
+    }
+  }
 
   public TokenPropertiesManagementPanel() {
     super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
@@ -42,7 +62,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     panelInit();
   }
 
-  public void copyCampaignToUI(CampaignProperties campaignProperties) {
+  public void copyCampaignToUI(CampaignProperties cp) {
+    campaignProperties = cp;
 
     tokenTypeMap = new HashMap<>();
     campaignProperties
@@ -50,7 +71,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .forEach(
             (k, v) ->
                 tokenTypeMap.put(k, new ArrayList<>(v.stream().map(TokenProperty::new).toList())));
-
+    var ssManager = new StatSheetManager();
+    tokenTypeMap
+        .keySet()
+        .forEach(tt -> tokenTypeStatSheetMap.put(tt, campaignProperties.getStatSheetId(tt)));
     updateTypeList();
   }
 
@@ -90,6 +114,14 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public JTable getTokenPropertiesTable() {
     return (JTable) getComponent("propertiesTable");
+  }
+
+  public JButton getStatSheetPropertiesButton() {
+    return (JButton) getComponent("statSheetPropertiesButton");
+  }
+
+  public JComboBox getStatSheetComboBox() {
+    return (JComboBox) getComponent("statSheetComboBox");
   }
 
   public TokenPropertiesTableModel getTokenPropertiesTableModel() {
@@ -244,20 +276,45 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 return;
               }
 
-              if (getTokenTypeList().getSelectedValue() == null) {
+              var propertyType = getTokenTypeList().getSelectedValue().toString();
+              if (propertyType == null) {
                 reset();
                 getPropertyAddButton().setEnabled(false);
                 getTypeDeleteButton().setEnabled(false);
                 getTokenTypeName().setEditable(false);
+                getStatSheetComboBox().setEnabled(false);
+                getStatSheetPropertiesButton().setEnabled(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
                 getPropertyAddButton().setEnabled(true);
                 getTokenTypeName().setEditable(true);
                 // Can't delete the last one
                 getTypeDeleteButton().setEnabled(tokenTypeMap.size() > 1);
+                getStatSheetComboBox().setEnabled(true);
+                getStatSheetPropertiesButton().setEnabled(true);
+                populateStatSheetComboBox(propertyType);
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+  }
+
+  private void populateStatSheetComboBox(String propertyType) {
+    var combo = getStatSheetComboBox();
+    combo.removeAllItems();
+    var ssManager = new StatSheetManager();
+    ssManager.getStatSheets(propertyType).stream()
+        .sorted(Comparator.comparing(StatSheet::description))
+        .forEach(ss -> combo.addItem(ss));
+    combo.setSelectedItem(ssManager.getStatSheet(campaignProperties.getStatSheetId(propertyType)));
+  }
+
+  public void initStatSheetDetails() {
+    var button = getStatSheetPropertiesButton();
+    button.setEnabled(false);
+
+    var combo = getStatSheetComboBox();
+    combo.setEnabled(false);
+    combo.setRenderer(new StatSheetComboBoxRenderer());
   }
 
   private void bind(String type) {

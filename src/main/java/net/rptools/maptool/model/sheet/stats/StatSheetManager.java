@@ -19,11 +19,48 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
+import org.apache.commons.lang.StringUtils;
 
 public class StatSheetManager {
+  private static final String LEGACY_STATSHEET_NAME = "legacy-sheet";
+  private static final String LEGACY_STATSHEET_NAMESPACE = "net.rptools.maptool";
+
+  public static final String LEGACY_STATSHEET_ID =
+      LEGACY_STATSHEET_NAMESPACE + "." + LEGACY_STATSHEET_NAME;
+
+  public static final StatSheet LEGACY_STATSHEET =
+      new StatSheet(
+          LEGACY_STATSHEET_NAME,
+          I18N.getText("token.statSheet.legacyStatSheetDescription"),
+          null,
+          Set.of(),
+          LEGACY_STATSHEET_NAMESPACE);
 
   private static final Map<StatSheet, String> statSheets = new ConcurrentHashMap<>();
+
+  static {
+    statSheets.put(LEGACY_STATSHEET, "");
+  }
+
+  public boolean isLegacyStatSheet(String id) {
+    return isLegacyStatSheet(getStatSheet(id));
+  }
+
+  private boolean isLegacyStatSheet(StatSheet statSheet) {
+    return statSheet == null || LEGACY_STATSHEET.equals(statSheet);
+  }
+
+  public StatSheet getStatSheet(String id) {
+    var namespace = StringUtils.substringBeforeLast(id, ".");
+    var name = StringUtils.substringAfterLast(id, ".");
+    return getStatSheet(namespace, name);
+  }
+
+  public String getId(String namespace, String name) {
+    return namespace + "." + name;
+  }
 
   public Set<StatSheet> getStatSheets(String propertyType) {
     return statSheets.keySet().stream()

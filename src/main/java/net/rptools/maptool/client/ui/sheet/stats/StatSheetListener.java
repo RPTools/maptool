@@ -36,11 +36,11 @@ public class StatSheetListener {
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
     System.out.println("TokenHoverListener.onHoverEnter");
-    if (statSheet == null) {
+    var ssManager = new StatSheetManager();
+    if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getPropertyType())) {
       statSheet = new StatSheet();
       statSheet.setContent(
-          event.token(),
-          new StatSheetManager().getStatSheetContent("net.rptools.statSheetTest", "Basic"));
+          event.token(), ssManager.getStatSheetContent("net.rptools.statSheetTest", "Basic"));
     }
   }
 
