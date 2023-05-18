@@ -601,18 +601,27 @@ public class Zone {
       }
     }
     // Set the initiative list using the newly create tokens.
+    int newCurrent = -1;
+    int oldCurrent = zone.initiativeList.getCurrent();
     if (saveInitiative.length > 0) {
+      int newInd = 0;
       for (int i = 0; i < saveInitiative.length; i++) {
         Token token = (Token) saveInitiative[i][0];
-        initiativeList.insertToken(i, token);
-        TokenInitiative ti = initiativeList.getTokenInitiative(i);
-        TokenInitiative oldti = (TokenInitiative) saveInitiative[i][1];
-        ti.setHolding(oldti.isHolding());
-        ti.setState(oldti.getState());
+        if (token != null) {
+          initiativeList.insertToken(newInd, token);
+          TokenInitiative ti = initiativeList.getTokenInitiative(newInd);
+          TokenInitiative oldti = (TokenInitiative) saveInitiative[i][1];
+          ti.setHolding(oldti.isHolding());
+          ti.setState(oldti.getState());
+          if (oldCurrent == i) {
+            newCurrent = newInd;
+          }
+          newInd++;
+        }
       }
     }
     initiativeList.setZone(this);
-    initiativeList.setCurrent(zone.initiativeList.getCurrent());
+    initiativeList.setCurrent(newCurrent);
     initiativeList.setRound(zone.initiativeList.getRound());
     initiativeList.setHideNPC(zone.initiativeList.isHideNPC());
 
