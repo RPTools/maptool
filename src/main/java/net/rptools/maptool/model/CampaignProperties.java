@@ -138,8 +138,12 @@ public class CampaignProperties {
     return tokenTypeMap;
   }
 
-  public String getStatSheetId(String propertyType) {
+  public String getTokenTypeDefaultStatSheetId(String propertyType) {
     return tokenTypeStatSheetMap.getOrDefault(propertyType, StatSheetManager.LEGACY_STATSHEET_ID);
+  }
+
+  public void setTokenTypeDefaultStatSheetId(String propertyType, String statSheetId) {
+    tokenTypeStatSheetMap.put(propertyType, statSheetId);
   }
 
   public Map<String, SightType> getSightTypeMap() {
@@ -457,6 +461,12 @@ public class CampaignProperties {
     if (dto.hasDefaultSightType()) {
       props.defaultSightType = dto.getDefaultSightType().getValue();
     }
+    tokenTypes
+        .keySet()
+        .forEach(
+            tt -> {
+              String sheetId = dto.getTokenTypeStatSheetMap().get(tt);
+            });
     dto.getTokenStatesList()
         .forEach(
             s -> {
@@ -515,6 +525,7 @@ public class CampaignProperties {
     if (defaultSightType != null) {
       dto.setDefaultSightType(StringValue.of(defaultSightType));
     }
+tokenTypeStatSheetMap.forEach(dto::putTokenTypeStatSheet);
     dto.addAllTokenStates(
         tokenStates.values().stream().map(BooleanTokenOverlay::toDto).collect(Collectors.toList()));
     dto.addAllTokenBars(

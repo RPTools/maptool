@@ -82,6 +82,7 @@ public class Campaign {
   // DEPRECATED: As of 1.3b20 these are now in campaignProperties, but are here for backward
   // compatibility
   private Map<String, List<TokenProperty>> tokenTypeMap;
+
   private List<String> remoteRepositoryList;
 
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
@@ -223,6 +224,24 @@ public class Campaign {
     List<String> list = new ArrayList<String>(getTokenTypeMap().keySet());
     Collections.sort(list);
     return list;
+  }
+
+  /**
+   * Returns the default Stat Sheet ID for the specified token property type.
+   * @param tokenProperty the token property type to get the sheet ID for.
+   * @return the ID of the Stat Sheet.
+   */
+  public String getTokenTypeDefaultSheetId(String tokenProperty) {
+    return campaignProperties.getTokenTypeDefaultStatSheetId(tokenProperty);
+  }
+
+  /**
+   * Sets the default Stat Sheet ID for the specified token property type.
+   * @param tokenProperty the token property type to set the sheet ID of.
+   * @param sheetId the Stat Sheet ID.
+   */
+  public void setTokenTypeDefaultSheetId(String tokenProperty, String sheetId) {
+    campaignProperties.setTokenTypeDefaultStatSheetId(tokenProperty, sheetId);
   }
 
   public List<String> getSightTypes() {

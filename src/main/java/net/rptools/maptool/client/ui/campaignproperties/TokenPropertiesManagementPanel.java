@@ -74,7 +74,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     var ssManager = new StatSheetManager();
     tokenTypeMap
         .keySet()
-        .forEach(tt -> tokenTypeStatSheetMap.put(tt, campaignProperties.getStatSheetId(tt)));
+        .forEach(
+            tt ->
+                tokenTypeStatSheetMap.put(
+                    tt, campaignProperties.getTokenTypeDefaultStatSheetId(tt)));
     updateTypeList();
   }
 
@@ -82,6 +85,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
     campaign.getTokenTypeMap().clear();
     campaign.getTokenTypeMap().putAll(tokenTypeMap);
+    campaign
+        .getTokenTypeMap()
+        .keySet()
+        .forEach(tt -> campaign.setTokenTypeDefaultSheetId(tt, tokenTypeStatSheetMap.get(tt)));
   }
 
   public JList getTokenTypeList() {
@@ -305,7 +312,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     ssManager.getStatSheets(propertyType).stream()
         .sorted(Comparator.comparing(StatSheet::description))
         .forEach(ss -> combo.addItem(ss));
-    combo.setSelectedItem(ssManager.getStatSheet(campaignProperties.getStatSheetId(propertyType)));
+    combo.setSelectedItem(
+        ssManager.getStatSheet(campaignProperties.getTokenTypeDefaultStatSheetId(propertyType)));
   }
 
   public void initStatSheetDetails() {

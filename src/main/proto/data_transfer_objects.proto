@@ -128,6 +128,7 @@ message CampaignPropertiesDto {
   repeated string remote_repositories = 11;
   repeated LookupTableDto lookup_tables = 12;
   repeated SightTypeDto sight_types = 13;
+  map<string, string> token_type_stat_sheet = 14;
 }
 
 message SightTypeDto {
