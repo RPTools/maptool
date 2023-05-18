@@ -37,6 +37,7 @@ public class TokenPropertiesDialog {
   private JTabbedPane tabPanel;
   private HtmlEditorSplit gmNotesEditor;
   private HtmlEditorSplit playerNotesEditor;
+  private JComboBox comboBox1;
   private JLabel ownershipList;
 
   /* spotless:off */
