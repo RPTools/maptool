@@ -24,6 +24,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.util.ImageManager;
 
 public class StatSheetContext {
 
@@ -59,8 +60,8 @@ public class StatSheetContext {
 
   private final MD5Key portraitAsset;
 
-  private final String portraitWidth;
-  private final String portraitHeight;
+  private final int portraitWidth;
+  private final int portraitHeight;
 
   private final List<Property> properties = new ArrayList<>();
 
@@ -90,14 +91,33 @@ public class StatSheetContext {
                   return;
                 }
 
+                var value = token.getProperty(tp.getName());
+                if (value == null) {
+                  return;
+                }
+
+                if (value instanceof String svalue) {
+                  if (svalue.isBlank()) {
+                    return;
+                  }
+                }
+
                 properties.add(
                     new Property(tp.getName(), token.getProperty(tp.getName()), tp.isGMOnly()));
               }
             });
-    var dim = new Dimension();
+
+    Dimension dim;
+    if (token.getPortraitImage() != null) {
+      var image = ImageManager.getImage(token.getPortraitImage(), null);
+      dim = new Dimension(image.getWidth(), image.getHeight());
+    } else {
+      var image = ImageManager.getImage(token.getImageAssetId(), null);
+      dim = new Dimension(image.getWidth(), image.getHeight());
+    }
     SwingUtil.constrainTo(dim, AppPreferences.getPortraitSize());
-    portraitWidth = String.valueOf(dim.width) + "px";
-    portraitHeight = String.valueOf(dim.height) + "px";
+    portraitWidth = dim.width;
+    portraitHeight = dim.height;
 
     System.out.println("StatSheetContext property count: " + properties.size());
   }
@@ -122,11 +142,11 @@ public class StatSheetContext {
     return label;
   }
 
-  public String getPortraitWidth() {
+  public int getPortraitWidth() {
     return portraitWidth;
   }
 
-  public String getPortraitHeight() {
+  public int getPortraitHeight() {
     return portraitHeight;
   }
 
