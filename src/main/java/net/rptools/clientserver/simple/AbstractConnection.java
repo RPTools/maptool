@@ -17,9 +17,6 @@ package net.rptools.clientserver.simple;
 import java.io.*;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import net.rptools.clientserver.ActivityListener;
-import net.rptools.clientserver.ActivityListener.Direction;
-import net.rptools.clientserver.ActivityListener.State;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -33,7 +30,6 @@ public abstract class AbstractConnection implements Connection {
 
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
-  protected List<ActivityListener> listeners = new CopyOnWriteArrayList<ActivityListener>();
 
   public final void addMessageHandler(MessageHandler handler) {
     messageHandlers.add(handler);
@@ -50,21 +46,6 @@ public abstract class AbstractConnection implements Connection {
 
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
-    }
-  }
-
-  public final void addActivityListener(ActivityListener listener) {
-    listeners.add(listener);
-  }
-
-  public final void removeActivityListener(ActivityListener listener) {
-    listeners.remove(listener);
-  }
-
-  protected final void notifyListeners(
-      Direction direction, State state, int totalTransferSize, int currentTransferSize) {
-    for (ActivityListener listener : listeners) {
-      listener.notify(direction, state, totalTransferSize, currentTransferSize);
     }
   }
 

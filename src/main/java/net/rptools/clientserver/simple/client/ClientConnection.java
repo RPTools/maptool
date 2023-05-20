@@ -14,6 +14,7 @@
  */
 package net.rptools.clientserver.simple.client;
 
+import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.Connection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 
@@ -29,6 +30,10 @@ public interface ClientConnection extends Connection {
   void addDisconnectHandler(DisconnectHandler handler);
 
   void removeDisconnectHandler(DisconnectHandler handler);
+
+  void addActivityListener(ActivityListener listener);
+
+  void removeActivityListener(ActivityListener listener);
 
   String getError();
 }

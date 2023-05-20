@@ -15,16 +15,11 @@
 package net.rptools.clientserver.simple;
 
 import java.io.IOException;
-import net.rptools.clientserver.ActivityListener;
 
 public interface Connection {
   void addMessageHandler(MessageHandler handler);
 
   void removeMessageHandler(MessageHandler handler);
-
-  void addActivityListener(ActivityListener listener);
-
-  void removeActivityListener(ActivityListener listener);
 
   void open() throws IOException;
 

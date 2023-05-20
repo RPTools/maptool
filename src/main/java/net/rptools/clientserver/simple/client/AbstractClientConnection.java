@@ -42,6 +42,7 @@ public abstract class AbstractClientConnection extends AbstractConnection
   private final Map<Object, List<byte[]>> outQueueMap = new HashMap<>();
   private final List<List<byte[]>> outQueueList = new LinkedList<>();
   private final List<DisconnectHandler> disconnectHandlers = new CopyOnWriteArrayList<>();
+  private final List<ActivityListener> listeners = new CopyOnWriteArrayList<>();
 
   private List<byte[]> getOutQueue(Object channel) {
     // Ordinarily I would synchronize this method, but I imagine the channels will be initialized
@@ -216,5 +217,23 @@ public abstract class AbstractClientConnection extends AbstractConnection
 
   public final void removeDisconnectHandler(DisconnectHandler handler) {
     disconnectHandlers.remove(handler);
+  }
+
+  public final void addActivityListener(ActivityListener listener) {
+    listeners.add(listener);
+  }
+
+  public final void removeActivityListener(ActivityListener listener) {
+    listeners.remove(listener);
+  }
+
+  private void notifyListeners(
+      ActivityListener.Direction direction,
+      ActivityListener.State state,
+      int totalTransferSize,
+      int currentTransferSize) {
+    for (ActivityListener listener : listeners) {
+      listener.notify(direction, state, totalTransferSize, currentTransferSize);
+    }
   }
 }
