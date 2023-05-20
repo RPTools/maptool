@@ -15,13 +15,11 @@
 package net.rptools.clientserver.simple;
 
 import java.io.*;
-import java.nio.ByteBuffer;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -47,11 +45,6 @@ public abstract class AbstractConnection implements Connection {
     messageHandlers.remove(handler);
   }
 
-  protected final void dispatchCompressedMessage(String id, byte[] compressedMessage) {
-    var message = inflate(compressedMessage);
-    dispatchMessage(id, message);
-  }
-
   public final void dispatchMessage(String id, byte[] message) {
     if (messageHandlers.size() == 0) {
       log.warn("message received but not messageHandlers registered.");
@@ -59,19 +52,6 @@ public abstract class AbstractConnection implements Connection {
 
     for (MessageHandler handler : messageHandlers) {
       handler.handleMessage(id, message);
-    }
-  }
-
-  private byte[] inflate(byte[] compressedMessage) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedMessage.length);
-    InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
-    try {
-      InputStream ios = new LZMACompressorInputStream(bytesIn);
-      var decompressed = ios.readAllBytes();
-      ios.close();
-      return decompressed;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 
@@ -107,63 +87,6 @@ public abstract class AbstractConnection implements Connection {
   ///////////////////////////////////////////////////////////////////////////
   // static helper methods
   ///////////////////////////////////////////////////////////////////////////
-
-  public final byte[] readMessage(InputStream in) throws IOException {
-    int b32 = in.read();
-    int b24 = in.read();
-    int b16 = in.read();
-    int b8 = in.read();
-
-    if (b32 < 0) {
-      throw new IOException("Stream closed");
-    }
-    int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
-
-    notifyListeners(Direction.Inbound, State.Start, length, 0);
-
-    byte[] ret = new byte[length];
-    for (int i = 0; i < length; i++) {
-      ret[i] = (byte) in.read();
-
-      if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
-        notifyListeners(Direction.Inbound, State.Progress, length, i);
-      }
-    }
-    notifyListeners(Direction.Inbound, State.Complete, length, length);
-    return ret;
-  }
-
-  private ByteBuffer messageBuffer = null;
-
-  public final byte[] readMessage(ByteBuffer part) {
-    if (messageBuffer == null) {
-      int length = part.getInt();
-      notifyListeners(Direction.Inbound, State.Start, length, 0);
-
-      if (part.remaining() == length) {
-        var ret = new byte[length];
-        part.get(ret);
-        notifyListeners(Direction.Inbound, State.Complete, length, length);
-        return ret;
-      }
-
-      messageBuffer = ByteBuffer.allocate(length);
-    }
-
-    messageBuffer.put(part);
-    notifyListeners(
-        Direction.Inbound, State.Progress, messageBuffer.capacity(), messageBuffer.position());
-
-    if (messageBuffer.capacity() == messageBuffer.position()) {
-      notifyListeners(
-          Direction.Inbound, State.Complete, messageBuffer.capacity(), messageBuffer.capacity());
-      var ret = messageBuffer.array();
-      messageBuffer = null;
-      return ret;
-    }
-
-    return null;
-  }
 
   public abstract String getError();
 }

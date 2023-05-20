@@ -14,9 +14,12 @@
  */
 package net.rptools.clientserver.simple.client;
 
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ import java.util.List;
 import java.util.Map;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.AbstractConnection;
+import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,6 +68,19 @@ public abstract class AbstractClientConnection extends AbstractConnection
     }
   }
 
+  private byte[] inflate(byte[] compressedMessage) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedMessage.length);
+    InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
+    try {
+      InputStream ios = new LZMACompressorInputStream(bytesIn);
+      var decompressed = ios.readAllBytes();
+      ios.close();
+      return decompressed;
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
   protected synchronized void addMessage(Object channel, byte[] message) {
     List<byte[]> queue = getOutQueue(channel);
     queue.add(compress(message));
@@ -90,6 +107,11 @@ public abstract class AbstractClientConnection extends AbstractConnection
     return message;
   }
 
+  protected final void dispatchCompressedMessage(String id, byte[] compressedMessage) {
+    var message = inflate(compressedMessage);
+    dispatchMessage(id, message);
+  }
+
   protected final void writeMessage(OutputStream out, byte[] message) throws IOException {
     int length = message.length;
 
@@ -111,5 +133,71 @@ public abstract class AbstractClientConnection extends AbstractConnection
     out.flush();
     notifyListeners(
         ActivityListener.Direction.Outbound, ActivityListener.State.Complete, length, length);
+  }
+
+  protected final byte[] readMessage(InputStream in) throws IOException {
+    int b32 = in.read();
+    int b24 = in.read();
+    int b16 = in.read();
+    int b8 = in.read();
+
+    if (b32 < 0) {
+      throw new IOException("Stream closed");
+    }
+    int length = (b32 << 24) + (b24 << 16) + (b16 << 8) + b8;
+
+    notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
+
+    byte[] ret = new byte[length];
+    for (int i = 0; i < length; i++) {
+      ret[i] = (byte) in.read();
+
+      if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
+        notifyListeners(
+            ActivityListener.Direction.Inbound, ActivityListener.State.Progress, length, i);
+      }
+    }
+    notifyListeners(
+        ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
+    return ret;
+  }
+
+  private ByteBuffer messageBuffer = null;
+
+  protected final byte[] readMessage(ByteBuffer part) {
+    if (messageBuffer == null) {
+      int length = part.getInt();
+      notifyListeners(ActivityListener.Direction.Inbound, ActivityListener.State.Start, length, 0);
+
+      if (part.remaining() == length) {
+        var ret = new byte[length];
+        part.get(ret);
+        notifyListeners(
+            ActivityListener.Direction.Inbound, ActivityListener.State.Complete, length, length);
+        return ret;
+      }
+
+      messageBuffer = ByteBuffer.allocate(length);
+    }
+
+    messageBuffer.put(part);
+    notifyListeners(
+        ActivityListener.Direction.Inbound,
+        ActivityListener.State.Progress,
+        messageBuffer.capacity(),
+        messageBuffer.position());
+
+    if (messageBuffer.capacity() == messageBuffer.position()) {
+      notifyListeners(
+          ActivityListener.Direction.Inbound,
+          ActivityListener.State.Complete,
+          messageBuffer.capacity(),
+          messageBuffer.capacity());
+      var ret = messageBuffer.array();
+      messageBuffer = null;
+      return ret;
+    }
+
+    return null;
   }
 }
