@@ -44,10 +44,11 @@ public class MapToolServerConnection
   private final PlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
-  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
+  public MapToolServerConnection(
+      MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler)
       throws IOException {
     this.connection =
-        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
+        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this, handler);
     this.server = server;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = server.getConfig().getUseEasyConnect();
@@ -128,10 +129,6 @@ public class MapToolServerConnection
             new String[] {conn.getId()},
             Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     playerMap.remove(conn.getId().toUpperCase());
-  }
-
-  public void addMessageHandler(ServerMessageHandler handler) {
-    connection.addMessageHandler(handler);
   }
 
   public void sendMessage(String id, Message message) {

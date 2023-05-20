@@ -50,7 +50,6 @@ public class MapToolServer {
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final MapToolServerConnection conn;
-  private final ServerMessageHandler handler;
   private final ServerConfig config;
   private final PlayerDatabase playerDatabase;
 
@@ -68,10 +67,8 @@ public class MapToolServer {
       throws IOException {
     this.config = config;
     this.policy = policy;
-    handler = new ServerMessageHandler(this);
     playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, playerDatabase);
-    conn.addMessageHandler(handler);
+    conn = new MapToolServerConnection(this, playerDatabase, new ServerMessageHandler(this));
 
     campaign = new Campaign();
 
@@ -164,10 +161,6 @@ public class MapToolServer {
 
   public void updateServerPolicy(ServerPolicy policy) {
     this.policy = policy;
-  }
-
-  public ServerMessageHandler getMethodHandler() {
-    return handler;
   }
 
   public ServerConfig getConfig() {

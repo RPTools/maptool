@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,8 +33,9 @@ public class SocketServerConnection extends AbstractServerConnection {
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServerConnection(int port, HandshakeProvider handshake) {
-    super(handshake);
+  public SocketServerConnection(
+      int port, HandshakeProvider handshake, MessageHandler messageHandler) {
+    super(handshake, messageHandler);
     this.port = port;
   }
 

@@ -15,8 +15,6 @@
 package net.rptools.clientserver.simple;
 
 import java.io.*;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -29,25 +27,6 @@ public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
-  protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
-
-  public final void addMessageHandler(MessageHandler handler) {
-    messageHandlers.add(handler);
-  }
-
-  public final void removeMessageHandler(MessageHandler handler) {
-    messageHandlers.remove(handler);
-  }
-
-  public final void dispatchMessage(String id, byte[] message) {
-    if (messageHandlers.size() == 0) {
-      log.warn("message received but not messageHandlers registered.");
-    }
-
-    for (MessageHandler handler : messageHandlers) {
-      handler.handleMessage(id, message);
-    }
-  }
 
   ///////////////////////////////////////////////////////////////////////////
   // static helper methods

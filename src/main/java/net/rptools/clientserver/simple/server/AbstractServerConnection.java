@@ -26,7 +26,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractServerConnection extends AbstractConnection
-    implements MessageHandler, DisconnectHandler, ServerConnection, HandshakeObserver {
+    implements DisconnectHandler, ServerConnection, HandshakeObserver {
 
   private static final Logger log = LogManager.getLogger(AbstractServerConnection.class);
   //    private final ReaperThread reaperThread;
@@ -37,9 +37,12 @@ public abstract class AbstractServerConnection extends AbstractConnection
       Collections.synchronizedList(new ArrayList<ServerObserver>());
 
   private final HandshakeProvider handshakeProvider;
+  private final MessageHandler messageHandler;
 
-  public AbstractServerConnection(HandshakeProvider handshakeProvider) {
+  public AbstractServerConnection(
+      HandshakeProvider handshakeProvider, MessageHandler messageHandler) {
     this.handshakeProvider = handshakeProvider;
+    this.messageHandler = messageHandler;
   }
 
   public void addObserver(ServerObserver observer) {
@@ -48,10 +51,6 @@ public abstract class AbstractServerConnection extends AbstractConnection
 
   public void removeObserver(ServerObserver observer) {
     observerList.remove(observer);
-  }
-
-  public void handleMessage(String id, byte[] message) {
-    dispatchMessage(id, message);
   }
 
   public void broadcastMessage(byte[] message) {
@@ -150,7 +149,7 @@ public abstract class AbstractServerConnection extends AbstractConnection
     var conn = handshake.getConnection();
     handshakeProvider.releaseHandshake(conn);
     if (handshake.isSuccessful()) {
-      conn.addMessageHandler(this);
+      conn.addMessageHandler(messageHandler);
       conn.addDisconnectHandler(this);
 
       log.debug("About to add new client");

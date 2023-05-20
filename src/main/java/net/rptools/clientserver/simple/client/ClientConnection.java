@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple.client;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.Connection;
 import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.MessageHandler;
 
 public interface ClientConnection extends Connection {
   void sendMessage(byte[] message);
@@ -26,6 +27,10 @@ public interface ClientConnection extends Connection {
   boolean isAlive();
 
   String getId();
+
+  void addMessageHandler(MessageHandler handler);
+
+  void removeMessageHandler(MessageHandler handler);
 
   void addDisconnectHandler(DisconnectHandler handler);
 

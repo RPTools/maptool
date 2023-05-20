@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessageDto;
 import net.rptools.clientserver.simple.webrtc.LoginMessageDto;
@@ -46,8 +47,9 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
-  public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
-    super(handshake);
+  public WebRTCServerConnection(
+      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
+    super(handshake, messageHandler);
     this.config = config;
 
     try {

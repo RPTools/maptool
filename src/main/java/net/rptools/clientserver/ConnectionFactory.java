@@ -15,6 +15,7 @@
 package net.rptools.clientserver;
 
 import java.io.IOException;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
@@ -39,11 +40,13 @@ public class ConnectionFactory {
     return new WebRTCClientConnection(id, config);
   }
 
-  public ServerConnection createServerConnection(ServerConfig config, HandshakeProvider handshake)
+  public ServerConnection createServerConnection(
+      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler)
       throws IOException {
-    if (!config.getUseWebRTC() || config.isPersonalServer())
-      return new SocketServerConnection(config.getPort(), handshake);
+    if (!config.getUseWebRTC() || config.isPersonalServer()) {
+      return new SocketServerConnection(config.getPort(), handshake, messageHandler);
+    }
 
-    return new WebRTCServerConnection(config, handshake);
+    return new WebRTCServerConnection(config, handshake, messageHandler);
   }
 }

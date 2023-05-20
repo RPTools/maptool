@@ -30,6 +30,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.MessageHandler;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
@@ -43,6 +44,7 @@ public abstract class AbstractClientConnection extends AbstractConnection
   private final List<List<byte[]>> outQueueList = new LinkedList<>();
   private final List<DisconnectHandler> disconnectHandlers = new CopyOnWriteArrayList<>();
   private final List<ActivityListener> listeners = new CopyOnWriteArrayList<>();
+  private final List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<>();
 
   private List<byte[]> getOutQueue(Object channel) {
     // Ordinarily I would synchronize this method, but I imagine the channels will be initialized
@@ -109,6 +111,24 @@ public abstract class AbstractClientConnection extends AbstractConnection
       outQueueList.add(queue);
     }
     return message;
+  }
+
+  public final void addMessageHandler(MessageHandler handler) {
+    messageHandlers.add(handler);
+  }
+
+  public final void removeMessageHandler(MessageHandler handler) {
+    messageHandlers.remove(handler);
+  }
+
+  private void dispatchMessage(String id, byte[] message) {
+    if (messageHandlers.size() == 0) {
+      log.warn("message received but not messageHandlers registered.");
+    }
+
+    for (MessageHandler handler : messageHandlers) {
+      handler.handleMessage(id, message);
+    }
   }
 
   protected final void dispatchCompressedMessage(String id, byte[] compressedMessage) {

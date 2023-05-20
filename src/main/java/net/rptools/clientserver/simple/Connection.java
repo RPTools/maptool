@@ -17,10 +17,6 @@ package net.rptools.clientserver.simple;
 import java.io.IOException;
 
 public interface Connection {
-  void addMessageHandler(MessageHandler handler);
-
-  void removeMessageHandler(MessageHandler handler);
-
   void open() throws IOException;
 
   void close();
