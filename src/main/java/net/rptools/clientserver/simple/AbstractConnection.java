@@ -16,18 +16,12 @@ package net.rptools.clientserver.simple;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.ActivityListener.Direction;
 import net.rptools.clientserver.ActivityListener.State;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -40,8 +34,6 @@ public abstract class AbstractConnection implements Connection {
   // We don't need to make each list synchronized since the class is synchronized
 
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
-  protected Map<Object, List<byte[]>> outQueueMap = new HashMap<Object, List<byte[]>>();
-  protected List<List<byte[]>> outQueueList = new LinkedList<List<byte[]>>();
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
   protected List<ActivityListener> listeners = new CopyOnWriteArrayList<ActivityListener>();
   protected List<DisconnectHandler> disconnectHandlers =
@@ -70,31 +62,6 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  public synchronized void addMessage(byte[] message) {
-    addMessage(null, message);
-  }
-
-  public synchronized void addMessage(Object channel, byte[] message) {
-    List<byte[]> queue = getOutQueue(channel);
-    queue.add(compress(message));
-    // Queue up for sending
-    outQueueList.add(queue);
-  }
-
-  private byte[] compress(byte[] message) {
-    try {
-      ByteArrayOutputStream baos = new ByteArrayOutputStream(message.length);
-      OutputStream ios = new LZMACompressorOutputStream(baos);
-      ios.write(message);
-      ios.close();
-
-      var compressedMessage = baos.toByteArray();
-      return compressedMessage;
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
   private byte[] inflate(byte[] compressedMessage) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedMessage.length);
     InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
@@ -106,39 +73,6 @@ public abstract class AbstractConnection implements Connection {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-  }
-
-  protected List<byte[]> getOutQueue(Object channel) {
-    // Ordinarily I would synchronize this method, but I imagine the channels will be initialized
-    // once
-    // at the beginning of execution.  Thus get(channel) will only return once right at the
-    // beginning
-    // no sense incurring the cost of synchronizing the method on the class for that.
-    List<byte[]> queue = outQueueMap.get(channel);
-    if (queue == null) {
-      queue = Collections.synchronizedList(new ArrayList<byte[]>());
-      outQueueMap.put(channel, queue);
-    }
-    return queue;
-  }
-
-  public synchronized boolean hasMoreMessages() {
-    return !outQueueList.isEmpty();
-  }
-
-  public synchronized byte[] nextMessage() {
-    if (!hasMoreMessages()) {
-      return null;
-    }
-    List<byte[]> queue = outQueueList.remove(0);
-
-    if (queue.isEmpty()) return null;
-
-    byte[] message = queue.remove(0);
-    if (!queue.isEmpty()) {
-      outQueueList.add(queue);
-    }
-    return message;
   }
 
   public final void fireDisconnect() {
@@ -173,26 +107,6 @@ public abstract class AbstractConnection implements Connection {
   ///////////////////////////////////////////////////////////////////////////
   // static helper methods
   ///////////////////////////////////////////////////////////////////////////
-  protected final void writeMessage(OutputStream out, byte[] message) throws IOException {
-    int length = message.length;
-
-    notifyListeners(Direction.Outbound, State.Start, length, 0);
-
-    out.write(length >> 24);
-    out.write(length >> 16);
-    out.write(length >> 8);
-    out.write(length);
-
-    for (int i = 0; i < message.length; i++) {
-      out.write(message[i]);
-
-      if (i != 0 && i % ActivityListener.CHUNK_SIZE == 0) {
-        notifyListeners(Direction.Outbound, State.Progress, length, i);
-      }
-    }
-    out.flush();
-    notifyListeners(Direction.Outbound, State.Complete, length, length);
-  }
 
   public final byte[] readMessage(InputStream in) throws IOException {
     int b32 = in.read();

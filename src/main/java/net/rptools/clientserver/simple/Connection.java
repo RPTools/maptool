@@ -22,12 +22,6 @@ public interface Connection {
 
   void removeMessageHandler(MessageHandler handler);
 
-  void addMessage(Object channel, byte[] message);
-
-  boolean hasMoreMessages();
-
-  byte[] nextMessage();
-
   void fireDisconnect();
 
   void addActivityListener(ActivityListener listener);
