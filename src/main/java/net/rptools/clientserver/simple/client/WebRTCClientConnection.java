@@ -20,7 +20,6 @@ import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.server.WebRTCServerConnection;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
@@ -30,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCClientConnection extends AbstractConnection
+public class WebRTCClientConnection extends AbstractClientConnection
     implements ClientConnection, PeerConnectionObserver, RTCDataChannelObserver {
   private static final Logger log = LogManager.getLogger(WebRTCClientConnection.class);
 

@@ -16,7 +16,6 @@ package net.rptools.clientserver.simple.client;
 
 import java.io.*;
 import java.net.Socket;
-import net.rptools.clientserver.simple.AbstractConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,7 +24,7 @@ import org.apache.logging.log4j.Logger;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public class SocketClientConnection extends AbstractConnection implements ClientConnection {
+public class SocketClientConnection extends AbstractClientConnection implements ClientConnection {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(SocketClientConnection.class);
 
