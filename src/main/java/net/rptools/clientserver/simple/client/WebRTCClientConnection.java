@@ -46,7 +46,7 @@ public class WebRTCClientConnection extends AbstractConnection
   private RTCDataChannel localDataChannel;
   private String lastError = null;
 
-  private final SendThread sendThread = new SendThread(this);
+  private final SendThread sendThread = new SendThread();
   private Thread handleDisconnect;
 
   // used from client side
@@ -525,11 +525,9 @@ public class WebRTCClientConnection extends AbstractConnection
 
   private class SendThread extends Thread {
     private boolean stopRequested = false;
-    private final ClientConnection connection;
 
-    public SendThread(ClientConnection connection) {
-      super("WebRTCClientConnection.SendThread_" + connection.getId());
-      this.connection = connection;
+    public SendThread() {
+      super("WebRTCClientConnection.SendThread_" + WebRTCClientConnection.this.getId());
     }
 
     public void requestStop() {
@@ -543,10 +541,10 @@ public class WebRTCClientConnection extends AbstractConnection
     public void run() {
       log.debug(prefix() + " sendThread started");
       try {
-        while (!stopRequested && connection.isAlive()) {
-          while (connection.hasMoreMessages()
+        while (!stopRequested && WebRTCClientConnection.this.isAlive()) {
+          while (WebRTCClientConnection.this.hasMoreMessages()
               && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
-            byte[] message = connection.nextMessage();
+            byte[] message = WebRTCClientConnection.this.nextMessage();
             if (message == null) {
               continue;
             }

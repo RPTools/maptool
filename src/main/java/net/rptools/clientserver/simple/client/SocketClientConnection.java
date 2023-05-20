@@ -51,7 +51,7 @@ public class SocketClientConnection extends AbstractConnection implements Client
 
   private void initialize(Socket socket) throws IOException {
     this.socket = socket;
-    this.send = new SendThread(this, new BufferedOutputStream(socket.getOutputStream()));
+    this.send = new SendThread(new BufferedOutputStream(socket.getOutputStream()));
     this.receive = new ReceiveThread(this, socket.getInputStream());
     this.send.start();
     this.receive.start();
@@ -109,13 +109,11 @@ public class SocketClientConnection extends AbstractConnection implements Client
   // send thread
   // /////////////////////////////////////////////////////////////////////////
   private class SendThread extends Thread {
-    private final SocketClientConnection conn;
     private final OutputStream out;
     private boolean stopRequested = false;
 
-    public SendThread(SocketClientConnection conn, OutputStream out) {
+    public SendThread(OutputStream out) {
       setName("SocketClientConnection.SendThread");
-      this.conn = conn;
       this.out = out;
     }
 
@@ -129,15 +127,15 @@ public class SocketClientConnection extends AbstractConnection implements Client
     @Override
     public void run() {
       try {
-        while (!stopRequested && conn.isAlive()) {
+        while (!stopRequested && SocketClientConnection.this.isAlive()) {
           try {
-            while (conn.hasMoreMessages()) {
+            while (SocketClientConnection.this.hasMoreMessages()) {
               try {
-                byte[] message = conn.nextMessage();
+                byte[] message = SocketClientConnection.this.nextMessage();
                 if (message == null) {
                   continue;
                 }
-                conn.writeMessage(out, message);
+                SocketClientConnection.this.writeMessage(out, message);
               } catch (IndexOutOfBoundsException e) {
                 // just ignore and wait
               }
