@@ -147,13 +147,12 @@
           <name value="statSheetComboBox"/>
         </properties>
       </component>
-      <component id="2c006" class="javax.swing.JButton" binding="statSheetPropertiesButton" default-binding="true">
+      <component id="e685d" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
         <constraints>
-          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="4" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <name value="statSheetPropertiesButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.button.statSheetProps"/>
+          <name value="statSheetLocationComboBox"/>
         </properties>
       </component>
     </children>

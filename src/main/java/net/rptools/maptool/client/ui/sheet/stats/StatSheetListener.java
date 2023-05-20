@@ -42,8 +42,8 @@ public class StatSheetListener {
       var ssManager = new StatSheetManager();
       if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
         statSheet = new StatSheet();
-        statSheet.setContent(
-            event.token(), ssManager.getStatSheetContent(event.token().getStatSheet().id()));
+        var ss = event.token().getStatSheet();
+        statSheet.setContent(event.token(), ssManager.getStatSheetContent(ss.id()), ss.location());
       }
     }
   }
