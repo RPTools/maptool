@@ -14,8 +14,8 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
+import java.awt.*;
 import java.io.IOException;
-import java.util.Map;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
@@ -32,60 +32,6 @@ public class StatSheet {
   /** Object for logging messages. */
   private static final Logger log = LogManager.getLogger(StatSheet.class);
 
-  private static final Map<StatSheetLocation, String> statSheetLocationScript =
-      Map.of(
-          StatSheetLocation.TOP_LEFT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.top = '0px';
-      sheet.style.left = '0px';
-      """,
-          StatSheetLocation.TOP_RIGHT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.top = '0px';
-      sheet.style.right = '0px';
-      """,
-          StatSheetLocation.BOTTOM_LEFT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.bottom = '0px';
-      sheet.style.left = '0px';
-      """,
-          StatSheetLocation.BOTTOM_RIGHT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.bottom = '0px';
-      sheet.style.right = '0px';
-      """,
-          StatSheetLocation.LEFT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.top = '50%';
-      sheet.style.left = '0px';
-      sheet.style.transform = 'translateY(-50%)';
-      """,
-          StatSheetLocation.RIGHT,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.top = '50%';
-      sheet.style.right = '0px';
-      sheet.style.transform = 'translateY(-50%)';
-      """,
-          StatSheetLocation.TOP,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.top = '0px';
-      sheet.style.left = '50%';
-      sheet.style.transform = 'translateX(-50%)';
-      """,
-          StatSheetLocation.BOTTOM,
-          """
-      const sheet = document.getElementById('statSheet');
-      sheet.style.bottom = '0px';
-      sheet.style.left = '50%';
-      sheet.style.transform = 'translateX(-50%)';
-      """);
   /**
    * Sets the content for the stat sheet. The content is a HTML page that is rendered using the
    * Handlebars template engine.
@@ -96,7 +42,7 @@ public class StatSheet {
    */
   public void setContent(Token token, String content, StatSheetLocation location) {
     try {
-      var statSheetContext = new StatSheetContext(token, MapTool.getPlayer());
+      var statSheetContext = new StatSheetContext(token, MapTool.getPlayer(), location);
       var output = new HandlebarsUtil<>(content).apply(statSheetContext);
       Platform.runLater(
           () -> {
@@ -112,11 +58,6 @@ public class StatSheet {
                   .showOverlay(
                       AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME, Integer.MIN_VALUE, output, null);
             }
-            MapTool.getFrame()
-                .getOverlayPanel()
-                .runScript(
-                    AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME,
-                    statSheetLocationScript.get(location));
           });
     } catch (IOException e) {
       MapTool.showError("msg.error.renderingStatSheet", e);

@@ -63,9 +63,11 @@ public class StatSheetContext {
   private final int portraitWidth;
   private final int portraitHeight;
 
+  private final String statSheetLocacation;
+
   private final List<Property> properties = new ArrayList<>();
 
-  public StatSheetContext(Token token, Player player) {
+  public StatSheetContext(Token token, Player player, StatSheetLocation location) {
 
     name = token.getName();
     gmName = player.isGM() ? token.getGMName() : null;
@@ -120,6 +122,18 @@ public class StatSheetContext {
     portraitHeight = dim.height;
 
     System.out.println("StatSheetContext property count: " + properties.size());
+
+    statSheetLocacation =
+        switch (location) {
+          case TOP_LEFT -> "statSheet-topLeft";
+          case TOP_RIGHT -> "statSheet-topRight";
+          case BOTTOM_LEFT -> "statSheet-bottomLeft";
+          case BOTTOM_RIGHT -> "statSheet-bottomRight";
+          case TOP -> "statSheet-top";
+          case BOTTOM -> "statSheet-bottom";
+          case LEFT -> "statSheet-left";
+          case RIGHT -> "statSheet-right";
+        };
   }
 
   public String getName() {
@@ -152,5 +166,9 @@ public class StatSheetContext {
 
   public List<Property> getProperties() {
     return properties;
+  }
+
+  public String getStatSheetLocation() {
+    return statSheetLocacation;
   }
 }

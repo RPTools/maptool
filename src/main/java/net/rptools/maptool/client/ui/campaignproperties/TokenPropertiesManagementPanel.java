@@ -110,8 +110,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JTable) getComponent("propertiesTable");
   }
 
-  public JButton getStatSheetPropertiesButton() {
-    return (JButton) getComponent("statSheetPropertiesButton");
+  public JComboBox getStatSheetLocationComboBox() {
+    return (JComboBox) getComponent("statSheetLocationComboBox");
   }
 
   public JComboBox getStatSheetComboBox() {
@@ -277,7 +277,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 getTypeDeleteButton().setEnabled(false);
                 getTokenTypeName().setEditable(false);
                 getStatSheetComboBox().setEnabled(false);
-                getStatSheetPropertiesButton().setEnabled(false);
+                getStatSheetLocationComboBox().setEnabled(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
                 getPropertyAddButton().setEnabled(true);
@@ -285,14 +285,14 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 // Can't delete the last one
                 getTypeDeleteButton().setEnabled(tokenTypeMap.size() > 1);
                 getStatSheetComboBox().setEnabled(true);
-                getStatSheetPropertiesButton().setEnabled(true);
-                populateStatSheetComboBox(propertyType);
+                getStatSheetLocationComboBox().setEnabled(true);
+                populateStatSheetComboBoxes(propertyType);
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
   }
 
-  private void populateStatSheetComboBox(String propertyType) {
+  private void populateStatSheetComboBoxes(String propertyType) {
     var combo = getStatSheetComboBox();
     combo.removeAllItems();
     var ssManager = new StatSheetManager();
@@ -300,26 +300,40 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .sorted(Comparator.comparing(StatSheet::description))
         .forEach(ss -> combo.addItem(ss));
     combo.setSelectedItem(ssManager.getStatSheet(tokenTypeStatSheetMap.get(propertyType).id()));
+
+    var locationCombo = getStatSheetLocationComboBox();
+    locationCombo.setSelectedItem(tokenTypeStatSheetMap.get(propertyType).location());
   }
 
   public void initStatSheetDetails() {
-    var button = getStatSheetPropertiesButton();
-    button.setEnabled(false);
+    var locationCombo = getStatSheetLocationComboBox();
+    locationCombo.setEnabled(false);
+    Arrays.stream(StatSheetLocation.values()).forEach(locationCombo::addItem);
+    locationCombo.addActionListener(
+        l -> {
+          if (getStatSheetLocationComboBox().hasFocus()) { // only if user has made change
+            var location = (StatSheetLocation) locationCombo.getSelectedItem();
+            var tokenType = (String) getTokenTypeList().getSelectedValue();
+            if (location != null && tokenType != null) {
+              var id = tokenTypeStatSheetMap.get(tokenType).id();
+              tokenTypeStatSheetMap.put(tokenType, new StatSheetProperties(id, location));
+            }
+          }
+        });
 
     var combo = getStatSheetComboBox();
     combo.setEnabled(false);
     combo.setRenderer(new StatSheetComboBoxRenderer());
     combo.addActionListener(
         l -> {
-          if (getStatSheetComboBox().hasFocus()) { // Only if user has mad change
+          if (getStatSheetComboBox().hasFocus()) { // Only if user has made change
             var ss = (StatSheet) combo.getSelectedItem();
             var tokenType = (String) getTokenTypeList().getSelectedValue();
             if (ss != null && tokenType != null) {
               var id = new StatSheetManager().getId(ss);
-              tokenTypeStatSheetMap.put(
-                  tokenType,
-                  new StatSheetProperties(
-                      new StatSheetManager().getId(ss), StatSheetLocation.BOTTOM_LEFT));
+              var location = tokenTypeStatSheetMap.get(tokenType).location();
+              tokenTypeStatSheetMap.put(tokenType, new StatSheetProperties(id, location));
+              getStatSheetLocationComboBox().setSelectedItem(location);
             }
           }
         });
