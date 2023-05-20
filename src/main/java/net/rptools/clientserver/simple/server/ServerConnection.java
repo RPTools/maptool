@@ -14,9 +14,14 @@
  */
 package net.rptools.clientserver.simple.server;
 
+import java.io.IOException;
 import net.rptools.clientserver.simple.Connection;
 
-public interface ServerConnection extends Connection {
+public interface ServerConnection extends Connection, AutoCloseable {
+  void start() throws IOException;
+
+  void close();
+
   void addObserver(ServerObserver observer);
 
   void removeObserver(ServerObserver observer);

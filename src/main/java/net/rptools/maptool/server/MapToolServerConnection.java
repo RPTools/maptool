@@ -170,7 +170,7 @@ public class MapToolServerConnection
   }
 
   public void open() throws IOException {
-    connection.open();
+    connection.start();
   }
 
   public void close() {

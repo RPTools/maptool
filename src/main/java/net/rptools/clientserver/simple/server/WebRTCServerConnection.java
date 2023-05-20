@@ -148,7 +148,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   }
 
   @Override
-  public void open() throws IOException {
+  public void start() throws IOException {
     signalingClient.connect();
   }
 

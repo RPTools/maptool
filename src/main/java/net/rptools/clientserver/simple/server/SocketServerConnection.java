@@ -40,7 +40,7 @@ public class SocketServerConnection extends AbstractServerConnection {
   }
 
   @Override
-  public void open() throws IOException {
+  public void start() throws IOException {
     socket = new ServerSocket(port);
     listeningThread = new ListeningThread(this, socket);
     listeningThread.start();

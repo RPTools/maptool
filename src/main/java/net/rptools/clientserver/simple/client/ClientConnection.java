@@ -14,12 +14,17 @@
  */
 package net.rptools.clientserver.simple.client;
 
+import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.Connection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 
-public interface ClientConnection extends Connection {
+public interface ClientConnection extends Connection, AutoCloseable {
+  void open() throws IOException;
+
+  void close();
+
   void sendMessage(byte[] message);
 
   void sendMessage(Object channel, byte[] message);

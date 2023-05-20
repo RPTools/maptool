@@ -14,10 +14,4 @@
  */
 package net.rptools.clientserver.simple;
 
-import java.io.IOException;
-
-public interface Connection {
-  void open() throws IOException;
-
-  void close();
-}
+public interface Connection {}
