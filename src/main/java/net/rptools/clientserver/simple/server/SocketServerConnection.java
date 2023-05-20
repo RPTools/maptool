@@ -67,7 +67,6 @@ public class SocketServerConnection extends AbstractServerConnection {
     }
   }
 
-  @Override
   public String getError() {
     return null;
   }

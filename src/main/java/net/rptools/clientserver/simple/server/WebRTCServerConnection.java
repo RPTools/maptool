@@ -143,7 +143,6 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     }
   }
 
-  @Override
   public String getError() {
     return lastError;
   }

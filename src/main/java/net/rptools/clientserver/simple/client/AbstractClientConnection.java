@@ -28,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
-import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
@@ -36,8 +35,7 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractClientConnection extends AbstractConnection
-    implements ClientConnection {
+public abstract class AbstractClientConnection implements ClientConnection {
   private static final Logger log = LogManager.getLogger(AbstractClientConnection.class);
 
   private final Map<Object, List<byte[]>> outQueueMap = new HashMap<>();

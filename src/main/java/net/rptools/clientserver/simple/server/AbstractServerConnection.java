@@ -16,7 +16,6 @@ package net.rptools.clientserver.simple.server;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.client.ClientConnection;
@@ -25,7 +24,7 @@ import net.rptools.maptool.server.HandshakeObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractServerConnection extends AbstractConnection
+public abstract class AbstractServerConnection
     implements DisconnectHandler, ServerConnection, HandshakeObserver {
 
   private static final Logger log = LogManager.getLogger(AbstractServerConnection.class);
