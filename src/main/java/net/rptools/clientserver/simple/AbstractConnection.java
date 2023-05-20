@@ -34,8 +34,6 @@ public abstract class AbstractConnection implements Connection {
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
   protected List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<MessageHandler>();
   protected List<ActivityListener> listeners = new CopyOnWriteArrayList<ActivityListener>();
-  protected List<DisconnectHandler> disconnectHandlers =
-      new CopyOnWriteArrayList<DisconnectHandler>();
 
   public final void addMessageHandler(MessageHandler handler) {
     messageHandlers.add(handler);
@@ -55,26 +53,12 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  public final void fireDisconnect() {
-    for (DisconnectHandler handler : disconnectHandlers) {
-      handler.handleDisconnect(this);
-    }
-  }
-
   public final void addActivityListener(ActivityListener listener) {
     listeners.add(listener);
   }
 
   public final void removeActivityListener(ActivityListener listener) {
     listeners.remove(listener);
-  }
-
-  public final void addDisconnectHandler(DisconnectHandler handler) {
-    disconnectHandlers.add(handler);
-  }
-
-  public final void removeDisconnectHandler(DisconnectHandler handler) {
-    disconnectHandlers.remove(handler);
   }
 
   protected final void notifyListeners(

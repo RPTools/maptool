@@ -132,11 +132,9 @@ public abstract class AbstractServerConnection extends AbstractConnection
 
   ////
   // DISCONNECT HANDLER
-  public void handleDisconnect(AbstractConnection conn) {
-    if (conn instanceof ClientConnection) {
-      log.debug("HandleDisconnect: " + ((ClientConnection) conn).getId());
-      fireClientDisconnect((ClientConnection) conn);
-    }
+  public void handleDisconnect(ClientConnection conn) {
+    log.debug("HandleDisconnect: " + conn.getId());
+    fireClientDisconnect(conn);
   }
 
   protected void handleConnection(ClientConnection conn)

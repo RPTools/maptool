@@ -22,15 +22,9 @@ public interface Connection {
 
   void removeMessageHandler(MessageHandler handler);
 
-  void fireDisconnect();
-
   void addActivityListener(ActivityListener listener);
 
   void removeActivityListener(ActivityListener listener);
-
-  void addDisconnectHandler(DisconnectHandler handler);
-
-  void removeDisconnectHandler(DisconnectHandler handler);
 
   void open() throws IOException;
 

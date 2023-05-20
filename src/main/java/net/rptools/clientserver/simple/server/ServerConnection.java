@@ -14,12 +14,9 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import net.rptools.clientserver.simple.AbstractConnection;
 import net.rptools.clientserver.simple.Connection;
 
 public interface ServerConnection extends Connection {
-  void handleDisconnect(AbstractConnection conn);
-
   void handleMessage(String id, byte[] message);
 
   void addObserver(ServerObserver observer);

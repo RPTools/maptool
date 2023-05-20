@@ -26,8 +26,10 @@ import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.AbstractConnection;
+import net.rptools.clientserver.simple.DisconnectHandler;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
 import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
@@ -39,6 +41,7 @@ public abstract class AbstractClientConnection extends AbstractConnection
 
   private final Map<Object, List<byte[]>> outQueueMap = new HashMap<>();
   private final List<List<byte[]>> outQueueList = new LinkedList<>();
+  private final List<DisconnectHandler> disconnectHandlers = new CopyOnWriteArrayList<>();
 
   private List<byte[]> getOutQueue(Object channel) {
     // Ordinarily I would synchronize this method, but I imagine the channels will be initialized
@@ -199,5 +202,19 @@ public abstract class AbstractClientConnection extends AbstractConnection
     }
 
     return null;
+  }
+
+  protected final void fireDisconnect() {
+    for (DisconnectHandler handler : disconnectHandlers) {
+      handler.handleDisconnect(this);
+    }
+  }
+
+  public final void addDisconnectHandler(DisconnectHandler handler) {
+    disconnectHandlers.add(handler);
+  }
+
+  public final void removeDisconnectHandler(DisconnectHandler handler) {
+    disconnectHandlers.remove(handler);
   }
 }
