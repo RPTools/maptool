@@ -18,7 +18,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.HandshakeObserver;
 import org.apache.logging.log4j.LogManager;
@@ -29,8 +29,8 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
   private static final Logger log = LogManager.getLogger(AbstractServer.class);
   //    private final ReaperThread reaperThread;
 
-  private final Map<String, ClientConnection> clients =
-      Collections.synchronizedMap(new HashMap<String, ClientConnection>());
+  private final Map<String, Connection> clients =
+      Collections.synchronizedMap(new HashMap<String, Connection>());
   private final List<ServerObserver> observerList =
       Collections.synchronizedList(new ArrayList<ServerObserver>());
 
@@ -52,7 +52,7 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
 
   public void broadcastMessage(byte[] message) {
     synchronized (clients) {
-      for (ClientConnection conn : clients.values()) {
+      for (Connection conn : clients.values()) {
         conn.sendMessage(message);
       }
     }
@@ -64,7 +64,7 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
       excludeSet.add(e);
     }
     synchronized (clients) {
-      for (Map.Entry<String, ClientConnection> entry : clients.entrySet()) {
+      for (Map.Entry<String, Connection> entry : clients.entrySet()) {
         if (!excludeSet.contains(entry.getKey())) {
           entry.getValue().sendMessage(message);
         }
@@ -73,13 +73,13 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
   }
 
   public void sendMessage(String id, Object channel, byte[] message) {
-    ClientConnection client = clients.get(id);
+    Connection client = clients.get(id);
     client.sendMessage(channel, message);
   }
 
   public void close() {
     synchronized (clients) {
-      for (ClientConnection conn : clients.values()) {
+      for (Connection conn : clients.values()) {
         conn.close();
       }
     }
@@ -90,10 +90,10 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
     synchronized (clients) {
       log.debug("Reaping clients");
 
-      for (Iterator<Map.Entry<String, ClientConnection>> i = clients.entrySet().iterator();
+      for (Iterator<Map.Entry<String, Connection>> i = clients.entrySet().iterator();
           i.hasNext(); ) {
-        Map.Entry<String, ClientConnection> entry = i.next();
-        ClientConnection conn = entry.getValue();
+        Map.Entry<String, Connection> entry = i.next();
+        Connection conn = entry.getValue();
         if (!conn.isAlive()) {
           log.debug("\tReaping: " + conn.getId());
           i.remove();
@@ -108,14 +108,14 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
     }
   }
 
-  protected void fireClientConnect(ClientConnection conn) {
+  protected void fireClientConnect(Connection conn) {
     log.debug("Firing: clientConnect: " + conn.getId());
     for (ServerObserver observer : observerList) {
       observer.connectionAdded(conn);
     }
   }
 
-  protected void fireClientDisconnect(ClientConnection conn) {
+  protected void fireClientDisconnect(Connection conn) {
     log.debug("Firing: clientDisconnect: " + conn.getId());
     for (ServerObserver observer : observerList) {
       observer.connectionRemoved(conn);
@@ -124,13 +124,12 @@ public abstract class AbstractServer implements DisconnectHandler, Server, Hands
 
   ////
   // DISCONNECT HANDLER
-  public void handleDisconnect(ClientConnection conn) {
+  public void handleDisconnect(Connection conn) {
     log.debug("HandleDisconnect: " + conn.getId());
     fireClientDisconnect(conn);
   }
 
-  protected void handleConnection(ClientConnection conn)
-      throws ExecutionException, InterruptedException {
+  protected void handleConnection(Connection conn) throws ExecutionException, InterruptedException {
     var handshake = handshakeProvider.getConnectionHandshake(conn);
     handshake.addObserver(this);
     // Make sure the client is allowed

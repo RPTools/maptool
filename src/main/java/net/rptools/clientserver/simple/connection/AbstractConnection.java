@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.connection;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -35,8 +35,8 @@ import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractClientConnection implements ClientConnection {
-  private static final Logger log = LogManager.getLogger(AbstractClientConnection.class);
+public abstract class AbstractConnection implements Connection {
+  private static final Logger log = LogManager.getLogger(AbstractConnection.class);
 
   private final Map<Object, List<byte[]>> outQueueMap = new HashMap<>();
   private final List<List<byte[]>> outQueueList = new LinkedList<>();

@@ -12,14 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.connection;
 
 import java.io.IOException;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 
-public interface ClientConnection extends AutoCloseable {
+public interface Connection extends AutoCloseable {
   void open() throws IOException;
 
   void close();

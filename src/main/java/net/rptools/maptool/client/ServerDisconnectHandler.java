@@ -19,7 +19,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.DisconnectHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.campaign.CampaignManager;
@@ -29,7 +29,7 @@ public class ServerDisconnectHandler implements DisconnectHandler {
   // TODO: This is a temporary hack until I can come up with a cleaner mechanism
   public static boolean disconnectExpected;
 
-  public void handleDisconnect(ClientConnection connection) {
+  public void handleDisconnect(Connection connection) {
     // Update internal state
     MapTool.disconnect();
 

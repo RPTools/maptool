@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
@@ -55,8 +55,8 @@ public class MapToolServer {
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
-  private final Map<String, ClientConnection> connectionMap =
-      Collections.synchronizedMap(new HashMap<String, ClientConnection>());
+  private final Map<String, Connection> connectionMap =
+      Collections.synchronizedMap(new HashMap<String, Connection>());
   private final AssetProducerThread assetProducerThread;
 
   private Campaign campaign;
@@ -82,13 +82,13 @@ public class MapToolServer {
     }
   }
 
-  public void configureClientConnection(ClientConnection connection) {
+  public void configureClientConnection(Connection connection) {
     String id = connection.getId();
     assetManagerMap.put(id, new AssetTransferManager());
     connectionMap.put(id, connection);
   }
 
-  public ClientConnection getClientConnection(String id) {
+  public Connection getClientConnection(String id) {
     return connectionMap.get(id);
   }
 
@@ -102,7 +102,7 @@ public class MapToolServer {
    * @param id the connection ID
    */
   public void releaseClientConnection(String id) {
-    ClientConnection connection = getClientConnection(id);
+    Connection connection = getClientConnection(id);
     if (connection != null) {
       connection.close();
     }

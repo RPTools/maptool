@@ -16,7 +16,7 @@ package net.rptools.maptool.server;
 
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.model.player.Player;
 
 public interface Handshake extends MessageHandler {
@@ -41,7 +41,7 @@ public interface Handshake extends MessageHandler {
    *
    * @return the connection for this {@code ServerHandshake}.
    */
-  ClientConnection getConnection();
+  Connection getConnection();
 
   /**
    * Returns the exception -- if any -- that occurred during processing of the handshake.

@@ -32,7 +32,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.*;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -69,7 +69,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
   private static final int PLAYER_CHALLENGE = 1;
 
   /** The connection for the handshake. */
-  private final ClientConnection connection;
+  private final Connection connection;
   /** The player for the client. */
   private final LocalPlayer player;
   /** Observers that want to be notified when the status changes. */
@@ -93,7 +93,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(ClientConnection connection, LocalPlayer player) {
+  public ClientHandshake(Connection connection, LocalPlayer player) {
     this.connection = connection;
     this.player = player;
   }
@@ -391,7 +391,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public ClientConnection getConnection() {
+  public Connection getConnection() {
     return connection;
   }
 

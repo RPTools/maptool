@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.net.Socket;
@@ -24,9 +24,9 @@ import org.apache.logging.log4j.Logger;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public class SocketClientConnection extends AbstractClientConnection implements ClientConnection {
+public class SocketConnection extends AbstractConnection implements Connection {
   /** Instance used for log messages. */
-  private static final Logger log = LogManager.getLogger(SocketClientConnection.class);
+  private static final Logger log = LogManager.getLogger(SocketConnection.class);
 
   private final String id;
   private SendThread send;
@@ -35,13 +35,13 @@ public class SocketClientConnection extends AbstractClientConnection implements 
   private String hostName;
   private int port;
 
-  public SocketClientConnection(String id, String hostName, int port) throws IOException {
+  public SocketConnection(String id, String hostName, int port) throws IOException {
     this.id = id;
     this.hostName = hostName;
     this.port = port;
   }
 
-  public SocketClientConnection(String id, Socket socket) throws IOException {
+  public SocketConnection(String id, Socket socket) throws IOException {
     this.id = id;
     this.hostName = socket.getInetAddress().getHostName();
     this.port = socket.getPort();
@@ -107,7 +107,7 @@ public class SocketClientConnection extends AbstractClientConnection implements 
     private boolean stopRequested = false;
 
     public SendThread(OutputStream out) {
-      setName("SocketClientConnection.SendThread");
+      setName("SocketConnection.SendThread");
       this.out = out;
     }
 
@@ -121,15 +121,15 @@ public class SocketClientConnection extends AbstractClientConnection implements 
     @Override
     public void run() {
       try {
-        while (!stopRequested && SocketClientConnection.this.isAlive()) {
+        while (!stopRequested && SocketConnection.this.isAlive()) {
           try {
-            while (SocketClientConnection.this.hasMoreMessages()) {
+            while (SocketConnection.this.hasMoreMessages()) {
               try {
-                byte[] message = SocketClientConnection.this.nextMessage();
+                byte[] message = SocketConnection.this.nextMessage();
                 if (message == null) {
                   continue;
                 }
-                SocketClientConnection.this.writeMessage(out, message);
+                SocketConnection.this.writeMessage(out, message);
               } catch (IndexOutOfBoundsException e) {
                 // just ignore and wait
               }
@@ -154,12 +154,12 @@ public class SocketClientConnection extends AbstractClientConnection implements 
   // receive thread
   // /////////////////////////////////////////////////////////////////////////
   private class ReceiveThread extends Thread {
-    private final SocketClientConnection conn;
+    private final SocketConnection conn;
     private final InputStream in;
     private boolean stopRequested = false;
 
-    public ReceiveThread(SocketClientConnection conn, InputStream in) {
-      setName("SocketClientConnection.ReceiveThread");
+    public ReceiveThread(SocketConnection conn, InputStream in) {
+      setName("SocketConnection.ReceiveThread");
       this.conn = conn;
       this.in = in;
     }

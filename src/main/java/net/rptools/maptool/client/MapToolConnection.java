@@ -17,7 +17,7 @@ package net.rptools.maptool.client;
 import java.io.IOException;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.ClientHandshake;
@@ -36,14 +36,13 @@ public class MapToolConnection {
   private static final Logger log = LogManager.getLogger(MapToolConnection.class);
 
   private final LocalPlayer player;
-  private ClientConnection connection;
+  private Connection connection;
   private Handshake handshake;
   private Runnable onCompleted;
 
   public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
 
-    this.connection =
-        ConnectionFactory.getInstance().createClientConnection(player.getName(), config);
+    this.connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
     this.player = player;
     this.handshake = new ClientHandshake(connection, player);
     onCompleted = () -> {};

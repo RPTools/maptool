@@ -19,7 +19,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.SocketClientConnection;
+import net.rptools.clientserver.simple.connection.SocketConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -107,7 +107,7 @@ public class SocketServer extends AbstractServer {
           log.debug("Client connecting ...");
 
           String id = nextClientId(s);
-          SocketClientConnection conn = new SocketClientConnection(id, s);
+          SocketConnection conn = new SocketConnection(id, s);
           server.handleConnection(conn);
         } catch (IOException | ExecutionException | InterruptedException e) {
           if (!suppressErrors) {

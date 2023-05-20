@@ -20,7 +20,7 @@ import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.WebRTCClientConnection;
+import net.rptools.clientserver.simple.connection.WebRTCConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessageDto;
 import net.rptools.clientserver.simple.webrtc.LoginMessageDto;
 import net.rptools.clientserver.simple.webrtc.MessageDto;
@@ -42,7 +42,7 @@ public class WebRTCServer extends AbstractServer {
   private URI webSocketUri = null;
   private int reconnectCounter = -1;
   private Thread reconnectThread;
-  private final Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
+  private final Map<String, WebRTCConnection> openConnections = new HashMap<>();
 
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
@@ -116,7 +116,7 @@ public class WebRTCServer extends AbstractServer {
       }
       case "offer" -> {
         var offerMsg = gson.fromJson(message, OfferMessageDto.class);
-        var clientConnection = new WebRTCClientConnection(offerMsg, this);
+        var clientConnection = new WebRTCConnection(offerMsg, this);
         openConnections.put(offerMsg.source, clientConnection);
       }
       case "candidate" -> {
@@ -135,7 +135,7 @@ public class WebRTCServer extends AbstractServer {
     return config;
   }
 
-  public void onDataChannelOpened(WebRTCClientConnection connection) {
+  public void onDataChannelOpened(WebRTCConnection connection) {
     try {
       handleConnection(connection);
     } catch (Exception e) {
