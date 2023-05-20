@@ -54,6 +54,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
@@ -97,7 +98,7 @@ public class Token implements Cloneable {
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
 
-  private String statSheetId;
+  private StatSheetProperties statSheet;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -2956,7 +2957,9 @@ public class Token implements Cloneable {
     token.speechMap.putAll(dto.getSpeechMap());
     token.heroLabData = dto.hasHeroLabData() ? HeroLabData.fromDto(dto.getHeroLabData()) : null;
     token.allowURIAccess = dto.getAllowUriAccess();
-    token.statSheetId = dto.getStatSheetId();
+    if (dto.hasStatSheetProperties()) {
+      token.statSheet = StatSheetProperties.fromDto(dto.getStatSheetProperties());
+    }
     return token;
   }
 
@@ -3085,33 +3088,33 @@ public class Token implements Cloneable {
       dto.setHeroLabData(heroLabData.toDto());
     }
     dto.setAllowUriAccess(allowURIAccess);
-    if (statSheetId != null) {
-      dto.setStatSheetId(statSheetId);
+    if (statSheet != null) {
+      dto.setStatSheetProperties(StatSheetProperties.toDto(statSheet));
     }
     return dto.build();
   }
 
   /**
-   * Returns the id of the Stat Sheet for this token. If no stat sheet is set, the default stat for
+   * Returns the Stat Sheet properties for this token. If no stat sheet is set, the default stat for
    * the token type is returned.
    *
-   * @return The id of the stat sheet for this token.
+   * @return The of the stat sheet for this token.
    */
-  public String getStatSheetId() {
-    if (statSheetId == null) {
+  public StatSheetProperties getStatSheet() {
+    if (statSheet == null) {
       return MapTool.getCampaign().getTokenTypeDefaultSheetId(propertyType);
     }
-    return statSheetId;
+    return statSheet;
   }
 
   /**
    * Sets the id of the stat sheet for this token. If null, the token will use the default stat
    * sheet for the token type.
    *
-   * @param statSheetId the id of the stat sheet for this token.
+   * @param statSheet the stat sheet properties for this token.
    */
-  public void setStatSheetId(String statSheetId) {
-    this.statSheetId = statSheetId;
+  public void setStatSheet(StatSheetProperties statSheet) {
+    this.statSheet = statSheet;
   }
 
   /**
@@ -3120,11 +3123,11 @@ public class Token implements Cloneable {
    * @return <code>true</code> if using the default stat sheet.
    */
   public boolean usingDefaultStatSheet() {
-    return statSheetId == null;
+    return statSheet == null;
   }
 
   /** Use the default stat sheet for the tokens token type. */
   public void useDefaultStatSheet() {
-    setStatSheetId(null);
+    setStatSheet(null);
   }
 }

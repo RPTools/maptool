@@ -30,15 +30,17 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 
 public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignProperties> {
 
   private Map<String, List<TokenProperty>> tokenTypeMap;
-  private final Map<String, String> tokenTypeStatSheetMap = new HashMap<>();
+  private final Map<String, StatSheetProperties> tokenTypeStatSheetMap = new HashMap<>();
   private String editingType;
 
-  private Map<String, String> renameTypes = new TreeMap<>();
+  private final Map<String, String> renameTypes = new TreeMap<>();
 
   CampaignProperties campaignProperties;
 
@@ -62,8 +64,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .keySet()
         .forEach(
             tt ->
-                tokenTypeStatSheetMap.put(
-                    tt, campaignProperties.getTokenTypeDefaultStatSheetId(tt)));
+                tokenTypeStatSheetMap.put(tt, campaignProperties.getTokenTypeDefaultStatSheet(tt)));
     updateTypeList();
   }
 
@@ -298,7 +299,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     ssManager.getStatSheets(propertyType).stream()
         .sorted(Comparator.comparing(StatSheet::description))
         .forEach(ss -> combo.addItem(ss));
-    combo.setSelectedItem(ssManager.getStatSheet(tokenTypeStatSheetMap.get(propertyType)));
+    combo.setSelectedItem(ssManager.getStatSheet(tokenTypeStatSheetMap.get(propertyType).id()));
   }
 
   public void initStatSheetDetails() {
@@ -315,7 +316,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             var tokenType = (String) getTokenTypeList().getSelectedValue();
             if (ss != null && tokenType != null) {
               var id = new StatSheetManager().getId(ss);
-              tokenTypeStatSheetMap.put(tokenType, new StatSheetManager().getId(ss));
+              tokenTypeStatSheetMap.put(
+                  tokenType,
+                  new StatSheetProperties(
+                      new StatSheetManager().getId(ss), StatSheetLocation.BOTTOM_LEFT));
             }
           }
         });

@@ -1691,7 +1691,7 @@ public class PointerTool extends DefaultTool {
             renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
       if (AppPreferences.getPortraitSize() > 0
           && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
-          && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheetId())
+          && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())
           && (tokenOnStatSheet == null
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
@@ -1741,7 +1741,7 @@ public class PointerTool extends DefaultTool {
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
         if (AppPreferences.getShowStatSheet()
-            && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheetId())) {
+            && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())) {
           CodeTimer timer = new CodeTimer("statSheet");
           timer.setEnabled(AppState.isCollectProfilingData());
           timer.setThreshold(5);

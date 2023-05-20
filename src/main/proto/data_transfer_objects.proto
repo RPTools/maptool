@@ -128,7 +128,7 @@ message CampaignPropertiesDto {
   repeated string remote_repositories = 11;
   repeated LookupTableDto lookup_tables = 12;
   repeated SightTypeDto sight_types = 13;
-  map<string, string> token_type_stat_sheet = 14;
+  map<string, StatSheetPropertiesDto> token_type_stat_sheet = 14;
 }
 
 message SightTypeDto {
@@ -355,7 +355,7 @@ message TokenDto {
   bool allow_uri_access = 64;
   string notes_type = 68;
   string gm_notes_type = 69;
-  string stat_sheet_id = 70;
+  StatSheetPropertiesDto stat_sheet_properties = 70;
 }
 
 message PathDto {
@@ -408,6 +408,11 @@ message MacroButtonPropertiesDto {
 
 message MacroButtonPropertiesListDto {
   repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message StatSheetPropertiesDto {
+  string id = 1;
+  string location = 2;
 }
 
 message HeroLabDataDto {

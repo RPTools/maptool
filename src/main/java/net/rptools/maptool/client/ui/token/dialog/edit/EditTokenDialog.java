@@ -82,7 +82,9 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -193,7 +195,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     if (token.usingDefaultStatSheet()) {
       combo.setSelectedItem(defaultSS);
     } else {
-      combo.setSelectedItem(new StatSheetManager().getStatSheet(token.getStatSheetId()));
+      combo.setSelectedItem(new StatSheetManager().getStatSheet(token.getStatSheet().id()));
     }
     dialog.showDialog();
   }
@@ -816,10 +818,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // Stat Sheet
     var ss = (StatSheet) getStatSheetCombo().getSelectedItem();
-    if (ss.name() == null && ss.namespace() == null) {
+    if (ss != null || (ss.name() == null && ss.namespace() == null)) {
       token.useDefaultStatSheet();
     } else {
-      token.setStatSheetId(new StatSheetManager().getId(ss));
+      token.setStatSheet(
+          new StatSheetProperties(new StatSheetManager().getId(ss), StatSheetLocation.BOTTOM_LEFT));
     }
 
     // Macros

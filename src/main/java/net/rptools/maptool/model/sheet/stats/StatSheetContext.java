@@ -109,10 +109,10 @@ public class StatSheetContext {
 
     Dimension dim;
     if (token.getPortraitImage() != null) {
-      var image = ImageManager.getImage(token.getPortraitImage(), null);
+      var image = ImageManager.getImage(token.getPortraitImage());
       dim = new Dimension(image.getWidth(), image.getHeight());
     } else {
-      var image = ImageManager.getImage(token.getImageAssetId(), null);
+      var image = ImageManager.getImage(token.getImageAssetId());
       dim = new Dimension(image.getWidth(), image.getHeight());
     }
     SwingUtil.constrainTo(dim, AppPreferences.getPortraitSize());

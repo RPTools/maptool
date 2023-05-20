@@ -40,10 +40,10 @@ public class StatSheetListener {
     if (AppPreferences.getShowStatSheet()
         && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
-      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheetId())) {
+      if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
         statSheet = new StatSheet();
         statSheet.setContent(
-            event.token(), ssManager.getStatSheetContent(event.token().getStatSheetId()));
+            event.token(), ssManager.getStatSheetContent(event.token().getStatSheet().id()));
       }
     }
   }

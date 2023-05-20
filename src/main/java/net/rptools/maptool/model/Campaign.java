@@ -31,6 +31,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
@@ -230,20 +231,20 @@ public class Campaign {
    * Returns the default Stat Sheet ID for the specified token property type.
    *
    * @param tokenProperty the token property type to get the sheet ID for.
-   * @return the ID of the Stat Sheet.
+   * @return the properties of the Stat Sheet.
    */
-  public String getTokenTypeDefaultSheetId(String tokenProperty) {
-    return campaignProperties.getTokenTypeDefaultStatSheetId(tokenProperty);
+  public StatSheetProperties getTokenTypeDefaultSheetId(String tokenProperty) {
+    return campaignProperties.getTokenTypeDefaultStatSheet(tokenProperty);
   }
 
   /**
    * Sets the default Stat Sheet ID for the specified token property type.
    *
    * @param tokenProperty the token property type to set the sheet ID of.
-   * @param sheetId the Stat Sheet ID.
+   * @param sheetId the Stat Sheet properties.
    */
-  public void setTokenTypeDefaultSheetId(String tokenProperty, String sheetId) {
-    campaignProperties.setTokenTypeDefaultStatSheetId(tokenProperty, sheetId);
+  public void setTokenTypeDefaultSheetId(String tokenProperty, StatSheetProperties sheetId) {
+    campaignProperties.setTokenTypeDefaultStatSheet(tokenProperty, sheetId);
   }
 
   public List<String> getSightTypes() {

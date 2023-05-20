@@ -50,8 +50,8 @@ public class StatSheetManager {
     return new String[] {namespace, name};
   }
 
-  public boolean isLegacyStatSheet(String id) {
-    return isLegacyStatSheet(getStatSheet(id));
+  public boolean isLegacyStatSheet(StatSheetProperties sheet) {
+    return isLegacyStatSheet(getStatSheet(sheet.id()));
   }
 
   private boolean isLegacyStatSheet(StatSheet statSheet) {
