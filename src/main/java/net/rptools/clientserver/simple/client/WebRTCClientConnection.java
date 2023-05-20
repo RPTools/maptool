@@ -20,7 +20,7 @@ import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import net.rptools.clientserver.simple.server.WebRTCServerConnection;
+import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.ServerConfig;
@@ -39,7 +39,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
   private final Gson gson = new Gson();
   private WebSocketClient signalingClient;
   // only set on server side
-  private WebRTCServerConnection serverConnection;
+  private WebRTCServer server;
   private RTCConfiguration rtcConfig;
   private RTCPeerConnection peerConnection;
   private RTCDataChannel localDataChannel;
@@ -56,12 +56,11 @@ public class WebRTCClientConnection extends AbstractClientConnection
   }
 
   // this is used from the server side
-  public WebRTCClientConnection(
-      OfferMessageDto message, WebRTCServerConnection webRTCServerConnection) {
+  public WebRTCClientConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
     this.id = message.source;
-    this.serverConnection = webRTCServerConnection;
-    this.config = serverConnection.getConfig();
-    this.signalingClient = serverConnection.getSignalingClient();
+    this.server = webRTCServer;
+    this.config = server.getConfig();
+    this.signalingClient = server.getSignalingClient();
     init();
 
     peerConnection = factory.createPeerConnection(rtcConfig, this);
@@ -91,7 +90,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
                   @Override
                   public void onSuccess() {
                     var msg = new AnswerMessageDto();
-                    msg.source = serverConnection.getConfig().getServerName();
+                    msg.source = server.getConfig().getServerName();
                     msg.destination = getId();
                     msg.answer = description;
                     sendSignalingMessage(gson.toJson(msg));
@@ -112,7 +111,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
   }
 
   private boolean isServerSide() {
-    return serverConnection != null;
+    return server != null;
   }
 
   private String getSource() {
@@ -125,7 +124,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
   private void startSignaling() {
     URI uri = null;
     try {
-      uri = new URI(WebRTCServerConnection.WebSocketUrl);
+      uri = new URI(WebRTCServer.WebSocketUrl);
     } catch (Exception e) {
     }
 
@@ -415,7 +414,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
     localDataChannel.registerObserver(this);
 
     if (isServerSide()) {
-      serverConnection.onDataChannelOpened(this);
+      server.onDataChannelOpened(this);
     }
   }
 
@@ -492,7 +491,7 @@ public class WebRTCClientConnection extends AbstractClientConnection
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) serverConnection.clearClients();
+              if (isServerSide()) server.clearClients();
             },
             "WebRTCClientConnection.handleDisconnect");
     handleDisconnect.start();

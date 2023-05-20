@@ -16,7 +16,7 @@ package net.rptools.clientserver.simple.server;
 
 import java.io.IOException;
 
-public interface ServerConnection extends AutoCloseable {
+public interface Server extends AutoCloseable {
   void start() throws IOException;
 
   void close();

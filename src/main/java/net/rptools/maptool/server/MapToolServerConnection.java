@@ -20,7 +20,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
-import net.rptools.clientserver.simple.server.ServerConnection;
+import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -40,7 +40,7 @@ public class MapToolServerConnection
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
-  private final ServerConnection connection;
+  private final Server connection;
   private final PlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
@@ -48,7 +48,7 @@ public class MapToolServerConnection
       MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler)
       throws IOException {
     this.connection =
-        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this, handler);
+        ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
     this.server = server;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = server.getConfig().getUseEasyConnect();

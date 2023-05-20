@@ -24,10 +24,9 @@ import net.rptools.maptool.server.HandshakeObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractServerConnection
-    implements DisconnectHandler, ServerConnection, HandshakeObserver {
+public abstract class AbstractServer implements DisconnectHandler, Server, HandshakeObserver {
 
-  private static final Logger log = LogManager.getLogger(AbstractServerConnection.class);
+  private static final Logger log = LogManager.getLogger(AbstractServer.class);
   //    private final ReaperThread reaperThread;
 
   private final Map<String, ClientConnection> clients =
@@ -38,8 +37,7 @@ public abstract class AbstractServerConnection
   private final HandshakeProvider handshakeProvider;
   private final MessageHandler messageHandler;
 
-  public AbstractServerConnection(
-      HandshakeProvider handshakeProvider, MessageHandler messageHandler) {
+  public AbstractServer(HandshakeProvider handshakeProvider, MessageHandler messageHandler) {
     this.handshakeProvider = handshakeProvider;
     this.messageHandler = messageHandler;
   }

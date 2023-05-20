@@ -20,9 +20,9 @@ import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.client.SocketClientConnection;
 import net.rptools.clientserver.simple.client.WebRTCClientConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
-import net.rptools.clientserver.simple.server.ServerConnection;
-import net.rptools.clientserver.simple.server.SocketServerConnection;
-import net.rptools.clientserver.simple.server.WebRTCServerConnection;
+import net.rptools.clientserver.simple.server.Server;
+import net.rptools.clientserver.simple.server.SocketServer;
+import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectionFactory {
@@ -40,13 +40,13 @@ public class ConnectionFactory {
     return new WebRTCClientConnection(id, config);
   }
 
-  public ServerConnection createServerConnection(
+  public Server createServer(
       ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler)
       throws IOException {
     if (!config.getUseWebRTC() || config.isPersonalServer()) {
-      return new SocketServerConnection(config.getPort(), handshake, messageHandler);
+      return new SocketServer(config.getPort(), handshake, messageHandler);
     }
 
-    return new WebRTCServerConnection(config, handshake, messageHandler);
+    return new WebRTCServer(config, handshake, messageHandler);
   }
 }

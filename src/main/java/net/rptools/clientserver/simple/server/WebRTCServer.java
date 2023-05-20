@@ -32,8 +32,8 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCServerConnection extends AbstractServerConnection {
-  private static final Logger log = LogManager.getLogger(WebRTCServerConnection.class);
+public class WebRTCServer extends AbstractServer {
+  private static final Logger log = LogManager.getLogger(WebRTCServer.class);
 
   private WebSocketClient signalingClient;
   private final ServerConfig config;
@@ -47,7 +47,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
-  public WebRTCServerConnection(
+  public WebRTCServer(
       ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
     super(handshake, messageHandler);
     this.config = config;
@@ -176,7 +176,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
               signalingClient = createSignalingClient();
               signalingClient.connect();
             });
-    reconnectThread.setName("WebRTCServerConnection.reconnectThread");
+    reconnectThread.setName("WebRTCServer.reconnectThread");
     reconnectThread.start();
   }
 

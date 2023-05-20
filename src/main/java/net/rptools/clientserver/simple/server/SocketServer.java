@@ -26,15 +26,14 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author drice
  */
-public class SocketServerConnection extends AbstractServerConnection {
+public class SocketServer extends AbstractServer {
 
-  private static final Logger log = LogManager.getLogger(SocketServerConnection.class);
+  private static final Logger log = LogManager.getLogger(SocketServer.class);
   private final int port;
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServerConnection(
-      int port, HandshakeProvider handshake, MessageHandler messageHandler) {
+  public SocketServer(int port, HandshakeProvider handshake, MessageHandler messageHandler) {
     super(handshake, messageHandler);
     this.port = port;
   }
@@ -74,7 +73,7 @@ public class SocketServerConnection extends AbstractServerConnection {
   ////
   // Threads
   private static class ListeningThread extends Thread {
-    private final SocketServerConnection server;
+    private final SocketServer server;
     private final ServerSocket socket;
 
     private boolean stopRequested = false;
@@ -86,8 +85,8 @@ public class SocketServerConnection extends AbstractServerConnection {
       return socket.getInetAddress().getHostAddress() + "-" + (nextConnectionId++);
     }
 
-    public ListeningThread(SocketServerConnection server, ServerSocket socket) {
-      setName("SocketServerConnection.ListeningThread");
+    public ListeningThread(SocketServer server, ServerSocket socket) {
+      setName("SocketServer.ListeningThread");
       this.server = server;
       this.socket = socket;
     }
