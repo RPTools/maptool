@@ -196,11 +196,6 @@ public class WebRTCClientConnection extends AbstractClientConnection
   }
 
   @Override
-  public void sendMessage(byte[] message) {
-    sendMessage(null, message);
-  }
-
-  @Override
   public void sendMessage(Object channel, byte[] message) {
     log.debug(prefix() + "added message");
     addMessage(channel, message);

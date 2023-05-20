@@ -29,7 +29,9 @@ public interface ServerConnection extends AutoCloseable {
 
   void broadcastMessage(String[] exclude, byte[] message);
 
-  void sendMessage(String id, byte[] message);
+  default void sendMessage(String id, byte[] message) {
+    sendMessage(id, null, message);
+  }
 
   void sendMessage(String id, Object channel, byte[] message);
 }

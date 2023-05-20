@@ -24,7 +24,9 @@ public interface ClientConnection extends AutoCloseable {
 
   void close();
 
-  void sendMessage(byte[] message);
+  default void sendMessage(byte[] message) {
+    sendMessage(null, message);
+  }
 
   void sendMessage(Object channel, byte[] message);
 

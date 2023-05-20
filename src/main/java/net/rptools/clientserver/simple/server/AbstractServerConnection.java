@@ -74,10 +74,6 @@ public abstract class AbstractServerConnection
     }
   }
 
-  public void sendMessage(String id, byte[] message) {
-    sendMessage(id, null, message);
-  }
-
   public void sendMessage(String id, Object channel, byte[] message) {
     ClientConnection client = clients.get(id);
     client.sendMessage(channel, message);
