@@ -12,11 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.library;
+package net.rptools.maptool.model.library.builtin;
 
-/** Library types */
-public enum LibraryType {
-  TOKEN,
-  ADD_ON,
-  BUILT_IN
-}
+import net.rptools.maptool.model.library.Library;
+
+public interface BuiltInLibrary extends Library {}

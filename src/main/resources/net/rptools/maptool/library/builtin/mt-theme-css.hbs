@@ -1,0 +1,92 @@
+/* MapTool Theme CSS 0.1 */
+
+:root {
+font-size: {{fontSize}};
+font-family: {{fontFamily}};
+}
+
+body,
+.mt-theme {
+font-family: {{fontFamily}};
+color: {{foregroundColor}};
+background-color: {{backgroundColor}};
+}
+
+.mt-border {
+
+}
+
+p,
+table,
+input {
+  vertical-align: middle;
+  font-size: 1rem;
+}
+
+/* Button */
+button,
+input[type=submit],
+.mt-button {
+  cursor: default;
+  position: relative;
+  background: transparent;
+color: {{button.foregroundColor}};
+padding: .2em .5em;
+margin: 0;
+font-family: inherit;
+font-size: 1em;
+border-radius: .15em;
+border: none;
+}
+
+button::after,
+.mt-button::after {
+  position: absolute;
+  display: block;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  padding 1px;
+  content: "";
+  border-radius: .15em;
+background: linear-gradient(
+{{button.startBackgroundColor}},
+{{button.endBackgroundColor}});
+z-index: -1;
+}
+
+
+button:active::after,
+input[type=submit]:active,
+.mt-button:active::after {
+background:	{{button.pressedBackgroundColor}};
+}
+
+
+button[disabled],
+input[type=submit][disabled],
+.mt-button[disabled],
+.mt-button--disabled {
+background: {{button.disabledBackgroundColor}};
+color: {{button.disabledForegroundColor}};
+border: {{button.disabledBorderSize}} solid {{button.disabledBorderColor}};
+}
+
+/* Text input */
+input[type=text],
+.mt-input[type=text] {
+color: {{textInput.foregroundColor}};
+background-color: {{textInput.backgroundColor}};
+border: {{textInput.disabledBorderSize}} solid {{textInput.disabledBorderColor}};
+}
+
+/* Headings. */
+h1 { font-size: 2.50rem; }
+h2 { font-size: 2.15rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.50rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1.00rem; }
+
+h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
