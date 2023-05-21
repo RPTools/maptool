@@ -44,6 +44,14 @@ public class StatSheetManager {
     statSheets.put(LEGACY_STATSHEET, "");
   }
 
+  public StatSheet getDefaultStatSheet() {
+    return LEGACY_STATSHEET;
+  }
+
+  public String getDefaultStatSheetId() {
+    return getId(LEGACY_STATSHEET);
+  }
+
   private String[] splitId(String id) {
     var namespace = StringUtils.substringBeforeLast(id, ".");
     var name = StringUtils.substringAfterLast(id, ".");

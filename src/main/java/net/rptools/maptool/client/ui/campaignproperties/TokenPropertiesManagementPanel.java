@@ -270,7 +270,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 return;
               }
 
-              var propertyType = getTokenTypeList().getSelectedValue().toString();
+              var propertyType =
+                  getTokenTypeList().getSelectedValue() == null
+                      ? null
+                      : getTokenTypeList().getSelectedValue().toString();
               if (propertyType == null) {
                 reset();
                 getPropertyAddButton().setEnabled(false);
@@ -299,7 +302,18 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     ssManager.getStatSheets(propertyType).stream()
         .sorted(Comparator.comparing(StatSheet::description))
         .forEach(ss -> combo.addItem(ss));
-    combo.setSelectedItem(ssManager.getStatSheet(tokenTypeStatSheetMap.get(propertyType).id()));
+    var statSheetProperty = tokenTypeStatSheetMap.get(propertyType);
+    String id;
+    if (statSheetProperty == null) {
+      id = ssManager.getDefaultStatSheetId();
+      tokenTypeStatSheetMap.put(
+          propertyType,
+          new StatSheetProperties(
+              ssManager.getDefaultStatSheetId(), StatSheetLocation.BOTTOM_LEFT));
+    } else {
+      id = statSheetProperty.id();
+    }
+    combo.setSelectedItem(ssManager.getStatSheet(id));
 
     var locationCombo = getStatSheetLocationComboBox();
     locationCombo.setSelectedItem(tokenTypeStatSheetMap.get(propertyType).location());
