@@ -235,7 +235,7 @@ public class RessourceManager {
           put(Images.DECORATION_RPTOK, IMAGE_DIR + "rptokIcon.png");
           put(Images.EMPTY, IMAGE_DIR + "empty.png");
           put(Images.GRID_BORDER_HEX, IMAGE_DIR + "hexBorder.png");
-          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "hexBorder.png");
+          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "isoBorder.png");
           put(Images.GRID_BORDER_SQUARE, IMAGE_DIR + "whiteBorder.png");
           put(Images.GRID_BORDER_SQUARE_RED, IMAGE_DIR + "grid-square-red.png");
           put(Images.HEROLABS_PORTRAIT, IMAGE_DIR + "powered_by_hero_lab_small.png");
