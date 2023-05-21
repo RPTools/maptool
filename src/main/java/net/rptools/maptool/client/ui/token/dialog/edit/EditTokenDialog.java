@@ -134,8 +134,32 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     setGmNotesEnabled(MapTool.getPlayer().isGM());
   }
 
-  public void initStatSheetComboBox() {
-    getStatSheetCombo().setRenderer(new StatSheetComboBoxRenderer());
+  public void initStatSheetComboBoxes() {
+    var sheetCombo = getStatSheetCombo();
+    sheetCombo.setRenderer(new StatSheetComboBoxRenderer());
+    var locationCombo = getStatSheetLocationCombo();
+    Arrays.stream(StatSheetLocation.values()).forEach(locationCombo::addItem);
+    sheetCombo.addActionListener(
+        l -> {
+          var sheet = (StatSheet) sheetCombo.getSelectedItem();
+          var ssManager = new StatSheetManager();
+          boolean usingDefault =
+              sheet != null && (sheet.name() == null && sheet.namespace() == null);
+          if (sheet == null || ssManager.isLegacyStatSheet(sheet) || usingDefault) {
+            locationCombo.setEnabled(false);
+            locationCombo.setSelectedItem(null);
+          } else {
+            locationCombo.setEnabled(true);
+            var tokenSheet = getModel().getStatSheet();
+            if (tokenSheet != null) {
+              locationCombo.setSelectedItem(tokenSheet.location());
+            } else {
+              var sheetProp =
+                  MapTool.getCampaign().getTokenTypeDefaultSheetId(getModel().getPropertyType());
+              locationCombo.setSelectedItem(sheetProp.location());
+            }
+          }
+        });
   }
 
   public void initTerrainModifierOperationComboBox() {
@@ -548,6 +572,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JComboBox) getComponent("statSheetComboBox");
   }
 
+  public JComboBox getStatSheetLocationCombo() {
+    return (JComboBox) getComponent("statSheetLocationComboBox");
+  }
+
   public void initTokenIconPanel() {
     getTokenIconPanel().setPreferredSize(new Dimension(100, 100));
     getTokenIconPanel().setMinimumSize(new Dimension(100, 100));
@@ -818,11 +846,15 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     // Stat Sheet
     var ss = (StatSheet) getStatSheetCombo().getSelectedItem();
-    if (ss != null || (ss.name() == null && ss.namespace() == null)) {
+    if (ss == null || (ss.name() == null && ss.namespace() == null)) {
       token.useDefaultStatSheet();
     } else {
-      token.setStatSheet(
-          new StatSheetProperties(new StatSheetManager().getId(ss), StatSheetLocation.BOTTOM_LEFT));
+      var ssManager = new StatSheetManager();
+      var location = (StatSheetLocation) getStatSheetLocationCombo().getSelectedItem();
+      if (location == null) {
+        location = StatSheetLocation.BOTTOM_LEFT;
+      }
+      token.setStatSheet(new StatSheetProperties(ssManager.getId(ss), location));
     }
 
     // Macros

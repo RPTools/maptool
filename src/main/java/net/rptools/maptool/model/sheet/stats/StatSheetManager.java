@@ -54,7 +54,7 @@ public class StatSheetManager {
     return isLegacyStatSheet(getStatSheet(sheet.id()));
   }
 
-  private boolean isLegacyStatSheet(StatSheet statSheet) {
+  public boolean isLegacyStatSheet(StatSheet statSheet) {
     return statSheet == null || LEGACY_STATSHEET.equals(statSheet);
   }
 
