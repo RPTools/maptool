@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
@@ -50,14 +50,13 @@ public class MapToolServer {
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final MapToolServerConnection conn;
-  private final ServerMessageHandler handler;
   private final ServerConfig config;
   private final PlayerDatabase playerDatabase;
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
-  private final Map<String, ClientConnection> connectionMap =
-      Collections.synchronizedMap(new HashMap<String, ClientConnection>());
+  private final Map<String, Connection> connectionMap =
+      Collections.synchronizedMap(new HashMap<String, Connection>());
   private final AssetProducerThread assetProducerThread;
 
   private Campaign campaign;
@@ -68,10 +67,8 @@ public class MapToolServer {
       throws IOException {
     this.config = config;
     this.policy = policy;
-    handler = new ServerMessageHandler(this);
     playerDatabase = playerDb;
-    conn = new MapToolServerConnection(this, playerDatabase);
-    conn.addMessageHandler(handler);
+    conn = new MapToolServerConnection(this, playerDatabase, new ServerMessageHandler(this));
 
     campaign = new Campaign();
 
@@ -85,13 +82,13 @@ public class MapToolServer {
     }
   }
 
-  public void configureClientConnection(ClientConnection connection) {
+  public void configureClientConnection(Connection connection) {
     String id = connection.getId();
     assetManagerMap.put(id, new AssetTransferManager());
     connectionMap.put(id, connection);
   }
 
-  public ClientConnection getClientConnection(String id) {
+  public Connection getClientConnection(String id) {
     return connectionMap.get(id);
   }
 
@@ -105,7 +102,7 @@ public class MapToolServer {
    * @param id the connection ID
    */
   public void releaseClientConnection(String id) {
-    ClientConnection connection = getClientConnection(id);
+    Connection connection = getClientConnection(id);
     if (connection != null) {
       connection.close();
     }
@@ -164,10 +161,6 @@ public class MapToolServer {
 
   public void updateServerPolicy(ServerPolicy policy) {
     this.policy = policy;
-  }
-
-  public ServerMessageHandler getMethodHandler() {
-    return handler;
   }
 
   public ServerConfig getConfig() {
