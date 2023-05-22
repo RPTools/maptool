@@ -62,7 +62,7 @@ public class StatSheetListener {
   @Subscribe
   public void onHoverExit(TokenHoverExit event) {
     System.out.println("TokenHoverListener.onHoverLeave");
-    MapTool.getFrame().unHideControlPanel();
+    MapTool.getFrame().showControlPanel();
     if (statSheet != null) {
       statSheet.clearContent();
       statSheet = null;
