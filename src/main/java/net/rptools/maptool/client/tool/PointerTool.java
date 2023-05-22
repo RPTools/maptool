@@ -194,7 +194,7 @@ public class PointerTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     htmlRenderer.detach(renderer);
   }
 

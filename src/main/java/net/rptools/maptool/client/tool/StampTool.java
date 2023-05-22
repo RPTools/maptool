@@ -117,7 +117,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     super.detachFrom(renderer);
   }
 

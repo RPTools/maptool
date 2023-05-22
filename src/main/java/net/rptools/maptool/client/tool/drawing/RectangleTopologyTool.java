@@ -40,7 +40,7 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     // Hide the drawable color palette
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
   }
 
   @Override

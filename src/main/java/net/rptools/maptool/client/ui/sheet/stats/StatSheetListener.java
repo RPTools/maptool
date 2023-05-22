@@ -16,6 +16,7 @@ package net.rptools.maptool.client.ui.sheet.stats;
 
 import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
@@ -41,6 +42,11 @@ public class StatSheetListener {
         && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
       if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
+        /*
+         * We have to hide the control panel as we don't know how big the stat sheet is going
+         * to be, and we don't want to obscure it.
+         */
+        MapTool.getFrame().hideControlPanel();
         statSheet = new StatSheet();
         var ss = event.token().getStatSheet();
         statSheet.setContent(event.token(), ssManager.getStatSheetContent(ss.id()), ss.location());
@@ -56,6 +62,7 @@ public class StatSheetListener {
   @Subscribe
   public void onHoverExit(TokenHoverExit event) {
     System.out.println("TokenHoverListener.onHoverLeave");
+    MapTool.getFrame().unHideControlPanel();
     if (statSheet != null) {
       statSheet.clearContent();
       statSheet = null;

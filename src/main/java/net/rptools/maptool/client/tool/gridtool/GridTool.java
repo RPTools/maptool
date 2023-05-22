@@ -239,7 +239,7 @@ public class GridTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     AppState.setShowGrid(oldShowGrid);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     renderer.repaint();
 
     // Commit the grid size change

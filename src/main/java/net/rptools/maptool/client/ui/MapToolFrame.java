@@ -961,13 +961,25 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return coordinateStatusBar;
   }
 
-  public void hideControlPanel() {
+  public void removeControlPanel() {
     if (visibleControlPanel != null) {
       if (zoneRendererPanel != null) {
         zoneRendererPanel.remove(visibleControlPanel);
       }
       visibleControlPanel = null;
       refresh();
+    }
+  }
+
+  public void hideControlPanel() {
+    if (visibleControlPanel != null) {
+      visibleControlPanel.setVisible(false);
+    }
+  }
+
+  public void unHideControlPanel() {
+    if (visibleControlPanel != null) {
+      visibleControlPanel.setVisible(true);
     }
   }
 
