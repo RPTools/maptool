@@ -44,6 +44,7 @@ public class StatSheet {
     try {
       var statSheetContext = new StatSheetContext(token, MapTool.getPlayer(), location);
       var output = new HandlebarsUtil<>(content).apply(statSheetContext);
+      System.out.println(output); // TODO: CDW
       Platform.runLater(
           () -> {
             var overlay =

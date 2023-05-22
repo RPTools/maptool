@@ -63,7 +63,7 @@ public class StatSheetContext {
   private final int portraitWidth;
   private final int portraitHeight;
 
-  private final String statSheetLocacation;
+  private final String statSheetLocation;
 
   private final List<Property> properties = new ArrayList<>();
 
@@ -123,7 +123,7 @@ public class StatSheetContext {
 
     System.out.println("StatSheetContext property count: " + properties.size());
 
-    statSheetLocacation =
+    statSheetLocation =
         switch (location) {
           case TOP_LEFT -> "statSheet-topLeft";
           case TOP_RIGHT -> "statSheet-topRight";
@@ -169,6 +169,6 @@ public class StatSheetContext {
   }
 
   public String getStatSheetLocation() {
-    return statSheetLocacation;
+    return statSheetLocation;
   }
 }
