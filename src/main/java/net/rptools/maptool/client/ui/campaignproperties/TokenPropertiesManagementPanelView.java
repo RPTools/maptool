@@ -69,7 +69,7 @@ public class TokenPropertiesManagementPanelView {
     final JScrollPane scrollPane2 = new JScrollPane();
     scrollPane2.setHorizontalScrollBarPolicy(31);
     mainPanel.add(scrollPane2,
-        new GridConstraints(2, 0, 3, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+        new GridConstraints(2, 0, 2, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -101,81 +101,81 @@ public class TokenPropertiesManagementPanelView {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    final JButton button1 = new JButton();
-    button1.setActionCommand("New");
-    button1.setName("typeAddButton");
-    this.$$$loadButtonText$$$(button1,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
-    mainPanel.add(button1,
-        new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-            null, 0, false));
     final Spacer spacer1 = new Spacer();
     mainPanel.add(spacer1, new GridConstraints(3, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
-    final JPanel panel1 = new JPanel();
-    panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
-    mainPanel.add(panel1,
-        new GridConstraints(5, 4, 1, 1, GridConstraints.ANCHOR_NORTHEAST, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-            null, 0, false));
-    final JButton button2 = new JButton();
-    button2.setActionCommand("AddProperty");
-    button2.setName("propertyAddButton");
-    this.$$$loadButtonText$$$(button2,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
-    panel1.add(button2,
-        new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-            null, 0, false));
-    final JButton button3 = new JButton();
-    button3.setActionCommand("DeleteProperty");
-    button3.setName("propertyDeleteButton");
-    this.$$$loadButtonText$$$(button3,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
-    panel1.add(button3,
-        new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-            null, 0, false));
     final Spacer spacer2 = new Spacer();
     mainPanel.add(spacer2, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
+    statSheetComboBox = new JComboBox();
+    statSheetComboBox.setName("statSheetComboBox");
+    mainPanel.add(statSheetComboBox, new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_WEST,
+        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
+        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    final JPanel panel1 = new JPanel();
+    panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
+    mainPanel.add(panel1,
+        new GridConstraints(4, 4, 1, 1, GridConstraints.ANCHOR_NORTHEAST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
+    final JButton button1 = new JButton();
+    button1.setActionCommand("AddProperty");
+    button1.setName("propertyAddButton");
+    this.$$$loadButtonText$$$(button1,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
+    panel1.add(button1,
+        new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
+    final JButton button2 = new JButton();
+    button2.setActionCommand("DeleteProperty");
+    button2.setName("propertyDeleteButton");
+    this.$$$loadButtonText$$$(button2,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
+    panel1.add(button2,
+        new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
+    comboBox1 = new JComboBox();
+    final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
+    comboBox1.setModel(defaultComboBoxModel1);
+    comboBox1.setName("statSheetLocationComboBox");
+    mainPanel.add(comboBox1, new GridConstraints(5, 4, 1, 1, GridConstraints.ANCHOR_WEST,
+        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
+        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    final JLabel label4 = new JLabel();
+    this.$$$loadLabelText$$$(label4,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
+            "TokenPropertiesPanel.label.statSheet"));
+    mainPanel.add(label4,
+        new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
+            false));
+    final JButton button3 = new JButton();
+    button3.setActionCommand("New");
+    button3.setName("typeAddButton");
+    this.$$$loadButtonText$$$(button3,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
+    mainPanel.add(button3,
+        new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
     final JButton button4 = new JButton();
     button4.setActionCommand("New");
     button4.setName("typeDeleteButton");
     this.$$$loadButtonText$$$(button4,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
     mainPanel.add(button4,
-        new GridConstraints(5, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
+        new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    final JLabel label4 = new JLabel();
-    this.$$$loadLabelText$$$(label4,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
-            "TokenPropertiesPanel.label.statSheet"));
-    mainPanel.add(label4,
-        new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
-            false));
-    statSheetComboBox = new JComboBox();
-    statSheetComboBox.setName("statSheetComboBox");
-    mainPanel.add(statSheetComboBox, new GridConstraints(4, 3, 1, 1, GridConstraints.ANCHOR_WEST,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
-        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-    comboBox1 = new JComboBox();
-    final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
-    comboBox1.setModel(defaultComboBoxModel1);
-    comboBox1.setName("statSheetLocationComboBox");
-    mainPanel.add(comboBox1, new GridConstraints(4, 4, 1, 1, GridConstraints.ANCHOR_WEST,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
-        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
   }
 
   private static Method $$$cachedGetBundleMethod$$$ = null;
