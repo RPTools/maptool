@@ -67,10 +67,33 @@ public class StatSheetContext {
 
   private final List<Property> properties = new ArrayList<>();
 
+  private final String notes;
+
+  private final String gmNotes;
+
+  private final String speechName;
+
+  private final String tokenType;
+
+  private final boolean gm;
+
   public StatSheetContext(Token token, Player player, StatSheetLocation location) {
 
     name = token.getName();
-    gmName = player.isGM() ? token.getGMName() : null;
+    tokenType = token.getType().name();
+
+    if (player.isGM()) {
+      gmName = token.getGMName();
+      gmNotes = token.getGMNotes();
+      gm = true;
+    } else {
+      gmName = null;
+      gmNotes = null;
+      gm = false;
+    }
+    notes = AppUtil.playerOwns(token) ? token.getNotes() : null;
+    speechName = token.getSpeechName();
+
     if (AppPreferences.getShowPortrait()) {
       imageAsset = token.getImageAssetId();
       portraitAsset = token.getPortraitImage();
@@ -121,7 +144,7 @@ public class StatSheetContext {
     portraitWidth = dim.width;
     portraitHeight = dim.height;
 
-    System.out.println("StatSheetContext property count: " + properties.size());
+    System.out.println("StatSheetContext property count: " + properties.size()); // TODO: CDW
 
     statSheetLocation =
         switch (location) {
@@ -170,5 +193,25 @@ public class StatSheetContext {
 
   public String getStatSheetLocation() {
     return statSheetLocation;
+  }
+
+  public String getNotes() {
+    return notes;
+  }
+
+  public String getGmNotes() {
+    return gmNotes;
+  }
+
+  public String getSpeechName() {
+    return speechName;
+  }
+
+  public String getTokenType() {
+    return tokenType;
+  }
+
+  public boolean isGm() {
+    return gm;
   }
 }
