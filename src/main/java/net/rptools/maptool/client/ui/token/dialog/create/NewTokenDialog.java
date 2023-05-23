@@ -232,6 +232,8 @@ public class NewTokenDialog extends AbeillePanel<Token> {
         .getTokenTypeMap()
         .keySet()
         .forEach(combo::addItem);
+    combo.setSelectedItem(
+        MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType());
     combo.addActionListener(
         l -> {
           if (combo.hasFocus()) {
