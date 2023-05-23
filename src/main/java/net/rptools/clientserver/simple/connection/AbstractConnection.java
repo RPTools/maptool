@@ -14,11 +14,7 @@
  */
 package net.rptools.clientserver.simple.connection;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -30,8 +26,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorInputStream;
-import org.apache.commons.compress.compressors.lzma.LZMACompressorOutputStream;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorInputStream;
+import org.apache.commons.compress.compressors.zstandard.ZstdCompressorOutputStream;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -61,10 +57,9 @@ public abstract class AbstractConnection implements Connection {
   private byte[] compress(byte[] message) {
     try {
       ByteArrayOutputStream baos = new ByteArrayOutputStream(message.length);
-      OutputStream ios = new LZMACompressorOutputStream(baos);
+      OutputStream ios = new ZstdCompressorOutputStream(baos);
       ios.write(message);
       ios.close();
-
       var compressedMessage = baos.toByteArray();
       return compressedMessage;
     } catch (IOException e) {
@@ -73,10 +68,9 @@ public abstract class AbstractConnection implements Connection {
   }
 
   private byte[] inflate(byte[] compressedMessage) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream(compressedMessage.length);
     InputStream bytesIn = new ByteArrayInputStream(compressedMessage);
     try {
-      InputStream ios = new LZMACompressorInputStream(bytesIn);
+      InputStream ios = new ZstdCompressorInputStream(bytesIn);
       var decompressed = ios.readAllBytes();
       ios.close();
       return decompressed;
