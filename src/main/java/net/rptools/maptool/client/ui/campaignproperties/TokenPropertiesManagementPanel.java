@@ -42,6 +42,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   private final Map<String, String> renameTypes = new TreeMap<>();
 
+  private String defaultPropertyType;
+
   CampaignProperties campaignProperties;
 
   public TokenPropertiesManagementPanel() {
@@ -52,6 +54,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public void copyCampaignToUI(CampaignProperties cp) {
     campaignProperties = cp;
+    defaultPropertyType = cp.getDefaultTokenPropertyType();
 
     tokenTypeMap = new HashMap<>();
     campaignProperties
@@ -76,6 +79,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         .getTokenTypeMap()
         .keySet()
         .forEach(tt -> campaign.setTokenTypeDefaultSheetId(tt, tokenTypeStatSheetMap.get(tt)));
+    campaign.setDefaultTokenPropertyType(defaultPropertyType);
   }
 
   public JList getTokenTypeList() {
@@ -116,6 +120,10 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public JComboBox getStatSheetComboBox() {
     return (JComboBox) getComponent("statSheetComboBox");
+  }
+
+  public JButton getTypeSetAsDefault() {
+    return (JButton) getComponent("typeDefaultButton");
   }
 
   public TokenPropertiesTableModel getTokenPropertiesTableModel() {
@@ -190,6 +198,22 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             }
           }
         });
+    button.setEnabled(false);
+  }
+
+  public void initTypeDefaultButton() {
+    var button = getTypeSetAsDefault();
+    button.addActionListener(
+        l -> {
+          var propertyType = (String) getTokenTypeList().getSelectedValue();
+          if (propertyType != null) {
+            defaultPropertyType = propertyType;
+            button.setEnabled(false);
+            var delButton = getTypeDeleteButton();
+            delButton.setEnabled(false);
+          }
+        });
+
     button.setEnabled(false);
   }
 
@@ -281,18 +305,29 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 getTokenTypeName().setEditable(false);
                 getStatSheetComboBox().setEnabled(false);
                 getStatSheetLocationComboBox().setEnabled(false);
+                getTypeSetAsDefault().setEnabled(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
                 getPropertyAddButton().setEnabled(true);
                 getTokenTypeName().setEditable(true);
-                // Can't delete the last one
-                getTypeDeleteButton().setEnabled(tokenTypeMap.size() > 1);
+                // Can't delete the default property
+                if (propertyType.equals(defaultPropertyType)) {
+                  getTypeDeleteButton().setEnabled(false);
+                } else {
+                  getTypeDeleteButton().setEnabled(true);
+                }
                 getStatSheetComboBox().setEnabled(true);
                 getStatSheetLocationComboBox().setEnabled(true);
                 populateStatSheetComboBoxes(propertyType);
+                if (!propertyType.equals(defaultPropertyType)) {
+                  getTypeSetAsDefault().setEnabled(true);
+                } else {
+                  getTypeSetAsDefault().setEnabled(false);
+                }
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    getTokenTypeList().setCellRenderer(new TokenTypeCellRenderer());
   }
 
   private void populateStatSheetComboBoxes(String propertyType) {
@@ -528,5 +563,39 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
   public Map<String, String> getRenameTypes() {
     return renameTypes;
+  }
+
+  private class TokenTypeCellRenderer extends JLabel implements ListCellRenderer {
+
+    public TokenTypeCellRenderer() {
+      setOpaque(true);
+    }
+
+    @Override
+    public Component getListCellRendererComponent(
+        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+      var val = value.toString();
+      if (val.equals(defaultPropertyType)) {
+        setText(
+            "<html>"
+                + val
+                + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>("
+                + I18N.getString("TokenPropertiesPanel.defaultPropertyType")
+                + ")</i></html>");
+      } else {
+        setText("<html>" + val + "</html>");
+      }
+
+      if (isSelected) {
+        setBackground(list.getSelectionBackground());
+        setForeground(list.getSelectionForeground());
+      } else {
+        setBackground(list.getBackground());
+        setForeground(list.getForeground());
+      }
+
+      return this;
+    }
   }
 }

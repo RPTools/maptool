@@ -43,9 +43,6 @@ import net.rptools.maptool.server.proto.CampaignDto;
  * images that will appear on it (and also campaign macro buttons).
  */
 public class Campaign {
-  /** The only built-in property type is "Basic". Any others are user-defined. */
-  public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
-
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
@@ -245,6 +242,10 @@ public class Campaign {
    */
   public void setTokenTypeDefaultSheetId(String tokenProperty, StatSheetProperties sheetId) {
     campaignProperties.setTokenTypeDefaultStatSheet(tokenProperty, sheetId);
+  }
+
+  public void setDefaultTokenPropertyType(String def) {
+    campaignProperties.setDefaultTokenPropertyType(def);
   }
 
   public List<String> getSightTypes() {

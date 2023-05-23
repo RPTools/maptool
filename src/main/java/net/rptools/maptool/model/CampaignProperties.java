@@ -55,7 +55,8 @@ import net.rptools.maptool.server.proto.TokenPropertyListDto;
 
 public class CampaignProperties {
 
-  public static final String DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
+  private static final String FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
+  private String defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
 
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
 
@@ -82,6 +83,14 @@ public class CampaignProperties {
 
   /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
   private boolean initiativePanelButtonsDisabled = false;
+
+  public String getDefaultTokenPropertyType() {
+    return defaultTokenPropertyType;
+  }
+
+  public void setDefaultTokenPropertyType(String def) {
+    defaultTokenPropertyType = def;
+  }
 
   public CampaignProperties() {}
 
@@ -119,6 +128,7 @@ public class CampaignProperties {
     for (String type : properties.characterSheets.keySet()) {
       characterSheets.put(type, properties.characterSheets.get(type));
     }
+    defaultTokenPropertyType = properties.defaultTokenPropertyType;
   }
 
   public void mergeInto(CampaignProperties properties) {
@@ -137,6 +147,7 @@ public class CampaignProperties {
     properties.sightTypeMap.putAll(sightTypeMap);
     properties.tokenStates.putAll(tokenStates);
     properties.tokenBars.putAll(tokenBars);
+    properties.defaultTokenPropertyType = defaultTokenPropertyType;
   }
 
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
@@ -313,7 +324,7 @@ public class CampaignProperties {
     list.add(new TokenProperty("Elevation", "Elv", true, false, false));
     list.add(new TokenProperty("Description", "Des"));
 
-    tokenTypeMap.put(DEFAULT_TOKEN_PROPERTY_TYPE, list);
+    tokenTypeMap.put(getDefaultTokenPropertyType(), list);
   }
 
   private void initTokenStatesMap() {
@@ -458,6 +469,10 @@ public class CampaignProperties {
     if (tokenTypeStatSheetMap == null) {
       tokenTypeStatSheetMap = new HashMap<>();
     }
+
+    if (defaultTokenPropertyType == null) {
+      defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
+    }
     return this;
   }
 
@@ -525,6 +540,13 @@ public class CampaignProperties {
               var sightType = SightType.fromDto(st);
               props.sightTypeMap.put(sightType.getName(), sightType);
             });
+
+    if (dto.hasDefaultTokenPropertyType()) {
+      props.defaultTokenPropertyType = dto.getDefaultTokenPropertyType().getValue();
+    } else {
+      props.defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
+    }
+
     return props;
   }
 
@@ -570,6 +592,7 @@ public class CampaignProperties {
         lookupTableMap.values().stream().map(LookupTable::toDto).collect(Collectors.toList()));
     dto.addAllSightTypes(
         sightTypeMap.values().stream().map(SightType::toDto).collect(Collectors.toList()));
+    dto.setDefaultTokenPropertyType(StringValue.of(defaultTokenPropertyType));
     return dto.build();
   }
 }

@@ -49,19 +49,19 @@ public class TokenPropertiesManagementPanelView {
   private void $$$setupUI$$$() {
     createUIComponents();
     mainPanel = new JPanel();
-    mainPanel.setLayout(new GridLayoutManager(6, 6, new Insets(0, 0, 0, 0), -1, -1));
+    mainPanel.setLayout(new GridLayoutManager(6, 8, new Insets(0, 0, 0, 0), -1, -1));
     final JLabel label1 = new JLabel();
     this.$$$loadLabelText$$$(label1,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "TokenPropertiesPanel.label.list"));
     mainPanel.add(label1,
-        new GridConstraints(0, 2, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+        new GridConstraints(0, 4, 1, 3, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JScrollPane scrollPane1 = new JScrollPane();
     mainPanel.add(scrollPane1,
-        new GridConstraints(3, 2, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+        new GridConstraints(3, 4, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -69,7 +69,7 @@ public class TokenPropertiesManagementPanelView {
     final JScrollPane scrollPane2 = new JScrollPane();
     scrollPane2.setHorizontalScrollBarPolicy(31);
     mainPanel.add(scrollPane2,
-        new GridConstraints(2, 0, 2, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+        new GridConstraints(2, 0, 2, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -80,14 +80,14 @@ public class TokenPropertiesManagementPanelView {
     this.$$$loadLabelText$$$(label2,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
     mainPanel.add(label2,
-        new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+        new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JTextField textField1 = new JTextField();
     textField1.setName("tokenTypeName");
     textField1.setText("");
-    mainPanel.add(textField1, new GridConstraints(2, 3, 1, 2, GridConstraints.ANCHOR_CENTER,
+    mainPanel.add(textField1, new GridConstraints(2, 5, 1, 2, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -97,27 +97,27 @@ public class TokenPropertiesManagementPanelView {
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "TokenPropertiesPanel.label.type"));
     mainPanel.add(label3,
-        new GridConstraints(0, 0, 1, 2, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
+        new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final Spacer spacer1 = new Spacer();
-    mainPanel.add(spacer1, new GridConstraints(3, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
+    mainPanel.add(spacer1, new GridConstraints(3, 7, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
     final Spacer spacer2 = new Spacer();
-    mainPanel.add(spacer2, new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER,
+    mainPanel.add(spacer2, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
     statSheetComboBox = new JComboBox();
     statSheetComboBox.setName("statSheetComboBox");
-    mainPanel.add(statSheetComboBox, new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_WEST,
+    mainPanel.add(statSheetComboBox, new GridConstraints(5, 5, 1, 1, GridConstraints.ANCHOR_WEST,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JPanel panel1 = new JPanel();
     panel1.setLayout(new GridLayoutManager(1, 2, new Insets(0, 0, 0, 0), -1, -1));
     mainPanel.add(panel1,
-        new GridConstraints(4, 4, 1, 1, GridConstraints.ANCHOR_NORTHEAST, GridConstraints.FILL_NONE,
+        new GridConstraints(4, 6, 1, 1, GridConstraints.ANCHOR_NORTHEAST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -145,7 +145,7 @@ public class TokenPropertiesManagementPanelView {
     final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
     comboBox1.setModel(defaultComboBoxModel1);
     comboBox1.setName("statSheetLocationComboBox");
-    mainPanel.add(comboBox1, new GridConstraints(5, 4, 1, 1, GridConstraints.ANCHOR_WEST,
+    mainPanel.add(comboBox1, new GridConstraints(5, 6, 1, 1, GridConstraints.ANCHOR_WEST,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JLabel label4 = new JLabel();
@@ -153,7 +153,7 @@ public class TokenPropertiesManagementPanelView {
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "TokenPropertiesPanel.label.statSheet"));
     mainPanel.add(label4,
-        new GridConstraints(5, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+        new GridConstraints(5, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
             false));
     final JButton button3 = new JButton();
@@ -173,6 +173,17 @@ public class TokenPropertiesManagementPanelView {
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
     mainPanel.add(button4,
         new GridConstraints(4, 1, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
+    final JButton button5 = new JButton();
+    button5.setActionCommand("New");
+    button5.setName("typeDefaultButton");
+    this.$$$loadButtonText$$$(button5,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
+            "TokenPropertiesPanel.button.setAsDefault"));
+    mainPanel.add(button5,
+        new GridConstraints(4, 2, 1, 2, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));

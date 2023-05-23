@@ -284,7 +284,7 @@ public class Token implements Cloneable {
   private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
-  private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
+  private String propertyType;
 
   private Integer facing = null;
 
@@ -510,6 +510,8 @@ public class Token implements Cloneable {
     if (macroMap != null) {
       loadOldMacros();
     }
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
   }
 
   /**
@@ -540,7 +542,7 @@ public class Token implements Cloneable {
      * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
      * what is default for new tokens.
      */
-    propertyType = getPropertyType();
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     /**
      * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures
@@ -2242,6 +2244,8 @@ public class Token implements Cloneable {
     notes = (String) td.get(TokenTransferData.NOTES);
     gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
     gmName = (String) td.get(TokenTransferData.GM_NAME);
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     // Get the image and portrait for the token
     Asset asset = createAssetFromIcon(td.getToken());
