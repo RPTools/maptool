@@ -1379,6 +1379,7 @@ public class MapTool {
         .getZone()
         .setTopologyTypes(AppPreferences.getTopologyTypes());
 
+    // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
 
     final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();

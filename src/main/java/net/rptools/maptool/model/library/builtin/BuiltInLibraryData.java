@@ -24,6 +24,7 @@ import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.library.data.LibraryData;
 
+/** Class that represents data storage for built in libraries. */
 public class BuiltInLibraryData implements LibraryData {
 
   private final MapToolBuiltInLibrary library;

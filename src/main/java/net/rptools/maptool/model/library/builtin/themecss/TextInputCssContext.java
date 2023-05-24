@@ -16,15 +16,28 @@ package net.rptools.maptool.model.library.builtin.themecss;
 
 import javax.swing.UIDefaults;
 
+/**
+ * A context for the text input. This is used to extract and provide the color values handlebars for
+ * the themed css.
+ */
 public class TextInputCssContext {
 
+  /** The foreground color of the text input. */
   private final String foregroundColor;
+  /** The background color of the text input. */
   private final String backgroundColor;
 
+  /** The border size of the text input when disabled. */
   private final String disabledBorderSize;
 
+  /** The border color of the text input when disabled. */
   private final String disabledBorderColor;
 
+  /**
+   * Creates a new instance of the text input css context.
+   *
+   * @param uiDef The UI defaults to use to extract the values.
+   */
   public TextInputCssContext(UIDefaults uiDef) {
     foregroundColor = ThemeCssContext.formatColor(uiDef.getColor("TextField.foreground"));
     backgroundColor = ThemeCssContext.formatColor(uiDef.getColor("TextField.background"));
@@ -33,18 +46,38 @@ public class TextInputCssContext {
         ThemeCssContext.formatColor(uiDef.getColor("TextField.inactiveForeground"));
   }
 
+  /**
+   * Returns the foreground color of the text input.
+   *
+   * @return The foreground color of the text input.
+   */
   public String getForegroundColor() {
     return foregroundColor;
   }
 
+  /**
+   * Returns the background color of the text input.
+   *
+   * @return The background color of the text input.
+   */
   public String getBackgroundColor() {
     return backgroundColor;
   }
 
+  /**
+   * Returns the border size of the text input when disabled.
+   *
+   * @return The border size of the text input when disabled.
+   */
   public String getDisabledBorderSize() {
     return disabledBorderSize;
   }
 
+  /**
+   * Returns the border color of the text input when disabled.
+   *
+   * @return The border color of the text input when disabled.
+   */
   public String getDisabledBorderColor() {
     return disabledBorderColor;
   }

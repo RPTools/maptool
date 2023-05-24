@@ -16,6 +16,7 @@ package net.rptools.maptool.model.sheet.stats;
 
 import net.rptools.maptool.language.I18N;
 
+/** The location of a stat sheet on a map view. */
 public enum StatSheetLocation {
   TOP_LEFT("position.corner.topLeft"),
   TOP("position.side.top"),
@@ -26,12 +27,23 @@ public enum StatSheetLocation {
   BOTTOM_LEFT("position.corner.bottomLeft"),
   LEFT("position.side.left");
 
+  /** The i18n key for the location. */
   private final String i18nKey;
 
+  /**
+   * Creates a new instance of <code>StatSheetLocation</code>.
+   *
+   * @param i18nKey The i18n key for the location.
+   */
   StatSheetLocation(String i18nKey) {
     this.i18nKey = i18nKey;
   }
 
+  /**
+   * Returns the i18n key for the location.
+   *
+   * @return The i18n key for the location.
+   */
   public String getI18nKey() {
     return i18nKey;
   }

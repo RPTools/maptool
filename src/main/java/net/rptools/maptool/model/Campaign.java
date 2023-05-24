@@ -244,6 +244,11 @@ public class Campaign {
     campaignProperties.setTokenTypeDefaultStatSheet(tokenProperty, sheetId);
   }
 
+  /**
+   * Sets the default property type for tokens.
+   *
+   * @param def the default property type.
+   */
   public void setDefaultTokenPropertyType(String def) {
     campaignProperties.setDefaultTokenPropertyType(def);
   }

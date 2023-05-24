@@ -16,4 +16,8 @@ package net.rptools.maptool.model.library.builtin;
 
 import net.rptools.maptool.model.library.Library;
 
+/**
+ * Interface for built in libraries. Built it libraries are code shipped with MapTool but act like
+ * an Add-On library.
+ */
 public interface BuiltInLibrary extends Library {}

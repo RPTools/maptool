@@ -16,7 +16,10 @@ package net.rptools.maptool.model.library;
 
 /** Library types */
 public enum LibraryType {
+  /** Lib:Token libraries */
   TOKEN,
+  /** Add-On Libraries */
   ADD_ON,
+  /** Built in libraries that behave like Add-Ons. */
   BUILT_IN
 }

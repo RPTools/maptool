@@ -77,6 +77,10 @@ public class AppConstants {
    */
   public static final String INTERNAL_FRAME_PREFIX = "MapTool-Internal:";
 
-  public static final String INTERNAL_MAP_HTML_OVERLAY_NAME =
-      INTERNAL_FRAME_PREFIX + "Internal Map Overlay";
+  /**
+   * Internal overlay for displaying information about what is under the pointer (token stat sheets
+   * for example);
+   */
+  public static final String INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME =
+      INTERNAL_FRAME_PREFIX + "Internal Map Under Pointer Overlay";
 }

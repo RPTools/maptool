@@ -55,12 +55,17 @@ import net.rptools.maptool.server.proto.TokenPropertyListDto;
 
 public class CampaignProperties {
 
+  /** The property type to fall back to for the default when none is defined. */
   private static final String FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
+
+  /** The default property type for tokens. */
   private String defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
 
   private Map<String, List<TokenProperty>> tokenTypeMap = new HashMap<>();
 
+  /** Mapping between property types and default stat sheets for them. */
   private Map<String, StatSheetProperties> tokenTypeStatSheetMap = new HashMap<>();
+
   private List<String> remoteRepositoryList = new ArrayList<>();
   private Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
   private Map<String, LookupTable> lookupTableMap = new HashMap<>();
@@ -84,10 +89,20 @@ public class CampaignProperties {
   /** Whether the Next/Previous buttons are disabled on the Initiative Panel */
   private boolean initiativePanelButtonsDisabled = false;
 
+  /**
+   * Returns the default property type for tokens.
+   *
+   * @return the default property type.
+   */
   public String getDefaultTokenPropertyType() {
     return defaultTokenPropertyType;
   }
 
+  /**
+   * Sets the default property type for tokens.
+   *
+   * @param def the default property type.
+   */
   public void setDefaultTokenPropertyType(String def) {
     defaultTokenPropertyType = def;
   }
@@ -154,6 +169,12 @@ public class CampaignProperties {
     return tokenTypeMap;
   }
 
+  /**
+   * Returns the default stat sheet details for a token property type.
+   *
+   * @param propertyType the token property type to get the details for.
+   * @return the stat sheet details.
+   */
   public StatSheetProperties getTokenTypeDefaultStatSheet(String propertyType) {
     return tokenTypeStatSheetMap.getOrDefault(
         propertyType,
@@ -161,6 +182,12 @@ public class CampaignProperties {
             StatSheetManager.LEGACY_STATSHEET_ID, StatSheetLocation.BOTTOM_LEFT));
   }
 
+  /**
+   * Sets the default stat sheet details for a token property type.
+   *
+   * @param propertyType the token property type to set the details for.
+   * @param statSheetProperties the stat sheet properties.
+   */
   public void setTokenTypeDefaultStatSheet(
       String propertyType, StatSheetProperties statSheetProperties) {
     tokenTypeStatSheetMap.put(propertyType, statSheetProperties);

@@ -27,57 +27,97 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ImageManager;
 
+/** Class that extracts and provides the information needed to render a stat sheet. */
 public class StatSheetContext {
 
+  /** Class that represents a token property on a stat sheet. */
   static class Property {
+    /** Name of the property. */
     private final String name;
+    /** Value of the property. */
     private final Object value;
+    /** True if the property is GM only. */
     private final boolean gmOnly;
 
+    /**
+     * Creates a new instance of the class.
+     *
+     * @param name Name of the property.
+     * @param value Value of the property.
+     * @param gmOnly True if the property is GM only.
+     * @note GM only properties are only extracted if the player is a GM.
+     */
     Property(String name, Object value, boolean gmOnly) {
       this.name = name;
       this.value = value;
       this.gmOnly = gmOnly;
     }
 
+    /**
+     * Returns the name of the property.
+     *
+     * @return The name of the property.
+     */
     public String getName() {
       return name;
     }
 
+    /**
+     * Returns the value of the property.
+     *
+     * @return The value of the property.
+     */
     public Object getValue() {
       return value;
     }
 
+    /**
+     * Returns true if the property is GM only.
+     *
+     * @return True if the property is GM only.
+     */
     public boolean getGmOnly() {
       return gmOnly;
     }
   }
 
+  /** The name of the token. */
   private final String name;
+  /** The GM name of the token. */
   private final String gmName;
-
+  /** The label of the token. */
   private final String label;
+  /** The image asset of the token. */
   private final MD5Key imageAsset;
-
+  /** The portrait asset of the token. */
   private final MD5Key portraitAsset;
-
+  /** The width of the portrait on the stat sheet. */
   private final int portraitWidth;
+  /** The height of the portrait stat sheet. */
   private final int portraitHeight;
 
+  /** The location of the stat sheet. */
   private final String statSheetLocation;
-
+  /** The properties of the token. */
   private final List<Property> properties = new ArrayList<>();
-
+  /** The notes of the token. */
   private final String notes;
-
+  /** The GM notes of the token. */
   private final String gmNotes;
-
+  /** The speech name of the token. */
   private final String speechName;
-
+  /** The type of the token. */
   private final String tokenType;
-
+  /** True if the player is a GM. */
   private final boolean gm;
 
+  /**
+   * Creates a new instance of the class.
+   *
+   * @param token The token to extract the information from.
+   * @param player The player to extract the information for.
+   * @param location The location of the stat sheet.
+   */
   public StatSheetContext(Token token, Player player, StatSheetLocation location) {
 
     name = token.getName();
@@ -157,58 +197,128 @@ public class StatSheetContext {
         };
   }
 
+  /**
+   * Returns the name of the token.
+   *
+   * @return The name of the token.
+   */
   public String getName() {
     return name;
   }
 
+  /**
+   * Returns the GM name of the token.
+   *
+   * @return The GM name of the token.
+   */
   public String getGmName() {
     return gmName;
   }
 
+  /**
+   * Returns the image asset of the token.
+   *
+   * @return The image asset of the token.
+   */
   public String getImage() {
     return imageAsset != null ? "asset://" + imageAsset : null;
   }
 
+  /**
+   * Returns the portrait asset of the token.
+   *
+   * @return The portrait asset of the token.
+   */
   public String getPortrait() {
     return portraitAsset != null ? "asset://" + portraitAsset : null;
   }
 
+  /**
+   * Returns the label of the token.
+   *
+   * @return The label of the token.
+   */
   public String getLabel() {
     return label;
   }
 
+  /**
+   * Returns the width of the portrait on the stat sheet.
+   *
+   * @return The width of the portrait on the stat sheet.
+   */
   public int getPortraitWidth() {
     return portraitWidth;
   }
 
+  /**
+   * Returns the height of the portrait on the stat sheet.
+   *
+   * @return The height of the portrait on the stat sheet.
+   */
   public int getPortraitHeight() {
     return portraitHeight;
   }
 
+  /**
+   * Returns the properties of the token.
+   *
+   * @return The properties of the token.
+   */
   public List<Property> getProperties() {
     return properties;
   }
 
+  /**
+   * Returns the css class for the location of the stat sheet.
+   *
+   * @return The css class for the location of the stat sheet.
+   */
   public String getStatSheetLocation() {
     return statSheetLocation;
   }
 
+  /**
+   * Returns the notes of the token.
+   *
+   * @return The notes of the token.
+   */
   public String getNotes() {
     return notes;
   }
 
+  /**
+   * Returns the GM notes of the token.
+   *
+   * @return The GM notes of the token.
+   */
   public String getGmNotes() {
     return gmNotes;
   }
 
+  /**
+   * Returns the speech name of the token.
+   *
+   * @return The speech name of the token.
+   */
   public String getSpeechName() {
     return speechName;
   }
 
+  /**
+   * Returns the type of the token.
+   *
+   * @return The type of the token.
+   */
   public String getTokenType() {
     return tokenType;
   }
 
+  /**
+   * Returns true if the player is a GM.
+   *
+   * @return True if the player is a GM.
+   */
   public boolean isGm() {
     return gm;
   }

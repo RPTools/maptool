@@ -937,6 +937,7 @@ public class MapToolLineParser {
                   frameName, FrameType.FRAME, false, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG:
+              // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
@@ -944,6 +945,7 @@ public class MapToolLineParser {
                   frameName, FrameType.DIALOG, false, frameOpts, expressionBuilder.toString());
               break;
             case OVERLAY:
+              // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
@@ -954,6 +956,7 @@ public class MapToolLineParser {
               builder.append(expressionBuilder);
               break;
             case FRAME5:
+              // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }
@@ -961,6 +964,7 @@ public class MapToolLineParser {
                   frameName, FrameType.FRAME, true, frameOpts, expressionBuilder.toString());
               break;
             case DIALOG5:
+              // Macros can not interact with internal frames/dialogs/overlays
               if (HTMLFrameFactory.isInternalOnly(frameName)) {
                 throw new ParserException(I18N.getText("msg.error.frame.reservedName", frameName));
               }

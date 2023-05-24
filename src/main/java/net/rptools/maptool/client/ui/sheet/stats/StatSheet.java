@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.sheet.stats;
 
-import java.awt.*;
 import java.io.IOException;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
@@ -49,14 +48,17 @@ public class StatSheet {
             var overlay =
                 MapTool.getFrame()
                     .getOverlayPanel()
-                    .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
+                    .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
             if (overlay != null) {
               overlay.updateContents(output, true);
             } else {
               MapTool.getFrame()
                   .getOverlayPanel()
                   .showOverlay(
-                      AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME, Integer.MIN_VALUE, output, null);
+                      AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME,
+                      Integer.MIN_VALUE,
+                      output,
+                      null);
             }
           });
     } catch (IOException e) {
@@ -71,7 +73,7 @@ public class StatSheet {
           var overlay =
               MapTool.getFrame()
                   .getOverlayPanel()
-                  .getOverlay(AppConstants.INTERNAL_MAP_HTML_OVERLAY_NAME);
+                  .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
           overlay.updateContents("", true);
         });
   }

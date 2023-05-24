@@ -20,15 +20,34 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import java.io.IOException;
 
+/**
+ * Utility class to apply a Handlebars template given a bean.
+ *
+ * @param <T> The type of the bean to apply the template to.
+ */
 public class HandlebarsUtil<T> {
 
+  /** The compiled template. */
   private final Template template;
 
+  /**
+   * Creates a new instance of the utility class.
+   *
+   * @param stringTemplate The template to compile.
+   * @throws IOException If there is an error compiling the template.
+   */
   public HandlebarsUtil(String stringTemplate) throws IOException {
     Handlebars handlebars = new Handlebars();
     template = handlebars.compileInline(stringTemplate);
   }
 
+  /**
+   * Applies the template to the given bean.
+   *
+   * @param bean The bean to apply the template to.
+   * @return The result of applying the template to the bean.
+   * @throws IOException If there is an error applying the template.
+   */
   public String apply(T bean) throws IOException {
     Handlebars handlebars = new Handlebars();
     var context = Context.newBuilder(bean).resolver(JavaBeanValueResolver.INSTANCE).build();

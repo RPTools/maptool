@@ -40,7 +40,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   private final Map<String, StatSheetProperties> tokenTypeStatSheetMap = new HashMap<>();
   private String editingType;
 
-  private final Map<String, String> renameTypes = new TreeMap<>();
+  private final SortedMap<String, String> renameTypes = new TreeMap<>();
 
   private String defaultPropertyType;
 
@@ -561,10 +561,16 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     }
   }
 
-  public Map<String, String> getRenameTypes() {
+  /**
+   * Gets the Token Property Type rename operations that have occurred.
+   *
+   * @return a {@link Map} of renames.
+   */
+  public SortedMap<String, String> getRenameTypes() {
     return renameTypes;
   }
 
+  /** A List cell renderer that calls out default property type. */
   private class TokenTypeCellRenderer extends JLabel implements ListCellRenderer {
 
     public TokenTypeCellRenderer() {

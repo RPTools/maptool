@@ -19,6 +19,7 @@ import javax.swing.*;
 import javax.swing.plaf.basic.BasicComboBoxRenderer;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
 
+/** Class that implements the Combo Box renderer for stat sheets. */
 public class StatSheetComboBoxRenderer extends BasicComboBoxRenderer {
   @Override
   public Component getListCellRendererComponent(

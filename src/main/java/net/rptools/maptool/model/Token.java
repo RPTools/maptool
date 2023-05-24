@@ -98,7 +98,8 @@ public class Token implements Cloneable {
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
 
-  private StatSheetProperties statSheet;
+  /** The stat sheet properties for the token. */
+  @Nullable private StatSheetProperties statSheet;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
