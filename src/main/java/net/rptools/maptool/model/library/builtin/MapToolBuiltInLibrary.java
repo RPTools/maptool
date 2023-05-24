@@ -24,7 +24,9 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.LibraryInfo;
@@ -64,8 +66,8 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
       System.out.println(css);
       return css;
     } catch (IOException e) {
-      e.printStackTrace();
-      return ""; // TODO: CDW
+      MapTool.showError(I18N.getText("msg.error.parsing.handlebars", rd.path()), e);
+      return "";
     }
   }
 
@@ -112,7 +114,7 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     if (resourcesMap.containsKey(path)) {
       return CompletableFuture.completedFuture(readAsString(resourcesMap.get(path)));
     } else {
-      throw new IOException("Resource not found: " + location); // TODO: CDW
+      throw new IOException("Resource not found: " + location);
     }
   }
 
@@ -122,7 +124,7 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     if (resourcesMap.containsKey(path)) {
       return CompletableFuture.completedFuture(read(resourcesMap.get(path)));
     } else {
-      throw new IOException("Resource not found: " + location); // TODO: CDW
+      throw new IOException("Resource not found: " + location);
     }
   }
 

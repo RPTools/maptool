@@ -16,9 +16,11 @@ package net.rptools.maptool.client.ui.sheet.stats;
 
 import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
+import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 
 /**
@@ -49,7 +51,13 @@ public class StatSheetListener {
         MapTool.getFrame().hideControlPanel();
         statSheet = new StatSheet();
         var ss = event.token().getStatSheet();
-        statSheet.setContent(event.token(), ssManager.getStatSheetContent(ss.id()), ss.location());
+        var token = event.token();
+        if (MapTool.getPlayer().isGM()
+            || AppUtil.playerOwns(token)
+            || token.getType() != Type.NPC) {
+          statSheet.setContent(
+              event.token(), ssManager.getStatSheetContent(ss.id()), ss.location());
+        }
       }
     }
   }

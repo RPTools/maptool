@@ -206,8 +206,7 @@ public class AddOnLibrary implements Library {
                 new HashSet<>(s.getPropertyTypesList()),
                 namespace));
       } catch (Exception e) {
-        logger.error(I18N.getText("library.error.addOn.sheet", namespace, s.getName()));
-        // TODO: CDW need better error notification
+        MapTool.showError(I18N.getText("library.error.addOn.sheet", namespace, s.getName()), e);
       }
     }
 
@@ -579,7 +578,7 @@ public class AddOnLibrary implements Library {
         statSheetManager.addStatSheet(sheet, this);
       } catch (IOException e) {
         logger.error(I18N.getText("library.error.addOn.sheet", namespace, sheet.name()));
-        // TODO: CDW need better error notification
+        MapTool.showError(I18N.getText("library.error.addOn.sheet", namespace, sheet.name()), e);
       }
     }
   }

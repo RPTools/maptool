@@ -144,8 +144,6 @@ public class StatSheetContext {
     portraitWidth = dim.width;
     portraitHeight = dim.height;
 
-    System.out.println("StatSheetContext property count: " + properties.size()); // TODO: CDW
-
     statSheetLocation =
         switch (location) {
           case TOP_LEFT -> "statSheet-topLeft";
