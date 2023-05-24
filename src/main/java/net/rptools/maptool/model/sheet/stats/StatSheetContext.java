@@ -21,6 +21,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
@@ -102,6 +103,7 @@ public class StatSheetContext {
       portraitAsset = null;
     }
     label = token.getLabel();
+    MapToolVariableResolver resolver = new MapToolVariableResolver(token);
     MapTool.getCampaign()
         .getCampaignProperties()
         .getTokenPropertyList(token.getPropertyType())
@@ -116,7 +118,7 @@ public class StatSheetContext {
                   return;
                 }
 
-                var value = token.getProperty(tp.getName());
+                Object value = token.getEvaluatedProperty(resolver, tp.getName());
                 if (value == null) {
                   return;
                 }
@@ -126,9 +128,7 @@ public class StatSheetContext {
                     return;
                   }
                 }
-
-                properties.add(
-                    new Property(tp.getName(), token.getProperty(tp.getName()), tp.isGMOnly()));
+                properties.add(new Property(tp.getName(), value, tp.isGMOnly()));
               }
             });
 
