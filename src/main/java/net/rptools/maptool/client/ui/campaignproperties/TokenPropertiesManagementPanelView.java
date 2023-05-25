@@ -58,7 +58,7 @@ public class TokenPropertiesManagementPanelView {
             null, 0, false));
     final JScrollPane scrollPane1 = new JScrollPane();
     mainPanel.add(scrollPane1,
-        new GridConstraints(3, 4, 1, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+        new GridConstraints(3, 3, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -68,7 +68,7 @@ public class TokenPropertiesManagementPanelView {
     final JScrollPane scrollPane2 = new JScrollPane();
     scrollPane2.setHorizontalScrollBarPolicy(31);
     mainPanel.add(scrollPane2,
-        new GridConstraints(2, 0, 2, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
+        new GridConstraints(2, 0, 2, 3, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
@@ -77,25 +77,9 @@ public class TokenPropertiesManagementPanelView {
     scrollPane2.setViewportView(list1);
     final JLabel label2 = new JLabel();
     this.$$$loadLabelText$$$(label2,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
-    mainPanel.add(label2,
-        new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-            null, 0, false));
-    final JTextField textField1 = new JTextField();
-    textField1.setName("tokenTypeName");
-    textField1.setText("");
-    mainPanel.add(textField1, new GridConstraints(2, 5, 1, 2, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL,
-        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
-        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
-        null, 0, false));
-    final JLabel label3 = new JLabel();
-    this.$$$loadLabelText$$$(label3,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "TokenPropertiesPanel.label.type"));
-    mainPanel.add(label3,
+    mainPanel.add(label2,
         new GridConstraints(0, 0, 1, 4, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -110,7 +94,7 @@ public class TokenPropertiesManagementPanelView {
         0, false));
     statSheetComboBox = new JComboBox();
     statSheetComboBox.setName("statSheetComboBox");
-    mainPanel.add(statSheetComboBox, new GridConstraints(5, 5, 1, 1, GridConstraints.ANCHOR_WEST,
+    mainPanel.add(statSheetComboBox, new GridConstraints(5, 4, 1, 2, GridConstraints.ANCHOR_WEST,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
     final JPanel panel1 = new JPanel();
@@ -147,14 +131,6 @@ public class TokenPropertiesManagementPanelView {
     mainPanel.add(comboBox1, new GridConstraints(5, 6, 1, 1, GridConstraints.ANCHOR_WEST,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
-    final JLabel label4 = new JLabel();
-    this.$$$loadLabelText$$$(label4,
-        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
-            "TokenPropertiesPanel.label.statSheet"));
-    mainPanel.add(label4,
-        new GridConstraints(5, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
-            GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
-            false));
     final JButton button3 = new JButton();
     button3.setActionCommand("New");
     button3.setName("typeAddButton");
@@ -182,10 +158,34 @@ public class TokenPropertiesManagementPanelView {
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "TokenPropertiesPanel.button.setAsDefault"));
     mainPanel.add(button5,
-        new GridConstraints(4, 2, 1, 2, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
+        new GridConstraints(4, 2, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
+    final JLabel label3 = new JLabel();
+    this.$$$loadLabelText$$$(label3,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
+    mainPanel.add(label3,
+        new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+            GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+            null, 0, false));
+    final JTextField textField1 = new JTextField();
+    textField1.setName("tokenTypeName");
+    textField1.setText("");
+    mainPanel.add(textField1, new GridConstraints(2, 4, 1, 2, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL,
+        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
+        null, 0, false));
+    final JLabel label4 = new JLabel();
+    this.$$$loadLabelText$$$(label4,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
+            "TokenPropertiesPanel.label.statSheet"));
+    mainPanel.add(label4,
+        new GridConstraints(5, 3, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
+            GridConstraints.SIZEPOLICY_FIXED, GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0,
+            false));
   }
 
   private static Method $$$cachedGetBundleMethod$$$ = null;

@@ -33,22 +33,26 @@ public class StatSheetContext {
   /** Class that represents a token property on a stat sheet. */
   static class Property {
     /** Name of the property. */
-    private final String name;
+    private final String displayName;
     /** Value of the property. */
     private final Object value;
     /** True if the property is GM only. */
     private final boolean gmOnly;
 
+    /** The short name of the property. */
+    private final String shortName;
+
     /**
      * Creates a new instance of the class.
      *
-     * @param name Name of the property.
+     * @param displayName Name of the property.
      * @param value Value of the property.
      * @param gmOnly True if the property is GM only.
      * @note GM only properties are only extracted if the player is a GM.
      */
-    Property(String name, Object value, boolean gmOnly) {
-      this.name = name;
+    Property(String displayName, String shortName, Object value, boolean gmOnly) {
+      this.displayName = displayName;
+      this.shortName = shortName;
       this.value = value;
       this.gmOnly = gmOnly;
     }
@@ -58,8 +62,8 @@ public class StatSheetContext {
      *
      * @return The name of the property.
      */
-    public String getName() {
-      return name;
+    public String getDisplayName() {
+      return displayName;
     }
 
     /**
@@ -78,6 +82,15 @@ public class StatSheetContext {
      */
     public boolean getGmOnly() {
       return gmOnly;
+    }
+
+    /**
+     * Returns the short name of the property.
+     *
+     * @return The short name of the property.
+     */
+    public String getShortName() {
+      return shortName;
     }
   }
 
@@ -168,7 +181,7 @@ public class StatSheetContext {
                     return;
                   }
                 }
-                properties.add(new Property(tp.getName(), value, tp.isGMOnly()));
+                properties.add(new Property(tp.getName(), tp.getShortName(), value, tp.isGMOnly()));
               }
             });
 
