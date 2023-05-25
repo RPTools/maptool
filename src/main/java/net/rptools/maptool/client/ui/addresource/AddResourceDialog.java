@@ -75,7 +75,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   private boolean install = false;
 
   public AddResourceDialog() {
-    super(new AddRessourcesDialogView().$$$getRootComponent$$$());
+    super(new AddRessourcesDialogView().getRootComponent());
 
     setPreferredSize(new Dimension(550, 300));
 

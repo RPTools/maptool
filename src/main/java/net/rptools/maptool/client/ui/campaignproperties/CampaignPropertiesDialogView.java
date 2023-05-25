@@ -20,7 +20,7 @@ import javax.swing.*;
 public class CampaignPropertiesDialogView {
   private JPanel mainPanel;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return mainPanel;
   }
 }

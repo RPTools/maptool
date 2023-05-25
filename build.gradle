@@ -156,6 +156,39 @@ run {
     }
 }
 
+tasks.register('deleteUiClasses') {
+    doFirst {
+        // add all classes generated from intellij forms xml here to force rebuild of them.
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/colorpicker/ColorPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/htmleditorsplit/HtmlEditorSplitGui.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/boardtool/AdjustBoardControlPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/gridtool/AdjustGridControlPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/layerselectiondialog/LayerSelectionDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/texttool/EditLabelDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/addresource/AddResourcesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/CampaignPropertiesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/TokenPropertiesManagementPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connectioninfodialog/ConnectionInfoDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connecttoserverdialog/ConnectToServerDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/exportdialog/ExportDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/CampaignItemListView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/UpdateRepoDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/EditLookupTablePanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/LookupTablePaneView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/macrobuttons/dialog/MacroButtonDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/mappropertiesdialog/MapPropertiesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/preferencesdialog/PreferencesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/startserverdialog/StartServerDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/create/NewTokenDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/edit/TokenPropertiesDialog..class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/transferprogressdialog/TransferProgressDialogView..class")
+    }
+}
+
+compileJava {
+    dependsOn(deleteUiClasses)
+}
+
 // Badass Runtime Plugin Options
 runtime {
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']

@@ -29,7 +29,7 @@ public class TokenPropertiesDialog {
   private HtmlEditorSplit playerNotesEditor;
   private JLabel ownershipList;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return mainPanel;
   }
 

@@ -55,7 +55,7 @@ public class HtmlEditorSplitGui {
   private JFXPanel jfxPanel;
   private JComboBox textTypeComboBox;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return rootPanel;
   }
 

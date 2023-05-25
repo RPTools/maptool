@@ -20,7 +20,7 @@ import javax.swing.*;
 public class StartServerDialogView {
   private JPanel mainPanel;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return mainPanel;
   }
 }

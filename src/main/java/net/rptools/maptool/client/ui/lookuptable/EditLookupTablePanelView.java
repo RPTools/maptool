@@ -21,7 +21,7 @@ public class EditLookupTablePanelView {
 
   private JPanel mainPanel;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return mainPanel;
   }
 }

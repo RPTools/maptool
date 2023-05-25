@@ -27,7 +27,7 @@ public class PreferencesDialogView {
   private JPanel developerTab;
   private JLabel developerTabWarning;
 
-  public JComponent $$$getRootComponent$$$() {
+  public JComponent getRootComponent() {
     return mainPanel;
   }
 }

@@ -91,7 +91,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().$$$getRootComponent$$$());
+    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().getRootComponent());
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);

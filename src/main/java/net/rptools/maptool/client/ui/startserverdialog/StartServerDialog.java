@@ -58,7 +58,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useEasyConnect;
 
   public StartServerDialog() {
-    super(new StartServerDialogView().$$$getRootComponent$$$());
+    super(new StartServerDialogView().getRootComponent());
     panelInit();
   }
 
