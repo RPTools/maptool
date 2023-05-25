@@ -21,8 +21,6 @@ import java.awt.*;
 import java.lang.reflect.Method;
 import java.util.ResourceBundle;
 import javax.swing.*;
-import net.rptools.maptool.client.swing.TextFieldEditorButtonTableCellEditor;
-import net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesTableModel.LargeEditableText;
 
 public class TokenPropertiesManagementPanelView {
 
@@ -47,7 +45,6 @@ public class TokenPropertiesManagementPanelView {
    * @noinspection ALL
    */
   private void $$$setupUI$$$() {
-    createUIComponents();
     mainPanel = new JPanel();
     mainPanel.setLayout(new GridLayoutManager(6, 8, new Insets(0, 0, 0, 0), -1, -1));
     final JLabel label1 = new JLabel();
@@ -65,6 +62,8 @@ public class TokenPropertiesManagementPanelView {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
+    propertiesTable = new JTable();
+    propertiesTable.setName("propertiesTable");
     scrollPane1.setViewportView(propertiesTable);
     final JScrollPane scrollPane2 = new JScrollPane();
     scrollPane2.setHorizontalScrollBarPolicy(31);
@@ -271,14 +270,6 @@ public class TokenPropertiesManagementPanelView {
    */
   public JComponent $$$getRootComponent$$$() {
     return mainPanel;
-  }
-
-  private void createUIComponents() {
-    propertiesTable = new JTable();
-    propertiesTable.setModel(new TokenPropertiesTableModel());
-    propertiesTable.setName("propertiesTable");
-    propertiesTable.setDefaultEditor(LargeEditableText.class,
-        new TextFieldEditorButtonTableCellEditor());
   }
 
 

@@ -24,6 +24,8 @@ import javax.swing.*;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.TextFieldEditorButtonTableCellEditor;
+import net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesTableModel.LargeEditableText;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -241,8 +243,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     button.setEnabled(false);
   }
 
-  public void initPropertyTableSelectionListener() {
-    getTokenPropertiesTable()
+  public void initPropertyTable() {
+    var propertyTable = getTokenPropertiesTable();
+    propertyTable.setModel(new TokenPropertiesTableModel());
+    propertyTable.setDefaultEditor(
+        LargeEditableText.class, new TextFieldEditorButtonTableCellEditor());
+    propertyTable
         .getSelectionModel()
         .addListSelectionListener(
             e -> {

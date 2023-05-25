@@ -23,9 +23,11 @@
         <properties/>
         <border type="none"/>
         <children>
-          <component id="25e4a" class="javax.swing.JTable" binding="propertiesTable" custom-create="true">
+          <component id="25e4a" class="javax.swing.JTable" binding="propertiesTable">
             <constraints/>
-            <properties/>
+            <properties>
+              <name value="propertiesTable"/>
+            </properties>
           </component>
         </children>
       </scrollpane>
