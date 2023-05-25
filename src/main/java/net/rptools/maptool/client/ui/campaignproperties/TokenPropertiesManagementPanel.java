@@ -288,6 +288,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     if (oldName == null || newName == null || oldName.equals(newName)) {
       return;
     }
+    if (defaultPropertyType.equals(oldName)) {
+      defaultPropertyType = newName;
+    }
     renameTypes.put(oldName, newName);
   }
 
