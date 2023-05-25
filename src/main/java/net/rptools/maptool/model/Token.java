@@ -285,7 +285,8 @@ public class Token implements Cloneable {
   private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
-  private String propertyType;
+  private String propertyType =
+      MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
   private Integer facing = null;
 
