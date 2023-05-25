@@ -23,7 +23,6 @@ import java.util.List;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -208,24 +207,6 @@ public class DrawingFunctions extends AbstractFunction {
     else if ("OBJECT".equalsIgnoreCase(layer)) return Layer.OBJECT;
     else if ("BACKGROUND".equalsIgnoreCase(layer)) return Layer.BACKGROUND;
     return Layer.TOKEN;
-  }
-
-  /**
-   * Find the map/zone for a given map name
-   *
-   * @param functionName String Name of the calling function.
-   * @param mapName String Name of the searched for map.
-   * @return ZoneRenderer The map/zone.
-   * @throws ParserException if the map is not found
-   */
-  protected ZoneRenderer getNamedMap(String functionName, String mapName) throws ParserException {
-    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
-      if (mapName.equals(zr.getZone().getName())) {
-        return zr;
-      }
-    }
-    throw new ParserException(
-        I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
   }
 
   /**

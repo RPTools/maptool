@@ -54,7 +54,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
     FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
     String mapName = parameters.get(0).toString();
     String id = parameters.get(1).toString();
-    Zone map = getNamedMap(functionName, mapName).getZone();
+    Zone map = FunctionUtil.getZoneRenderer(functionName, mapName).getZone();
     GUID guid = getGUID(functionName, id);
     if ("setDrawingLayer".equalsIgnoreCase(functionName)) {
       Layer layer = getLayer(parameters.get(2).toString());
