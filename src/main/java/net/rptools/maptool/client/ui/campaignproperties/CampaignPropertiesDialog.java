@@ -40,6 +40,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
+import net.rptools.maptool.client.ui.campaignproperties.sight.CampaignPropertiesSightController;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -100,6 +101,7 @@ public class CampaignPropertiesDialog extends JDialog {
     tokenBarController.setNames(tokenStatesController.getNames());
 
     initHelp();
+    initSight();
     initOKButton();
     initCancelButton();
     initAddRepoButton();
@@ -143,11 +145,11 @@ public class CampaignPropertiesDialog extends JDialog {
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
     lightHelp.setCaretPosition(0);
+  }
 
-    JEditorPane sightHelp = (JEditorPane) formPanel.getComponent("sightHelp");
-    sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
-    sightHelp.setCaretPosition(0);
+  private void initSight() {
+    var sightTable = (JTable) formPanel.getComponent("sightTable");
+    new CampaignPropertiesSightController(sightTable);
   }
 
   private void initAddRepoButton() {
