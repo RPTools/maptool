@@ -12,33 +12,26 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple;
+package net.rptools.clientserver.simple.server;
 
 import java.io.IOException;
-import net.rptools.clientserver.ActivityListener;
 
-public interface Connection {
-  void addMessageHandler(MessageHandler handler);
-
-  void removeMessageHandler(MessageHandler handler);
-
-  void addMessage(Object channel, byte[] message);
-
-  boolean hasMoreMessages();
-
-  byte[] nextMessage();
-
-  void fireDisconnect();
-
-  void addActivityListener(ActivityListener listener);
-
-  void removeActivityListener(ActivityListener listener);
-
-  void addDisconnectHandler(DisconnectHandler handler);
-
-  void removeDisconnectHandler(DisconnectHandler handler);
-
-  void open() throws IOException;
+public interface Server extends AutoCloseable {
+  void start() throws IOException;
 
   void close();
+
+  void addObserver(ServerObserver observer);
+
+  void removeObserver(ServerObserver observer);
+
+  void broadcastMessage(byte[] message);
+
+  void broadcastMessage(String[] exclude, byte[] message);
+
+  default void sendMessage(String id, byte[] message) {
+    sendMessage(id, null, message);
+  }
+
+  void sendMessage(String id, Object channel, byte[] message);
 }

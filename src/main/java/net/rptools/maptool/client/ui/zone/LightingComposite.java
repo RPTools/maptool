@@ -77,6 +77,14 @@ public class LightingComposite implements Composite {
   }
 
   private static final class BlenderContext implements CompositeContext {
+    // Technically contexts can be multithreaded, but not in practice. If need be, the buffers could
+    // be made thread-local. A length of 4K was chosen as the size since it is larger than most
+    // screen widths (a little more than 4K resolution) while not be too high for this sort of use.
+    // So this should support typical cases without needing to blend rows in chunks.
+    private static final int BUFFER_LENGTH = 4 * 1024;
+    private static final int[] SRC_BUFFER = new int[BUFFER_LENGTH];
+    private static final int[] DST_BUFFER = new int[BUFFER_LENGTH];
+
     private final Blender blender;
 
     public BlenderContext(Blender blender) {
@@ -88,17 +96,29 @@ public class LightingComposite implements Composite {
       final int w = Math.min(src.getWidth(), dstIn.getWidth());
       final int h = Math.min(src.getHeight(), dstIn.getHeight());
 
-      final int[] srcPixels = new int[w];
-      final int[] dstPixels = new int[w];
-      final int[] dstOutPixels = new int[w];
+      final int[] srcPixels = SRC_BUFFER;
+      final int[] dstPixels = DST_BUFFER;
 
       for (int y = 0; y < h; y++) {
-        src.getDataElements(src.getMinX(), y + src.getMinY(), w, 1, srcPixels);
-        dstIn.getDataElements(dstIn.getMinX(), y + dstIn.getMinY(), w, 1, dstPixels);
+        // region "Fast path". If w < BUFFER_LENGTH, this just blends in one go.
+        final var firstChunkLength = (w - 1) % BUFFER_LENGTH + 1;
+        src.getDataElements(src.getMinX(), y + src.getMinY(), firstChunkLength, 1, srcPixels);
+        dstIn.getDataElements(dstIn.getMinX(), y + dstIn.getMinY(), firstChunkLength, 1, dstPixels);
+        blender.blendRow(dstPixels, srcPixels, firstChunkLength);
+        dstOut.setDataElements(
+            dstOut.getMinX(), y + dstOut.getMinY(), firstChunkLength, 1, dstPixels);
+        // endregion
 
-        blender.blendRow(dstPixels, srcPixels, dstOutPixels, w);
-
-        dstOut.setDataElements(dstOut.getMinX(), y + dstOut.getMinY(), w, 1, dstOutPixels);
+        // region Repeat as necessary. This is meant to not be done very often.
+        for (var x = firstChunkLength; x < w; x += BUFFER_LENGTH) {
+          src.getDataElements(x + src.getMinX(), y + src.getMinY(), BUFFER_LENGTH, 1, srcPixels);
+          dstIn.getDataElements(
+              x + dstIn.getMinX(), y + dstIn.getMinY(), BUFFER_LENGTH, 1, dstPixels);
+          blender.blendRow(dstPixels, srcPixels, BUFFER_LENGTH);
+          dstOut.setDataElements(
+              x + dstOut.getMinX(), y + dstOut.getMinY(), BUFFER_LENGTH, 1, dstPixels);
+        }
+        // endregion
       }
     }
 
@@ -127,14 +147,14 @@ public class LightingComposite implements Composite {
     /**
      * Blend source and destination pixels for a row of pixels.
      *
-     * <p>The pixels must be encoded as 32-bit ARGB, and the result will be likewise.
+     * <p>The pixels must be encoded as 32-bit ARGB, and the result will be likewise. Results are
+     * written back to `dstPixels`.
      *
      * @param dstPixels The bottom layer pixels.
      * @param srcPixels The top layer pixels.
-     * @param outPixels A buffer that this method will write results into.
      * @param samples The number of pixels in the row.
      */
-    void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples);
+    void blendRow(int[] dstPixels, int[] srcPixels, int samples);
   }
 
   /**
@@ -151,7 +171,7 @@ public class LightingComposite implements Composite {
    * </ul>
    */
   private static final class ScreenBlender implements Blender {
-    public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
+    public void blendRow(int[] dstPixels, int[] srcPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
@@ -175,7 +195,7 @@ public class LightingComposite implements Composite {
         }
 
         // This keeps the light alpha around instead of the base.
-        outPixels[x] = srcPixel + ((resultR << 16) | (resultG << 8) | resultB);
+        dstPixels[x] = srcPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }
@@ -209,11 +229,10 @@ public class LightingComposite implements Composite {
    *   <li>When the bottom component is 0, the result is 0.
    *   <li>When the bottom component is maxed, the result is maxed.
    *   <li>When the top component is 0, the result is the bottom component.
-   *   <li>
    * </ul>
    */
   private static final class ConstrainedBrightenBlender implements Blender {
-    public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
+    public void blendRow(int[] dstPixels, int[] srcPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
@@ -237,7 +256,7 @@ public class LightingComposite implements Composite {
         }
 
         // This deliberately keeps the bottom alpha around.
-        outPixels[x] = dstPixel + ((resultR << 16) | (resultG << 8) | resultB);
+        dstPixels[x] = dstPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }
