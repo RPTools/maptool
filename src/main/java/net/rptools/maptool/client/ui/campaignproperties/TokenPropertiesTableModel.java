@@ -134,8 +134,28 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   /** Adds a new token property, with a generated name. */
   public void addProperty() {
     var properties = tokenTypeMap.get(tokenType);
-    var prop = new TokenProperty("New");
-    properties.add(prop);
+
+    // First find a unique name, there are so few entries we don't have to worry
+    // about being fancy
+    int seq = 1;
+    while (true) {
+      boolean free = true;
+      String newName = I18N.getText("campaignPropertiesDialog.newTokenPropertyDefaultName", seq);
+      for (var p : properties) {
+        if (newName.equals(p.getName())) {
+          free = false;
+          break;
+        }
+      }
+
+      if (free) {
+        var prop = new TokenProperty(newName);
+        properties.add(prop);
+        break;
+      }
+      seq++;
+    }
+
     fireTableRowsInserted(properties.size() - 1, properties.size() - 1);
   }
 
