@@ -12,26 +12,14 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.util;
 
-import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.I18nName;
+/** Interface for classes that have an i18n name. */
+public interface I18nName {
 
-public enum ShapeType implements I18nName {
-  SQUARE("ShapeTypes.square"),
-  CIRCLE("ShapeTypes.circle"),
-  CONE("ShapeTypes.cone"),
-  HEX("ShapeTypes.hex"),
-  GRID("ShapeTypes.grid");
-
-  private final String i18nName;
-
-  ShapeType(String i18nName) {
-    this.i18nName = i18nName;
-  }
-
-  @Override
-  public String i18nName() {
-    return I18N.getText(i18nName);
-  }
+  /**
+   * @return the i18n name of the object.
+   * @return the i18n name of the object.
+   */
+  String i18nName();
 }

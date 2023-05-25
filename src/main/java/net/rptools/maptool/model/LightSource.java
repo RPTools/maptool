@@ -71,6 +71,20 @@ public class LightSource implements Comparable<LightSource>, Serializable {
     this(name, new GUID(), Type.NORMAL, false, Collections.emptyList());
   }
 
+  /**
+   * Copy constructor. This will create a copy of the LightSource, with the same id
+   *
+   * @param copyFrom The LightSource to copy from.
+   */
+  public LightSource(@Nonnull LightSource copyFrom) {
+    name = copyFrom.name;
+    id = copyFrom.id;
+    type = copyFrom.type;
+    scaleWithToken = copyFrom.scaleWithToken;
+    // Since Lights are immutable we don't need to make a deep copy.
+    lightList = new LinkedList<>(copyFrom.lightList);
+  }
+
   private LightSource(
       @Nullable String name,
       @Nullable GUID id,

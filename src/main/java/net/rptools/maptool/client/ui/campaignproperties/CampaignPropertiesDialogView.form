@@ -1,9 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialogView">
-  <grid id="6db9f" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-    <margin top="5" left="5" bottom="5" right="5"/>
+  <grid id="6db9f" binding="mainPanel" layout-manager="GridBagLayout">
     <constraints>
-      <xy x="10" y="10" width="815" height="720"/>
+      <xy x="10" y="10" width="868" height="720"/>
     </constraints>
     <properties>
       <name value="mainForm"/>
@@ -13,8 +12,11 @@
       <tabbedpane id="b1395">
         <constraints>
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
         </constraints>
-        <properties/>
+        <properties>
+          <preferredSize width="900" height="651"/>
+        </properties>
         <border type="none"/>
         <children>
           <grid id="1450f" layout-manager="GridLayoutManager" row-count="1" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -126,7 +128,7 @@
             </constraints>
             <properties>
               <preferredSize width="-1" height="-1"/>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -151,24 +153,19 @@
                   </component>
                 </children>
               </scrollpane>
-              <scrollpane id="d244a">
+              <scrollpane id="3b40">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="600" height="300"/>
-                  </grid>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
-                <properties>
-                  <horizontalScrollBarPolicy value="31"/>
-                  <name value="sightTable"/>
-                  <verticalScrollBarPolicy value="22"/>
-                  <visible value="true"/>
-                </properties>
+                <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="f25a3" class="javax.swing.JTable" binding="table1" default-binding="true">
+                  <component id="5dad3" class="javax.swing.JTable" binding="table1" default-binding="true">
                     <constraints/>
                     <properties>
+                      <minimumSize width="800" height="32"/>
                       <name value="sightTable"/>
+                      <preferredScrollableViewportSize width="800" height="400"/>
                     </properties>
                   </component>
                 </children>
@@ -613,7 +610,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.bars"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -1036,6 +1033,7 @@
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <gridbag weightx="1.0" weighty="1.0"/>
         </constraints>
         <properties/>
         <border type="none"/>

@@ -76,6 +76,22 @@ public class SightType {
     this.shape = shape;
   }
 
+  /**
+   * Copy constructor
+   *
+   * @param copyFrom the SightType to copy from.
+   */
+  public SightType(SightType copyFrom) {
+    name = copyFrom.name;
+    multiplier = copyFrom.multiplier;
+    personalLightSource = new LightSource(copyFrom.personalLightSource);
+    shape = copyFrom.shape;
+    arc = copyFrom.arc;
+    distance = copyFrom.distance;
+    offset = copyFrom.offset;
+    scaleWithToken = copyFrom.scaleWithToken;
+  }
+
   public SightType(
       String name,
       double multiplier,

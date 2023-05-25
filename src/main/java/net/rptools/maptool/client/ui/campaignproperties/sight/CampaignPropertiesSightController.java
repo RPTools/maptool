@@ -14,11 +14,31 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties.sight;
 
+import java.util.List;
 import javax.swing.*;
+import net.rptools.maptool.client.ui.misc.EnumComboBoxCellEditor;
+import net.rptools.maptool.client.ui.misc.EnumComboBoxCellRenderer;
+import net.rptools.maptool.model.ShapeType;
 
+/** Controller for the Sight tab of the Campaign Properties dialog. */
 public class CampaignPropertiesSightController {
 
+  /**
+   * Creates a new instance of the controller.
+   *
+   * @param sightTable The table that displays the sight types.
+   */
   public CampaignPropertiesSightController(JTable sightTable) {
     sightTable.setModel(new CampaignPropertiesSightModel());
+    sightTable.setDefaultRenderer(
+        ShapeType.class,
+        new EnumComboBoxCellRenderer<>(
+            ShapeType.class,
+            List.of(ShapeType.CIRCLE, ShapeType.CONE, ShapeType.SQUARE, ShapeType.GRID)));
+    sightTable.setDefaultEditor(
+        ShapeType.class,
+        new EnumComboBoxCellEditor<>(
+            ShapeType.class,
+            List.of(ShapeType.CIRCLE, ShapeType.CONE, ShapeType.SQUARE, ShapeType.GRID)));
   }
 }
