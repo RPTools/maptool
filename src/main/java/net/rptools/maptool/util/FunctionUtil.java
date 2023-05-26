@@ -21,7 +21,9 @@ import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
 import javax.annotation.Nonnull;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.functions.StringFunctions;
@@ -31,6 +33,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
@@ -488,6 +493,24 @@ public class FunctionUtil {
   public static BigDecimal getDecimalForBoolean(boolean b) {
     return b ? BigDecimal.ONE : BigDecimal.ZERO;
   }
+
+  /**
+   * Parses a string into either a Color Paint or Texture Paint.
+   *
+   * @param paint String containing the paint description.
+   * @return Pen DrawableTexturePaint or DrawableColorPaint.
+   */
+  public static DrawablePaint getPaintFromString(String paint) {
+    if (paint.toLowerCase().startsWith("asset://")) {
+      String id = paint.substring("asset://".length());
+      return new DrawableTexturePaint(new MD5Key(id));
+    } else if (paint.length() == 32) {
+      return new DrawableTexturePaint(new MD5Key(paint));
+    } else {
+      return new DrawableColorPaint(MapToolUtil.getColor(paint));
+    }
+  }
+
   /**
    * Throw an exception if the macro isn't trusted.
    *

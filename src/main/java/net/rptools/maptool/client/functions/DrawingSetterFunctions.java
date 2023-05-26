@@ -74,7 +74,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
         getPen(functionName, map, guid).setForegroundMode(Pen.MODE_TRANSPARENT);
       else {
         getPen(functionName, map, guid).setForegroundMode(Pen.MODE_SOLID);
-        getPen(functionName, map, guid).setPaint(paintFromString(paint));
+        getPen(functionName, map, guid).setPaint(FunctionUtil.getPaintFromString(paint));
       }
       return "";
     } else if ("setFillColor".equalsIgnoreCase(functionName)) {
@@ -83,7 +83,7 @@ public class DrawingSetterFunctions extends DrawingFunctions {
         getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_TRANSPARENT);
       else {
         getPen(functionName, map, guid).setBackgroundMode(Pen.MODE_SOLID);
-        getPen(functionName, map, guid).setBackgroundPaint(paintFromString(paint));
+        getPen(functionName, map, guid).setBackgroundPaint(FunctionUtil.getPaintFromString(paint));
       }
       return "";
     } else if ("setDrawingEraser".equalsIgnoreCase(functionName)) {
