@@ -21,6 +21,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LightSource.Type;
@@ -88,16 +89,16 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
   @Override
   public String getColumnName(int column) {
     return switch (column) {
-      case 0 -> "Name";
-      case 1 -> "Shape";
-      case 2 -> "Distance";
-      case 3 -> "Measure From";
-      case 4 -> "Arc";
-      case 5 -> "Offset";
-      case 6 -> "Light Multiplier";
-      case 7 -> "Personal Distance";
-      case 8 -> "Color";
-      case 9 -> "Lumens";
+      case 0 -> I18N.getString("CampaignPropertiesSite.table.column.name");
+      case 1 -> I18N.getString("CampaignPropertiesSite.table.column.shape");
+      case 2 -> I18N.getString("CampaignPropertiesSite.table.column.distance");
+      case 3 -> I18N.getString("CampaignPropertiesSite.table.column.scaleWithToken");
+      case 4 -> I18N.getString("CampaignPropertiesSite.table.column.arc");
+      case 5 -> I18N.getString("CampaignPropertiesSite.table.column.offset");
+      case 6 -> I18N.getString("CampaignPropertiesSite.table.column.multiplier");
+      case 7 -> I18N.getString("CampaignPropertiesSite.table.column.personalLightDistance");
+      case 8 -> I18N.getString("CampaignPropertiesSite.table.column.personalLightColor");
+      case 9 -> I18N.getString("CampaignPropertiesSite.table.column.personalLightLumens");
       default -> null;
     };
   }
