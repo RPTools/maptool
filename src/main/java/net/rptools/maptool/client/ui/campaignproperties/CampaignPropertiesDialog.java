@@ -65,6 +65,8 @@ public class CampaignPropertiesDialog extends JDialog {
   private TokenStatesController tokenStatesController;
   private TokenBarController tokenBarController;
 
+  private CampaignPropertiesSightController campaignPropertiesSightController;
+
   private Status status;
   private AbeillePanel formPanel;
   private Campaign campaign;
@@ -149,7 +151,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initSight() {
     var sightTable = (JTable) formPanel.getComponent("sightTable");
-    new CampaignPropertiesSightController(sightTable);
+    campaignPropertiesSightController = new CampaignPropertiesSightController(sightTable);
   }
 
   private void initAddRepoButton() {
@@ -453,7 +455,8 @@ public class CampaignPropertiesDialog extends JDialog {
     campaign.getLightSourcesMap().clear();
     campaign.getLightSourcesMap().putAll(lightMap);
 
-    commitSightMap(getSightPanel().getText());
+    // TODO: CDW Remove commitSightMap(getSightPanel().getText());
+    campaign.setSightTypes(campaignPropertiesSightController.getSightTypes());
     tokenStatesController.copyUIToCampaign(campaign);
     tokenBarController.copyUIToCampaign(campaign);
 
