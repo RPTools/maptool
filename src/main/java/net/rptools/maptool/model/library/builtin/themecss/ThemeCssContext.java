@@ -44,6 +44,9 @@ public class ThemeCssContext {
   /** The theme color CSS context. */
   private final ColorCssContext themeColor;
 
+  /** The scroll bar CSS context. */
+  private final ScrollBarCSSContext scrollBar;
+
   /** Creates a new instance of the theme CSS context. */
   public ThemeCssContext() {
     var uiDef = UIManager.getDefaults();
@@ -56,6 +59,7 @@ public class ThemeCssContext {
     button = new ButtonCssContext(uiDef);
     textInput = new TextInputCssContext(uiDef);
     themeColor = new ColorCssContext(uiDef);
+    scrollBar = new ScrollBarCSSContext(uiDef);
   }
 
   /**
@@ -131,5 +135,9 @@ public class ThemeCssContext {
    */
   public ColorCssContext getThemeColor() {
     return themeColor;
+  }
+
+  public ScrollBarCSSContext getScrollBar() {
+    return scrollBar;
   }
 }

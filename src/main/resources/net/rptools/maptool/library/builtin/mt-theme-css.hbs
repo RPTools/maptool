@@ -1,84 +1,53 @@
 /* MapTool Theme CSS 0.1 */
 
 :root {
-font-size: {{fontSize}};
-font-family: {{fontFamily}};
-}
+  --mt-theme-color-actions-blue: {{themeColor.actionsBlue}};
+  --mt-theme-color-actions-blue-dark: {{themeColor.actionsBlueDark}};
+  --mt-theme-color-actions-green: {{themeColor.actionsGreen}};
+  --mt-theme-color-actions-green-dark: {{themeColor.actionsGreenDark}};
+  --mt-theme-color-actions-grey: {{themeColor.actionsGrey}};
+  --mt-theme-color-actions-grey-dark: {{themeColor.actionsGreyDark}};
+  --mt-theme-color-actions-grey-inline: {{themeColor.actionsGreyInline}};
+  --mt-theme-color-actions-grey-inline-dark: {{themeColor.actionsGreyInlineDark}};
+  --mt-theme-color-actions-red: {{themeColor.actionsRed}};
+  --mt-theme-color-actions-red-dark: {{themeColor.actionsRedDark}};
+  --mt-theme-color-actions-yellow: {{themeColor.actionsYellow}};
+  --mt-theme-color-actions-yellow-dark: {{themeColor.actionsYellowDark}};
+  --mt-theme-color-objects-black-text: {{themeColor.objectsBlackText}};
+  --mt-theme-color-objects-blue: {{themeColor.objectsBlue}};
+  --mt-theme-color-objects-green: {{themeColor.objectsGreen}};
+  --mt-theme-color-objects-green-android: {{themeColor.objectsGreenAndroid}};
+  --mt-theme-color-objects-grey: {{themeColor.objectsGrey}};
+  --mt-theme-color-objects-pink: {{themeColor.objectsPink}};
+  --mt-theme-color-objects-red: {{themeColor.objectsRed}};
+  --mt-theme-color-objects-red-status: {{themeColor.objectsRedStatus}};
+  --mt-theme-color-objects-yellow: {{themeColor.objectsYellow}};
+  --mt-theme-color-objects-yellow-dark: {{themeColor.objectsYellowDark}};
 
-body,
-.mt-theme {
-font-family: {{fontFamily}};
-color: {{foregroundColor}};
-background-color: {{backgroundColor}};
-}
+  --mt-theme-font-size: {{fontSize}};
+  --mt-theme-font-family: {{fontFamily}};
 
-.mt-border {
+  --mt-theme-color-foreground: {{foregroundColor}};
+  --mt-theme-color-background: {{backgroundColor}};
+  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
 
-}
+  --mt-theme-color-button-start-background: {{button.startBackgroundColor}};
+  --mt-theme-color-button-end-background: {{button.endBackgroundColor}};
+  --mt-theme-color-button-foreground: {{button.foregroundColor}};
+  --mt-theme-color-button-background-disabled: {{button.disabledBackgroundColor}};
+  --mt-theme-color-button-foreground-disabled: {{button.disabledForegroundColor}};
+  --mt-theme-color-button-pressed-background: {{button.pressedBackgroundColor}};
+  --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}};
 
-p,
-table,
-input {
-  vertical-align: middle;
-  font-size: 1rem;
-}
+  font-size: var(--mt-theme-font-size);
+  font-family: var(--mt-theme-font-family);
 
-/* Button */
-button,
-input[type=submit],
-.mt-button {
-  cursor: default;
-  position: relative;
-  background: transparent;
-color: {{button.foregroundColor}};
-padding: .2em .5em;
-margin: 0;
-font-family: inherit;
-font-size: 1em;
-border-radius: .15em;
-border: none;
-}
-
-button::after,
-.mt-button::after {
-  position: absolute;
-  display: block;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding 1px;
-  content: "";
-  border-radius: .15em;
-background: linear-gradient(
-{{button.startBackgroundColor}},
-{{button.endBackgroundColor}});
-z-index: -1;
 }
 
 
-button:active::after,
-input[type=submit]:active,
-.mt-button:active::after {
-background:	{{button.pressedBackgroundColor}};
-}
-
-
-button[disabled],
-input[type=submit][disabled],
-.mt-button[disabled],
-.mt-button--disabled {
-background: {{button.disabledBackgroundColor}};
-color: {{button.disabledForegroundColor}};
-border: {{button.disabledBorderSize}} solid {{button.disabledBorderColor}};
-}
-
-/* Text input */
-input[type=text],
-.mt-input[type=text] {
-color: {{textInput.foregroundColor}};
-background-color: {{textInput.backgroundColor}};
-border: {{textInput.disabledBorderSize}} solid {{textInput.disabledBorderColor}};
+body {
+  background-color: var(--mt-theme-color-background);
+  color: var(--mt-theme-color-foreground);
 }
 
 /* Headings. */
@@ -90,3 +59,23 @@ h5 { font-size: 1.25rem; }
 h6 { font-size: 1.00rem; }
 
 h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
+
+::-webkit-scrollbar {
+  width: {{scrollBar.width}};
+}
+::-webkit-scrollbar-track  {
+  background-color: {{scrollBar.backgroundColor}};
+}
+
+::-webkit-scrollbar-thumb {
+  border-radius: 6px;
+  background: {{scrollBar.thumbColor}}
+}
+
+::-webkit-scrollbar-thumb:vertical {
+  min-height: 100px;
+}
+
+::-webkit-scrollbar-thumb:hover, ::-webkit-scrollbar-thumb:active {
+  background: {{scrollBar.hoverThumbColor}}
+}

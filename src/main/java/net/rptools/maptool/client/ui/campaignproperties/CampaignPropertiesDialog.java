@@ -41,6 +41,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.campaignproperties.sight.CampaignPropertiesSightController;
+import net.rptools.maptool.client.ui.misc.HTMLDocumentPanel;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -152,6 +153,9 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initSight() {
     var sightTable = (JTable) formPanel.getComponent("sightTable");
     campaignPropertiesSightController = new CampaignPropertiesSightController(sightTable);
+    var sightDescription = (JPanel) formPanel.getComponent("sightDescriptionPanel");
+    var htmlViewer = new HTMLDocumentPanel("sight/sight-description.html");
+    sightDescription.add(htmlViewer.getComponent(), BorderLayout.CENTER);
   }
 
   private void initAddRepoButton() {
@@ -229,9 +233,6 @@ public class CampaignPropertiesDialog extends JDialog {
     updateRepositoryList(campaignProperties);
 
     String text;
-    text = updateSightPanel(campaignProperties.getSightTypeMap());
-    getSightPanel().setText(text);
-    getSightPanel().setCaretPosition(0);
 
     text = updateLightPanel(campaignProperties.getLightSourcesMap());
     getLightPanel().setText(text);
@@ -832,6 +833,7 @@ public class CampaignPropertiesDialog extends JDialog {
     return (JEditorPane) formPanel.getTextComponent("lightPanel");
   }
 
+  // TODO: CDW Remove
   public JEditorPane getSightPanel() {
     return (JEditorPane) formPanel.getTextComponent("sightPanel");
   }

@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <link
+      rel="stylesheet"
+      href="lib://net.rptools.maptool/css/mt-theme.css?cachelib=false"
+  />
+  <title>Sight</title>
+</head>
+<body>
+  <h2>Sight Properties</h2>
+  <p>The sight properties define how a token can see</p>
+  <h3>Name</h3>
+  <p>This is the name of the light source</p>
+  <h3>Shape</h3>
+  <p>
+    The shape of the vision, this can be one of
+    <ul>
+      <li>Circle</li>
+      <li>Cone</li>
+      <li>Square</li>
+      <li>Grid</li>
+    </ul>
+  </p>
+  <h3>Distance</h3>
+  <p>The distance that the vision extends to, if this is 0 then it uses the vision distance from
+  the map.</p>
+  <h3>From Edge of Token</h3>
+  <p>If this is checked then the distance is measured from the edge of the token, otherwise it
+    is measured from the center of the token.</p>
+  <h3>Arc</h3>
+  <p>Specifies how large the field of vision should be for conical vision (in Degrees).</p>
+  <h3>Offset</h3>
+  <p>Specifies how many degrees offset conical vision should be from the tokens facing.</p>
+  <h3>Light Source Multiplier</h3>
+  <p>The multiplier value to add to light sources when using this vision type. For example if a
+     low light vision doubled the distance of light source then this value would be 2.</p>
+  </p>
+
+  <h2>Personal Lights</h2>
+  <p>As well as the main sight properties you can define personal light sources that tokens with
+  this vision have. A personal light is only "seen" by the token in question. Personal light
+    sources can be used for things like
+    <ul>
+      <li>Darkvision where the token does not need any "normal" light source to see</li>
+      <li>Light sources that only the token can see</li>
+      <li>To handle any rules such as a player can always determine what is 5' away via
+        sight/touch</li>
+  </ul>
+  <p>A token can never see the personal light source of another token even if they are using the
+    same vision type.</p>
+  </p>
+<h3>Personal Light Distance</h3>
+<p>The distance that the personal light source for the token extends.</p>
+<h3>Personal Light Color</h3>
+<p>The color of the personal light source for the token.</p>
+<h3>Personal Light Lumens</h3>
+<p>The lumens value for the personal light source. The lumens determine the strength of the
+  light source and are compared against lights with a negative value (darkness) to determine if
+  they light up the darkness or not. Seet the light tab for more information about lumens</p>
+</body>
+</html>

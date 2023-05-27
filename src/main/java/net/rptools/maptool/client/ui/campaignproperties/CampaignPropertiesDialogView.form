@@ -128,7 +128,7 @@
             </constraints>
             <properties>
               <preferredSize width="-1" height="-1"/>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -137,25 +137,6 @@
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
                     <preferred-size width="600" height="300"/>
                   </grid>
-                </constraints>
-                <properties/>
-                <border type="none"/>
-                <children>
-                  <component id="5f828" class="javax.swing.JEditorPane">
-                    <constraints/>
-                    <properties>
-                      <autoscrolls value="true"/>
-                      <contentType value="text/plain"/>
-                      <name value="sightPanel"/>
-                      <text value=""/>
-                      <visible value="true"/>
-                    </properties>
-                  </component>
-                </children>
-              </scrollpane>
-              <scrollpane id="3b40">
-                <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -170,6 +151,16 @@
                   </component>
                 </children>
               </scrollpane>
+              <grid id="22980" layout-manager="BorderLayout" hgap="0" vgap="0">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="sightDescriptionPanel"/>
+                </properties>
+                <border type="none"/>
+                <children/>
+              </grid>
             </children>
           </grid>
           <grid id="485f5" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -610,7 +601,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.bars"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
