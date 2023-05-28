@@ -254,98 +254,6 @@ public class CampaignPropertiesDialog extends JDialog {
     // updateTableList();
   }
 
-  private String updateSightPanel(Map<String, SightType> sightTypeMap) {
-    StringBuilder builder = new StringBuilder();
-    for (SightType sight : sightTypeMap.values()) {
-      builder.append(sight.getName()).append(": ");
-
-      switch (sight.getShape()) {
-        case SQUARE:
-          builder.append("square ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CIRCLE:
-          builder.append("circle ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case GRID:
-          builder.append("grid ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case HEX:
-          builder.append("hex ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CONE:
-          builder.append("cone ");
-          if (sight.getArc() != 0)
-            builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
-          if (sight.getOffset() != 0)
-            builder
-                .append("offset=")
-                .append(StringUtil.formatDecimal(sight.getOffset()))
-                .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        default:
-          throw new IllegalArgumentException("Invalid shape?!");
-      }
-      // Scale with Token
-      if (sight.isScaleWithToken()) {
-        builder.append("scale ");
-      }
-      // Multiplier
-      if (sight.getMultiplier() != 1 && sight.getMultiplier() != 0) {
-        builder.append("x").append(StringUtil.formatDecimal(sight.getMultiplier())).append(' ');
-      }
-      // Personal light
-      if (sight.getPersonalLightSource() != null) {
-        LightSource source = sight.getPersonalLightSource();
-
-        if (source.getLightList() != null) {
-          for (Light light : source.getLightList()) {
-            double range = light.getRadius();
-
-            builder.append("r").append(StringUtil.formatDecimal(range));
-
-            if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
-              Color color = (Color) light.getPaint().getPaint();
-              builder.append(toHex(color));
-            }
-            final var lumens = light.getLumens();
-            if (lumens >= 0) {
-              builder.append('+');
-            }
-            builder.append(Integer.toString(lumens, 10));
-            builder.append(' ');
-          }
-        }
-      }
-      builder.append('\n');
-    }
-    return builder.toString();
-  }
-
   private String updateLightPanel(Map<String, Map<GUID, LightSource>> lightSources) {
     StringBuilder builder = new StringBuilder();
     for (Entry<String, Map<GUID, LightSource>> entry : lightSources.entrySet()) {
@@ -467,7 +375,6 @@ public class CampaignPropertiesDialog extends JDialog {
     campaign.getLightSourcesMap().clear();
     campaign.getLightSourcesMap().putAll(lightMap);
 
-    // TODO: CDW Remove commitSightMap(getSightPanel().getText());
     campaign.setSightTypes(campaignPropertiesSightController.getSightTypes());
     tokenStatesController.copyUIToCampaign(campaign);
     tokenBarController.copyUIToCampaign(campaign);
@@ -842,15 +749,6 @@ public class CampaignPropertiesDialog extends JDialog {
 
   public JEditorPane getLightPanel() {
     return (JEditorPane) formPanel.getTextComponent("lightPanel");
-  }
-
-  // TODO: CDW Remove
-  public JEditorPane getSightPanel() {
-    return (JEditorPane) formPanel.getTextComponent("sightPanel");
-  }
-
-  public JTextArea getTokenPropertiesTextArea() {
-    return (JTextArea) formPanel.getTextComponent("tokenProperties");
   }
 
   public JButton getOKButton() {
