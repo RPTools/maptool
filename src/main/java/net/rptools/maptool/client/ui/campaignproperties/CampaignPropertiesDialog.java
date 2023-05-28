@@ -143,6 +143,14 @@ public class CampaignPropertiesDialog extends JDialog {
     return formPanel.getTextField("newServer");
   }
 
+  private JButton getAddSightButton() {
+    return (JButton) formPanel.getButton("addSightButton");
+  }
+
+  private JButton getDeleteSightButton() {
+    return (JButton) formPanel.getButton("deleteSightButton");
+  }
+
   private void initHelp() {
     JEditorPane lightHelp = (JEditorPane) formPanel.getComponent("lightHelp");
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
@@ -152,7 +160,9 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initSight() {
     var sightTable = (JTable) formPanel.getComponent("sightTable");
-    campaignPropertiesSightController = new CampaignPropertiesSightController(sightTable);
+    campaignPropertiesSightController =
+        new CampaignPropertiesSightController(
+            sightTable, getAddSightButton(), getDeleteSightButton());
     var sightDescription = (JPanel) formPanel.getComponent("sightDescriptionPanel");
     var htmlViewer = new HTMLDocumentPanel("sight/sight-description.html");
     sightDescription.add(htmlViewer.getComponent(), BorderLayout.CENTER);
@@ -240,6 +250,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
     tokenStatesController.copyCampaignToUI(campaignProperties);
     tokenBarController.copyCampaignToUI(campaignProperties);
+    campaignPropertiesSightController.copyCampaignToUI(campaignProperties);
     // updateTableList();
   }
 

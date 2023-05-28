@@ -28,6 +28,8 @@ public class CampaignPropertiesDialogView {
 
   private JPanel mainPanel;
   private JTable table1;
+  private JButton addSightButton;
+  private JButton deleteSightButton;
 
   /* spotless:off */
 
@@ -159,13 +161,40 @@ public class CampaignPropertiesDialogView {
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JPanel panel6 = new JPanel();
-    panel6.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
-    panel6.setVisible(false);
+    panel6.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+    panel5.add(panel6, BorderLayout.NORTH);
+    addSightButton = new JButton();
+    addSightButton.setName("addSightButton");
+    this.$$$loadButtonText$$$(addSightButton,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
+    panel6.add(addSightButton, new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL,
+        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    final Spacer spacer4 = new Spacer();
+    panel6.add(spacer4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
+        0, false));
+    final Spacer spacer5 = new Spacer();
+    panel6.add(spacer5, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
+        false));
+    deleteSightButton = new JButton();
+    deleteSightButton.setName("deleteSightButton");
+    this.$$$loadButtonText$$$(deleteSightButton,
+        this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
+    panel6.add(deleteSightButton, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL,
+        GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
+        GridConstraints.SIZEPOLICY_FIXED, null, null, null, 0, false));
+    final JPanel panel7 = new JPanel();
+    panel7.setLayout(new GridLayoutManager(2, 1, new Insets(5, 5, 5, 5), -1, -1));
+    panel7.setVisible(false);
     tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
-        "CampaignPropertiesDialog.tab.light"), panel6);
+        "CampaignPropertiesDialog.tab.light"), panel7);
     final JScrollPane scrollPane3 = new JScrollPane();
     scrollPane3.setVisible(true);
-    panel6.add(scrollPane3,
+    panel7.add(scrollPane3,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null,
@@ -180,7 +209,7 @@ public class CampaignPropertiesDialogView {
     scrollPane4.setHorizontalScrollBarPolicy(31);
     scrollPane4.setVerticalScrollBarPolicy(22);
     scrollPane4.setVisible(true);
-    panel6.add(scrollPane4,
+    panel7.add(scrollPane4,
         new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null,
@@ -194,18 +223,18 @@ public class CampaignPropertiesDialogView {
     editorPane2.setSelectionStart(1);
     editorPane2.setText("<html>\n  <head>\n    \n  </head>\n  <body>\n  </body>\n</html>\n");
     scrollPane4.setViewportView(editorPane2);
-    final JPanel panel7 = new JPanel();
-    panel7.setLayout(new GridLayoutManager(7, 11, new Insets(5, 5, 5, 5), -1, -1));
-    panel7.setName("tokenStatesPanel");
-    panel7.setVisible(false);
+    final JPanel panel8 = new JPanel();
+    panel8.setLayout(new GridLayoutManager(7, 11, new Insets(5, 5, 5, 5), -1, -1));
+    panel8.setName("tokenStatesPanel");
+    panel8.setVisible(false);
     tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
-        "CampaignPropertiesDialog.tab.states"), panel7);
+        "CampaignPropertiesDialog.tab.states"), panel8);
     final JComboBox comboBox1 = new JComboBox();
     comboBox1.setActionCommand("comboBoxChanged");
     final DefaultComboBoxModel defaultComboBoxModel1 = new DefaultComboBoxModel();
     comboBox1.setModel(defaultComboBoxModel1);
     comboBox1.setName("tokenStatesType");
-    panel7.add(comboBox1, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(comboBox1, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -215,7 +244,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label2,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "GridControlPanel.color"));
-    panel7.add(label2,
+    panel8.add(label2,
         new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -226,7 +255,7 @@ public class CampaignPropertiesDialogView {
       colorWell1.setFont(colorWell1Font);
     }
     colorWell1.setName("tokenStatesColor");
-    panel7.add(colorWell1,
+    panel8.add(colorWell1,
         new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -236,14 +265,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label3,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "dialog.resizeStamp.label.width"));
-    panel7.add(label3,
+    panel8.add(label3,
         new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner1 = new JSpinner();
     spinner1.setName("tokenStatesWidth");
-    panel7.add(spinner1, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(spinner1, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -252,7 +281,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label4,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "dialog.NewToken.type"));
-    panel7.add(label4,
+    panel8.add(label4,
         new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -262,7 +291,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label5,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.image"));
-    panel7.add(label5,
+    panel8.add(label5,
         new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -270,7 +299,7 @@ public class CampaignPropertiesDialogView {
     final JTextField textField2 = new JTextField();
     textField2.setName("tokenStatesImageFile");
     textField2.setText("");
-    panel7.add(textField2, new GridConstraints(4, 1, 1, 8, GridConstraints.ANCHOR_CENTER,
+    panel8.add(textField2, new GridConstraints(4, 1, 1, 8, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -280,14 +309,14 @@ public class CampaignPropertiesDialogView {
     final DefaultComboBoxModel defaultComboBoxModel2 = new DefaultComboBoxModel();
     comboBox2.setModel(defaultComboBoxModel2);
     comboBox2.setName("tokenStatesCorner");
-    panel7.add(comboBox2, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(comboBox2, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
     final JSpinner spinner2 = new JSpinner();
     spinner2.setName("tokenStatesFlowGrid");
-    panel7.add(spinner2, new GridConstraints(2, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(spinner2, new GridConstraints(2, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -297,7 +326,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label6,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.corner"));
-    panel7.add(label6,
+    panel8.add(label6,
         new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -307,7 +336,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label7,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "GridControlPanel.size"));
-    panel7.add(label7,
+    panel8.add(label7,
         new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -316,7 +345,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label8,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.mouse"));
-    panel7.add(label8,
+    panel8.add(label8,
         new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -324,14 +353,14 @@ public class CampaignPropertiesDialogView {
     final JCheckBox checkBox1 = new JCheckBox();
     checkBox1.setName("tokenStatesMouseover");
     checkBox1.setText("");
-    panel7.add(checkBox1,
+    panel8.add(checkBox1,
         new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner3 = new JSpinner();
     spinner3.setName("tokenStatesOpacity");
-    panel7.add(spinner3, new GridConstraints(1, 7, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(spinner3, new GridConstraints(1, 7, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -341,7 +370,7 @@ public class CampaignPropertiesDialogView {
     button3.setName("tokenStatesBrowseImage");
     this.$$$loadButtonText$$$(button3,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.browse"));
-    panel7.add(button3, new GridConstraints(4, 10, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(button3, new GridConstraints(4, 10, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -349,7 +378,7 @@ public class CampaignPropertiesDialogView {
     final JLabel label9 = new JLabel();
     this.$$$loadLabelText$$$(label9,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
-    panel7.add(label9,
+    panel8.add(label9,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -358,7 +387,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label10,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.opacity"));
-    panel7.add(label10,
+    panel8.add(label10,
         new GridConstraints(1, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -369,21 +398,21 @@ public class CampaignPropertiesDialogView {
             "CampaignPropertiesDialog.label.order"));
     label11.setToolTipText(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
         "CampaignPropertiesDialog.label.order.tooltip"));
-    panel7.add(label11,
+    panel8.add(label11,
         new GridConstraints(2, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner4 = new JSpinner();
     spinner4.setName("tokenStatesIndex");
-    panel7.add(spinner4, new GridConstraints(2, 7, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(spinner4, new GridConstraints(2, 7, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
-    final JPanel panel8 = new JPanel();
-    panel8.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
-    panel7.add(panel8, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
+    final JPanel panel9 = new JPanel();
+    panel9.setLayout(new GridLayoutManager(2, 3, new Insets(0, 0, 0, 0), -1, -1));
+    panel8.add(panel9, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -391,7 +420,7 @@ public class CampaignPropertiesDialogView {
     final JTextField textField3 = new JTextField();
     textField3.setName("tokenStatesName");
     textField3.setText("");
-    panel8.add(textField3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel9.add(textField3, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -400,7 +429,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label12,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.group"));
-    panel8.add(label12,
+    panel9.add(label12,
         new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -408,22 +437,22 @@ public class CampaignPropertiesDialogView {
     final JTextField textField4 = new JTextField();
     textField4.setName("tokenStatesGroup");
     textField4.setText("");
-    panel8.add(textField4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel9.add(textField4, new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
-    final Spacer spacer4 = new Spacer();
-    panel8.add(spacer4, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer6 = new Spacer();
+    panel9.add(spacer6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
-    final Spacer spacer5 = new Spacer();
-    panel8.add(spacer5, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer7 = new Spacer();
+    panel9.add(spacer7, new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
-    final JPanel panel9 = new JPanel();
-    panel9.setLayout(new GridLayoutManager(9, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel7.add(panel9,
+    final JPanel panel10 = new JPanel();
+    panel10.setLayout(new GridLayoutManager(9, 1, new Insets(0, 0, 0, 0), -1, -1));
+    panel8.add(panel10,
         new GridConstraints(5, 10, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -433,7 +462,7 @@ public class CampaignPropertiesDialogView {
     button4.setName("tokenStatesAddState");
     this.$$$loadButtonText$$$(button4,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
-    panel9.add(button4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel10.add(button4, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -443,7 +472,7 @@ public class CampaignPropertiesDialogView {
     button5.setName("tokenStatesDeleteState");
     this.$$$loadButtonText$$$(button5,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
-    panel9.add(button5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel10.add(button5, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -453,7 +482,7 @@ public class CampaignPropertiesDialogView {
     button6.setName("tokenStatesUpdateState");
     this.$$$loadButtonText$$$(button6,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.update"));
-    panel9.add(button6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel10.add(button6, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -463,7 +492,7 @@ public class CampaignPropertiesDialogView {
     button7.setName("tokenStatesMoveUp");
     this.$$$loadButtonText$$$(button7,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.up"));
-    panel9.add(button7, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel10.add(button7, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -473,20 +502,20 @@ public class CampaignPropertiesDialogView {
     button8.setName("tokenStatesMoveDown");
     this.$$$loadButtonText$$$(button8,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.down"));
-    panel9.add(button8, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel10.add(button8, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
-    final JPanel panel10 = new JPanel();
-    panel10.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
-    panel10.setName("1234");
-    panel7.add(panel10,
+    final JPanel panel11 = new JPanel();
+    panel11.setLayout(new GridLayoutManager(1, 3, new Insets(0, 0, 0, 0), -1, -1));
+    panel11.setName("1234");
+    panel8.add(panel11,
         new GridConstraints(3, 0, 1, 4, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    panel10.setBorder(BorderFactory.createTitledBorder(null,
+    panel11.setBorder(BorderFactory.createTitledBorder(null,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.show"), TitledBorder.DEFAULT_JUSTIFICATION,
         TitledBorder.DEFAULT_POSITION, null, null));
@@ -496,7 +525,7 @@ public class CampaignPropertiesDialogView {
     checkBox2.setSelected(true);
     this.$$$loadButtonText$$$(checkBox2,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "userTerm.GM"));
-    panel10.add(checkBox2,
+    panel11.add(checkBox2,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -508,7 +537,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadButtonText$$$(checkBox3,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaginPropertiesDialog.label.owner"));
-    panel10.add(checkBox3,
+    panel11.add(checkBox3,
         new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -520,13 +549,13 @@ public class CampaignPropertiesDialogView {
     this.$$$loadButtonText$$$(checkBox4,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.else"));
-    panel10.add(checkBox4,
+    panel11.add(checkBox4,
         new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JScrollPane scrollPane5 = new JScrollPane();
-    panel7.add(scrollPane5,
+    panel8.add(scrollPane5,
         new GridConstraints(5, 0, 1, 9, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -535,27 +564,27 @@ public class CampaignPropertiesDialogView {
     list2.setName("tokenStatesStates");
     list2.setSelectionMode(0);
     scrollPane5.setViewportView(list2);
-    final Spacer spacer6 = new Spacer();
-    panel7.add(spacer6, new GridConstraints(6, 0, 1, 8, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
-        0, false));
-    final Spacer spacer7 = new Spacer();
-    panel7.add(spacer7, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER,
-        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
-        0, false));
     final Spacer spacer8 = new Spacer();
-    panel7.add(spacer8, new GridConstraints(5, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel8.add(spacer8, new GridConstraints(6, 0, 1, 8, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
+        0, false));
+    final Spacer spacer9 = new Spacer();
+    panel8.add(spacer9, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER,
+        GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
+        0, false));
+    final Spacer spacer10 = new Spacer();
+    panel8.add(spacer10, new GridConstraints(5, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
-    final JPanel panel11 = new JPanel();
-    panel11.setLayout(new GridLayoutManager(8, 11, new Insets(5, 5, 5, 5), -1, -1));
-    panel11.setVisible(false);
+    final JPanel panel12 = new JPanel();
+    panel12.setLayout(new GridLayoutManager(8, 11, new Insets(5, 5, 5, 5), -1, -1));
+    panel12.setVisible(false);
     tabbedPane1.addTab(this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
-        "CampaignPropertiesDialog.tab.bars"), panel11);
+        "CampaignPropertiesDialog.tab.bars"), panel12);
     final JLabel label13 = new JLabel();
     this.$$$loadLabelText$$$(label13,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Label.name"));
-    panel11.add(label13,
+    panel12.add(label13,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -563,7 +592,7 @@ public class CampaignPropertiesDialogView {
     final JTextField textField5 = new JTextField();
     textField5.setName("tokenBarName");
     textField5.setText("");
-    panel11.add(textField5, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
+    panel12.add(textField5, new GridConstraints(0, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -572,7 +601,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label14,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "dialog.NewToken.type"));
-    panel11.add(label14,
+    panel12.add(label14,
         new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -582,7 +611,7 @@ public class CampaignPropertiesDialogView {
     final DefaultComboBoxModel defaultComboBoxModel3 = new DefaultComboBoxModel();
     comboBox3.setModel(defaultComboBoxModel3);
     comboBox3.setName("tokenBarType");
-    panel11.add(comboBox3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel12.add(comboBox3, new GridConstraints(1, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -592,7 +621,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label15,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.bar"));
-    panel11.add(label15,
+    panel12.add(label15,
         new GridConstraints(1, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -604,7 +633,7 @@ public class CampaignPropertiesDialogView {
     }
     colorWell2.setForeground(new Color(-1));
     colorWell2.setName("tokenBarColor");
-    panel11.add(colorWell2,
+    panel12.add(colorWell2,
         new GridConstraints(1, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -614,14 +643,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label16,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.thick"));
-    panel11.add(label16,
+    panel12.add(label16,
         new GridConstraints(1, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner5 = new JSpinner();
     spinner5.setName("tokenBarThickness");
-    panel11.add(spinner5, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel12.add(spinner5, new GridConstraints(1, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -630,14 +659,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label17,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.inc"));
-    panel11.add(label17,
+    panel12.add(label17,
         new GridConstraints(1, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner6 = new JSpinner();
     spinner6.setName("tokenBarIncrements");
-    panel11.add(spinner6,
+    panel12.add(spinner6,
         new GridConstraints(1, 7, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -646,7 +675,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label18,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.side"));
-    panel11.add(label18,
+    panel12.add(label18,
         new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -656,7 +685,7 @@ public class CampaignPropertiesDialogView {
     final DefaultComboBoxModel defaultComboBoxModel4 = new DefaultComboBoxModel();
     comboBox4.setModel(defaultComboBoxModel4);
     comboBox4.setName("tokenBarSide");
-    panel11.add(comboBox4, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel12.add(comboBox4, new GridConstraints(2, 1, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -666,7 +695,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label19,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.background"));
-    panel11.add(label19,
+    panel12.add(label19,
         new GridConstraints(2, 2, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -677,7 +706,7 @@ public class CampaignPropertiesDialogView {
       colorWell3.setFont(colorWell3Font);
     }
     colorWell3.setName("tokenBarBgColor");
-    panel11.add(colorWell3,
+    panel12.add(colorWell3,
         new GridConstraints(2, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -686,14 +715,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label20,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.opacity"));
-    panel11.add(label20,
+    panel12.add(label20,
         new GridConstraints(2, 4, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
     final JSpinner spinner7 = new JSpinner();
     spinner7.setName("tokenBarOpacity");
-    panel11.add(spinner7, new GridConstraints(2, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel12.add(spinner7, new GridConstraints(2, 5, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -702,7 +731,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label21,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.mouse"));
-    panel11.add(label21,
+    panel12.add(label21,
         new GridConstraints(2, 6, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -710,7 +739,7 @@ public class CampaignPropertiesDialogView {
     final JCheckBox checkBox5 = new JCheckBox();
     checkBox5.setName("tokenBarMouseover");
     checkBox5.setText("");
-    panel11.add(checkBox5,
+    panel12.add(checkBox5,
         new GridConstraints(2, 7, 1, 1, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -720,14 +749,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label22,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.images"));
-    panel11.add(label22,
+    panel12.add(label22,
         new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_NORTHWEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    final JPanel panel12 = new JPanel();
-    panel12.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel11.add(panel12,
+    final JPanel panel13 = new JPanel();
+    panel13.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
+    panel12.add(panel13,
         new GridConstraints(4, 10, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -737,7 +766,7 @@ public class CampaignPropertiesDialogView {
     button9.setName("tokenBarAddImage");
     this.$$$loadButtonText$$$(button9,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
-    panel12.add(button9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel13.add(button9, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -747,7 +776,7 @@ public class CampaignPropertiesDialogView {
     button10.setName("tokenBarDeleteImage");
     this.$$$loadButtonText$$$(button10,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
-    panel12.add(button10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel13.add(button10, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -757,7 +786,7 @@ public class CampaignPropertiesDialogView {
     button11.setName("tokenBarUpdateImage");
     this.$$$loadButtonText$$$(button11,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.update"));
-    panel12.add(button11, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel13.add(button11, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -767,7 +796,7 @@ public class CampaignPropertiesDialogView {
     button12.setName("tokenBarMoveUpImage");
     this.$$$loadButtonText$$$(button12,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.up"));
-    panel12.add(button12, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel13.add(button12, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -777,21 +806,21 @@ public class CampaignPropertiesDialogView {
     button13.setName("tokenBarMoveDownImage");
     this.$$$loadButtonText$$$(button13,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.down"));
-    panel12.add(button13, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel13.add(button13, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
-    final Spacer spacer9 = new Spacer();
-    panel12.add(spacer9, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer11 = new Spacer();
+    panel13.add(spacer11, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
-    final Spacer spacer10 = new Spacer();
-    panel11.add(spacer10, new GridConstraints(5, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer12 = new Spacer();
+    panel12.add(spacer12, new GridConstraints(5, 1, 1, 7, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
-    final Spacer spacer11 = new Spacer();
-    panel11.add(spacer11, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer13 = new Spacer();
+    panel12.add(spacer13, new GridConstraints(0, 8, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL, GridConstraints.SIZEPOLICY_WANT_GROW, 1, null, null, null,
         0, false));
     final JSlider slider1 = new JSlider();
@@ -800,7 +829,7 @@ public class CampaignPropertiesDialogView {
     slider1.setOrientation(1);
     slider1.setPaintLabels(true);
     slider1.setPaintTicks(true);
-    panel11.add(slider1,
+    panel12.add(slider1,
         new GridConstraints(6, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -810,14 +839,14 @@ public class CampaignPropertiesDialogView {
     this.$$$loadLabelText$$$(label23,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.preview"));
-    panel11.add(label23,
+    panel12.add(label23,
         new GridConstraints(7, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    final JPanel panel13 = new JPanel();
-    panel13.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
-    panel11.add(panel13,
+    final JPanel panel14 = new JPanel();
+    panel14.setLayout(new GridLayoutManager(6, 1, new Insets(0, 0, 0, 0), -1, -1));
+    panel12.add(panel14,
         new GridConstraints(6, 10, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -827,7 +856,7 @@ public class CampaignPropertiesDialogView {
     button14.setName("tokenBarAddBar");
     this.$$$loadButtonText$$$(button14,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.add"));
-    panel13.add(button14, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel14.add(button14, new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -837,7 +866,7 @@ public class CampaignPropertiesDialogView {
     button15.setName("tokenBarDeleteBar");
     this.$$$loadButtonText$$$(button15,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.delete"));
-    panel13.add(button15, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel14.add(button15, new GridConstraints(2, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -847,7 +876,7 @@ public class CampaignPropertiesDialogView {
     button16.setName("tokenBarUpdateBar");
     this.$$$loadButtonText$$$(button16,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.update"));
-    panel13.add(button16, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel14.add(button16, new GridConstraints(1, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -857,7 +886,7 @@ public class CampaignPropertiesDialogView {
     button17.setName("tokenBarMoveUp");
     this.$$$loadButtonText$$$(button17,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.up"));
-    panel13.add(button17, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel14.add(button17, new GridConstraints(3, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -867,17 +896,17 @@ public class CampaignPropertiesDialogView {
     button18.setName("tokenBarMoveDown");
     this.$$$loadButtonText$$$(button18,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.down"));
-    panel13.add(button18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    panel14.add(button18, new GridConstraints(4, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_HORIZONTAL,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
         GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
         null, 0, false));
-    final Spacer spacer12 = new Spacer();
-    panel13.add(spacer12, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer14 = new Spacer();
+    panel14.add(spacer14, new GridConstraints(5, 0, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
     final JScrollPane scrollPane6 = new JScrollPane();
-    panel11.add(scrollPane6,
+    panel12.add(scrollPane6,
         new GridConstraints(4, 1, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null,
@@ -887,7 +916,7 @@ public class CampaignPropertiesDialogView {
     list3.setSelectionMode(0);
     scrollPane6.setViewportView(list3);
     final JScrollPane scrollPane7 = new JScrollPane();
-    panel11.add(scrollPane7,
+    panel12.add(scrollPane7,
         new GridConstraints(6, 1, 1, 8, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_BOTH,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_WANT_GROW, null,
@@ -896,14 +925,14 @@ public class CampaignPropertiesDialogView {
     list4.setName("tokenBarBars");
     list4.setSelectionMode(0);
     scrollPane7.setViewportView(list4);
-    final JPanel panel14 = new JPanel();
-    panel14.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
-    panel11.add(panel14,
+    final JPanel panel15 = new JPanel();
+    panel15.setLayout(new GridLayoutManager(1, 5, new Insets(0, 0, 0, 0), -1, -1));
+    panel12.add(panel15,
         new GridConstraints(3, 0, 1, 6, GridConstraints.ANCHOR_WEST, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    panel14.setBorder(BorderFactory.createTitledBorder(null,
+    panel15.setBorder(BorderFactory.createTitledBorder(null,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.show"), TitledBorder.DEFAULT_JUSTIFICATION,
         TitledBorder.DEFAULT_POSITION, null, null));
@@ -913,7 +942,7 @@ public class CampaignPropertiesDialogView {
     checkBox6.setSelected(true);
     this.$$$loadButtonText$$$(checkBox6,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "userTerm.GM"));
-    panel14.add(checkBox6,
+    panel15.add(checkBox6,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -925,7 +954,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadButtonText$$$(checkBox7,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaginPropertiesDialog.label.owner"));
-    panel14.add(checkBox7,
+    panel15.add(checkBox7,
         new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -937,34 +966,34 @@ public class CampaignPropertiesDialogView {
     this.$$$loadButtonText$$$(checkBox8,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.label.else"));
-    panel14.add(checkBox8,
+    panel15.add(checkBox8,
         new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
             null, 0, false));
-    final Spacer spacer13 = new Spacer();
-    panel11.add(spacer13, new GridConstraints(4, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer15 = new Spacer();
+    panel12.add(spacer15, new GridConstraints(4, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
-    final Spacer spacer14 = new Spacer();
-    panel11.add(spacer14, new GridConstraints(6, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
+    final Spacer spacer16 = new Spacer();
+    panel12.add(spacer16, new GridConstraints(6, 9, 1, 1, GridConstraints.ANCHOR_CENTER,
         GridConstraints.FILL_VERTICAL, 1, GridConstraints.SIZEPOLICY_WANT_GROW, null, null, null, 0,
         false));
-    final JPanel panel15 = new JPanel();
-    panel15.setLayout(new GridLayoutManager(1, 6, new Insets(0, 0, 0, 0), -1, -1));
+    final JPanel panel16 = new JPanel();
+    panel16.setLayout(new GridLayoutManager(1, 6, new Insets(0, 0, 0, 0), -1, -1));
     gbc = new GridBagConstraints();
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbc.weightx = 1.0;
     gbc.weighty = 1.0;
     gbc.anchor = GridBagConstraints.EAST;
-    mainPanel.add(panel15, gbc);
+    mainPanel.add(panel16, gbc);
     final JButton button19 = new JButton();
     button19.setActionCommand("OK");
     button19.setName("okButton");
     this.$$$loadButtonText$$$(button19,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.ok"));
-    panel15.add(button19,
+    panel16.add(button19,
         new GridConstraints(0, 4, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -974,7 +1003,7 @@ public class CampaignPropertiesDialogView {
     button20.setName("cancelButton");
     this.$$$loadButtonText$$$(button20,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.cancel"));
-    panel15.add(button20,
+    panel16.add(button20,
         new GridConstraints(0, 5, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -984,7 +1013,7 @@ public class CampaignPropertiesDialogView {
     button21.setName("importButton");
     this.$$$loadButtonText$$$(button21,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.import"));
-    panel15.add(button21,
+    panel16.add(button21,
         new GridConstraints(0, 0, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -994,7 +1023,7 @@ public class CampaignPropertiesDialogView {
     button22.setName("exportButton");
     this.$$$loadButtonText$$$(button22,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n", "Button.export"));
-    panel15.add(button22,
+    panel16.add(button22,
         new GridConstraints(0, 1, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -1005,7 +1034,7 @@ public class CampaignPropertiesDialogView {
     this.$$$loadButtonText$$$(button23,
         this.$$$getMessageFromBundle$$$("net/rptools/maptool/language/i18n",
             "CampaignPropertiesDialog.button.import"));
-    panel15.add(button23,
+    panel16.add(button23,
         new GridConstraints(0, 2, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,
@@ -1013,7 +1042,7 @@ public class CampaignPropertiesDialogView {
     final JComboBox comboBox5 = new JComboBox();
     comboBox5.setActionCommand("comboBoxChanged");
     comboBox5.setName("predefinedPropertiesComboBox");
-    panel15.add(comboBox5,
+    panel16.add(comboBox5,
         new GridConstraints(0, 3, 1, 1, GridConstraints.ANCHOR_CENTER, GridConstraints.FILL_NONE,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW,
             GridConstraints.SIZEPOLICY_CAN_SHRINK | GridConstraints.SIZEPOLICY_CAN_GROW, null, null,

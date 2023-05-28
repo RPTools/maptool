@@ -18,9 +18,11 @@ import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.swing.table.AbstractTableModel;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
@@ -36,15 +38,6 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
    * Copy of the sight types from the campaign properties. This is used so that we can modify them.
    */
   private List<SightType> sightTypes = new ArrayList<>();
-
-  /** Creates a new instance of the model. */
-  public CampaignPropertiesSightModel() {
-    // Make a copy so that we can modify it
-    sightTypes.addAll(
-        MapTool.getCampaign().getCampaignProperties().getSightTypeMap().values().stream()
-            .sorted(Comparator.comparing(SightType::getName))
-            .toList());
-  }
 
   @Override
   public int getRowCount() {
@@ -212,5 +205,37 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
    */
   public List<SightType> getSightTypes() {
     return sightTypes;
+  }
+
+  public void addNewSightType() {
+    int seq = 1;
+    Set<String> sightNames =
+        sightTypes.stream().map(SightType::getName).collect(Collectors.toSet());
+
+    // There are so few sight types that we don't need to do anything fancy to find a unique name.
+    String name = I18N.getText("campaignProperties.newSightType", seq);
+    while (sightNames.contains(name)) {
+      seq++;
+      name = I18N.getText("campaignProperties.newSightType", seq);
+    }
+    var sightType = new SightType(name, 1.0, null);
+    sightTypes.add(sightType);
+    fireTableRowsInserted(sightTypes.size() - 1, sightTypes.size() - 1);
+  }
+
+  public void removeSightType(int selectedRow) {
+    if (selectedRow < 0 || selectedRow >= sightTypes.size()) {
+      return;
+    }
+    sightTypes.remove(selectedRow);
+    fireTableRowsDeleted(selectedRow, selectedRow);
+  }
+
+  public void setSightTypes(Map<String, SightType> sightTypeMap) {
+    // Make a copy so that we can modify it
+    sightTypes.clear();
+    sightTypes.addAll(
+        sightTypeMap.values().stream().sorted(Comparator.comparing(SightType::getName)).toList());
+    fireTableDataChanged();
   }
 }

@@ -18,12 +18,11 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
 import javax.swing.*;
-import javax.swing.event.CellEditorListener;
-import javax.swing.event.ChangeEvent;
 import net.rptools.maptool.client.ui.misc.ColorComboBoxCellEditor;
 import net.rptools.maptool.client.ui.misc.EnumComboBoxCellEditor;
 import net.rptools.maptool.client.ui.misc.I18NLabelTableCellRenderer;
 import net.rptools.maptool.client.ui.misc.MultiLineTableHeaderRenderer;
+import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.SightType;
 
@@ -38,24 +37,9 @@ public class CampaignPropertiesSightController {
    *
    * @param sightTable The table that displays the sight types.
    */
-  public CampaignPropertiesSightController(JTable sightTable) {
+  public CampaignPropertiesSightController(
+      JTable sightTable, JButton addSightButton, JButton removeSightButton) {
     sightTable.setModel(model);
-    sightTable
-        .getColumnModel()
-        .getColumn(2)
-        .getCellEditor()
-        .addCellEditorListener(
-            new CellEditorListener() {
-              @Override
-              public void editingStopped(ChangeEvent e) {
-                System.out.println("editing stopped");
-              }
-
-              @Override
-              public void editingCanceled(ChangeEvent e) {
-                System.out.println("editing canceled");
-              }
-            });
     sightTable.getColumnModel().getColumn(0).setPreferredWidth(250);
     sightTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
     sightTable.setDefaultRenderer(ShapeType.class, new I18NLabelTableCellRenderer());
@@ -76,6 +60,25 @@ public class CampaignPropertiesSightController {
         });
     sightTable.setDefaultEditor(Color.class, new ColorComboBoxCellEditor());
     sightTable.getTableHeader().setDefaultRenderer(new MultiLineTableHeaderRenderer());
+    sightTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    sightTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            l -> {
+              if (!l.getValueIsAdjusting()) {
+                removeSightButton.setEnabled(sightTable.getSelectedRow() >= 0);
+              }
+            });
+    addSightButton.addActionListener(
+        l -> {
+          model.addNewSightType();
+        });
+    removeSightButton.addActionListener(
+        l -> {
+          model.removeSightType(sightTable.getSelectedRow());
+          removeSightButton.setEnabled(false);
+        });
+    removeSightButton.setEnabled(false);
     /*
      * Who would have thought that setting the height of a table header contained in a scroll pane
      * would be so difficult.  Since the viewport for the table header is managed separately from
@@ -116,5 +119,9 @@ public class CampaignPropertiesSightController {
    */
   public List<SightType> getSightTypes() {
     return model.getSightTypes();
+  }
+
+  public void copyCampaignToUI(CampaignProperties campaignProperties) {
+    model.setSightTypes(campaignProperties.getSightTypeMap());
   }
 }
