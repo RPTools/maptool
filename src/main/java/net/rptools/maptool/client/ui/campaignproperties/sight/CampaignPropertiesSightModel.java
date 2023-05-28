@@ -62,10 +62,10 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
     return switch (columnIndex) {
       case 0 -> sightType.getName();
       case 1 -> sightType.getShape();
-      case 2 -> sightType.getDistance();
+      case 2 -> sightType.getDistance() != 0 ? sightType.getDistance() : null;
       case 3 -> sightType.isScaleWithToken();
-      case 4 -> sightType.getArc();
-      case 5 -> sightType.getOffset();
+      case 4 -> sightType.getShape() == ShapeType.CONE ? sightType.getArc() : null;
+      case 5 -> sightType.getShape() == ShapeType.CONE ? sightType.getOffset() : null;
       case 6 -> sightType.getMultiplier();
       case 7 -> light == null ? null : light.getRadius();
       case 8 -> {
@@ -123,7 +123,17 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
 
     switch (columnIndex) {
       case 0 -> sight.setName((String) aValue);
-      case 1 -> sight.setShape((ShapeType) aValue);
+      case 1 -> {
+        sight.setShape((ShapeType) aValue);
+        if (sight.getShape() == ShapeType.CONE) {
+          if (sight.getArc() == 0) {
+            sight.setArc(120);
+          }
+        } else {
+          sight.setArc(0);
+          sight.setOffset(0);
+        }
+      }
       case 2 -> sight.setDistance((Float) aValue);
       case 3 -> sight.setScaleWithToken((Boolean) aValue);
       case 4 -> sight.setArc((Integer) aValue);
@@ -186,7 +196,13 @@ public class CampaignPropertiesSightModel extends AbstractTableModel {
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return true;
+    return switch (columnIndex) {
+      case 4, 5 -> {
+        var sightType = sightTypes.get(rowIndex);
+        yield sightType.getShape() == ShapeType.CONE;
+      }
+      default -> true;
+    };
   }
 
   /**

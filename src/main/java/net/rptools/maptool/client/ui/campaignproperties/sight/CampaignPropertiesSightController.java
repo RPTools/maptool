@@ -18,6 +18,8 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.event.CellEditorListener;
+import javax.swing.event.ChangeEvent;
 import net.rptools.maptool.client.ui.misc.ColorComboBoxCellEditor;
 import net.rptools.maptool.client.ui.misc.EnumComboBoxCellEditor;
 import net.rptools.maptool.client.ui.misc.I18NLabelTableCellRenderer;
@@ -38,6 +40,22 @@ public class CampaignPropertiesSightController {
    */
   public CampaignPropertiesSightController(JTable sightTable) {
     sightTable.setModel(model);
+    sightTable
+        .getColumnModel()
+        .getColumn(2)
+        .getCellEditor()
+        .addCellEditorListener(
+            new CellEditorListener() {
+              @Override
+              public void editingStopped(ChangeEvent e) {
+                System.out.println("editing stopped");
+              }
+
+              @Override
+              public void editingCanceled(ChangeEvent e) {
+                System.out.println("editing canceled");
+              }
+            });
     sightTable.getColumnModel().getColumn(0).setPreferredWidth(250);
     sightTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
     sightTable.setDefaultRenderer(ShapeType.class, new I18NLabelTableCellRenderer());
