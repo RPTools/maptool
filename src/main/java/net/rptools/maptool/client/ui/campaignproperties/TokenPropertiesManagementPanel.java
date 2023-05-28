@@ -259,6 +259,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
               var button = getPropertyDeleteButton();
               button.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
             });
+    propertyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
   }
 
   public void initTokenTypeName() {
