@@ -49,7 +49,8 @@ public class HTMLDocumentPanel {
   /**
    * Sets up the scene with the WebView that displays the HTML document.
    *
-   * @param docPath
+   * @param docPath the path to the HTML document relative to
+   *     /net/rptools/maptool/doc/<language>/html/
    */
   private void setupScene(String docPath) {
     var root = new StackPane();
