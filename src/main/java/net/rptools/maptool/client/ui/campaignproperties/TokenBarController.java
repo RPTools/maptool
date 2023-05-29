@@ -70,6 +70,11 @@ public class TokenBarController
         ItemListener,
         ChangeListener {
 
+  /** a bit of a hack to map i18n strings to values, but it works until we replace the dialog. */
+  private final Map<String, String> sidesMap = new HashMap<>();
+  /** a bit of a hack to map i18n strings to values, but it works until we replace the dialog. */
+  private final Map<String, String> typesMap = new HashMap<>();
+
   /** Panel containing the campaign properties form panel */
   private final AbeillePanel formPanel;
 
@@ -255,14 +260,18 @@ public class TokenBarController
     var typeComboBox = panel.getComboBox(TYPE);
     typeComboBox.setModel(new DefaultComboBoxModel());
     for (var type : types) {
-      typeComboBox.addItem(I18N.getText(type));
+      var i18n = I18N.getText(type);
+      typeComboBox.addItem(i18n);
+      typesMap.put(i18n, type);
     }
     typeComboBox.addActionListener(this);
 
     var sideComboBox = panel.getComboBox(SIDE);
     sideComboBox.setModel(new DefaultComboBoxModel());
     for (var side : sides) {
+      var i18n = I18N.getText(side);
       sideComboBox.addItem(I18N.getText(side));
+      sidesMap.put(i18n, side);
     }
 
     panel.getSpinner(THICKNESS).setModel(new SpinnerNumberModel(5, 2, 10, 1));
@@ -271,6 +280,7 @@ public class TokenBarController
     panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
     panel.getList(BARS).setCellRenderer(renderer);
     panel.getList(BARS).addListSelectionListener(this);
+    panel.getList(IMAGES).setModel(new DefaultListModel<MD5Key>());
     panel.getList(IMAGES).setCellRenderer(new ImageListRenderer());
     panel.getList(IMAGES).addListSelectionListener(this);
     panel.getTextComponent(NAME).getDocument().addDocumentListener(this);
@@ -741,7 +751,8 @@ public class TokenBarController
         Side.valueOf(((String) formPanel.getComboBox(SIDE).getSelectedItem()).toUpperCase());
 
     BarTokenOverlay to = null;
-    if (overlay.equals("SOLID_BAR")) {
+    String type = typesMap.get(overlay);
+    if (type.equals("SOLID_BAR")) {
       to = new DrawnBarTokenOverlay(name, color, thickness);
     } else if (overlay.equals("TWO_TONE_BAR")) {
       to = new TwoToneBarTokenOverlay(name, color, bgColor, thickness);
@@ -754,11 +765,11 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals("TWO_IMAGES_BAR")) {
+      if (type.equals("TWO_IMAGES_BAR")) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals("SINGLE_IMAGE_BAR")) {
+      } else if (type.equals("SINGLE_IMAGE_BAR")) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals("MULTIPLE_IMAGES_BAR")) {
+      } else if (type.equals("MULTIPLE_IMAGES_BAR")) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
