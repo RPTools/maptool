@@ -341,8 +341,14 @@ public class ClientMessageHandler implements MessageHandler {
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           zone.setVisible(visible);
-
           ZoneRenderer currentRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+          List<MacroButtonProperties> AllMacroButtons = new ArrayList<>();
+          Collection<GUID> AllTokenIDs = new ArrayList<>();
+          for (Token token : renderer.getZone().getAllTokens()) {
+            AllTokenIDs.add(token.getId());
+          }
+          renderer.getSelectionModel().removeTokensFromSelection(AllTokenIDs);
+          MapTool.getFrame().setCurrentZoneRenderer(null);
           if (!visible
               && !MapTool.getPlayer().isGM()
               && currentRenderer != null
