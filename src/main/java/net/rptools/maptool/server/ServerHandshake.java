@@ -30,7 +30,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -71,7 +71,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private final PlayerDatabase playerDatabase;
 
   /** The connection to the client. */
-  private final ClientConnection connection;
+  private final Connection connection;
 
   /** Observers that want to be notified when the status changes. */
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
@@ -116,7 +116,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @param useEasyConnect If true, the client will use the easy connect method.
    */
   public ServerHandshake(
-      ClientConnection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
+      Connection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
     this.connection = connection;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = useEasyConnect;
@@ -133,7 +133,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public synchronized ClientConnection getConnection() {
+  public synchronized Connection getConnection() {
     return connection;
   }
 

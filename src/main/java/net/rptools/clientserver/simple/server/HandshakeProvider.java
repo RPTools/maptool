@@ -14,11 +14,11 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.server.Handshake;
 
 public interface HandshakeProvider {
-  Handshake getConnectionHandshake(ClientConnection conn);
+  Handshake getConnectionHandshake(Connection conn);
 
-  void releaseHandshake(ClientConnection conn);
+  void releaseHandshake(Connection conn);
 }

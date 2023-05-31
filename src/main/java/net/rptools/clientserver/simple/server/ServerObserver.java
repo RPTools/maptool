@@ -14,12 +14,12 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 
 /** */
 public interface ServerObserver {
 
-  public void connectionAdded(ClientConnection conn);
+  public void connectionAdded(Connection conn);
 
-  public void connectionRemoved(ClientConnection conn);
+  public void connectionRemoved(Connection conn);
 }

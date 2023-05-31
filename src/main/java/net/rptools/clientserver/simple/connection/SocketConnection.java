@@ -12,11 +12,10 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.net.Socket;
-import net.rptools.clientserver.simple.AbstractConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -25,9 +24,9 @@ import org.apache.logging.log4j.Logger;
  *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
  *     Java - Code Style - Code Templates
  */
-public class SocketClientConnection extends AbstractConnection implements ClientConnection {
+public class SocketConnection extends AbstractConnection implements Connection {
   /** Instance used for log messages. */
-  private static final Logger log = LogManager.getLogger(SocketClientConnection.class);
+  private static final Logger log = LogManager.getLogger(SocketConnection.class);
 
   private final String id;
   private SendThread send;
@@ -36,13 +35,13 @@ public class SocketClientConnection extends AbstractConnection implements Client
   private String hostName;
   private int port;
 
-  public SocketClientConnection(String id, String hostName, int port) throws IOException {
+  public SocketConnection(String id, String hostName, int port) throws IOException {
     this.id = id;
     this.hostName = hostName;
     this.port = port;
   }
 
-  public SocketClientConnection(String id, Socket socket) throws IOException {
+  public SocketConnection(String id, Socket socket) throws IOException {
     this.id = id;
     this.hostName = socket.getInetAddress().getHostName();
     this.port = socket.getPort();
@@ -51,7 +50,7 @@ public class SocketClientConnection extends AbstractConnection implements Client
 
   private void initialize(Socket socket) throws IOException {
     this.socket = socket;
-    this.send = new SendThread(this, new BufferedOutputStream(socket.getOutputStream()));
+    this.send = new SendThread(new BufferedOutputStream(socket.getOutputStream()));
     this.receive = new ReceiveThread(this, socket.getInputStream());
     this.send.start();
     this.receive.start();
@@ -64,11 +63,6 @@ public class SocketClientConnection extends AbstractConnection implements Client
   @Override
   public void open() throws IOException {
     initialize(new Socket(hostName, port));
-  }
-
-  @Override
-  public void sendMessage(byte[] message) {
-    sendMessage(null, message);
   }
 
   public void sendMessage(Object channel, byte[] message) {
@@ -109,13 +103,11 @@ public class SocketClientConnection extends AbstractConnection implements Client
   // send thread
   // /////////////////////////////////////////////////////////////////////////
   private class SendThread extends Thread {
-    private final SocketClientConnection conn;
     private final OutputStream out;
     private boolean stopRequested = false;
 
-    public SendThread(SocketClientConnection conn, OutputStream out) {
-      setName("SocketClientConnection.SendThread");
-      this.conn = conn;
+    public SendThread(OutputStream out) {
+      setName("SocketConnection.SendThread");
       this.out = out;
     }
 
@@ -129,15 +121,15 @@ public class SocketClientConnection extends AbstractConnection implements Client
     @Override
     public void run() {
       try {
-        while (!stopRequested && conn.isAlive()) {
+        while (!stopRequested && SocketConnection.this.isAlive()) {
           try {
-            while (conn.hasMoreMessages()) {
+            while (SocketConnection.this.hasMoreMessages()) {
               try {
-                byte[] message = conn.nextMessage();
+                byte[] message = SocketConnection.this.nextMessage();
                 if (message == null) {
                   continue;
                 }
-                conn.writeMessage(out, message);
+                SocketConnection.this.writeMessage(out, message);
               } catch (IndexOutOfBoundsException e) {
                 // just ignore and wait
               }
@@ -162,12 +154,12 @@ public class SocketClientConnection extends AbstractConnection implements Client
   // receive thread
   // /////////////////////////////////////////////////////////////////////////
   private class ReceiveThread extends Thread {
-    private final SocketClientConnection conn;
+    private final SocketConnection conn;
     private final InputStream in;
     private boolean stopRequested = false;
 
-    public ReceiveThread(SocketClientConnection conn, InputStream in) {
-      setName("SocketClientConnection.ReceiveThread");
+    public ReceiveThread(SocketConnection conn, InputStream in) {
+      setName("SocketConnection.ReceiveThread");
       this.conn = conn;
       this.in = in;
     }
