@@ -2347,6 +2347,10 @@ public class Zone {
 
   public ZoneDto toDto() {
     var dto = ZoneDto.newBuilder();
+    dto.setName(name);
+    if (playerAlias != null) {
+      dto.setPlayerAlias(StringValue.of(playerAlias));
+    }
     dto.setCreationTime(creationTime);
     dto.setId(id.toString());
     dto.setGrid(grid.toDto());
@@ -2396,10 +2400,6 @@ public class Zone {
     dto.setBoardPosition(Mapper.map(boardPosition));
     dto.setDrawBoard(drawBoard);
     dto.setBoardChanged(boardChanged);
-    dto.setName(name);
-    if (playerAlias != null) {
-      dto.setPlayerAlias(StringValue.of(playerAlias));
-    }
     dto.setIsVisible(isVisible);
     dto.setVisionType(ZoneDto.VisionTypeDto.valueOf(visionType.name()));
     dto.setLightingStyle(ZoneDto.LightingStyleDto.valueOf(lightingStyle.name()));
