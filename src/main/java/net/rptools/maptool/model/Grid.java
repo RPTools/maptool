@@ -71,6 +71,12 @@ public abstract class Grid implements Cloneable {
   protected static final Logger log = LogManager.getLogger();
   protected static final int CIRCLE_SEGMENTS = 60;
 
+  public static final String LINE_GRID = "Line";
+
+  public static final String DASH_GRID = "Dash";
+
+  public static final String INTERSECT_GRID = "Intersection";
+
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
   private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
@@ -80,6 +86,8 @@ public abstract class Grid implements Cloneable {
   private int size;
   private Zone zone;
   private Area cellShape;
+
+  private String gridType;
 
   public Grid() {
     setSize(AppPreferences.getDefaultGridSize());
@@ -293,6 +301,10 @@ public abstract class Grid implements Cloneable {
     fireGridChanged();
   }
 
+  public void setGridType(String gridType) {
+    this.gridType = gridType;
+  }
+
   /**
    * @return The x component of the grid's offset.
    */
@@ -305,6 +317,10 @@ public abstract class Grid implements Cloneable {
    */
   public int getOffsetY() {
     return offsetY;
+  }
+
+  public String getGridType() {
+    return gridType;
   }
 
   public ZoneWalker createZoneWalker() {

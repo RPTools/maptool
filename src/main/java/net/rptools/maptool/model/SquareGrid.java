@@ -14,12 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -329,27 +324,75 @@ public class SquareGrid extends Grid {
 
     int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
     int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
+    String currentGridType = getGridType();
+    float[] dashArray = {4f, 2f};
 
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
+      if (currentGridType == LINE_GRID) {
+        if (AppState.getGridSize() == 1) {
+          g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
+        } else {
+          g.fillRect(
+              bounds.x,
+              (int) (row + offY - (AppState.getGridSize() / 2)),
+              bounds.width,
+              AppState.getGridSize());
+        }
+      } else if (currentGridType == DASH_GRID) {
+        g.setStroke(
+            new BasicStroke(
+                AppState.getGridSize(),
+                BasicStroke.CAP_BUTT,
+                BasicStroke.JOIN_ROUND,
+                0,
+                dashArray,
+                0));
+        if (AppState.getGridSize() == 1) {
+          g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
+        } else {
+          g.drawLine(
+              bounds.x,
+              (int) (row + offY - (AppState.getGridSize() / 2)),
+              bounds.x + bounds.width,
+              (int) (row + offY - (AppState.getGridSize() / 2)));
+        }
       } else {
-        g.fillRect(
-            bounds.x,
-            (int) (row + offY - (AppState.getGridSize() / 2)),
-            bounds.width,
-            AppState.getGridSize());
+        if (AppState.getGridSize() == 1) {
+          g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
+        } else {
+          g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
+        }
       }
     }
     for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
+      if (currentGridType == LINE_GRID) {
+        if (AppState.getGridSize() == 1) {
+          g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
+        } else {
+          g.fillRect(
+              (int) (col + offX - (AppState.getGridSize() / 2)),
+              bounds.y,
+              AppState.getGridSize(),
+              bounds.height);
+        }
+      } else if (currentGridType == DASH_GRID) {
+        if (AppState.getGridSize() == 1) {
+          g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
+        } else {
+          // Draw the dashed line
+          g.drawLine(
+              (int) (col + offX - (AppState.getGridSize() / 2)),
+              bounds.y,
+              (int) (col + offX - (AppState.getGridSize() / 2)),
+              bounds.y + bounds.height);
+        }
+
       } else {
-        g.fillRect(
-            (int) (col + offX - (AppState.getGridSize() / 2)),
-            bounds.y,
-            AppState.getGridSize(),
-            bounds.height);
+        if (AppState.getGridSize() == 1) {
+          g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
+        } else {
+          g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
+        }
       }
     }
   }

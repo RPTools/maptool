@@ -16,14 +16,7 @@ package net.rptools.maptool.client.tool.gridtool;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
+import java.awt.event.*;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -59,6 +52,8 @@ public class GridTool extends DefaultTool {
   private final JSlider zoomSlider;
   private final JTextField gridSecondDimension;
   private final JLabel gridSecondDimensionLabel;
+  private final JComboBox<String> gridTypeSelector;
+
   private final AbeillePanel controlPanel;
 
   private int lastZoomIndex;
@@ -90,6 +85,10 @@ public class GridTool extends DefaultTool {
 
     colorWell = (ColorWell) controlPanel.getComponent("colorWell");
     colorWell.addActionListener(e -> copyControlPanelToGrid());
+
+    gridTypeSelector = (JComboBox<String>) controlPanel.getComponent("GridSelectorBox");
+    gridTypeSelector.addFocusListener(new UpdateGridListener());
+
 
     JButton closeButton = (JButton) controlPanel.getComponent("closeButton");
     closeButton.addActionListener(
@@ -140,6 +139,7 @@ public class GridTool extends DefaultTool {
     gridOffsetXTextField.setText(Integer.toString(grid.getOffsetX()));
     gridOffsetYTextField.setText(Integer.toString(grid.getOffsetY()));
     colorWell.setColor(new Color(zone.getGridColor()));
+    gridTypeSelector.setSelectedItem(grid.getGridType());
     // Setting the size must be done last as it triggers a ChangeEvent
     // which causes copyControlPanelToGrid() to be called.
     gridSizeSpinner.setValue(grid.getSize());
@@ -175,6 +175,7 @@ public class GridTool extends DefaultTool {
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
     grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
+    grid.setGridType(getString(gridTypeSelector, "Line"));
   }
 
   @Override
@@ -204,6 +205,14 @@ public class GridTool extends DefaultTool {
       return value.length() > 0 ? Double.parseDouble(value.trim()) : defaultValue;
     } catch (NumberFormatException e) {
       return 0;
+    }
+  }
+
+  private String getString(JComboBox<String> component, String defaultValue) {
+    try {
+      return component.getSelectedItem().toString();
+    } catch (NullPointerException e) {
+      return defaultValue;
     }
   }
 
