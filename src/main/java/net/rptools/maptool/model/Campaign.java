@@ -96,7 +96,6 @@ public class Campaign {
    * @param to the name to rename to.
    */
   public record RenamePropertyType(@Nonnull String from, @Nonnull String to) {}
-  ;
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
