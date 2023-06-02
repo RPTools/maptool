@@ -26,6 +26,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.StringUtil;
 
 /** Class that extracts and provides the information needed to render a stat sheet. */
 public class StatSheetContext {
@@ -115,8 +116,16 @@ public class StatSheetContext {
   private final List<Property> properties = new ArrayList<>();
   /** The notes of the token. */
   private final String notes;
+
+  /** The notes type of the token. */
+  private final String notesType;
+
   /** The GM notes of the token. */
   private final String gmNotes;
+
+  /** The GM notes type of the token. */
+  private final String gmNotesType;
+
   /** The speech name of the token. */
   private final String speechName;
   /** The type of the token. */
@@ -139,13 +148,16 @@ public class StatSheetContext {
     if (player.isGM()) {
       gmName = token.getGMName();
       gmNotes = token.getGMNotes();
+      gmNotesType = token.getNotesType();
       gm = true;
     } else {
       gmName = null;
       gmNotes = null;
+      gmNotesType = null;
       gm = false;
     }
     notes = AppUtil.playerOwns(token) ? token.getNotes() : null;
+    notesType = AppUtil.playerOwns(token) ? token.getNotesType() : null;
     speechName = token.getSpeechName();
 
     if (AppPreferences.getShowPortrait()) {
@@ -297,7 +309,11 @@ public class StatSheetContext {
    * @return The notes of the token.
    */
   public String getNotes() {
-    return notes;
+    if (notes != null) {
+      return StringUtil.htmlize(notes, notesType);
+    } else {
+      return null;
+    }
   }
 
   /**
@@ -306,7 +322,11 @@ public class StatSheetContext {
    * @return The GM notes of the token.
    */
   public String getGmNotes() {
-    return gmNotes;
+    if (gmNotes != null) {
+      return StringUtil.htmlize(gmNotes, gmNotesType);
+    } else {
+      return null;
+    }
   }
 
   /**
