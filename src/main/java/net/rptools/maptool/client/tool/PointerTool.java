@@ -718,11 +718,25 @@ public class PointerTool extends DefaultTool {
     if (tokenUnderMouse == null) {
       statSheet = null;
       if (oldTokenUnderMouse != null) {
-        new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
       }
     } else if (tokenUnderMouse != oldTokenUnderMouse) {
       if (oldTokenUnderMouse != null) {
-        new MapToolEventBus().getMainEventBus().post(new TokenHoverExit(getZone()));
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
       }
       new MapToolEventBus()
           .getMainEventBus()

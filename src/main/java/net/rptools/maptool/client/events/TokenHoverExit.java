@@ -14,11 +14,15 @@
  */
 package net.rptools.maptool.client.events;
 
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 
 /**
  * Event fired when the mouse exits a token.
  *
+ * @param token the token that the mouse pointer is hovering over.
  * @param zone the zone for the event.
+ * @param shiftDown is the shift key down.
+ * @param controlDown is the control key down.
  */
-public record TokenHoverExit(Zone zone) {}
+public record TokenHoverExit(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}
