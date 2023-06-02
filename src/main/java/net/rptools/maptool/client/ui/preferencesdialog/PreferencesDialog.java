@@ -260,7 +260,7 @@ public class PreferencesDialog extends JDialog {
         .forEach(lm::addElement);
     lightThemesListModel = lm;
 
-    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().$$$getRootComponent$$$());
+    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().getRootComponent());
 
     JButton okButton = (JButton) panel.getButton("okButton");
     getRootPane().setDefaultButton(okButton);

@@ -395,7 +395,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // Initialize the panel and button actions
     //
     createWaitPanel();
-    interactPanel = new AbeillePanel(new ExportDialogView().$$$getRootComponent$$$());
+    interactPanel = new AbeillePanel(new ExportDialogView().getRootComponent());
     setLayout(new GridLayout());
     add(interactPanel);
     getRootPane().setDefaultButton((JButton) interactPanel.getButton("exportButton"));

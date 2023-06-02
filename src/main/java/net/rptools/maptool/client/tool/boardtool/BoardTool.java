@@ -80,7 +80,7 @@ public class BoardTool extends DefaultTool {
   /** Initialize the panel and set up the actions. */
   public BoardTool() {
     // Create the control panel
-    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().$$$getRootComponent$$$());
+    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().getRootComponent());
 
     boardPositionXTextField = (JTextField) controlPanel.getComponent("offsetX");
     boardPositionXTextField.addKeyListener(new UpdateBoardListener());

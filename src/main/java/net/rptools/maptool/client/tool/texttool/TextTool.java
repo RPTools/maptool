@@ -218,7 +218,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     private final EditLabelDialog dialog;
 
     public EditLabelPanel(EditLabelDialog dialog) {
-      super(new EditLabelDialogView().$$$getRootComponent$$$());
+      super(new EditLabelDialogView().getRootComponent());
 
       this.dialog = dialog;
       panelInit();

@@ -72,7 +72,7 @@ public class ColorPicker extends JPanel {
     paintChooser = new PaintChooser();
     paintChooser.setPreferredSize(new Dimension(450, 400));
 
-    AbeillePanel panel = new AbeillePanel(new ColorPanelView().$$$getRootComponent$$$());
+    AbeillePanel panel = new AbeillePanel(new ColorPanelView().getRootComponent());
 
     ColorWellListener listener = new ColorWellListener(1);
 
