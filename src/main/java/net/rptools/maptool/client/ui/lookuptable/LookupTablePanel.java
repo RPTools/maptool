@@ -44,7 +44,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private EditLookupTablePanel editorPanel;
 
   public LookupTablePanel() {
-    super(new LookupTablePaneView().$$$getRootComponent$$$());
+    super(new LookupTablePaneView().getRootComponent());
     panelInit();
   }
 
