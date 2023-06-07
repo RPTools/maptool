@@ -15,20 +15,15 @@ buildscript {
 // Access Git info from build script
 plugins {
     id "application"
+    id "base"
+    id "java"
     id "org.ajoberstar.grgit" version "5.0.0"
     id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
     id "com.google.protobuf" version "0.8.19"
+    id 'io.github.file5.guidesigner' version '1.0.2'
 }
-
-// Apply the java plugin to add support for Java
-apply plugin: 'base'
-apply plugin: 'application'
-apply plugin: 'java'
-apply plugin: 'eclipse'
-apply plugin: 'com.diffplug.spotless'
-apply plugin: 'com.google.protobuf'
 
 // Definitions
 defaultTasks 'clean', 'build'
@@ -159,6 +154,39 @@ run {
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
     }
+}
+
+tasks.register('deleteUiClasses') {
+    doFirst {
+        // add all classes generated from intellij forms xml here to force rebuild of them.
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/colorpicker/ColorPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/htmleditorsplit/HtmlEditorSplitGui.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/boardtool/AdjustBoardControlPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/gridtool/AdjustGridControlPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/layerselectiondialog/LayerSelectionDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/texttool/EditLabelDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/addresource/AddResourcesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/CampaignPropertiesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/TokenPropertiesManagementPanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connectioninfodialog/ConnectionInfoDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connecttoserverdialog/ConnectToServerDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/exportdialog/ExportDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/CampaignItemListView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/UpdateRepoDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/EditLookupTablePanelView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/LookupTablePaneView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/macrobuttons/dialog/MacroButtonDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/mappropertiesdialog/MapPropertiesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/preferencesdialog/PreferencesDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/startserverdialog/StartServerDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/create/NewTokenDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/edit/TokenPropertiesDialog..class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/transferprogressdialog/TransferProgressDialogView.class")
+    }
+}
+
+compileJava {
+    dependsOn(deleteUiClasses)
 }
 
 // Badass Runtime Plugin Options

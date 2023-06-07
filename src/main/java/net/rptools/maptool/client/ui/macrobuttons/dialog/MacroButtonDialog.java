@@ -101,11 +101,12 @@ public class MacroButtonDialog extends JDialog implements SearchListener {
     super(MapTool.getFrame(), "", true);
     this.setModalityType(ModalityType.MODELESS);
 
-    panel = new AbeillePanel(new MacroButtonDialogView().$$$getRootComponent$$$());
+    panel = new AbeillePanel(new MacroButtonDialogView().getRootComponent());
     setContentPane(panel);
     setSize(700, 400);
 
     installRunButton();
+
     installApplyButton();
     installOKButton();
     installCancelButton();
