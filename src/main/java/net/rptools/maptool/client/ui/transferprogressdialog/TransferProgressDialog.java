@@ -37,7 +37,7 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
   private GenericDialog dialog;
 
   public TransferProgressDialog() {
-    super(new TransferProgressDialogView().$$$getRootComponent$$$());
+    super(new TransferProgressDialogView().getRootComponent());
 
     panelInit();
   }

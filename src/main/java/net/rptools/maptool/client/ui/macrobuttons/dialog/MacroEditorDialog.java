@@ -137,11 +137,12 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     editingMacroButton = isMacroButton;
     this.callback = callback;
 
-    panel = new AbeillePanel(new MacroButtonDialogView().$$$getRootComponent$$$());
+    panel = new AbeillePanel(new MacroButtonDialogView().getRootComponent());
     setContentPane(panel);
     setSize(700, 400);
 
     installRunButton();
+
     installApplyButton();
     installOKButton();
     installCancelButton();

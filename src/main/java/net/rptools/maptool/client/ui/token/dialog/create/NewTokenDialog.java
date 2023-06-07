@@ -59,7 +59,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
    * @param y y value for center point of the token dialog
    */
   public NewTokenDialog(Token token, int x, int y) {
-    super(new NewTokenDialogView().$$$getRootComponent$$$());
+    super(new NewTokenDialogView().getRootComponent());
 
     this.token = token;
     centerX = x;

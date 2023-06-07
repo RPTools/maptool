@@ -32,7 +32,7 @@ public class LayerSelectionDialog extends JPanel {
   private final Zone.Layer[] layerList;
 
   public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
-    panel = new AbeillePanel(new LayerSelectionDialogView().$$$getRootComponent$$$());
+    panel = new AbeillePanel(new LayerSelectionDialogView().getRootComponent());
     this.listener = listener;
     this.layerList = layerList;
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));

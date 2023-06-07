@@ -65,7 +65,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
 
   /** This is the default constructor */
   public ConnectToServerDialog() {
-    super(new ConnectToServerDialogView().$$$getRootComponent$$$());
+    super(new ConnectToServerDialogView().getRootComponent());
     setPreferredSize(new Dimension(600, 500));
     panelInit();
   }

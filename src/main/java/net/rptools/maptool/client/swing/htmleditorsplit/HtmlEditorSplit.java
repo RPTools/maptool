@@ -27,7 +27,7 @@ public class HtmlEditorSplit extends JPanel {
   public HtmlEditorSplit() {
     setLayout(new GridLayoutManager(1, 1, new Insets(0, 0, 0, 0), -1, -1));
     add(
-        gui.$$$getRootComponent$$$(),
+        gui.getRootComponent(),
         new GridConstraints(
             0,
             0,

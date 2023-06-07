@@ -46,7 +46,7 @@ import org.apache.logging.log4j.Logger;
 public class UpdateRepoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(FTPClient.class);
   private static final AbeillePanel form =
-      new AbeillePanel(new UpdateRepoDialogView().$$$getRootComponent$$$());
+      new AbeillePanel(new UpdateRepoDialogView().getRootComponent());
 
   private int status = -1;
   private CheckBoxListWithSelectable list;

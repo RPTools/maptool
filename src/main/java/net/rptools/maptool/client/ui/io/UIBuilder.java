@@ -213,7 +213,7 @@ public class UIBuilder extends JDialog {
   }
 
   private static final AbeillePanel form =
-      new AbeillePanel(new CampaignItemListView().$$$getRootComponent$$$());
+      new AbeillePanel(new CampaignItemListView().getRootComponent());
 
   private final CheckBoxTree tree;
   private final TreeModel dtm;

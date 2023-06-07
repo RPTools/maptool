@@ -49,7 +49,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   CampaignProperties campaignProperties;
 
   public TokenPropertiesManagementPanel() {
-    super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
+    super(new TokenPropertiesManagementPanelView().getRootComponent());
 
     panelInit();
   }

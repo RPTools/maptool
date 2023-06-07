@@ -126,7 +126,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   /** Create a new token notes dialog. */
   public EditTokenDialog() {
-    super(new TokenPropertiesDialog().$$$getRootComponent$$$());
+    super(new TokenPropertiesDialog().getRootComponent());
     panelInit();
   }
 

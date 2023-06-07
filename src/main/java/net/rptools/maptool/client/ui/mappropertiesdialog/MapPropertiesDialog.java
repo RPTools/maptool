@@ -140,7 +140,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new MapPropertiesDialogView().$$$getRootComponent$$$());
+    formPanel = new AbeillePanel(new MapPropertiesDialogView().getRootComponent());
 
     initDistanceTextField();
 
