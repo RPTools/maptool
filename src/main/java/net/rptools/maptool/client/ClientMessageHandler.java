@@ -18,6 +18,8 @@ import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
@@ -341,12 +343,16 @@ public class ClientMessageHandler implements MessageHandler {
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
           zone.setVisible(visible);
-
           ZoneRenderer currentRenderer = MapTool.getFrame().getCurrentZoneRenderer();
           if (!visible
               && !MapTool.getPlayer().isGM()
               && currentRenderer != null
               && currentRenderer.getZone().getId().equals(zoneGUID)) {
+            Collection<GUID> AllTokenIDs = new ArrayList<>();
+            for (Token token : currentRenderer.getZone().getAllTokens()) {
+              AllTokenIDs.add(token.getId());
+            }
+            currentRenderer.getSelectionModel().removeTokensFromSelection(AllTokenIDs);
             MapTool.getFrame().setCurrentZoneRenderer(null);
           }
           if (visible && currentRenderer == null) {
