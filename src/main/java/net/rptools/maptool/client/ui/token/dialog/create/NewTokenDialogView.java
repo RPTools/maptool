@@ -18,7 +18,11 @@ import java.awt.*;
 import javax.swing.*;
 
 public class NewTokenDialogView {
+
   private JPanel mainPanel;
+  private JComboBox comboBox1;
+  private JComboBox comboBox2;
+  private JComboBox comboBox3;
 
   public JComponent getRootComponent() {
     return mainPanel;

@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import com.google.common.eventbus.Subscribe;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
@@ -259,5 +260,20 @@ public class HTMLFrameFactory {
     } else {
       HTMLDialog.close(name);
     }
+  }
+
+  /**
+   * Returns if the specified name is reserved for internal MapTool frames/dialogs/overlays.
+   *
+   * @param name the name to check.
+   * @return <code>true</code> if this name is reserved.
+   */
+  public static boolean isInternalOnly(String name) {
+    if (name == null || name.length() < AppConstants.INTERNAL_FRAME_PREFIX.length()) {
+      return false;
+    }
+
+    return name.substring(0, AppConstants.INTERNAL_FRAME_PREFIX.length())
+        .equalsIgnoreCase(AppConstants.INTERNAL_FRAME_PREFIX);
   }
 }

@@ -36,6 +36,8 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.TokenHoverEnter;
+import net.rptools.maptool.client.events.TokenHoverExit;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.swing.HTMLPanelRenderer;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -45,12 +47,14 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.FogUtil;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -190,7 +194,7 @@ public class PointerTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     htmlRenderer.detach(renderer);
   }
 
@@ -706,12 +710,42 @@ public class PointerTool extends DefaultTool {
       handleDragToken(zp, zp.x - last.x, zp.y - last.y);
       return;
     }
+    var oldTokenUnderMouse = tokenUnderMouse;
     tokenUnderMouse = renderer.getTokenAt(mouseX, mouseY);
     keysDown = e.getModifiersEx();
     renderer.setMouseOver(tokenUnderMouse);
 
     if (tokenUnderMouse == null) {
       statSheet = null;
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
+      }
+    } else if (tokenUnderMouse != oldTokenUnderMouse) {
+      if (oldTokenUnderMouse != null) {
+        new MapToolEventBus()
+            .getMainEventBus()
+            .post(
+                new TokenHoverExit(
+                    oldTokenUnderMouse,
+                    getZone(),
+                    SwingUtil.isShiftDown(keysDown),
+                    SwingUtil.isControlDown(keysDown)));
+      }
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(
+              new TokenHoverEnter(
+                  tokenUnderMouse,
+                  getZone(),
+                  SwingUtil.isShiftDown(keysDown),
+                  SwingUtil.isControlDown(keysDown)));
     }
     Token marker = renderer.getMarkerAt(mouseX, mouseY);
     if (!AppUtil.tokenIsVisible(renderer.getZone(), marker, renderer.getPlayerView())) {
@@ -1671,6 +1705,7 @@ public class PointerTool extends DefaultTool {
             renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
       if (AppPreferences.getPortraitSize() > 0
           && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
+          && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())
           && (tokenOnStatSheet == null
               || !tokenOnStatSheet.equals(tokenUnderMouse)
               || statSheet == null)) {
@@ -1719,7 +1754,8 @@ public class PointerTool extends DefaultTool {
         Map<String, String> propertyMap = new LinkedHashMap<String, String>();
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
-        if (AppPreferences.getShowStatSheet()) {
+        if (AppPreferences.getShowStatSheet()
+            && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())) {
           CodeTimer timer = new CodeTimer("statSheet");
           timer.setEnabled(AppState.isCollectProfilingData());
           timer.setThreshold(5);

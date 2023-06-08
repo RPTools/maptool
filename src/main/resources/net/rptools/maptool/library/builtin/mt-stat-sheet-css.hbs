@@ -1,0 +1,126 @@
+
+:root {
+
+  --mt-theme-color-actions-blue: {{themeColor.actionsBlue}};
+  --mt-theme-color-actions-blue-dark: {{themeColor.actionsBlueDark}};
+  --mt-theme-color-actions-green: {{themeColor.actionsGreen}};
+  --mt-theme-color-actions-green-dark: {{themeColor.actionsGreenDark}};
+  --mt-theme-color-actions-grey: {{themeColor.actionsGrey}};
+  --mt-theme-color-actions-grey-dark: {{themeColor.actionsGreyDark}};
+  --mt-theme-color-actions-grey-inline: {{themeColor.actionsGreyInline}};
+  --mt-theme-color-actions-grey-inline-dark: {{themeColor.actionsGreyInlineDark}};
+  --mt-theme-color-actions-red: {{themeColor.actionsRed}};
+  --mt-theme-color-actions-red-dark: {{themeColor.actionsRedDark}};
+  --mt-theme-color-actions-yellow: {{themeColor.actionsYellow}};
+  --mt-theme-color-actions-yellow-dark: {{themeColor.actionsYellowDark}};
+  --mt-theme-color-objects-black-text: {{themeColor.objectsBlackText}};
+  --mt-theme-color-objects-blue: {{themeColor.objectsBlue}};
+  --mt-theme-color-objects-green: {{themeColor.objectsGreen}};
+  --mt-theme-color-objects-green-android: {{themeColor.objectsGreenAndroid}};
+  --mt-theme-color-objects-grey: {{themeColor.objectsGrey}};
+  --mt-theme-color-objects-pink: {{themeColor.objectsPink}};
+  --mt-theme-color-objects-red: {{themeColor.objectsRed}};
+  --mt-theme-color-objects-red-status: {{themeColor.objectsRedStatus}};
+  --mt-theme-color-objects-yellow: {{themeColor.objectsYellow}};
+  --mt-theme-color-objects-yellow-dark: {{themeColor.objectsYellowDark}};
+
+  --mt-theme-font-size: {{fontSize}};
+  --mt-theme-font-family: {{fontFamily}};
+
+  --mt-theme-color-foreground: {{foregroundColor}};
+  --mt-theme-color-background: {{backgroundColor}};
+  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
+
+  --mt-theme-color-button-start-background: {{button.startBackgroundColor}};
+  --mt-theme-color-button-end-background: {{button.endBackgroundColor}};
+  --mt-theme-color-button-foreground: {{button.foregroundColor}};
+  --mt-theme-color-button-background-disabled: {{button.disabledBackgroundColor}};
+  --mt-theme-color-button-foreground-disabled: {{button.disabledForegroundColor}};
+  --mt-theme-color-button-pressed-background: {{button.pressedBackgroundColor}};
+  --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}};
+
+  font-size: var(--mt-theme-font-size);
+  font-family: var(--mt-theme-font-family);
+
+}
+
+
+body {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  padding: 0px;
+  margin: 0px;
+  background-color: rgba(0, 0, 0, 0); /* Needs to be transparent. */
+}
+
+#statSheet {
+  background-color: var(--mt-theme-color-background);
+  color: var(--mt-theme-color-foreground);
+  position: fixed;
+  padding: 10px;
+  margin: 0px;
+}
+
+.statSheet-topLeft {
+  position: fixed;
+  left: 0px;
+  top: 0px;
+}
+
+.statSheet-topRight {
+  position: fixed;
+  right: 0px;
+  top: 0px;
+}
+
+.statSheet-bottomLeft {
+  position: fixed;
+  left: 0px;
+  bottom: 0px;
+}
+
+.statSheet-bottomRight {
+  position: fixed;
+  right: 0px;
+  bottom: 0px;
+}
+
+.statSheet-top {
+  position: fixed;
+  left: 50%;
+  top: 0px;
+  transform: translate(-50%, 0);
+}
+
+.statSheet-bottom {
+  position: fixed;
+  left: 50%;
+  bottom: 0px;
+  transform: translate(-50%, 0);
+}
+
+.statSheet-left {
+  position: fixed;
+  left: 0px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+.statSheet-right {
+  position: fixed;
+  right: 0px;
+  top: 50%;
+  transform: translate(0, -50%);
+}
+
+
+/* Headings. */
+h1 { font-size: 2.50rem; }
+h2 { font-size: 2.15rem; }
+h3 { font-size: 1.75rem; }
+h4 { font-size: 1.50rem; }
+h5 { font-size: 1.25rem; }
+h6 { font-size: 1.00rem; }
+
+h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }

@@ -237,7 +237,7 @@ public class BoardTool extends DefaultTool {
    */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     MapTool.serverCommand()
         .setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
     AppState.setShowGrid(oldShowGrid);

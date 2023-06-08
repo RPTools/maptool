@@ -896,7 +896,22 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return saveFileChooser;
   }
 
+  /**
+   * Show the control panel. If panels is not empty then the control panel's contents are replaced
+   * with the passed contents. If it is empty (no arguments) then it will restore the control panel
+   * if it is hidden.
+   *
+   * @param panels The panels to add to control panel, or empty to restore hidden control panel.
+   * @see #hideControlPanel()
+   */
   public void showControlPanel(JPanel... panels) {
+    if (panels.length == 0) {
+      if (visibleControlPanel != null) {
+        visibleControlPanel.setVisible(true);
+      }
+      return;
+    }
+
     JPanel layoutPanel = new JPanel(new GridBagLayout());
     layoutPanel.setBorder(BorderFactory.createBevelBorder(BevelBorder.RAISED));
 
@@ -961,13 +976,33 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return coordinateStatusBar;
   }
 
-  public void hideControlPanel() {
+  /**
+   * Removes the control panel. IF you want to temporarily hide the control panel use {@link
+   * #hideControlPanel()}.
+   *
+   * @see #hideControlPanel()
+   * @see #showControlPanel(JPanel...)
+   */
+  public void removeControlPanel() {
     if (visibleControlPanel != null) {
       if (zoneRendererPanel != null) {
         zoneRendererPanel.remove(visibleControlPanel);
       }
       visibleControlPanel = null;
       refresh();
+    }
+  }
+
+  /**
+   * Hides but does not remove the current control panel. To restore the control panel use {@link
+   * #showControlPanel(JPanel...)} with an empty argument list.
+   *
+   * @see #showControlPanel(JPanel...)
+   * @see #removeControlPanel()
+   */
+  public void hideControlPanel() {
+    if (visibleControlPanel != null) {
+      visibleControlPanel.setVisible(false);
     }
   }
 

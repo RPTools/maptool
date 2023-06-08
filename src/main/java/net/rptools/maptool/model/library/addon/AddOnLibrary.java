@@ -17,6 +17,7 @@ package net.rptools.maptool.model.library.addon;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -49,10 +50,15 @@ import net.rptools.maptool.model.library.LibraryNotValidException;
 import net.rptools.maptool.model.library.LibraryNotValidException.Reason;
 import net.rptools.maptool.model.library.MTScriptMacroInfo;
 import net.rptools.maptool.model.library.data.LibraryData;
+import net.rptools.maptool.model.library.proto.*;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.parser.ParserException;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.javatuples.Pair;
 
 /** Class that implements add-on libraries. */
@@ -78,6 +84,9 @@ public class AddOnLibrary implements Library {
 
   /** The directory where public MT MacroScripts are stored. */
   private static final String MTSCRIPT_PUBLIC_DIR = "public/";
+
+  /** Logger instance for this class. */
+  private static final Logger logger = LogManager.getLogger(AddOnLibrary.class);
 
   /** The Asset for the library read me file. */
   private final String readMeFile;
@@ -139,6 +148,9 @@ public class AddOnLibrary implements Library {
   /** The name of the JavaScript context for the add on library. */
   private final String jsContextName;
 
+  /** The Stat Sheets defined by the add-on library. */
+  private final Set<StatSheet> statSheets = new HashSet<>();
+
   /**
    * Class used to represent Drop In Libraries.
    *
@@ -152,6 +164,7 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      AddOnStatSheetsDto statSheetsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
@@ -181,6 +194,20 @@ public class AddOnLibrary implements Library {
       }
 
       descriptionMap.put(path, properties.getDescription());
+    }
+
+    for (var s : statSheetsDto.getStatSheetsList()) {
+      try {
+        statSheets.add(
+            new StatSheet(
+                s.getName(),
+                s.getDescription(),
+                new URI("lib://" + namespace + "/" + s.getEntry()).toURL(),
+                new HashSet<>(s.getPropertyTypesList()),
+                namespace));
+      } catch (Exception e) {
+        MapTool.showError(I18N.getText("library.error.addOn.sheet", namespace, s.getName()), e);
+      }
     }
 
     eventsDto.getEventsList().stream()
@@ -237,9 +264,10 @@ public class AddOnLibrary implements Library {
       AddOnLibraryDto dto,
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
+      AddOnStatSheetsDto statSheetsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, pathAssetMap);
+    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap);
   }
 
   @Override
@@ -502,6 +530,7 @@ public class AddOnLibrary implements Library {
 
   /** Run first time initialization of the add-on library. */
   void initialize() {
+    registerSheets();
     getLibraryData()
         .thenAccept(
             d -> {
@@ -538,6 +567,20 @@ public class AddOnLibrary implements Library {
                       });
             })
         .join();
+  }
+
+  /** Registers the stat sheets that this add-on defines. */
+  private void registerSheets() {
+    var statSheetManager = new StatSheetManager();
+    statSheetManager.removeNamespace(namespace);
+    for (StatSheet sheet : statSheets) {
+      try {
+        statSheetManager.addStatSheet(sheet, this);
+      } catch (IOException e) {
+        logger.error(I18N.getText("library.error.addOn.sheet", namespace, sheet.name()));
+        MapTool.showError(I18N.getText("library.error.addOn.sheet", namespace, sheet.name()), e);
+      }
+    }
   }
 
   /**

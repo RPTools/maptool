@@ -27,6 +27,8 @@ public class TokenPropertiesDialog {
   private JTabbedPane tabPanel;
   private HtmlEditorSplit gmNotesEditor;
   private HtmlEditorSplit playerNotesEditor;
+  private JComboBox comboBox1;
+  private JComboBox comboBox2;
   private JLabel ownershipList;
 
   public JComponent getRootComponent() {

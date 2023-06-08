@@ -67,6 +67,7 @@ import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 import net.rptools.maptool.client.ui.ImageAssetPanel;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -80,6 +81,10 @@ import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
@@ -129,6 +134,34 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     setGmNotesEnabled(MapTool.getPlayer().isGM());
   }
 
+  public void initStatSheetComboBoxes() {
+    var sheetCombo = getStatSheetCombo();
+    sheetCombo.setRenderer(new StatSheetComboBoxRenderer());
+    var locationCombo = getStatSheetLocationCombo();
+    Arrays.stream(StatSheetLocation.values()).forEach(locationCombo::addItem);
+    sheetCombo.addActionListener(
+        l -> {
+          var sheet = (StatSheet) sheetCombo.getSelectedItem();
+          var ssManager = new StatSheetManager();
+          boolean usingDefault =
+              sheet != null && (sheet.name() == null && sheet.namespace() == null);
+          if (sheet == null || ssManager.isLegacyStatSheet(sheet) || usingDefault) {
+            locationCombo.setEnabled(false);
+            locationCombo.setSelectedItem(null);
+          } else {
+            locationCombo.setEnabled(true);
+            var tokenSheet = getModel().getStatSheet();
+            if (tokenSheet != null) {
+              locationCombo.setSelectedItem(tokenSheet.location());
+            } else {
+              var sheetProp =
+                  MapTool.getCampaign().getTokenTypeDefaultSheetId(getModel().getPropertyType());
+              locationCombo.setSelectedItem(sheetProp.location());
+            }
+          }
+        });
+  }
+
   public void initTerrainModifierOperationComboBox() {
     getTerrainModifierOperationComboBox()
         .setModel(new DefaultComboBoxModel<>(TerrainModifierOperation.values()));
@@ -173,6 +206,21 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     setLibTokenPaneEnabled(token.isLibToken());
     validateLibTokenURIAccess(getNameField().getName());
+    var combo = getStatSheetCombo();
+    combo.removeAllItems();
+    // Default Entry
+    var defaultSS =
+        new StatSheet(null, I18N.getText("token.statSheet.useDefault"), null, Set.of(), null);
+    combo.addItem(defaultSS);
+    var ssManager = new StatSheetManager();
+    ssManager.getStatSheets(token.getPropertyType()).stream()
+        .sorted(Comparator.comparing(StatSheet::description))
+        .forEach(ss -> combo.addItem(ss));
+    if (token.usingDefaultStatSheet()) {
+      combo.setSelectedItem(defaultSS);
+    } else {
+      combo.setSelectedItem(new StatSheetManager().getStatSheet(token.getStatSheet().id()));
+    }
     dialog.showDialog();
   }
 
@@ -520,6 +568,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JComboBox) getComponent("type");
   }
 
+  public JComboBox getStatSheetCombo() {
+    return (JComboBox) getComponent("statSheetComboBox");
+  }
+
+  public JComboBox getStatSheetLocationCombo() {
+    return (JComboBox) getComponent("statSheetLocationComboBox");
+  }
+
   public void initTokenIconPanel() {
     getTokenIconPanel().setPreferredSize(new Dimension(100, 100));
     getTokenIconPanel().setMinimumSize(new Dimension(100, 100));
@@ -787,6 +843,19 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     }
     // SHAPE
     token.setShape((Token.TokenShape) getShapeCombo().getSelectedItem());
+
+    // Stat Sheet
+    var ss = (StatSheet) getStatSheetCombo().getSelectedItem();
+    if (ss == null || (ss.name() == null && ss.namespace() == null)) {
+      token.useDefaultStatSheet();
+    } else {
+      var ssManager = new StatSheetManager();
+      var location = (StatSheetLocation) getStatSheetLocationCombo().getSelectedItem();
+      if (location == null) {
+        location = StatSheetLocation.BOTTOM_LEFT;
+      }
+      token.setStatSheet(new StatSheetProperties(ssManager.getId(ss), location));
+    }
 
     // Macros
     token.setSpeechMap(((KeyValueTableModel) getSpeechTable().getModel()).getMap());

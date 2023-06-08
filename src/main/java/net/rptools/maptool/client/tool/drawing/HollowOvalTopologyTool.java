@@ -41,7 +41,7 @@ public class HollowOvalTopologyTool extends AbstractDrawingTool implements Mouse
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     // Hide the drawable color palette
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
   }
 
   @Override

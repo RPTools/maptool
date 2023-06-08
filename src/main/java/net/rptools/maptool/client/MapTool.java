@@ -71,6 +71,7 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
 import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -1377,6 +1378,9 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyTypes(AppPreferences.getTopologyTypes());
+
+    // Register the instance that will listen for token hover events and create a stat sheet.
+    new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
 
     final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
     if (!enabledDeveloperOptions.isEmpty()) {
