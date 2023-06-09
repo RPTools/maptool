@@ -18,6 +18,7 @@ import java.awt.*;
 import javax.swing.*;
 
 public class CampaignPropertiesDialogView {
+
   private JPanel mainPanel;
 
   public JComponent getRootComponent() {

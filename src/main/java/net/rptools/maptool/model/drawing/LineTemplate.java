@@ -486,10 +486,14 @@ public class LineTemplate extends AbstractTemplate {
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
-        .setQuadrant(getQuadrant().name())
         .setMouseSlopeGreater(isMouseSlopeGreater())
-        .setPathVertex(getPathVertex().toDto())
         .setDoubleWide(isDoubleWide());
+    if (getPathVertex() != null) {
+      dto.setPathVertex(getPathVertex().toDto());
+    }
+    if (getQuadrant() != null) {
+      dto.setQuadrant(getQuadrant().name());
+    }
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
