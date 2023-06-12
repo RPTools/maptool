@@ -28,6 +28,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -75,17 +76,7 @@ public class FogOfWarFunctions extends AbstractFunction {
               parameters.size()));
     }
 
-    ZoneRenderer zoneRenderer;
-    if (parameters.size() >= 1) {
-      String mapName = parameters.get(0).toString();
-      zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
-      if (zoneRenderer == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
-      }
-    } else {
-      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
-    }
+    final var zoneRenderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 0);
 
     /*
      * String empty = exposePCOnlyArea(optional String mapName)

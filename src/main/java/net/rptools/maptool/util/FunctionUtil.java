@@ -20,6 +20,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
@@ -27,6 +28,8 @@ import net.rptools.maptool.client.functions.StringFunctions;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -51,6 +54,7 @@ public class FunctionUtil {
   private static final String KEY_NOT_STRING = "macro.function.general.argumentTypeS";
 
   private static final String KEY_NO_PERM = "macro.function.general.noPermOther";
+  private static final String KEY_NO_CURRENT_MAP = "macro.function.map.none";
   private static final String KEY_UNKNOWN_MAP = "macro.function.moveTokenMap.unknownMap";
   private static final String KEY_UNKNOWN_TOKEN = "macro.function.general.unknownToken";
   private static final String KEY_UNKNOWN_TOKEN_ON_MAP = "macro.function.general.unknownTokenOnMap";
@@ -106,7 +110,7 @@ public class FunctionUtil {
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
    * @param indexToken the index to find the token at. If -1, use current token instead.
-   * @param indexMap the index to find the map name at. If -1, use current map instead.
+   * @param indexMap the index to find the map name or ID at. If -1, use current map instead.
    * @return the token.
    * @throws ParserException if a token is specified but the macro is not trusted, or the specified
    *     token can not be found, or if no token is specified and no token is impersonated.
@@ -150,15 +154,26 @@ public class FunctionUtil {
    * Gets the ZoneRender with the given name, throwing a ParserException if it does not exist.
    *
    * @param functionName the function name (used for generating exception messages).
-   * @param mapName the name of the map
+   * @param map the name or ID of the map
    * @return the ZoneRenderer.
    * @throws ParserException if the map cannot be found
    */
-  public static ZoneRenderer getZoneRenderer(String functionName, String mapName)
+  public static @Nonnull ZoneRenderer getZoneRenderer(String functionName, String map)
       throws ParserException {
-    ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
+    if (!GUID.isNotGUID(map)) {
+      try {
+        final var zr = MapTool.getFrame().getZoneRenderer(GUID.valueOf(map));
+        if (zr != null) {
+          return zr;
+        }
+      } catch (InvalidGUIDException ignored) {
+        // Wasn't a GUID after all. Fall back to looking up by name.
+      }
+    }
+
+    ZoneRenderer zoneRenderer = MapTool.getFrame().getZoneRenderer(map);
     if (zoneRenderer == null) {
-      throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, mapName));
+      throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
     }
     return zoneRenderer;
   }
@@ -170,11 +185,11 @@ public class FunctionUtil {
    *
    * @param functionName the function name (used for generating exception messages).
    * @param param the parameters for the function
-   * @param indexMap the index to find the map name at. If -1, use current map instead.
+   * @param indexMap the index to find the map name or ID at. If -1, use current map instead.
    * @return the ZoneRenderer.
    * @throws ParserException if the map cannot be found
    */
-  public static ZoneRenderer getZoneRendererFromParam(
+  public static @Nonnull ZoneRenderer getZoneRendererFromParam(
       String functionName, List<Object> param, int indexMap) throws ParserException {
 
     String map = indexMap >= 0 && param.size() > indexMap ? param.get(indexMap).toString() : null;
@@ -184,9 +199,6 @@ public class FunctionUtil {
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
     } else {
       zoneRenderer = getZoneRenderer(functionName, map);
-    }
-    if (zoneRenderer == null) {
-      throw new ParserException(I18N.getText(KEY_UNKNOWN_MAP, functionName, map));
     }
 
     return zoneRenderer;

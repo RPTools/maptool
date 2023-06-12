@@ -307,10 +307,13 @@ public class getInfoFunction extends AbstractFunction {
         "initiative owner permissions",
         FunctionUtil.getDecimalForBoolean(cp.isInitiativeOwnerPermissions()));
 
+    JsonArray zoneIds = new JsonArray();
     JsonObject zinfo = new JsonObject();
     for (Zone z : c.getZones()) {
+      zoneIds.add(z.getId().toString());
       zinfo.addProperty(z.getName(), z.getId().toString());
     }
+    cinfo.add("zoneIDs", zoneIds);
     cinfo.add("zones", zinfo);
 
     JsonArray tinfo = new JsonArray();
