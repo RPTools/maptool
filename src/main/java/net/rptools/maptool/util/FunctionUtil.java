@@ -21,6 +21,7 @@ import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -509,6 +510,25 @@ public class FunctionUtil {
     } else {
       return new DrawableColorPaint(MapToolUtil.getColor(paint));
     }
+  }
+
+  /**
+   * Parses a string as an asset URL.
+   *
+   * @param assetUrlOrId String containing the asset ID or asset URL.
+   * @return The MD5 key present in {@code assetUrlOrId}, or null.
+   */
+  public static @Nullable MD5Key getAssetKeyFromString(String assetUrlOrId) {
+    final String id;
+    if (assetUrlOrId.toLowerCase().startsWith("asset://")) {
+      id = assetUrlOrId.substring("asset://".length());
+    } else if (assetUrlOrId.length() == 32) {
+      id = assetUrlOrId;
+    } else {
+      return null;
+    }
+
+    return new MD5Key(id);
   }
 
   /**
