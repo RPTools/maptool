@@ -1136,15 +1136,24 @@ public class MapTool {
   }
 
   public static void addZone(Zone zone, boolean changeZone) {
+    Zone zoneToRemove = null;
     if (getCampaign().getZones().size() == 1) {
       // Remove the default map
       Zone singleZone = getCampaign().getZones().get(0);
       if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
-        removeZone(singleZone);
+        zoneToRemove = singleZone;
       }
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
+
+    // Now that clients know about the new zone, we can delete the single empty zone. Otherwise
+    // clients would not have anything to switch to, and they would get all confused.
+    if (zoneToRemove != null) {
+      removeZone(zoneToRemove);
+      changeZone = true;
+    }
+
     new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
     // Now we have fire off adding the tokens in the zone
     new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));

@@ -20,9 +20,7 @@ import java.awt.Point;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.List;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -221,23 +219,6 @@ public class DrawingFunctions extends AbstractFunction {
    */
   protected Pen getPen(String functionName, Zone map, GUID guid) throws ParserException {
     return getDrawnElement(functionName, map, guid).getPen();
-  }
-
-  /**
-   * Parses a string into either a Color Paint or Texture Paint.
-   *
-   * @param paint String containing the paint description.
-   * @return Pen DrawableTexturePaint or DrawableColorPaint.
-   */
-  protected DrawablePaint paintFromString(String paint) {
-    if (paint.toLowerCase().startsWith("asset://")) {
-      String id = paint.substring(8);
-      return new DrawableTexturePaint(new MD5Key(id));
-    } else if (paint.length() == 32) {
-      return new DrawableTexturePaint(new MD5Key(paint));
-    } else {
-      return new DrawableColorPaint(MapToolUtil.getColor(paint));
-    }
   }
 
   protected String paintToString(DrawablePaint drawablePaint) {
