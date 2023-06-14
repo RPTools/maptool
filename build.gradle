@@ -384,6 +384,7 @@ dependencies {
     implementation 'net.tsc.servicediscovery:servicediscovery:1.0.b5'
 
     //maybe replace with jupnp
+    implementation 'commons-jxpath:commons-jxpath:1.3'
     implementation 'net.sbbi.upnp:upnplib:1.0.9-nodebug'
 
     // custom binding stuff, should probably be replace with Beans Binding (JSR 295)
