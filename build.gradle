@@ -402,7 +402,7 @@ dependencies {
     implementation 'com.formdev:flatlaf-jide-oss:3.1.1'
 
     // JS support for macros
-    implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
+    implementation group: 'org.graalvm.js', name: 'js', version: '23.0.0'
     implementation group: 'org.graalvm.js', name: 'js-scriptengine', version: '21.1.0'
 
     implementation 'com.jayway.jsonpath:json-path:2.8.0'
