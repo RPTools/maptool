@@ -110,7 +110,7 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
       contextName = (String) args.remove(0);
       boolean makeTrusted = MapTool.getParser().isMacroTrusted();
       if (args.size() > 0) {
-        makeTrusted = ((int) args.remove(0)) > 0;
+        makeTrusted = !BigDecimal.ZERO.equals(args.remove(0));
       }
       JSScriptEngine.registerContext(
           contextName, MapTool.getParser().isMacroTrusted(), makeTrusted);
