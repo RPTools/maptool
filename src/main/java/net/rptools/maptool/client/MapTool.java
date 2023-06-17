@@ -481,10 +481,17 @@ public class MapTool {
    */
   public static void showDocument(String url) {
     if (Desktop.isDesktopSupported()) {
+      String lowerCaseUrl = url.toLowerCase();
+      String urlToBrowse;
+      if (lowerCaseUrl.startsWith("http://") || lowerCaseUrl.startsWith("https://")) {
+        urlToBrowse = url;
+      } else {
+        urlToBrowse = "https://" + url;
+      }
       Desktop desktop = Desktop.getDesktop();
       URI uri = null;
       try {
-        uri = new URI(url);
+        uri = new URI(urlToBrowse);
         desktop.browse(uri);
       } catch (Exception e) {
         MapTool.showError(I18N.getText("msg.error.browser.cannotStart", uri), e);
