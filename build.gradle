@@ -180,8 +180,9 @@ tasks.register('deleteUiClasses') {
         delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/preferencesdialog/PreferencesDialogView.class")
         delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/startserverdialog/StartServerDialogView.class")
         delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/create/NewTokenDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/edit/TokenPropertiesDialog..class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/edit/TokenPropertiesDialog.class")
         delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/transferprogressdialog/TransferProgressDialogView.class")
+        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/addon/AddOnLibrariesDialogView.class")
     }
 }
 

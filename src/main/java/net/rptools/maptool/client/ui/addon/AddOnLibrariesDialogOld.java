@@ -17,14 +17,14 @@ package net.rptools.maptool.client.ui.addon;
 import net.rptools.maptool.client.ui.javfx.SimpleSwingJavaFXDialog;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialog;
 
-public class AddOnLibrariesDialog {
+public class AddOnLibrariesDialogOld {
   /** The path of the FXML file for the dialog. */
   private static final String FXML_PATH =
       "/net/rptools/maptool/client/ui/fxml/AddOnLibrariesDialog.fxml";
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private final SimpleSwingJavaFXDialog simpleSwingJavaFXDialog;
 
-  public AddOnLibrariesDialog() {
+  public AddOnLibrariesDialogOld() {
     simpleSwingJavaFXDialog =
         new SimpleSwingJavaFXDialog<AddOnLibrariesDialogController>(
             FXML_PATH, "library.dialog.title");

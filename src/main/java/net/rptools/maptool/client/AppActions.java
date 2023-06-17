@@ -41,11 +41,12 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.boardtool.BoardTool;
 import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
+import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogView;
 import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
@@ -3211,7 +3212,10 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          new AddOnLibrariesDialog().show();
+          var dialog = new AddOnLibrariesDialogView();
+          dialog.pack();
+          SwingUtil.centerOver(dialog, MapTool.getFrame());
+          dialog.setVisible(true);
         }
       };
 
