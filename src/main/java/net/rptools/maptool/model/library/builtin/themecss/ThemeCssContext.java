@@ -132,4 +132,13 @@ public class ThemeCssContext {
   public ColorCssContext getThemeColor() {
     return themeColor;
   }
+
+  /**
+   * Gets the disabled foreground color CSS.
+   *
+   * @return The disabled foreground color CSS.
+   */
+  public String getForegroundColorDisabled() {
+    return foregroundColorDisabled;
+  }
 }
