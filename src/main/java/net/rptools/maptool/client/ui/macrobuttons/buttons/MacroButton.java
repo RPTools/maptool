@@ -82,7 +82,6 @@ public class MacroButton extends JButton implements MouseListener {
     }
     this.properties.setTokenId(this.tokenId);
     this.properties.setSaveLocation(this.panelClass);
-    this.properties.setButton(this);
     // we have to call setColor() and setText() here since properties only hold "dumb" data.
     setColor(properties.getColorKey());
     setText(getButtonText());

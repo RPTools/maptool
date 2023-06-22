@@ -72,7 +72,7 @@ public class GridTool extends DefaultTool {
 
   public GridTool() {
     // Create the control panel
-    controlPanel = new AbeillePanel(new AdjustGridControlPanelView().$$$getRootComponent$$$());
+    controlPanel = new AbeillePanel(new AdjustGridControlPanelView().getRootComponent());
 
     gridSizeSpinner = (JSpinner) controlPanel.getComponent("gridSize");
     gridSizeSpinner.setModel(new SpinnerNumberModel());
@@ -239,7 +239,7 @@ public class GridTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     AppState.setShowGrid(oldShowGrid);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     renderer.repaint();
 
     // Commit the grid size change

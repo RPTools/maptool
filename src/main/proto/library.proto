@@ -49,3 +49,15 @@ message AddOnLibraryEventsDto {
   repeated Events events = 1;
   repeated Events legacy_events = 2;
 }
+
+message AddOnStatSheetsDto {
+  message AddOnStatSheet {
+    string name = 1;
+    string description = 2;
+    string entry = 4;
+    string namespace = 7;
+    repeated string  property_types = 8;
+  }
+
+  repeated AddOnStatSheet stat_sheets = 1;
+}

@@ -872,21 +872,35 @@ public class FindTokenFunctions extends AbstractFunction {
    * Finds the specified token.
    *
    * @param identifier the identifier of the token (name, GM name, or GUID).
-   * @param zoneName the name of the zone. If null, check current zone.
+   * @param zoneNameOrId the name or ID of the zone. If null, check current zone.
    * @return the token, or null if none found.
    */
-  public static Token findToken(String identifier, String zoneName) {
+  public static Token findToken(String identifier, String zoneNameOrId) {
     if (identifier == null) {
       return null;
     }
-    if (zoneName == null || zoneName.length() == 0) {
+    if (zoneNameOrId == null || zoneNameOrId.length() == 0) {
       ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
       return zr == null ? null : zr.getZone().resolveToken(identifier);
     } else {
+      if (!GUID.isNotGUID(zoneNameOrId)) {
+        try {
+          final var zr = MapTool.getFrame().getZoneRenderer(GUID.valueOf(zoneNameOrId));
+          if (zr != null) {
+            Token token = zr.getZone().resolveToken(identifier);
+            if (token != null) {
+              return token;
+            }
+          }
+        } catch (InvalidGUIDException ignored) {
+          // Wasn't a GUID after all. Fall back to looking up by name.
+        }
+      }
+
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         Zone zone = zr.getZone();
-        if (zone.getName().equalsIgnoreCase(zoneName)) {
+        if (zone.getName().equalsIgnoreCase(zoneNameOrId)) {
           Token token = zone.resolveToken(identifier);
           if (token != null) {
             return token;

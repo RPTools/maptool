@@ -70,15 +70,13 @@ public class ServerMessageHandler implements MessageHandler {
       var msg = Message.parseFrom(message);
       var msgType = msg.getMessageTypeCase();
 
-      // we don't do anything with heartbeats they are only there to avoid routers dropping the
-      // connection.
-      // So just ignore then.
+      log.debug("from " + id + " got: " + msgType);
+
+      // We don't do anything with heartbeats they are only there to avoid routers dropping the
+      // connection. So just ignore then.
       if (msgType == HEARTBEAT_MSG) {
-        log.debug("from " + id + " got: " + msgType);
         return;
       }
-
-      log.info("from " + id + " got: " + msgType);
 
       switch (msgType) {
         case ADD_TOPOLOGY_MSG -> {
@@ -260,9 +258,9 @@ public class ServerMessageHandler implements MessageHandler {
           sendToClients(id, msg);
         }
 
-        default -> log.warn(msgType + "not handled.");
+        default -> log.warn(msgType + " not handled.");
       }
-      log.info("from " + id + " handled: " + msgType);
+      log.debug("from " + id + " handled: " + msgType);
     } catch (Exception e) {
       log.error(ExceptionUtils.getStackTrace(e));
       MapTool.showError(ExceptionUtils.getStackTrace(e));

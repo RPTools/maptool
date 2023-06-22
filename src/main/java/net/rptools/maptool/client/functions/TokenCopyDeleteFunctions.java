@@ -257,6 +257,17 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       }
     }
 
+    // Token Property Type
+    if (newVals.has("propertyType")) {
+      String propType = newVals.get("propertyType").getAsString();
+      if (MapTool.getCampaign().getTokenTypeMap().containsKey(propType)) {
+        token.setPropertyType(propType);
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenCopy.invalidPropertyType", propType));
+      }
+    }
+
     int x = token.getX();
     int y = token.getY();
 

@@ -19,7 +19,8 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import net.rptools.clientserver.simple.client.WebRTCClientConnection;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.connection.WebRTCConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessageDto;
 import net.rptools.clientserver.simple.webrtc.LoginMessageDto;
 import net.rptools.clientserver.simple.webrtc.MessageDto;
@@ -31,8 +32,8 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCServerConnection extends AbstractServerConnection {
-  private static final Logger log = LogManager.getLogger(WebRTCServerConnection.class);
+public class WebRTCServer extends AbstractServer {
+  private static final Logger log = LogManager.getLogger(WebRTCServer.class);
 
   private WebSocketClient signalingClient;
   private final ServerConfig config;
@@ -41,13 +42,14 @@ public class WebRTCServerConnection extends AbstractServerConnection {
   private URI webSocketUri = null;
   private int reconnectCounter = -1;
   private Thread reconnectThread;
-  private final Map<String, WebRTCClientConnection> openConnections = new HashMap<>();
+  private final Map<String, WebRTCConnection> openConnections = new HashMap<>();
 
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
-  public WebRTCServerConnection(ServerConfig config, HandshakeProvider handshake) {
-    super(handshake);
+  public WebRTCServer(
+      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
+    super(handshake, messageHandler);
     this.config = config;
 
     try {
@@ -114,7 +116,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
       }
       case "offer" -> {
         var offerMsg = gson.fromJson(message, OfferMessageDto.class);
-        var clientConnection = new WebRTCClientConnection(offerMsg, this);
+        var clientConnection = new WebRTCConnection(offerMsg, this);
         openConnections.put(offerMsg.source, clientConnection);
       }
       case "candidate" -> {
@@ -133,7 +135,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     return config;
   }
 
-  public void onDataChannelOpened(WebRTCClientConnection connection) {
+  public void onDataChannelOpened(WebRTCConnection connection) {
     try {
       handleConnection(connection);
     } catch (Exception e) {
@@ -141,13 +143,12 @@ public class WebRTCServerConnection extends AbstractServerConnection {
     }
   }
 
-  @Override
   public String getError() {
     return lastError;
   }
 
   @Override
-  public void open() throws IOException {
+  public void start() throws IOException {
     signalingClient.connect();
   }
 
@@ -175,7 +176,7 @@ public class WebRTCServerConnection extends AbstractServerConnection {
               signalingClient = createSignalingClient();
               signalingClient.connect();
             });
-    reconnectThread.setName("WebRTCServerConnection.reconnectThread");
+    reconnectThread.setName("WebRTCServer.reconnectThread");
     reconnectThread.start();
   }
 

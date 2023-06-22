@@ -25,6 +25,7 @@ import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -219,20 +220,48 @@ public class TokenBarController
     new String[0], // Two Tone
   };
 
-  private static final List<String> types =
-      List.of(
-          "CampaignPropertiesDialog.combo.bars.type.twoImages",
-          "CampaignPropertiesDialog.combo.bars.type.singleImage",
-          "CampaignPropertiesDialog.combo.bars.type.multipleImages",
-          "CampaignPropertiesDialog.combo.bars.type.solid",
-          "CampaignPropertiesDialog.combo.bars.type.twoTone");
+  enum BarType {
+    TWO_IMAGE("CampaignPropertiesDialog.combo.bars.type.twoImages"),
+    ONE_IMAGE("CampaignPropertiesDialog.combo.bars.type.singleImage"),
+    MULTIPLE_IMAGE("CampaignPropertiesDialog.combo.bars.type.multipleImages"),
+    SOLID("CampaignPropertiesDialog.combo.bars.type.solid"),
+    TWO_TONE("CampaignPropertiesDialog.combo.bars.type.twoTone");
 
-  private static final List<String> sides =
-      List.of(
-          "CampaignPropertiesDialog.combo.bars.side.top",
-          "CampaignPropertiesDialog.combo.bars.type.bottom",
-          "CampaignPropertiesDialog.combo.bars.type.left",
-          "CampaignPropertiesDialog.combo.bars.type.right");
+    private final String i18nKey;
+
+    BarType(String i18nKey) {
+      this.i18nKey = i18nKey;
+    }
+
+    @Override
+    public String toString() {
+      return I18N.getText(i18nKey);
+    }
+  }
+
+  enum BarSide {
+    TOP("CampaignPropertiesDialog.combo.bars.side.top", Side.TOP),
+    BOTTOM("CampaignPropertiesDialog.combo.bars.type.bottom", Side.BOTTOM),
+    LEFT("CampaignPropertiesDialog.combo.bars.type.left", Side.LEFT),
+    RIGHT("CampaignPropertiesDialog.combo.bars.type.right", Side.RIGHT);
+
+    private final String i18nKey;
+    private final Side side;
+
+    BarSide(String i18nKey, Side side) {
+      this.i18nKey = i18nKey;
+      this.side = side;
+    }
+
+    public Side getSide() {
+      return side;
+    }
+
+    @Override
+    public String toString() {
+      return I18N.getText(i18nKey);
+    }
+  }
 
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
@@ -253,17 +282,13 @@ public class TokenBarController
     panel.getButton(IMAGE_MOVE_DOWN).addActionListener(this);
 
     var typeComboBox = panel.getComboBox(TYPE);
-    typeComboBox.setModel(new DefaultComboBoxModel());
-    for (var type : types) {
-      typeComboBox.addItem(I18N.getText(type));
-    }
+    typeComboBox.setModel(new DefaultComboBoxModel<BarType>());
+    Arrays.stream(BarType.values()).forEach(typeComboBox::addItem);
     typeComboBox.addActionListener(this);
 
     var sideComboBox = panel.getComboBox(SIDE);
-    sideComboBox.setModel(new DefaultComboBoxModel());
-    for (var side : sides) {
-      sideComboBox.addItem(I18N.getText(side));
-    }
+    sideComboBox.setModel(new DefaultComboBoxModel<BarSide>());
+    Arrays.stream(BarSide.values()).forEach(sideComboBox::addItem);
 
     panel.getSpinner(THICKNESS).setModel(new SpinnerNumberModel(5, 2, 10, 1));
     panel.getSpinner(INCREMENTS).setModel(new SpinnerNumberModel(0, 0, 100, 1));
@@ -271,6 +296,7 @@ public class TokenBarController
     panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
     panel.getList(BARS).setCellRenderer(renderer);
     panel.getList(BARS).addListSelectionListener(this);
+    panel.getList(IMAGES).setModel(new DefaultListModel<MD5Key>());
     panel.getList(IMAGES).setCellRenderer(new ImageListRenderer());
     panel.getList(IMAGES).addListSelectionListener(this);
     panel.getTextComponent(NAME).getDocument().addDocumentListener(this);
@@ -730,20 +756,23 @@ public class TokenBarController
     Color bgColor = ((ColorWell) formPanel.getComponent(BG_COLOR)).getColor();
     String name = formPanel.getTextComponent(NAME).getText();
     boolean mouseover = formPanel.getCheckBox(MOUSEOVER).isSelected();
-    String overlay = ((String) formPanel.getComboBox(TYPE).getSelectedItem());
+    var overlay = ((BarType) formPanel.getComboBox(TYPE).getSelectedItem());
     int opacity = TokenStatesController.getSpinner(OPACITY, "opacity", formPanel);
     boolean showGM = formPanel.getCheckBox(SHOW_GM).isSelected();
     boolean showOwner = formPanel.getCheckBox(SHOW_OWNER).isSelected();
     boolean showOthers = formPanel.getCheckBox(SHOW_OTHERS).isSelected();
     int thickness = TokenStatesController.getSpinner(THICKNESS, "thickness", formPanel);
     int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
-    Side side =
-        Side.valueOf(((String) formPanel.getComboBox(SIDE).getSelectedItem()).toUpperCase());
+    var side = (BarSide) formPanel.getComboBox(SIDE).getSelectedItem();
+
+    if (overlay == null || side == null) {
+      return null;
+    }
 
     BarTokenOverlay to = null;
-    if (overlay.equals("SOLID_BAR")) {
+    if (overlay.equals(BarType.SOLID)) {
       to = new DrawnBarTokenOverlay(name, color, thickness);
-    } else if (overlay.equals("TWO_TONE_BAR")) {
+    } else if (overlay.equals(BarType.TWO_TONE)) {
       to = new TwoToneBarTokenOverlay(name, color, bgColor, thickness);
     } else {
 
@@ -754,11 +783,11 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals("TWO_IMAGES_BAR")) {
+      if (overlay.equals(BarType.TWO_IMAGE)) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals("SINGLE_IMAGE_BAR")) {
+      } else if (overlay.equals(BarType.ONE_IMAGE)) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals("MULTIPLE_IMAGES_BAR")) {
+      } else if (overlay.equals(BarType.MULTIPLE_IMAGE)) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
@@ -771,7 +800,7 @@ public class TokenBarController
       to.setShowOthers(showOthers);
       to.setShowOwner(showOwner);
       to.setIncrements(increments);
-      to.setSide(side);
+      to.setSide(side.getSide());
     } // endif
     return to;
   }

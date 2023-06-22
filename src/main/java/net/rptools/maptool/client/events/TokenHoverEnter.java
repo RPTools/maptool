@@ -12,17 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui;
+package net.rptools.maptool.client.events;
 
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
-import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
-import org.junit.jupiter.api.Test;
-
-public class ExportDialogTest {
-
-  @Test
-  public void testSingletonExists() {
-    assertNotNull(ExportDialog.getInstance());
-  }
-}
+/**
+ * Event fired when the mouse pointer hovers over a token.
+ *
+ * @param token the token that the mouse pointer is hovering over.
+ * @param zone the zone that the token is in.
+ * @param shiftDown is the shift key down.
+ * @param controlDown is the control key down.
+ */
+public record TokenHoverEnter(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}

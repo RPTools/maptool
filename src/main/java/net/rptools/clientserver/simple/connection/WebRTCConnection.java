@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.clientserver.simple.connection;
 
 import com.google.gson.Gson;
 import dev.onvoid.webrtc.*;
@@ -20,8 +20,7 @@ import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
-import net.rptools.clientserver.simple.AbstractConnection;
-import net.rptools.clientserver.simple.server.WebRTCServerConnection;
+import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.ServerConfig;
@@ -30,9 +29,9 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCClientConnection extends AbstractConnection
-    implements ClientConnection, PeerConnectionObserver, RTCDataChannelObserver {
-  private static final Logger log = LogManager.getLogger(WebRTCClientConnection.class);
+public class WebRTCConnection extends AbstractConnection
+    implements Connection, PeerConnectionObserver, RTCDataChannelObserver {
+  private static final Logger log = LogManager.getLogger(WebRTCConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
   private final ServerConfig config;
@@ -40,29 +39,28 @@ public class WebRTCClientConnection extends AbstractConnection
   private final Gson gson = new Gson();
   private WebSocketClient signalingClient;
   // only set on server side
-  private WebRTCServerConnection serverConnection;
+  private WebRTCServer server;
   private RTCConfiguration rtcConfig;
   private RTCPeerConnection peerConnection;
   private RTCDataChannel localDataChannel;
   private String lastError = null;
 
-  private final SendThread sendThread = new SendThread(this);
+  private final SendThread sendThread = new SendThread();
   private Thread handleDisconnect;
 
   // used from client side
-  public WebRTCClientConnection(String id, ServerConfig config) {
+  public WebRTCConnection(String id, ServerConfig config) {
     this.id = id;
     this.config = config;
     init();
   }
 
   // this is used from the server side
-  public WebRTCClientConnection(
-      OfferMessageDto message, WebRTCServerConnection webRTCServerConnection) {
+  public WebRTCConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
     this.id = message.source;
-    this.serverConnection = webRTCServerConnection;
-    this.config = serverConnection.getConfig();
-    this.signalingClient = serverConnection.getSignalingClient();
+    this.server = webRTCServer;
+    this.config = server.getConfig();
+    this.signalingClient = server.getSignalingClient();
     init();
 
     peerConnection = factory.createPeerConnection(rtcConfig, this);
@@ -92,7 +90,7 @@ public class WebRTCClientConnection extends AbstractConnection
                   @Override
                   public void onSuccess() {
                     var msg = new AnswerMessageDto();
-                    msg.source = serverConnection.getConfig().getServerName();
+                    msg.source = server.getConfig().getServerName();
                     msg.destination = getId();
                     msg.answer = description;
                     sendSignalingMessage(gson.toJson(msg));
@@ -113,7 +111,7 @@ public class WebRTCClientConnection extends AbstractConnection
   }
 
   private boolean isServerSide() {
-    return serverConnection != null;
+    return server != null;
   }
 
   private String getSource() {
@@ -126,7 +124,7 @@ public class WebRTCClientConnection extends AbstractConnection
   private void startSignaling() {
     URI uri = null;
     try {
-      uri = new URI(WebRTCServerConnection.WebSocketUrl);
+      uri = new URI(WebRTCServer.WebSocketUrl);
     } catch (Exception e) {
     }
 
@@ -194,11 +192,6 @@ public class WebRTCClientConnection extends AbstractConnection
     openRelayTurn3.username = "openrelayproject";
     openRelayTurn3.password = "openrelayproject";
     rtcConfig.iceServers.add(openRelayTurn3);
-  }
-
-  @Override
-  public void sendMessage(byte[] message) {
-    sendMessage(null, message);
   }
 
   @Override
@@ -325,7 +318,7 @@ public class WebRTCClientConnection extends AbstractConnection
   @Override
   public void onSignalingChange(RTCSignalingState state) {
     // set thread name for better logs.
-    Thread.currentThread().setName("WebRTCClientConnection.WebRTCThread_" + getId());
+    Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
     log.info(prefix() + "PeerConnection.onSignalingChange: " + state);
   }
 
@@ -421,14 +414,14 @@ public class WebRTCClientConnection extends AbstractConnection
     localDataChannel.registerObserver(this);
 
     if (isServerSide()) {
-      serverConnection.onDataChannelOpened(this);
+      server.onDataChannelOpened(this);
     }
   }
 
   @Override
   public void onRenegotiationNeeded() {
     // set thread name for better logs
-    Thread.currentThread().setName("WebRTCClientConnection.WebRTCThread_" + getId());
+    Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
     log.info(prefix() + "PeerConnection.onRenegotiationNeeded");
   }
 
@@ -498,9 +491,9 @@ public class WebRTCClientConnection extends AbstractConnection
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) serverConnection.clearClients();
+              if (isServerSide()) server.clearClients();
             },
-            "WebRTCClientConnection.handleDisconnect");
+            "WebRTCConnection.handleDisconnect");
     handleDisconnect.start();
   }
 
@@ -525,11 +518,9 @@ public class WebRTCClientConnection extends AbstractConnection
 
   private class SendThread extends Thread {
     private boolean stopRequested = false;
-    private final ClientConnection connection;
 
-    public SendThread(ClientConnection connection) {
-      super("WebRTCClientConnection.SendThread_" + connection.getId());
-      this.connection = connection;
+    public SendThread() {
+      super("WebRTCConnection.SendThread_" + WebRTCConnection.this.getId());
     }
 
     public void requestStop() {
@@ -543,10 +534,10 @@ public class WebRTCClientConnection extends AbstractConnection
     public void run() {
       log.debug(prefix() + " sendThread started");
       try {
-        while (!stopRequested && connection.isAlive()) {
-          while (connection.hasMoreMessages()
+        while (!stopRequested && WebRTCConnection.this.isAlive()) {
+          while (WebRTCConnection.this.hasMoreMessages()
               && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
-            byte[] message = connection.nextMessage();
+            byte[] message = WebRTCConnection.this.nextMessage();
             if (message == null) {
               continue;
             }

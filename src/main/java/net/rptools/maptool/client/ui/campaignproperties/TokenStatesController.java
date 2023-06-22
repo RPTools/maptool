@@ -222,10 +222,10 @@ public class TokenStatesController
   // the order needs to match the AbstractTemplate.Quadrant enum
   private static final List<String> corners =
       List.of(
-          "CampaignPropertiesDialog.combo.states.corner.topRight",
-          "CampaignPropertiesDialog.combo.states.corner.topLeft",
-          "CampaignPropertiesDialog.combo.states.corner.bottomRight",
-          "CampaignPropertiesDialog.combo.states.corner.bottomLeft");
+          "position.corner.topRight",
+          "position.corner.topLeft",
+          "position.corner.bottomRight",
+          "position.corner.bottomLeft");
 
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners

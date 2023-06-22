@@ -153,9 +153,6 @@ public class ZoneRenderer extends JComponent
 
   private boolean autoResizeStamp = false;
 
-  /** Show blocked grid lines during AStar moving, for debugging... */
-  private boolean showAstarDebugging = false;
-
   /** Store previous view to restore to, eg after GM shows ctrl+shift+space pointer */
   private double previousScale;
 
@@ -410,7 +407,7 @@ public class ZoneRenderer extends JComponent
     // Lee: check only matters for snap-to-grid
     if (stg) {
       CodeTimer moveTimer = new CodeTimer("ZoneRenderer.commitMoveSelectionSet");
-      moveTimer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+      moveTimer.setEnabled(AppState.isCollectProfilingData());
       moveTimer.setThreshold(1);
 
       moveTimer.start("setup");
@@ -539,11 +536,7 @@ public class ZoneRenderer extends JComponent
       moveTimer.stop("updateTokenTree");
 
       if (moveTimer.isEnabled()) {
-        String results = moveTimer.toString();
-        MapTool.getProfilingNoteFrame().addText(results);
-        if (log.isDebugEnabled()) {
-          log.debug(results);
-        }
+        MapTool.getProfilingNoteFrame().addText(moveTimer.toString());
         moveTimer.clear();
       }
     } else {
@@ -797,7 +790,7 @@ public class ZoneRenderer extends JComponent
     if (timer == null) {
       timer = new CodeTimer("ZoneRenderer.renderZone");
     }
-    timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+    timer.setEnabled(AppState.isCollectProfilingData());
     timer.clear();
     timer.setThreshold(10);
     timer.start("paintComponent");
@@ -842,11 +835,7 @@ public class ZoneRenderer extends JComponent
 
     timer.stop("paintComponent");
     if (timer.isEnabled()) {
-      String results = timer.toString();
-      MapTool.getProfilingNoteFrame().addText(results);
-      if (log.isDebugEnabled()) {
-        log.debug(results);
-      }
+      MapTool.getProfilingNoteFrame().addText(timer.toString());
       timer.clear();
     }
   }
@@ -1389,10 +1378,6 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  public CodeTimer getCodeTimer() {
-    return timer;
-  }
-
   private enum LightOverlayClipStyle {
     CLIP_TO_VISIBLE_AREA,
     CLIP_TO_NOT_VISIBLE_AREA,
@@ -1509,15 +1494,16 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLumensOverlay:allocateBuffer");
 
       Graphics2D newG = lumensOverlay.createGraphics();
-      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
-      SwingUtil.useAntiAliasing(newG);
-
       // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
+      newG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
       newG.setPaint(
           zone.getVisionType() == Zone.VisionType.NIGHT
               ? new Color(0.f, 0.f, 0.f, 1.f)
               : new Color(0.f, 0.f, 0.f, 0.f));
       newG.fillRect(0, 0, lumensOverlay.getWidth(), lumensOverlay.getHeight());
+
+      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
+      SwingUtil.useAntiAliasing(newG);
 
       if (clipStyle != null && visibleScreenArea != null) {
         timer.start("renderLumensOverlay:setClip");
@@ -2163,7 +2149,7 @@ public class ZoneRenderer extends JComponent
         }
 
         // Show current Blocked Movement directions for A*
-        if (walker != null && (log.isDebugEnabled() || showAstarDebugging)) {
+        if (walker != null && DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
           Map<CellPoint, Set<CellPoint>> blockedMovesByTarget = walker.getBlockedMoves();
           // Color currentColor = g.getColor();
           for (var entry : blockedMovesByTarget.entrySet()) {
@@ -2734,7 +2720,7 @@ public class ZoneRenderer extends JComponent
     int textOffset = (int) (getScale() * 7 * fontScale); // 7 pixels at 100% zoom & grid size of 50
 
     String distanceText = NumberFormat.getInstance().format(distance);
-    if (log.isDebugEnabled() || showAstarDebugging) {
+    if (DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
       distanceText += " (" + NumberFormat.getInstance().format(distanceWithoutTerrain) + ")";
       fontSize = (int) (fontSize * 0.75);
     }

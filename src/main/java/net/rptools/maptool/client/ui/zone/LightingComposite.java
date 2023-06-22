@@ -77,6 +77,14 @@ public class LightingComposite implements Composite {
   }
 
   private static final class BlenderContext implements CompositeContext {
+    // Technically contexts can be multithreaded, but not in practice. If need be, the buffers could
+    // be made thread-local. A length of 4K was chosen as the size since it is larger than most
+    // screen widths (a little more than 4K resolution) while not be too high for this sort of use.
+    // So this should support typical cases without needing to blend rows in chunks.
+    private static final int BUFFER_LENGTH = 4 * 1024;
+    private static final int[] SRC_BUFFER = new int[BUFFER_LENGTH];
+    private static final int[] DST_BUFFER = new int[BUFFER_LENGTH];
+
     private final Blender blender;
 
     public BlenderContext(Blender blender) {
@@ -88,17 +96,29 @@ public class LightingComposite implements Composite {
       final int w = Math.min(src.getWidth(), dstIn.getWidth());
       final int h = Math.min(src.getHeight(), dstIn.getHeight());
 
-      final int[] srcPixels = new int[w];
-      final int[] dstPixels = new int[w];
-      final int[] dstOutPixels = new int[w];
+      final int[] srcPixels = SRC_BUFFER;
+      final int[] dstPixels = DST_BUFFER;
 
       for (int y = 0; y < h; y++) {
-        src.getDataElements(src.getMinX(), y + src.getMinY(), w, 1, srcPixels);
-        dstIn.getDataElements(dstIn.getMinX(), y + dstIn.getMinY(), w, 1, dstPixels);
+        // region "Fast path". If w < BUFFER_LENGTH, this just blends in one go.
+        final var firstChunkLength = (w - 1) % BUFFER_LENGTH + 1;
+        src.getDataElements(src.getMinX(), y + src.getMinY(), firstChunkLength, 1, srcPixels);
+        dstIn.getDataElements(dstIn.getMinX(), y + dstIn.getMinY(), firstChunkLength, 1, dstPixels);
+        blender.blendRow(dstPixels, srcPixels, firstChunkLength);
+        dstOut.setDataElements(
+            dstOut.getMinX(), y + dstOut.getMinY(), firstChunkLength, 1, dstPixels);
+        // endregion
 
-        blender.blendRow(dstPixels, srcPixels, dstOutPixels, w);
-
-        dstOut.setDataElements(dstOut.getMinX(), y + dstOut.getMinY(), w, 1, dstOutPixels);
+        // region Repeat as necessary. This is meant to not be done very often.
+        for (var x = firstChunkLength; x < w; x += BUFFER_LENGTH) {
+          src.getDataElements(x + src.getMinX(), y + src.getMinY(), BUFFER_LENGTH, 1, srcPixels);
+          dstIn.getDataElements(
+              x + dstIn.getMinX(), y + dstIn.getMinY(), BUFFER_LENGTH, 1, dstPixels);
+          blender.blendRow(dstPixels, srcPixels, BUFFER_LENGTH);
+          dstOut.setDataElements(
+              x + dstOut.getMinX(), y + dstOut.getMinY(), BUFFER_LENGTH, 1, dstPixels);
+        }
+        // endregion
       }
     }
 
@@ -106,18 +126,35 @@ public class LightingComposite implements Composite {
     public void dispose() {}
   }
 
+  /**
+   * Renormalizes a product of bytes by magically dividing by 255.
+   *
+   * <p>This is very non-obvious, but is described well in this course sheet: <a
+   * href="https://docs.google.com/document/d/1tNrMWShq55rfltcZxAx1N-6f82Dt7MWLDHm-5GQVEnE/edit">Dividing
+   * by 255</a>.
+   *
+   * <p>The SWAR technique of multiplying in parallel is inapplicable to our operations, so that is
+   * not represented anywhere.
+   *
+   * @param x The result of a byte product, in the range 0 .. 0xFFFF.
+   * @return The normalized value of x, in the range 0 .. 0xFF.
+   */
+  private static int renormalize(int x) {
+    return (x + (x >>> 8)) >>> 8;
+  }
+
   public interface Blender {
     /**
      * Blend source and destination pixels for a row of pixels.
      *
-     * <p>The pixels must be encoded as 32-bit ARGB, and the result will be likewise.
+     * <p>The pixels must be encoded as 32-bit ARGB, and the result will be likewise. Results are
+     * written back to `dstPixels`.
      *
      * @param dstPixels The bottom layer pixels.
      * @param srcPixels The top layer pixels.
-     * @param outPixels A buffer that this method will write results into.
      * @param samples The number of pixels in the row.
      */
-    void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples);
+    void blendRow(int[] dstPixels, int[] srcPixels, int samples);
   }
 
   /**
@@ -134,24 +171,31 @@ public class LightingComposite implements Composite {
    * </ul>
    */
   private static final class ScreenBlender implements Blender {
-    public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
+    public void blendRow(int[] dstPixels, int[] srcPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the light alpha around.
-        int resultPixel = srcPixel & (0xFF << 24);
+        final int resultR, resultG, resultB;
 
-        for (int shift = 0; shift < 24; shift += 8) {
-          final var dstC = (dstPixel >>> shift) & 0xFF;
-          final var srcC = (srcPixel >>> shift) & 0xFF;
-
-          final var resultC = dstC + srcC - (dstC * srcC) / 255;
-
-          resultPixel |= (resultC << shift);
+        {
+          final var dstC = (dstPixel >>> 16) & 0xFF;
+          final var srcC = (srcPixel >>> 16) & 0xFF;
+          resultR = renormalize((255 - srcC) * dstC);
+        }
+        {
+          final var dstC = (dstPixel >>> 8) & 0xFF;
+          final var srcC = (srcPixel >>> 8) & 0xFF;
+          resultG = renormalize((255 - srcC) * dstC);
+        }
+        {
+          final var dstC = dstPixel & 0xFF;
+          final var srcC = srcPixel & 0xFF;
+          resultB = renormalize((255 - srcC) * dstC);
         }
 
-        outPixels[x] = resultPixel;
+        // This keeps the light alpha around instead of the base.
+        dstPixels[x] = srcPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }
@@ -161,15 +205,13 @@ public class LightingComposite implements Composite {
    * components by no more than some multiple of the component.
    *
    * <p>When the bottom component ({@code dstC}) is low, the result is between the bottom component
-   * and a multiple of the bottom component controlled by {@link #MAX_DARKNESS_BOOST_PER_128}. The
-   * exact result is determined by using the top component ({@code srcC}) to interpolate between the
-   * two bounds.
+   * and twice the bottom component. The exact result is determined by using the top component
+   * ({@code srcC}) to interpolate between the two bounds.
    *
    * <p>When the bottom component is high, the result is between the bottom component and 255, again
    * using the top component to interpolate between the two.
    *
-   * <p>The transition point from low to high depends on the value of {@link
-   * #MAX_DARKNESS_BOOST_PER_128} - the higher that value, the lower the transition point.
+   * <p>The transition point from low to high is at 0.5 (or 128 as an int).
    *
    * <p>When viewed as a function of the bottom component, this blend mode is built from two linear
    * pieces. The first piece has a slope no less than 1, and the second piece has a slope no greater
@@ -178,10 +220,8 @@ public class LightingComposite implements Composite {
    *
    * <p>The behaviour is actually is very similar to overlay, but where the value at the transition
    * point is always greater than the bottom component (in overlay it can be greater than or less
-   * than the bottom component). The relation can be best seen when {@link
-   * #MAX_DARKNESS_BOOST_PER_128} is set to 128. It also has a much looser relation to the soft
-   * light blend mode, which inspired the idea of constraining the increase of dark components by
-   * some multiple.
+   * than the bottom component). It also has a much looser relation to the soft light blend mode,
+   * which inspired the idea of constraining the increase of dark components by some multiple.
    *
    * <p>Special cases:
    *
@@ -189,31 +229,34 @@ public class LightingComposite implements Composite {
    *   <li>When the bottom component is 0, the result is 0.
    *   <li>When the bottom component is maxed, the result is maxed.
    *   <li>When the top component is 0, the result is the bottom component.
-   *   <li>
    * </ul>
    */
   private static final class ConstrainedBrightenBlender implements Blender {
-    private static final int MAX_DARKNESS_BOOST_PER_128 = 128;
-
-    public void blendRow(int[] dstPixels, int[] srcPixels, int[] outPixels, int samples) {
+    public void blendRow(int[] dstPixels, int[] srcPixels, int samples) {
       for (int x = 0; x < samples; ++x) {
         final int srcPixel = srcPixels[x];
         final int dstPixel = dstPixels[x];
 
-        // This keeps the bottom alpha around.
-        int resultPixel = dstPixel & (0xFF << 24);
+        final int resultR, resultG, resultB;
 
-        for (int shift = 0; shift < 24; shift += 8) {
-          final var dstC = (dstPixel >>> shift) & 0xFF;
-          final var srcC = (srcPixel >>> shift) & 0xFF;
-
-          final var resultC =
-              dstC + srcC * Math.min(MAX_DARKNESS_BOOST_PER_128 * dstC / 128, 255 - dstC) / 255;
-
-          resultPixel |= (resultC << shift);
+        {
+          final var dstC = (dstPixel >>> 16) & 0xFF;
+          final var srcC = (srcPixel >>> 16) & 0xFF;
+          resultR = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
+        }
+        {
+          final var dstC = (dstPixel >>> 8) & 0xFF;
+          final var srcC = (srcPixel >>> 8) & 0xFF;
+          resultG = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
+        }
+        {
+          final var dstC = dstPixel & 0xFF;
+          final var srcC = srcPixel & 0xFF;
+          resultB = renormalize(srcC * (dstC < 128 ? dstC : 255 - dstC));
         }
 
-        outPixels[x] = resultPixel;
+        // This deliberately keeps the bottom alpha around.
+        dstPixels[x] = dstPixel + ((resultR << 16) | (resultG << 8) | resultB);
       }
     }
   }

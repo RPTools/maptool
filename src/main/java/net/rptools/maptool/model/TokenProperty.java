@@ -66,6 +66,20 @@ public class TokenProperty implements Serializable {
     this.defaultValue = defaultValue;
   }
 
+  /**
+   * Creates a new <code>TokenProperty</code> that's a copy of another.
+   *
+   * @param prop the property to copy the values from.
+   */
+  public TokenProperty(TokenProperty prop) {
+    this.name = prop.name;
+    this.shortName = prop.shortName;
+    this.highPriority = prop.highPriority;
+    this.ownerOnly = prop.ownerOnly;
+    this.gmOnly = prop.gmOnly;
+    this.defaultValue = prop.defaultValue;
+  }
+
   public boolean isOwnerOnly() {
     return ownerOnly;
   }

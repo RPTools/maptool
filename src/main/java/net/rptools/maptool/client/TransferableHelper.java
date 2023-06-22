@@ -191,11 +191,11 @@ public class TransferableHelper extends TransferHandler {
 
       // EXISTING ASSET
       if (transferable.isDataFlavorSupported(TransferableAsset.dataFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + TransferableAsset.dataFlavor);
+        log.info("Selected: {}", TransferableAsset.dataFlavor);
         o = handleTransferableAsset(transferable);
       }
       if (o == null && transferable.isDataFlavorSupported(TransferableAssetReference.dataFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + TransferableAssetReference.dataFlavor);
+        log.info("Selected: {}", TransferableAssetReference.dataFlavor);
         o = handleTransferableAssetReference(transferable);
       }
 
@@ -227,7 +227,7 @@ public class TransferableHelper extends TransferHandler {
       // "text/x-java-file-list", but
       // until it does...
       if (o == null && transferable.isDataFlavorSupported(URI_LIST_FLAVOR)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URI_LIST_FLAVOR);
+        log.info("Selected: {}", URI_LIST_FLAVOR);
         String data = (String) transferable.getTransferData(URI_LIST_FLAVOR);
         List<URL> list = textURIListToFileList(data);
         if (!list.isEmpty()) {
@@ -240,7 +240,7 @@ public class TransferableHelper extends TransferHandler {
       // Used by OSX (and Windows?) when files are dragged from the desktop: 'text/java-file-list;
       // java.util.List<java.io.File>'
       if (o == null && transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + DataFlavor.javaFileListFlavor);
+        log.info("Selected: {}", DataFlavor.javaFileListFlavor);
         List<URL> list = new FileTransferableHandler().getTransferObject(transferable);
         if (!list.isEmpty()) {
           List<Object> urls = handleURLList(list);
@@ -251,7 +251,7 @@ public class TransferableHelper extends TransferHandler {
       // DIRECT/BROWSER
       // Try 'image/x-java-image; java.awt.Image' to see if Java has recognized the image as such
       if (o == null && transferable.isDataFlavorSupported(X_JAVA_IMAGE)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + X_JAVA_IMAGE);
+        log.info("Selected: {}", X_JAVA_IMAGE);
         BufferedImage image =
             (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
         o = Asset.createImageAsset("unnamed", ImageUtil.imageToBytes(image));
@@ -260,7 +260,7 @@ public class TransferableHelper extends TransferHandler {
       // DIRECT/BROWSER
       // Try 'application/x-java-url; java.net.URL'
       if (o == null && transferable.isDataFlavorSupported(URL_FLAVOR_URI)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URL_FLAVOR_URI);
+        log.info("Selected: {}", URL_FLAVOR_URI);
         URL url = (URL) transferable.getTransferData(URL_FLAVOR_URI);
         o = handleImage(url, "URL_FLAVOR_URI", transferable);
       }
@@ -270,7 +270,7 @@ public class TransferableHelper extends TransferHandler {
       // are better than
       // other file types...
       if (o == null && transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
-        if (log.isInfoEnabled()) log.info("Selected: " + URL_FLAVOR_PLAIN);
+        log.info("Selected: {}", URL_FLAVOR_PLAIN);
         String text = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
         URL url = new URL(text);
         o = handleImage(url, "URL_FLAVOR_PLAIN", transferable);
@@ -316,7 +316,7 @@ public class TransferableHelper extends TransferHandler {
         list.add(url);
       } catch (Exception e) {
         // There's no reason to trap the individual exceptions when a single catch suffices.
-        if (log.isInfoEnabled()) log.info(s, e);
+        log.info(s, e);
         // } catch (URISyntaxException e) { // Thrown by the URI constructor
         // e.printStackTrace();
         // } catch (IllegalArgumentException e) { // Thrown by URI.toURL()
@@ -333,16 +333,15 @@ public class TransferableHelper extends TransferHandler {
     BufferedImage image = null;
     Asset asset = null;
     try {
-      if (log.isDebugEnabled()) log.debug("Reading URL:  " + url); // $NON-NLS-1$
+      log.debug("Reading URL:  {}", url); // $NON-NLS-1$
       image = ImageIO.read(url);
     } catch (Exception e) {
       MapTool.showError("TransferableHelper.error.urlFlavor", e); // $NON-NLS-1$
     }
     if (image == null) {
-      if (log.isDebugEnabled())
-        log.debug(
-            type
-                + " didn't work; trying ImageTransferableHandler().getTransferObject()"); // $NON-NLS-1$
+      log.debug(
+          "{} didn't work; trying ImageTransferableHandler().getTransferObject()",
+          type); // $NON-NLS-1$
       image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
     }
     if (image != null) {
@@ -413,8 +412,8 @@ public class TransferableHelper extends TransferHandler {
           Asset temp = AssetManager.createAsset(url, Type.MTLIB);
           if (temp != null) { // `null' means no image available
             assets.add(temp);
-          } else if (log.isInfoEnabled()) {
-            log.info("Invalid MTLib for " + url);
+          } else {
+            log.info("Invalid MTLib for {}", url);
           }
         } else {
           // Get the MediaType so we can use it when creating the Asset later
@@ -428,8 +427,8 @@ public class TransferableHelper extends TransferHandler {
             Asset temp = AssetManager.createAsset(url);
             if (temp != null) { // `null' means no image available
               assets.add(temp);
-            } else if (log.isInfoEnabled()) {
-              log.info("No image available for " + url);
+            } else {
+              log.info("No image available for {}", url);
             }
           }
         }
@@ -549,6 +548,7 @@ public class TransferableHelper extends TransferHandler {
    * @param t Transferable to check
    * @return a list of all DataFlavor objects that succeeded
    */
+  // TODO The result is always ignored, this method is just used for informational logging now.
   private static List<DataFlavor> whichOnesWork(Transferable t) {
     List<DataFlavor> worked = new ArrayList<DataFlavor>();
 
@@ -565,9 +565,9 @@ public class TransferableHelper extends TransferHandler {
       try {
         result = t.getTransferData(flavor);
       } catch (UnsupportedFlavorException ufe) {
-        if (log.isDebugEnabled()) log.debug("Failed (UFE):  " + flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (UFE):  {}", flavor.toString()); // $NON-NLS-1$
       } catch (IOException ioe) {
-        if (log.isDebugEnabled()) log.debug("Failed (IOE):  " + flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (IOE):  {}", flavor.toString()); // $NON-NLS-1$
       } catch (Exception e) {
         // System.err.println(e);
       }
@@ -575,8 +575,7 @@ public class TransferableHelper extends TransferHandler {
         for (Class<?> type : validTypes) {
           if (type.equals(result.getClass())) {
             worked.add(flavor);
-            if (log.isInfoEnabled())
-              log.info("Possible: " + flavor.toString() + " (" + result + ")"); // $NON-NLS-1$
+            log.info("Possible: {} ({})", flavor, result); // $NON-NLS-1$
             break;
           }
         }

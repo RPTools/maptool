@@ -70,4 +70,17 @@ public class AppConstants {
       (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
   public static final String THEME_CONFIG_FILE =
       AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
+
+  /**
+   * MapTool internal frame/dialog/overlay prefix. These should only be managed by MapTool code not
+   * macros.
+   */
+  public static final String INTERNAL_FRAME_PREFIX = "MapTool-Internal:";
+
+  /**
+   * Internal overlay for displaying information about what is under the pointer (token stat sheets
+   * for example);
+   */
+  public static final String INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME =
+      INTERNAL_FRAME_PREFIX + "Internal Map Under Pointer Overlay";
 }
