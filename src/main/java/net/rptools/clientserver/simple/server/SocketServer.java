@@ -18,27 +18,28 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutionException;
-import net.rptools.clientserver.simple.client.SocketClientConnection;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.connection.SocketConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
  * @author drice
  */
-public class SocketServerConnection extends AbstractServerConnection {
+public class SocketServer extends AbstractServer {
 
-  private static final Logger log = LogManager.getLogger(SocketServerConnection.class);
+  private static final Logger log = LogManager.getLogger(SocketServer.class);
   private final int port;
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServerConnection(int port, HandshakeProvider handshake) {
-    super(handshake);
+  public SocketServer(int port, HandshakeProvider handshake, MessageHandler messageHandler) {
+    super(handshake, messageHandler);
     this.port = port;
   }
 
   @Override
-  public void open() throws IOException {
+  public void start() throws IOException {
     socket = new ServerSocket(port);
     listeningThread = new ListeningThread(this, socket);
     listeningThread.start();
@@ -65,7 +66,6 @@ public class SocketServerConnection extends AbstractServerConnection {
     }
   }
 
-  @Override
   public String getError() {
     return null;
   }
@@ -73,7 +73,7 @@ public class SocketServerConnection extends AbstractServerConnection {
   ////
   // Threads
   private static class ListeningThread extends Thread {
-    private final SocketServerConnection server;
+    private final SocketServer server;
     private final ServerSocket socket;
 
     private boolean stopRequested = false;
@@ -85,8 +85,8 @@ public class SocketServerConnection extends AbstractServerConnection {
       return socket.getInetAddress().getHostAddress() + "-" + (nextConnectionId++);
     }
 
-    public ListeningThread(SocketServerConnection server, ServerSocket socket) {
-      setName("SocketServerConnection.ListeningThread");
+    public ListeningThread(SocketServer server, ServerSocket socket) {
+      setName("SocketServer.ListeningThread");
       this.server = server;
       this.socket = socket;
     }
@@ -107,7 +107,7 @@ public class SocketServerConnection extends AbstractServerConnection {
           log.debug("Client connecting ...");
 
           String id = nextClientId(s);
-          SocketClientConnection conn = new SocketClientConnection(id, s);
+          SocketConnection conn = new SocketConnection(id, s);
           server.handleConnection(conn);
         } catch (IOException | ExecutionException | InterruptedException e) {
           if (!suppressErrors) {

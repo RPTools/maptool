@@ -299,9 +299,7 @@ public class HTMLWebViewManager {
   }
 
   public void updateContents(final String html, boolean scrollReset) {
-    if (log.isDebugEnabled()) {
-      log.debug("setting text in WebView: " + html);
-    }
+    log.debug("setting text in WebView: {}", html);
     this.scrollReset = scrollReset;
     // If the WebView has been flushed, the scrolling has already been stored
     if (!scrollReset && !isFlushed) {
@@ -467,9 +465,7 @@ public class HTMLWebViewManager {
    */
   private void doRegisterMacro(String type, String link) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("registerMacro event: type='" + type + "' link='" + link + "'");
-      }
+      log.debug("registerMacro event: type='{}' link='{}'", type, link);
       actionListeners.actionPerformed(
           new HTMLActionEvent.RegisterMacroActionEvent(this, type, link));
     }
@@ -556,9 +552,7 @@ public class HTMLWebViewManager {
    * @param event the href event triggered
    */
   private void fixHref(org.w3c.dom.events.Event event) {
-    if (log.isDebugEnabled()) {
-      log.debug("Responding to hyperlink event: " + event.getType() + " " + event.toString());
-    }
+    log.debug("Responding to hyperlink event: {} {}", event.getType(), event);
 
     final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
     if (href != null && !href.equals("")) {
@@ -586,9 +580,7 @@ public class HTMLWebViewManager {
    */
   private void doChangeTitle(String title) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("changeTitle event: " + title);
-      }
+      log.debug("changeTitle event: {}", title);
       actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
     }
   }
@@ -603,9 +595,7 @@ public class HTMLWebViewManager {
     String content = element.getAttribute("content");
 
     if (actionListeners != null && name != null && content != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("metaTag found: name='" + name + "' content='" + content + "'");
-      }
+      log.debug("metaTag found: name='{}' content='{}'", name, content);
       actionListeners.actionPerformed(new HTMLActionEvent.MetaTagActionEvent(this, name, content));
     }
   }
@@ -790,10 +780,7 @@ public class HTMLWebViewManager {
    */
   private void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "submit event: method='" + method + "' action='" + action + "' data='" + data + "'");
-      }
+      log.debug("submit event: method='{}' action='{}' data='{}'", method, action, data);
       actionListeners.actionPerformed(
           new HTMLActionEvent.FormActionEvent(this, method, action, data));
     }

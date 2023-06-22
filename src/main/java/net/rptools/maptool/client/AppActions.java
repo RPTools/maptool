@@ -49,7 +49,6 @@ import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
 import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
-import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
@@ -234,22 +233,6 @@ public class AppActions {
             } catch (Exception ex) {
               MapTool.showError("msg.error.failedExportingImage", ex);
             }
-          }
-        }
-      };
-
-  public static final Action EXPORT_CAMPAIGN_AS =
-      new AdminClientAction() {
-        {
-          init("action.exportCampaignAs");
-        }
-
-        @Override
-        protected void executeAction() {
-          try {
-            doCampaignExport();
-          } catch (Exception ex) {
-            MapTool.showError("Cannot create the ExportCampaignDialog object", ex);
           }
         }
       };
@@ -1525,7 +1508,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_LUMENS_OVERLAY =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLumensOverlay");
         }
@@ -1544,7 +1527,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_SHOW_LIGHTS =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLights");
         }
@@ -2712,28 +2695,22 @@ public class AppActions {
   }
 
   private static void doSaveCampaign(final File file, Runnable onSuccess) {
-    doSaveCampaign(file, null, onSuccess);
-  }
-
-  private static void doSaveCampaign(File file, String campaignVersion, Runnable onSuccess) {
 
     if (AppState.testBackgroundTaskLock()) {
       MapTool.showError("msg.error.failedSaveCampaignLock");
       return;
     }
-    new CampaignSaver(file, campaignVersion, onSuccess).execute();
+    new CampaignSaver(file, onSuccess).execute();
   }
 
   private static class CampaignSaver extends SwingWorker<Object, String> {
 
     private File file;
-    private String campaignVersion;
     private Runnable onSuccess;
     private int maxWaitForLock = 30;
 
-    public CampaignSaver(File file, String campaignVersion, Runnable onSuccess) {
+    public CampaignSaver(File file, Runnable onSuccess) {
       this.file = file;
-      this.campaignVersion = campaignVersion;
       this.onSuccess = onSuccess;
     }
 
@@ -2746,7 +2723,7 @@ public class AppActions {
 
       try {
         long start = System.currentTimeMillis();
-        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file, campaignVersion);
+        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file);
 
         publish(I18N.getString("msg.info.campaignSaved"));
 
@@ -2788,26 +2765,16 @@ public class AppActions {
     JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
     int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
     if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(null, chooser.getSelectedFile(), onSuccess);
+      saveAndUpdateCampaignName(chooser.getSelectedFile(), onSuccess);
     }
   }
 
-  public static void doCampaignExport() {
-    CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
-    dialog.setVisible(true);
-
-    if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(dialog.getVersionText(), dialog.getCampaignFile(), null);
-    }
-  }
-
-  private static void saveAndUpdateCampaignName(
-      String campaignVersion, File selectedFile, Runnable onSuccess) {
+  private static void saveAndUpdateCampaignName(File selectedFile, Runnable onSuccess) {
     File campaignFile = getFileWithExtension(selectedFile, AppConstants.CAMPAIGN_FILE_EXTENSION);
     if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
       return;
     }
-    doSaveCampaign(campaignFile, campaignVersion, onSuccess);
+    doSaveCampaign(campaignFile, onSuccess);
     AppState.setCampaignFile(campaignFile);
     AppPreferences.setSaveDir(campaignFile.getParentFile());
     AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());

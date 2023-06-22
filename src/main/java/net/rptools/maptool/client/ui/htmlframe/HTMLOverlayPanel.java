@@ -264,8 +264,10 @@ public class HTMLOverlayPanel extends JFXPanel {
             overlayManager.setupWebView(new WebView());
             overlays.add(overlayManager);
             root.getChildren().add(overlayManager.getWebView());
-            AppMenuBar.addToOverlayMenu(overlayManager);
-            needsSorting = true;
+            if (!HTMLFrameFactory.isInternalOnly(overlayManager.getName())) {
+              AppMenuBar.addToOverlayMenu(overlayManager);
+              needsSorting = true;
+            }
           }
           if (needsSorting) {
             sortOverlays();

@@ -56,7 +56,7 @@ public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
   private boolean newTable = false;
 
   public EditLookupTablePanel() {
-    super(new EditLookupTablePanelView().$$$getRootComponent$$$());
+    super(new EditLookupTablePanelView().getRootComponent());
     panelInit();
   }
 

@@ -54,6 +54,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
@@ -96,6 +97,9 @@ public class Token implements Cloneable {
 
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
+
+  /** The stat sheet properties for the token. */
+  @Nullable private StatSheetProperties statSheet;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -281,7 +285,8 @@ public class Token implements Cloneable {
   private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
-  private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
+  private String propertyType =
+      MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
   private Integer facing = null;
 
@@ -507,6 +512,8 @@ public class Token implements Cloneable {
     if (macroMap != null) {
       loadOldMacros();
     }
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
   }
 
   /**
@@ -537,7 +544,7 @@ public class Token implements Cloneable {
      * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
      * what is default for new tokens.
      */
-    propertyType = getPropertyType();
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     /**
      * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures
@@ -1846,16 +1853,11 @@ public class Token implements Cloneable {
       }
     }
     try {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "Evaluating property: '"
-                + key
-                + "' for token "
-                + getName()
-                + "("
-                + getId()
-                + ")----------------------------------------------------------------------------------");
-      }
+      log.debug(
+          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
+          key,
+          getName(),
+          getId());
       val = MapTool.getParser().parseLine(resolver, this, val.toString());
     } catch (ParserException pe) {
       log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
@@ -1906,9 +1908,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.put(prop.getIndex(), prop);
     }
     macroMap = null;
-    if (log.isDebugEnabled()) {
-      log.debug("Token.loadOldMacros() set up " + macroPropertiesMap.size() + " new macros.");
-    }
+    log.debug("Token.loadOldMacros() set up {} new macros.", macroPropertiesMap.size());
   }
 
   public int getMacroNextIndex() {
@@ -1982,9 +1982,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.clear();
     }
     for (MacroButtonProperties macro : newMacroList) {
-      if (macro.getLabel() == null
-          || macro.getLabel().trim().length() == 0
-          || macro.getCommand().trim().length() == 0) {
+      if (macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
@@ -2248,6 +2246,8 @@ public class Token implements Cloneable {
     notes = (String) td.get(TokenTransferData.NOTES);
     gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
     gmName = (String) td.get(TokenTransferData.GM_NAME);
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     // Get the image and portrait for the token
     Asset asset = createAssetFromIcon(td.getToken());
@@ -2963,6 +2963,9 @@ public class Token implements Cloneable {
     token.speechMap.putAll(dto.getSpeechMap());
     token.heroLabData = dto.hasHeroLabData() ? HeroLabData.fromDto(dto.getHeroLabData()) : null;
     token.allowURIAccess = dto.getAllowUriAccess();
+    if (dto.hasStatSheetProperties()) {
+      token.statSheet = StatSheetProperties.fromDto(dto.getStatSheetProperties());
+    }
     return token;
   }
 
@@ -3091,6 +3094,46 @@ public class Token implements Cloneable {
       dto.setHeroLabData(heroLabData.toDto());
     }
     dto.setAllowUriAccess(allowURIAccess);
+    if (statSheet != null) {
+      dto.setStatSheetProperties(StatSheetProperties.toDto(statSheet));
+    }
     return dto.build();
+  }
+
+  /**
+   * Returns the Stat Sheet properties for this token. If no stat sheet is set, the default stat for
+   * the token type is returned.
+   *
+   * @return The of the stat sheet for this token.
+   */
+  public StatSheetProperties getStatSheet() {
+    if (statSheet == null) {
+      return MapTool.getCampaign().getTokenTypeDefaultSheetId(propertyType);
+    }
+    return statSheet;
+  }
+
+  /**
+   * Sets the id of the stat sheet for this token. If null, the token will use the default stat
+   * sheet for the token type.
+   *
+   * @param statSheet the stat sheet properties for this token.
+   */
+  public void setStatSheet(StatSheetProperties statSheet) {
+    this.statSheet = statSheet;
+  }
+
+  /**
+   * Returns if the token is using the default stat sheet for its token type.
+   *
+   * @return <code>true</code> if using the default stat sheet.
+   */
+  public boolean usingDefaultStatSheet() {
+    return statSheet == null;
+  }
+
+  /** Use the default stat sheet for the tokens token type. */
+  public void useDefaultStatSheet() {
+    setStatSheet(null);
   }
 }

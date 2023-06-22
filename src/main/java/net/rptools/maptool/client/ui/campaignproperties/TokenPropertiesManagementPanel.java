@@ -14,45 +14,62 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import java.awt.EventQueue;
+import java.awt.*;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import javax.swing.AbstractListModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JTextArea;
-import javax.swing.JTextField;
-import javax.swing.ListSelectionModel;
+import javax.swing.*;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.TextFieldEditorButtonTableCellEditor;
+import net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesTableModel.LargeEditableText;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.TokenProperty;
+import net.rptools.maptool.model.sheet.stats.StatSheet;
+import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
+import net.rptools.maptool.model.sheet.stats.StatSheetManager;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 
 public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignProperties> {
 
   private Map<String, List<TokenProperty>> tokenTypeMap;
+  private final Map<String, StatSheetProperties> tokenTypeStatSheetMap = new HashMap<>();
   private String editingType;
 
+  private final SortedMap<String, String> renameTypes = new TreeMap<>();
+
+  private String defaultPropertyType;
+
+  CampaignProperties campaignProperties;
+
   public TokenPropertiesManagementPanel() {
-    super(new TokenPropertiesManagementPanelView().$$$getRootComponent$$$());
+    super(new TokenPropertiesManagementPanelView().getRootComponent());
 
     panelInit();
   }
 
-  public void copyCampaignToUI(CampaignProperties campaignProperties) {
+  public void copyCampaignToUI(CampaignProperties cp) {
+    campaignProperties = cp;
+    defaultPropertyType = cp.getDefaultTokenPropertyType();
 
-    tokenTypeMap = new HashMap<String, List<TokenProperty>>(campaignProperties.getTokenTypeMap());
-
+    tokenTypeMap = new HashMap<>();
+    campaignProperties
+        .getTokenTypeMap()
+        .forEach(
+            (k, v) ->
+                tokenTypeMap.put(k, new ArrayList<>(v.stream().map(TokenProperty::new).toList())));
+    var ssManager = new StatSheetManager();
+    tokenTypeMap
+        .keySet()
+        .forEach(
+            tt ->
+                tokenTypeStatSheetMap.put(tt, campaignProperties.getTokenTypeDefaultStatSheet(tt)));
     updateTypeList();
   }
 
@@ -60,6 +77,11 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
     campaign.getTokenTypeMap().clear();
     campaign.getTokenTypeMap().putAll(tokenTypeMap);
+    campaign
+        .getTokenTypeMap()
+        .keySet()
+        .forEach(tt -> campaign.setTokenTypeDefaultSheetId(tt, tokenTypeStatSheetMap.get(tt)));
+    campaign.setDefaultTokenPropertyType(defaultPropertyType);
   }
 
   public JList getTokenTypeList() {
@@ -74,40 +96,203 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JTextField) getComponent("tokenTypeName");
   }
 
-  public JButton getNewButton() {
-    return (JButton) getComponent("newButton");
+  public JButton getTypeAddButton() {
+    return (JButton) getComponent("typeAddButton");
   }
 
-  public JButton getUpdateButton() {
-    return (JButton) getComponent("updateButton");
+  public JButton getTypeDeleteButton() {
+    return (JButton) getComponent("typeDeleteButton");
   }
 
-  public JButton getRevertButton() {
-    return (JButton) getComponent("revertButton");
+  public JButton getPropertyAddButton() {
+    return (JButton) getComponent("propertyAddButton");
   }
 
-  public JTextArea getTokenPropertiesArea() {
-    return (JTextArea) getComponent("tokenProperties");
+  public JButton getPropertyDeleteButton() {
+    return (JButton) getComponent("propertyDeleteButton");
   }
 
-  public void initUpdateButton() {
-    getUpdateButton().addActionListener(e -> update());
+  public JTable getTokenPropertiesTable() {
+    return (JTable) getComponent("propertiesTable");
   }
 
-  public void initNewButton() {
-    getNewButton()
+  public JComboBox getStatSheetLocationComboBox() {
+    return (JComboBox) getComponent("statSheetLocationComboBox");
+  }
+
+  public JComboBox getStatSheetComboBox() {
+    return (JComboBox) getComponent("statSheetComboBox");
+  }
+
+  public JButton getTypeSetAsDefault() {
+    return (JButton) getComponent("typeDefaultButton");
+  }
+
+  public TokenPropertiesTableModel getTokenPropertiesTableModel() {
+    return (TokenPropertiesTableModel) getTokenPropertiesTable().getModel();
+  }
+
+  public void initTypeAddButton() {
+    getTypeAddButton()
         .addActionListener(
             e ->
                 EventQueue.invokeLater(
                     () -> {
-                      // This will force a reset
-                      getTokenTypeList().getSelectionModel().clearSelection();
-                      reset();
+                      // First find a unique name, there are so few entries we don't have to worry
+                      // about being fancy
+                      int seq = 1;
+                      String name =
+                          I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                      while (tokenTypeMap.containsKey(name)) {
+                        seq++;
+                        name =
+                            I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                      }
+
+                      var newName =
+                          (String)
+                              JOptionPane.showInputDialog(
+                                  this,
+                                  I18N.getText("campaignPropertiesDialog.newTokenTypeName"),
+                                  I18N.getText("campaignPropertiesDialog.newTokenTypeTitle"),
+                                  JOptionPane.PLAIN_MESSAGE,
+                                  null,
+                                  null,
+                                  name);
+                      if (newName != null) {
+                        tokenTypeMap.put(newName, new LinkedList<>());
+                        updateTypeList();
+                        getTokenTypeList().setSelectedValue(newName, true);
+                      }
                     }));
   }
 
-  public void initRevertButton() {
-    getRevertButton().addActionListener(e -> bind(editingType));
+  public void initTypeDeleteButton() {
+    var button = getTypeDeleteButton();
+    button.addActionListener(
+        e -> {
+          var type = (String) getTokenTypeList().getSelectedValue();
+          if (type != null) {
+            JPanel renameToPanel = new JPanel();
+            // renameToPanel.setLayout(new BoxLayout(renameToPanel, BoxLayout.PAGE_AXIS));
+            JComboBox<String> types =
+                new JComboBox<>(
+                    tokenTypeMap.keySet().stream()
+                        .filter(t -> !t.equals(type))
+                        .map(String::toString)
+                        .toArray(String[]::new));
+            renameToPanel.add(
+                new JLabel(I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteMessage")));
+            renameToPanel.add(types);
+            int option =
+                JOptionPane.showConfirmDialog(
+                    this,
+                    renameToPanel,
+                    I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteTitle", type),
+                    JOptionPane.OK_CANCEL_OPTION);
+            if (option == JOptionPane.OK_OPTION) {
+              var newType = (String) types.getSelectedItem();
+              if (newType != null) {
+                renameTypes.put(type, newType);
+                tokenTypeMap.remove(type);
+                updateTypeList();
+              }
+            }
+          }
+        });
+    button.setEnabled(false);
+  }
+
+  public void initTypeDefaultButton() {
+    var button = getTypeSetAsDefault();
+    button.addActionListener(
+        l -> {
+          var propertyType = (String) getTokenTypeList().getSelectedValue();
+          if (propertyType != null) {
+            defaultPropertyType = propertyType;
+            button.setEnabled(false);
+            var delButton = getTypeDeleteButton();
+            delButton.setEnabled(false);
+          }
+        });
+
+    button.setEnabled(false);
+  }
+
+  public void initPropertyAddButton() {
+    var button = getPropertyAddButton();
+    button.addActionListener(
+        e ->
+            EventQueue.invokeLater(
+                () -> {
+                  var model = getTokenPropertiesTableModel();
+                  model.addProperty();
+                }));
+    button.setEnabled(false);
+  }
+
+  public void initPropertyDeleteButton() {
+    var button = getPropertyDeleteButton();
+    button.addActionListener(
+        e ->
+            EventQueue.invokeLater(
+                () -> {
+                  var model = getTokenPropertiesTableModel();
+                  model.deleteProperty(getTokenPropertiesTable().getSelectedRow());
+                }));
+    button.setEnabled(false);
+  }
+
+  public void initPropertyTable() {
+    var propertyTable = getTokenPropertiesTable();
+    propertyTable.setModel(new TokenPropertiesTableModel());
+    propertyTable.setDefaultEditor(
+        LargeEditableText.class, new TextFieldEditorButtonTableCellEditor());
+    propertyTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            e -> {
+              if (e.getValueIsAdjusting()) {
+                return;
+              }
+
+              var button = getPropertyDeleteButton();
+              button.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
+            });
+    propertyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+  }
+
+  public void initTokenTypeName() {
+    var field = getTokenTypeName();
+    field.setEditable(false);
+    field.addActionListener(
+        event -> {
+          int option =
+              JOptionPane.showConfirmDialog(
+                  this,
+                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeWarning"),
+                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeTitle"),
+                  JOptionPane.OK_CANCEL_OPTION,
+                  JOptionPane.WARNING_MESSAGE);
+          if (option == JOptionPane.OK_OPTION) {
+            var ttList = getTokenTypeList();
+            var oldName = (String) ttList.getSelectedValue();
+            var newName = field.getText();
+            tokenTypeMap.put(newName, tokenTypeMap.remove(oldName));
+            ttList.setSelectedValue(newName, true);
+            updateExistingTokenTypes(oldName, newName);
+          }
+        });
+  }
+
+  private void updateExistingTokenTypes(String oldName, String newName) {
+    if (oldName == null || newName == null || oldName.equals(newName)) {
+      return;
+    }
+    if (defaultPropertyType.equals(oldName)) {
+      defaultPropertyType = newName;
+    }
+    renameTypes.put(oldName, newName);
   }
 
   public void initTypeList() {
@@ -119,13 +304,98 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 return;
               }
 
-              if (getTokenTypeList().getSelectedValue() == null) {
+              var propertyType =
+                  getTokenTypeList().getSelectedValue() == null
+                      ? null
+                      : getTokenTypeList().getSelectedValue().toString();
+              if (propertyType == null) {
                 reset();
+                getPropertyAddButton().setEnabled(false);
+                getTypeDeleteButton().setEnabled(false);
+                getTokenTypeName().setEditable(false);
+                getStatSheetComboBox().setEnabled(false);
+                getStatSheetLocationComboBox().setEnabled(false);
+                getTypeSetAsDefault().setEnabled(false);
               } else {
                 bind((String) getTokenTypeList().getSelectedValue());
+                getPropertyAddButton().setEnabled(true);
+                getTokenTypeName().setEditable(true);
+                // Can't delete the default property
+                if (propertyType.equals(defaultPropertyType)) {
+                  getTypeDeleteButton().setEnabled(false);
+                } else {
+                  getTypeDeleteButton().setEnabled(true);
+                }
+                getStatSheetComboBox().setEnabled(true);
+                getStatSheetLocationComboBox().setEnabled(true);
+                populateStatSheetComboBoxes(propertyType);
+                if (!propertyType.equals(defaultPropertyType)) {
+                  getTypeSetAsDefault().setEnabled(true);
+                } else {
+                  getTypeSetAsDefault().setEnabled(false);
+                }
               }
             });
     getTokenTypeList().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    getTokenTypeList().setCellRenderer(new TokenTypeCellRenderer());
+  }
+
+  private void populateStatSheetComboBoxes(String propertyType) {
+    var combo = getStatSheetComboBox();
+    combo.removeAllItems();
+    var ssManager = new StatSheetManager();
+    ssManager.getStatSheets(propertyType).stream()
+        .sorted(Comparator.comparing(StatSheet::description))
+        .forEach(ss -> combo.addItem(ss));
+    var statSheetProperty = tokenTypeStatSheetMap.get(propertyType);
+    String id;
+    if (statSheetProperty == null) {
+      id = ssManager.getDefaultStatSheetId();
+      tokenTypeStatSheetMap.put(
+          propertyType,
+          new StatSheetProperties(
+              ssManager.getDefaultStatSheetId(), StatSheetLocation.BOTTOM_LEFT));
+    } else {
+      id = statSheetProperty.id();
+    }
+    combo.setSelectedItem(ssManager.getStatSheet(id));
+
+    var locationCombo = getStatSheetLocationComboBox();
+    locationCombo.setSelectedItem(tokenTypeStatSheetMap.get(propertyType).location());
+  }
+
+  public void initStatSheetDetails() {
+    var locationCombo = getStatSheetLocationComboBox();
+    locationCombo.setEnabled(false);
+    Arrays.stream(StatSheetLocation.values()).forEach(locationCombo::addItem);
+    locationCombo.addActionListener(
+        l -> {
+          if (getStatSheetLocationComboBox().hasFocus()) { // only if user has made change
+            var location = (StatSheetLocation) locationCombo.getSelectedItem();
+            var tokenType = (String) getTokenTypeList().getSelectedValue();
+            if (location != null && tokenType != null) {
+              var id = tokenTypeStatSheetMap.get(tokenType).id();
+              tokenTypeStatSheetMap.put(tokenType, new StatSheetProperties(id, location));
+            }
+          }
+        });
+
+    var combo = getStatSheetComboBox();
+    combo.setEnabled(false);
+    combo.setRenderer(new StatSheetComboBoxRenderer());
+    combo.addActionListener(
+        l -> {
+          if (getStatSheetComboBox().hasFocus()) { // Only if user has made change
+            var ss = (StatSheet) combo.getSelectedItem();
+            var tokenType = (String) getTokenTypeList().getSelectedValue();
+            if (ss != null && tokenType != null) {
+              var id = new StatSheetManager().getId(ss);
+              var location = tokenTypeStatSheetMap.get(tokenType).location();
+              tokenTypeStatSheetMap.put(tokenType, new StatSheetProperties(id, location));
+              getStatSheetLocationComboBox().setSelectedItem(location);
+            }
+          }
+        });
   }
 
   private void bind(String type) {
@@ -133,26 +403,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     editingType = type;
 
     getTokenTypeName().setText(type != null ? type : "");
-    getTokenTypeName().setEditable(!CampaignProperties.DEFAULT_TOKEN_PROPERTY_TYPE.equals(type));
-    getTokenPropertiesArea()
-        .setText(type != null ? compileTokenProperties(tokenTypeMap.get(type)) : "");
-  }
-
-  void update() {
-
-    // Pull the old one out and put the new one in (rename)
-    List<TokenProperty> current;
-    try {
-      // If an exception occurs here, the GUI goes back into editing of the text.
-      current = parseTokenProperties(getTokenPropertiesArea().getText());
-
-      tokenTypeMap.remove(editingType);
-      tokenTypeMap.put(getTokenTypeName().getText().trim(), current);
-      reset();
-      updateTypeList();
-    } catch (IllegalArgumentException e) {
-      // Don't need to do anything here...
-    }
+    var model = getTokenPropertiesTableModel();
+    model.setPropertyType(type);
   }
 
   private void reset() {
@@ -161,8 +413,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   private void updateTypeList() {
-
     getTokenTypeList().setModel(new TypeListModel());
+    getTokenPropertiesTableModel().setPropertyTypeMap(tokenTypeMap);
   }
 
   private String compileTokenProperties(List<TokenProperty> propertyList) {
@@ -316,6 +568,50 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
 
     public int getSize() {
       return tokenTypeMap.size();
+    }
+  }
+
+  /**
+   * Gets the Token Property Type rename operations that have occurred.
+   *
+   * @return a {@link Map} of renames.
+   */
+  public SortedMap<String, String> getRenameTypes() {
+    return renameTypes;
+  }
+
+  /** A List cell renderer that calls out default property type. */
+  private class TokenTypeCellRenderer extends JLabel implements ListCellRenderer {
+
+    public TokenTypeCellRenderer() {
+      setOpaque(true);
+    }
+
+    @Override
+    public Component getListCellRendererComponent(
+        JList list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+
+      var val = value.toString();
+      if (val.equals(defaultPropertyType)) {
+        setText(
+            "<html>"
+                + val
+                + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<i>("
+                + I18N.getString("TokenPropertiesPanel.defaultPropertyType")
+                + ")</i></html>");
+      } else {
+        setText("<html>" + val + "</html>");
+      }
+
+      if (isSelected) {
+        setBackground(list.getSelectionBackground());
+        setForeground(list.getSelectionForeground());
+      } else {
+        setBackground(list.getBackground());
+        setForeground(list.getForeground());
+      }
+
+      return this;
     }
   }
 }

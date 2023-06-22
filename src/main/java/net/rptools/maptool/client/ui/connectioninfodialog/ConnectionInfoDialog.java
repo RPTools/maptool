@@ -54,7 +54,7 @@ public class ConnectionInfoDialog extends JDialog {
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);
 
-    AbeillePanel panel = new AbeillePanel(new ConnectionInfoDialogView().$$$getRootComponent$$$());
+    AbeillePanel panel = new AbeillePanel(new ConnectionInfoDialogView().getRootComponent());
 
     JTextField nameLabel = panel.getTextField("name");
     JTextField localAddressLabel = panel.getTextField("localAddress");

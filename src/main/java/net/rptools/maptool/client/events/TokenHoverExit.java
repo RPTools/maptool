@@ -12,16 +12,17 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.client;
+package net.rptools.maptool.client.events;
 
-import net.rptools.clientserver.simple.Connection;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 
-public interface ClientConnection extends Connection {
-  void sendMessage(byte[] message);
-
-  void sendMessage(Object channel, byte[] message);
-
-  boolean isAlive();
-
-  String getId();
-}
+/**
+ * Event fired when the mouse exits a token.
+ *
+ * @param token the token that the mouse pointer is hovering over.
+ * @param zone the zone for the event.
+ * @param shiftDown is the shift key down.
+ * @param controlDown is the control key down.
+ */
+public record TokenHoverExit(Token token, Zone zone, boolean shiftDown, boolean controlDown) {}

@@ -118,7 +118,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setTokenLayoutProps",
         "setTokenSnapToGrid",
         "getAllowsURIAccess",
-        "setAllowsURIAccess");
+        "setAllowsURIAccess",
+        "getDefaultPropertyType");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -1012,6 +1013,15 @@ public class TokenPropertyFunctions extends AbstractFunction {
       }
       token.setAllowURIAccess(!allowURIAccess.equals(BigDecimal.ZERO));
       return "";
+    }
+
+    /*
+     * getDefaultPropertyType
+     */
+    if (functionName.equalsIgnoreCase("getDefaultPropertyType")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+      FunctionUtil.blockUntrustedMacro(functionName);
+      return MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

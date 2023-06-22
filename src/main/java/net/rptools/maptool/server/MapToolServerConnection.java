@@ -18,9 +18,9 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
-import net.rptools.clientserver.simple.server.ServerConnection;
+import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
@@ -38,16 +38,17 @@ public class MapToolServerConnection
     implements ServerObserver, HandshakeProvider, HandshakeObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
-  private final Map<ClientConnection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
+  private final Map<Connection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
-  private final ServerConnection connection;
+  private final Server connection;
   private final PlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
-  public MapToolServerConnection(MapToolServer server, PlayerDatabase playerDatabase)
+  public MapToolServerConnection(
+      MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler)
       throws IOException {
     this.connection =
-        ConnectionFactory.getInstance().createServerConnection(server.getConfig(), this);
+        ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
     this.server = server;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = server.getConfig().getUseEasyConnect();
@@ -59,7 +60,7 @@ public class MapToolServerConnection
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  public Handshake getConnectionHandshake(ClientConnection conn) {
+  public Handshake getConnectionHandshake(Connection conn) {
     var handshake = new ServerHandshake(conn, playerDatabase, useEasyConnect);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
@@ -68,7 +69,7 @@ public class MapToolServerConnection
   }
 
   @Override
-  public void releaseHandshake(ClientConnection conn) {
+  public void releaseHandshake(Connection conn) {
     var handshake = handshakeMap.get(conn);
     handshakeMap.remove(conn);
     conn.removeMessageHandler(handshake);
@@ -96,7 +97,7 @@ public class MapToolServerConnection
   // SERVER OBSERVER
 
   /** Handle late connections */
-  public void connectionAdded(ClientConnection conn) {
+  public void connectionAdded(Connection conn) {
     server.configureClientConnection(conn);
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
@@ -118,7 +119,7 @@ public class MapToolServerConnection
         .sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
-  public void connectionRemoved(ClientConnection conn) {
+  public void connectionRemoved(Connection conn) {
     server.releaseClientConnection(conn.getId());
     var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
     var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(player.toDto());
@@ -130,12 +131,8 @@ public class MapToolServerConnection
     playerMap.remove(conn.getId().toUpperCase());
   }
 
-  public void addMessageHandler(ServerMessageHandler handler) {
-    connection.addMessageHandler(handler);
-  }
-
   public void sendMessage(String id, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " sent to "
             + id
@@ -145,7 +142,7 @@ public class MapToolServerConnection
   }
 
   public void sendMessage(String id, Object channel, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " sent to "
             + id
@@ -158,12 +155,12 @@ public class MapToolServerConnection
   }
 
   public void broadcastMessage(Message message) {
-    log.info(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
+    log.debug(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
     connection.broadcastMessage(message.toByteArray());
   }
 
   public void broadcastMessage(String[] exclude, Message message) {
-    log.info(
+    log.debug(
         server.getConfig().getServerName()
             + " broadcast: "
             + message.getMessageTypeCase()
@@ -173,7 +170,7 @@ public class MapToolServerConnection
   }
 
   public void open() throws IOException {
-    connection.open();
+    connection.start();
   }
 
   public void close() {

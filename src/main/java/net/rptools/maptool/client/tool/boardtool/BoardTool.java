@@ -80,7 +80,7 @@ public class BoardTool extends DefaultTool {
   /** Initialize the panel and set up the actions. */
   public BoardTool() {
     // Create the control panel
-    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().$$$getRootComponent$$$());
+    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().getRootComponent());
 
     boardPositionXTextField = (JTextField) controlPanel.getComponent("offsetX");
     boardPositionXTextField.addKeyListener(new UpdateBoardListener());
@@ -237,7 +237,7 @@ public class BoardTool extends DefaultTool {
    */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     MapTool.serverCommand()
         .setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
     AppState.setShowGrid(oldShowGrid);

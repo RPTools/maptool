@@ -155,7 +155,6 @@ public abstract class AbstractButtonGroup extends JPanel
   }
 
   public void setPropertiesList(List<MacroButtonProperties> propertiesList) {
-    MacroButtonProperties.fixOldMacroSetCompare(propertiesList);
     this.propertiesList = propertiesList;
   }
 

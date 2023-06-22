@@ -2275,6 +2275,54 @@
               </vspacer>
             </children>
           </grid>
+          <grid id="2e306" binding="developerTab" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.tab.developer"/>
+            </constraints>
+            <properties/>
+            <border type="none"/>
+            <children>
+              <vspacer id="a74f1">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                </constraints>
+              </vspacer>
+              <grid id="a5b3c" binding="developerOptionToggles" layout-manager="GridBagLayout">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="1" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                </constraints>
+                <properties>
+                  <name value="developerOptionToggles"/>
+                </properties>
+                <border type="empty" title="" noi18n="true">
+                  <font name="Dialog" size="12" style="1"/>
+                  <title-color color="-13538620"/>
+                  <size top="5" left="5" bottom="5" right="5"/>
+                  <color color="-6710887"/>
+                </border>
+                <children>
+                  <component id="bc6ed" class="javax.swing.JLabel" binding="developerTabWarning">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <gridbag top="6" left="0" bottom="6" right="0" weightx="0.0" weighty="0.0"/>
+                    </constraints>
+                    <properties>
+                      <foreground color="-51200"/>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.tab.developer.warning"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.developer.autoSaveMeasuredInSeconds.tooltip"/>
+                    </properties>
+                  </component>
+                  <hspacer id="100b0">
+                    <constraints>
+                      <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                      <gridbag weightx="1.0" weighty="0.0"/>
+                    </constraints>
+                  </hspacer>
+                </children>
+              </grid>
+            </children>
+          </grid>
         </children>
       </tabbedpane>
       <vspacer id="1de9c">

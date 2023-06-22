@@ -39,6 +39,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -91,7 +92,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().$$$getRootComponent$$$());
+    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().getRootComponent());
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);
@@ -126,11 +127,6 @@ public class CampaignPropertiesDialog extends JDialog {
               }
             });
     getRootPane().setDefaultButton(getOKButton());
-  }
-
-  // need to access update button action in token properties panel
-  public void tokenPropertiesDialogUpdate() {
-    tokenPropertiesPanel.update();
   }
 
   private void initTokenPropertiesDialog(AbeillePanel panel) {
@@ -198,7 +194,17 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void accept() {
     try {
-      tokenPropertiesDialogUpdate(); // update token properties for the forgetful
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+      tokenPropertiesPanel
+          .getRenameTypes()
+          .forEach(
+              (o, n) -> {
+                campaign.renameTokenTypes(o, n);
+                System.out.println("Renaming " + o + " to " + n);
+              });
+      MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
       status = Status.OK;

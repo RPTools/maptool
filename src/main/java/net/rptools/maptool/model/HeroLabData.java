@@ -550,6 +550,11 @@ public class HeroLabData {
     if (dto.hasPortfolioPath()) {
       data.portfolioPath = dto.getPortfolioPath().getValue();
     }
+
+    if (dto.hasPortfolioFile()) {
+      data.portfolioFile = new File(dto.getPortfolioFile().getValue());
+    }
+
     dto.getHeroImageAssetsMap()
         .forEach((key, value) -> data.heroImageAssets.put(key, new MD5Key(value)));
     return data;
@@ -586,6 +591,11 @@ public class HeroLabData {
     if (portfolioPath != null) {
       dto.setPortfolioPath(StringValue.of(portfolioPath));
     }
+
+    if (portfolioFile != null) {
+      dto.setPortfolioFile(StringValue.of(portfolioFile.toString()));
+    }
+
     heroImageAssets.forEach((key, value) -> dto.putHeroImageAssets(key, value.toString()));
     return dto.build();
   }

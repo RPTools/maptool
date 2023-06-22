@@ -30,6 +30,7 @@ import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryData;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.library.builtin.BuiltInLibraryManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.token.LibraryTokenManager;
 import org.apache.logging.log4j.LogManager;
@@ -58,6 +59,9 @@ public class LibraryManager {
   /** The reserved library names. */
   private static final Set<String> RESERVED_NAMES =
       Set.of("rptools", "maptool", "maptools", "internal", "builtin", "standard");
+
+  /** Built in libraries */
+  private static final BuiltInLibraryManager builtInLibraryManager = new BuiltInLibraryManager();
 
   /** Drop in libraries */
   private static final AddOnLibraryManager addOnLibraryManager = new AddOnLibraryManager();
@@ -110,7 +114,10 @@ public class LibraryManager {
    * @return the library.
    */
   public CompletableFuture<Optional<Library>> getLibrary(URL path) {
-    if (addOnLibraryManager.handles(path)) {
+    if (builtInLibraryManager.handles(path) && builtInLibraryManager.getLibrary(path) != null) {
+      return CompletableFuture.completedFuture(
+          Optional.ofNullable(builtInLibraryManager.getLibrary(path)));
+    } else if (addOnLibraryManager.handles(path)) {
       return CompletableFuture.completedFuture(
           Optional.ofNullable(addOnLibraryManager.getLibrary(path)));
     } else if (libraryTokenManager.handles(path)) {
@@ -208,6 +215,7 @@ public class LibraryManager {
         switch (libraryType) {
           case TOKEN -> libraryTokenManager.getLibraries().get();
           case ADD_ON -> addOnLibraryManager.getLibraries();
+          case BUILT_IN -> builtInLibraryManager.getLibraries();
         };
 
     var libInfo = new ArrayList<LibraryInfo>();
@@ -260,7 +268,10 @@ public class LibraryManager {
    * @return the library.
    */
   public Optional<Library> getLibrary(String namespace) {
-    var lib = addOnLibraryManager.getLibrary(namespace);
+    var lib = builtInLibraryManager.getLibrary(namespace);
+    if (lib == null) {
+      lib = addOnLibraryManager.getLibrary(namespace);
+    }
     if (lib == null) {
       lib = libraryTokenManager.getLibrary(namespace).join();
     }
