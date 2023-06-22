@@ -21,8 +21,9 @@ plugins {
     id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
-    id "com.google.protobuf" version "0.8.19"
+    id "com.google.protobuf" version "0.9.3"
     id 'io.github.file5.guidesigner' version '1.0.2'
+
 }
 
 // Definitions
