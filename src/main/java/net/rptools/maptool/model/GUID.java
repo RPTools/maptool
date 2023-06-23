@@ -60,9 +60,16 @@ public class GUID implements Serializable, Comparable<GUID> {
    * @throws InvalidGUIDException if the GUID is invalid
    */
   public GUID(String strGUID) {
-    if (strGUID == null) throw new InvalidGUIDException("GUID is null");
+    if (strGUID == null) {
+      throw new InvalidGUIDException("GUID is null");
+    }
 
-    this.baGUID = HexFormat.of().parseHex(strGUID);
+    try {
+      this.baGUID = HexFormat.of().parseHex(strGUID);
+    } catch (Exception e) {
+      throw new InvalidGUIDException("Invalid format for GUID");
+    }
+
     validateGUID();
   }
 
