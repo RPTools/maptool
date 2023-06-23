@@ -1,19 +1,110 @@
 /* MapTool Theme CSS 0.1 */
 
 :root {
-font-size: {{fontSize}};
-font-family: {{fontFamily}};
+  --mt-theme-color-actions-blue: {{themeColor.actionsBlue}};
+  --mt-theme-color-actions-blue-dark: {{themeColor.actionsBlueDark}};
+  --mt-theme-color-actions-green: {{themeColor.actionsGreen}};
+  --mt-theme-color-actions-green-dark: {{themeColor.actionsGreenDark}};
+  --mt-theme-color-actions-grey: {{themeColor.actionsGrey}};
+  --mt-theme-color-actions-grey-dark: {{themeColor.actionsGreyDark}};
+  --mt-theme-color-actions-grey-inline: {{themeColor.actionsGreyInline}};
+  --mt-theme-color-actions-grey-inline-dark: {{themeColor.actionsGreyInlineDark}};
+  --mt-theme-color-actions-red: {{themeColor.actionsRed}};
+  --mt-theme-color-actions-red-dark: {{themeColor.actionsRedDark}};
+  --mt-theme-color-actions-yellow: {{themeColor.actionsYellow}};
+  --mt-theme-color-actions-yellow-dark: {{themeColor.actionsYellowDark}};
+  --mt-theme-color-objects-black-text: {{themeColor.objectsBlackText}};
+  --mt-theme-color-objects-blue: {{themeColor.objectsBlue}};
+  --mt-theme-color-objects-green: {{themeColor.objectsGreen}};
+  --mt-theme-color-objects-green-android: {{themeColor.objectsGreenAndroid}};
+  --mt-theme-color-objects-grey: {{themeColor.objectsGrey}};
+  --mt-theme-color-objects-pink: {{themeColor.objectsPink}};
+  --mt-theme-color-objects-red: {{themeColor.objectsRed}};
+  --mt-theme-color-objects-red-status: {{themeColor.objectsRedStatus}};
+  --mt-theme-color-objects-yellow: {{themeColor.objectsYellow}};
+  --mt-theme-color-objects-yellow-dark: {{themeColor.objectsYellowDark}};
+
+  --mt-theme-font-size: {{fontSize}};
+  --mt-theme-font-family: {{fontFamily}};
+
+  --mt-theme-color-foreground: {{foregroundColor}};
+  --mt-theme-color-background: {{backgroundColor}};
+  --mt-theme-color-foreground-disabled: {{foregroundColorDisabled}};
+
+  --mt-theme-color-button-start-background: {{button.startBackgroundColor}};
+  --mt-theme-color-button-end-background: {{button.endBackgroundColor}};
+  --mt-theme-color-button-foreground: {{button.foregroundColor}};
+  --mt-theme-color-button-background-disabled: {{button.disabledBackgroundColor}};
+  --mt-theme-color-button-foreground-disabled: {{button.disabledForegroundColor}};
+  --mt-theme-color-button-pressed-background: {{button.pressedBackgroundColor}};
+  --mt-theme-color-button-background-hover: {{button.hoverBackgroundColor}};
+  --mt-theme-color-button-disabled-border-size: {{button.disabledBorderSize}};
+  --mt-theme-color-button-disabled-border-color: {{button.disabledBorderColor}};
+
+  --mt-theme-color-text-input-foreground: {{textInput.foregroundColor}};
+  --mt-theme-color-text-input-background: {{textInput.backgroundColor}};
+  --mt-theme-color-text-input-disabled-border-size: {{textInput.disabledBorderSize}};
+  --mt-theme-color-text-input-disabled-border-color: {{textInput.disabledBorderColor}};
+
+  --mt-theme-h1-font-family: {{themeHeader.h1.fontFamily}};
+  --mt-theme-h1-font-size: {{themeHeader.h1.fontSize}};
+
+  --mt-theme-h2-font-family: {{themeHeader.h2.fontFamily}};
+  --mt-theme-h2-font-size: {{themeHeader.h2.fontSize}};
+
+  --mt-theme-h3-font-family: {{themeHeader.h3.fontFamily}};
+  --mt-theme-h3-font-size: {{themeHeader.h3.fontSize}};
+
+  --mt-theme-h4-font-family: {{themeHeader.h4.fontFamily}};
+  --mt-theme-h4-font-size: {{themeHeader.h4.fontSize}};
+
+  --mt-theme-h5-font-family: {{themeHeader.h5.fontFamily}};
+  --mt-theme-h5-font-size: {{themeHeader.h5.fontSize}};
+
+  --mt-theme-h6-font-family: {{themeHeader.h6.fontFamily}};
+  --mt-theme-h6-font-size: {{themeHeader.h6.fontSize}};
+
+  font-size: var(--mt-theme-font-size);
+  font-family: var(--mt-theme-font-family);
+
 }
 
-body,
-.mt-theme {
-font-family: {{fontFamily}};
-color: {{foregroundColor}};
-background-color: {{backgroundColor}};
+/* Headings. */
+h1 {
+  font-family: var(--mt-theme-h1-font-family);
+  font-size: var(--mt-theme-h1-font-size);
 }
 
-.mt-border {
+h2 {
+  font-family: var(--mt-theme-h2-font-family);
+  font-size: var(--mt-theme-h2-font-size);
+}
 
+h3 {
+  font-family: var(--mt-theme-h3-font-family);
+  font-size: var(--mt-theme-h3-font-size);
+}
+
+h4 {
+  font-family: var(--mt-theme-h4-font-family);
+  font-size: var(--mt-theme-h4-font-size);
+}
+
+h5 {
+  font-family: var(--mt-theme-h5-font-family);
+  font-size: var(--mt-theme-h5-font-size);
+}
+
+h6 {
+  font-family: var(--mt-theme-h6-font-family);
+  font-size: var(--mt-theme-h6-font-size);
+}
+
+h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
+
+body {
+  color: var(--mt-theme-color-foreground);
+  background-color: var(--mt-theme-color-background);
 }
 
 p,
@@ -30,13 +121,13 @@ input[type=submit],
   cursor: default;
   position: relative;
   background: transparent;
-color: {{button.foregroundColor}};
-padding: .2em .5em;
-margin: 0;
-font-family: inherit;
-font-size: 1em;
-border-radius: .15em;
-border: none;
+  color: var(--mt-theme-color-button-foreground);
+  padding: .2em .5em;
+  margin: 0;
+  font-family: inherit;
+  font-size: 1em;
+  border-radius: .15em;
+  border: none;
 }
 
 button::after,
@@ -50,43 +141,30 @@ button::after,
   padding 1px;
   content: "";
   border-radius: .15em;
-background: linear-gradient(
-{{button.startBackgroundColor}},
-{{button.endBackgroundColor}});
-z-index: -1;
+  background: linear-gradient(
+    var(--mt-theme-color-button-start-background),
+    var(--mt-theme-color-button-end-background)
+  );
+  z-index: -1;
 }
 
 
 button:active::after,
-input[type=submit]:active,
-.mt-button:active::after {
-background:	{{button.pressedBackgroundColor}};
+input[type=submit]:active {
+  background:	var(--mt-theme-color-button-pressed-background);
 }
 
 
 button[disabled],
-input[type=submit][disabled],
-.mt-button[disabled],
-.mt-button--disabled {
-background: {{button.disabledBackgroundColor}};
-color: {{button.disabledForegroundColor}};
-border: {{button.disabledBorderSize}} solid {{button.disabledBorderColor}};
+input[type=submit][disabled] {
+  background: var(--mt-theme-color-button-background-disabled);
+  color: var(--mt-theme-color-button-foreground-disabled);
+  border: var(--mt-theme-color-button-disabled-border-size) solid var(--mt-theme-color-button-disabled-border-color);
 }
 
 /* Text input */
-input[type=text],
-.mt-input[type=text] {
-color: {{textInput.foregroundColor}};
-background-color: {{textInput.backgroundColor}};
-border: {{textInput.disabledBorderSize}} solid {{textInput.disabledBorderColor}};
+input[type=text] {
+  color: var(--mt-theme-color-text-input-foreground);
+  background-color: var(--mt-theme-color-text-input-background);
+  border: var(--mt-theme-color-text-input-disabled-border-size) solid var(--mt-theme-color-text-input-disabled-border-color);
 }
-
-/* Headings. */
-h1 { font-size: 2.50rem; }
-h2 { font-size: 2.15rem; }
-h3 { font-size: 1.75rem; }
-h4 { font-size: 1.50rem; }
-h5 { font-size: 1.25rem; }
-h6 { font-size: 1.00rem; }
-
-h1, h2, h3, h4, h5, h6 { margin-bottom: .5rem; }
