@@ -43,17 +43,6 @@ public class GUID implements Serializable, Comparable<GUID> {
   }
 
   /**
-   * Creates a new GUID based on the specified GUID value.
-   *
-   * @param baGUID the new GUID
-   * @throws InvalidGUIDException if the GUID is invalid
-   */
-  public GUID(byte[] baGUID) throws InvalidGUIDException {
-    this.baGUID = baGUID;
-    validateGUID();
-  }
-
-  /**
    * Creates a new GUID based on the specified hexadecimal-code string.
    *
    * @param strGUID the guid as a hexadecimal-code string
@@ -82,17 +71,6 @@ public class GUID implements Serializable, Comparable<GUID> {
     if (baGUID == null) throw new InvalidGUIDException("GUID is null");
     if (baGUID.length != GUID_LENGTH)
       throw new InvalidGUIDException("GUID length is invalid: " + baGUID.length);
-  }
-
-  /**
-   * Returns the GUID representation of the {@link byte} array argument.
-   *
-   * @param bits the {@link byte} array of the GUID
-   * @return a new GUID instance
-   */
-  public static GUID valueOf(byte[] bits) {
-    if (bits == null) return null;
-    return new GUID(bits);
   }
 
   /**
