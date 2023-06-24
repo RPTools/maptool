@@ -30,10 +30,10 @@ import java.util.List;
 import javafx.application.Platform;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Scene;
-import javafx.scene.control.TextArea;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.JDialog;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Asset;
@@ -140,7 +140,29 @@ public class ViewAssetDialog {
           var scene = new Scene(pane, width, height);
           jfxPanel.setScene(scene);
           var webView = new WebView();
-          webView.getEngine().loadContent(html);
+          var webEngine = webView.getEngine();
+          webEngine
+              .getLoadWorker()
+              .stateProperty()
+              .addListener(
+                  (obs, oldState, newState) -> {
+                    if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                      var doc = webEngine.getDocument();
+                      var cssNode = doc.createElement("link");
+                      cssNode.setAttribute("rel", "stylesheet");
+                      cssNode.setAttribute("href", AppConstants.MT_THEME_CSS);
+                      var head = doc.getDocumentElement().getElementsByTagName("head").item(0);
+                      var first = head.getFirstChild();
+                      if (first != null) {
+                        head.insertBefore(cssNode, first);
+                      } else {
+                        head.appendChild(cssNode);
+                      }
+                      System.out.println(
+                          webEngine.executeScript("document.documentElement.innerHTML"));
+                    }
+                  });
+          webEngine.loadContent(html);
           pane.getChildren().add(webView);
         });
   }
@@ -153,12 +175,11 @@ public class ViewAssetDialog {
   private void textDialog(Asset asset) {
     Platform.runLater(
         () -> {
-          var pane = new StackPane();
-          var scene = new Scene(pane, width, height);
-          jfxPanel.setScene(scene);
-          var textArea = new TextArea(asset.getDataAsString());
-          textArea.setEditable(false);
-          pane.getChildren().add(textArea);
+          String html =
+              "<!DOCTYPE html><html><head></head><body><pre>"
+                  + asset.getDataAsString()
+                  + "</pre></body></html>";
+          htmlDialog(html);
         });
   }
 

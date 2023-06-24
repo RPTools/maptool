@@ -83,4 +83,11 @@ public class AppConstants {
    */
   public static final String INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME =
       INTERNAL_FRAME_PREFIX + "Internal Map Under Pointer Overlay";
+
+  /** CSS used for MT Theme support */
+  public static final String MT_THEME_CSS = "lib://net.rptools.maptool/css/mt-theme.css";
+
+  /** CSS used for MT Stat Sheet Theme support */
+  public static final String MT_THEME_STAT_SHEET_CSS =
+      "lib://net.rptools.maptool/css/mt-stat-sheet.css";
 }
