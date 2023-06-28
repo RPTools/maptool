@@ -728,6 +728,7 @@ public class PointerTool extends DefaultTool {
                     SwingUtil.isControlDown(keysDown)));
       }
     } else if (tokenUnderMouse != oldTokenUnderMouse) {
+      statSheet = null;
       if (oldTokenUnderMouse != null) {
         new MapToolEventBus()
             .getMainEventBus()
