@@ -207,9 +207,7 @@ public class AddOnLibraryImporter {
         byte[] bytes = inputStream.readAllBytes();
         MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
         Asset asset =
-            Type.fromMediaType(mediaType)
-                .getFactory()
-                .apply(namespace + "/" + path, bytes);
+            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
