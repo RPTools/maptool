@@ -209,7 +209,7 @@ public class AddOnLibraryImporter {
         Asset asset =
             Type.fromMediaType(mediaType)
                 .getFactory()
-                .apply(namespace + "/" + METADATA_DIR + path, bytes);
+                .apply(namespace + "/" + path, bytes);
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
