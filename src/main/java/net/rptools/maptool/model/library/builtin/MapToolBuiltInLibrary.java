@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.language.I18N;
@@ -71,31 +72,31 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
     }
   }
 
-  private final Map<String, String> cache = new ConcurrentHashMap<>();
+  private static final Map<String, String> cache = new ConcurrentHashMap<>();
 
-  private final String name = "MapTool Built-In Library";
-  private final String namespace = "net.rptools.maptool";
-  private final String version = "1.0.0";
+  private static final String name = "MapTool Built-In Library";
+  private static final String namespace = AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE;
+  private static final String version = "1.0.0";
 
-  private final String website = "https://www.rptools.net";
+  private static final String website = "https://www.rptools.net";
 
-  private final String gitUrl = "https://github.com/RPTools/maptool";
+  private static final String gitUrl = "https://github.com/RPTools/maptool";
 
-  private final String[] authors = new String[] {"RPTools Team"};
+  private static final String[] authors = new String[] {"RPTools Team"};
 
-  private final String license = "AGPLv3";
+  private static final String license = "AGPLv3";
 
-  private final String description = "MapTool Built-In Library";
+  private static final String description = "MapTool Built-In Library";
 
-  private final String shortDescription = "MapTool Built-In Library";
+  private static final String shortDescription = "MapTool Built-In Library";
 
-  private final boolean allowsUriAccess = true;
+  private static final boolean allowsUriAccess = true;
 
-  private final String readMeFile = "";
+  private static final String readMeFile = "";
 
-  private final String licenseFile = "";
+  private static final String licenseFile = "";
 
-  private final String[] tags = new String[] {};
+  private static final String[] tags = new String[] {};
 
   @Override
   public CompletableFuture<String> getVersion() {
