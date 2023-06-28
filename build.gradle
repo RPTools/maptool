@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.8.18'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.3'
     }
 }
 
@@ -21,8 +21,9 @@ plugins {
     id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
-    id "com.google.protobuf" version "0.8.19"
+    id "com.google.protobuf" version "0.9.3"
     id 'io.github.file5.guidesigner' version '1.0.2'
+
 }
 
 // Definitions
@@ -449,7 +450,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.3.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.4.0'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
@@ -461,7 +462,7 @@ dependencies {
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
     // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.2'
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.3'
     implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0'
     if (osdetector.os.is('windows'))
         implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:windows-x86_64'
