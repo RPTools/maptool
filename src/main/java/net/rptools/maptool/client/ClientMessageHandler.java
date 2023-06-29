@@ -760,9 +760,9 @@ public class ClientMessageHandler implements MessageHandler {
   }
 
   private void handle(PutAssetMsg msg) {
+    AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
     EventQueue.invokeLater(
         () -> {
-          AssetManager.putAsset(Asset.fromDto(msg.getAsset()));
           MapTool.getFrame().getCurrentZoneRenderer().flushDrawableRenderer();
           MapTool.getFrame().refresh();
         });
