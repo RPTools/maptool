@@ -44,6 +44,8 @@ public class ThemeCssContext {
   /** The theme color CSS context. */
   private final ColorCssContext themeColor;
 
+  private final ThemeHeader themeHeader;
+
   /** Creates a new instance of the theme CSS context. */
   public ThemeCssContext() {
     var uiDef = UIManager.getDefaults();
@@ -56,6 +58,7 @@ public class ThemeCssContext {
     button = new ButtonCssContext(uiDef);
     textInput = new TextInputCssContext(uiDef);
     themeColor = new ColorCssContext(uiDef);
+    themeHeader = new ThemeHeader(uiDef);
   }
 
   /**
@@ -140,5 +143,14 @@ public class ThemeCssContext {
    */
   public String getForegroundColorDisabled() {
     return foregroundColorDisabled;
+  }
+
+  /**
+   * Gets the theme header CSS context.
+   *
+   * @return The theme header CSS context.
+   */
+  public ThemeHeader getThemeHeader() {
+    return themeHeader;
   }
 }
