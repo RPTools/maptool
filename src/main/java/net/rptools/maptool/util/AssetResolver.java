@@ -25,17 +25,14 @@ import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
 
 /**
- * Utility Class to aid in resolving asset keys for images.
- * It will resolve the asset key for the following:
- * lib:// URI
- * asset:// URI
- * image:token
- * MD5 hash (as String)
+ * Utility Class to aid in resolving asset keys for images. It will resolve the asset key for the
+ * following: lib:// URI asset:// URI image:token MD5 hash (as String)
  */
 public class AssetResolver {
 
   /**
    * Returns the asset key for the specified URL.
+   *
    * @param url the URL to get the asset key for.
    * @return the MD5key of the asset at the specified URL.
    */
@@ -57,12 +54,8 @@ public class AssetResolver {
   }
 
   /**
-   * Returns the asset key for the specified location.
-   * Locations can be:
-   * lib:// URI
-   * asset:// URI
-   * image:token
-   * MD5 hash (as String)
+   * Returns the asset key for the specified location. Locations can be: lib:// URI asset:// URI
+   * image:token MD5 hash (as String)
    *
    * @param location the location to get the asset key for.
    * @return the MD5key of the asset at the specified location.
@@ -83,6 +76,7 @@ public class AssetResolver {
 
   /**
    * Returns the asset key for the specified URI.
+   *
    * @param uri the URI to get the asset key for.
    * @return the MD5key of the asset at the specified URI.
    */
