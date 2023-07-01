@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.library.builtin.themecss;
 
+import java.awt.Color;
+import java.util.function.Function;
 import javax.swing.UIDefaults;
 
 /**
@@ -37,13 +39,13 @@ public class TextInputCssContext {
    * Creates a new instance of the text input css context.
    *
    * @param uiDef The UI defaults to use to extract the values.
+   * @param formatColor The function to use to format the color.
    */
-  public TextInputCssContext(UIDefaults uiDef) {
-    foregroundColor = ThemeCssContext.formatColor(uiDef.getColor("TextField.foreground"));
-    backgroundColor = ThemeCssContext.formatColor(uiDef.getColor("TextField.background"));
+  public TextInputCssContext(UIDefaults uiDef, Function<Color, String> formatColor) {
+    foregroundColor = formatColor.apply(uiDef.getColor("TextField.foreground"));
+    backgroundColor = formatColor.apply(uiDef.getColor("TextField.background"));
     disabledBorderSize = "1px";
-    disabledBorderColor =
-        ThemeCssContext.formatColor(uiDef.getColor("TextField.inactiveForeground"));
+    disabledBorderColor = formatColor.apply(uiDef.getColor("TextField.inactiveForeground"));
   }
 
   /**

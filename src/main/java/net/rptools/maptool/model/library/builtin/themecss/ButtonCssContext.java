@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.library.builtin.themecss;
 
+import java.awt.Color;
+import java.util.function.Function;
 import javax.swing.UIDefaults;
 
 /**
@@ -51,20 +53,18 @@ public class ButtonCssContext {
    * Creates a new <code>ButtonCssContext</code>
    *
    * @param uiDef the {@link UIDefaults} to extract information from.
+   * @param formatColor the function to use to format the color.
    */
-  public ButtonCssContext(UIDefaults uiDef) {
-    foregroundColor = ThemeCssContext.formatColor(uiDef.getColor("Button.foreground"));
-    startBackgroundColor = ThemeCssContext.formatColor(uiDef.getColor("Button.startBackground"));
-    endBackgroundColor = ThemeCssContext.formatColor(uiDef.getColor("Button.endBackground"));
-    pressedBackgroundColor =
-        ThemeCssContext.formatColor(uiDef.getColor("Button.pressedBackground"));
-    disabledBackgroundColor =
-        ThemeCssContext.formatColor(uiDef.getColor("Button.disabledBackground"));
-    disabledForegroundColor =
-        ThemeCssContext.formatColor(uiDef.getColor("Button.disabledForeground"));
+  public ButtonCssContext(UIDefaults uiDef, Function<Color, String> formatColor) {
+    foregroundColor = formatColor.apply(uiDef.getColor("Button.foreground"));
+    startBackgroundColor = formatColor.apply(uiDef.getColor("Button.startBackground"));
+    endBackgroundColor = formatColor.apply(uiDef.getColor("Button.endBackground"));
+    pressedBackgroundColor = formatColor.apply(uiDef.getColor("Button.pressedBackground"));
+    disabledBackgroundColor = formatColor.apply(uiDef.getColor("Button.disabledBackground"));
+    disabledForegroundColor = formatColor.apply(uiDef.getColor("Button.disabledForeground"));
     disabledBorderSize = uiDef.getInt("Button.disabledBorderSize") + "px";
-    disabledBorderColor = ThemeCssContext.formatColor(uiDef.getColor("Button.disabledBorderColor"));
-    hoverBackgroundColor = ThemeCssContext.formatColor(uiDef.getColor("Button.hoverBackground"));
+    disabledBorderColor = formatColor.apply(uiDef.getColor("Button.disabledBorderColor"));
+    hoverBackgroundColor = formatColor.apply(uiDef.getColor("Button.hoverBackground"));
   }
 
   /**

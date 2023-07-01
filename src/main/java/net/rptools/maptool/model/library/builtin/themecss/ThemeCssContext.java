@@ -35,6 +35,12 @@ public class ThemeCssContext {
   /** The disabled foreground color to use for the theme. */
   private final String foregroundColorDisabled;
 
+  /** The background color to use for the panel. */
+  private final String panelBackgroundColor;
+
+  /** The foreground color to use for the panel. */
+  private final String panelForegroundColor;
+
   /** The button CSS context. */
   private final ButtonCssContext button;
 
@@ -44,7 +50,14 @@ public class ThemeCssContext {
   /** The theme color CSS context. */
   private final ColorCssContext themeColor;
 
+  /** The theme header CSS context. */
   private final ThemeHeader themeHeader;
+
+  /** The scroll bar CSS context. */
+  private final ScrollBarCSSContext scrollBar;
+
+  /** The progress bar CSS context. */
+  private final ProgressBarCSSContext progressBar;
 
   /** Creates a new instance of the theme CSS context. */
   public ThemeCssContext() {
@@ -52,13 +65,17 @@ public class ThemeCssContext {
     backgroundColor = formatColor(uiDef.getColor("Label.background"));
     foregroundColor = formatColor(uiDef.getColor("Label.foreground"));
     foregroundColorDisabled = formatColor(uiDef.getColor("Label.disabledForeground"));
+    panelForegroundColor = formatColor(uiDef.getColor("Panel.foreground"));
+    panelBackgroundColor = formatColor(uiDef.getColor("Panel.background"));
     var font = uiDef.getFont("Label.font");
     fontFamily = font.getFamily();
     fontSize = font.getSize() + "px";
-    button = new ButtonCssContext(uiDef);
-    textInput = new TextInputCssContext(uiDef);
-    themeColor = new ColorCssContext(uiDef);
+    button = new ButtonCssContext(uiDef, ThemeCssContext::formatColor);
+    textInput = new TextInputCssContext(uiDef, ThemeCssContext::formatColor);
+    themeColor = new ColorCssContext(uiDef, ThemeCssContext::formatColor);
     themeHeader = new ThemeHeader(uiDef);
+    scrollBar = new ScrollBarCSSContext(uiDef, ThemeCssContext::formatColor);
+    progressBar = new ProgressBarCSSContext(uiDef, ThemeCssContext::formatColor);
   }
 
   /**
@@ -152,5 +169,29 @@ public class ThemeCssContext {
    */
   public ThemeHeader getThemeHeader() {
     return themeHeader;
+  }
+
+  /**
+   * Gets the panel background color.
+   *
+   * @return The panel background color.
+   */
+  public String getPanelBackgroundColor() {
+    return panelBackgroundColor;
+  }
+
+  /** Gets the panel foreground color. */
+  public String getPanelForegroundColor() {
+    return panelForegroundColor;
+  }
+
+  /** Gets the scroll bar CSS context. */
+  public ScrollBarCSSContext getScrollBar() {
+    return scrollBar;
+  }
+
+  /** Gets the progress bar CSS context. */
+  public ProgressBarCSSContext getProgressBar() {
+    return progressBar;
   }
 }
