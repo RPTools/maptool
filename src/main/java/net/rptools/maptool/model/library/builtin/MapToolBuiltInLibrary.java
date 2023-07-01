@@ -24,6 +24,7 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -107,6 +108,16 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
   public CompletableFuture<Boolean> locationExists(URL location) throws IOException {
     var key = location.getPath().replaceFirst("^/", "");
     return CompletableFuture.completedFuture(resourcesMap.containsKey(key));
+  }
+
+  @Override
+  public CompletableFuture<Boolean> isAsset(URL location) {
+    return CompletableFuture.completedFuture(false);
+  }
+
+  @Override
+  public CompletableFuture<Optional<MD5Key>> getAssetKey(URL location) {
+    return CompletableFuture.completedFuture(Optional.empty());
   }
 
   @Override

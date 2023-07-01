@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
@@ -47,6 +48,23 @@ public interface Library {
    * @throws IOException if there is an io error reading the location.
    */
   CompletableFuture<Boolean> locationExists(URL location) throws IOException;
+
+  /**
+   * Checks to see if the specified location is an Asset.
+   *
+   * @param location the location to check.
+   * @return {@code true} if the location is an asset, otherwise {@code false}.
+   */
+  CompletableFuture<Boolean> isAsset(URL location);
+
+  /**
+   * Returns the asset at the specified location. This will only return a value if {@link
+   * #isAsset(URL)} returns {@code true}.
+   *
+   * @param location the location to get the asset for.
+   * @return the asset at the specified location.
+   */
+  CompletableFuture<Optional<MD5Key>> getAssetKey(URL location);
 
   /**
    * Reads the location as a string.

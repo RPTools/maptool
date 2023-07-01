@@ -28,6 +28,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.language.I18N;
@@ -180,6 +181,16 @@ class LibraryToken implements Library {
                 return getProperty(loc.location()) != null ? Boolean.TRUE : Boolean.FALSE;
               }
             });
+  }
+
+  @Override
+  public CompletableFuture<Boolean> isAsset(URL location) {
+    return CompletableFuture.completedFuture(Boolean.FALSE);
+  }
+
+  @Override
+  public CompletableFuture<Optional<MD5Key>> getAssetKey(URL location) {
+    return CompletableFuture.completedFuture(Optional.empty());
   }
 
   @Override

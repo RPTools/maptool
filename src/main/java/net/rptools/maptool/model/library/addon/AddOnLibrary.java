@@ -440,6 +440,20 @@ public class AddOnLibrary implements Library {
   }
 
   @Override
+  public CompletableFuture<Boolean> isAsset(URL location) {
+    return CompletableFuture.completedFuture(getURILocation(location) != null);
+  }
+
+  @Override
+  public CompletableFuture<Optional<MD5Key>> getAssetKey(URL location) {
+    var AssetInfo = getURILocation(location);
+    if (AssetInfo == null) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    }
+    return CompletableFuture.completedFuture(Optional.of(AssetInfo.getValue0()));
+  }
+
+  @Override
   public CompletableFuture<String> readAsString(URL location) throws IOException {
     if (allowsUriAccess) {
       var values = getURILocation(location);
