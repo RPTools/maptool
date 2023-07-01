@@ -90,4 +90,7 @@ public class AppConstants {
   /** CSS used for MT Stat Sheet Theme support */
   public static final String MT_THEME_STAT_SHEET_CSS =
       "lib://net.rptools.maptool/css/mt-stat-sheet.css";
+
+  /** Namespace for built in add-ons. This is used to determine if an add-on is built in or not. */
+  public static final String MT_BUILTIN_ADD_ON_NAMESPACE = "net.rptools.maptool";
 }

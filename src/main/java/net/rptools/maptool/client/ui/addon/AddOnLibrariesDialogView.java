@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client.ui.addon;
 
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -21,6 +23,7 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
@@ -34,6 +37,7 @@ import javax.swing.JTable;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
@@ -63,6 +67,8 @@ public class AddOnLibrariesDialogView extends JDialog {
   private JLabel addOnLicenseLabel;
   private JButton viewReadMeFileButton;
   private JButton viewLicenseFileButton;
+  private JButton copyThemeCSS;
+  private JButton copyStatSheetThemeButton;
 
   private LibraryInfo selectedAddOn;
 
@@ -160,6 +166,44 @@ public class AddOnLibrariesDialogView extends JDialog {
             buttonAdd.setEnabled(false);
             buttonRemove.setEnabled(false);
           }
+        });
+
+    copyThemeCSS.addActionListener(
+        e -> {
+          new LibraryManager()
+              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+              .ifPresent(
+                  library -> {
+                    URI uri = URI.create(AppConstants.MT_THEME_CSS);
+                    String themeCss = null;
+                    try {
+                      themeCss = library.readAsString(uri.toURL()).get();
+                    } catch (InterruptedException | ExecutionException | IOException ex) {
+                      throw new RuntimeException(ex);
+                    }
+                    Toolkit.getDefaultToolkit()
+                        .getSystemClipboard()
+                        .setContents(new StringSelection(themeCss), null);
+                  });
+        });
+
+    copyStatSheetThemeButton.addActionListener(
+        e -> {
+          new LibraryManager()
+              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+              .ifPresent(
+                  library -> {
+                    URI uri = URI.create(AppConstants.MT_THEME_STAT_SHEET_CSS);
+                    String themeCss = null;
+                    try {
+                      themeCss = library.readAsString(uri.toURL()).get();
+                    } catch (InterruptedException | ExecutionException | IOException ex) {
+                      throw new RuntimeException(ex);
+                    }
+                    Toolkit.getDefaultToolkit()
+                        .getSystemClipboard()
+                        .setContents(new StringSelection(themeCss), null);
+                  });
         });
   }
 

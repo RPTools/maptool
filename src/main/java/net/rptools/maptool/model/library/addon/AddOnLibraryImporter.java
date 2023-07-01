@@ -59,6 +59,9 @@ public class AddOnLibraryImporter {
   /** The name of the file with the stat sheets. */
   public static final String STATS_SHEET_FILE = "stat_sheets.json";
 
+  /** The directory where metadata from the root dir of the zip directory is copied to. */
+  public static final String METADATA_DIR = "metadata/";
+
   /**
    * Returns the {@link FileFilter} for add on library files.
    *
@@ -176,6 +179,9 @@ public class AddOnLibraryImporter {
             .merge(new InputStreamReader(zip.getInputStream(statSheetEntry)), statSheetsBuilder);
       }
 
+      // Copy Metadata
+      addMetaData(builder.getNamespace(), zip, pathAssetMap);
+
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
       var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
@@ -188,6 +194,23 @@ public class AddOnLibraryImporter {
           eventPropBuilder.build(),
           statSheetsBuilder.build(),
           pathAssetMap);
+    }
+  }
+
+  private void addMetaData(
+      String namespace, ZipFile zip, Map<String, Pair<MD5Key, Type>> pathAssetMap)
+      throws IOException {
+    var entries = zip.stream().filter(e -> !e.getName().contains("/")).toList();
+    for (var entry : entries) {
+      String path = METADATA_DIR + entry.getName();
+      try (InputStream inputStream = zip.getInputStream(entry)) {
+        byte[] bytes = inputStream.readAllBytes();
+        MediaType mediaType = Asset.getMediaType(entry.getName(), bytes);
+        Asset asset =
+            Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+        addAsset(asset);
+        pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
+      }
     }
   }
 
