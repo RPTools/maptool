@@ -63,6 +63,29 @@
   --mt-theme-h6-font-family: {{themeHeader.h6.fontFamily}};
   --mt-theme-h6-font-size: {{themeHeader.h6.fontSize}};
 
+
+  --mt-theme-panel-background: {{panelBackgroundColor}};
+  --mt-theme-panel-foreground: {{panelForegroundColor}};
+
+  --mt-theme-progress-bar-arc: {{progressBar.arc}};
+  --mt-theme-progress-bar-background-color: {{progressBar.backgroundColor}};
+  --mt-theme-progress-font-family: {{progressBar.fontFamily}};
+  --mt-theme-progress-font-size: {{progressBar.fontSize}};
+
+  --mt-theme-scroll-bar-background-color: {{scrollBar.backgroundColor}};
+  --mt-theme-scroll-bar-show-buttons: {{scrollBar.showButtons}};
+  --mt-theme-scroll-bar-thumb-highlight-color: {{scrollBar.thumbHighlightColor}};
+  --mt-theme-scroll-bar-thumb-arc: {{scrollBar.thumbArc}};
+  --mt-theme-scroll-bar-thumb-border-color: {{scrollBar.thumbBorderColor}};
+  --mt-theme-scroll-bar-thumb-shadow-color: {{scrollBar.thumbShadowColor}};
+  --mt-theme-scroll-bar-thumb-dark-shadow-color: {{scrollBar.thumbDarkShadowColor}};
+  --mt-theme-scroll-bar-thumb-color: {{scrollBar.thumbColor}};
+  --mt-theme-scroll-bar-thumb-insets-left: {{scrollBar.thumbInsetsLeft}};
+  --mt-theme-scroll-bar-thumb-insets-top: {{scrollBar.thumbInsetsTop}};
+  --mt-theme-scroll-bar-thumb-insets-right: {{scrollBar.thumbInsetsRight}};
+  --mt-theme-scroll-bar-thumb-insets-bottom: {{scrollBar.thumbInsetsBottom}};
+
+
   font-size: var(--mt-theme-font-size);
   font-family: var(--mt-theme-font-family);
 }
@@ -176,54 +199,6 @@ table,
 input {
   vertical-align: middle;
   font-size: 1rem;
-}
-
-/* Button */
-button,
-input[type=submit],
-.mt-button {
-  cursor: default;
-  position: relative;
-  background: transparent;
-  color: var(--mt-theme-color-button-foreground);
-  padding: .2em .5em;
-  margin: 0;
-  font-family: inherit;
-  font-size: 1em;
-  border-radius: .15em;
-  border: none;
-}
-
-button::after,
-.mt-button::after {
-  position: absolute;
-  display: block;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  padding 1px;
-  content: "";
-  border-radius: .15em;
-  background: linear-gradient(
-    var(--mt-theme-color-button-start-background),
-    var(--mt-theme-color-button-end-background)
-  );
-  z-index: -1;
-}
-
-
-button:active::after,
-input[type=submit]:active {
-  background:	var(--mt-theme-color-button-pressed-background);
-}
-
-
-button[disabled],
-input[type=submit][disabled] {
-  background: var(--mt-theme-color-button-background-disabled);
-  color: var(--mt-theme-color-button-foreground-disabled);
-  border: var(--mt-theme-color-button-disabled-border-size) solid var(--mt-theme-color-button-disabled-border-color);
 }
 
 /* Text input */

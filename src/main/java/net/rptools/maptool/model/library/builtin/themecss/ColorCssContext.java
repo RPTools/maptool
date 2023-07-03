@@ -15,6 +15,8 @@
 package net.rptools.maptool.model.library.builtin.themecss;
 
 import com.formdev.flatlaf.FlatIconColors;
+import java.awt.Color;
+import java.util.function.Function;
 import javax.swing.UIDefaults;
 
 /**
@@ -74,40 +76,31 @@ public class ColorCssContext {
    *
    * @param uiDef The UI defaults to extract the colors from.
    */
-  public ColorCssContext(UIDefaults uiDef) {
-    actionsBlue = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_BLUE.key));
-    actionsBlueDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_BLUE_DARK.key));
-    actionsGreen = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREEN.key));
-    actionsGreenDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREEN_DARK.key));
-    actionsGrey = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREY.key));
-    actionsGreyDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREY_DARK.key));
-    actionsGreyInline =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREYINLINE.key));
+  public ColorCssContext(UIDefaults uiDef, Function<Color, String> formatColor) {
+    actionsBlue = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_BLUE.key));
+    actionsBlueDark = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_BLUE_DARK.key));
+    actionsGreen = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREEN.key));
+    actionsGreenDark = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREEN_DARK.key));
+    actionsGrey = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREY.key));
+    actionsGreyDark = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREY_DARK.key));
+    actionsGreyInline = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREYINLINE.key));
     actionsGreyInlineDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_GREYINLINE_DARK.key));
-    actionsRed = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_RED.key));
-    actionsRedDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_RED_DARK.key));
-    actionsYellow = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_YELLOW.key));
-    actionsYellowDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.ACTIONS_YELLOW_DARK.key));
-    objectsBlackText =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_BLACK_TEXT.key));
-    objectsBlue = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_BLUE.key));
-    objectsGreen = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_GREEN.key));
+        formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_GREYINLINE_DARK.key));
+    actionsRed = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_RED.key));
+    actionsRedDark = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_RED_DARK.key));
+    actionsYellow = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_YELLOW.key));
+    actionsYellowDark = formatColor.apply(uiDef.getColor(FlatIconColors.ACTIONS_YELLOW_DARK.key));
+    objectsBlackText = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_BLACK_TEXT.key));
+    objectsBlue = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_BLUE.key));
+    objectsGreen = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_GREEN.key));
     objectsGreenAndroid =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_GREEN_ANDROID.key));
-    objectsGrey = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_GREY.key));
-    objectsPink = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_PINK.key));
-    objectsRed = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_RED.key));
-    objectsRedStatus =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_RED_STATUS.key));
-    objectsYellow = ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_YELLOW.key));
-    objectsYellowDark =
-        ThemeCssContext.formatColor(uiDef.getColor(FlatIconColors.OBJECTS_YELLOW_DARK.key));
+        formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_GREEN_ANDROID.key));
+    objectsGrey = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_GREY.key));
+    objectsPink = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_PINK.key));
+    objectsRed = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_RED.key));
+    objectsRedStatus = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_RED_STATUS.key));
+    objectsYellow = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_YELLOW.key));
+    objectsYellowDark = formatColor.apply(uiDef.getColor(FlatIconColors.OBJECTS_YELLOW_DARK.key));
   }
 
   /**
