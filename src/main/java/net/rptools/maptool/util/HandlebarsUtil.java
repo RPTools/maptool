@@ -18,7 +18,15 @@ import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
+import com.github.jknack.handlebars.helper.AssignHelper;
+import com.github.jknack.handlebars.helper.ConditionalHelpers;
+import com.github.jknack.handlebars.helper.NumberHelper;
+import com.github.jknack.handlebars.helper.StringHelpers;
 import java.io.IOException;
+import java.util.Arrays;
+import net.rptools.maptool.model.Token;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Utility class to apply a Handlebars template given a bean.
@@ -30,6 +38,9 @@ public class HandlebarsUtil<T> {
   /** The compiled template. */
   private final Template template;
 
+  /** Logging class instance. */
+  private static final Logger log = LogManager.getLogger(Token.class);
+
   /**
    * Creates a new instance of the utility class.
    *
@@ -37,8 +48,19 @@ public class HandlebarsUtil<T> {
    * @throws IOException If there is an error compiling the template.
    */
   public HandlebarsUtil(String stringTemplate) throws IOException {
-    Handlebars handlebars = new Handlebars();
-    template = handlebars.compileInline(stringTemplate);
+    try {
+      Handlebars handlebars = new Handlebars();
+      StringHelpers.register(handlebars);
+      Arrays.stream(ConditionalHelpers.values())
+          .forEach(h -> handlebars.registerHelper(h.name(), h));
+      NumberHelper.register(handlebars);
+      handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
+
+      template = handlebars.compileInline(stringTemplate);
+    } catch (IOException e) {
+      log.error("Handlebars Error: {}", e.getMessage());
+      throw e;
+    }
   }
 
   /**
@@ -49,8 +71,14 @@ public class HandlebarsUtil<T> {
    * @throws IOException If there is an error applying the template.
    */
   public String apply(T bean) throws IOException {
-    Handlebars handlebars = new Handlebars();
-    var context = Context.newBuilder(bean).resolver(JavaBeanValueResolver.INSTANCE).build();
-    return template.apply(context);
+    try {
+
+      Handlebars handlebars = new Handlebars();
+      var context = Context.newBuilder(bean).resolver(JavaBeanValueResolver.INSTANCE).build();
+      return template.apply(context);
+    } catch (IOException e) {
+      log.error("Handlebars Error: {}", e.getMessage());
+      throw e;
+    }
   }
 }
