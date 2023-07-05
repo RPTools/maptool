@@ -297,7 +297,7 @@ public class Mapper {
         return stripped.setScale(Math.max(0, stripped.scale()));
       }
       case JSON_VAL -> {
-        return new JsonParser().parse(dto.getJsonVal());
+        return JsonParser.parseString(dto.getJsonVal());
       }
       default -> {
         log.warn("Unexpected type case:" + dto.getTypeCase());

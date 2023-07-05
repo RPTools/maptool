@@ -46,15 +46,14 @@ class JsonObjectFunctionsTest {
 
   @BeforeEach
   void setup() {
-    JsonParser jsonParser = new JsonParser();
-    JsonMTSTypeConversion typeConversion = new JsonMTSTypeConversion(jsonParser);
+    JsonMTSTypeConversion typeConversion = new JsonMTSTypeConversion();
     random = new Random(System.currentTimeMillis());
 
     jsonObjectFunctions = new JsonObjectFunctions(typeConversion);
 
-    jsonObject1 = jsonParser.parse(jsonObjString1).getAsJsonObject();
-    jsonObject2 = jsonParser.parse(jsonObjString2).getAsJsonObject();
-    jsonObject3 = jsonParser.parse(jsonObjString3).getAsJsonObject();
+    jsonObject1 = JsonParser.parseString(jsonObjString1).getAsJsonObject();
+    jsonObject2 = JsonParser.parseString(jsonObjString2).getAsJsonObject();
+    jsonObject3 = JsonParser.parseString(jsonObjString3).getAsJsonObject();
 
     jsonEmpty = new JsonObject();
   }

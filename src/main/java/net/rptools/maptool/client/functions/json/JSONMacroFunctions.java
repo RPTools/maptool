@@ -77,9 +77,6 @@ public class JSONMacroFunctions extends AbstractFunction {
   private static final Configuration jaywayConfig =
       Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
 
-  /** The parser used to parse Json strings into an internal representation. */
-  private static final JsonParser jsonParser = new JsonParser();
-
   /** Creates a new <code>JSONMacroFunctions</code> object. */
   private JSONMacroFunctions() {
     super(
@@ -123,7 +120,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.rolls",
         "json.objrolls");
 
-    typeConversion = new JsonMTSTypeConversion(jsonParser);
+    typeConversion = new JsonMTSTypeConversion();
     jsonArrayFunctions = new JsonArrayFunctions(typeConversion);
     jsonObjectFunctions = new JsonObjectFunctions(typeConversion);
   }
