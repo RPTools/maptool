@@ -70,31 +70,34 @@ public class RequestHandler {
                           "macro.responseHeaders", gson.toJsonTree(responseHeaders));
                       String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
                       return line;
+                    })
+                .thenApply(
+                    (String r) -> {
+                      try {
+                        HashMap<String, String> returnedHeaders;
+                        Object headerObj = resolver.getVariable("macro.responseHeaders");
+
+                        if (headerObj instanceof JsonObject headerJson) {
+                          returnedHeaders =
+                              gson.fromJson(
+                                  headerJson,
+                                  new TypeToken<HashMap<String, String>>() {}.getType());
+                        } else {
+                          String headerString = headerObj.toString();
+                          returnedHeaders =
+                              gson.fromJson(
+                                  headerString,
+                                  new TypeToken<HashMap<String, String>>() {}.getType());
+                        }
+
+                        responseHeaders.putAll(returnedHeaders);
+                      } catch (Exception pe) {
+                        responseHeaders.put(
+                            ":Status", "500 Internal Exception (bad response header)");
+                        return pe.toString();
+                      }
+                      return r;
                     });
-        c.thenApply(
-            (String r) -> {
-              try {
-                HashMap<String, String> returnedHeaders;
-                Object headerObj = resolver.getVariable("macro.responseHeaders");
-
-                if (headerObj instanceof JsonObject headerJson) {
-                  returnedHeaders =
-                      gson.fromJson(
-                          headerJson, new TypeToken<HashMap<String, String>>() {}.getType());
-                } else {
-                  String headerString = headerObj.toString();
-                  returnedHeaders =
-                      gson.fromJson(
-                          headerString, new TypeToken<HashMap<String, String>>() {}.getType());
-                }
-
-                responseHeaders.putAll(returnedHeaders);
-              } catch (Exception pe) {
-                responseHeaders.put(":Status", "500 Internal Exception (bad response header)");
-                return pe.toString();
-              }
-              return r;
-            });
 
         return c;
       } catch (Exception e) {
