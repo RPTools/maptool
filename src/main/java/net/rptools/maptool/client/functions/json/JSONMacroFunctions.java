@@ -19,6 +19,7 @@ import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -74,11 +75,15 @@ public class JSONMacroFunctions extends AbstractFunction {
   private static final JSONMacroFunctions instance = new JSONMacroFunctions();
 
   /** Configuration object for JSONPath. */
-  private static final Configuration jaywayConfig =
-      Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
+  private static final Configuration jaywayConfig;
 
-  /** The parser used to parse Json strings into an internal representation. */
-  private static final JsonParser jsonParser = new JsonParser();
+  static {
+    jaywayConfig =
+        Configuration.builder()
+            .jsonProvider(new GsonJsonProvider())
+            .mappingProvider(new GsonMappingProvider())
+            .build();
+  }
 
   /** Creates a new <code>JSONMacroFunctions</code> object. */
   private JSONMacroFunctions() {
@@ -123,7 +128,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.rolls",
         "json.objrolls");
 
-    typeConversion = new JsonMTSTypeConversion(jsonParser);
+    typeConversion = new JsonMTSTypeConversion();
     jsonArrayFunctions = new JsonArrayFunctions(typeConversion);
     jsonObjectFunctions = new JsonObjectFunctions(typeConversion);
   }
