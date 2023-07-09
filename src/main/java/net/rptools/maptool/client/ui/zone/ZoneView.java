@@ -333,7 +333,7 @@ public class ZoneView {
             getTopologyTree(Zone.TopologyType.WALL_VBL),
             getTopologyTree(Zone.TopologyType.HILL_VBL),
             getTopologyTree(Zone.TopologyType.PIT_VBL));
-    if (lightSourceVisibleArea == null) {
+    if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
     }
@@ -591,8 +591,6 @@ public class ZoneView {
               getTopologyTree(Zone.TopologyType.WALL_VBL),
               getTopologyTree(Zone.TopologyType.HILL_VBL),
               getTopologyTree(Zone.TopologyType.PIT_VBL));
-      // Can be null if no visibility.
-      tokenVisibleArea = Objects.requireNonNullElse(tokenVisibleArea, new Area());
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
