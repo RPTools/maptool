@@ -84,7 +84,7 @@ public class ConnectionInfoDialog extends JDialog {
    * @param server the server instance for the connection dialog
    */
   public ConnectionInfoDialog(MapToolServer server) {
-    // super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
+    super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);
 
