@@ -20,6 +20,7 @@ import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.concurrent.Callable;
@@ -62,6 +63,12 @@ public class ConnectionInfoDialog extends JDialog {
           if (inetAddress.isLoopbackAddress()
               || inetAddress.isLinkLocalAddress()
               || inetAddress.isMulticastAddress()) {
+            continue;
+          }
+
+          try {
+            InetAddress rptools = InetAddress.getByName("www.rptools.net");
+          } catch (UnknownHostException e) {
             continue;
           }
 

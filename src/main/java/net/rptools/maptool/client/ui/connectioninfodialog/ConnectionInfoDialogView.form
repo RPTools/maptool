@@ -32,7 +32,7 @@
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.external"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
         </properties>
       </component>
       <component id="3c360" class="javax.swing.JLabel">
