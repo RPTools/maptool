@@ -107,13 +107,19 @@ public class ConnectionInfoDialog extends JDialog {
     if (name == null) {
       name = "---";
     }
+
     String localv4Address = "Unknown";
-    String localv6Address = "Unknown";
     try {
       localv4Address = getIPAddress(false);
+    } catch (IOException e) { // UnknownHost | Socket
+      log.warn("Can't resolve our own IPv4 address!?", e);
+    }
+
+    String localv6Address = "Unknown";
+    try {
       localv6Address = getIPAddress(true);
     } catch (IOException e) { // UnknownHost | Socket
-      log.warn("Can't resolve our own IP address!?", e);
+      log.warn("Can't resolve our own IPv6 address!?", e);
     }
 
     String port =
