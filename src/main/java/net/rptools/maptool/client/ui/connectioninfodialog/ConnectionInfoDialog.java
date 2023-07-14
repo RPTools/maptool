@@ -16,8 +16,12 @@ package net.rptools.maptool.client.ui.connectioninfodialog;
 
 import java.awt.GridLayout;
 import java.io.IOException;
+import java.net.Inet6Address;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.util.Collections;
+import java.util.Enumeration;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
@@ -45,19 +49,50 @@ public class ConnectionInfoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(ConnectionInfoDialog.class);
 
   /**
+   * Get the IP-Address of the active NetworkInterface
+   *
+   * @param v6 Should the IPv6 Address be returnes (true) or the IPv4 Address (false)
+   */
+  private static String getIPAddress(boolean v6) throws SocketException {
+    Enumeration<NetworkInterface> netInts = NetworkInterface.getNetworkInterfaces();
+    for (NetworkInterface netInt : Collections.list(netInts)) {
+      if (netInt.isUp() && !netInt.isLoopback()) {
+        for (InetAddress inetAddress : Collections.list(netInt.getInetAddresses())) {
+
+          if (inetAddress.isLoopbackAddress()
+              || inetAddress.isLinkLocalAddress()
+              || inetAddress.isMulticastAddress()) {
+            continue;
+          }
+
+          if (v6 && inetAddress instanceof Inet6Address) {
+            return inetAddress.getHostAddress();
+          }
+
+          if (!v6 && inetAddress instanceof InetAddress) {
+            return inetAddress.getHostAddress();
+          }
+        }
+      }
+    }
+    return null;
+  }
+
+  /**
    * This is the default constructor
    *
    * @param server the server instance for the connection dialog
    */
   public ConnectionInfoDialog(MapToolServer server) {
-    super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
+    // super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);
 
     AbeillePanel panel = new AbeillePanel(new ConnectionInfoDialogView().getRootComponent());
 
     JTextField nameLabel = panel.getTextField("name");
-    JTextField localAddressLabel = panel.getTextField("localAddress");
+    JTextField localv4AddressLabel = panel.getTextField("localv4Address");
+    JTextField localv6AddressLabel = panel.getTextField("localv6Address");
     JTextField portLabel = panel.getTextField("port");
     externalAddressLabel = panel.getTextField("externalAddress");
 
@@ -65,23 +100,21 @@ public class ConnectionInfoDialog extends JDialog {
     if (name == null) {
       name = "---";
     }
-    String localAddress = "Unknown";
+    String localv4Address = "Unknown";
+    String localv6Address = "Unknown";
     try {
-      InetAddress rptools = InetAddress.getByName("www.rptools.net");
-      try {
-        InetAddress localAddy = InetAddress.getLocalHost();
-        localAddress = localAddy.getHostAddress();
-      } catch (IOException e) { // Socket|UnknownHost
-        log.warn("Can't resolve 'www.rptools.net' or our own IP address!?", e);
-      }
-    } catch (UnknownHostException e) {
-      log.warn("Can't resolve 'www.rptools.net' or our own IP address!?", e);
+      localv4Address = getIPAddress(false);
+      localv6Address = getIPAddress(true);
+    } catch (IOException e) { // UnknownHost | Socket
+      log.warn("Can't resolve our own IP address!?", e);
     }
+
     String port =
         MapTool.isPersonalServer() ? "---" : Integer.toString(server.getConfig().getPort());
 
     nameLabel.setText(name);
-    localAddressLabel.setText(localAddress);
+    localv4AddressLabel.setText(localv4Address);
+    localv6AddressLabel.setText(localv6Address);
     externalAddressLabel.setText(I18N.getText("ConnectionInfoDialog.discovering"));
     portLabel.setText(port);
 
