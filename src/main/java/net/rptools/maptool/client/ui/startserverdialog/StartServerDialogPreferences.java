@@ -269,4 +269,8 @@ public class StartServerDialogPreferences {
   public void setKeyUseWebrtc(boolean flag) {
     prefs.putBoolean(KEY_USE_WEBRTC, flag);
   }
+
+  public static Preferences getPrefs() {
+    return prefs;
+  }
 }

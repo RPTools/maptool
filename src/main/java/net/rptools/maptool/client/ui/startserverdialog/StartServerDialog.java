@@ -14,14 +14,23 @@
  */
 package net.rptools.maptool.client.ui.startserverdialog;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.DecimalFormat;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.InvalidPreferencesFormatException;
+import java.util.prefs.Preferences;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JTextField;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -192,6 +201,14 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     return (JTextField) getComponent("@username");
   }
 
+  public JButton getexportButton() {
+    return (JButton) getComponent("exportButton");
+  }
+
+  public JButton getimportButton() {
+    return (JButton) getComponent("importButton");
+  }
+
   public JButton getOKButton() {
     return (JButton) getComponent("okButton");
   }
@@ -223,6 +240,65 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   @Override
   protected void preModelBind() {
     Binder.setFormat(getPortTextField(), new DecimalFormat("####"));
+  }
+
+  public void initexportButton() {
+    getexportButton()
+        .addActionListener(
+            e -> {
+              String file_name = "";
+              JFileChooser fileChooser = new JFileChooser();
+              fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+              FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("XML-Files", "xml");
+              fileChooser.setFileFilter(xmlfilter);
+              fileChooser.setSelectedFile(new File("MaptoolServersettings.xml"));
+              int result = fileChooser.showSaveDialog(this);
+              if (result == JFileChooser.APPROVE_OPTION) {
+                File selectedFile = fileChooser.getSelectedFile();
+                file_name = selectedFile.getAbsolutePath();
+              } else {
+                return;
+              }
+              try {
+                commit();
+                FileOutputStream outStream = new FileOutputStream(file_name, false);
+                Preferences prefex = prefs.getPrefs();
+                prefex.exportSubtree(outStream);
+                outStream.close();
+              } catch (IOException | BackingStoreException | IllegalStateException prefserr) {
+
+              }
+            });
+  }
+
+  public void initimportButton() {
+    getimportButton()
+        .addActionListener(
+            e -> {
+              try {
+                String file_name = "";
+                JFileChooser fileChooser = new JFileChooser();
+                fileChooser.setCurrentDirectory(new File(System.getProperty("user.home")));
+                FileNameExtensionFilter xmlfilter = new FileNameExtensionFilter("XML-Files", "xml");
+                fileChooser.setFileFilter(xmlfilter);
+                fileChooser.setSelectedFile(new File("MaptoolServersettings.xml"));
+                int result = fileChooser.showOpenDialog(this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                  File selectedFile = fileChooser.getSelectedFile();
+                  file_name = selectedFile.getAbsolutePath();
+                } else {
+                  return;
+                }
+                FileInputStream inStream = new FileInputStream(file_name);
+                Preferences prefim = prefs.getPrefs();
+                prefim.importPreferences(inStream);
+                inStream.close();
+                unbind();
+                bind(prefs);
+              } catch (IOException | InvalidPreferencesFormatException prefserr) {
+
+              }
+            });
   }
 
   public void initOKButton() {
