@@ -280,7 +280,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefex.exportSubtree(outStream);
                 outStream.close();
               } catch (IOException | BackingStoreException | IllegalStateException prefserr) {
-                MapTool.showError("Error while Exporting, please try again.");
+                MapTool.showError("ServerDialog.error.xmlExport");
               }
             });
   }
@@ -348,7 +348,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 getMovementMetric().setSelectedItem(prefs.getMovementMetric());
                 getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
               } catch (IOException | InvalidPreferencesFormatException prefserr) {
-                MapTool.showError("Error while Importing, please try again.");
+                MapTool.showError("ServerDialog.error.xmlImport");
               }
             });
   }

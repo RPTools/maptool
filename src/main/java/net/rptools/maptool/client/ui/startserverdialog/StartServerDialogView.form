@@ -3,7 +3,7 @@
   <grid id="67a17" binding="mainPanel" layout-manager="GridLayoutManager" row-count="9" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="1542" height="707"/>
+      <xy x="10" y="10" width="1825" height="707"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -428,7 +428,7 @@
         <properties>
           <actionCommand value="OK"/>
           <name value="exportButton"/>
-          <text value="Export to XML"/>
+	  <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.button.xmlExport"/>
         </properties>
       </component>
       <component id="99124" class="javax.swing.JButton">
@@ -437,9 +437,8 @@
         </constraints>
         <properties>
           <actionCommand value="OK"/>
-          <enabled value="true"/>
           <name value="importButton"/>
-          <text value="Import from XML"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ServerDialog.button.xmlImport"/>
         </properties>
       </component>
     </children>
