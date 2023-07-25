@@ -261,12 +261,26 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
               }
               try {
                 commit();
+                prefs.setRole((Player.Role) getRoleCombo().getSelectedItem());
+                prefs.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem());
+                prefs.setAutoRevealOnMovement(autoRevealOnMovement.isSelected());
+                prefs.setUsePasswordFile(usePasswordFile.isSelected());
+                prefs.setUseEasyConnect(useEasyConnect.isSelected());
+                prefs.setMapSelectUIHidden(hideMapSelectUI.isSelected());
+                prefs.setLockTokenEditOnStart(lockTokenEditOnStartup.isSelected());
+                prefs.setLockPlayerMovementOnStart(lockPlayerMoveOnStartup.isSelected());
+                prefs.setPlayerLibraryLock(lockPlayerLibrary.isSelected());
+                JCheckBox useWebRTCCheckBox = getUseWebRTCCheckBox();
+                prefs.setKeyUseWebrtc(
+                    useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
+                prefs.setUseToolTipsForUnformattedRolls(getUseTooltipForRolls().isSelected());
+                prefs.setUseTooltips(getUseTooltipForRolls().isSelected());
                 FileOutputStream outStream = new FileOutputStream(file_name, false);
                 Preferences prefex = prefs.getPrefs();
                 prefex.exportSubtree(outStream);
                 outStream.close();
               } catch (IOException | BackingStoreException | IllegalStateException prefserr) {
-
+                  MapTool.showError("Error while Exporting, please try again.");
               }
             });
   }
@@ -295,8 +309,46 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 inStream.close();
                 unbind();
                 bind(prefs);
+                getRoleCombo().setSelectedItem(prefs.getRole());
+                useIndividualFOW.setEnabled(prefs.getUseIndividualViews());
+                if (!useIndividualViews.isSelected()) {
+                  useIndividualFOW.setSelected(false);
+                  useIndividualFOW.setEnabled(false);
+                } else {
+                  useIndividualFOW.setEnabled(true);
+                }
+                autoRevealOnMovement.setEnabled(prefs.getPlayersCanRevealVision());
+                if (!playersCanRevealVision.isSelected()) {
+                  autoRevealOnMovement.setSelected(false);
+                  autoRevealOnMovement.setEnabled(false);
+                } else {
+                  autoRevealOnMovement.setEnabled(true);
+                }
+                boolean usePf = usePasswordFile.isSelected();
+                boolean useEC = useEasyConnect.isSelected();
+                playerPassword.setEnabled(!usePf);
+                gmPassword.setEnabled(!usePf);
+                usePasswordFile.setEnabled(!useEC);
+                boolean passwordFile = usePasswordFile.isSelected();
+                playerPassword.setEnabled(!passwordFile);
+                gmPassword.setEnabled(!passwordFile);
+                boolean easyConnect = useEasyConnect.isSelected();
+                if (easyConnect) {
+                  usePasswordFile.setSelected(true);
+                  usePasswordFile.setEnabled(false);
+                } else {
+                  usePasswordFile.setEnabled(true);
+                }
+                hideMapSelectUI.setSelected(prefs.getMapSelectUIHidden());
+                lockTokenEditOnStartup.setSelected(prefs.getLockTokenEditOnStart());
+                lockPlayerMoveOnStartup.setSelected(prefs.getLockPlayerMovementOnStart());
+                lockPlayerLibrary.setSelected(prefs.getPlayerLibraryLock());
+                getUseTooltipForRolls().setSelected(prefs.getUseTooltips());
+                prefs.setUseToolTipsForUnformattedRolls(getUseTooltipForRolls().isSelected());
+                getMovementMetric().setSelectedItem(prefs.getMovementMetric());
+                getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
               } catch (IOException | InvalidPreferencesFormatException prefserr) {
-
+                  MapTool.showError("Error while Importing, please try again.");
               }
             });
   }

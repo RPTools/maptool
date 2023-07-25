@@ -51,6 +51,7 @@ public class StartServerDialogPreferences {
   private static final String KEY_START_LOCKED_TOKEN_EDIT = "lockTokenEditOnStartup";
   private static final String KEY_START_LOCKED_PLAYER_MOVEMENT = "lockPlayerMovementOnStartup";
   private static final String KEY_LOCK_PLAYER_LIBRARY = "lockPlayerLibrary";
+  private static final String KEY_USE_TOOLTIPS = "useTooltips";
 
   private static final String KEY_USE_WEBRTC = "useWebRTC";
 
@@ -187,6 +188,14 @@ public class StartServerDialogPreferences {
 
   public void setUseToolTipsForUnformattedRolls(boolean flag) {
     useToolTipsForUnformattedRolls = flag;
+  }
+
+  public boolean getUseTooltips() {
+    return prefs.getBoolean(KEY_USE_TOOLTIPS, false);
+  }
+
+  public void setUseTooltips(boolean flag) {
+    prefs.putBoolean(KEY_USE_TOOLTIPS, flag);
   }
 
   public WalkerMetric getMovementMetric() {
