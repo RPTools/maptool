@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialogView">
-  <grid id="f0bbd" binding="mainPanel" layout-manager="GridLayoutManager" row-count="6" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="f0bbd" binding="mainPanel" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
       <xy x="10" y="10" width="207" height="211"/>
@@ -17,7 +17,7 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
         </properties>
       </component>
-      <component id="12eb5" class="javax.swing.JLabel">
+      <component id="12eb6" class="javax.swing.JLabel">
         <constraints>
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -26,9 +26,18 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
         </properties>
       </component>
-      <component id="3c360" class="javax.swing.JLabel">
+      <component id="12eb5" class="javax.swing.JLabel">
         <constraints>
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="SansSerif" size="11" style="1"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
+        </properties>
+      </component>
+      <component id="3c360" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
@@ -37,7 +46,7 @@
       </component>
       <component id="d0010" class="javax.swing.JLabel">
         <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
@@ -67,13 +76,26 @@
           <text value="name"/>
         </properties>
       </component>
-      <component id="4188" class="javax.swing.JTextField">
+      <component id="4189" class="javax.swing.JTextField">
         <constraints>
           <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
-          <name value="localAddress"/>
+          <name value="localv4Address"/>
+          <opaque value="false"/>
+          <selectionEnd value="12"/>
+          <selectionStart value="12"/>
+          <text value="localAddress"/>
+        </properties>
+      </component>
+      <component id="4188" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+          <name value="localv6Address"/>
           <opaque value="false"/>
           <selectionEnd value="12"/>
           <selectionStart value="12"/>
@@ -82,7 +104,7 @@
       </component>
       <component id="96cea" class="javax.swing.JTextField">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -95,7 +117,7 @@
       </component>
       <component id="a928c" class="javax.swing.JTextField">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -108,7 +130,7 @@
       </component>
       <component id="74e0b" class="javax.swing.JButton">
         <constraints>
-          <grid row="5" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <actionCommand value="OK"/>
