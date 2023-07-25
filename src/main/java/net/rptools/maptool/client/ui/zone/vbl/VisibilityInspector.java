@@ -149,7 +149,7 @@ public class VisibilityInspector extends JPanel {
     final var obstructedVision = new Area(unobstructedVision);
 
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, .5f));
-    if (vision != null) {
+    {
       obstructedVision.subtract(vision);
       g2d.setColor(Color.red);
       g2d.fill(vision);
