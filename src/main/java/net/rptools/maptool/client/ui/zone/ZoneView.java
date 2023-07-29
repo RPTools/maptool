@@ -520,7 +520,7 @@ public class ZoneView {
     return personalLights;
   }
 
-  private Illumination getIllumination(PlayerView view) {
+  public Illumination getIllumination(PlayerView view) {
     var illumination = illuminationsPerView.get(view);
     if (illumination == null) {
       // Not yet calculated. Do so now.
@@ -750,6 +750,12 @@ public class ZoneView {
                   .filter(laud -> laud.lightInfo() != null)
                   .map(
                       (ContributedLight laud) -> {
+                        var isDarkness = laud.litArea().lumens() < 0;
+                        if (isDarkness && !view.isGMView()) {
+                          // Non-GM players do not render the light aspect of darkness.
+                          return null;
+                        }
+
                         // Make sure each drawable light is restricted to the area it covers,
                         // accounting for darkness effects.
                         final var obscuredArea = new Area(laud.litArea().area());
@@ -761,7 +767,7 @@ public class ZoneView {
                         }
 
                         obscuredArea.intersect(
-                            laud.litArea().lumens() < 0
+                            isDarkness
                                 ? lumensLevel.get().darknessArea()
                                 : lumensLevel.get().lightArea());
                         return new DrawableLight(

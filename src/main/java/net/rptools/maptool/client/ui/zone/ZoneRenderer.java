@@ -1196,6 +1196,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("auras");
     }
 
+    renderPlayerDarkness(g2d, view);
+
     /**
      * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by
      * the Token layer. The problem was that we want all drawables to appear below all tokens, and
@@ -1430,20 +1432,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLights:renderLightOverlay");
     }
 
-    if (!view.isGMView()) {
-      // Note that the ZoneView has already restricted the darkness to its affected areas.
-      final var darknessLights =
-          drawableLights.stream().filter(light -> light.getLumens() <= 0).toList();
-      renderLightOverlay(
-          g,
-          new SolidColorComposite(0xff000000),
-          AlphaComposite.SrcOver,
-          LightOverlayClipStyle.CLIP_TO_NOT_VISIBLE_AREA,
-          darknessLights,
-          Color.black,
-          new Color(0, 0, 0, 0));
-    }
-
     if (AppState.isShowLumensOverlay()) {
       // Lumens overlay enabled.
       timer.start("renderLights:renderLumensOverlay");
@@ -1657,6 +1645,43 @@ public class ZoneRenderer extends JComponent
       g.setComposite(overlayBlending);
       g.drawImage(lightOverlay, null, 0, 0);
       timer.stop("renderLightOverlay:drawBuffer");
+    }
+  }
+
+  /**
+   * Draws a solid black overlay wherever a non-GM player should see darkness.
+   *
+   * <p>If {@code view} is a GM view, this renders nothing.
+   *
+   * @param g The graphics object used to render the zone.
+   * @param view The player view.
+   */
+  private void renderPlayerDarkness(Graphics2D g, PlayerView view) {
+    if (view.isGMView()) {
+      // GMs see the darkness rendered as lights, not as blackness.
+      return;
+    }
+
+    final var darkness = zoneView.getIllumination(view).getDarkenedArea();
+    if (darkness.isEmpty()) {
+      // Skip the rendering work if it isn't necessary.
+      return;
+    }
+
+    g = (Graphics2D) g.create();
+    try {
+      timer.start("renderPlayerDarkness:setTransform");
+      AffineTransform af = new AffineTransform();
+      af.translate(getViewOffsetX(), getViewOffsetY());
+      af.scale(getScale(), getScale());
+      g.setTransform(af);
+      timer.stop("renderPlayerDarkness:setTransform");
+
+      g.setComposite(AlphaComposite.Src);
+      g.setPaint(Color.black);
+      g.fill(darkness);
+    } finally {
+      g.dispose();
     }
   }
 
