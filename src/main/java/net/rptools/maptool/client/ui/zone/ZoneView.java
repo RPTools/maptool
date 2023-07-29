@@ -625,14 +625,14 @@ public class ZoneView {
     // perspective.
     final var singleTokenView = new PlayerView(view.getRole(), Collections.singletonList(token));
     final var illumination = getIllumination(singleTokenView);
-    final var visibleArea = illumination.getVisibleArea();
-    visibleArea.intersect(tokenVisibleArea);
+    final var litArea = illumination.getLitArea();
+    litArea.intersect(tokenVisibleArea);
 
-    tokenVisionCache.put(token.getId(), visibleArea);
+    tokenVisionCache.put(token.getId(), litArea);
 
     // log.info("getVisibleArea: \t\t" + stopwatch);
 
-    return visibleArea;
+    return litArea;
   }
 
   /**

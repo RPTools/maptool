@@ -27,7 +27,7 @@ import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 
 /**
- * Manages the light sources and illuminations of a zone, for a given set of illumniator parameters.
+ * Manages the light sources and illuminations of a zone, for a given set of illuminator parameters.
  *
  * <p>This needs to be kept in sync with the associated {@code Zone} in order for the results to
  * make sense
