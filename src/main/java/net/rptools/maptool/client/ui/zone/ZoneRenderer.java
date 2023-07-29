@@ -1427,7 +1427,6 @@ public class ZoneRenderer extends JComponent
           overlayBlending,
           view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
-          Color.black,
           overlayFillColor);
       timer.stop("renderLights:renderLightOverlay");
     }
@@ -1463,7 +1462,6 @@ public class ZoneRenderer extends JComponent
         AlphaComposite.SrcOver,
         view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         drawableAuras,
-        new Color(255, 255, 255, 150),
         new Color(0, 0, 0, 0));
     timer.stop("renderAuras:renderAuraOverlay");
   }
@@ -1580,7 +1578,6 @@ public class ZoneRenderer extends JComponent
    * @param clipStyle How to clip the overlay relative to the visible area. Set to null for no extra
    *     clipping.
    * @param lights The lights that will be rendered and blended.
-   * @param defaultPaint A default paint for lights without a paint.
    */
   private void renderLightOverlay(
       Graphics2D g,
@@ -1588,7 +1585,6 @@ public class ZoneRenderer extends JComponent
       Composite overlayBlending,
       @Nullable LightOverlayClipStyle clipStyle,
       Collection<DrawableLight> lights,
-      Paint defaultPaint,
       Paint backgroundFill) {
     if (lights.isEmpty()) {
       // No point spending resources accomplishing nothing.
@@ -1631,8 +1627,7 @@ public class ZoneRenderer extends JComponent
       // Draw lights onto the buffer image so the map doesn't affect how they blend
       timer.start("renderLightOverlay:drawLights");
       for (var light : lights) {
-        var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
-        newG.setPaint(paint);
+        newG.setPaint(light.getPaint().getPaint());
         timer.start("renderLightOverlay:fillLight");
         newG.fill(light.getArea());
         timer.stop("renderLightOverlay:fillLight");

@@ -756,6 +756,12 @@ public class ZoneView {
                           return null;
                         }
 
+                        // Lights without a colour are "clear" and should not be rendered.
+                        var paint = laud.lightInfo().light().getPaint();
+                        if (paint == null) {
+                          return null;
+                        }
+
                         // Make sure each drawable light is restricted to the area it covers,
                         // accounting for darkness effects.
                         final var obscuredArea = new Area(laud.litArea().area());
@@ -770,10 +776,7 @@ public class ZoneView {
                             isDarkness
                                 ? lumensLevel.get().darknessArea()
                                 : lumensLevel.get().lightArea());
-                        return new DrawableLight(
-                            laud.lightInfo().light().getPaint(),
-                            obscuredArea,
-                            laud.litArea().lumens());
+                        return new DrawableLight(paint, obscuredArea, laud.litArea().lumens());
                       })
                   .filter(Objects::nonNull)
                   .toList();
