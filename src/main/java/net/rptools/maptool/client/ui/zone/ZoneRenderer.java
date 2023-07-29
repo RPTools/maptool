@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -1109,7 +1110,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("ZoneRenderer-getVisibleArea");
 
       timer.start("createTransformedArea");
-      if (a != null && !a.isEmpty()) {
+      if (!a.isEmpty()) {
         visibleScreenArea = a.createTransformedArea(af);
       }
       timer.stop("createTransformedArea");
@@ -1120,7 +1121,7 @@ public class ZoneRenderer extends JComponent
     {
       // renderMoveSelectionSet() requires exposedFogArea to be properly set
       exposedFogArea = new Area(zone.getExposedArea());
-      if (exposedFogArea != null && zone.hasFog()) {
+      if (zone.hasFog()) {
         if (visibleScreenArea != null && !visibleScreenArea.isEmpty()) {
           exposedFogArea.intersect(visibleScreenArea);
         } else {
@@ -1864,10 +1865,10 @@ public class ZoneRenderer extends JComponent
   }
 
   private void renderFogArea(
-      final Graphics2D buffG, final PlayerView view, Area softFog, Area visibleArea) {
+      final Graphics2D buffG, final PlayerView view, Area softFog, @Nonnull Area visibleArea) {
     if (zoneView.isUsingVision()) {
       buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-      if (visibleArea != null && !visibleArea.isEmpty()) {
+      if (!visibleArea.isEmpty()) {
         buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
 
         // Fill in the exposed area
@@ -1889,9 +1890,10 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area visibleArea) {
+  private void renderFogOutline(
+      final Graphics2D buffG, PlayerView view, @Nonnull Area visibleArea) {
     // If there is no visible area, there is no outline that needs rendering.
-    if (zoneView.isUsingVision() && visibleArea != null && !visibleArea.isEmpty()) {
+    if (zoneView.isUsingVision() && !visibleArea.isEmpty()) {
       // Transform the area (not G2D) because we want the drawn line to remain thin.
       AffineTransform af = new AffineTransform();
       af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());

@@ -189,7 +189,7 @@ public class ZoneView {
    * @param view the PlayerView
    * @return the visible area
    */
-  public Area getVisibleArea(PlayerView view) {
+  public @Nonnull Area getVisibleArea(PlayerView view) {
     return visibleAreaMap.computeIfAbsent(
         view,
         view2 -> {
