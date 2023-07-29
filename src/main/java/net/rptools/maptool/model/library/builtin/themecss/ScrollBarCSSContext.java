@@ -68,9 +68,11 @@ public class ScrollBarCSSContext {
     showButtons = uiDef.getBoolean("ScrollBar.showButtons") ? 1 : 0;
     thumbHighlightColor = formatColor.apply(uiDef.getColor("ScrollBar.thumbHighlight"));
     thumbArc = uiDef.getInt("ScrollBar.thumbArc");
-    thumbBorderColor = formatColor.apply(uiDef.getColor("ScrollBar.thumbBorderColor"));
     thumbShadowColor = formatColor.apply(uiDef.getColor("ScrollBar.thumbShadow"));
-    thumbDarkShadowColor = formatColor.apply(uiDef.getColor("ScrollBar.thumbDarkShadow"));
+    var dscol = uiDef.getColor("ScrollBar.thumbDarkShadow");
+    thumbDarkShadowColor = dscol != null ? formatColor.apply(dscol) : thumbShadowColor;
+    var tcol = uiDef.getColor("ScrollBar.thumbBorderColor");
+    thumbBorderColor = tcol != null ? formatColor.apply(tcol) : thumbShadowColor;
     thumbColor = formatColor.apply(uiDef.getColor("ScrollBar.thumb"));
     thumbInsetsLeft = uiDef.getInt("ScrollBar.thumbInsets.left");
     thumbInsetsTop = uiDef.getInt("ScrollBar.thumbInsets.top");
