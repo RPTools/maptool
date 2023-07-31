@@ -753,11 +753,6 @@ public class PackedFile implements AutoCloseable {
     dirty = !file.exists();
   }
 
-  @Override
-  protected void finalize() throws Throwable {
-    close();
-  }
-
   protected File getExplodedFile(String path) {
     return new File(tmpFile, path);
   }
