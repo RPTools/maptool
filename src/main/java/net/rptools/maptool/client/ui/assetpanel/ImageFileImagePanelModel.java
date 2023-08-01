@@ -133,8 +133,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     if (!Token.isTokenFile(fileList.get(index).getName())) {
       return null;
     }
-    try {
-      PackedFile pakFile = new PackedFile(fileList.get(index));
+    try (PackedFile pakFile = new PackedFile(fileList.get(index))) {
       Object isHeroLab = pakFile.getProperty(PersistenceUtil.HERO_LAB);
       if (isHeroLab != null && (boolean) isHeroLab) {
         return new Image[] {herolabDecorationImage};
