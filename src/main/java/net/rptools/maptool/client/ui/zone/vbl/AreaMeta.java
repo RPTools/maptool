@@ -20,31 +20,39 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
 import net.rptools.lib.GeometryUtil;
-import net.rptools.lib.GeometryUtil.PointNode;
+import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
-  Area area;
-  Point2D centerPoint;
-  List<AreaFace> faceList = new ArrayList<AreaFace>();
+  private Area area;
+  private List<Coordinate> vertices = new ArrayList<>();
 
   // Only used during construction
-  boolean isHole;
-  PointNode pointNodeList;
-  GeneralPath path;
-  PointNode lastPointNode;
+  private boolean isHole;
+  private GeneralPath path;
 
   public AreaMeta() {}
 
-  public Point2D getCenterPoint() {
-    if (centerPoint == null) {
-      centerPoint =
-          new Point2D.Double(
-              area.getBounds().x + area.getBounds().width / 2,
-              area.getBounds().y + area.getBounds().height / 2);
-    }
-    return centerPoint;
+  public boolean contains(Point2D point) {
+    return area.contains(point);
+  }
+
+  public Area getBounds() {
+    return new Area(area);
+  }
+
+  /**
+   * @return true if this object does not have any edges.
+   */
+  public boolean isEmpty() {
+    // Note: vertices is a closed loop, so we can only have edges if we have at least 3 points with
+    // which to form a line.
+    return vertices.size() < 3;
   }
 
   /**
@@ -52,28 +60,50 @@ public class AreaMeta {
    * @param faceAway If `true`, only return segments facing away from origin.
    * @return
    */
-  public List<VisibleAreaSegment> getFacingSegments(
-      GeometryFactory geometryFactory, Point2D origin, boolean faceAway) {
-    List<VisibleAreaSegment> segments = new ArrayList<>();
-    List<AreaFace> currentSegmentFaces = new ArrayList<>();
+  public List<LineString> getFacingSegments(
+      GeometryFactory geometryFactory,
+      Coordinate origin,
+      boolean faceAway,
+      PreparedGeometry vision) {
+    final var requiredOrientation = faceAway ? Orientation.CLOCKWISE : Orientation.COUNTERCLOCKWISE;
+    List<LineString> segments = new ArrayList<>();
+    List<Coordinate> currentSegmentPoints = new ArrayList<>();
 
-    for (AreaFace face : faceList) {
-      double originAngle = GeometryUtil.getAngle(origin, face.getMidPoint());
-      double delta = Math.abs(GeometryUtil.getAngleDelta(originAngle, face.getFacing()));
+    Coordinate current = null;
+    for (Coordinate coordinate : vertices) {
+      assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
 
-      boolean shouldIncludeFace = (delta > 90) == faceAway;
+      final var previous = current;
+      current = coordinate;
+      if (previous == null) {
+        continue;
+      }
+
+      final var faceLineSegment = new LineSegment(previous, coordinate);
+      final var orientation = faceLineSegment.orientationIndex(origin);
+      final var shouldIncludeFace =
+          (orientation == requiredOrientation)
+              && vision.intersects(faceLineSegment.toGeometry(geometryFactory));
+
       if (shouldIncludeFace) {
         // Since we're including this face, the existing segment can be extended.
-        currentSegmentFaces.add(face);
-      } else if (!currentSegmentFaces.isEmpty()) {
+        if (currentSegmentPoints.isEmpty()) {
+          // Also need the first point.
+          currentSegmentPoints.add(faceLineSegment.p0);
+        }
+        currentSegmentPoints.add(faceLineSegment.p1);
+      } else if (!currentSegmentPoints.isEmpty()) {
         // Since we're skipping this face, the segment is broken and we must start a new one.
-        segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
-        currentSegmentFaces = new ArrayList<>();
+        segments.add(
+            geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
+        currentSegmentPoints.clear();
       }
     }
+    assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
     // In case there is still current segment, we add it.
-    if (!currentSegmentFaces.isEmpty()) {
-      segments.add(new VisibleAreaSegment(geometryFactory, origin, currentSegmentFaces));
+    if (!currentSegmentPoints.isEmpty()) {
+      segments.add(
+          geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
     }
 
     return segments;
@@ -83,86 +113,44 @@ public class AreaMeta {
     return isHole;
   }
 
-  public void addPoint(float x, float y) {
-    // Cut out redundant points
-    // TODO: This works ... in concept, but in practice it can create holes that pop outside of
-    // their parent bounds
-    // for really thin diagonal lines. At some point this could be moved to a post processing step,
-    // after the
-    // islands have been placed into their oceans. But that's an optimization for another day
-    // if (lastPointNode != null && GeometryUtil.getDistance(lastPointNode.point, new
-    // Point2D.Float(x, y)) < 1.5) {
-    // skippedPoints++;
-    // return;
-    // }
-    PointNode pointNode = new PointNode(new Point2D.Double(x, y));
+  public void addPoint(double x, double y) {
+    final var vertex = new Coordinate(x, y);
+    GeometryUtil.getPrecisionModel().makePrecise(vertex);
 
-    // Don't add if we haven't moved
-    if (lastPointNode != null && lastPointNode.point.equals(pointNode.point)) {
-      return;
+    if (!vertices.isEmpty()) {
+      final var lastVertex = vertices.get(vertices.size() - 1);
+      // Don't add if we haven't moved
+      if (lastVertex.equals(vertex)) {
+        return;
+      }
     }
+    vertices.add(vertex);
+
     if (path == null) {
       path = new GeneralPath();
-      path.moveTo(x, y);
-
-      pointNodeList = pointNode;
+      path.moveTo(vertex.x, vertex.y);
     } else {
-      path.lineTo(x, y);
-
-      lastPointNode.next = pointNode;
-      pointNode.previous = lastPointNode;
+      path.lineTo(vertex.x, vertex.y);
     }
-    lastPointNode = pointNode;
   }
 
   public void close() {
     area = new Area(path);
 
-    // Close the circle
-    lastPointNode.next = pointNodeList;
-    pointNodeList.previous = lastPointNode;
-    lastPointNode = null;
-
-    // For some odd reason, sometimes the first and last point are the same, which causes
-    // bugs in the way areas are calculated
-    if (pointNodeList.point.equals(pointNodeList.previous.point)) {
-      // Pull out the dupe node
-      PointNode trueLastPoint = pointNodeList.previous.previous;
-      trueLastPoint.next = pointNodeList;
-      pointNodeList.previous = trueLastPoint;
+    // Close the circle.
+    // For some odd reason, sometimes the first and last point are already the same, so don't add
+    // the point again in that case.
+    final var first = vertices.get(0);
+    final var last = vertices.get(vertices.size() - 1);
+    if (!first.equals(last)) {
+      vertices.add(first);
     }
-    computeIsHole();
-    computeFaces();
 
-    // Don't need point list anymore
-    pointNodeList = null;
+    isHole = vertices.size() >= 4 && Orientation.isCCW(vertices.toArray(Coordinate[]::new));
+
+    // Don't need this anymore
     path = null;
     // System.out.println("AreaMeta.skippedPoints: " + skippedPoints + " h:" + isHole + " f:" +
     // faceList.size());
-  }
-
-  private void computeIsHole() {
-    double angle = 0;
-
-    PointNode currNode = pointNodeList.next;
-
-    while (currNode != pointNodeList) {
-      double currAngle =
-          GeometryUtil.getAngleDelta(
-              GeometryUtil.getAngle(currNode.previous.point, currNode.point),
-              GeometryUtil.getAngle(currNode.point, currNode.next.point));
-
-      angle += currAngle;
-      currNode = currNode.next;
-    }
-    isHole = angle < 0;
-  }
-
-  private void computeFaces() {
-    PointNode node = pointNodeList;
-    do {
-      faceList.add(new AreaFace(node.point, node.next.point));
-      node = node.next;
-    } while (!node.point.equals(pointNodeList.point));
   }
 }

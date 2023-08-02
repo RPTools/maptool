@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:2;">
+    <g transform="matrix(1,0,0,1,-76,-19)">
+        <g id="Pathing-MBL" serif:id="Pathing MBL" transform="matrix(-1,0,0,1,164,19)">
+            <rect x="72" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(-1.49849,0,0,1.49849,202.374,-31.9594)">
+                <path d="M81.649,27C82.087,26.01 82.975,25.332 84,25.332C85.025,25.332 85.913,26.01 86.351,27C85.913,27.99 85.025,28.668 84,28.668C82.975,28.668 82.087,27.99 81.649,27ZM84,25.993C84.556,25.993 85.007,26.444 85.007,27C85.007,27.556 84.556,28.007 84,28.007C83.444,28.007 82.993,27.556 82.993,27C82.993,26.444 83.444,25.993 84,25.993Z" style="fill:rgb(110,110,110);"/>
+            </g>
+            <g transform="matrix(1.87048e-16,1.83333,-1,1.12568e-17,89,-6.16667)">
+                <path d="M6.636,7L6.636,9L5,6L6.636,3L6.636,5L11,5L11,7L6.636,7Z" style="fill:rgb(89,168,105);"/>
+            </g>
+            <g transform="matrix(1.48153e-16,1.04913,-0.721559,-4.6022e-17,103.189,-33.211)">
+                <rect x="43.094" y="26.623" width="1.906" height="6.9" style="fill:rgb(89,168,105);"/>
+            </g>
+        </g>
+    </g>
+</svg>

@@ -27,7 +27,9 @@ public class HTMLActionEvent {
       newTitle = title;
     }
 
-    /** @return the new title. */
+    /**
+     * @return the new title.
+     */
     String getNewTitle() {
       return newTitle;
     }

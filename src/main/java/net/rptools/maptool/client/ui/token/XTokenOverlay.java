@@ -23,6 +23,8 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Line2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Draw an X over a token.
@@ -60,8 +62,8 @@ public class XTokenOverlay extends BooleanTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -80,7 +82,9 @@ public class XTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new XTokenOverlay(getName(), getColor(), getWidth());
@@ -138,5 +142,29 @@ public class XTokenOverlay extends BooleanTokenOverlay {
   public void setWidth(int aWidth) {
     if (aWidth <= 0) aWidth = 3;
     stroke = new BasicStroke(aWidth, BasicStroke.CAP_BUTT, BasicStroke.JOIN_BEVEL);
+  }
+
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    color = new Color(dto.getColor(), true);
+    stroke = Mapper.map(dto.getStroke());
+  }
+
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    var dto = BooleanTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setColor(color.getRGB());
+    dto.setStroke(Mapper.map(stroke));
+    return dto;
+  }
+
+  public static XTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new XTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.X).build();
   }
 }

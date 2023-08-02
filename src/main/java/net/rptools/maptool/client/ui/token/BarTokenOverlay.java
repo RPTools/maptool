@@ -17,6 +17,8 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto.SideDto;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -49,7 +51,9 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Constructors
    *-------------------------------------------------------------------------------------------*/
 
-  /** @param name Name of the new bar. */
+  /**
+   * @param name Name of the new bar.
+   */
   public BarTokenOverlay(String name) {
     super(name);
   }
@@ -58,12 +62,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @return Getter for increments */
+  /**
+   * @return Getter for increments
+   */
   public int getIncrements() {
     return increments;
   }
 
-  /** @param increments Setter for increments */
+  /**
+   * @param increments Setter for increments
+   */
   public void setIncrements(int increments) {
     this.increments = increments;
   }
@@ -96,12 +104,16 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
     return (int) Math.ceil(value * (increments - 1));
   }
 
-  /** @return Getter for side */
+  /**
+   * @return Getter for side
+   */
   public Side getSide() {
     return side;
   }
 
-  /** @param side Setter for side */
+  /**
+   * @param side Setter for side
+   */
   public void setSide(Side side) {
     this.side = side;
   }
@@ -111,8 +123,8 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, java.lang.Object)
+   * @see AbstractTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, java.lang.Object)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
@@ -196,4 +208,36 @@ public abstract class BarTokenOverlay extends AbstractTokenOverlay {
   // image = ImageUtil.createCompatibleImage(image, size.width, size.height, null);
   // return image;
   // }
+
+  public static BarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar =
+        switch (dto.getType()) {
+          case DRAWN -> DrawnBarTokenOverlay.fromDto(dto);
+          case MULTIPLE_IMAGE -> MultipleImageBarTokenOverlay.fromDto(dto);
+          case SINGLE_IMAGE -> SingleImageBarTokenOverlay.fromDto(dto);
+          case TWO_IMAGES -> TwoImageBarTokenOverlay.fromDto(dto);
+          case TWO_TONE -> TwoToneBarTokenOverlay.fromDto(dto);
+          case UNRECOGNIZED -> null;
+        };
+    if (bar != null) {
+      switch (dto.getSide()) {
+        case TOP -> bar.setSide(Side.TOP);
+        case LEFT -> bar.setSide(Side.LEFT);
+        case RIGHT -> bar.setSide(Side.RIGHT);
+        case BOTTOM -> bar.setSide(Side.BOTTOM);
+      }
+    }
+    return bar;
+  }
+
+  protected void setSideDto(BarTokenOverlayDto.Builder dto) {
+    switch (side) {
+      case TOP -> dto.setSide(SideDto.TOP);
+      case BOTTOM -> dto.setSide(SideDto.BOTTOM);
+      case LEFT -> dto.setSide(SideDto.LEFT);
+      case RIGHT -> dto.setSide(SideDto.RIGHT);
+    }
+  }
+
+  public abstract BarTokenOverlayDto toDto();
 }

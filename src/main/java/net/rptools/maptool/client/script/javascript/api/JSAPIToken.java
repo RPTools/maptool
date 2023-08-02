@@ -125,11 +125,11 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public void setProperty(String name, String value) {
+  public void setProperty(String name, Object value) {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
-      this.token.setProperty(name, value);
+      this.token.setProperty(name, value.toString());
     }
   }
 

@@ -36,6 +36,8 @@ public class AppState {
   private static boolean enforceNotification = false;
   private static File campaignFile;
   private static int gridSize = 1;
+  private static boolean showLumensOverlay;
+  private static boolean showLights;
   private static boolean showAsPlayer = false;
   private static boolean showLightSources = false;
   private static boolean zoomLocked = false;
@@ -43,10 +45,14 @@ public class AppState {
   private static boolean collectProfilingData = false;
   private static boolean isLoggingToConsole = false;
   private static boolean isLockedForBackgroundTask = false;
-  private static boolean useWebRTC = false;
   private static boolean enableFullScreenUI = true;
 
   private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
+
+  static {
+    showLumensOverlay = AppPreferences.getLumensOverlayShowByDefault();
+    showLights = AppPreferences.getLightsShowByDefault();
+  }
 
   public static void addPropertyChangeListener(PropertyChangeListener listener) {
     changeSupport.addPropertyChangeListener(listener);
@@ -173,6 +179,22 @@ public class AppState {
     return showTextLabels;
   }
 
+  public static boolean isShowLights() {
+    return showLights;
+  }
+
+  public static void setShowLights(boolean show) {
+    showLights = show;
+  }
+
+  public static boolean isShowLumensOverlay() {
+    return showLumensOverlay;
+  }
+
+  public static void setShowLumensOverlay(boolean show) {
+    showLumensOverlay = show;
+  }
+
   public static boolean isShowAsPlayer() {
     return showAsPlayer;
   }
@@ -216,14 +238,6 @@ public class AppState {
 
   public static void setNotificationEnforced(boolean enforce) {
     enforceNotification = enforce;
-  }
-
-  public static boolean useWebRTC() {
-    return useWebRTC;
-  }
-
-  public static void setUseWebRTC(boolean use) {
-    useWebRTC = use;
   }
 
   public static boolean isFullScreenUIEnabled() {

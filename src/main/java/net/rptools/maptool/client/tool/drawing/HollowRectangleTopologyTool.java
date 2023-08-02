@@ -18,9 +18,6 @@ import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -28,26 +25,16 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.Rectangle;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class HollowRectangleTopologyTool extends AbstractDrawingTool
     implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 
   protected Rectangle rectangle;
 
-  public HollowRectangleTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-hrect.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public HollowRectangleTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

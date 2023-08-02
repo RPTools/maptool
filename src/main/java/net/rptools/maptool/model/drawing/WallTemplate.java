@@ -14,9 +14,13 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.util.List;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.WallTemplateDto;
 
 /**
  * A template that draws consecutive blocks
@@ -31,13 +35,22 @@ public class WallTemplate extends LineTemplate {
     setPathVertex(new ZonePoint(0, 0));
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#getRadius() */
+  public WallTemplate(GUID id) {
+    super(id);
+    setPathVertex(new ZonePoint(0, 0));
+  }
+
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#getRadius()
+   */
   @Override
   public int getRadius() {
     return getPath() == null ? 0 : getPath().size();
   }
 
-  /** @see net.rptools.maptool.model.drawing.LineTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.LineTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     // Do nothing, calculated from path length
@@ -54,9 +67,30 @@ public class WallTemplate extends LineTemplate {
     v.y = vertex.y;
   }
 
-  /** @see net.rptools.maptool.model.drawing.LineTemplate#calcPath() */
+  /**
+   * @see net.rptools.maptool.model.drawing.LineTemplate#calcPath()
+   */
   @Override
   protected List<CellPoint> calcPath() {
     return getPath(); // Do nothing, path is set by tool.
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = WallTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setMouseSlopeGreater(isMouseSlopeGreater())
+        .setPathVertex(getPathVertex().toDto())
+        .setDoubleWide(isDoubleWide());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    for (var point : getPath()) dto.addPoints(point.toDto());
+
+    return DrawableDto.newBuilder().setWallTemplate(dto).build();
   }
 }

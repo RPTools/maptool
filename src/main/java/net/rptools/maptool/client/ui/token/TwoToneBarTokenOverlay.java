@@ -18,8 +18,11 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 
-/** @author Jay */
+/**
+ * @author Jay
+ */
 public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   /** Background color of the bar. */
@@ -40,22 +43,26 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
 
   /** Default constructor for serialization */
   public TwoToneBarTokenOverlay() {
-    this(AbstractTokenOverlay.DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
+    this(DEFAULT_STATE_NAME, Color.RED, Color.BLACK, 5);
   }
 
-  /** @return Getter for bgColor */
+  /**
+   * @return Getter for bgColor
+   */
   public Color getBgColor() {
     return bgColor;
   }
 
-  /** @param bgColor Setter for bgColor */
+  /**
+   * @param bgColor Setter for bgColor
+   */
   public void setBgColor(Color bgColor) {
     this.bgColor = bgColor;
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -92,7 +99,9 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay =
@@ -107,5 +116,19 @@ public class TwoToneBarTokenOverlay extends DrawnBarTokenOverlay {
     overlay.setShowOwner(isShowOwner());
     overlay.setShowOthers(isShowOthers());
     return overlay;
+  }
+
+  public static TwoToneBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar = new TwoToneBarTokenOverlay();
+    bar.fillFrom(dto);
+    bar.bgColor = new Color(dto.getBgColor(), true);
+    return bar;
+  }
+
+  public BarTokenOverlayDto toDto() {
+    var dto = getDto();
+    dto.setBgColor(bgColor.getRGB());
+    setSideDto(dto);
+    return dto.setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.TWO_TONE).build();
   }
 }

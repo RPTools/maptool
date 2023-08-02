@@ -25,14 +25,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Path2D;
 import java.util.List;
-import net.rptools.lib.swing.ColorPicker;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.tool.DefaultTool;
-import net.rptools.maptool.client.tool.LayerSelectionDialog;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
@@ -53,20 +52,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   private boolean isEraser;
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
-  private static final LayerSelectionDialog layerSelectionDialog;
-
-  private static Zone.Layer selectedLayer = Zone.Layer.TOKEN;
-
-  protected static final int TOOLBAR_ICON_SIZE = 32;
-
-  static {
-    layerSelectionDialog =
-        new LayerSelectionDialog(
-            new Zone.Layer[] {
-              Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-            },
-            layer -> selectedLayer = layer);
-  }
 
   protected Rectangle createRect(ZonePoint originPoint, ZonePoint newPoint) {
     int x = Math.min(originPoint.x, newPoint.x);
@@ -138,9 +123,10 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
+    super.attachTo(renderer);
     if (MapTool.getPlayer().isGM()) {
       MapTool.getFrame()
-          .showControlPanel(MapTool.getFrame().getColorPicker(), layerSelectionDialog);
+          .showControlPanel(MapTool.getFrame().getColorPicker(), getLayerSelectionDialog());
     } else {
       MapTool.getFrame().showControlPanel(MapTool.getFrame().getColorPicker());
     }
@@ -148,7 +134,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
     MapTool.getFrame().getColorPicker().setSnapSelected(isSnapToGridSelected);
     MapTool.getFrame().getColorPicker().setEraseSelected(isEraseSelected);
-    super.attachTo(renderer);
   }
 
   @Override
@@ -234,16 +219,16 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return zp;
   }
 
-  protected Area getTokenTopology() {
-    List<Token> vblTokens =
-        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithVBL();
+  protected Area getTokenTopology(Zone.TopologyType topologyType) {
+    List<Token> topologyTokens =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
 
-    Area tokenTopolgy = new Area();
-    for (Token vblToken : vblTokens) {
-      tokenTopolgy.add(vblToken.getTransformedVBL());
+    Area tokenTopology = new Area();
+    for (Token topologyToken : topologyTokens) {
+      tokenTopology.add(topologyToken.getTransformedTopology(topologyType));
     }
 
-    return tokenTopolgy;
+    return tokenTopology;
   }
 
   @Override
@@ -286,20 +271,26 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
       g2.scale(renderer.getScale(), renderer.getScale());
 
+      g2.setColor(AppStyle.tokenMblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.MBL));
       g2.setColor(AppStyle.tokenTopologyColor);
-      g2.fill(getTokenTopology());
+      g2.fill(getTokenTopology(Zone.TopologyType.WALL_VBL));
+      g2.setColor(AppStyle.tokenHillVblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.HILL_VBL));
+      g2.setColor(AppStyle.tokenPitVblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.PIT_VBL));
 
       g2.setColor(AppStyle.topologyTerrainColor);
-      g2.fill(zone.getTopologyTerrain());
+      g2.fill(zone.getTopology(Zone.TopologyType.MBL));
 
       g2.setColor(AppStyle.topologyColor);
-      g2.fill(zone.getTopology());
+      g2.fill(zone.getTopology(Zone.TopologyType.WALL_VBL));
 
       g2.setColor(AppStyle.hillVblColor);
-      g2.fill(zone.getHillVbl());
+      g2.fill(zone.getTopology(Zone.TopologyType.HILL_VBL));
 
       g2.setColor(AppStyle.pitVblColor);
-      g2.fill(zone.getPitVbl());
+      g2.fill(zone.getTopology(Zone.TopologyType.PIT_VBL));
 
       g2.dispose();
     }
@@ -341,9 +332,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     if (drawable.getBounds() == null) {
       return;
     }
-    drawable.setLayer(selectedLayer);
     if (MapTool.getPlayer().isGM()) {
-      drawable.setLayer(selectedLayer);
+      drawable.setLayer(renderer.getActiveLayer());
     } else {
       drawable.setLayer(Layer.TOKEN);
     }

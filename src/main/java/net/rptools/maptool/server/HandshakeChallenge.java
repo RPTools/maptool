@@ -15,6 +15,7 @@
 package net.rptools.maptool.server;
 
 import java.nio.charset.StandardCharsets;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import javax.crypto.BadPaddingException;
@@ -26,49 +27,134 @@ import net.rptools.maptool.util.cipher.CipherUtil;
 public class HandshakeChallenge {
   private final byte[] challenge;
   private final byte[] expectedResponse;
+  private final CipherUtil.Key key;
+
+  private HandshakeChallenge(byte[] challenge, byte[] expectedResponse, CipherUtil.Key key) {
+    this.challenge = challenge;
+    this.expectedResponse = expectedResponse;
+    this.key = key;
+  }
 
   private HandshakeChallenge(byte[] challenge, byte[] expectedResponse) {
     this.challenge = challenge;
     this.expectedResponse = expectedResponse;
+    this.key = null;
   }
 
-  static HandshakeChallenge createChallenge(String username, String password, CipherUtil.Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException {
-    Cipher encryptor = CipherUtil.createEncryptor(key);
+  static HandshakeChallenge createSymmetricChallenge(
+      String username, String password, CipherUtil.Key key, byte[] iv)
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
+          InvalidAlgorithmParameterException {
+    if (key.asymmetric()) {
+      throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
+    }
+    return createChallenge(username, password, key, iv);
+  }
+
+  static HandshakeChallenge createAsymmetricChallenge(
+      String username, String password, CipherUtil.Key key)
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
+          InvalidAlgorithmParameterException {
+    if (!key.asymmetric()) {
+      throw new AssertionError("Expected Asymmetric algorithm without IV, got Symmetric algorithm");
+    }
+    return createChallenge(username, password, key, null);
+  }
+
+  private static HandshakeChallenge createChallenge(
+      String username, String password, CipherUtil.Key key, byte[] iv)
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          InvalidAlgorithmParameterException {
+    Cipher encryptor;
+    if (key.asymmetric()) {
+      encryptor = CipherUtil.createAsymmetricEncryptor(key);
+    } else {
+      encryptor = CipherUtil.createSymmetricEncryptor(key, iv);
+    }
     String toEncrypt = username + password;
     byte[] challenge = encryptor.doFinal(toEncrypt.getBytes(StandardCharsets.UTF_8));
-    byte[] response;
     var revPassword = new StringBuilder(password).reverse().toString();
+    var response = revPassword.getBytes(StandardCharsets.UTF_8);
+
     if (key.asymmetric()) {
-      response = revPassword.getBytes(StandardCharsets.UTF_8);
+      return new HandshakeChallenge(challenge, response);
     } else {
-      response = encryptor.doFinal(revPassword.getBytes(StandardCharsets.UTF_8));
+      return new HandshakeChallenge(challenge, response, key);
     }
-    return new HandshakeChallenge(challenge, response);
   }
 
-  static HandshakeChallenge fromChallengeBytes(
+  static HandshakeChallenge fromSymmetricChallengeBytes(
+      String username, byte[] challenge, CipherUtil.Key key, byte[] iv)
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
+          InvalidAlgorithmParameterException {
+    if (key.asymmetric()) {
+      throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
+    }
+    return fromChallengeBytes(username, challenge, key, iv);
+  }
+
+  static HandshakeChallenge fromAsymmetricChallengeBytes(
       String username, byte[] challenge, CipherUtil.Key key)
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeyException,
-          IllegalBlockSizeException, BadPaddingException {
-    Cipher decryptor = CipherUtil.createDecryptor(key);
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          AssertionError,
+          InvalidAlgorithmParameterException {
+    if (!key.asymmetric()) {
+      throw new AssertionError("Expected Symmetric algorithm and IV, got Asymmetric algorithm");
+    }
+    return fromChallengeBytes(username, challenge, key, null);
+  }
+
+  private static HandshakeChallenge fromChallengeBytes(
+      String username, byte[] challenge, CipherUtil.Key key, byte[] iv)
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeyException,
+          IllegalBlockSizeException,
+          BadPaddingException,
+          InvalidAlgorithmParameterException {
+    Cipher decryptor;
+    if (key.asymmetric()) {
+      decryptor = CipherUtil.createAsymmetricDecryptor(key);
+    } else {
+      decryptor = CipherUtil.createSymmetricDecryptor(key, iv);
+    }
     String challengeString = new String(decryptor.doFinal(challenge));
     if (!challengeString.startsWith(username)) {
       throw new IllegalStateException(
           "Handhshake challenge " + challengeString + " does not start with username " + username);
     }
-    String responseString = challengeString.replace(username, "");
-    byte[] response;
+    String responseString = challengeString.substring(username.length());
     var revPassword = new StringBuilder(responseString).reverse().toString();
-    if (key.asymmetric()) {
-      response = revPassword.getBytes(StandardCharsets.UTF_8);
-    } else {
-      Cipher encryptor = CipherUtil.createEncryptor(key);
-      response = encryptor.doFinal(revPassword.getBytes(StandardCharsets.UTF_8));
-    }
+    var response = revPassword.getBytes(StandardCharsets.UTF_8);
 
-    return new HandshakeChallenge(challenge, response);
+    if (key.asymmetric()) {
+      return new HandshakeChallenge(challenge, response);
+    } else {
+      return new HandshakeChallenge(challenge, response, key);
+    }
   }
 
   public byte[] getChallenge() {
@@ -77,5 +163,16 @@ public class HandshakeChallenge {
 
   public byte[] getExpectedResponse() {
     return expectedResponse;
+  }
+
+  public byte[] getExpectedResponse(byte[] iv)
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
+    Cipher encryptor = CipherUtil.createSymmetricEncryptor(key, iv);
+    return encryptor.doFinal(expectedResponse);
   }
 }

@@ -17,7 +17,6 @@ package net.rptools.maptool.client;
 import java.io.File;
 import java.io.FilenameFilter;
 import javax.imageio.ImageIO;
-import net.rptools.lib.swing.ImageBorder;
 import net.rptools.maptool.model.Token;
 import net.tsc.servicediscovery.ServiceGroup;
 
@@ -38,20 +37,6 @@ public class AppConstants {
   /** Directory to search for theme files. */
   public static final File UI_THEMES_DIR = AppUtil.getAppHome("themes/ui");
 
-  public static final ImageBorder GRAY_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/gray");
-  public static final ImageBorder SHADOW_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/shadow");
-  public static final ImageBorder HIGHLIGHT_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/highlight");
-  public static final ImageBorder GREEN_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/green");
-  public static final ImageBorder YELLOW_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/yellow");
-  public static final ImageBorder PURPLE_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/purple");
-  public static final ImageBorder FOW_TOOLS_BORDER =
-      new ImageBorder("net/rptools/maptool/client/image/border/fowtools");
   public static final int NOTE_PORTRAIT_SIZE = 200;
   public static final int ASSET_SEARCH_LIMIT = 1000;
 
@@ -83,4 +68,6 @@ public class AppConstants {
 
   public static final FilenameFilter CAMPAIGN_PROPERTIES_FILE_FILTER =
       (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+  public static final String THEME_CONFIG_FILE =
+      AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
 }

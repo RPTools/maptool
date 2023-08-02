@@ -24,6 +24,7 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Token overlay that draws a colored dot in one of the corners.
@@ -38,7 +39,7 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
   public ColorDotTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, Quadrant.SOUTH_EAST);
+    this(DEFAULT_STATE_NAME, Color.RED, Quadrant.SOUTH_EAST);
   }
 
   /**
@@ -53,7 +54,9 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
     if (aCorner != null) corner = aCorner;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ColorDotTokenOverlay(getName(), getColor(), getCorner());
@@ -68,8 +71,8 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -109,8 +112,20 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
     }
   }
 
-  /** @return Getter for corner */
+  /**
+   * @return Getter for corner
+   */
   public Quadrant getCorner() {
     return corner;
+  }
+
+  public static ColorDotTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new ColorDotTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.COLOR_DOT).build();
   }
 }

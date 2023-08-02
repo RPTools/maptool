@@ -39,7 +39,9 @@ public class InitiativeRoundFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final InitiativeRoundFunction instance = new InitiativeRoundFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static InitiativeRoundFunction getInstance() {
     return instance;
   }

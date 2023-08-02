@@ -15,18 +15,22 @@
 package net.rptools.maptool.model;
 
 import com.google.gson.JsonObject;
+import com.google.protobuf.StringValue;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.Serializable;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.stream.Collectors;
 import javax.swing.Icon;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.server.proto.InitiativeListDto;
+import net.rptools.maptool.server.proto.TokenInitiativeDto;
 import net.rptools.maptool.util.EventMacroUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,6 +114,7 @@ public class InitiativeList implements Serializable {
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
+  private InitiativeList() {}
   /**
    * Create an initiative list for a zone.
    *
@@ -130,7 +135,12 @@ public class InitiativeList implements Serializable {
    * @return The token initiative data for the passed index.
    */
   public TokenInitiative getTokenInitiative(int index) {
-    return index < tokens.size() && index >= 0 ? tokens.get(index) : null;
+    if (index < tokens.size() && index >= 0) {
+      return tokens.get(index);
+    } else {
+      LOGGER.error("getTokenInitiative: index = " + index + ", size = " + tokens.size());
+      return null;
+    }
   }
 
   /**
@@ -253,12 +263,16 @@ public class InitiativeList implements Serializable {
     return currentIndex < 0 ? null : getTokenInitiative(currentIndex);
   }
 
-  /** @return Getter for current */
+  /**
+   * @return Getter for current
+   */
   public int getCurrent() {
     return current;
   }
 
-  /** @param aCurrent Setter for the current to set */
+  /**
+   * @param aCurrent Setter for the current to set
+   */
   public void setCurrent(int aCurrent) {
     if (current == aCurrent) return;
     startUnitOfWork();
@@ -319,12 +333,16 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for round */
+  /**
+   * @return Getter for round
+   */
   public int getRound() {
     return round;
   }
 
-  /** @param aRound Setter for the round to set */
+  /**
+   * @param aRound Setter for the round to set
+   */
   public void setRound(int aRound) {
     if (round == aRound) return;
     startUnitOfWork();
@@ -515,13 +533,17 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for zone */
+  /**
+   * @return Getter for zone
+   */
   public Zone getZone() {
     if (zone == null && zoneId != null) zone = MapTool.getCampaign().getZone(zoneId);
     return zone;
   }
 
-  /** @return Getter for pcs */
+  /**
+   * @return Getter for pcs
+   */
   private PropertyChangeSupport getPCS() {
     if (pcs == null) pcs = new PropertyChangeSupport(this);
     return pcs;
@@ -588,7 +610,9 @@ public class InitiativeList implements Serializable {
         .updateTokenInitiative(zoneId, ti.getId(), ti.isHolding(), ti.getState(), indexOf(ti));
   }
 
-  /** @param aZone Setter for the zone */
+  /**
+   * @param aZone Setter for the zone
+   */
   public void setZone(Zone aZone) {
     zone = aZone;
     if (aZone != null) {
@@ -598,12 +622,16 @@ public class InitiativeList implements Serializable {
     } // endif
   }
 
-  /** @return Getter for hideNPC */
+  /**
+   * @return Getter for hideNPC
+   */
   public boolean isHideNPC() {
     return hideNPC;
   }
 
-  /** @param hide Setter for hideNPC */
+  /**
+   * @param hide Setter for hideNPC
+   */
   public void setHideNPC(boolean hide) {
     if (hide == hideNPC) return;
     startUnitOfWork();
@@ -613,7 +641,9 @@ public class InitiativeList implements Serializable {
     finishUnitOfWork();
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<TokenInitiative> getTokens() {
     return Collections.unmodifiableList(tokens);
   }
@@ -697,7 +727,7 @@ public class InitiativeList implements Serializable {
     try {
       var libs =
           new LibraryManager()
-              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK)
+              .getLegacyEventTargets(ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK)
               .get();
       if (!libs.isEmpty()) {
         JsonObject args = new JsonObject();
@@ -751,6 +781,37 @@ public class InitiativeList implements Serializable {
     return info;
   }
 
+  public static InitiativeList fromDto(InitiativeListDto dto) {
+    var initiativeList = new InitiativeList();
+    initiativeList.current = dto.getCurrent();
+    initiativeList.round = dto.getRound();
+    initiativeList.zoneId = GUID.valueOf(dto.getZoneId());
+    initiativeList.hideNPC = dto.getHideNpc();
+    initiativeList.tokens =
+        dto.getTokensList().stream()
+            .map(t -> initiativeList.fromDto(t))
+            .collect(Collectors.toList());
+    return initiativeList;
+  }
+
+  public InitiativeListDto toDto() {
+    var dto = InitiativeListDto.newBuilder();
+    dto.setCurrent(current);
+    dto.setRound(round);
+    dto.setZoneId(zoneId.toString());
+    dto.setHideNpc(hideNPC);
+    dto.addAllTokens(tokens.stream().map(t -> t.toDto()).collect(Collectors.toList()));
+    return dto.build();
+  }
+
+  public TokenInitiative fromDto(TokenInitiativeDto dto) {
+    var initiative = new TokenInitiative();
+    initiative.holding = dto.getHolding();
+    initiative.id = GUID.valueOf(dto.getTokenId());
+    initiative.state = dto.hasState() ? dto.getState().getValue() : null;
+    return initiative;
+  }
+
   /** Types of initiative changes - intended for use with initiative event macros. */
   public enum InitiativeChangeDirection {
     /** The initiative is advancing normally from the current initiative to the next */
@@ -798,6 +859,8 @@ public class InitiativeList implements Serializable {
      * Constructors
      *-------------------------------------------------------------------------------------------*/
 
+    private TokenInitiative() {}
+
     /**
      * Create the token initiative for the passed token.
      *
@@ -811,22 +874,30 @@ public class InitiativeList implements Serializable {
      * Instance Methods
      *-------------------------------------------------------------------------------------------*/
 
-    /** @return Getter for token */
+    /**
+     * @return Getter for token
+     */
     public Token getToken() {
       return getZone().getToken(id);
     }
 
-    /** @return Getter for id */
+    /**
+     * @return Getter for id
+     */
     public GUID getId() {
       return id;
     }
 
-    /** @param id Setter for the id to set */
+    /**
+     * @param id Setter for the id to set
+     */
     public void setId(GUID id) {
       this.id = id;
     }
 
-    /** @return Getter for holding */
+    /**
+     * @return Getter for holding
+     */
     public boolean isHolding() {
       return holding;
     }
@@ -845,7 +916,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for state */
+    /**
+     * @return Getter for state
+     */
     public String getState() {
       return state;
     }
@@ -864,7 +937,9 @@ public class InitiativeList implements Serializable {
       finishUnitOfWork(this);
     }
 
-    /** @return Getter for displayIcon */
+    /**
+     * @return Getter for displayIcon
+     */
     public Icon getDisplayIcon() {
       return displayIcon;
     }
@@ -912,6 +987,16 @@ public class InitiativeList implements Serializable {
       state = aState;
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), old, isHolding);
       getPCS().fireIndexedPropertyChange(TOKENS_PROP, tokens.indexOf(this), oldState, aState);
+    }
+
+    public TokenInitiativeDto toDto() {
+      var dto = TokenInitiativeDto.newBuilder();
+      dto.setHolding(holding);
+      dto.setTokenId(id.toString());
+      if (state != null) {
+        dto.setState(StringValue.of(state));
+      }
+      return dto.build();
     }
   }
 }

@@ -19,8 +19,6 @@ import javax.swing.undo.CannotRedoException;
 import javax.swing.undo.CannotUndoException;
 import javax.swing.undo.UndoManager;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.Pen;
@@ -41,7 +39,7 @@ import org.apache.logging.log4j.Logger;
  * @version $Revision: 5828 $ $Date: 2011-11-26 18:29:24 -0500 (Sat, 26 Nov 2011) $ $Author:
  *     azhrei_fje $
  */
-public class UndoPerZone implements ModelChangeListener {
+public class UndoPerZone {
   private static final Logger log = LogManager.getLogger(UndoPerZone.class);
 
   /** Swing's undo/redo support */
@@ -182,16 +180,14 @@ public class UndoPerZone implements ModelChangeListener {
       MapTool.serverCommand().undoDraw(zone.getId(), drawable.getId());
     }
 
-    /** @see javax.swing.undo.UndoableEdit#redo() */
+    /**
+     * @see javax.swing.undo.UndoableEdit#redo()
+     */
     @Override
     public void redo() throws CannotRedoException {
       super.redo();
       // Render the drawable again, but don't add it to the undo manager.
       MapTool.serverCommand().draw(zone.getId(), pen, drawable);
     }
-  }
-
-  public void modelChanged(ModelChangeEvent event) {
-    log.debug("Inside the modelChanged() event");
   }
 }

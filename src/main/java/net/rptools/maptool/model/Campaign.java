@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.BoolValue;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -25,12 +26,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.net.Location;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.CampaignExportDialog;
-import net.rptools.maptool.client.ui.ExportDialog;
 import net.rptools.maptool.client.ui.ToolbarPanel;
+import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
+import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -38,6 +40,7 @@ import net.rptools.maptool.client.ui.token.ImageTokenOverlay;
 import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
+import net.rptools.maptool.server.proto.CampaignDto;
 
 /**
  * This object contains {@link Zone}s and {@link Asset}s that make up a campaign as well as links to
@@ -72,8 +75,8 @@ public class Campaign {
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
   private Location exportLocation; // FJE 2011-01-14
-  private Map<String, Boolean>
-      exportSettings; // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
+  private Map<String, Boolean> exportSettings =
+      new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
   private CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
@@ -123,6 +126,14 @@ public class Campaign {
     gmMacroButtonProperties = new ArrayList<MacroButtonProperties>();
   }
 
+  private Object readResolve() {
+    if (exportSettings == null) {
+      exportSettings = new HashMap<>();
+    }
+
+    return this;
+  }
+
   private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();
@@ -156,6 +167,7 @@ public class Campaign {
    * @param campaign The campaign to copy from.
    */
   public Campaign(Campaign campaign) {
+    id = campaign.getId();
     name = campaign.getName();
 
     /*
@@ -652,22 +664,30 @@ public class Campaign {
     return assetSet;
   }
 
-  /** @return Getter for initiativeOwnerPermissions */
+  /**
+   * @return Getter for initiativeOwnerPermissions
+   */
   public boolean isInitiativeOwnerPermissions() {
     return campaignProperties != null && campaignProperties.isInitiativeOwnerPermissions();
   }
 
-  /** @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions */
+  /**
+   * @param initiativeOwnerPermissions Setter for initiativeOwnerPermissions
+   */
   public void setInitiativeOwnerPermissions(boolean initiativeOwnerPermissions) {
     campaignProperties.setInitiativeOwnerPermissions(initiativeOwnerPermissions);
   }
 
-  /** @return Getter for initiativeMovementLock */
+  /**
+   * @return Getter for initiativeMovementLock
+   */
   public boolean isInitiativeMovementLock() {
     return campaignProperties != null && campaignProperties.isInitiativeMovementLock();
   }
 
-  /** @param initiativeMovementLock Setter for initiativeMovementLock */
+  /**
+   * @param initiativeMovementLock Setter for initiativeMovementLock
+   */
   public void setInitiativeMovementLock(boolean initiativeMovementLock) {
     campaignProperties.setInitiativeMovementLock(initiativeMovementLock);
   }
@@ -688,7 +708,9 @@ public class Campaign {
     campaignProperties.setInitiativePanelButtonsDisabled(disabled);
   }
 
-  /** @return Getter for characterSheets */
+  /**
+   * @return Getter for characterSheets
+   */
   public Map<String, String> getCharacterSheets() {
     return getCampaignProperties().getCharacterSheets();
   }
@@ -712,5 +734,63 @@ public class Campaign {
 
   public CampaignExportDialog getExportCampaignDialog() {
     return campaignExportDialog;
+  }
+
+  public void initDefault() {
+    campaignProperties.initDefaultProperties();
+  }
+
+  public static Campaign fromDto(CampaignDto dto) {
+    var campaign = new Campaign();
+    campaign.id = GUID.valueOf(dto.getId());
+    campaign.name = dto.getName();
+    campaign.hasUsedFogToolbar =
+        dto.hasHasUsedFogToolbar() ? dto.getHasUsedFogToolbar().getValue() : null;
+    campaign.campaignProperties = CampaignProperties.fromDto(dto.getProperties());
+    campaign.exportLocation =
+        dto.hasExportLocation() ? Location.fromDto(dto.getExportLocation()) : null;
+    campaign.exportSettings.putAll(dto.getExportSettingsMap());
+    campaign.macroButtonLastIndex = dto.getMacroButtonLastIndex();
+    campaign.gmMacroButtonLastIndex = dto.getGmMacroButtonLastIndex();
+    campaign.macroButtonProperties =
+        dto.getMacroButtonPropertiesList().stream()
+            .map(MacroButtonProperties::fromDto)
+            .collect(Collectors.toList());
+    campaign.gmMacroButtonProperties =
+        dto.getGmMacroButtonPropertiesList().stream()
+            .map(MacroButtonProperties::fromDto)
+            .collect(Collectors.toList());
+    var zoneList = dto.getZonesList().stream().map(Zone::fromDto).toList();
+    zoneList.forEach(z -> campaign.zones.put(z.getId(), z));
+    return campaign;
+  }
+
+  public CampaignDto toDto() {
+    var dto = CampaignDto.newBuilder();
+    dto.setId(id.toString());
+    dto.setName(name);
+    if (hasUsedFogToolbar != null) {
+      dto.setHasUsedFogToolbar(BoolValue.of(hasUsedFogToolbar));
+    }
+    dto.setProperties(campaignProperties.toDto());
+    if (exportLocation != null) {
+      dto.setExportLocation(exportLocation.toDto());
+    }
+    dto.putAllExportSettings(exportSettings);
+    dto.setMacroButtonLastIndex(macroButtonLastIndex);
+    dto.setGmMacroButtonLastIndex(gmMacroButtonLastIndex);
+    dto.addAllMacroButtonProperties(
+        macroButtonProperties.stream()
+            .map(MacroButtonProperties::toDto)
+            .collect(Collectors.toList()));
+    dto.addAllZones(zones.values().stream().map(Zone::toDto).collect(Collectors.toList()));
+    // gmMacroButtonProperties is null if you are loading an old campaign file < 1.5.6
+    if (gmMacroButtonProperties != null) {
+      dto.addAllGmMacroButtonProperties(
+          gmMacroButtonProperties.stream()
+              .map(MacroButtonProperties::toDto)
+              .collect(Collectors.toList()));
+    }
+    return dto.build();
   }
 }

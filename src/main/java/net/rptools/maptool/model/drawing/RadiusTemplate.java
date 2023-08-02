@@ -14,14 +14,18 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.RadiusTemplateDto;
 
 /**
  * The radius template draws a highlight over all the squares effected from a specific spine.
@@ -31,6 +35,13 @@ import net.rptools.maptool.model.ZonePoint;
  *     azhrei_fje $
  */
 public class RadiusTemplate extends AbstractTemplate {
+
+  public RadiusTemplate() {}
+
+  public RadiusTemplate(GUID id) {
+    super(id);
+  }
+
   /**
    * Paint the border at a specific radius.
    *
@@ -107,7 +118,9 @@ public class RadiusTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     if (getZoneId() == null) {
       // This avoids a NPE when loading up a campaign
@@ -155,5 +168,19 @@ public class RadiusTemplate extends AbstractTemplate {
       }
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = RadiusTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setRadiusTemplate(dto).build();
   }
 }

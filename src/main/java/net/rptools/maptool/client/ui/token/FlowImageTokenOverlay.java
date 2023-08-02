@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.token;
 import java.awt.Rectangle;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * An overlay that allows multiple images to be placed on the token so that they do not interfere
@@ -61,15 +62,16 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.ImageTokenOverlay#getImageBounds(java.awt.Rectangle,
-   *     Token)
+   * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
    */
   @Override
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
     return getFlow().getStateBounds(bounds, token, getName());
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowImageTokenOverlay(getName(), getAssetId(), grid);
@@ -83,8 +85,24 @@ public class FlowImageTokenOverlay extends ImageTokenOverlay {
     return overlay;
   }
 
-  /** @return Getter for grid */
+  /**
+   * @return Getter for grid
+   */
   public int getGrid() {
     return grid;
+  }
+
+  public static FlowImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowImageTokenOverlay();
+    overlay.fillFrom(dto);
+    overlay.grid = dto.getGridSize();
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setGridSize(grid)
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_IMAGE)
+        .build();
   }
 }

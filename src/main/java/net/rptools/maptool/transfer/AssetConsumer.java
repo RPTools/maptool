@@ -17,7 +17,8 @@ package net.rptools.maptool.transfer;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.Serializable;
+import net.rptools.lib.MD5Key;
+import net.rptools.maptool.server.proto.AssetChunkDto;
 
 /**
  * Receiving end of AssetProducer
@@ -55,8 +56,10 @@ public class AssetConsumer {
     }
   }
 
-  /** @return the ID of the incoming asset */
-  public Serializable getId() {
+  /**
+   * @return the ID of the incoming asset
+   */
+  public MD5Key getId() {
     return header.getId();
   }
 
@@ -71,9 +74,9 @@ public class AssetConsumer {
    * @throws IOException if the file exists but is a directory rather than a regular file, does not
    *     exist but cannot be created, or cannot be opened for any other reason
    */
-  public void update(AssetChunk chunk) throws IOException {
+  public void update(AssetChunkDto chunk) throws IOException {
     File file = getFilename();
-    byte[] data = chunk.getData();
+    byte[] data = chunk.getData().toByteArray();
     try (FileOutputStream out = new FileOutputStream(file, true)) {
       out.write(data);
     }

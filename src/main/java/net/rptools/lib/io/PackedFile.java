@@ -14,6 +14,7 @@
  */
 package net.rptools.lib.io;
 
+import com.google.common.io.CharStreams;
 import com.thoughtworks.xstream.XStream;
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -29,6 +30,7 @@ import java.io.LineNumberReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.io.StringReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -51,6 +53,7 @@ import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
@@ -558,7 +561,38 @@ public class PackedFile implements AutoCloseable {
       xstream
           .ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields
       // added.
-      return xstream.fromXML(r);
+      var obj = xstream.fromXML(r);
+      return obj;
+    } catch (InstantiationError ie) {
+      log.error("Found at line number " + r.getLineNumber());
+      log.error("Cannot convert XML to Object", ie);
+      throw ie;
+    }
+  }
+
+  /**
+   * Loads Legacy Asset data. The legacy format contains a single XML file with the Asset data
+   * including image bytes serialized via XStream.
+   *
+   * @param path the path to the file.
+   * @return the LegacyAsset object.
+   * @throws IOException if an error occurs.
+   */
+  public LegacyAsset getLegacyAsset(String path) throws IOException {
+    var reader = getFileAsReader(path);
+    // Not the prettiest, but it works. Change the class to LegacyAsset
+    var bytes =
+        CharStreams.toString(reader)
+            .replace("<net.rptools.maptool.model.Asset>", "<net.rptools.lib.io.LegacyAsset>")
+            .replace("</net.rptools.maptool.model.Asset>", "</net.rptools.lib.io.LegacyAsset>")
+            .getBytes();
+    var r = new LineNumberReader(new StringReader(new String(bytes)));
+
+    try (r) {
+      xstream.ignoreUnknownElements();
+      // added.
+      var obj = xstream.fromXML(r);
+      return (LegacyAsset) obj;
     } catch (InstantiationError ie) {
       log.error("Found at line number " + r.getLineNumber());
       log.error("Cannot convert XML to Object", ie);
@@ -585,6 +619,7 @@ public class PackedFile implements AutoCloseable {
         String name = null;
         String extension = null;
         String type = null;
+        byte[] embeddedImage = null;
 
         NodeList childNodes = doc.getChildNodes().item(0).getChildNodes();
         for (int i = 0; i < childNodes.getLength(); i++) {
@@ -607,17 +642,27 @@ public class PackedFile implements AutoCloseable {
             extension = item.getTextContent();
           } else if ("type".equals(item.getNodeName())) {
             type = item.getTextContent();
+          } else if ("image".equalsIgnoreCase(item.getNodeName())) {
+            if (!item.getTextContent().isEmpty()) {
+              var legacyAsset = getLegacyAsset(path);
+              embeddedImage = legacyAsset.getImageData();
+            }
           }
         }
 
-        if (id == null || name == null || extension == null) {
+        if (id == null || name == null || (extension == null && embeddedImage == null)) {
           log.error("Error reading asset, missing id, name, extension.");
           return null;
         }
 
-        byte[] image = getFileAsInputStream(path + "." + extension).readAllBytes();
-
-        return Asset.createImageAsset(name, image);
+        if (embeddedImage == null) {
+          byte[] image = getFileAsInputStream(path + "." + extension).readAllBytes();
+          return Asset.createImageAsset(name, image);
+        } else {
+          var asset = Asset.createImageAsset(name, embeddedImage);
+          AssetManager.putAsset(asset);
+          return asset;
+        }
 
       } catch (ParserConfigurationException | SAXException | IOException e) {
         log.error("Error reading asset", e);
@@ -739,7 +784,9 @@ public class PackedFile implements AutoCloseable {
     return paths;
   }
 
-  /** @return Getter for file */
+  /**
+   * @return Getter for file
+   */
   public File getPackedFile() {
     return file;
   }

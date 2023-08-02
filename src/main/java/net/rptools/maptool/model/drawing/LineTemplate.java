@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -26,8 +27,11 @@ import java.util.ListIterator;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineTemplateDto;
 
 /**
  * A drawing tool that will draw a line template between 2 vertices.
@@ -61,6 +65,12 @@ public class LineTemplate extends AbstractTemplate {
 
   /** Flag used to determine mouse position relative to vertex position */
   private boolean mouseSlopeGreater;
+
+  public LineTemplate() {}
+
+  public LineTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
@@ -141,14 +151,18 @@ public class LineTemplate extends AbstractTemplate {
     } // endfor
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint)
+   */
   @Override
   public void setVertex(ZonePoint vertex) {
     clearPath();
     super.setVertex(vertex);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     if (squares == getRadius()) return;
@@ -352,12 +366,16 @@ public class LineTemplate extends AbstractTemplate {
     doubleWide = aDoubleWide;
   }
 
-  /** @return Getter for path */
+  /**
+   * @return Getter for path
+   */
   public List<CellPoint> getPath() {
     return path;
   }
 
-  /** @param path Setter for the path to set */
+  /**
+   * @param path Setter for the path to set
+   */
   public void setPath(List<CellPoint> path) {
     this.path = path;
   }
@@ -366,7 +384,9 @@ public class LineTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     // Get all of the numbers needed for the calculation
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
@@ -456,5 +476,27 @@ public class LineTemplate extends AbstractTemplate {
       result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = LineTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setMouseSlopeGreater(isMouseSlopeGreater())
+        .setDoubleWide(isDoubleWide());
+    if (getPathVertex() != null) {
+      dto.setPathVertex(getPathVertex().toDto());
+    }
+    if (getQuadrant() != null) {
+      dto.setQuadrant(getQuadrant().name());
+    }
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setLineTemplate(dto).build();
   }
 }

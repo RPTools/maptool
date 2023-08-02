@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import com.jeta.forms.components.colors.JETAColorWell;
-import com.jeta.forms.components.panel.FormPanel;
-import com.jeta.forms.store.properties.ListItemProperty;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Rectangle;
@@ -28,22 +25,13 @@ import java.awt.event.ItemListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import javax.swing.DefaultListCellRenderer;
-import javax.swing.DefaultListModel;
-import javax.swing.Icon;
-import javax.swing.JComponent;
-import javax.swing.JFileChooser;
-import javax.swing.JList;
-import javax.swing.JScrollPane;
-import javax.swing.JSlider;
-import javax.swing.ListCellRenderer;
-import javax.swing.ListModel;
-import javax.swing.SpinnerNumberModel;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
@@ -54,6 +42,8 @@ import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.ui.PreviewPanelFileChooser;
 import net.rptools.maptool.client.ui.campaignproperties.TokenStatesController.StateListRenderer;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
@@ -63,6 +53,7 @@ import net.rptools.maptool.client.ui.token.MultipleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.SingleImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.util.ImageManager;
@@ -81,7 +72,7 @@ public class TokenBarController
         ChangeListener {
 
   /** Panel containing the campaign properties form panel */
-  private final FormPanel formPanel;
+  private final AbeillePanel formPanel;
 
   /** Names of the bars */
   private Set<String> names;
@@ -229,12 +220,55 @@ public class TokenBarController
     new String[0], // Two Tone
   };
 
+  enum BarType {
+    TWO_IMAGE("CampaignPropertiesDialog.combo.bars.type.twoImages"),
+    ONE_IMAGE("CampaignPropertiesDialog.combo.bars.type.singleImage"),
+    MULTIPLE_IMAGE("CampaignPropertiesDialog.combo.bars.type.multipleImages"),
+    SOLID("CampaignPropertiesDialog.combo.bars.type.solid"),
+    TWO_TONE("CampaignPropertiesDialog.combo.bars.type.twoTone");
+
+    private final String i18nKey;
+
+    BarType(String i18nKey) {
+      this.i18nKey = i18nKey;
+    }
+
+    @Override
+    public String toString() {
+      return I18N.getText(i18nKey);
+    }
+  }
+
+  enum BarSide {
+    TOP("CampaignPropertiesDialog.combo.bars.side.top", Side.TOP),
+    BOTTOM("CampaignPropertiesDialog.combo.bars.type.bottom", Side.BOTTOM),
+    LEFT("CampaignPropertiesDialog.combo.bars.type.left", Side.LEFT),
+    RIGHT("CampaignPropertiesDialog.combo.bars.type.right", Side.RIGHT);
+
+    private final String i18nKey;
+    private final Side side;
+
+    BarSide(String i18nKey, Side side) {
+      this.i18nKey = i18nKey;
+      this.side = side;
+    }
+
+    public Side getSide() {
+      return side;
+    }
+
+    @Override
+    public String toString() {
+      return I18N.getText(i18nKey);
+    }
+  }
+
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
    *
    * @param panel The {@link CampaignProperties} form panel
    */
-  public TokenBarController(FormPanel panel) {
+  public TokenBarController(AbeillePanel panel) {
     formPanel = panel;
     panel.getButton(ADD).addActionListener(this);
     panel.getButton(DELETE).addActionListener(this);
@@ -246,21 +280,31 @@ public class TokenBarController
     panel.getButton(IMAGE_UPDATE).addActionListener(this);
     panel.getButton(IMAGE_MOVE_UP).addActionListener(this);
     panel.getButton(IMAGE_MOVE_DOWN).addActionListener(this);
-    panel.getComboBox(TYPE).addActionListener(this);
+
+    var typeComboBox = panel.getComboBox(TYPE);
+    typeComboBox.setModel(new DefaultComboBoxModel<BarType>());
+    Arrays.stream(BarType.values()).forEach(typeComboBox::addItem);
+    typeComboBox.addActionListener(this);
+
+    var sideComboBox = panel.getComboBox(SIDE);
+    sideComboBox.setModel(new DefaultComboBoxModel<BarSide>());
+    Arrays.stream(BarSide.values()).forEach(sideComboBox::addItem);
+
     panel.getSpinner(THICKNESS).setModel(new SpinnerNumberModel(5, 2, 10, 1));
     panel.getSpinner(INCREMENTS).setModel(new SpinnerNumberModel(0, 0, 100, 1));
     panel.getSpinner(INCREMENTS).addChangeListener(this);
     panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
     panel.getList(BARS).setCellRenderer(renderer);
     panel.getList(BARS).addListSelectionListener(this);
+    panel.getList(IMAGES).setModel(new DefaultListModel<MD5Key>());
     panel.getList(IMAGES).setCellRenderer(new ImageListRenderer());
     panel.getList(IMAGES).addListSelectionListener(this);
     panel.getTextComponent(NAME).getDocument().addDocumentListener(this);
     panel.getCheckBox(SHOW_GM).addItemListener(this);
     panel.getCheckBox(SHOW_OTHERS).addItemListener(this);
     panel.getCheckBox(SHOW_OWNER).addItemListener(this);
-    ((JSlider) panel.getComponentByName(TESTER)).addChangeListener(this);
-    ((JSlider) panel.getComponentByName(TESTER)).setValue(100);
+    ((JSlider) panel.getComponent(TESTER)).addChangeListener(this);
+    ((JSlider) panel.getComponent(TESTER)).setValue(100);
     enableDataComponents();
     changedUpdate(null);
     // Initially no bar is selected, so these start disabled
@@ -299,12 +343,12 @@ public class TokenBarController
       if (overlay != null) {
         model.addElement(overlay);
         getNames().add(overlay.getName());
-        formPanel.setText(NAME, "");
-        formPanel.setSelected(MOUSEOVER, false);
+        formPanel.getTextComponent(NAME).setText("");
+        formPanel.getCheckBox(MOUSEOVER).setSelected(false);
         formPanel.getSpinner(OPACITY).setValue(100);
-        formPanel.setSelected(SHOW_GM, true);
-        formPanel.setSelected(SHOW_OWNER, true);
-        formPanel.setSelected(SHOW_OTHERS, true);
+        formPanel.getCheckBox(SHOW_GM).setSelected(true);
+        formPanel.getCheckBox(SHOW_OWNER).setSelected(true);
+        formPanel.getCheckBox(SHOW_OTHERS).setSelected(true);
         formPanel.getList(IMAGES).setModel(new DefaultListModel<>());
         formPanel.getList(BARS).clearSelection();
       } // endif
@@ -335,7 +379,7 @@ public class TokenBarController
               TokenStatesController.loadAsssetFile(imageFile.getAbsolutePath(), formPanel));
           imageSelected = imageModel.size() - 1;
         } // endif
-        ((JScrollPane) formPanel.getComponentByName("tokenBarImagesScroll"))
+        ((JScrollPane) formPanel.getComponent("tokenBarImagesScroll"))
             .scrollRectToVisible(imageList.getCellBounds(imageSelected, imageSelected));
         AppPreferences.setLoadDir(imageFile.getParentFile());
         changedUpdate(null);
@@ -392,7 +436,8 @@ public class TokenBarController
 
       // Update the selected overlay
     } else if (UPDATE.equals(name)) {
-      BarTokenOverlay selectedOverlay = (BarTokenOverlay) formPanel.getSelectedItem(BARS);
+      BarTokenOverlay selectedOverlay =
+          (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
       BarTokenOverlay overlay = createTokenOverlay(selectedOverlay);
       if (overlay != null) model.set(selected, overlay);
 
@@ -432,9 +477,9 @@ public class TokenBarController
         }
       }
 
-      formPanel.getComponentByName(DATA_ENTRY_COMPONENTS[i]).setEnabled(enabled);
+      formPanel.getComponent(DATA_ENTRY_COMPONENTS[i]).setEnabled(enabled);
       if (i < DATA_ENTRY_COMPONENT_LABELS.length) {
-        formPanel.getComponentByName(DATA_ENTRY_COMPONENT_LABELS[i]).setEnabled(enabled);
+        formPanel.getComponent(DATA_ENTRY_COMPONENT_LABELS[i]).setEnabled(enabled);
       }
     } // endfor
     changedUpdate(null);
@@ -476,14 +521,14 @@ public class TokenBarController
     int size = NEEDED_IMAGES[type] == null ? -1 : NEEDED_IMAGES[type].length;
     int imageCount = formPanel.getList(IMAGES).getModel().getSize();
     int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
-    String text = formPanel.getText(NAME);
+    String text = formPanel.getTextComponent(NAME).getText();
     boolean hasName = text != null && (text = text.trim()).length() != 0;
     boolean hasShow =
-        formPanel.isSelected(SHOW_GM)
-            || formPanel.isSelected(SHOW_OWNER)
-            || formPanel.isSelected(SHOW_OTHERS);
+        formPanel.getCheckBox(SHOW_GM).isSelected()
+            || formPanel.getCheckBox(SHOW_OWNER).isSelected()
+            || formPanel.getCheckBox(SHOW_OTHERS).isSelected();
     boolean hasImages = false;
-    BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getSelectedItem(BARS);
+    BarTokenOverlay selectedBar = (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
     boolean hasUniqueUpdateName = false;
     if (selectedBar != null)
       hasUniqueUpdateName = selectedBar.getName().equals(text) || !getNames().contains(text);
@@ -502,12 +547,16 @@ public class TokenBarController
         .setEnabled(hasName && hasUniqueUpdateName && selectedBar != null && hasShow && hasImages);
   }
 
-  /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+   */
   public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
-  /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+   */
   public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
@@ -530,12 +579,12 @@ public class TokenBarController
       if (selected >= 0) {
         // Set common stuff
         BarTokenOverlay bar = (BarTokenOverlay) formPanel.getList(BARS).getSelectedValue();
-        formPanel.setText(NAME, bar.getName());
-        formPanel.setSelected(MOUSEOVER, bar.isMouseover());
+        formPanel.getTextComponent(NAME).setText(bar.getName());
+        formPanel.getCheckBox(MOUSEOVER).setSelected(bar.isMouseover());
         formPanel.getSpinner(OPACITY).setValue(bar.getOpacity());
-        formPanel.setSelected(SHOW_GM, bar.isShowGM());
-        formPanel.setSelected(SHOW_OWNER, bar.isShowOwner());
-        formPanel.setSelected(SHOW_OTHERS, bar.isShowOthers());
+        formPanel.getCheckBox(SHOW_GM).setSelected(bar.isShowGM());
+        formPanel.getCheckBox(SHOW_OWNER).setSelected(bar.isShowOwner());
+        formPanel.getCheckBox(SHOW_OTHERS).setSelected(bar.isShowOthers());
         formPanel.getSpinner(INCREMENTS).setValue(bar.getIncrements());
         formPanel.getComboBox(SIDE).setSelectedIndex(bar.getSide().ordinal());
 
@@ -543,12 +592,12 @@ public class TokenBarController
         int type = -1;
         if (bar instanceof DrawnBarTokenOverlay) {
           formPanel.getSpinner(THICKNESS).setValue(((DrawnBarTokenOverlay) bar).getThickness());
-          ((JETAColorWell) formPanel.getComponentByName(COLOR))
+          ((ColorWell) formPanel.getComponent(COLOR))
               .setColor(((DrawnBarTokenOverlay) bar).getBarColor());
           type = 3;
         } // endif
         if (bar instanceof TwoToneBarTokenOverlay) {
-          ((JETAColorWell) formPanel.getComponentByName(BG_COLOR))
+          ((ColorWell) formPanel.getComponent(BG_COLOR))
               .setColor(((TwoToneBarTokenOverlay) bar).getBgColor());
           type = 4;
         } // endif
@@ -703,24 +752,27 @@ public class TokenBarController
   public BarTokenOverlay createTokenOverlay(BarTokenOverlay updatedOverlay) {
 
     // Need the color and name for everything
-    Color color = ((JETAColorWell) formPanel.getComponentByName(COLOR)).getColor();
-    Color bgColor = ((JETAColorWell) formPanel.getComponentByName(BG_COLOR)).getColor();
-    String name = formPanel.getText(NAME);
-    boolean mouseover = formPanel.isSelected(MOUSEOVER);
-    String overlay = ((ListItemProperty) formPanel.getSelectedItem(TYPE)).getName();
+    Color color = ((ColorWell) formPanel.getComponent(COLOR)).getColor();
+    Color bgColor = ((ColorWell) formPanel.getComponent(BG_COLOR)).getColor();
+    String name = formPanel.getTextComponent(NAME).getText();
+    boolean mouseover = formPanel.getCheckBox(MOUSEOVER).isSelected();
+    var overlay = ((BarType) formPanel.getComboBox(TYPE).getSelectedItem());
     int opacity = TokenStatesController.getSpinner(OPACITY, "opacity", formPanel);
-    boolean showGM = formPanel.isSelected(SHOW_GM);
-    boolean showOwner = formPanel.isSelected(SHOW_OWNER);
-    boolean showOthers = formPanel.isSelected(SHOW_OTHERS);
+    boolean showGM = formPanel.getCheckBox(SHOW_GM).isSelected();
+    boolean showOwner = formPanel.getCheckBox(SHOW_OWNER).isSelected();
+    boolean showOthers = formPanel.getCheckBox(SHOW_OTHERS).isSelected();
     int thickness = TokenStatesController.getSpinner(THICKNESS, "thickness", formPanel);
     int increments = TokenStatesController.getSpinner(INCREMENTS, "increments", formPanel);
-    Side side =
-        Side.valueOf(((ListItemProperty) formPanel.getSelectedItem(SIDE)).getName().toUpperCase());
+    var side = (BarSide) formPanel.getComboBox(SIDE).getSelectedItem();
+
+    if (overlay == null || side == null) {
+      return null;
+    }
 
     BarTokenOverlay to = null;
-    if (overlay.equals("SOLID_BAR")) {
+    if (overlay.equals(BarType.SOLID)) {
       to = new DrawnBarTokenOverlay(name, color, thickness);
-    } else if (overlay.equals("TWO_TONE_BAR")) {
+    } else if (overlay.equals(BarType.TWO_TONE)) {
       to = new TwoToneBarTokenOverlay(name, color, bgColor, thickness);
     } else {
 
@@ -731,11 +783,11 @@ public class TokenBarController
       model.copyInto(assetIds);
 
       // Create the bars
-      if (overlay.equals("TWO_IMAGES_BAR")) {
+      if (overlay.equals(BarType.TWO_IMAGE)) {
         to = new TwoImageBarTokenOverlay(name, assetIds[1], assetIds[0]);
-      } else if (overlay.equals("SINGLE_IMAGE_BAR")) {
+      } else if (overlay.equals(BarType.ONE_IMAGE)) {
         to = new SingleImageBarTokenOverlay(name, assetIds[0]);
-      } else if (overlay.equals("MULTIPLE_IMAGES_BAR")) {
+      } else if (overlay.equals(BarType.MULTIPLE_IMAGE)) {
         to = new MultipleImageBarTokenOverlay(name, assetIds);
       } // endif
     } // endif
@@ -748,27 +800,33 @@ public class TokenBarController
       to.setShowOthers(showOthers);
       to.setShowOwner(showOwner);
       to.setIncrements(increments);
-      to.setSide(side);
+      to.setSide(side.getSide());
     } // endif
     return to;
   }
 
-  /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
+  /**
+   * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+   */
   public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
   }
 
-  /** @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent) */
+  /**
+   * @see javax.swing.event.ChangeListener#stateChanged(javax.swing.event.ChangeEvent)
+   */
   public void stateChanged(ChangeEvent e) {
-    if (e.getSource() == formPanel.getComponentByName(TESTER)) {
-      renderer.value = ((JSlider) formPanel.getComponentByName(TESTER)).getValue() / 100.0;
+    if (e.getSource() == formPanel.getComponent(TESTER)) {
+      renderer.value = ((JSlider) formPanel.getComponent(TESTER)).getValue() / 100.0;
       formPanel.getList(BARS).repaint();
     } else {
       changedUpdate(null);
     }
   }
 
-  /** @param names Setter for names */
+  /**
+   * @param names Setter for names
+   */
   public void setNames(Set<String> names) {
     this.names = names;
   }

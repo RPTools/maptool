@@ -31,12 +31,14 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public class DefaultPlayerDatabase implements PlayerDatabase {
 
-  private final CipherUtil playerPassword;
-  private final CipherUtil gmPassword;
+  private final CipherUtil.Key playerPassword;
+  private final CipherUtil.Key gmPassword;
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   DefaultPlayerDatabase(String playerPassword, String gmPassword)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchPaddingException,
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          NoSuchPaddingException,
           InvalidKeyException {
     byte[] salt = CipherUtil.createSalt();
     this.playerPassword = CipherUtil.fromSharedKey(playerPassword, salt);
@@ -51,7 +53,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   @Override
   public Player getPlayer(String playerName) {
     // If role is not specified always return player!
-    return new Player(playerName, Player.Role.PLAYER, playerPassword.getKey());
+    return new Player(playerName, Player.Role.PLAYER, playerPassword);
   }
 
   @Override
@@ -61,7 +63,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
 
   @Override
   public byte[] getPlayerPasswordSalt(String playerName) {
-    return playerPassword.getKey().salt(); // Player and GM password salt are the same
+    return playerPassword.salt(); // Player and GM password salt are the same
   }
 
   @Override
@@ -73,9 +75,9 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   public Optional<CipherUtil.Key> getRolePassword(Player.Role role) {
     switch (role) {
       case PLAYER:
-        return Optional.of(playerPassword.getKey());
+        return Optional.of(playerPassword);
       case GM:
-        return Optional.of(gmPassword.getKey());
+        return Optional.of(gmPassword);
       default:
         return Optional.empty();
     }
@@ -122,7 +124,7 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public CompletableFuture<CipherUtil> getPublicKey(Player player, MD5Key md5key) {
+  public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key) {
     return CompletableFuture.completedFuture(null);
   }
 

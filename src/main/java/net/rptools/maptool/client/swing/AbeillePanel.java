@@ -14,14 +14,16 @@
  */
 package net.rptools.maptool.client.swing;
 
-import com.jeta.forms.components.panel.FormPanel;
-import java.awt.Component;
-import java.awt.GridLayout;
+import com.intellij.uiDesigner.core.GridLayoutManager;
+import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.Collection;
+import java.util.HashMap;
 import javax.swing.*;
+import javax.swing.text.JTextComponent;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import yasb.Binder;
@@ -33,7 +35,7 @@ import yasb.swing.AbstractComponentAdapter;
 import yasb.swing.BindingResolver;
 
 /**
- * This class acts as a "field binding front-end" for the {@link FormPanel} class.
+ * This class acts as a "field binding front-end" and accessor for the different view classes.
  *
  * <p>After instantiating an object and passing it the name of the Abeille form, call the {@link
  * #bind(Object)} method and pass the data model instance as a parameter. This class will then copy
@@ -54,7 +56,8 @@ import yasb.swing.BindingResolver;
 @SuppressWarnings("serial")
 public class AbeillePanel<T> extends JPanel {
   private static final Logger log = LogManager.getLogger(AbeillePanel.class);
-  private final FormPanel panel;
+  private final Container panel;
+  private HashMap<String, Component> componentMap;
   private T model;
 
   static {
@@ -78,11 +81,10 @@ public class AbeillePanel<T> extends JPanel {
         });
   }
 
-  public AbeillePanel(String panelForm) {
-    setLayout(new GridLayout());
-    panel = new FormPanelI18N(panelForm);
-
-    add(panel);
+  public AbeillePanel(JComponent mainPanel) {
+    panel = mainPanel;
+    setLayout(new BorderLayout());
+    add(panel, "Center");
   }
 
   public T getModel() {
@@ -102,13 +104,53 @@ public class AbeillePanel<T> extends JPanel {
     }
   }
 
-  protected void replaceComponent(String panelName, String name, Component component) {
-    panel.getFormAccessor(panelName).replaceBean(name, component);
-    panel.reset();
+  public void replaceComponent(String panelName, String name, Component replacement) {
+    var placeHolder = getComponent(name);
+    var container = (JPanel) getComponent(panelName);
+    Object constraints = null;
+    var layout = container.getLayout();
+    if (layout instanceof GridLayoutManager gridLayoutManager) {
+      constraints = gridLayoutManager.getConstraintsForComponent(placeHolder);
+    } else {
+      throw new RuntimeException(
+          "Replacement of components not implemented for layout: " + layout.getClass().getName());
+    }
+
+    container.remove(placeHolder);
+    container.add(replacement, constraints);
+    container.revalidate();
+    container.repaint();
+    componentMap.remove(name);
+    collectComponents(replacement);
   }
 
-  protected Component getComponent(String name) {
-    return panel.getComponentByName(name);
+  private void createComponentMap() {
+    componentMap = new HashMap<>();
+    collectComponents(panel);
+  }
+
+  private void collectComponents(Component component) {
+    var name = component.getName();
+
+    if (name != null && !name.isEmpty()) {
+      componentMap.put(name, component);
+    }
+
+    if (component instanceof Container container) {
+      for (var comp : container.getComponents()) {
+        collectComponents(comp);
+      }
+    }
+  }
+
+  public Component getComponent(String name) {
+    if (componentMap == null) {
+      createComponentMap();
+    }
+    if (componentMap.containsKey(name)) {
+      return (Component) componentMap.get(name);
+    }
+    return null;
   }
 
   /**
@@ -161,6 +203,57 @@ public class AbeillePanel<T> extends JPanel {
   /** Breaks the binding between the model and the view. */
   public void unbind() {
     model = null;
+  }
+
+  public AbstractButton getButton(String name) {
+    return (AbstractButton) getComponent(name);
+  }
+
+  public JRadioButton getRadioButton(String name) {
+    return (JRadioButton) getComponent(name);
+  }
+
+  public JComboBox getComboBox(String name) {
+    return (JComboBox) getComponent(name);
+  }
+
+  public JLabel getLabel(String name) {
+    return (JLabel) getComponent(name);
+  }
+
+  public JTabbedPane getTabbedPane(String name) {
+    return (JTabbedPane) getComponent(name);
+  }
+
+  public JTextField getTextField(String name) {
+    return (JTextField) getComponent(name);
+  }
+
+  public Collection<Component> getAllCompoments() {
+    if (componentMap == null) {
+      createComponentMap();
+    }
+    return componentMap.values();
+  }
+
+  public JTree getTree(String name) {
+    return (JTree) getComponent(name);
+  }
+
+  public JSpinner getSpinner(String name) {
+    return (JSpinner) getComponent(name);
+  }
+
+  public JList getList(String name) {
+    return (JList) getComponent(name);
+  }
+
+  public JCheckBox getCheckBox(String name) {
+    return (JCheckBox) getComponent(name);
+  }
+
+  public JTextComponent getTextComponent(String name) {
+    return (JTextComponent) getComponent(name);
   }
 
   public static class RadioButtonAdapter extends AbstractComponentAdapter implements ItemListener {

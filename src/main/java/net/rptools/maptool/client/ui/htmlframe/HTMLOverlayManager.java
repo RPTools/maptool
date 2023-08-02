@@ -85,6 +85,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
   private final Map<String, String> macroCallbacks = new HashMap<>();
 
   HTMLOverlayManager(String name, int zOrder) {
+    super("overlay", name);
     addActionListener(this); // add the action listeners for form events
     this.name = name;
     this.zOrder = zOrder;
@@ -95,7 +96,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     super.setupWebView(webView);
   }
 
-  /** @return the zOrder of the overlay. */
+  /**
+   * @return the zOrder of the overlay.
+   */
   public int getZOrder() {
     return zOrder;
   }
@@ -109,7 +112,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     this.zOrder = zOrder;
   }
 
-  /** @return the name of the overlay. */
+  /**
+   * @return the name of the overlay.
+   */
   public String getName() {
     return name;
   }
@@ -152,7 +157,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     }
   }
 
-  /** @return the rule for an invisible body. */
+  /**
+   * @return the rule for an invisible body.
+   */
   @Override
   String getCSSRule() {
     return String.format(CSS_BODY, AppPreferences.getFontSize())
@@ -191,7 +198,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     if (element == null) {
       return HTMLOverlayPanel.mousePassResult.BLOCK;
     } else {
-      String pe = (String) element.eval(SCRIPT_GET_POINTERMAP);
+      String pe = ((String) element.eval(SCRIPT_GET_POINTERMAP)).trim();
       if ("blockopaque".equals(pe)) return HTMLOverlayPanel.mousePassResult.CHECK_OPACITY;
       if ("block".equals(pe)) return HTMLOverlayPanel.mousePassResult.BLOCK;
       return HTMLOverlayPanel.mousePassResult.PASS;

@@ -17,6 +17,7 @@ package net.rptools.maptool.model.player;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -190,10 +191,20 @@ public class Players {
   private PlayerInfo getPlayerInfo(String name) {
     try {
       var playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      if (!playerDatabase.isPlayerRegistered(name)) {
+      if (!playerDatabase.playerExists(name)) {
         return null;
       }
-      Player player = playerDatabase.getPlayer(name);
+      Player player;
+      if (playerDatabase instanceof DefaultPlayerDatabase dpdb) {
+        player =
+            dpdb.getAllPlayers().stream()
+                .filter(p -> p.getName().equals(name))
+                .findFirst()
+                .orElse(dpdb.getPlayer(name));
+      } else {
+        player = playerDatabase.getPlayer(name);
+      }
+
       Role role = player.getRole();
       boolean supportsBlocking = playerDatabase.supportsDisabling();
       String blockedReason = "";
@@ -330,6 +341,7 @@ public class Players {
         playerDb.addPlayerAsymmetricKey(name, role, pkeys);
         return ChangePlayerStatus.OK;
       } catch (NoSuchAlgorithmException
+          | InvalidAlgorithmParameterException
           | InvalidKeySpecException
           | PasswordDatabaseException
           | NoSuchPaddingException
@@ -364,6 +376,7 @@ public class Players {
         playerDb.setAsymmetricKeys(name, pkeys);
       } catch (NoSuchPaddingException
           | NoSuchAlgorithmException
+          | InvalidAlgorithmParameterException
           | InvalidKeySpecException
           | PasswordDatabaseException
           | InvalidKeyException e) {
@@ -505,8 +518,11 @@ public class Players {
    * @throws InvalidKeyException if there is an error hashing the password.
    */
   public void commitChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.commitChanges();
     }
@@ -522,8 +538,11 @@ public class Players {
    * @throws InvalidKeyException i
    */
   public void rollbackChanges()
-      throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidKeySpecException,
-          PasswordDatabaseException, InvalidKeyException {
+      throws NoSuchPaddingException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          PasswordDatabaseException,
+          InvalidKeyException {
     if (PlayerDatabaseFactory.getCurrentPlayerDatabase() instanceof PersistedPlayerDatabase db) {
       db.rollbackChanges();
     }

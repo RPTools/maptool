@@ -169,7 +169,7 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
 
           MapTool.serverCommand()
               .updateTokenProperty(
-                  token, Update.setTerrainModifierOperation, terrainModifierOperation);
+                  token, Update.setTerrainModifierOperation, terrainModifierOperation.name());
         }
       } catch (java.lang.IllegalArgumentException iae) {
         throw new ParserException(
@@ -196,7 +196,11 @@ public class TokenTerrainModifierFunctions extends AbstractFunction {
 
         MapTool.serverCommand()
             .updateTokenProperty(
-                token, Update.setTerrainModifiersIgnored, ignoredTerrainOperationsSet);
+                token,
+                Update.setTerrainModifiersIgnored,
+                ignoredTerrainOperationsSet.stream()
+                    .map(TerrainModifierOperation::name)
+                    .collect(Collectors.toList()));
       }
     }
 

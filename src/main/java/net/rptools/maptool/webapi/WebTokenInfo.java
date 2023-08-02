@@ -14,56 +14,48 @@
  */
 package net.rptools.maptool.webapi;
 
+import com.google.common.eventbus.Subscribe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.awt.*;
 import java.util.*;
 import java.util.List;
-import net.rptools.lib.AppEventListener;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
 
 public class WebTokenInfo {
 
   private static final WebTokenInfo instance = new WebTokenInfo();
 
-  private final AppEventListener appEventListener;
-  private final Map<Zone, ModelChangeListener> modelChangeListeners = new WeakHashMap<>();
-
   private WebTokenInfo() {
     // Add listener for new zones.
-    appEventListener =
-        appEvent -> {
-          if (appEvent.getId().equals(MapTool.ZoneEvent.Added)) {
-            addTokenChangeListeners();
-          }
-        };
-
-    addTokenChangeListeners();
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
-  // TODO: This could be a single listener for all zones
-  private void addTokenChangeListeners() {
-    for (Zone zone : MapTool.getCampaign().getZones()) {
-      if (modelChangeListeners.containsKey(zone) == false) {
-        modelChangeListeners.put(
-            zone,
-            event -> {
-              System.out.println("DEBUG: Event " + event.eventType);
-              if (event.eventType == Zone.Event.TOKEN_CHANGED) {
-                tokenChanged((Token) event.getArg());
-              } else if (event.eventType == Zone.Event.TOKEN_ADDED) {
-                tokenAdded((Token) event.getArg());
-              } else if (event.eventType == Zone.Event.TOKEN_REMOVED) {
-                for (Token token : event.getTokensAsList()) {
-                  tokenRemoved(token);
-                }
-              }
-            });
-        zone.addModelChangeListener(modelChangeListeners.get(zone));
-      }
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    for (final var token : event.tokens()) {
+      tokenAdded(token);
+    }
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    for (final var token : event.tokens()) {
+      tokenRemoved(token);
+    }
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    for (final var token : event.tokens()) {
+      tokenChanged(token);
     }
   }
 

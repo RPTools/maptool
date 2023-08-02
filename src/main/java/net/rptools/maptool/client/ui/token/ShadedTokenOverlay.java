@@ -20,6 +20,7 @@ import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Paints a single reduced alpha color over the token.
@@ -65,8 +66,8 @@ public class ShadedTokenOverlay extends BooleanTokenOverlay {
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -81,7 +82,9 @@ public class ShadedTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ShadedTokenOverlay(getName(), getColor());
@@ -111,5 +114,20 @@ public class ShadedTokenOverlay extends BooleanTokenOverlay {
    */
   public void setColor(Color aColor) {
     color = aColor;
+  }
+
+  public static ShadedTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new ShadedTokenOverlay();
+    overlay.fillFrom(dto.getCommon());
+    overlay.color = new Color(dto.getColor(), true);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    var dto = BooleanTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setColor(color.getRGB());
+    dto.setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.SHADED);
+    return dto.build();
   }
 }

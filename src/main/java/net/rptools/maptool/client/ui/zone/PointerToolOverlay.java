@@ -18,7 +18,7 @@ import java.awt.*;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
-import net.rptools.maptool.client.ui.Tool;
+import net.rptools.maptool.client.tool.Tool;
 
 /** Transparent JPanel that displays the PointTool overlay. */
 public class PointerToolOverlay extends JPanel {

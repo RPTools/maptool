@@ -24,6 +24,7 @@ import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Rectangle2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Paint a dot so that it doesn't overlay any other states being displayed in the same grid.
@@ -40,7 +41,7 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
 
   /** Default constructor needed for XML encoding/decoding */
   public FlowColorDotTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, -1);
+    this(DEFAULT_STATE_NAME, Color.RED, -1);
   }
 
   /**
@@ -56,7 +57,9 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
     grid = aGrid;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new FlowColorDotTokenOverlay(getName(), getColor(), grid);
@@ -81,8 +84,8 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -116,8 +119,33 @@ public class FlowColorDotTokenOverlay extends XTokenOverlay {
     return new Ellipse2D.Double(r.getX(), r.getY(), r.getWidth(), r.getHeight());
   }
 
-  /** @return Getter for grid */
+  /**
+   * @return Getter for grid
+   */
   public int getGrid() {
     return grid;
+  }
+
+  @Override
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    return super.getDto().setGridSize(grid);
+  }
+
+  @Override
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    super.fillFrom(dto);
+    grid = dto.getGridSize();
+  }
+
+  public static FlowColorDotTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new FlowColorDotTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.FLOW_COLOR_DOT)
+        .build();
   }
 }

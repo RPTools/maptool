@@ -29,15 +29,18 @@ import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
+import net.rptools.maptool.client.ui.theme.Images;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.server.proto.GridDto;
+import net.rptools.maptool.server.proto.IsometricGridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
@@ -51,16 +54,8 @@ public class IsometricGrid extends Grid {
   private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
   private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight;
-
-  static {
-    try {
-      pathHighlight =
-          ImageUtil.getCompatibleImage("net/rptools/maptool/client/image/isoBorder.png");
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  private static BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
   public IsometricGrid() {
     super();
@@ -424,6 +419,11 @@ public class IsometricGrid extends Grid {
     mtx.translate(bounds.getBounds().getX(), bounds.getBounds().getY());
     cellShape.transform(mtx);
     return cellShape;
+  }
+
+  @Override
+  protected void fillDto(GridDto.Builder dto) {
+    dto.setIsometricGrid(IsometricGridDto.newBuilder());
   }
 
   @Override

@@ -19,9 +19,6 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.io.IOException;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
@@ -30,25 +27,15 @@ import net.rptools.maptool.model.drawing.Cross;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.GraphicsUtil;
 
-/** @author CoveredInFish */
+/**
+ * @author CoveredInFish
+ */
 public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 
   protected Cross cross;
 
-  public CrossTopologyTool() {
-    try {
-      setIcon(
-          new ImageIcon(
-              ImageIO.read(
-                  getClass()
-                      .getClassLoader()
-                      .getResourceAsStream(
-                          "net/rptools/maptool/client/image/tool/top-blue-cross.png"))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
-  }
+  public CrossTopologyTool() {}
 
   @Override
   // Override abstracttool to prevent color palette from

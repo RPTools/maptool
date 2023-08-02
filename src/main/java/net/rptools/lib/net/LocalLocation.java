@@ -25,6 +25,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import javax.imageio.ImageWriter;
 import javax.imageio.stream.FileImageOutputStream;
+import net.rptools.maptool.server.proto.LocalLocationDto;
+import net.rptools.maptool.server.proto.LocationDto;
 import org.apache.commons.io.IOUtils;
 
 public class LocalLocation implements Location {
@@ -60,10 +62,14 @@ public class LocalLocation implements Location {
     }
   }
 
-  /*
-   * public void backgroundPutContent(ImageWriter writer, BufferedImage content) throws IOException { FileImageOutputStream out = null; // TODO: put this in another thread try { out = new
-   * FileImageOutputStream(getFile());
-   *
-   * writer.setOutput(out); writer.write(content); } finally { if (out != null) { out.close(); } } }
-   */
+  public static LocalLocation fromDto(LocalLocationDto dto) {
+    var location = new LocalLocation();
+    location.localFile = dto.getLocalFile();
+    return location;
+  }
+
+  public LocationDto toDto() {
+    var dto = LocalLocationDto.newBuilder().setLocalFile(localFile);
+    return LocationDto.newBuilder().setLocalLocation(dto).build();
+  }
 }

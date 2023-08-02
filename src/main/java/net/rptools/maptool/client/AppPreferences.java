@@ -14,7 +14,10 @@
  */
 package net.rptools.maptool.client;
 
+import com.twelvemonkeys.image.ResampleOp;
 import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.RenderingHints;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -22,6 +25,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.prefs.Preferences;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
@@ -34,6 +38,8 @@ public class AppPreferences {
 
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
   private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+
+  private static RenderQuality renderQuality;
 
   private static final String KEY_ASSET_ROOTS = "assetRoots";
   private static final String KEY_SAVE_DIR = "saveDir";
@@ -80,6 +86,18 @@ public class AppPreferences {
 
   private static final String KEY_LIGHT_OVERLAY_OPACITY = "lightOverlayOpacity";
   private static final int DEFAULT_LIGHT_OVERLAY_OPACITY = 60;
+
+  private static final String KEY_LUMENS_OVERLAY_OPACITY = "lumensOverlayOpacity";
+  private static final int DEFAULT_LUMENS_OVERLAY_OPACITY = 120;
+
+  private static final String KEY_LUMENS_OVERLAY_BORDER_THICKNESS = "lumensOverlayBorderThickness";
+  private static final int DEFAULT_LUMENS_OVERLAY_BORDER_THICKNESS = 5;
+
+  private static final String KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT = "lumensOverlayShowByDefault";
+  private static final boolean DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT = false;
+
+  private static final String KEY_LIGHTS_SHOW_BY_DEFAULT = "lightsShowByDefault";
+  private static final boolean DEFAULT_LIGHTS_SHOW_BY_DEFAULT = true;
 
   private static final String KEY_FOG_OVERLAY_OPACITY = "fogOverlayOpacity";
   private static final int DEFAULT_FOG_OVERLAY_OPACITY = 100;
@@ -185,7 +203,10 @@ public class AppPreferences {
   private static final boolean DEFAULT_VBL_BLOCKS_MOVE = true;
 
   private static final String MACRO_EDITOR_THEME = "macroEditorTheme";
-  private static final String DEFAULT_MACRO_EDITOR_THEME = "default";
+  private static final String DEFAULT_MACRO_EDITOR_THEME = "Default";
+
+  private static final String ICON_THEME = "iconTheme";
+  private static final String DEFAULT_ICON_THEME = RessourceManager.ROD_TAKEHARA;
 
   // When hill VBL was introduced, older versions of MapTool were unable to read the new topology
   // modes. So we use a different preference key than in the past so older versions would not
@@ -338,6 +359,41 @@ public class AppPreferences {
     return range0to255(value);
   }
 
+  public static void setLumensOverlayOpacity(int size) {
+    prefs.putInt(KEY_LUMENS_OVERLAY_OPACITY, range0to255(size));
+  }
+
+  public static int getLumensOverlayOpacity() {
+    int value = prefs.getInt(KEY_LUMENS_OVERLAY_OPACITY, DEFAULT_LUMENS_OVERLAY_OPACITY);
+    return range0to255(value);
+  }
+
+  public static void setLumensOverlayBorderThickness(int thickness) {
+    prefs.putInt(KEY_LUMENS_OVERLAY_BORDER_THICKNESS, thickness);
+  }
+
+  public static int getLumensOverlayBorderThickness() {
+    return prefs.getInt(
+        KEY_LUMENS_OVERLAY_BORDER_THICKNESS, DEFAULT_LUMENS_OVERLAY_BORDER_THICKNESS);
+  }
+
+  public static void setLumensOverlayShowByDefault(boolean show) {
+    prefs.putBoolean(KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT, show);
+  }
+
+  public static boolean getLumensOverlayShowByDefault() {
+    return prefs.getBoolean(
+        KEY_LUMENS_OVERLAY_SHOW_BY_DEFAULT, DEFAULT_LUMENS_OVERLAY_SHOW_BY_DEFAULT);
+  }
+
+  public static void setLightsShowByDefault(boolean show) {
+    prefs.putBoolean(KEY_LIGHTS_SHOW_BY_DEFAULT, show);
+  }
+
+  public static boolean getLightsShowByDefault() {
+    return prefs.getBoolean(KEY_LIGHTS_SHOW_BY_DEFAULT, DEFAULT_LIGHTS_SHOW_BY_DEFAULT);
+  }
+
   public static void setFogOverlayOpacity(int size) {
     prefs.putInt(KEY_FOG_OVERLAY_OPACITY, range0to255(size));
 
@@ -479,6 +535,84 @@ public class AppPreferences {
 
   private static final String KEY_ALLOW_EXTERNAL_MACRO_ACCESS = "allowExternalMacroAccess";
   private static final boolean DEFAULT_ALLOW_EXTERNAL_MACRO_ACCESS = false;
+
+  private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
+
+  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.LOW_SCALING;
+
+  public enum RenderQuality {
+    LOW_SCALING,
+    PIXEL_ART_SCALING,
+    MEDIUM_SCALING,
+    HIGH_SCALING;
+
+    public void setRenderingHints(Graphics2D g) {
+      switch (this) {
+        case LOW_SCALING, PIXEL_ART_SCALING -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION,
+              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+        }
+        case MEDIUM_SCALING -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
+        }
+        case HIGH_SCALING -> {
+          g.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        }
+      }
+    }
+
+    public void setShrinkRenderingHints(Graphics2D d) {
+      switch (this) {
+        case LOW_SCALING, PIXEL_ART_SCALING -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION,
+              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
+        }
+        case MEDIUM_SCALING -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
+        }
+        case HIGH_SCALING -> {
+          d.setRenderingHint(
+              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        }
+      }
+    }
+
+    public int getResampleOpFilter() {
+      return switch (this) {
+        case LOW_SCALING, PIXEL_ART_SCALING -> ResampleOp.FILTER_POINT;
+        case MEDIUM_SCALING -> ResampleOp.FILTER_TRIANGLE;
+        case HIGH_SCALING -> ResampleOp.FILTER_QUADRATIC;
+      };
+    }
+  }
+
+  public static void setRenderQuality(RenderQuality quality) {
+    prefs.put(KEY_RENDER_QUALITY, quality.name());
+    renderQuality = quality;
+  }
+
+  public static RenderQuality getRenderQuality() {
+    if (renderQuality == null) {
+      try {
+        renderQuality =
+            RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, DEFAULT_RENDER_QUALITY.name()));
+      } catch (Exception e) {
+        renderQuality = DEFAULT_RENDER_QUALITY;
+      }
+    }
+    return renderQuality;
+  }
 
   public static void setTypingNotificationDuration(int ms) {
     prefs.putInt(KEY_TYPING_NOTIFICATION_DURATION, ms);
@@ -1266,6 +1400,14 @@ public class AppPreferences {
 
   public static void setDefaultMacroEditorTheme(String type) {
     prefs.put(MACRO_EDITOR_THEME, type);
+  }
+
+  public static String getIconTheme() {
+    return prefs.get(ICON_THEME, DEFAULT_ICON_THEME);
+  }
+
+  public static void setIconTheme(String theme) {
+    prefs.put(ICON_THEME, theme);
   }
 
   public static Zone.TopologyTypeSet getTopologyTypes() {

@@ -18,6 +18,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 
 /**
  * Draws a single color bar along one side of a token.
@@ -51,8 +52,8 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BarTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle, double)
+   * @see BarTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle, double)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, double value) {
@@ -80,7 +81,9 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     g.setColor(tempColor);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new DrawnBarTokenOverlay(getName(), barColor, thickness);
@@ -96,23 +99,56 @@ public class DrawnBarTokenOverlay extends BarTokenOverlay {
     return overlay;
   }
 
-  /** @return Getter for barColor */
+  /**
+   * @return Getter for barColor
+   */
   public Color getBarColor() {
     return barColor;
   }
 
-  /** @param barColor Setter for barColor */
+  /**
+   * @param barColor Setter for barColor
+   */
   public void setBarColor(Color barColor) {
     this.barColor = barColor;
   }
 
-  /** @return Getter for thickness */
+  /**
+   * @return Getter for thickness
+   */
   public int getThickness() {
     return thickness;
   }
 
-  /** @param thickness Setter for thickness */
+  /**
+   * @param thickness Setter for thickness
+   */
   public void setThickness(int thickness) {
     this.thickness = thickness;
+  }
+
+  protected void fillFrom(BarTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    barColor = new Color(dto.getColor(), true);
+    thickness = dto.getThickness();
+  }
+
+  public static DrawnBarTokenOverlay fromDto(BarTokenOverlayDto dto) {
+    var bar = new DrawnBarTokenOverlay();
+    bar.fillFrom(dto);
+    return bar;
+  }
+
+  protected BarTokenOverlayDto.Builder getDto() {
+    var dto = BarTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setThickness(thickness);
+    dto.setColor(barColor.getRGB());
+    setSideDto(dto);
+    return dto;
+  }
+
+  public BarTokenOverlayDto toDto() {
+    return getDto().setType(BarTokenOverlayDto.BarTokenOverlayTypeDto.DRAWN).build();
   }
 }

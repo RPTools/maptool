@@ -14,15 +14,16 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
+import com.google.common.eventbus.Subscribe;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.ZoneActivated;
+import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.ui.zone.SelectionModel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.parser.ParserException;
 
 public class HTMLFrameFactory {
@@ -163,7 +164,7 @@ public class HTMLFrameFactory {
           frameValue,
           html);
     } else if (frameType == FrameType.OVERLAY) {
-      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html);
+      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, html, frameValue);
     }
   }
 
@@ -192,28 +193,42 @@ public class HTMLFrameFactory {
     MapTool.getFrame().getOverlayPanel().doTokenChanged(token);
   }
 
-  public static class Listener implements ModelChangeListener, AppEventListener {
+  public static class Listener {
+    private Zone currentZone;
+
     public Listener() {
-      MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
-      MapTool.getFrame().getCurrentZoneRenderer().getZone().addModelChangeListener(this);
+      new MapToolEventBus().getMainEventBus().register(this);
+      currentZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     }
 
-    public void modelChanged(ModelChangeEvent event) {
-      if (event.eventType == Event.TOKEN_CHANGED) {
-        for (Token token : event.getTokensAsList()) {
-          tokenChanged(token);
-        }
+    @Subscribe
+    private void onSelectionChanged(SelectionModel.SelectionChanged event) {
+      if (event.zone() != currentZone) {
+        return;
       }
+
+      selectedListChanged();
     }
 
-    public void handleAppEvent(AppEvent event) {
-      Zone oldZone = (Zone) event.getOldValue();
-      Zone newZone = (Zone) event.getNewValue();
+    @Subscribe
+    void onZoneDeactivated(ZoneDeactivated event) {
+      currentZone = null;
+    }
 
-      if (oldZone != null) {
-        oldZone.removeModelChangeListener(this);
+    @Subscribe
+    void onZoneActivated(ZoneActivated event) {
+      currentZone = event.zone();
+    }
+
+    @Subscribe
+    private void onTokensChanged(TokensChanged event) {
+      if (event.zone() != currentZone) {
+        return;
       }
-      newZone.addModelChangeListener(this);
+
+      for (Token token : event.tokens()) {
+        tokenChanged(token);
+      }
     }
   }
 

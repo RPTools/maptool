@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.AlphaComposite;
 import java.awt.Composite;
 import java.awt.Graphics2D;
@@ -21,7 +22,11 @@ import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
 /**
  * The blast template draws a square for DnD 4e
@@ -41,6 +46,14 @@ public class BlastTemplate extends ConeTemplate {
   private int offsetX;
   private int offsetY;
 
+  public BlastTemplate() {}
+
+  public BlastTemplate(GUID id, int offsetX, int offsetY) {
+    super(id);
+    this.offsetX = offsetX;
+    this.offsetY = offsetY;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
@@ -51,7 +64,15 @@ public class BlastTemplate extends ConeTemplate {
    */
   private void adjustRectangle() {
     if (getZoneId() == null) return;
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    Zone zone;
+    if (MapTool.isHostingServer()) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    } else {
+      zone = MapTool.getCampaign().getZone(getZoneId());
+    }
+    if (zone == null) return;
+
+    int gridSize = zone.getGrid().getSize();
     int size = getRadius() * gridSize;
 
     Rectangle r = (Rectangle) renderer.getShape();
@@ -127,7 +148,9 @@ public class BlastTemplate extends ConeTemplate {
     adjustRectangle();
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
+   */
   @Override
   public int getDistance(int x, int y) {
     return Math.max(x, y);
@@ -137,13 +160,17 @@ public class BlastTemplate extends ConeTemplate {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
+   */
   @Override
   protected void draw(Graphics2D g) {
     renderer.draw(g);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
+   */
   @Override
   protected void drawBackground(Graphics2D g) {
     Composite old = g.getComposite();
@@ -156,5 +183,30 @@ public class BlastTemplate extends ConeTemplate {
   @Override
   public Area getArea() {
     return renderer.getArea();
+  }
+
+  public int getOffsetX() {
+    return offsetX;
+  }
+
+  public int getOffsetY() {
+    return offsetY;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = BlastTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setDirection(getDirection().name())
+        .setOffsetX(getOffsetX())
+        .setOffsetY(getOffsetY());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setBlastTemplate(dto).build();
   }
 }

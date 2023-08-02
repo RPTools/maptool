@@ -25,29 +25,31 @@ import java.util.Random;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.client.ClientConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
-import net.rptools.maptool.client.ClientCommand;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
-import net.rptools.maptool.client.ui.ConnectionInfoDialog;
+import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.transfer.AssetChunk;
+import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class MapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final MapToolServerConnection conn;
-  private final ServerMethodHandler handler;
+  private final ServerMessageHandler handler;
   private final ServerConfig config;
   private final PlayerDatabase playerDatabase;
 
@@ -65,7 +67,7 @@ public class MapToolServer {
       throws IOException {
     this.config = config;
     this.policy = policy;
-    handler = new ServerMethodHandler(this);
+    handler = new ServerMessageHandler(this);
     playerDatabase = playerDb;
     conn = new MapToolServerConnection(this, playerDatabase);
     conn.addMessageHandler(handler);
@@ -157,7 +159,7 @@ public class MapToolServer {
     this.policy = policy;
   }
 
-  public ServerMethodHandler getMethodHandler() {
+  public ServerMessageHandler getMethodHandler() {
     return handler;
   }
 
@@ -276,15 +278,15 @@ public class MapToolServer {
           boolean lookForMore = false;
           for (Entry<String, AssetTransferManager> entry : assetManagerMap.entrySet()) {
             entryForException = entry;
-            AssetChunk chunk = entry.getValue().nextChunk(ASSET_CHUNK_SIZE);
+            var chunk = entry.getValue().nextChunk(ASSET_CHUNK_SIZE);
             if (chunk != null) {
               lookForMore = true;
+              var msg = UpdateAssetTransferMsg.newBuilder().setChunk(chunk);
               getConnection()
-                  .callMethod(
+                  .sendMessage(
                       entry.getKey(),
                       MapToolConstants.Channel.IMAGE,
-                      ClientCommand.COMMAND.updateAssetTransfer.name(),
-                      chunk);
+                      Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
             }
           }
           if (lookForMore) {
@@ -295,7 +297,7 @@ public class MapToolServer {
             Thread.sleep(500);
           }
         } catch (Exception e) {
-          log.info("Couldn't retrieve AssetChunk for " + entryForException.getKey(), e);
+          log.warn("Couldn't retrieve AssetChunk for " + entryForException.getKey(), e);
           // keep on going
         }
       }

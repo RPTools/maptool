@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import net.rptools.maptool.server.proto.drawing.DrawnElementDto;
+
 /** */
 public class DrawnElement {
 
@@ -35,5 +37,16 @@ public class DrawnElement {
 
   public void setPen(Pen pen) {
     this.pen = pen;
+  }
+
+  public static DrawnElement fromDto(DrawnElementDto dto) {
+    return new DrawnElement(Drawable.fromDto(dto.getDrawable()), Pen.fromDto(dto.getPen()));
+  }
+
+  public DrawnElementDto toDto() {
+    return DrawnElementDto.newBuilder()
+        .setDrawable(getDrawable().toDto())
+        .setPen(getPen().toDto())
+        .build();
   }
 }

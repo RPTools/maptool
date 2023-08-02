@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.BasicStroke;
 import java.awt.Graphics2D;
 import java.awt.Point;
@@ -22,8 +23,14 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class LineSegment extends AbstractDrawing {
   private final List<Point> points = new ArrayList<Point>();
   private Float width;
@@ -33,6 +40,12 @@ public class LineSegment extends AbstractDrawing {
   private transient Area area;
 
   public LineSegment(float width, boolean squareCap) {
+    this.width = width;
+    this.squareCap = squareCap;
+  }
+
+  public LineSegment(GUID id, float width, boolean squareCap) {
+    super(id);
     this.width = width;
     this.squareCap = squareCap;
   }
@@ -55,6 +68,20 @@ public class LineSegment extends AbstractDrawing {
       area = createLineArea();
     }
     return area;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = LineSegmentDrawableDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setWidth(getWidth())
+        .setSquareCap(isSquareCap());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    getPoints().forEach(p -> dto.addPoints(Mapper.map(p)));
+    return DrawableDto.newBuilder().setLineSegment(dto).build();
   }
 
   private Area createLineArea() {

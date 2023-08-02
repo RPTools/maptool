@@ -35,7 +35,10 @@ public interface ZoneWalker {
       CellPoint point,
       boolean restrictMovement,
       Set<TerrainModifierOperation> terrainModifiersIgnored,
-      Area tokenVBL);
+      Area tokenWallVbl,
+      Area tokenHillVbl,
+      Area tokenPitVbl,
+      Area tokenMbl);
 
   public boolean isWaypoint(CellPoint point);
 

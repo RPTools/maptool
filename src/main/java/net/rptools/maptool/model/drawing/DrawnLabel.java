@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -21,6 +22,10 @@ import java.awt.geom.Area;
 import javax.swing.CellRendererPane;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
+import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
 
 /**
  * @author jgorrell
@@ -58,6 +63,21 @@ public class DrawnLabel extends AbstractDrawing {
     font = aFont;
   }
 
+  public DrawnLabel(GUID id, String theText, Rectangle theBounds, String aFont) {
+    super(id);
+    text = theText;
+    bounds = theBounds;
+    font = aFont;
+  }
+
+  public String getText() {
+    return text;
+  }
+
+  public String getFont() {
+    return font;
+  }
+
   /**
    * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D,
    *     net.rptools.maptool.model.drawing.Pen)
@@ -74,7 +94,9 @@ public class DrawnLabel extends AbstractDrawing {
   @Override
   protected void drawBackground(Graphics2D g) {}
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     return bounds;
   }
@@ -82,5 +104,19 @@ public class DrawnLabel extends AbstractDrawing {
   public Area getArea() {
     // TODO Auto-generated method stub
     return null;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+    var dto = DrawnLabelDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setBounds(Mapper.map(getBounds()))
+        .setText(getText())
+        .setFont(getFont());
+
+    if (getName() != null) dto.setName(StringValue.of(getName()));
+
+    return DrawableDto.newBuilder().setDrawnLabel(dto).build();
   }
 }

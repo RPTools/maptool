@@ -15,12 +15,12 @@
 package net.rptools.maptool.transfer;
 
 import java.io.File;
-import java.io.Serializable;
+import net.rptools.lib.MD5Key;
 
 public interface ConsumerListener {
-  public void assetAdded(Serializable id);
+  void assetAdded(MD5Key id);
 
-  public void assetComplete(Serializable id, String name, File data);
+  void assetComplete(MD5Key id, String name, File data);
 
-  public void assetUpdated(Serializable id);
+  void assetUpdated(MD5Key id);
 }

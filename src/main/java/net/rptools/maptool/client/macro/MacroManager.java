@@ -32,7 +32,9 @@ import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class MacroManager {
 
   private static final Logger log = LogManager.getLogger(MacroManager.class);

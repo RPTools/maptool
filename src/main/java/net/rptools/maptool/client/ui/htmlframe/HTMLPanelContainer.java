@@ -24,10 +24,14 @@ import net.rptools.maptool.model.Token;
 /** Interface for the container of an HTML panel. */
 public interface HTMLPanelContainer extends ActionListener {
 
-  /** @return the visibility of the container. */
+  /**
+   * @return the visibility of the container.
+   */
   boolean isVisible();
 
-  /** @return the macroCallBacks of the container. */
+  /**
+   * @return the macroCallBacks of the container.
+   */
   Map<String, String> macroCallbacks();
 
   /**
@@ -37,7 +41,9 @@ public interface HTMLPanelContainer extends ActionListener {
    */
   void setVisible(boolean visible);
 
-  /** @return the temporary status of the container. */
+  /**
+   * @return the temporary status of the container.
+   */
   boolean getTemporary();
 
   /**
@@ -47,7 +53,9 @@ public interface HTMLPanelContainer extends ActionListener {
    */
   void setTemporary(boolean temp);
 
-  /** @return the value stored into the container. */
+  /**
+   * @return the value stored into the container.
+   */
   Object getValue();
 
   /**

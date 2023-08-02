@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.ui.token;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.util.Comparator;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.server.proto.TokenOverlayDto;
 
 /**
  * An overlay that may be applied to a token to show state.
@@ -104,76 +106,104 @@ public abstract class AbstractTokenOverlay implements Cloneable {
     name = aName;
   }
 
-  /** @return Getter for order */
+  /**
+   * @return Getter for order
+   */
   public int getOrder() {
     return order;
   }
 
-  /** @param order Setter for the order to set */
+  /**
+   * @param order Setter for the order to set
+   */
   public void setOrder(int order) {
     this.order = order;
   }
 
-  /** @return Getter for group */
+  /**
+   * @return Getter for group
+   */
   public String getGroup() {
     return group;
   }
 
-  /** @param group Setter for group */
+  /**
+   * @param group Setter for group
+   */
   public void setGroup(String group) {
     this.group = group;
   }
 
-  /** @return Getter for mouseover */
+  /**
+   * @return Getter for mouseover
+   */
   public boolean isMouseover() {
     return mouseover;
   }
 
-  /** @param mouseover Setter for mouseover */
+  /**
+   * @param mouseover Setter for mouseover
+   */
   public void setMouseover(boolean mouseover) {
     this.mouseover = mouseover;
   }
 
-  /** @return Getter for opacity */
+  /**
+   * @return Getter for opacity
+   */
   public int getOpacity() {
     if (opacity == 0) opacity = 100;
     return opacity;
   }
 
-  /** @param opacity Setter for opacity */
+  /**
+   * @param opacity Setter for opacity
+   */
   public void setOpacity(int opacity) {
     this.opacity = opacity;
   }
 
-  /** @return Getter for showGM */
+  /**
+   * @return Getter for showGM
+   */
   public boolean isShowGM() {
     if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
     return showGM;
   }
 
-  /** @param showGM Setter for showGM */
+  /**
+   * @param showGM Setter for showGM
+   */
   public void setShowGM(boolean showGM) {
     this.showGM = showGM;
   }
 
-  /** @return Getter for showOwner */
+  /**
+   * @return Getter for showOwner
+   */
   public boolean isShowOwner() {
     if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
     return showOwner;
   }
 
-  /** @param showOwner Setter for showOwner */
+  /**
+   * @param showOwner Setter for showOwner
+   */
   public void setShowOwner(boolean showOwner) {
     this.showOwner = showOwner;
   }
 
-  /** @return Getter for showOthers */
+  /**
+   * @return Getter for showOthers
+   */
   public boolean isShowOthers() {
     if (!showGM && !showOwner && !showOthers) showGM = showOwner = showOthers = true;
     return showOthers;
   }
 
-  /** @param showOthers Setter for showOthers */
+  /**
+   * @param showOthers Setter for showOthers
+   */
   public void setShowOthers(boolean showOthers) {
     this.showOthers = showOthers;
   }
@@ -211,6 +241,32 @@ public abstract class AbstractTokenOverlay implements Cloneable {
    */
   public abstract void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value);
 
-  /** @see java.lang.Object#clone() */
+  /**
+   * @see java.lang.Object#clone()
+   */
   public abstract Object clone();
+
+  protected void fillFrom(TokenOverlayDto dto) {
+    name = dto.getName();
+    order = dto.getOrder();
+    group = dto.hasGroup() ? dto.getGroup().getValue() : null;
+    mouseover = dto.getMouseOver();
+    opacity = dto.getOpacity();
+    showGM = dto.getShowGm();
+    showOwner = dto.getShowOwner();
+    showOthers = dto.getShowOthers();
+  }
+
+  protected TokenOverlayDto getCommonDto() {
+    var dto = TokenOverlayDto.newBuilder();
+    dto.setName(name);
+    dto.setOrder(order);
+    if (group != null) dto.setGroup(StringValue.of(group));
+    dto.setMouseOver(mouseover);
+    dto.setOpacity(opacity);
+    dto.setShowGm(showGM);
+    dto.setShowOwner(showOwner);
+    dto.setShowOthers(showOthers);
+    return dto.build();
+  }
 }

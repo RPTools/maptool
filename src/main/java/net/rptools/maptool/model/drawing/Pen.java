@@ -16,6 +16,7 @@ package net.rptools.maptool.model.drawing;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
+import net.rptools.maptool.server.proto.drawing.PenDto;
 
 /**
  * The color and thickness to draw a {@link Drawable}with. Also used to erase by drawing {@link
@@ -148,5 +149,41 @@ public class Pen {
 
   public int getBackgroundColor() {
     return backgroundColor;
+  }
+
+  public static Pen fromDto(PenDto dto) {
+    var pen = new Pen();
+    pen.eraser = dto.getEraser();
+    pen.foregroundMode = dto.getForegroundModeValue();
+    pen.backgroundMode = dto.getBackgroundModeValue();
+    pen.thickness = dto.getThickness();
+    pen.opacity = dto.getOpacity();
+    pen.squareCap = dto.getSquareCap();
+    if (dto.hasForegroundColor()) {
+      pen.paint = DrawablePaint.fromDto(dto.getForegroundColor());
+    }
+    if (dto.hasBackgroundColor()) {
+      pen.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundColor());
+    }
+    return pen;
+  }
+
+  public PenDto toDto() {
+    var dto =
+        PenDto.newBuilder()
+            .setEraser(eraser)
+            .setForegroundMode(PenDto.mode.forNumber(foregroundMode))
+            .setBackgroundMode(PenDto.mode.forNumber(backgroundMode))
+            .setThickness(thickness)
+            .setOpacity(opacity)
+            .setSquareCap(squareCap);
+
+    if (paint != null) {
+      dto.setForegroundColor(paint.toDto());
+    }
+    if (backgroundPaint != null) {
+      dto.setBackgroundColor(backgroundPaint.toDto());
+    }
+    return dto.build();
   }
 }

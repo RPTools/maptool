@@ -45,15 +45,12 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.StringUtil;
-import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.config.TikaConfig;
-import org.apache.tika.exception.TikaException;
-import org.apache.tika.io.TikaInputStream;
-import org.apache.tika.metadata.Metadata;
 import org.apache.tika.mime.MediaType;
 
 /**
@@ -350,7 +347,8 @@ public class TransferableHelper extends TransferHandler {
     }
     if (image != null) {
       String name = findName(url);
-      asset = Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
+      asset =
+          Asset.createImageAsset(name != null ? name : "unnamed", ImageUtil.imageToBytes(image));
     } else {
       throw new IllegalArgumentException("cannot convert drop object to image: " + url.toString());
     }
@@ -411,6 +409,13 @@ public class TransferableHelper extends TransferHandler {
           // will strip out anything in the List that isn't an Asset anyway...
           Token token = PersistenceUtil.loadToken(url);
           assets.add(token);
+        } else if (AddOnLibraryImporter.isAddOnLibrary(url.getPath())) {
+          Asset temp = AssetManager.createAsset(url, Type.MTLIB);
+          if (temp != null) { // `null' means no image available
+            assets.add(temp);
+          } else if (log.isInfoEnabled()) {
+            log.info("Invalid MTLib for " + url);
+          }
         } else {
           // Get the MediaType so we can use it when creating the Asset later
           MediaType mediaType = Asset.getMediaType(url);
@@ -421,10 +426,11 @@ public class TransferableHelper extends TransferHandler {
             assets.add(AssetManager.getAsset(AssetManager.BAD_ASSET_LOCATION_KEY));
           } else {
             Asset temp = AssetManager.createAsset(url);
-            if (temp != null) // `null' means no image available
+            if (temp != null) { // `null' means no image available
               assets.add(temp);
-            else if (log.isInfoEnabled())
+            } else if (log.isInfoEnabled()) {
               log.info("No image available for " + url);
+            }
           }
         }
       }
@@ -432,24 +438,22 @@ public class TransferableHelper extends TransferHandler {
     return assets;
   }
 
-
   private static boolean checkValidType(MediaType mediaType) {
     String contentType = mediaType.getType();
 
     String subType = mediaType.getSubtype();
-    return switch(contentType) {
+    return switch (contentType) {
       case "audio", "image" -> true;
-      case "text" -> switch(subType) {
+      case "text" -> switch (subType) {
         case "html", "markdown", "x-web-markdown", "plain", "javascript", "css" -> true;
         default -> false;
       };
-      case "application" -> switch(subType) {
+      case "application" -> switch (subType) {
         case "pdf", "json", "javascript", "xml" -> true;
         default -> false;
       };
       default -> false;
     };
-
   }
 
   private static Asset handleTransferableAssetReference(Transferable transferable)
@@ -615,11 +619,32 @@ public class TransferableHelper extends TransferHandler {
       // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
         if (working instanceof Asset asset) {
-          Token token = new Token(asset.getName(), asset.getMD5Key());
-          // token.setName(MapToolUtil.nextTokenId(zone, token));
-          tokens.add(token);
-          // A token from an image asset needs additional configuration.
-          configureTokens.add(true);
+          if (asset.getType() == Type.MTLIB) {
+            if (MapTool.getPlayer().isGM()) {
+              try {
+                var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
+                new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showInformation(
+                          I18N.getText("library.imported", addOnLibrary.getNamespace().join()));
+                    });
+              } catch (IOException e) {
+                SwingUtilities.invokeLater(
+                    () -> {
+                      MapTool.showError(I18N.getText("library.import.error", asset.getName()), e);
+                    });
+              }
+            } else {
+              MapTool.showError(I18N.getText("library.import.error.notGM"));
+            }
+          } else {
+            Token token = new Token(asset.getName(), asset.getMD5Key());
+            // token.setName(MapToolUtil.nextTokenId(zone, token));
+            tokens.add(token);
+            // A token from an image asset needs additional configuration.
+            configureTokens.add(true);
+          }
         } else if (working instanceof Token) {
           Token token = new Token((Token) working);
           // token.setName(MapToolUtil.nextTokenId(zone, token));
@@ -654,30 +679,40 @@ public class TransferableHelper extends TransferHandler {
     return tokens != null;
   }
 
-  /** @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent) */
+  /**
+   * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+   */
   @Override
   public int getSourceActions(JComponent c) {
     return NONE;
   }
 
-  /** @return Getter for tokens */
+  /**
+   * @return Getter for tokens
+   */
   public List<Token> getTokens() {
     return tokens;
   }
 
-  /** @param tokens Setter for tokens */
+  /**
+   * @param tokens Setter for tokens
+   */
   public void setTokens(List<Token> tokens) {
     // This doesn't appear to be called from anywhere; this class simply makes assignments
     // to the instance member variable. Remove this method?
     this.tokens = tokens;
   }
 
-  /** @return Getter for configureTokens */
+  /**
+   * @return Getter for configureTokens
+   */
   public List<Boolean> getConfigureTokens() {
     return configureTokens;
   }
 
-  /** @param configureTokens Setter for configureTokens */
+  /**
+   * @param configureTokens Setter for configureTokens
+   */
   public void setConfigureTokens(List<Boolean> configureTokens) {
     this.configureTokens = configureTokens;
   }

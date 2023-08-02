@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
@@ -27,24 +28,27 @@ import java.util.Set;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.InitiativeListModel;
-import net.rptools.maptool.model.ModelChangeEvent;
-import net.rptools.maptool.model.ModelChangeListener;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.InitiativeListChanged;
+import net.rptools.maptool.model.zones.TokensAdded;
+import net.rptools.maptool.model.zones.TokensChanged;
+import net.rptools.maptool.model.zones.TokensRemoved;
 
 /**
  * This panel shows the initiative order inside of MapTools.
@@ -52,7 +56,7 @@ import net.rptools.maptool.model.Zone.Event;
  * @author Jay
  */
 public class InitiativePanel extends JPanel
-    implements PropertyChangeListener, ModelChangeListener, ListSelectionListener {
+    implements PropertyChangeListener, ListSelectionListener {
 
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
@@ -129,7 +133,6 @@ public class InitiativePanel extends JPanel
   /*---------------------------------------------------------------------------------------------
    * Constructor
    *-------------------------------------------------------------------------------------------*/
-
   /** Setup the menu */
   public InitiativePanel() {
 
@@ -143,7 +146,9 @@ public class InitiativePanel extends JPanel
     popupMenu = new JPopupMenu();
     toolBar.add(
         SwingUtil.makePopupMenuButton(
-            new JButton(new ImageIcon(AppStyle.arrowMenu)), () -> popupMenu, false));
+            new JButton(RessourceManager.getSmallIcon(Icons.ACTION_SETTINGS)),
+            () -> popupMenu,
+            false));
 
     toolBar.add(new TextlessButton(PREV_ACTION));
     toolBar.add(new TextlessButton(TOGGLE_HOLD_ACTION));
@@ -156,7 +161,7 @@ public class InitiativePanel extends JPanel
     toolBar.add(Box.createHorizontalStrut(8));
 
     // ensure that the preferred width is enough to show the round counter in fullscreen
-    round.setText(I18N.getText("initPanel.round") + " 99");
+    round.setText(I18N.getText("initPanel.round") + "WWW");
     round.setPreferredSize(round.getMinimumSize());
     round.setText("");
 
@@ -186,10 +191,12 @@ public class InitiativePanel extends JPanel
     map.put("REMOVE_TOKEN_ACTION", REMOVE_TOKEN_ACTION);
 
     // Set action text and icons
-    PREV_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowLeft));
-    TOGGLE_HOLD_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowHold));
-    NEXT_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowRight));
-    RESET_COUNTER_ACTION.putValue(Action.SMALL_ICON, new ImageIcon(AppStyle.arrowRotateClockwise));
+    PREV_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PREVIOUS));
+    TOGGLE_HOLD_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_PAUSE));
+    NEXT_ACTION.putValue(Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_NEXT));
+    RESET_COUNTER_ACTION.putValue(
+        Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.ACTION_RESET));
 
     I18N.setAction("initPanel.sort", SORT_LIST_ACTION);
     I18N.setAction("initPanel.toggleHold", TOGGLE_HOLD_ACTION);
@@ -214,6 +221,8 @@ public class InitiativePanel extends JPanel
     I18N.setAction("initPanel.next", NEXT_ACTION);
     I18N.setAction("initPanel.prev", PREV_ACTION);
     updateView();
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   private static class TextlessButton extends JButton {
@@ -309,12 +318,16 @@ public class InitiativePanel extends JPanel
     else round.setText("");
   }
 
-  /** @return Getter for list */
+  /**
+   * @return Getter for list
+   */
   public InitiativeList getList() {
     return list;
   }
 
-  /** @param theList Setter for the list to set */
+  /**
+   * @param theList Setter for the list to set
+   */
   public void setList(InitiativeList theList) {
     // Remove the old list
     if (list == theList) return;
@@ -339,22 +352,30 @@ public class InitiativePanel extends JPanel
         });
   }
 
-  /** @return Getter for showTokens */
+  /**
+   * @return Getter for showTokens
+   */
   public boolean isShowTokens() {
     return showTokens;
   }
 
-  /** @return Getter for showTokenStates */
+  /**
+   * @return Getter for showTokenStates
+   */
   public boolean isShowTokenStates() {
     return showTokenStates;
   }
 
-  /** @return Getter for showInitState */
+  /**
+   * @return Getter for showInitState
+   */
   public boolean isShowInitState() {
     return showInitState;
   }
 
-  /** @return Getter for model */
+  /**
+   * @return Getter for model
+   */
   public InitiativeListModel getModel() {
     return model;
   }
@@ -367,9 +388,7 @@ public class InitiativePanel extends JPanel
   public void setZone(Zone aZone) {
     // Clean up listeners
     if (aZone == zone) return;
-    if (zone != null) zone.removeModelChangeListener(this);
     zone = aZone;
-    if (zone != null) zone.addModelChangeListener(this);
 
     // Older campaigns didn't have a list, make sure this one does
     InitiativeList list = (zone != null) ? zone.getInitiativeList() : new InitiativeList(null);
@@ -410,23 +429,31 @@ public class InitiativePanel extends JPanel
     return (MapTool.getPlayer() == null || MapTool.getPlayer().isGM());
   }
 
-  /** @return Getter for ownerPermissions */
+  /**
+   * @return Getter for ownerPermissions
+   */
   public boolean isOwnerPermissions() {
     return ownerPermissions;
   }
 
-  /** @param anOwnerPermissions Setter for ownerPermissions */
+  /**
+   * @param anOwnerPermissions Setter for ownerPermissions
+   */
   public void setOwnerPermissions(boolean anOwnerPermissions) {
     ownerPermissions = anOwnerPermissions;
     updateView();
   }
 
-  /** @return Getter for MovementLock */
+  /**
+   * @return Getter for MovementLock
+   */
   public boolean isMovementLock() {
     return movementLock;
   }
 
-  /** @param anMovementLock Setter for MovementLock */
+  /**
+   * @param anMovementLock Setter for MovementLock
+   */
   public void setMovementLock(boolean anMovementLock) {
     movementLock = anMovementLock;
   }
@@ -474,14 +501,54 @@ public class InitiativePanel extends JPanel
     return true;
   }
 
-  /** @return Getter for initStateSecondLine */
+  /**
+   * @return Getter for initStateSecondLine
+   */
   public boolean isInitStateSecondLine() {
     return initStateSecondLine;
   }
 
-  /** @param initStateSecondLine Setter for initStateSecondLine */
+  /**
+   * @param initStateSecondLine Setter for initStateSecondLine
+   */
   public void setInitStateSecondLine(boolean initStateSecondLine) {
     this.initStateSecondLine = initStateSecondLine;
+  }
+
+  @Subscribe
+  private void onInitiativeListChanged(InitiativeListChanged event) {
+    final var list = event.initiativeList();
+    if (list.getZone() != zone) {
+      return;
+    }
+
+    int oldSize = model.getSize();
+    setList(list);
+    if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
+  }
+
+  @Subscribe
+  private void onTokensAdded(TokensAdded event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
+  }
+
+  @Subscribe
+  private void onTokensRemoved(TokensRemoved event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
+  }
+
+  @Subscribe
+  private void onTokensChanged(TokensChanged event) {
+    if (event.zone() != zone) {
+      return;
+    }
+    model.updateModel();
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -511,7 +578,9 @@ public class InitiativePanel extends JPanel
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
@@ -535,29 +604,6 @@ public class InitiativePanel extends JPanel
     } else if (evt.getPropertyName().equals(InitiativeList.OWNER_PERMISSIONS_PROP)) {
       updateView();
     } // endif
-  }
-
-  /*---------------------------------------------------------------------------------------------
-   * ModelChangeListener Interface Methods
-   *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.ModelChangeListener#modelChanged(net.rptools.maptool.model.ModelChangeEvent)
-   */
-  @Override
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.getEvent().equals(Event.INITIATIVE_LIST_CHANGED)) {
-      if (event.getModel() == zone) {
-        int oldSize = model.getSize();
-        setList(((Zone) event.getModel()).getInitiativeList());
-        if (oldSize != model.getSize()) displayList.getSelectionModel().clearSelection();
-      }
-    } else if (event.getEvent().equals(Event.TOKEN_ADDED)
-        || event.getEvent().equals(Event.TOKEN_CHANGED)
-        || event.getEvent().equals(Event.TOKEN_REMOVED)) {
-      model.updateModel();
-    }
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -830,7 +876,9 @@ public class InitiativePanel extends JPanel
    */
   private class MouseHandler extends MouseAdapter {
 
-    /** @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent) */
+    /**
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -852,9 +900,7 @@ public class InitiativePanel extends JPanel
                   return;
                 }
 
-                renderer.clearSelectedTokens();
-                renderer.centerOn(token);
-                renderer.updateAfterSelection();
+                renderer.centerOnAndSetSelected(token);
                 renderer.maybeForcePlayersView();
               }
             });

@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client.ui.tokenpanel;
 
-import com.jgoodies.forms.layout.CellConstraints;
-import com.jgoodies.forms.layout.CellConstraints.Alignment;
-import com.jgoodies.forms.layout.FormLayout;
 import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
@@ -29,12 +26,15 @@ import javax.swing.JPanel;
 import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
+import net.miginfocom.swing.MigLayout;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.ImageBorder;
-import net.rptools.lib.swing.ImageLabel;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.ImageLabel;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.theme.Borders;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -81,21 +81,18 @@ public class InitiativeListCellRenderer extends JPanel
 
   /** The icon for the current indicator. */
   public static final Icon CURRENT_INDICATOR_ICON =
-      new ImageIcon(
-          InitiativePanel.class
-              .getClassLoader()
-              .getResource("net/rptools/maptool/client/image/currentIndicator.png"));
+      RessourceManager.getSmallIcon(Icons.INITIATIVE_CURRENT_INDICATOR);
 
   /** Border used to show that an item is selected */
-  public static final Border SELECTED_BORDER = ImageBorder.RED;
+  public static final Border SELECTED_BORDER = RessourceManager.getBorder(Borders.RED);
 
   /** Border used to show that an item is not selected */
   public static final Border UNSELECTED_BORDER =
       BorderFactory.createEmptyBorder(
-          ImageBorder.RED.getTopMargin(),
-          ImageBorder.RED.getLeftMargin(),
-          ImageBorder.RED.getBottomMargin(),
-          ImageBorder.RED.getRightMargin());
+          RessourceManager.getBorder(Borders.RED).getTopMargin(),
+          RessourceManager.getBorder(Borders.RED).getLeftMargin(),
+          RessourceManager.getBorder(Borders.RED).getBottomMargin(),
+          RessourceManager.getBorder(Borders.RED).getRightMargin());
 
   /** Border used for name plate */
   public static final Border NAME_BORDER = BorderFactory.createEmptyBorder(2, 4, 3, 4);
@@ -116,7 +113,7 @@ public class InitiativeListCellRenderer extends JPanel
 
     // Set up the panel
     panel = aPanel;
-    setLayout(new FormLayout("1px pref 1px pref:grow", "fill:pref"));
+    setLayout(new MigLayout("", "[][grow]"));
     //    setBorder(SELECTED_BORDER);
     //    setBackground(Color.WHITE);
 
@@ -125,7 +122,7 @@ public class InitiativeListCellRenderer extends JPanel
     currentIndicator.setPreferredSize(INDICATOR_SIZE);
     currentIndicator.setHorizontalAlignment(SwingConstants.CENTER);
     currentIndicator.setVerticalAlignment(SwingConstants.CENTER);
-    add(currentIndicator, new CellConstraints(2, 1));
+    add(currentIndicator);
 
     // And the name
     name = new NameLabel();
@@ -133,7 +130,7 @@ public class InitiativeListCellRenderer extends JPanel
     name.setBorder(NAME_BORDER);
     name.setFont(getFont().deriveFont(Font.BOLD));
     textHeight = getFontMetrics(getFont()).getHeight();
-    add(name, new CellConstraints(4, 1, CellConstraints.LEFT, CellConstraints.CENTER));
+    add(name);
     validate();
   }
 
@@ -198,13 +195,14 @@ public class InitiativeListCellRenderer extends JPanel
     name.setIcon(icon);
 
     // Align it properly
-    Alignment alignment = ti.isHolding() ? CellConstraints.RIGHT : CellConstraints.LEFT;
-    FormLayout layout = (FormLayout) getLayout();
-    layout.setConstraints(name, new CellConstraints(4, 1, alignment, CellConstraints.CENTER));
-    if (alignment == CellConstraints.RIGHT) {
-      name.setHorizontalTextPosition(SwingConstants.LEFT);
+    var alignment = ti.isHolding() ? SwingConstants.LEFT : SwingConstants.RIGHT;
+    name.setHorizontalTextPosition(alignment);
+    MigLayout layout = (MigLayout) getLayout();
+    //
+    if (alignment == SwingConstants.RIGHT) {
+      layout.setComponentConstraints(name, "align left");
     } else {
-      name.setHorizontalTextPosition(SwingConstants.RIGHT);
+      layout.setComponentConstraints(name, "align right");
     } // endif
 
     // Selected?
@@ -227,7 +225,9 @@ public class InitiativeListCellRenderer extends JPanel
    */
   public class NameLabel extends JLabel {
 
-    /** @see javax.swing.JComponent#paintComponent(java.awt.Graphics) */
+    /**
+     * @see javax.swing.JComponent#paintComponent(java.awt.Graphics)
+     */
     @Override
     protected void paintComponent(Graphics g) {
       boolean initStateSecondLine = panel.isInitStateSecondLine() && panel.isShowInitState();
@@ -237,7 +237,9 @@ public class InitiativeListCellRenderer extends JPanel
       super.paintComponent(g);
     }
 
-    /** @see javax.swing.JComponent#getPreferredSize() */
+    /**
+     * @see javax.swing.JComponent#getPreferredSize()
+     */
     @Override
     public Dimension getPreferredSize() {
       boolean initStateSecondLine = panel.isInitStateSecondLine() && panel.isShowInitState();
@@ -317,13 +319,17 @@ public class InitiativeListCellRenderer extends JPanel
       return bi;
     }
 
-    /** @see javax.swing.ImageIcon#getIconHeight() */
+    /**
+     * @see javax.swing.ImageIcon#getIconHeight()
+     */
     @Override
     public int getIconHeight() {
       return panel.isShowTokenStates() ? ICON_SIZE : textTokenSize;
     }
 
-    /** @see javax.swing.ImageIcon#getIconWidth() */
+    /**
+     * @see javax.swing.ImageIcon#getIconWidth()
+     */
     @Override
     public int getIconWidth() {
       return panel.isShowTokenStates() ? ICON_SIZE : textTokenSize;

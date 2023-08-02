@@ -45,6 +45,12 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   /** The id of the zone where this drawable is painted. */
   private GUID zoneId;
 
+  protected AbstractTemplate() {}
+
+  protected AbstractTemplate(GUID id) {
+    super(id);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Class Variables
    *-------------------------------------------------------------------------------------------*/
@@ -182,9 +188,13 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * @param area Paint the area?
    */
   protected void paint(Graphics2D g, boolean border, boolean area) {
-    if (radius == 0) return;
+    if (radius == 0) {
+      return;
+    }
     Zone zone = MapTool.getCampaign().getZone(zoneId);
-    if (zone == null) return;
+    if (zone == null) {
+      return;
+    }
 
     // Find the proper distance
     int gridSize = zone.getGrid().getSize();
@@ -321,13 +331,17 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
+   */
   @Override
   protected void draw(Graphics2D g) {
     paint(g, true, false);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
+   */
   @Override
   protected void drawBackground(Graphics2D g) {
 

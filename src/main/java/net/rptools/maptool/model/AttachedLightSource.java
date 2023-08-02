@@ -14,25 +14,35 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.server.proto.AttachedLightSourceDto;
+
 public class AttachedLightSource {
 
   private GUID lightSourceId;
-  private String direction;
 
   public AttachedLightSource() {
     // for serialization
   }
 
-  public AttachedLightSource(LightSource source, Direction direction) {
-    lightSourceId = source.getId();
-    this.direction = direction.name();
+  private AttachedLightSource(GUID lightSourceId) {
+    this.lightSourceId = lightSourceId;
   }
 
-  public Direction getDirection() {
-    return direction != null ? Direction.valueOf(direction) : Direction.CENTER;
+  public AttachedLightSource(LightSource source) {
+    lightSourceId = source.getId();
   }
 
   public GUID getLightSourceId() {
     return lightSourceId;
+  }
+
+  public static AttachedLightSource fromDto(AttachedLightSourceDto dto) {
+    return new AttachedLightSource(GUID.valueOf(dto.getLightSourceId()));
+  }
+
+  public AttachedLightSourceDto toDto() {
+    var dto = AttachedLightSourceDto.newBuilder();
+    dto.setLightSourceId(getLightSourceId().toString());
+    return dto.build();
   }
 }
