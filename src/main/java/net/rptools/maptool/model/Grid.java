@@ -42,8 +42,11 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.zones.GridChanged;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -237,7 +240,9 @@ public abstract class Grid implements Cloneable {
     return 0;
   }
 
-  /** @return the difference in pixels between the center of a cell and its converted zonepoint. */
+  /**
+   * @return the difference in pixels between the center of a cell and its converted zonepoint.
+   */
   public abstract Point2D.Double getCenterOffset();
 
   /**
@@ -287,12 +292,16 @@ public abstract class Grid implements Cloneable {
     fireGridChanged();
   }
 
-  /** @return The x component of the grid's offset. */
+  /**
+   * @return The x component of the grid's offset.
+   */
   public int getOffsetX() {
     return offsetX;
   }
 
-  /** @return The y component of the grid's offset */
+  /**
+   * @return The y component of the grid's offset
+   */
   public int getOffsetY() {
     return offsetY;
   }
@@ -497,10 +506,8 @@ public abstract class Grid implements Cloneable {
   }
 
   private void fireGridChanged() {
-    if (zone != null) {
-      gridShapeCache.clear();
-      zone.fireModelChangeEvent(new ModelChangeEvent(this, Event.GRID_CHANGED));
-    }
+    gridShapeCache.clear();
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
   }
 
   /**
@@ -920,6 +927,41 @@ public abstract class Grid implements Cloneable {
     at.scale(rescale, rescale);
 
     return getGridShapeCache().get(gridRadius).createTransformedArea(at);
+  }
+
+  public static Grid fromDto(GridDto dto) {
+    Grid grid = null;
+    switch (dto.getTypeCase()) {
+      case GRIDLESS_GRID -> grid = new GridlessGrid();
+      case HEX_GRID -> {
+        grid = HexGrid.fromDto(dto.getHexGrid());
+      }
+      case SQUARE_GRID -> grid = new SquareGrid();
+      case ISOMETRIC_GRID -> grid = new IsometricGrid();
+    }
+    grid.offsetX = dto.getOffsetX();
+    grid.offsetY = dto.getOffsetY();
+    grid.size = dto.getSize();
+    if (dto.hasCellShape()) {
+      grid.cellShape = Mapper.map(dto.getCellShape());
+    } else {
+      grid.cellShape = null;
+    }
+    return grid;
+  }
+
+  protected abstract void fillDto(GridDto.Builder dto);
+
+  public GridDto toDto() {
+    var dto = GridDto.newBuilder();
+    fillDto(dto);
+    dto.setOffsetX(offsetX);
+    dto.setOffsetY(offsetY);
+    dto.setSize(size);
+    if (cellShape != null) {
+      dto.setCellShape(Mapper.map(cellShape));
+    }
+    return dto.build();
   }
 
   static class DirectionCalculator {

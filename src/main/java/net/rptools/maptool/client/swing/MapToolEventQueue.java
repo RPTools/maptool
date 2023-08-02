@@ -87,7 +87,9 @@ public class MapToolEventQueue extends EventQueue {
     }
   }
 
-  /** @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured. */
+  /**
+   * @return the JideOptionPane. Initializes it if null. Must be done after Jide is configured.
+   */
   private static JideOptionPane getOptionPane() {
     if (optionPane == null) {
       optionPane =

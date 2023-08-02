@@ -36,7 +36,9 @@ import javax.swing.text.View;
  */
 public class TwoToneTextFieldUI extends BasicTextFieldUI {
 
-  /** @see javax.swing.plaf.basic.BasicTextFieldUI#create(javax.swing.text.Element) */
+  /**
+   * @see javax.swing.plaf.basic.BasicTextFieldUI#create(javax.swing.text.Element)
+   */
   public View create(Element aElem) {
     return new TwoToneTextFieldView(aElem);
   }
@@ -87,13 +89,17 @@ public class TwoToneTextFieldUI extends BasicTextFieldUI {
      * Overridden FieldView Methods
      *-------------------------------------------------------------------------------------------*/
 
-    /** @see javax.swing.text.FieldView#getPreferredSpan(int) */
+    /**
+     * @see javax.swing.text.FieldView#getPreferredSpan(int)
+     */
     public float getPreferredSpan(int axis) {
       // Do not use the HORIZONTAL_OFFSET here as it will interfere with highlighting
       return super.getPreferredSpan(axis) + (axis == View.X_AXIS ? 0 : VERTICAL_OFFSET);
     }
 
-    /** @see javax.swing.text.PlainView#drawUnselectedText(java.awt.Graphics, int, int, int, int) */
+    /**
+     * @see javax.swing.text.PlainView#drawUnselectedText(java.awt.Graphics, int, int, int, int)
+     */
     protected int drawUnselectedText(Graphics g, int x, int y, int p0, int p1)
         throws BadLocationException {
 

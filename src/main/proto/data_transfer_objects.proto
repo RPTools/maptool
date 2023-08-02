@@ -1,0 +1,695 @@
+syntax = "proto3";
+
+package maptool;
+
+option java_multiple_files = true;
+option java_package = "net.rptools.maptool.server.proto";
+option java_outer_classname = "DataTranferObjectProtos";
+
+import "drawing_dto.proto";
+import "google/protobuf/wrappers.proto";
+/*
+ * For easier differentiation between protobuf classes and "normal" classes
+ * protobuf classes end with "Dto" or "Msg".
+ */
+
+message ServerPolicyDto {
+  bool use_strict_token_management = 1;
+  bool is_movement_locked = 2;
+  bool is_token_editor_locked = 3;
+  bool players_can_reveal_vision = 4;
+  bool gm_reveals_vision_for_unowned_tokens = 5;
+  bool use_individual_views = 6;
+  bool restricted_impersonation = 7;
+  bool players_receive_campaign_macros = 8;
+  bool use_tool_tips_for_default_roll_format = 9;
+  bool use_individual_FOW = 10;
+  bool is_auto_reveal_on_movement = 11;
+  bool include_owned_NPCs = 12;
+  WalkerMetricDto movement_metric = 13;
+  bool using_astar_pathfinding = 14;
+  bool vbl_blocks_move = 15;
+  bool hide_map_select_ui = 16;
+  bool lock_player_library = 17;
+}
+
+message CampaignDto {
+  string id = 1;
+  string name = 2;
+  google.protobuf.BoolValue has_used_fog_toolbar = 3;
+  CampaignPropertiesDto properties = 4;
+  LocationDto export_location = 5;
+  map<string, bool> export_settings = 6;
+  int32 macro_button_last_index = 7;
+  int32 gm_macro_button_last_index = 8;
+  repeated MacroButtonPropertiesDto macro_button_properties = 9;
+  repeated ZoneDto zones = 10;
+  repeated MacroButtonPropertiesDto gm_macro_button_properties = 11;
+}
+
+message LookupTableDto {
+  repeated LookupEntryDto entries = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue default_roll = 3;
+  google.protobuf.StringValue table_image = 4;
+  bool visible = 5;
+  bool allow_lookup = 6;
+  bool pick_once = 7;
+}
+
+message LookupEntryDto {
+  int32 min = 1;
+  int32 max = 2;
+  bool picked = 3;
+  google.protobuf.StringValue value = 4;
+  google.protobuf.StringValue image_id = 5;
+}
+
+message LightSourceDto {
+  enum LightTypeDto {
+    NORMAL = 0;
+    AURA = 1;
+  }
+  repeated LightDto lights = 1;
+  google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue id = 3;
+  LightTypeDto type = 4;
+  bool scale_with_token = 5;
+}
+
+enum ShapeTypeDto {
+    SQUARE = 0;
+    CIRCLE = 1;
+    CONE = 2;
+    HEX = 3;
+    GRID = 4;
+}
+
+message LightDto {
+  DrawablePaintDto paint = 1;
+  double facing_offset = 2;
+  double radius = 3;
+  double arc_angle = 4;
+  ShapeTypeDto shape = 5;
+  bool is_gm = 6;
+  bool owner_only = 7;
+  int32 lumens = 8;
+}
+
+message LocationDto {
+  oneof LocationTyp {
+    LocalLocationDto local_location = 1;
+    FtpLocationDto ftp_location = 2;
+  }
+}
+
+message LocalLocationDto {
+  string local_file = 1;
+}
+
+message FtpLocationDto {
+  string user_name = 1;
+  string host_name = 2;
+  string path = 3;
+  bool binary = 4;
+}
+
+message CampaignPropertiesDto {
+  map<string, TokenPropertyListDto> token_types = 1;
+  google.protobuf.StringValue default_sight_type = 2;
+  repeated BooleanTokenOverlayDto token_states = 3;
+  repeated BarTokenOverlayDto token_bars = 4;
+  map<string, string> character_sheets = 5;
+  bool initiative_owner_permissions = 6;
+  bool initiative_movementLock = 7;
+  bool initiative_use_reverse_sort = 8;
+  bool initiative_panel_buttons_disabled = 9;
+  map<string, LightSourceListDto> light_sources = 10;
+  repeated string remote_repositories = 11;
+  repeated LookupTableDto lookup_tables = 12;
+  repeated SightTypeDto sight_types = 13;
+}
+
+message SightTypeDto {
+  string name = 1;
+  double multiplier = 2;
+  LightSourceDto personal_light_source = 3;
+  ShapeTypeDto shape = 4;
+  int32 arc = 5;
+  float distance = 6;
+  int32 offset = 7;
+  bool scale_with_token = 8;
+}
+
+message TokenPropertyDto {
+  string name = 1;
+  google.protobuf.StringValue short_name = 2;
+  bool high_priority = 3;
+  bool owner_only = 4;
+  bool gm_only = 5;
+  google.protobuf.StringValue default_value = 6;
+}
+
+message TokenOverlayDto {
+  string name = 1;
+  int32 order = 2;
+  google.protobuf.StringValue group = 3;
+  bool mouse_over = 4;
+  int32 opacity = 5;
+  bool show_gm = 6;
+  bool show_owner = 7;
+  bool show_others = 8;
+}
+
+message BarTokenOverlayDto {
+  enum SideDto {
+    TOP = 0;
+    BOTTOM = 1;
+    LEFT = 2;
+    RIGHT = 3;
+  }
+  enum BarTokenOverlayTypeDto {
+    MULTIPLE_IMAGE = 0;
+    SINGLE_IMAGE = 1;
+    DRAWN = 2;
+    TWO_TONE = 3;
+    TWO_IMAGES = 4;
+  }
+  TokenOverlayDto common = 1;
+  int32 increments = 2;
+  SideDto side = 3;
+  repeated string asset_ids = 4;
+  int32 color = 5;
+  int32 bg_color = 6;
+  int32 thickness = 7;
+  BarTokenOverlayTypeDto type = 8;
+}
+
+enum QuadrantDto {
+  NORTH_EAST = 0;
+  NORTH_WEST = 1;
+  SOUTH_EAST = 2;
+  SOUTH_WEST = 3;
+}
+
+message BooleanTokenOverlayDto {
+  enum BooleanTokenOverlayTypeDto {
+    X = 0;
+    YIELD = 1;
+    O = 2;
+    COLOR_DOT = 3;
+    DIAMOND = 4;
+    TRIANGLE = 5;
+    CROSS = 6;
+    FLOW_COLOR_DOT = 7;
+    FLOW_DIAMOND = 8;
+    FLOW_COLOR_SQUARE = 9;
+    FLOW_YIELD = 10;
+    SHADED = 11;
+    IMAGE = 12;
+    FLOW_IMAGE = 13;
+    CORNER_IMAGE = 14;
+  }
+  TokenOverlayDto common = 1;
+  int32 color = 2;
+  StrokeDto stroke = 3;
+  QuadrantDto quadrant = 4;
+  int32 grid_size = 5;
+  string asset_id = 6;
+  BooleanTokenOverlayTypeDto type = 7;
+}
+
+message StrokeDto {
+  enum CapDto {
+    CAP_BUTT = 0;
+    CAP_ROUND = 1;
+    CAP_SQUARE = 2;
+  }
+  enum JoinDto {
+    JOIN_MITER = 0;
+    JOIN_ROUND = 1;
+    JOIN_BEVEL = 2;
+  }
+  float width = 1;
+  CapDto cap = 2;
+  JoinDto join = 3;
+}
+
+message TokenPropertyListDto {
+  repeated TokenPropertyDto properties = 1;
+}
+
+message LightSourceListDto {
+  repeated LightSourceDto light_sources = 1;
+}
+
+
+enum WalkerMetricDto {
+  NO_DIAGONALS = 0;
+  MANHATTAN = 1;
+  ONE_TWO_ONE = 2;
+  ONE_ONE_ONE = 3;
+}
+
+enum RoleDto {
+  PLAYER = 0;
+  GM = 1;
+}
+
+enum TopologyTypeDto {
+  WALL_VBL = 0;
+  HILL_VBL = 1;
+  PIT_VBL = 2;
+  MBL = 3;
+}
+
+// for token size_map
+enum GridTypeDto {
+  Square = 0;
+  Gridless = 1;
+  HexVertical = 2;
+  HexHorizontal = 3;
+  Isometric = 4;
+}
+
+message TokenDto {
+  message State {
+    oneof state_type {
+      bool bool_value = 1;
+      double double_value = 2;
+    }
+  }
+  enum TokenShape {
+    TOP_DOWN = 0;
+    CIRCLE = 1;
+    SQUARE = 2;
+    FIGURE = 3;
+  }
+  string id = 1;
+  bool being_impersonated = 2;
+  string exposed_area_guid = 3;
+  map<string, string> image_asset_map = 4;
+  google.protobuf.StringValue current_image_asset = 5;
+  int32 x = 6;
+  int32 y = 7;
+  int32 z = 8;
+  int32 anchor_x = 9;
+  int32 anchor_y = 10;
+  double size_scale = 11;
+  int32 last_x = 12;
+  int32 last_y = 13;
+  PathDto last_path = 14;
+  bool snap_to_scale = 15;
+  int32 width = 16;
+  int32 height = 17;
+  int32 iso_width = 18;
+  int32 iso_height = 19;
+  double scale_x = 20;
+  double scale_y = 21;
+  map<string, string> size_map = 22;
+  bool snap_to_grid = 23;
+  bool is_visible = 24;
+  bool visible_only_to_owner = 25;
+  int32 vbl_color_sensitivity = 26;
+  int32 always_visible_tolerance = 27;
+  bool is_always_visible = 28;
+  AreaDto vbl = 29;
+  AreaDto hillVbl = 65;
+  AreaDto pitVbl = 66;
+  AreaDto mbl = 67;
+  string name = 30;
+  repeated string owner_list = 31;
+  int32 owner_type = 32;
+  string token_shape = 33;
+  string token_type = 34;
+  string layer = 35;
+  string property_type = 36;
+  google.protobuf.Int32Value facing = 37;
+  google.protobuf.Int32Value halo_color = 38;
+  google.protobuf.Int32Value  vision_overlay_color = 39;
+  float token_opacity = 40;
+  string speech_name = 41;
+  double terrain_modifier = 42;
+  TerrainModifierOperationDto terrain_modifier_operation = 43;
+  repeated TerrainModifierOperationDto terrain_modifiers_ignored = 44;
+  bool is_flipped_x = 45;
+  bool is_flipped_y = 46;
+  bool is_flipped_iso = 47;
+  google.protobuf.StringValue charsheet_image = 48;
+  google.protobuf.StringValue portrait_image = 49;
+  repeated AttachedLightSourceDto light_sources = 50;
+  google.protobuf.StringValue sight_type = 51;
+  bool has_sight = 52;
+  bool has_image_table = 53;
+  google.protobuf.StringValue image_table_name = 54;
+  google.protobuf.StringValue label = 55;
+  google.protobuf.StringValue notes = 56;
+  google.protobuf.StringValue gm_notes = 57;
+  google.protobuf.StringValue gm_name = 58;
+  map<string, TokenDto.State> state = 59;
+  map<string, string> properties = 60;
+  map<int32, MacroButtonPropertiesDto> macro_properties = 61;
+  map<string, string> speech = 62;
+  HeroLabDataDto hero_lab_data = 63;
+  bool allow_uri_access = 64;
+  string notes_type = 68;
+  string gm_notes_type = 69;
+}
+
+message PathDto {
+  enum PointType {
+    CELL_POINT = 0;
+    ZONE_POINT = 1;
+  }
+  PointType point_type = 1;
+  repeated IntPointDto cells = 2;
+  repeated IntPointDto waypoints = 3;
+}
+
+enum TerrainModifierOperationDto {
+    NONE = 0;
+    MULTIPLY = 1;
+    ADD = 2;
+    BLOCK = 3;
+    FREE = 4;
+}
+
+message TerrainModifierOperationListDto {
+  repeated TerrainModifierOperationDto modifiers = 1;
+}
+
+message AttachedLightSourceDto {
+  string light_source_id = 1;
+}
+
+message MacroButtonPropertiesDto {
+  string macro_id = 1;
+  string save_location = 2;
+  int32 index = 3;
+  string color_key = 4;
+  string hot_key = 5;
+  string command = 6;
+  string label = 7;
+  string group = 8;
+  string sortby = 9;
+  bool auto_execute = 10;
+  bool include_label = 11;
+  bool apply_to_tokens = 12;
+  string font_color_key = 13;
+  string font_size = 14;
+  string min_width = 15;
+  string max_width = 16;
+  bool allow_player_edits = 17;
+  string tool_tip = 18;
+  bool display_hot_key = 19;
+}
+
+message MacroButtonPropertiesListDto {
+  repeated MacroButtonPropertiesDto macros = 1;
+}
+
+message HeroLabDataDto {
+  google.protobuf.StringValue hero_lab_statblock_asset_id = 1;
+  string name = 2;
+  google.protobuf.StringValue summary = 3;
+  google.protobuf.StringValue player_name = 4;
+  google.protobuf.StringValue game_system = 5;
+  google.protobuf.StringValue hero_lab_index = 6;
+  google.protobuf.StringValue minion_master_index = 7;
+  google.protobuf.StringValue minion_master_name = 8;
+  bool is_ally = 9;
+  bool is_dirty = 10;
+  bool is_minion = 11;
+  google.protobuf.StringValue portfolio_path = 12;
+  map<string, string> hero_image_assets = 13;
+}
+
+message ScriptTypeDto {
+  oneof type {
+    double double_val = 1;
+    string string_val = 2;
+    string json_val = 3;
+  }
+}
+
+message TextMessageDto {
+  int32 channel = 1;
+  google.protobuf.StringValue target = 2;
+  string message = 3;
+  string source = 4;
+  repeated string transform = 5;
+}
+
+message PlayerDto {
+  string name = 1;
+  string role = 2;
+}
+
+enum AssetDtoType {
+  IMAGE = 0;
+  AUDIO = 1;
+  HTML = 2;
+  DATA = 3;
+  MARKDOWN = 4;
+  JAVASCRIPT = 5;
+  CSS = 6;
+  TEXT = 7;
+  JSON = 8;
+  XML = 9;
+  PDF = 10;
+  MTLIB = 11;
+  INVAlID = 12;
+}
+
+message AssetDto {
+  string md5_key = 1;
+  string name = 2;
+  string extension = 3;
+  AssetDtoType type = 4;
+  bytes data = 5;
+}
+
+message LabelDto {
+  string id = 1;
+  string label = 2;
+  int32 x = 3;
+  int32 y = 4;
+  bool show_background = 5;
+  int32 foreground_color = 6;
+}
+
+message ZoneDto {
+  enum TokenSelectionDto {
+    PC = 0;
+    NPC = 1;
+    ALL = 2;
+    GM = 3;
+  }
+  enum VisionTypeDto {
+    OFF = 0;
+    DAY = 1;
+    NIGHT = 2;
+  }
+  enum LightingStyleDto {
+      ENVIRONMENTAL = 0;
+      OVERTOP = 1;
+  }
+  enum AStarRoundingOptionsDto {
+    NONE = 0;
+    CELL_UNIT = 1;
+    INTEGER = 2;
+  }
+  int64 creation_time = 1;
+  string id = 2;
+  GridDto grid = 3;
+  int32 grid_color = 4;
+  float image_scale_x = 5;
+  float image_scale_y = 6;
+  int32 token_vision_distance = 7;
+  double units_per_cell = 8;
+  AStarRoundingOptionsDto a_star_rounding = 9;
+  repeated TopologyTypeDto topologyTypes = 10;
+  repeated DrawnElementDto drawables = 11;
+  repeated DrawnElementDto gm_drawables = 12;
+  repeated DrawnElementDto object_drawables = 13;
+  repeated DrawnElementDto background_drawables = 14;
+  repeated LabelDto labels = 15;
+  repeated TokenDto tokens = 16;
+  map<string, AreaDto> exposed_area_meta = 17;
+  InitiativeListDto initiative = 18;
+  AreaDto exposed_area = 19;
+  bool has_fog = 20;
+  DrawablePaintDto fog_paint = 21;
+  AreaDto topology = 22;
+  AreaDto hill_vbl = 23;
+  AreaDto pit_vbl = 24;
+  AreaDto topology_terrain = 25;
+  DrawablePaintDto background_paint = 26;
+  google.protobuf.StringValue map_asset = 27;
+  IntPointDto boardPosition = 28;
+  bool draw_board = 29;
+  bool boardChanged = 30;
+  string name = 31;
+  google.protobuf.StringValue player_alias = 32;
+  bool is_visible = 33;
+  VisionTypeDto vision_type = 34;
+  LightingStyleDto lighting_style = 35;
+  TokenSelectionDto token_selection = 36;
+  int32 height = 37;
+  int32 width = 38;
+}
+
+message InitiativeListDto {
+  repeated TokenInitiativeDto tokens = 1;
+  int32 current = 2;
+  int32 round = 3;
+  string zone_id = 4;
+  bool hide_npc = 5;
+}
+
+message TokenInitiativeDto {
+  string token_id = 1;
+  bool holding = 2;
+  google.protobuf.StringValue state = 3;
+}
+
+message GridDto {
+  int32 offset_x = 1;
+  int32 offset_y = 2;
+  int32 size = 3;
+  AreaDto cell_shape = 4;
+  oneof type {
+    SquareGridDto square_grid = 5;
+    GridlessGridDto gridless_grid = 6;
+    HexGridDto hex_grid = 7;
+    IsometricGridDto isometric_grid = 8;
+  }
+}
+
+message SquareGridDto {}
+message GridlessGridDto {}
+message IsometricGridDto {}
+message HexGridDto {
+  bool vertical = 1;
+  double hex_ratio = 2;
+  double edge_projection = 3;
+  double minor_radius = 4;
+  double edge_length = 5;
+  double scaled_edge_projection = 6;
+  double scaled_minor_radius = 7;
+  double scaled_edge_length = 8;
+  double last_scale = 9;
+  IntPointDto cellOffset = 10;
+}
+
+enum TokenUpdateDto {
+    setState = 0;
+    setAllStates = 1;
+    setPropertyType = 2;
+    setPC = 3;
+    setNPC = 4;
+    setLayer = 5;
+    setLayerShape = 6;
+    setShape = 7;
+    setSnapToScale = 8;
+    setSnapToGrid = 9;
+    setSnapToGridAndXY = 10;
+    setFootprint = 11;
+    setProperty = 12;
+    resetProperty = 13;
+    setZOrder = 14;
+    setFacing = 15;
+    clearAllOwners = 16;
+    setOwnedByAll = 17;
+    addOwner = 18;
+    setScaleX = 19;
+    setScaleY = 20;
+    setScaleXY = 21;
+    setNotes = 22;
+    setGMNotes = 23;
+    saveMacro = 24;
+    saveMacroList = 25;
+    deleteMacro = 26;
+    setX = 27;
+    setY = 28;
+    setXY = 29;
+    setHaloColor = 30;
+    setLabel = 31;
+    setName = 32;
+    setGMName = 33;
+    setVisible = 34;
+    setVisibleOnlyToOwner = 35;
+    setIsAlwaysVisible = 36;
+    setTokenOpacity = 37;
+    setTerrainModifier = 38;
+    setTerrainModifierOperation = 39;
+    setTerrainModifiersIgnored = 40;
+    setTopology = 41;
+    setImageAsset = 42;
+    setPortraitImage = 43;
+    setCharsheetImage = 44;
+    setLayout = 45;
+    clearLightSources = 46;
+    removeLightSource = 47;
+    addLightSource = 48;
+    setHasSight = 49;
+    setSightType = 50;
+    flipX = 51;
+    flipY = 52;
+    flipIso = 53;
+    setSpeechName = 54;
+    removeFacing = 55;
+}
+
+message AssetTransferHeaderDto {
+  string id = 1;
+  string name = 2;
+  int64  size = 3;
+}
+
+message AssetChunkDto {
+  string id = 1;
+  bytes data = 2;
+}
+
+message TokenPropertyValueDto {
+  oneof value_type {
+    int32 int_value = 1;
+    bool bool_value = 2;
+    string string_value = 3;
+    double double_value = 4;
+    MacroButtonPropertiesListDto macros = 5;
+    LightSourceDto light_source = 6;
+    AreaDto area = 7;
+    StringListDto string_values = 8;
+    GridDto grid = 9;
+    TokenFootPrintDto token_foot_print = 10;
+    string topology_type = 11;
+  }
+}
+
+message StringListDto {
+  repeated string values = 1;
+}
+
+message PointerDto {
+  string zone_guid = 1;
+  IntPointDto point = 2;
+  double direction = 3;
+  string type = 4;
+}
+
+message TransferableAddOnLibraryDto {
+  string namespace = 1;
+  string version = 2;
+  string asset_key = 3;
+}
+
+message TokenFootPrintDto {
+  repeated IntPointDto cell_set = 1;
+  string name = 2;
+  string id = 3;
+  bool is_default = 4;;
+  double scale = 5;
+  bool localize_name = 6;
+}

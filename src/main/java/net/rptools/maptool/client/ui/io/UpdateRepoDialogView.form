@@ -1,0 +1,193 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.io.UpdateRepoDialogView">
+  <grid id="30751" binding="mainPanel" layout-manager="GridLayoutManager" row-count="10" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+    <margin top="5" left="5" bottom="5" right="5"/>
+    <constraints>
+      <xy x="10" y="10" width="506" height="442"/>
+    </constraints>
+    <properties/>
+    <border type="none"/>
+    <children>
+      <component id="938cd" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Save To:"/>
+        </properties>
+      </component>
+      <component id="b8a34" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Repositories are listed in the same order as they appear in the Campaign Properties."/>
+        </properties>
+      </component>
+      <component id="b4be1" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="FTP Server:"/>
+        </properties>
+      </component>
+      <component id="b7afe" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Username:"/>
+        </properties>
+      </component>
+      <component id="77ce3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Password:"/>
+        </properties>
+      </component>
+      <component id="4aba" class="javax.swing.JButton">
+        <constraints>
+          <grid row="9" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@okButton"/>
+          <text value="OK"/>
+          <toolTipText value="Begin the update process."/>
+        </properties>
+      </component>
+      <component id="c88c6" class="javax.swing.JButton">
+        <constraints>
+          <grid row="9" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@cancelButton"/>
+          <text value="Cancel"/>
+          <toolTipText value="Cancel the update."/>
+        </properties>
+      </component>
+      <component id="5bec2" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="6" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@hostname"/>
+          <text value=""/>
+          <toolTipText value="The FTP server name may be a hostname or an IP address.  When using an IPv6 address surround it with &quot;[&quot; and &quot;]&quot;."/>
+        </properties>
+      </component>
+      <component id="29283" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@username"/>
+          <text value=""/>
+          <toolTipText value="The username to login as on the FTP server."/>
+        </properties>
+      </component>
+      <component id="5bb50" class="javax.swing.JPasswordField">
+        <constraints>
+          <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@password"/>
+          <text value=""/>
+          <toolTipText value="The password associated with the above username.  It will not display here nor will it be saved for future use."/>
+        </properties>
+      </component>
+      <component id="ce9ac" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="5" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@saveTo"/>
+          <text value=""/>
+          <toolTipText value="Set this to one of the repositories in the list above.  You may double-click an entry from the list, use keyboard cut/paste, or type in the text."/>
+        </properties>
+      </component>
+      <component id="7d7ca" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="3" column="0" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;Double-click a repository to copy the repository location into the &lt;b&gt;Save To:&lt;/b&gt; field."/>
+        </properties>
+      </component>
+      <component id="78776" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Directory on Server:"/>
+        </properties>
+      </component>
+      <component id="cd20a" class="javax.swing.JTextField">
+        <constraints>
+          <grid row="7" column="1" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@directory"/>
+          <selectionEnd value="1"/>
+          <selectionStart value="1"/>
+          <text value="/"/>
+          <toolTipText value="&lt;html&gt;If your FTP login requires that you change directory to navigate to the location of the repository's &lt;b&gt;index.gz&lt;/b&gt; directory, enter the directory name here."/>
+        </properties>
+      </component>
+      <component id="2f2d3" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="Place a checkmark in each repository that you want to search for existing assets."/>
+        </properties>
+      </component>
+      <component id="e801b" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="4" column="0" row-span="1" col-span="5" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text value="&lt;html&gt;This is the &lt;b&gt;index.gz&lt;/b&gt; that will be updated with the new image information."/>
+        </properties>
+      </component>
+      <component id="9ffe0" class="javax.swing.JCheckBox">
+        <constraints>
+          <grid row="8" column="2" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <name value="@subdir"/>
+          <selected value="true"/>
+          <text value="Create subdir on server?"/>
+          <toolTipText value="Some FTP servers may not allow MapTool to create a directory.  If this is the case for your server yet you want new assets in their own directory, uncheck this field and create the directory yourself, then specify that directory as the location on the server."/>
+        </properties>
+      </component>
+      <hspacer id="ee1e8">
+        <constraints>
+          <grid row="9" column="2" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </hspacer>
+      <vspacer id="e8e08">
+        <constraints>
+          <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <scrollpane id="85552">
+        <constraints>
+          <grid row="2" column="0" row-span="1" col-span="5" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="ee28c" class="com.jidesoft.swing.CheckBoxListWithSelectable">
+            <constraints/>
+            <properties>
+              <toolTipText value="&amp;lt;html&amp;gt;These repositories are from the &amp;lt;b&amp;gt;Campaign Properties&amp;lt;/b&amp;gt; on the &amp;lt;b&amp;gt;Edit&amp;lt;/b&amp;gt; menu."/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+    </children>
+  </grid>
+</form>

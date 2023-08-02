@@ -102,13 +102,17 @@ public class InitiativeTransferHandler extends TransferHandler {
     return false;
   }
 
-  /** @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent) */
+  /**
+   * @see javax.swing.TransferHandler#getSourceActions(javax.swing.JComponent)
+   */
   @Override
   public int getSourceActions(JComponent c) {
     return COPY_OR_MOVE;
   }
 
-  /** @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent) */
+  /**
+   * @see javax.swing.TransferHandler#createTransferable(javax.swing.JComponent)
+   */
   @Override
   protected Transferable createTransferable(JComponent c) {
     JList displayList = (JList) c;

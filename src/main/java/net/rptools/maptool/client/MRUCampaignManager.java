@@ -22,7 +22,9 @@ import javax.swing.Action;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
 
-/** @author tylere */
+/**
+ * @author tylere
+ */
 public class MRUCampaignManager {
   // To increase max mru's need to update mnemonics code
   private static final int DEFAULT_MAX_MRU = 9;

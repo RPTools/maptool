@@ -22,6 +22,7 @@ import java.awt.Rectangle;
 import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 
 /**
  * Draw an empty circle over a token.
@@ -48,7 +49,9 @@ public class OTokenOverlay extends XTokenOverlay {
     super(aName, aColor, aWidth);
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new OTokenOverlay(getName(), getColor(), getWidth());
@@ -63,8 +66,8 @@ public class OTokenOverlay extends XTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
@@ -83,5 +86,15 @@ public class OTokenOverlay extends XTokenOverlay {
     g.setColor(tempColor);
     g.setStroke(tempStroke);
     g.setComposite(tempComposite);
+  }
+
+  public static OTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new OTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.O).build();
   }
 }

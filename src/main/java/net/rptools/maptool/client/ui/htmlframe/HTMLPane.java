@@ -53,8 +53,7 @@ public class HTMLPane extends JEditorPane {
   private final HTMLPaneEditorKit editorKit;
 
   /** The default rule for the body tag. */
-  private static final String CSS_RULE_BODY =
-      "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8}";
+  private static final String CSS_RULE_BODY = "body { font-family: sans-serif; font-size: %dpt; }";
   /** The default rule for the div tag. */
   private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
   /** The default rule for the span tag. */
@@ -92,7 +91,9 @@ public class HTMLPane extends JEditorPane {
     ToolTipManager.sharedInstance().registerComponent(this);
   }
 
-  /** @return the rule for the body tag */
+  /**
+   * @return the rule for the body tag
+   */
   public String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }

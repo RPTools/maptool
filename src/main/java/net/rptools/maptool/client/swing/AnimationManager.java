@@ -17,7 +17,9 @@ package net.rptools.maptool.client.swing;
 import java.util.ArrayList;
 import java.util.List;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class AnimationManager {
 
   private static final List<Animatable> animatableList = new ArrayList<Animatable>();

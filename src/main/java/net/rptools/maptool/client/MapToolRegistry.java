@@ -70,6 +70,7 @@ public class MapToolRegistry {
   public static class SeverConnectionDetails {
     public String address;
     public int port;
+    public boolean webrtc;
   }
 
   public enum RegisterResponse {
@@ -82,22 +83,54 @@ public class MapToolRegistry {
 
   public SeverConnectionDetails findInstance(String id) {
     OkHttpClient client = new OkHttpClient();
-    String requestUrl =
-        HttpUrl.parse(SERVER_DETAILS).newBuilder().addQueryParameter("name", id).build().toString();
+
+    String requestUrl;
+    try {
+      requestUrl =
+          HttpUrl.parse(SERVER_DETAILS)
+              .newBuilder()
+              .addQueryParameter("name", id)
+              .build()
+              .toString();
+    } catch (Exception e) {
+      log.error("Error building request url", e);
+      MapTool.showError("msg.error.fetchingRegistryInformation", e);
+      return new SeverConnectionDetails();
+    }
 
     Request request = new Request.Builder().url(requestUrl).build();
 
     try (Response response = client.newCall(request).execute()) {
-      JsonObject json = JsonParser.parseString(response.body().string()).getAsJsonObject();
+
+      // Check if we got an actual response. If we did not, just do an early return,
+      // the server isn't real.
+      var responseString = response.body().string();
+      if (responseString.isEmpty()) {
+        MapTool.showError("msg.error.fetchingRegistryInformation");
+        return new SeverConnectionDetails();
+      }
+
+      JsonObject json = JsonParser.parseString(responseString).getAsJsonObject();
       SeverConnectionDetails details = new SeverConnectionDetails();
 
       details.address = json.getAsJsonPrimitive("address").getAsString();
       details.port = json.getAsJsonPrimitive("port").getAsInt();
 
+      // currently the webrtc property is sent as int. In the future this will
+      // change to boolean. So we check what the type is. Can be removed when
+      // we get it as boolean.
+      var webrtcProperty = json.getAsJsonPrimitive("webrtc");
+      if (webrtcProperty.isBoolean()) {
+        details.webrtc = webrtcProperty.getAsBoolean();
+      } else {
+        details.webrtc = webrtcProperty.getAsInt() > 0;
+      }
+
       return details;
 
-    } catch (IOException | NullPointerException e) {
+    } catch (Exception e) {
       log.error("Error fetching instance from server registry", e);
+      MapTool.showError("msg.error.fetchingRegistryInformation", e);
       return new SeverConnectionDetails();
     }
   }
@@ -121,11 +154,12 @@ public class MapToolRegistry {
     }
   }
 
-  public RegisterResponse registerInstance(String id, int port) {
+  public RegisterResponse registerInstance(String id, int port, boolean webrtc) {
     JsonObject body = new JsonObject();
     body.addProperty("name", id);
     body.addProperty("port", port);
     body.addProperty("address", getAddress());
+    body.addProperty("webrtc", webrtc);
     if (MapTool.isDevelopment()) {
       body.addProperty("version", "Dev");
     } else {

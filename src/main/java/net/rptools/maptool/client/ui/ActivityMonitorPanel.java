@@ -17,15 +17,17 @@ package net.rptools.maptool.client.ui;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Image;
-import java.io.IOException;
 import javax.swing.JComponent;
 import net.rptools.clientserver.ActivityListener;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.swing.Animatable;
 import net.rptools.maptool.client.swing.AnimationManager;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ActivityMonitorPanel extends JComponent implements ActivityListener, Animatable {
   private static final int PADDING = 5;
   private static final int ON_DELAY = 100;
@@ -48,29 +50,20 @@ public class ActivityMonitorPanel extends JComponent implements ActivityListener
   private static Dimension prefSize;
 
   static {
-    try {
-      transmitOn =
-          ImageUtil.getImage("net/rptools/maptool/client/image/transmitOn.png"); // $NON-NLS-1$
-      transmitOff =
-          ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); // $NON-NLS-1$
+    transmitOn = RessourceManager.getSmallIcon(Icons.STATUSBAR_TRANSMIT_ON).getImage();
+    transmitOff = RessourceManager.getSmallIcon(Icons.STATUSBAR_TRANSMIT_OFF).getImage();
+    receiveOn = RessourceManager.getSmallIcon(Icons.STATUSBAR_RECEIVE_ON).getImage();
+    receiveOff = RessourceManager.getSmallIcon(Icons.STATUSBAR_RECEIVE_OFF).getImage();
 
-      receiveOn =
-          ImageUtil.getImage("net/rptools/maptool/client/image/receiveOn.png"); // $NON-NLS-1$
-      receiveOff =
-          ImageUtil.getImage("net/rptools/maptool/client/image/activityOff.png"); // $NON-NLS-1$
+    int width =
+        Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null))
+            + Math.max(receiveOn.getWidth(null), receiveOff.getWidth(null));
+    int height =
+        Math.max(
+            Math.max(transmitOn.getHeight(null), transmitOff.getHeight(null)),
+            Math.max(receiveOn.getHeight(null), receiveOff.getHeight(null)));
 
-      int width =
-          Math.max(transmitOn.getWidth(null), transmitOff.getWidth(null))
-              + Math.max(receiveOn.getWidth(null), receiveOff.getWidth(null));
-      int height =
-          Math.max(transmitOn.getHeight(null), transmitOff.getHeight(null))
-              + Math.max(receiveOn.getHeight(null), receiveOff.getHeight(null));
-
-      prefSize = new Dimension(width + (PADDING * 2) + 2, height);
-    } catch (IOException ioe) {
-      // TODO: handle this better
-      ioe.printStackTrace();
-    }
+    prefSize = new Dimension(width + (PADDING * 2) + 2, height);
   }
 
   public ActivityMonitorPanel() {

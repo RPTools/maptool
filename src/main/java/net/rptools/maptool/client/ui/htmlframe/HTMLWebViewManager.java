@@ -24,6 +24,7 @@ import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
@@ -43,6 +44,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.util.PromiseUtil;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -75,7 +77,7 @@ public class HTMLWebViewManager {
   private boolean isFlushed = true;
 
   /** The bridge from Javascript to Java. */
-  private final JavaBridge bridge = new JavaBridge();
+  private final JavaBridge bridge;
 
   // Event listener for the href macro link clicks.
   private final EventListener listenerA = this::fixHref;
@@ -84,14 +86,46 @@ public class HTMLWebViewManager {
 
   /** Represents a bridge from Javascript to Java. */
   public class JavaBridge {
+
+    public JavaBridge(HTMLPanelContainer container, String kind, String name) {
+      this.kind = kind;
+      this.name = name;
+      this.container = container;
+    }
+
     /** Magic value that window.status must take to initiate the bridge. */
     public static final String BRIDGE_VALUE = "MY_INITIALIZING_VALUE";
 
     /** Name of the Bridge. */
     private static final String NAME = "MapTool";
 
+    private final String name;
+
+    private final String kind;
+
+    private final HTMLPanelContainer container;
+
+    private JSObject window;
+
     public MTXMLHttpRequest makeXMLHttpRequest(JSObject ctx, String href) {
       return new MTXMLHttpRequest(ctx, href);
+    }
+
+    public String getName() {
+      return name;
+    }
+
+    public String getKind() {
+      return kind;
+    }
+
+    public JSObject getUserData() {
+      Object frameValue = container.getValue();
+      if (frameValue == null) {
+        frameValue = "";
+      }
+      return PromiseUtil.convertToPromise(
+          window, CompletableFuture.completedFuture(frameValue.toString()));
     }
 
     /**
@@ -195,22 +229,25 @@ public class HTMLWebViewManager {
   private static final String SCRIPT_ANCHOR =
       "element = document.getElementById('%s'); if(element != null) {element.scrollIntoView();}";
 
-  /** JS that directs the console.log function to the Java bridge function "log". */
-  private static final String SCRIPT_REPLACE_LOG =
-      "console.log = function(message){" + JavaBridge.NAME + ".log(message);};";
-
   /** JS to initialize the Java bridge. Needs to be the first script of the page. */
   private static final String SCRIPT_BRIDGE =
       String.format(
           "<SCRIPT>window.status = '%s'; window.status = '';</SCRIPT>", JavaBridge.BRIDGE_VALUE);
 
   private static final String[] INITIALIZATION_SCRIPTS = {
+    "net/rptools/maptool/client/html5/javascript/Console.js",
     "net/rptools/maptool/client/html5/javascript/Replace_Submit.js",
     "net/rptools/maptool/client/html5/javascript/Mutation_Observer.js",
     "net/rptools/maptool/client/html5/javascript/XMLHttpRequest.js"
   };
 
-  HTMLWebViewManager() {}
+  HTMLWebViewManager(String kind, String name) {
+    bridge = new JavaBridge((HTMLPanelContainer) this, kind, name);
+  }
+
+  HTMLWebViewManager(HTMLPanelContainer container, String kind, String name) {
+    bridge = new JavaBridge(container, kind, name);
+  }
 
   /**
    * Setup the WebView
@@ -285,9 +322,7 @@ public class HTMLWebViewManager {
     if (JavaBridge.BRIDGE_VALUE.equals(event.getData())) {
       JSObject window = (JSObject) webEngine.executeScript("window");
       window.setMember(JavaBridge.NAME, bridge);
-
-      // Redirect console.log to the JavaBridge
-      webEngine.executeScript(SCRIPT_REPLACE_LOG);
+      bridge.window = window;
 
       for (String rsrc : INITIALIZATION_SCRIPTS) {
         try {

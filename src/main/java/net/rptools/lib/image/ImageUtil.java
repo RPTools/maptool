@@ -14,13 +14,13 @@
  */
 package net.rptools.lib.image;
 
+import com.twelvemonkeys.image.ResampleOp;
 import java.awt.AlphaComposite;
 import java.awt.Color;
 import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.MediaTracker;
-import java.awt.RenderingHints;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.awt.image.ColorModel;
@@ -38,11 +38,14 @@ import java.util.Map;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
+import net.rptools.maptool.client.AppPreferences;
 import org.apache.commons.io.FileUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class ImageUtil {
   private static final Logger log = LogManager.getLogger();
 
@@ -93,10 +96,6 @@ public class ImageUtil {
       dataStream.write(bite);
     }
     return bytesToImage(dataStream.toByteArray(), image);
-  }
-
-  public static Image getImage(String image, int w, int h) throws IOException {
-    return resizeImage(getImage(image), w, h);
   }
 
   public static BufferedImage getCompatibleImage(String image) throws IOException {
@@ -156,8 +155,7 @@ public class ImageUtil {
     Graphics2D g = null;
     try {
       g = compImg.createGraphics();
-      g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-
+      AppPreferences.getRenderQuality().setRenderingHints(g);
       g.drawImage(img, 0, 0, width, height, null);
     } finally {
       if (g != null) {
@@ -417,28 +415,6 @@ public class ImageUtil {
     return workImage;
   }
 
-  /*
-   * Jamz: Some common image utility methods
-   */
-  public static ImageIcon resizeImage(ImageIcon imageIcon) {
-    // Default to 30x30 w/h not passed
-    return resizeImage(imageIcon, 30, 30);
-  }
-
-  public static ImageIcon resizeImage(ImageIcon imageIcon, int w, int h) {
-    return new ImageIcon(imageIcon.getImage().getScaledInstance(w, h, Image.SCALE_SMOOTH));
-  }
-
-  public static Image resizeImage(Image image) {
-    // Default to 30x30 w/h not passed
-    return resizeImage(image, 30, 30);
-  }
-
-  public static Image resizeImage(Image image, int w, int h) {
-    // Default to 30x30 w/h not passed
-    return image.getScaledInstance(w, h, Image.SCALE_SMOOTH);
-  }
-
   public static ImageIcon scaleImage(ImageIcon icon, int w, int h) {
     int nw = icon.getIconWidth();
     int nh = icon.getIconHeight();
@@ -465,12 +441,8 @@ public class ImageUtil {
    * @return The scaled BufferedImage
    */
   public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
-    BufferedImage scaled = new BufferedImage(width, height, image.getType());
-    Graphics2D g = scaled.createGraphics();
-    g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-    g.drawImage(image, 0, 0, width, height, null);
-    g.dispose();
-
-    return scaled;
+    ResampleOp resampleOp =
+        new ResampleOp(width, height, AppPreferences.getRenderQuality().getResampleOpFilter());
+    return resampleOp.filter(image, null);
   }
 }

@@ -14,31 +14,22 @@
  */
 package net.rptools.maptool.client.ui;
 
+import com.jidesoft.docking.DockingManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ItemEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppActions;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppSetup;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.MRUCampaignManager;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
@@ -60,18 +51,14 @@ public class AppMenuBar extends JMenuBar {
     add(createViewMenu());
     add(createToolsMenu());
     add(createWindowMenu());
-    Map<String, File> themes = AppUtil.getUIThemeNames();
-    if (themes.size() > 0) {
-      add(createThemesMenu(themes));
-    }
     add(createHelpMenu());
     // shift to the right
     add(Box.createGlue());
 
     add(
         createMinimizeButton(
-            "net/rptools/maptool/client/image/tool/downArrow.png",
-            "net/rptools/maptool/client/image/tool/upArrow.png",
+            Icons.TOOLBAR_HIDE_ON,
+            Icons.TOOLBAR_HIDE_OFF,
             I18N.getText("tools.hidetoolbar.tooltip"),
             I18N.getText("tools.unhidetoolbar.tooltip")));
   }
@@ -278,6 +265,16 @@ public class AppMenuBar extends JMenuBar {
     menu.add(gridSizeMenu);
 
     menu.addSeparator();
+    JCheckBoxMenuItem toggleLumensOverlay =
+        new RPCheckBoxMenuItem(AppActions.TOGGLE_LUMENS_OVERLAY, menu);
+    toggleLumensOverlay.setSelected(AppState.isShowLumensOverlay());
+    menu.add(toggleLumensOverlay);
+    JCheckBoxMenuItem toggleShowLights =
+        new RPCheckBoxMenuItem(AppActions.TOGGLE_SHOW_LIGHTS, menu);
+    toggleShowLights.setSelected(AppState.isShowLights());
+    menu.add(toggleShowLights);
+
+    menu.addSeparator();
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_DRAW_MEASUREMENTS, menu));
     menu.add(new RPCheckBoxMenuItem(AppActions.TOGGLE_DOUBLE_WIDE, menu));
 
@@ -332,14 +329,10 @@ public class AppMenuBar extends JMenuBar {
    * @return the JToggleButton
    */
   protected JToggleButton createMinimizeButton(
-      final String icon, final String offIcon, String hidetooltip, String unhidetooltip) {
+      final Icons icon, final Icons offIcon, String hidetooltip, String unhidetooltip) {
     final JToggleButton button = new JToggleButton();
-    try {
-      button.setSelectedIcon(new ImageIcon(ImageUtil.getImage((icon))));
-      button.setIcon(new ImageIcon(ImageUtil.getImage((offIcon))));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    }
+    button.setSelectedIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_ON));
+    button.setIcon(RessourceManager.getSmallIcon(Icons.TOOLBAR_HIDE_OFF));
     button.setOpaque(false);
     button.setContentAreaFilled(false);
     button.setBorderPainted(false);
@@ -386,10 +379,20 @@ public class AppMenuBar extends JMenuBar {
       Arrays.sort(helpArray);
       for (String key : helpArray) {
         OpenUrlAction temp = new AppActions.OpenUrlAction(key);
-        /*
-         * TODO This could be more efficient by using ImageManager or AssetManager, but I'm not sure those facilities have been initialized by the time this code is executed so this is safer.
-         * :-/
-         */
+        switch (key) {
+          case "action.helpurl.01" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_DOCUMENTATION));
+          case "action.helpurl.02" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_TUTORIALS));
+          case "action.helpurl.03" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FORUMS));
+          case "action.helpurl.04" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_NETWORK_SETUP));
+          case "action.helpurl.05" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_SCRIPTING));
+          case "action.helpurl.06" -> temp.putValue(
+              Action.SMALL_ICON, RessourceManager.getSmallIcon(Icons.MENU_FRAMEWORKS));
+        }
         menu.add(new JMenuItem(temp));
       }
       menu.addSeparator();
@@ -412,7 +415,9 @@ public class AppMenuBar extends JMenuBar {
     return menu;
   }
 
-  /** @return an overlay menu. */
+  /**
+   * @return an overlay menu.
+   */
   protected JMenu createOverlayMenu() {
     overlayMenu = I18N.createMenu("menu.overlay");
     overlayMenu.setEnabled(false); // empty by default
@@ -464,7 +469,19 @@ public class AppMenuBar extends JMenuBar {
           }
 
           public void actionPerformed(ActionEvent e) {
-            MapTool.getFrame().getDockingManager().resetToDefault();
+            DockingManager dm = MapTool.getFrame().getDockingManager();
+            dm.resetToDefault();
+
+            /* Issue #2485
+             * Calling resetToDefault() will expose all macro created frames and placeholders,
+             * so they need to hidden after
+             */
+            List<String> mtFrameNames =
+                Stream.of(MapToolFrame.MTFrame.values()).map(Enum::name).toList();
+            dm.getAllFrames().stream()
+                .filter(f -> !mtFrameNames.contains(f))
+                .forEach(dm::hideFrame);
+            /* /Issue #2485 */
           }
         });
 
@@ -481,26 +498,6 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
     menu.add(new JMenuItem(AppActions.SHOW_TRANSFER_WINDOW));
 
-    return menu;
-  }
-
-  private JMenu createThemesMenu(Map<String, File> themes) {
-    JMenu menu = I18N.createMenu("menu.themes");
-
-    for (Entry<String, File> theme : themes.entrySet()) {
-      menu.add(
-          new AbstractAction() {
-            {
-              putValue(Action.NAME, theme.getKey());
-            }
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-              AppUtil.setThemeName(theme.getKey());
-              MapTool.showInformation(I18N.getText("msg.theme.needrestart"));
-            }
-          });
-    }
     return menu;
   }
 

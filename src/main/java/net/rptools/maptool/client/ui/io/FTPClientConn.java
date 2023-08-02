@@ -20,7 +20,9 @@ import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 class FTPClientConn {
   private static final String PROTOCOL = "ftp://";
   private static final String TYPE_IMAGE = ";type=i";

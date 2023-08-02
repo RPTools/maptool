@@ -27,6 +27,7 @@ import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
@@ -64,7 +65,8 @@ public class AssetManager {
   private static final Logger log = LogManager.getLogger(AssetManager.class);
 
   /** Assets are associated with the MD5 sum of their raw data */
-  private static Map<MD5Key, Asset> assetMap = new ConcurrentHashMap<MD5Key, Asset>();
+  private static final Map<MD5Key, Asset> assetMap =
+      Collections.synchronizedMap(new HashMap<MD5Key, Asset>());
 
   /** Location of the cache on the filesystem */
   private static File cacheDir;
@@ -247,7 +249,12 @@ public class AssetManager {
       }
     }
 
-    assetMap.put(asset.getMD5Key(), asset);
+    synchronized (assetMap) {
+      var oldAsset = assetMap.get(asset.getMD5Key());
+      if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+        assetMap.put(asset.getMD5Key(), asset);
+      }
+    }
 
     // Invalid images are represented by empty assets.
     // Don't persist those
@@ -284,7 +291,7 @@ public class AssetManager {
           Asset asset = getAsset(id);
 
           // Simplest case, we already have it
-          if (asset != null) {
+          if (asset != null && asset.getData() != null && asset.getData().length > 0) {
             for (AssetAvailableListener listener : listeners) {
               listener.assetAvailable(id);
             }
@@ -473,7 +480,12 @@ public class AssetManager {
         return null;
       }
 
-      assetMap.put(id, asset);
+      synchronized (assetMap) {
+        var oldAsset = assetMap.get(id);
+        if (oldAsset == null || oldAsset.getData() == null || oldAsset.getData().length == 0) {
+          assetMap.put(id, asset);
+        }
+      }
 
       return asset;
     } catch (IOException ioe) {
@@ -502,15 +514,24 @@ public class AssetManager {
    * @throws IOException in case of an I/O error
    */
   public static Asset createAsset(URL url) throws IOException {
+    return createAsset(url, null);
+  }
+
+  public static Asset createAsset(URL url, Asset.Type assetType) throws IOException {
     // Create a temporary file from the downloaded URL
     File newFile = File.createTempFile("remote", null, null);
     try {
       FileUtils.copyURLToFile(url, newFile);
       if (!newFile.exists() || newFile.length() < 20) return null;
-      Asset temp =
-          Asset.createAssetDetectType(
-              FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
-      return temp;
+      if (assetType != null) {
+        return Asset.createAsset(
+            FileUtil.getNameWithoutExtension(url),
+            FileUtils.readFileToByteArray(newFile),
+            assetType);
+      } else {
+        return Asset.createAssetDetectType(
+            FileUtil.getNameWithoutExtension(url), FileUtils.readFileToByteArray(newFile));
+      }
     } finally {
       newFile.delete();
     }

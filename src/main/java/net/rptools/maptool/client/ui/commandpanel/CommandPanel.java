@@ -14,34 +14,37 @@
  */
 package net.rptools.maptool.client.ui.commandpanel;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
-import net.rptools.lib.AppEvent;
-import net.rptools.lib.AppEventListener;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.*;
+import net.rptools.maptool.client.events.ChatMessageAdded;
+import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.FindTokenFunctions;
 import net.rptools.maptool.client.macro.MacroManager;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.chat.ChatProcessor;
 import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
+import net.rptools.maptool.client.ui.theme.Icons;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Zone.Event;
+import net.rptools.maptool.model.tokens.TokenPanelChanged;
+import net.rptools.maptool.model.zones.TokenEdited;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
-public class CommandPanel extends JPanel
-    implements Observer, AppEventListener, ModelChangeListener {
+public class CommandPanel extends JPanel {
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -57,6 +60,9 @@ public class CommandPanel extends JPanel
   private JPopupMenu emotePopup;
   private JButton emotePopupButton;
   private String typedCommandBuffer;
+  private BufferedImage cancelButton =
+      ImageUtil.createCompatibleImage(
+          RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
   // private long chatNotifyDuration; // Initialize it on first load
@@ -81,7 +87,7 @@ public class CommandPanel extends JPanel
     initializeSmilies();
     addFocusHotKey();
 
-    MapTool.getEventDispatcher().addListener(this, MapTool.ZoneEvent.Activated);
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   public ChatProcessor getChatProcessor() {
@@ -192,12 +198,16 @@ public class CommandPanel extends JPanel
     }
   }
 
-  /** @return whether the current identity is a token. */
+  /**
+   * @return whether the current identity is a token.
+   */
   public boolean isImpersonatingToken() {
     return getCurrentIdentity().validToken();
   }
 
-  /** @return whether the global identity is a token. */
+  /**
+   * @return whether the global identity is a token.
+   */
   public boolean isGlobalImpersonatingToken() {
     return globalIdentity.validToken();
   }
@@ -244,21 +254,6 @@ public class CommandPanel extends JPanel
     setCharacterLabel(token == null ? label : token.getName());
   }
 
-  @Override
-  public void modelChanged(ModelChangeEvent event) {
-    if (event.eventType == Event.TOKEN_PANEL_CHANGED || event.eventType == Event.TOKEN_EDITED) {
-      GUID tokenId = globalIdentity.getIdentityGUID();
-      if (tokenId != null) {
-        // If the impersonated token has changed, update the identity
-
-        Token impersonated = getImpersonatedAmongList(event.getTokensAsList());
-        if (impersonated != null) {
-          setGlobalIdentity(new TokenIdentity(impersonated));
-        }
-      }
-    }
-  }
-
   private boolean isTokenImpersonated(Token token) {
     return token != null && token.getId().equals(globalIdentity.getIdentityGUID());
   }
@@ -272,15 +267,47 @@ public class CommandPanel extends JPanel
     return null;
   }
 
-  @Override
-  public void handleAppEvent(AppEvent event) {
-    Zone oldZone = (Zone) event.getOldValue();
-    Zone newZone = (Zone) event.getNewValue();
+  @Subscribe
+  private void onTokenPanelChanged(TokenPanelChanged event) {
+    updateIdentityIfImpersonatedChanged(Collections.singletonList(event.token()));
+  }
 
-    if (oldZone != null) {
-      oldZone.removeModelChangeListener(this);
+  @Subscribe
+  private void onTokenEdited(TokenEdited event) {
+    updateIdentityIfImpersonatedChanged(Collections.singletonList(event.token()));
+  }
+
+  private void updateIdentityIfImpersonatedChanged(List<Token> tokens) {
+    GUID tokenId = globalIdentity.getIdentityGUID();
+    if (tokenId != null) {
+      // If the impersonated token has changed, update the identity
+
+      Token impersonated = getImpersonatedAmongList(tokens);
+      if (impersonated != null) {
+        setGlobalIdentity(new TokenIdentity(impersonated));
+      }
     }
-    newZone.addModelChangeListener(this);
+  }
+
+  @Subscribe
+  void onPreferencesChanged(PreferencesChanged event) {
+    // Resize on demand
+    if (commandTextArea != null) {
+      commandTextArea.setFont(
+          commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+      doLayout();
+    }
+
+    // Update whenever the preferences change
+    if (messagePanel != null) {
+      messagePanel.refreshRenderer();
+    }
+  }
+
+  @Subscribe
+  void onChatMessageAdded(ChatMessageAdded event) {
+    addMessage(event.message());
+    System.out.printf("Added message %s%n", event.message());
   }
 
   /**
@@ -362,7 +389,9 @@ public class CommandPanel extends JPanel
       }
     }
 
-    /** @return a string representing the identity. */
+    /**
+     * @return a string representing the identity.
+     */
     public String getIdentity() {
       if (identityName == null) {
         if (identityGUID == null) return MapTool.getPlayer().getName();
@@ -371,27 +400,37 @@ public class CommandPanel extends JPanel
       return identityName;
     }
 
-    /** @return a string for the character label of the identity. */
+    /**
+     * @return a string for the character label of the identity.
+     */
     public String getCharacterLabel() {
       return hasName() ? identityName : "";
     }
 
-    /** @return the GUID of the identity. */
+    /**
+     * @return the GUID of the identity.
+     */
     public GUID getIdentityGUID() {
       return identityGUID;
     }
 
-    /** @return the token of the identity. */
+    /**
+     * @return the token of the identity.
+     */
     public Token getToken() {
       return FindTokenFunctions.findToken(identityGUID, null);
     }
 
-    /** @return whether the identity has a name. */
+    /**
+     * @return whether the identity has a name.
+     */
     public boolean hasName() {
       return identityName != null;
     }
 
-    /** @return whether the token can still be found on the current map. */
+    /**
+     * @return whether the token can still be found on the current map.
+     */
     public boolean validToken() {
       if (identityGUID == null) {
         return false;
@@ -403,20 +442,13 @@ public class CommandPanel extends JPanel
 
   public JButton getEmotePopupButton() {
     if (emotePopupButton == null) {
-      try {
-        emotePopupButton =
-            new JButton(
-                new ImageIcon(
-                    ImageUtil.getImage("net/rptools/maptool/client/image/smiley/emsmile.png")));
-        emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
-        emotePopupButton.setContentAreaFilled(false);
-        emotePopupButton.setBorderPainted(false);
-        emotePopupButton.setFocusPainted(false);
-        emotePopupButton.setOpaque(false);
-        emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
+      emotePopupButton = new JButton(RessourceManager.getSmallIcon(Icons.CHAT_SMILEY));
+      emotePopupButton.setMargin(new Insets(0, 0, 0, 0));
+      emotePopupButton.setContentAreaFilled(false);
+      emotePopupButton.setBorderPainted(false);
+      emotePopupButton.setFocusPainted(false);
+      emotePopupButton.setOpaque(false);
+      emotePopupButton.addActionListener(e -> emotePopup.show(emotePopupButton, 0, 0));
     }
     return emotePopupButton;
   }
@@ -424,8 +456,8 @@ public class CommandPanel extends JPanel
   public JToggleButton getScrollLockButton() {
     if (scrollLockButton == null) {
       scrollLockButton = new JToggleButton();
-      scrollLockButton.setIcon(new ImageIcon(AppStyle.chatScrollImage));
-      scrollLockButton.setSelectedIcon(new ImageIcon(AppStyle.chatScrollLockImage));
+      scrollLockButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_OFF));
+      scrollLockButton.setSelectedIcon(RessourceManager.getSmallIcon(Icons.CHAT_SCROLL_LOCK_ON));
       scrollLockButton.setToolTipText(I18N.getText("action.chat.scrolllock.tooltip"));
       scrollLockButton.setUI(new BasicToggleButtonUI());
       scrollLockButton.setBorderPainted(false);
@@ -444,8 +476,9 @@ public class CommandPanel extends JPanel
   public JToggleButton getNotifyButton() {
     if (chatNotifyButton == null) {
       chatNotifyButton = new JToggleButton();
-      chatNotifyButton.setIcon(new ImageIcon(AppStyle.showTypingNotification));
-      chatNotifyButton.setSelectedIcon(new ImageIcon(AppStyle.hideTypingNotification));
+      chatNotifyButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SHOW_TYPING_NOTIFICATION));
+      chatNotifyButton.setSelectedIcon(
+          RessourceManager.getSmallIcon(Icons.CHAT_HIDE_TYPING_NOTIFICATION));
       chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);
@@ -590,16 +623,6 @@ public class CommandPanel extends JPanel
       inputs.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
           AppActions.NEWLINE_COMMAND_ID);
-
-      // Resize on demand
-      MapTool.getEventDispatcher()
-          .addListener(
-              MapTool.PreferencesEvent.Changed,
-              event -> {
-                commandTextArea.setFont(
-                    commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
-                doLayout();
-              });
     }
     return commandTextArea;
   }
@@ -791,14 +814,11 @@ public class CommandPanel extends JPanel
   private MessagePanel getMessagePanel() {
     if (messagePanel == null) {
       messagePanel = new MessagePanel();
-      // Update whenever the preferences change
-      MapTool.getEventDispatcher()
-          .addListener(MapTool.PreferencesEvent.Changed, event -> messagePanel.refreshRenderer());
     }
     return messagePanel;
   }
 
-  public void addMessage(TextMessage message) {
+  private void addMessage(TextMessage message) {
     messagePanel.addMessage(message);
   }
 
@@ -892,8 +912,7 @@ public class CommandPanel extends JPanel
       Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
       SwingUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
 
-      ((Graphics2D) g)
-          .setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+      AppPreferences.getRenderQuality().setShrinkRenderingHints((Graphics2D) g);
       g.drawImage(
           image,
           (size.width - imgSize.width) / 2,
@@ -903,32 +922,10 @@ public class CommandPanel extends JPanel
           this);
 
       // Cancel
-      BufferedImage cancelButton = AppStyle.cancelButton;
       int x = size.width - cancelButton.getWidth();
       int y = 2;
       g.drawImage(cancelButton, x, y, this);
       cancelBounds = new Rectangle(x, y, cancelButton.getWidth(), cancelButton.getHeight());
-    }
-  }
-
-  ////
-  // OBSERVER
-  public void update(Observable o, Object arg) {
-    ObservableList<TextMessage> textList = MapTool.getMessageList();
-    ObservableList.Event event = (ObservableList.Event) arg;
-    switch (event) {
-      case append:
-        addMessage(textList.get(textList.size() - 1));
-        break;
-      case add:
-      case remove:
-        // resetMessagePanel();
-        break;
-      case clear:
-        clearMessagePanel();
-        break;
-      default:
-        throw new IllegalArgumentException("Unknown event: " + event);
     }
   }
 

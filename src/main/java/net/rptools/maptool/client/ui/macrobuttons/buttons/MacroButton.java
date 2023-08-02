@@ -34,10 +34,10 @@ import java.util.regex.Pattern;
 import javax.swing.JButton;
 import javax.swing.SwingUtilities;
 import javax.swing.ToolTipManager;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ui.MacroButtonHotKeyManager;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
@@ -121,10 +121,8 @@ public class MacroButton extends JButton implements MouseListener {
   }
 
   public void setColor(String colorKey) {
-    // If the key doesn't correspond to one of our colors, then use the default
-    // FJE Why??
     if ("default".equals(colorKey)) {
-      setBackground(null);
+      updateUI(); // Reset to Theme default
     } else {
       setBackground(MapToolUtil.getColor(colorKey));
     }
@@ -142,13 +140,16 @@ public class MacroButton extends JButton implements MouseListener {
 
     String div = "<div style='font-size: " + properties.getFontSize() + "; text-align: center'>";
     String formatButtonLabel =
-        "<p style='color: "
-            + properties.getFontColorAsHtml()
-            + "; "
-            + getMinWidth()
-            + getMaxWidth()
-            + "'>"
-            + buttonLabel;
+        switch (properties.getFontColorKey()) {
+          case "", "default" -> "<p style='" + getMinWidth() + getMaxWidth() + "'>" + buttonLabel;
+          default -> "<p style='color: "
+              + properties.getFontColorAsHtml()
+              + "; "
+              + getMinWidth()
+              + getMaxWidth()
+              + "'>"
+              + buttonLabel;
+        };
 
     // if there is no hotkey (HOTKEY[0]) then no need to add hint
     String hotKey = properties.getHotKey();

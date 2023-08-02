@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.model;
 
+import net.rptools.maptool.server.proto.PointerDto;
+import net.rptools.maptool.server.proto.drawing.IntPointDto;
+
 /** Represents a player pointer on the screen */
 public class Pointer {
 
@@ -30,8 +33,7 @@ public class Pointer {
   private double direction; //
   private String type;
 
-  public Pointer() {
-    /* Hessian serializable */ }
+  private Pointer() {}
 
   public Pointer(Zone zone, int x, int y, double direction, Type type) {
     this.zoneGUID = zone.getId();
@@ -71,5 +73,24 @@ public class Pointer {
 
   public double getDirection() {
     return direction;
+  }
+
+  public static Pointer fromDto(PointerDto dto) {
+    var pointer = new Pointer();
+    pointer.direction = dto.getDirection();
+    pointer.x = dto.getPoint().getX();
+    pointer.y = dto.getPoint().getY();
+    pointer.zoneGUID = GUID.valueOf(dto.getZoneGuid());
+    pointer.type = dto.getType();
+    return pointer;
+  }
+
+  public PointerDto toDto() {
+    var dto = PointerDto.newBuilder();
+    dto.setDirection(direction);
+    dto.setPoint(IntPointDto.newBuilder().setX(x).setY(y).build());
+    dto.setZoneGuid(zoneGUID.toString());
+    dto.setType(type);
+    return dto.build();
   }
 }

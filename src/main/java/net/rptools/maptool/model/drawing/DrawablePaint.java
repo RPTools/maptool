@@ -19,10 +19,16 @@ import java.awt.Paint;
 import java.awt.TexturePaint;
 import java.awt.image.ImageObserver;
 import java.io.Serializable;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.ui.AssetPaint;
 import net.rptools.maptool.model.Asset;
+import net.rptools.maptool.server.proto.drawing.DrawablePaintDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class DrawablePaint implements Serializable {
+  private static final Logger log = LogManager.getLogger(DrawablePaint.class);
+
   public abstract Paint getPaint(ImageObserver... observers);
 
   public abstract Paint getPaint(
@@ -48,4 +54,24 @@ public abstract class DrawablePaint implements Serializable {
     }
     throw new IllegalArgumentException("Invalid type of paint: " + paint.getClass().getName());
   }
+
+  public static DrawablePaint fromDto(DrawablePaintDto dto) {
+    switch (dto.getPaintTypeCase()) {
+      case COLOR_PAINT -> {
+        var paint = new DrawableColorPaint(dto.getColorPaint().getColor());
+        return paint;
+      }
+      case TEXTURE_PAINT -> {
+        var texturePaintDto = dto.getTexturePaint();
+        return new DrawableTexturePaint(
+            new MD5Key(texturePaintDto.getAssetId()), texturePaintDto.getScale());
+      }
+      default -> {
+        log.warn("unknown DrawablePaintDto type: " + dto.getPaintTypeCase());
+        return null;
+      }
+    }
+  }
+
+  public abstract DrawablePaintDto toDto();
 }

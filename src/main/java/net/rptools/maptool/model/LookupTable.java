@@ -14,27 +14,32 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.protobuf.StringValue;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.common.expression.ExpressionParser;
 import net.rptools.common.expression.Result;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.server.proto.LookupEntryDto;
+import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.parser.ParserException;
 
 public class LookupTable {
 
   private static ExpressionParser expressionParser = new ExpressionParser();
 
-  private List<LookupEntry> entryList;
-  private String name;
-  private String defaultRoll;
-  private MD5Key tableImage;
-  private Boolean visible;
-  private Boolean allowLookup;
+  private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
+  private @Nullable String name;
+  private @Nullable String defaultRoll;
+  private @Nullable MD5Key tableImage;
+  private @Nonnull Boolean visible = true;
+  private @Nonnull Boolean allowLookup = true;
   // Flags a table as Pick Once, i.e. each entry can only be chosen once before the
   // table must be reset().
-  private Boolean pickOnce = false;
+  private @Nonnull Boolean pickOnce = false;
 
   public static final String NO_PICKS_LEFT = "NO_PICKS_LEFT";
 
@@ -44,11 +49,10 @@ public class LookupTable {
     name = table.name;
     defaultRoll = table.defaultRoll;
     tableImage = table.tableImage;
-    pickOnce = Objects.requireNonNullElse(table.pickOnce, false);
-
-    if (table.entryList != null) {
-      getInternalEntryList().addAll(table.entryList);
-    }
+    pickOnce = table.pickOnce;
+    visible = table.visible;
+    allowLookup = table.allowLookup;
+    entryList.addAll(table.entryList);
   }
 
   public void setRoll(String roll) {
@@ -56,11 +60,11 @@ public class LookupTable {
   }
 
   public void clearEntries() {
-    getInternalEntryList().clear();
+    entryList.clear();
   }
 
   public void addEntry(int min, int max, String result, MD5Key imageId) {
-    getInternalEntryList().add(new LookupEntry(min, max, result, imageId));
+    entryList.add(new LookupEntry(min, max, result, imageId));
   }
 
   public LookupEntry getLookup() throws ParserException {
@@ -137,7 +141,7 @@ public class LookupTable {
 
       tableResult = constrainRoll(tableResult);
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (tableResult >= entry.min && tableResult <= entry.max) {
           retEntry = entry;
         }
@@ -173,7 +177,7 @@ public class LookupTable {
     int minmin = Integer.MAX_VALUE;
     int maxmax = Integer.MIN_VALUE;
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (entry.min < minmin) {
         minmin = entry.min;
       }
@@ -194,7 +198,7 @@ public class LookupTable {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      List<LookupEntry> le = getInternalEntryList();
+      List<LookupEntry> le = entryList;
       LookupEntry entry;
       int len = le.size();
       List unpicked = new ArrayList<Integer>();
@@ -224,7 +228,7 @@ public class LookupTable {
       Integer min = null;
       Integer max = null;
 
-      for (LookupEntry entry : getInternalEntryList()) {
+      for (LookupEntry entry : entryList) {
         if (min == null || entry.min < min) {
           min = entry.min;
         }
@@ -237,16 +241,9 @@ public class LookupTable {
     }
   }
 
-  private List<LookupEntry> getInternalEntryList() {
-    if (entryList == null) {
-      entryList = new ArrayList<>();
-    }
-    return entryList;
-  }
-
   /** Sets the picked flag on each table entry to false. */
   public void reset() {
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (LookupEntry entry : curList) {
       entry.setPicked(false);
@@ -269,7 +266,7 @@ public class LookupTable {
         entriesToReset.stream()
             .map(Integer::parseInt)
             .collect(Collectors.toCollection(HashSet::new));
-    List<LookupEntry> curList = getInternalEntryList();
+    List<LookupEntry> curList = entryList;
     List<LookupEntry> newList = new ArrayList<>();
     for (int i = 0; i < curList.size(); i++) {
       LookupEntry entry = curList.get(i);
@@ -287,7 +284,7 @@ public class LookupTable {
    * @return List of LookupEntrys
    */
   public List<LookupEntry> getEntryList() {
-    return Collections.unmodifiableList(getInternalEntryList());
+    return Collections.unmodifiableList(entryList);
   }
 
   /**
@@ -313,7 +310,7 @@ public class LookupTable {
    *
    * @return Boolean - true if table is Pick Once
    */
-  public Boolean getPickOnce() {
+  public boolean getPickOnce() {
     // Older tables won't have it set.
     if (pickOnce == null) {
       pickOnce = false;
@@ -328,7 +325,7 @@ public class LookupTable {
    *
    * @param pickOnce - Boolean
    */
-  public void setPickOnce(Boolean pickOnce) {
+  public void setPickOnce(boolean pickOnce) {
     this.pickOnce = pickOnce;
     this.reset();
   }
@@ -342,7 +339,7 @@ public class LookupTable {
    */
   public int getPicksLeft() {
     int count = 0;
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
       if (!entry.picked) {
         count++;
       }
@@ -354,7 +351,7 @@ public class LookupTable {
   public String toString() {
     StringBuilder builder = new StringBuilder();
 
-    for (LookupEntry entry : getInternalEntryList()) {
+    for (LookupEntry entry : entryList) {
 
       if (entry.min == entry.max) {
         builder.append(entry.min);
@@ -372,31 +369,45 @@ public class LookupTable {
     private int min;
     private int max;
     // For Pick Once tables each entry is flagged as picked (true) or not (false).
-    private Boolean picked = false;
+    private @Nonnull Boolean picked = false;
+    private @Nullable String value;
+    private @Nullable MD5Key imageId;
 
-    private String value;
+    /**
+     * @deprecated here to prevent xstream from breaking b24-b25
+     */
+    @Deprecated private @Nullable String result;
 
-    private MD5Key imageId;
-
-    /** @Deprecated here to prevent xstream from breaking b24-b25 */
-    private String result;
-
-    public LookupEntry(int min, int max, String result, MD5Key imageId) {
+    public LookupEntry(int min, int max, String value, MD5Key imageId) {
       this.min = min;
       this.max = max;
-      this.value = result;
+      this.value = value;
       this.imageId = imageId;
+    }
+
+    @SuppressWarnings("ConstantValue")
+    private Object readResolve() {
+      if (picked == null) {
+        picked = false;
+      }
+      // Temporary fix to convert b24 to b25
+      if (result != null) {
+        value = result;
+        result = null;
+      }
+
+      return this;
     }
 
     public MD5Key getImageId() {
       return imageId;
     }
 
-    public void setPicked(Boolean b) {
+    public void setPicked(boolean b) {
       picked = b;
     }
 
-    public Boolean getPicked() {
+    public boolean getPicked() {
       return picked;
     }
 
@@ -409,12 +420,32 @@ public class LookupTable {
     }
 
     public String getValue() {
-      // Temporary fix to convert b24 to b25
-      if (result != null) {
-        value = result;
-        result = null;
-      }
       return value;
+    }
+
+    public static LookupEntry fromDto(LookupEntryDto dto) {
+      var entry =
+          new LookupEntry(
+              dto.getMin(),
+              dto.getMax(),
+              dto.hasValue() ? dto.getValue().getValue() : null,
+              dto.hasImageId() ? new MD5Key(dto.getImageId().getValue()) : null);
+      entry.picked = dto.getPicked();
+      return entry;
+    }
+
+    public LookupEntryDto toDto() {
+      var dto = LookupEntryDto.newBuilder();
+      dto.setMin(min);
+      dto.setMax(max);
+      dto.setPicked(picked);
+      if (value != null) {
+        dto.setValue(StringValue.of(value));
+      }
+      if (imageId != null) {
+        dto.setImageId(StringValue.of(imageId.toString()));
+      }
+      return dto.build();
     }
   }
 
@@ -438,10 +469,7 @@ public class LookupTable {
    * @return Boolean -- True indicates that the table will be visible to players. False indicates
    *     that the table will be hidden from players.
    */
-  public Boolean getVisible() {
-    if (visible == null) {
-      visible = true;
-    }
+  public boolean getVisible() {
     return visible;
   }
 
@@ -451,7 +479,7 @@ public class LookupTable {
    * @param value(Boolean) -- True specifies that the table will be visible to players. False
    *     indicates that the table will be hidden from players.
    */
-  public void setVisible(Boolean value) {
+  public void setVisible(boolean value) {
     visible = value;
   }
 
@@ -462,10 +490,7 @@ public class LookupTable {
    *     indicates that players will be prevented from calling values from this table. GM's can
    *     ALWAYS perform lookups against a table.
    */
-  public Boolean getAllowLookup() {
-    if (allowLookup == null) {
-      allowLookup = true;
-    }
+  public boolean getAllowLookup() {
     return allowLookup;
   }
 
@@ -476,7 +501,55 @@ public class LookupTable {
    *     indicates that players will be prevented from calling values from this table. GM's can
    *     ALWAYS perform lookups against a table.
    */
-  public void setAllowLookup(Boolean value) {
+  public void setAllowLookup(boolean value) {
     allowLookup = value;
+  }
+
+  @SuppressWarnings("ConstantValue")
+  private Object readResolve() {
+    if (visible == null) {
+      visible = true;
+    }
+    if (pickOnce == null) {
+      pickOnce = false;
+    }
+    if (allowLookup == null) {
+      allowLookup = true;
+    }
+    if (entryList == null) {
+      entryList = new ArrayList<>();
+    }
+    return this;
+  }
+
+  public static LookupTable fromDto(LookupTableDto dto) {
+    var table = new LookupTable();
+    table.name = dto.hasName() ? dto.getName().getValue() : null;
+    table.entryList =
+        dto.getEntriesList().stream().map(e -> LookupEntry.fromDto(e)).collect(Collectors.toList());
+    table.defaultRoll = dto.hasDefaultRoll() ? dto.getDefaultRoll().getValue() : null;
+    table.tableImage = dto.hasTableImage() ? new MD5Key(dto.getTableImage().getValue()) : null;
+    table.setVisible(dto.getVisible());
+    table.setAllowLookup(dto.getAllowLookup());
+    table.setPickOnce(dto.getPickOnce());
+    return table;
+  }
+
+  public LookupTableDto toDto() {
+    var dto = LookupTableDto.newBuilder();
+    dto.addAllEntries(entryList.stream().map(e -> e.toDto()).collect(Collectors.toList()));
+    if (name != null) {
+      dto.setName(StringValue.of(name));
+    }
+    if (defaultRoll != null) {
+      dto.setDefaultRoll(StringValue.of(defaultRoll));
+    }
+    if (tableImage != null) {
+      dto.setTableImage(StringValue.of(tableImage.toString()));
+    }
+    dto.setVisible(visible);
+    dto.setAllowLookup(allowLookup);
+    dto.setPickOnce(pickOnce);
+    return dto.build();
   }
 }

@@ -17,7 +17,7 @@ package net.rptools.maptool.client.walker.astar;
 import java.util.Objects;
 import net.rptools.maptool.model.CellPoint;
 
-class AStarCellPoint {
+public class AStarCellPoint {
   final CellPoint position;
   final boolean isOddStepOfOneTwoOneMovement;
 

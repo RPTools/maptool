@@ -16,25 +16,26 @@ package net.rptools.maptool.client.ui.zone;
 
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.stream.Collectors;
+import java.util.function.Function;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.vbl.AreaContainer;
-import net.rptools.maptool.client.ui.zone.vbl.AreaIsland;
-import net.rptools.maptool.client.ui.zone.vbl.AreaOcean;
 import net.rptools.maptool.client.ui.zone.vbl.AreaTree;
-import net.rptools.maptool.client.ui.zone.vbl.VisibleAreaSegment;
+import net.rptools.maptool.client.ui.zone.vbl.VisibilitySweepEndpoint;
+import net.rptools.maptool.client.ui.zone.vbl.VisionBlockingAccumulator;
 import net.rptools.maptool.model.AbstractPoint;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
@@ -48,89 +49,252 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.player.Player.Role;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.awt.ShapeWriter;
+import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.LineSegment;
+import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
+import org.locationtech.jts.geom.util.LineStringExtracter;
 import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
-  private static final PrecisionModel precisionModel = new PrecisionModel(100000);
-  private static final GeometryFactory geometryFactory = new GeometryFactory(precisionModel);
+  private static final GeometryFactory geometryFactory = GeometryUtil.getGeometryFactory();
 
   /**
    * Return the visible area for an origin, a lightSourceArea and a VBL.
    *
-   * @param x the x vision origin.
-   * @param y the y vision origin.
+   * @param origin the vision origin.
    * @param vision the lightSourceArea.
    * @param topology the VBL topology.
    * @return the visible area.
    */
   public static Area calculateVisibility(
-      int x, int y, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
-    vision = new Area(vision);
-    vision.transform(AffineTransform.getTranslateInstance(x, y));
+      Point origin, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
+    // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
+    final var visionGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vision));
 
-    Point origin = new Point(x, y);
-    var accumulator = new VisionBlockingAccumulator(origin);
-    if (!accumulator.addWallBlocking(topology)
-        || !accumulator.addHillBlocking(hillVbl)
-        || !accumulator.addPitBlocking(pitVbl)) {
-      // Vision has been completely blocked by topology.
-      return null;
+    /*
+     * Find the visible area for each topology type independently.
+     *
+     * In principle, we could also combine all the vision blocking segments for all topology types
+     * and run the sweep algorithm once. But this is subject to some pathological cases that JTS
+     * cannot handle. These cases do not exist within a single type of topology, but can arise when
+     * we combine them.
+     */
+    List<Geometry> visibleAreas = new ArrayList<>();
+    final List<Function<VisionBlockingAccumulator, Boolean>> topologyConsumers = new ArrayList<>();
+    topologyConsumers.add(acc -> acc.addWallBlocking(topology));
+    topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
+    topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
+    for (final var consumer : topologyConsumers) {
+      final var accumulator =
+          new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
+      final var isVisionCompletelyBlocked = consumer.apply(accumulator);
+      if (!isVisionCompletelyBlocked) {
+        // Vision has been completely blocked by this topology. Short circuit.
+        return null;
+      }
+
+      final var visibleArea =
+          calculateVisibleArea(
+              new Coordinate(origin.getX(), origin.getY()),
+              accumulator.getVisionBlockingSegments(),
+              visionGeometry);
+      if (visibleArea != null) {
+        visibleAreas.add(visibleArea);
+      }
     }
 
-    Geometry totalClearedArea = calculateBlockedVision(accumulator.getVisionBlockingSegments());
-
-    if (totalClearedArea != null) {
-      // Convert back to AWT area to modify vision.
+    // We have to intersect all the results in order to find the true remaining visible area.
+    vision = new Area(vision);
+    if (!visibleAreas.isEmpty()) {
+      // We intersect in AWT space because JTS can be really finicky about intersection precision.
       var shapeWriter = new ShapeWriter();
-      var area = new Area(shapeWriter.toShape(totalClearedArea));
-      vision.subtract(area);
+      for (final var visibleArea : visibleAreas) {
+        var area = new Area(shapeWriter.toShape(visibleArea));
+        vision.intersect(area);
+      }
     }
 
     // For simplicity, this catches some of the edge cases
     return vision;
   }
 
-  private static @Nullable Geometry calculateBlockedVision(
-      List<VisibleAreaSegment> visionBlockingSegments) {
-    int skippedAreas = 0;
-    Collections.sort(visionBlockingSegments);
-    List<PreparedGeometry> clearedAreaList = new ArrayList<>();
-    nextSegment:
-    for (var segment : visionBlockingSegments) {
-      Geometry boundingBox = segment.getBoundingBox();
-      for (var clearedArea : clearedAreaList) {
-        if (clearedArea.contains(boundingBox)) {
-          skippedAreas++;
-          continue nextSegment;
-        }
+  private record NearestWallResult(LineSegment wall, Coordinate point, double distance) {}
+
+  private static NearestWallResult findNearestOpenWall(
+      Set<LineSegment> openWalls, LineSegment ray) {
+    assert !openWalls.isEmpty();
+
+    @Nullable LineSegment currentNearest = null;
+    @Nullable Coordinate currentNearestPoint = null;
+    double nearestDistance = Double.MAX_VALUE;
+    for (final var openWall : openWalls) {
+      final var intersection = ray.lineIntersection(openWall);
+      if (intersection == null) {
+        continue;
       }
 
-      Geometry blockedVision = segment.calculateVisionBlockedBySegment(Integer.MAX_VALUE / 2);
-
-      PreparedGeometry prepared = PreparedGeometryFactory.prepare(blockedVision);
-      clearedAreaList.add(prepared);
+      final var distance = ray.p0.distance(intersection);
+      if (distance < nearestDistance) {
+        currentNearest = openWall;
+        currentNearestPoint = intersection;
+        nearestDistance = distance;
+      }
     }
 
-    if (clearedAreaList.isEmpty()) {
+    assert currentNearest != null;
+    return new NearestWallResult(currentNearest, currentNearestPoint, nearestDistance);
+  }
+
+  /**
+   * Builds a list of endpoints for the sweep algorithm to consume.
+   *
+   * <p>The endpoints will be unique (i.e., no coordinate is represented more than once) and in a
+   * consistent orientation (i.e., counterclockwise around the origin). In addition, all endpoints
+   * will have their starting and ending walls filled according to which walls are incident to the
+   * corresponding point.
+   *
+   * @param origin The center of vision, by which orientation can be determined.
+   * @param visionBlockingSegments The "walls" that are able to block vision. All points in these
+   *     walls will be present in the returned list.
+   * @return A list of all endpoints in counterclockwise order.
+   */
+  private static List<VisibilitySweepEndpoint> getSweepEndpoints(
+      Coordinate origin, List<LineString> visionBlockingSegments) {
+    final Map<Coordinate, VisibilitySweepEndpoint> endpointsByPosition = new HashMap<>();
+    for (final var segment : visionBlockingSegments) {
+      VisibilitySweepEndpoint current = null;
+      for (final var coordinate : segment.getCoordinates()) {
+        final var previous = current;
+        current =
+            endpointsByPosition.computeIfAbsent(
+                coordinate, c -> new VisibilitySweepEndpoint(c, origin));
+        if (previous == null) {
+          // We just started this segment; still need a second point.
+          continue;
+        }
+
+        final var isForwards =
+            Orientation.COUNTERCLOCKWISE
+                == Orientation.index(origin, previous.getPoint(), current.getPoint());
+        // Make sure the wall always goes in the counterclockwise direction.
+        final LineSegment wall =
+            isForwards
+                ? new LineSegment(previous.getPoint(), coordinate)
+                : new LineSegment(coordinate, previous.getPoint());
+        if (isForwards) {
+          previous.startsWall(wall);
+          current.endsWall(wall);
+        } else {
+          previous.endsWall(wall);
+          current.startsWall(wall);
+        }
+      }
+    }
+    final List<VisibilitySweepEndpoint> endpoints = new ArrayList<>(endpointsByPosition.values());
+
+    endpoints.sort(
+        Comparator.comparingDouble(VisibilitySweepEndpoint::getPseudoangle)
+            .thenComparing(VisibilitySweepEndpoint::getDistance));
+
+    return endpoints;
+  }
+
+  private static @Nullable Geometry calculateVisibleArea(
+      Coordinate origin, List<LineString> visionBlockingSegments, PreparedGeometry visionGeometry) {
+    if (visionBlockingSegments.isEmpty()) {
+      // No topology, apparently.
       return null;
     }
 
-    List<Geometry> plainGeometries =
-        clearedAreaList.stream().map(PreparedGeometry::getGeometry).collect(Collectors.toList());
+    /*
+     * Unioning all the line segments has the nice effect of noding any intersections between line
+     * segments. Without this, it may not be valid.
+     * Note: if the geometry were only composed of one topology, it would certainly be valid due to
+     * its "flat" nature. But even in that case, it is more robust to due the union in case this
+     * flatness assumption ever changes.
+     */
+    final var allWallGeometry = new UnaryUnionOp(visionBlockingSegments).union();
+    // Replace the original geometry with the well-defined geometry.
+    visionBlockingSegments = new ArrayList<>();
+    LineStringExtracter.getLines(allWallGeometry, visionBlockingSegments);
 
-    Geometry geometryCollection =
-        geometryFactory
-            .createGeometryCollection(plainGeometries.toArray(Geometry[]::new))
-            .buffer(0);
+    /*
+     * The algorithm requires walls in every direction. The easiest way to accomplish this is to add
+     * the boundary of the bounding box.
+     */
+    final var envelope = allWallGeometry.getEnvelopeInternal();
+    envelope.expandToInclude(visionGeometry.getGeometry().getEnvelopeInternal());
+    // Exact expansion distance doesn't matter, we just don't want the boundary walls to overlap
+    // endpoints from real walls.
+    envelope.expandBy(1.0);
+    // Because we definitely have geometry, the envelope will always be a non-trivial rectangle.
+    visionBlockingSegments.add(((Polygon) geometryFactory.toGeometry(envelope)).getExteriorRing());
 
-    return new UnaryUnionOp(geometryCollection).union();
+    // Now that we have valid geometry and a bounding box, we can continue with the sweep.
+
+    final var endpoints = getSweepEndpoints(origin, visionBlockingSegments);
+    Set<LineSegment> openWalls = Collections.newSetFromMap(new IdentityHashMap<>());
+
+    // This initial sweep just makes sure we have the correct open set to start.
+    for (final var endpoint : endpoints) {
+      openWalls.addAll(endpoint.getStartsWalls());
+      openWalls.removeAll(endpoint.getEndsWalls());
+    }
+
+    // Now for the real sweep. Make sure to process the first point once more at the end to ensure
+    // the sweep covers the full 360 degrees.
+    endpoints.add(endpoints.get(0));
+    List<Coordinate> visionPoints = new ArrayList<>();
+    for (final var endpoint : endpoints) {
+      assert !openWalls.isEmpty();
+
+      final var ray = new LineSegment(origin, endpoint.getPoint());
+      final var nearestWallResult = findNearestOpenWall(openWalls, ray);
+
+      openWalls.addAll(endpoint.getStartsWalls());
+      openWalls.removeAll(endpoint.getEndsWalls());
+
+      // Find a new nearest wall.
+      final var newNearestWallResult = findNearestOpenWall(openWalls, ray);
+
+      if (newNearestWallResult.wall != nearestWallResult.wall) {
+        // Implies we have changed which wall we are at. Need to figure out projections.
+
+        if (openWalls.contains(nearestWallResult.wall())) {
+          // The previous nearest wall is still open. I.e., we didn't fall of its end but
+          // encountered a new closer wall. So we project the current point to the previous
+          // nearest wall, then step to the current point.
+          visionPoints.add(nearestWallResult.point());
+          visionPoints.add(endpoint.getPoint());
+        } else {
+          // The previous nearest wall is now closed. I.e., we "fell off" it and therefore have
+          // encountered a different wall. So we step from the current point (which is on the
+          // previous wall) to the projection on the new wall.
+          visionPoints.add(endpoint.getPoint());
+          // Special case: if the two walls are adjacent, they share the current point. We don't
+          // need to add the point twice, so just skip in that case.
+          if (!endpoint.getStartsWalls().contains(newNearestWallResult.wall())) {
+            visionPoints.add(newNearestWallResult.point());
+          }
+        }
+      }
+    }
+    if (visionPoints.size() < 3) {
+      // This shouldn't happen, but just in case.
+      log.warn("Sweep produced too few points: {}", visionPoints);
+      return null;
+    }
+    visionPoints.add(visionPoints.get(0)); // Ensure a closed loop.
+
+    return geometryFactory.createPolygon(visionPoints.toArray(Coordinate[]::new));
   }
 
   /**
@@ -187,7 +351,8 @@ public class FogUtil {
           tokenClone.setY(zp.y);
 
           renderer.flush(tokenClone);
-          Area tokenVision = renderer.getZoneView().getVisibleArea(tokenClone);
+          Area tokenVision =
+              renderer.getZoneView().getVisibleArea(tokenClone, renderer.getPlayerView());
           if (tokenVision != null) {
             Set<GUID> filteredToks = new HashSet<GUID>();
             filteredToks.add(tokenClone.getId());
@@ -198,7 +363,7 @@ public class FogUtil {
         renderer.flush(token);
       } else {
         renderer.flush(token);
-        Area tokenVision = renderer.getVisibleArea(token);
+        Area tokenVision = renderer.getZoneView().getVisibleArea(token, renderer.getPlayerView());
         if (tokenVision != null) {
           Set<GUID> filteredToks = new HashSet<GUID>();
           filteredToks.add(token.getId());
@@ -229,7 +394,7 @@ public class FogUtil {
       token.setY(zp.y);
       renderer.flush(token);
 
-      Area tokenVision = renderer.getZoneView().getVisibleArea(token);
+      Area tokenVision = renderer.getZoneView().getVisibleArea(token, renderer.getPlayerView());
       if (tokenVision != null) {
         Set<GUID> filteredToks = new HashSet<GUID>();
         filteredToks.add(token.getId());
@@ -377,7 +542,7 @@ public class FogUtil {
             tokenClone.setX(zp.x);
             tokenClone.setY(zp.y);
 
-            Area currVisionArea = zoneView.getVisibleArea(tokenClone);
+            Area currVisionArea = zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
             if (currVisionArea != null) {
               visionArea.add(currVisionArea);
               meta.addToExposedAreaHistory(currVisionArea);
@@ -441,181 +606,5 @@ public class FogUtil {
     y = bounds.y + bounds.height / 2;
 
     return new Point(x, y);
-  }
-
-  private static final class VisionBlockingAccumulator {
-    private final Point origin;
-    private final List<VisibleAreaSegment> visionBlockingSegments;
-
-    public VisionBlockingAccumulator(Point origin) {
-      this.origin = origin;
-      this.visionBlockingSegments = new ArrayList<>();
-    }
-
-    public List<VisibleAreaSegment> getVisionBlockingSegments() {
-      return visionBlockingSegments;
-    }
-
-    private void addVisionBlockingSegments(AreaContainer areaContainer, boolean frontSide) {
-      var segments =
-          areaContainer.getVisionBlockingBoundarySegements(geometryFactory, origin, frontSide);
-      visionBlockingSegments.addAll(segments);
-    }
-
-    private void addIslandForHillBlocking(
-        AreaIsland blockingIsland, @Nullable AreaOcean excludeChildOcean) {
-      // The back side of the island blocks.
-      addVisionBlockingSegments(blockingIsland, false);
-      // The front side of each contained ocean also acts as a back side boundary of the island.
-      for (var blockingOcean : blockingIsland.getOceans()) {
-        if (blockingOcean == excludeChildOcean) {
-          continue;
-        }
-
-        addVisionBlockingSegments(blockingOcean, true);
-      }
-    }
-
-    /**
-     * Finds all wall topology segments that can take part in blocking vision.
-     *
-     * @param topology The topology to treat as Wall VBL.
-     * @return false if the vision has been completely blocked by topology, or true if vision may be
-     *     blocked by particular segments.
-     */
-    public boolean addWallBlocking(AreaTree topology) {
-      final AreaContainer container = topology.getContainerAt(origin);
-      if (container == null) {
-        // Should never happen since the global ocean should catch everything.
-        return false;
-      }
-
-      if (container instanceof AreaIsland) {
-        // Since we're contained in a wall island, there can be no vision through it.
-        return false;
-      } else if (container instanceof AreaOcean ocean) {
-        final var parentIsland = ocean.getParentIsland();
-        if (parentIsland != null) {
-          // The near edge of the island blocks vision, which is the same as the boundary of this
-          // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
-          // back side.
-          addVisionBlockingSegments(ocean, false);
-        }
-
-        // Check each contained island.
-        for (var containedIsland : ocean.getIslands()) {
-          // The front side of wall VBL blocks vision.
-          addVisionBlockingSegments(containedIsland, true);
-        }
-      }
-
-      return true;
-    }
-
-    /**
-     * Finds all hill topology segments that can take part in blocking vision.
-     *
-     * @param topology The topology to treat as Hill VBL.
-     * @return false if the vision has been completely blocked by topology, or true if vision can be
-     *     blocked by particular segments.
-     */
-    public boolean addHillBlocking(AreaTree topology) {
-      final AreaContainer container = topology.getContainerAt(origin);
-      if (container == null) {
-        // Should never happen since the global ocean should catch everything.
-        return false;
-      }
-
-      /*
-       * There are two cases for Hill VBL:
-       * 1. A token inside hill VBL can see into adjacent oceans, and therefore into other areas of
-       *    Hill VBL in those oceans.
-       * 2. A token outside hill VBL can see into hill VBL, but not into any oceans adjacent to it.
-       */
-
-      if (container instanceof final AreaIsland island) {
-        /*
-         * Since we're in an island, vision is blocked by:
-         * 1. The back side of the parent ocean's parent island.
-         * 2. The back side of any sibling islands (other children of the parent ocean).
-         * 3. The back side of any child ocean's islands.
-         * 4. For each island in the above, any child ocean provided it's not the parent of the
-         *    current island.
-         */
-        final var parentOcean = island.getParentOcean();
-
-        final var grandparentIsland = parentOcean.getParentIsland();
-        if (grandparentIsland != null) {
-          addIslandForHillBlocking(grandparentIsland, parentOcean);
-        }
-
-        for (final var siblingIsland : parentOcean.getIslands()) {
-          if (siblingIsland == island) {
-            // We don't want to block vision for the hill we're currently in.
-            // TODO Ideally we could block the second occurence of the current island, but we need
-            //  a way to do that reliably.
-            continue;
-          }
-
-          addIslandForHillBlocking(siblingIsland, null);
-        }
-
-        for (final var childOcean : island.getOceans()) {
-          for (final var grandchildIsland : childOcean.getIslands()) {
-            addIslandForHillBlocking(grandchildIsland, null);
-          }
-        }
-      } else if (container instanceof final AreaOcean ocean) {
-        /*
-         * Since we're in an ocean, vision is blocked by:
-         * 1. The back side of the parent island.
-         * 2. The back side of any child island
-         * 3. For each island in the above, any child ocean provided it's not the current ocean.
-         */
-        final var parentIsland = ocean.getParentIsland();
-        if (parentIsland != null) {
-          addIslandForHillBlocking(parentIsland, null);
-        }
-        // Check each contained island.
-        for (var containedIsland : ocean.getIslands()) {
-          addIslandForHillBlocking(containedIsland, null);
-        }
-      }
-
-      return true;
-    }
-
-    /**
-     * Finds all pit topology segments that can take part in blocking vision.
-     *
-     * @param topology The topology to treat as Pit VBL.
-     * @return false if the vision has been completely blocked by topology, or true if vision can be
-     *     blocked by particular segments.
-     */
-    public boolean addPitBlocking(AreaTree topology) {
-      final AreaContainer container = topology.getContainerAt(origin);
-      if (container == null) {
-        // Should never happen since the global ocean should catch everything.
-        return false;
-      }
-
-      /*
-       * There are two cases for Pit VBL:
-       * 1. A token inside Pit VBL can see only see within the current island, not into any adjacent
-       *    oceans.
-       * 2. A token outside Pit VBL is unobstructed by the Pit VBL (nothing special to do).
-       */
-
-      if (container instanceof final AreaIsland island) {
-        /*
-         * Since we're in an island, vision is blocked by:
-         * 1. The back side of the island.
-         * 2. The front side of any child ocean.
-         */
-        addIslandForHillBlocking(island, null);
-      }
-
-      return true;
-    }
   }
 }

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.drawing;
 
+import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
@@ -25,8 +26,11 @@ import java.util.List;
 import java.util.ListIterator;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.server.proto.drawing.DrawableDto;
+import net.rptools.maptool.server.proto.drawing.LineCellTemplateDto;
 
 /**
  * A drawing tool that will draw a line template between 2 vertices.
@@ -55,6 +59,12 @@ public class LineCellTemplate extends AbstractTemplate {
 
   /** Flag used to determine mouse position relative to vertex position */
   private boolean mouseSlopeGreater;
+
+  public LineCellTemplate() {}
+
+  public LineCellTemplate(GUID id) {
+    super(id);
+  }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
@@ -112,9 +122,15 @@ public class LineCellTemplate extends AbstractTemplate {
       return;
     }
     // Need to paint? We need a line and to translate the painting
-    if (pathVertex == null) return;
-    if (getRadius() == 0) return;
-    if (calcPath() == null) return;
+    if (pathVertex == null) {
+      return;
+    }
+    if (getRadius() == 0) {
+      return;
+    }
+    if (calcPath() == null) {
+      return;
+    }
 
     // Paint each element in the path
     int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
@@ -144,17 +160,23 @@ public class LineCellTemplate extends AbstractTemplate {
     } // endfor
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint)
+   */
   @Override
   public void setVertex(ZonePoint vertex) {
     clearPath();
     super.setVertex(vertex);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
-    if (squares == getRadius()) return;
+    if (squares == getRadius()) {
+      return;
+    }
     clearPath();
     super.setRadius(squares);
   }
@@ -169,13 +191,19 @@ public class LineCellTemplate extends AbstractTemplate {
    * @return The new path or <code>null</code> if there is no path.
    */
   protected List<CellPoint> calcPath() {
-    if (getRadius() == 0) return null;
-    if (pathVertex == null) return null;
+    if (getRadius() == 0) {
+      return null;
+    }
+    if (pathVertex == null) {
+      return null;
+    }
     int radius = getRadius();
 
     // Is there a slope?
     ZonePoint vertex = getVertex();
-    if (vertex.equals(pathVertex)) return null;
+    if (vertex.equals(pathVertex)) {
+      return null;
+    }
 
     double dx = pathVertex.x - vertex.x;
     double dy = pathVertex.y - vertex.y;
@@ -288,14 +316,18 @@ public class LineCellTemplate extends AbstractTemplate {
    * @param pathVertex The pathVertex to set.
    */
   public void setPathVertex(ZonePoint pathVertex) {
-    if (pathVertex.equals(this.pathVertex)) return;
+    if (pathVertex.equals(this.pathVertex)) {
+      return;
+    }
     clearPath();
     this.pathVertex = pathVertex;
   }
 
   /** Clear the current path. This will cause it to be recalculated during the next draw. */
   public void clearPath() {
-    if (path != null) pool = path;
+    if (path != null) {
+      pool = path;
+    }
     path = null;
   }
 
@@ -305,7 +337,9 @@ public class LineCellTemplate extends AbstractTemplate {
    * @return Returns the current value of quadrant.
    */
   public Quadrant getQuadrant() {
-    if (quadrant != null) return Quadrant.valueOf(quadrant);
+    if (quadrant != null) {
+      return Quadrant.valueOf(quadrant);
+    }
     return null;
   }
 
@@ -315,8 +349,11 @@ public class LineCellTemplate extends AbstractTemplate {
    * @param quadrant The quadrant to set.
    */
   public void setQuadrant(Quadrant quadrant) {
-    if (quadrant != null) this.quadrant = quadrant.name();
-    else this.quadrant = null;
+    if (quadrant != null) {
+      this.quadrant = quadrant.name();
+    } else {
+      this.quadrant = null;
+    }
   }
 
   /**
@@ -337,12 +374,16 @@ public class LineCellTemplate extends AbstractTemplate {
     mouseSlopeGreater = aMouseSlopeGreater;
   }
 
-  /** @return Getter for path */
+  /**
+   * @return Getter for path
+   */
   public List<CellPoint> getPath() {
     return path;
   }
 
-  /** @param path Setter for the path to set */
+  /**
+   * @param path Setter for the path to set
+   */
   public void setPath(List<CellPoint> path) {
     this.path = path;
   }
@@ -351,7 +392,9 @@ public class LineCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     // Get all of the numbers needed for the calculation
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
@@ -447,5 +490,34 @@ public class LineCellTemplate extends AbstractTemplate {
       result.add(new Area(new Rectangle(rx, ry, gridSize, gridSize)));
     }
     return result;
+  }
+
+  @Override
+  public DrawableDto toDto() {
+
+    if (getQuadrant() == null) {
+      calcPath(); // force calculation of the quadrent
+    }
+
+    var dto = LineCellTemplateDto.newBuilder();
+    dto.setId(getId().toString())
+        .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
+        .setRadius(getRadius())
+        .setVertex(getVertex().toDto())
+        .setMouseSlopeGreater(isMouseSlopeGreater());
+
+    if (getQuadrant() != null) {
+      dto.setQuadrant(getQuadrant().name());
+    }
+    if (getPathVertex() != null) {
+      dto.setPathVertex(getPathVertex().toDto());
+    }
+
+    if (getName() != null) {
+      dto.setName(StringValue.of(getName()));
+    }
+
+    return DrawableDto.newBuilder().setLineCellTemplate(dto).build();
   }
 }

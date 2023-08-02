@@ -762,7 +762,7 @@ class MemoryDataStoreTest {
   }
 
   @Test
-  void createNamespaceWithInitialData() {
+  void createNamespaceWithInitialData() throws ExecutionException, InterruptedException {
     var jsonArray1 = new JsonArray();
     var jsonArray2 = new JsonArray();
     var jsonArray3 = new JsonArray();
@@ -771,37 +771,40 @@ class MemoryDataStoreTest {
     var jsonObject3 = new JsonObject();
     var mds = new MemoryDataStore();
     mds.createNamespaceWithInitialData(
-        "testType",
-        "testNamespace",
-        Set.of(
-            DataValueFactory.fromBoolean("boolean1", true),
-            DataValueFactory.fromLong("long1", 12),
-            DataValueFactory.fromDouble("double1", 65.8),
-            DataValueFactory.fromString("string1", "test"),
-            DataValueFactory.fromJsonObject("jsonObject1", jsonObject1),
-            DataValueFactory.fromJsonArray("jsonArray1", jsonArray1)));
+            "testType",
+            "testNamespace",
+            Set.of(
+                DataValueFactory.fromBoolean("boolean1", true),
+                DataValueFactory.fromLong("long1", 12),
+                DataValueFactory.fromDouble("double1", 65.8),
+                DataValueFactory.fromString("string1", "test"),
+                DataValueFactory.fromJsonObject("jsonObject1", jsonObject1),
+                DataValueFactory.fromJsonArray("jsonArray1", jsonArray1)))
+        .get();
 
     mds.createNamespaceWithInitialData(
-        "testType2",
-        "testNamespace2",
-        Set.of(
-            DataValueFactory.fromBoolean("boolean2", false),
-            DataValueFactory.fromLong("long2", 44),
-            DataValueFactory.fromDouble("double2", 99.8),
-            DataValueFactory.fromString("string2", "test2"),
-            DataValueFactory.fromJsonObject("jsonObject2", jsonObject2),
-            DataValueFactory.fromJsonArray("jsonArray2", jsonArray2)));
+            "testType2",
+            "testNamespace2",
+            Set.of(
+                DataValueFactory.fromBoolean("boolean2", false),
+                DataValueFactory.fromLong("long2", 44),
+                DataValueFactory.fromDouble("double2", 99.8),
+                DataValueFactory.fromString("string2", "test2"),
+                DataValueFactory.fromJsonObject("jsonObject2", jsonObject2),
+                DataValueFactory.fromJsonArray("jsonArray2", jsonArray2)))
+        .get();
 
     mds.createNamespaceWithInitialData(
-        "testType2",
-        "testNamespace3",
-        Set.of(
-            DataValueFactory.fromBoolean("boolean3", true),
-            DataValueFactory.fromLong("long3", 24),
-            DataValueFactory.fromDouble("double3", 29.8),
-            DataValueFactory.fromString("string3", "test3"),
-            DataValueFactory.fromJsonObject("jsonObject3", jsonObject3),
-            DataValueFactory.fromJsonArray("jsonArray3", jsonArray3)));
+            "testType2",
+            "testNamespace3",
+            Set.of(
+                DataValueFactory.fromBoolean("boolean3", true),
+                DataValueFactory.fromLong("long3", 24),
+                DataValueFactory.fromDouble("double3", 29.8),
+                DataValueFactory.fromString("string3", "test3"),
+                DataValueFactory.fromJsonObject("jsonObject3", jsonObject3),
+                DataValueFactory.fromJsonArray("jsonArray3", jsonArray3)))
+        .get();
 
     assertAll(
         () -> assertEquals(1, mds.getPropertyNamespaces("testType").get().size()),
@@ -1092,5 +1095,32 @@ class MemoryDataStoreTest {
             assertEquals(
                 DataType.UNDEFINED,
                 mds.getPropertyDataType("testType2", "testNamespace3", "invalid").get()));
+  }
+
+  @Test
+  void emptyValueCanBeUpdated() throws ExecutionException, InterruptedException {
+    final String PROPERTY_TYPE = "pt";
+    final String NAMESPACE = "ns";
+    final String PROPERTY_NAME = "a";
+
+    var mdsWithUndefined = new MemoryDataStore();
+    mdsWithUndefined
+        .createNamespaceWithTypes(
+            PROPERTY_TYPE, NAMESPACE, Map.of(PROPERTY_NAME, DataType.UNDEFINED))
+        .get();
+    assertEquals(
+        DataType.UNDEFINED,
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().getDataType());
+
+    mdsWithUndefined
+        .setProperty(PROPERTY_TYPE, NAMESPACE, DataValueFactory.fromString(PROPERTY_NAME, "1"))
+        .get();
+
+    assertEquals(
+        DataType.STRING,
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().getDataType());
+    assertEquals(
+        "1",
+        mdsWithUndefined.getProperty(PROPERTY_TYPE, NAMESPACE, PROPERTY_NAME).get().asString());
   }
 }

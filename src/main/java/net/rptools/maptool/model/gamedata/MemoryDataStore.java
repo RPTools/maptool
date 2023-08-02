@@ -17,14 +17,7 @@ package net.rptools.maptool.model.gamedata;
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
@@ -35,7 +28,8 @@ import net.rptools.maptool.model.gamedata.data.DataValue;
 import net.rptools.maptool.model.gamedata.data.DataValueFactory;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
-import org.apache.log4j.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class that implements the DataStore interface. */
 public class MemoryDataStore implements DataStore {
@@ -50,7 +44,7 @@ public class MemoryDataStore implements DataStore {
       Collections.synchronizedMap(new HashMap<>());
 
   /** Class for logging. */
-  private static final Logger log = Logger.getLogger(MemoryDataStore.class);
+  private static final Logger log = LogManager.getLogger(MemoryDataStore.class);
 
   /** Creates a new MemoryDataStore. */
   MemoryDataStore() {}
@@ -202,8 +196,7 @@ public class MemoryDataStore implements DataStore {
     var dataMap =
         namespaceDataMap.computeIfAbsent(
             new PropertyTypeNamespace(type, namespace), k -> new ConcurrentHashMap<>());
-    if (existing == null) {
-
+    if (existing == null || existing.getDataType() == DataType.UNDEFINED) {
       dataMap.put(value.getName(), value);
     } else {
       var newValue = DataType.convert(value, existing.getDataType());

@@ -14,15 +14,12 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.swing.SwingUtil;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,7 +39,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 
   /** Needed for serialization */
   public ImageTokenOverlay() {
-    this(BooleanTokenOverlay.DEFAULT_STATE_NAME, null);
+    this(DEFAULT_STATE_NAME, null);
   }
 
   /**
@@ -56,7 +53,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     assetId = anAssetId;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new ImageTokenOverlay(getName(), assetId);
@@ -71,8 +70,8 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.Token, java.awt.Rectangle)
+   * @see BooleanTokenOverlay#paintOverlay(java.awt.Graphics2D, net.rptools.maptool.model.Token,
+   *     java.awt.Rectangle)
    */
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds) {
@@ -98,7 +97,9 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for assetId */
+  /**
+   * @return Getter for assetId
+   */
   public MD5Key getAssetId() {
     return assetId;
   }
@@ -112,5 +113,27 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
    */
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
     return bounds;
+  }
+
+  protected void fillFrom(BooleanTokenOverlayDto dto) {
+    fillFrom(dto.getCommon());
+    assetId = new MD5Key(dto.getAssetId());
+  }
+
+  protected BooleanTokenOverlayDto.Builder getDto() {
+    var dto = BooleanTokenOverlayDto.newBuilder();
+    dto.setCommon(getCommonDto());
+    dto.setAssetId(assetId.toString());
+    return dto;
+  }
+
+  public static ImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new ImageTokenOverlay();
+    overlay.fillFrom(dto);
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto().setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.IMAGE).build();
   }
 }

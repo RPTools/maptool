@@ -15,15 +15,12 @@
 package net.rptools.maptool.client.tool.drawing;
 
 import java.awt.event.MouseEvent;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.imageio.ImageIO;
-import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
-import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.maptool.client.ScreenPoint;
+import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -42,40 +39,31 @@ public class WallTemplateTool extends BurstTemplateTool {
    *-------------------------------------------------------------------------------------------*/
 
   /** Set the icon for the base tool. */
-  public WallTemplateTool() {
-    try {
-      setIcon(
-          ImageUtil.resizeImage(
-              new ImageIcon(
-                  ImageIO.read(
-                      getClass()
-                          .getClassLoader()
-                          .getResourceAsStream(
-                              "net/rptools/maptool/client/image/tool/temp-blue-wall.png"))),
-              TOOLBAR_ICON_SIZE,
-              TOOLBAR_ICON_SIZE));
-    } catch (IOException ioe) {
-      ioe.printStackTrace();
-    } // endtry
-  }
+  public WallTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Overridden RadiusTemplateTool methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new WallTemplate();
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.walltemplate.tooltip";
   }
 
-  /** @see net.rptools.maptool.client.ui.Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.walltemplate.instructions";
@@ -151,7 +139,9 @@ public class WallTemplateTool extends BurstTemplateTool {
     } // endif
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#resetTool() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#resetTool()
+   */
   @Override
   protected void resetTool() {
     super.resetTool();

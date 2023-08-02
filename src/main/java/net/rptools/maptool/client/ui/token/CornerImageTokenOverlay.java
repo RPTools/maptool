@@ -18,6 +18,8 @@ import java.awt.Rectangle;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
+import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
+import net.rptools.maptool.server.proto.QuadrantDto;
 
 /**
  * Place an image in a given corner.
@@ -46,7 +48,9 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     corner = aCorner;
   }
 
-  /** @see net.rptools.maptool.client.ui.token.BooleanTokenOverlay#clone() */
+  /**
+   * @see BooleanTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BooleanTokenOverlay overlay = new CornerImageTokenOverlay(getName(), getAssetId(), corner);
@@ -61,8 +65,7 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
   }
 
   /**
-   * @see net.rptools.maptool.client.ui.token.ImageTokenOverlay#getImageBounds(java.awt.Rectangle,
-   *     Token)
+   * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
    */
   @Override
   protected Rectangle getImageBounds(Rectangle bounds, Token token) {
@@ -84,8 +87,24 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
     return new Rectangle(x, y, bounds.width / 2, bounds.height / 2);
   }
 
-  /** @return Getter for corner */
+  /**
+   * @return Getter for corner
+   */
   public Quadrant getCorner() {
     return corner;
+  }
+
+  public static CornerImageTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
+    var overlay = new CornerImageTokenOverlay();
+    overlay.fillFrom(dto);
+    overlay.corner = Quadrant.valueOf(dto.getQuadrant().name());
+    return overlay;
+  }
+
+  public BooleanTokenOverlayDto toDto() {
+    return getDto()
+        .setQuadrant(QuadrantDto.valueOf(corner.name()))
+        .setType(BooleanTokenOverlayDto.BooleanTokenOverlayTypeDto.CORNER_IMAGE)
+        .build();
   }
 }

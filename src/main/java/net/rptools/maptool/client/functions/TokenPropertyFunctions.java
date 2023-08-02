@@ -57,7 +57,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
   private TokenPropertyFunctions() {
     super(
         0,
-        4,
+        5,
         "getPropertyNames",
         "getAllPropertyNames",
         "getPropertyNamesRaw",
@@ -549,7 +549,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("setLibProperty")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
       String property = parameters.get(0).toString();
-      String value = parameters.get(1).toString();
+      Object value = parameters.get(1);
 
       String location;
       if (parameters.size() > 2) {
@@ -575,7 +575,12 @@ public class TokenPropertyFunctions extends AbstractFunction {
                               "macro.function.tokenProperty.unknownLibToken",
                               functionName,
                               libName)));
-      library.getLibraryData().thenCompose(libData -> libData.setStringData(property, value));
+      library
+          .getLibraryData()
+          .thenCompose(
+              libData ->
+                  libData.setData(
+                      new MTScriptDataConversion().parseMTScriptString(property, value)));
       return "";
     }
 
@@ -670,7 +675,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("removeTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, (Integer) null);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeFacing);
       return "";
     }
 
@@ -788,7 +793,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       Token.TokenShape newShape =
           Token.TokenShape.valueOf(
               parameters.get(0).toString().toUpperCase().trim().replace(" ", "_"));
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setShape, newShape.name());
       return token.getShape().name();
     }
 
@@ -1138,9 +1143,9 @@ public class TokenPropertyFunctions extends AbstractFunction {
 
     if (tokenShape != null) {
       MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayerShape, layer, tokenShape);
+          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), tokenShape.name());
     } else {
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer.name());
     }
     return layer.name();
   }
@@ -1171,10 +1176,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @throws ParserException
    */
   private String getAllPropertyNames(String type, String delim) throws ParserException {
+    ArrayList<String> namesList = new ArrayList<String>();
     if (type == null || type.length() == 0 || type.equals("*")) {
       Map<String, List<TokenProperty>> pmap =
           MapTool.getCampaign().getCampaignProperties().getTokenTypeMap();
-      ArrayList<String> namesList = new ArrayList<String>();
 
       for (Entry<String, List<TokenProperty>> entry : pmap.entrySet()) {
         for (TokenProperty tp : entry.getValue()) {
@@ -1191,14 +1196,11 @@ public class TokenPropertyFunctions extends AbstractFunction {
     } else {
       List<TokenProperty> props =
           MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(type);
-      if (props == null) {
-        throw new ParserException(
-            I18N.getText(
-                "macro.function.tokenProperty.unknownPropType", "getAllPropertyNames", type));
-      }
-      ArrayList<String> namesList = new ArrayList<String>();
-      for (TokenProperty tp : props) {
-        namesList.add(tp.getName());
+      // If property type not found return an empty string or JSON array
+      if (props != null) {
+        for (TokenProperty tp : props) {
+          namesList.add(tp.getName());
+        }
       }
       if ("json".equals(delim)) {
         JsonArray jarr = new JsonArray();

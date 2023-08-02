@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
+    <g transform="matrix(1,0,0,1,-19,-19)">
+        <g id="Show-Grids" serif:id="Show Grids" transform="matrix(1,0,0,1,-240.667,19)">
+            <rect x="259.667" y="0" width="16" height="16" style="fill:none;"/>
+            <g transform="matrix(0.833333,0,0,1,245.167,-15)">
+                <path d="M21,21.5L33,21.5" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.09px;"/>
+            </g>
+            <g transform="matrix(0.833333,0,0,1,245.167,-12)">
+                <path d="M21,21.5L33,21.5" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.09px;"/>
+            </g>
+            <g transform="matrix(5.10269e-17,0.833333,-1,6.12323e-17,290.667,-14.5)">
+                <path d="M21,21.5L33,21.5" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.09px;"/>
+            </g>
+            <g transform="matrix(5.10269e-17,0.833333,-1,6.12323e-17,287.667,-14.5)">
+                <path d="M21,21.5L33,21.5" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.09px;"/>
+            </g>
+            <g transform="matrix(0.833333,0,0,0.833333,245.167,-14.5)">
+                <path d="M33,21L21,21L21,33L33,33L33,21ZM31.8,22.2L31.8,31.8C31.8,31.8 22.2,31.8 22.2,31.8C22.2,31.8 22.2,22.2 22.2,22.2L31.8,22.2Z" style="fill:rgb(110,110,110);"/>
+            </g>
+        </g>
+    </g>
+</svg>

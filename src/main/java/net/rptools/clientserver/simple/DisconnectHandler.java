@@ -14,7 +14,9 @@
  */
 package net.rptools.clientserver.simple;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public interface DisconnectHandler {
 
   public void handleDisconnect(AbstractConnection conn);

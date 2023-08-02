@@ -19,6 +19,8 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
+import com.google.protobuf.Int32Value;
+import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -33,26 +35,35 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.Serializable;
 import java.io.StringReader;
+import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.lib.swing.SwingUtil;
 import net.rptools.lib.transferable.TokenTransferData;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
+import net.rptools.maptool.server.proto.TokenDto;
+import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
 /**
  * This object represents the placeable objects on a map. For example an icon that represents a
@@ -60,7 +71,7 @@ import org.apache.logging.log4j.Logger;
  */
 
 // Lee: made tokens cloneable
-public class Token extends BaseModel implements Cloneable {
+public class Token implements Cloneable {
 
   private static final Logger log = LogManager.getLogger(Token.class);
 
@@ -84,7 +95,7 @@ public class Token extends BaseModel implements Cloneable {
   public static final String LIB_TOKEN_PREFIX = "lib:";
 
   private boolean beingImpersonated = false;
-  private GUID exposedAreaGUID;
+  private GUID exposedAreaGUID = new GUID();
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -191,7 +202,7 @@ public class Token extends BaseModel implements Cloneable {
     setTerrainModifier,
     setTerrainModifierOperation,
     setTerrainModifiersIgnored,
-    setVBL,
+    setTopology,
     setImageAsset,
     setPortraitImage,
     setCharsheetImage,
@@ -204,13 +215,14 @@ public class Token extends BaseModel implements Cloneable {
     flipX,
     flipY,
     flipIso,
-    setSpeechName
+    setSpeechName,
+    removeFacing
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
       (o1, o2) -> o1.getName().compareToIgnoreCase(o2.getName());
 
-  private final Map<String, MD5Key> imageAssetMap;
+  private final Map<String, MD5Key> imageAssetMap = new HashMap<>();
   private String currentImageAsset;
 
   private int x;
@@ -240,31 +252,33 @@ public class Token extends BaseModel implements Cloneable {
   private double scaleX = 1;
   private double scaleY = 1;
 
-  private Map<Class<? extends Grid>, GUID> sizeMap;
+  private Map<String, GUID> sizeMap = new HashMap<>();
 
   private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
   // floating
 
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
-
   private int vblColorSensitivity = -1;
   private int alwaysVisibleTolerance = 2; // Default for # of regions (out of 9) that must be seen
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
   private Area vbl;
+  private Area hillVbl;
+  private Area pitVbl;
+  private Area mbl;
 
-  private String name;
-  private Set<String> ownerList;
+  private String name = "";
+  private Set<String> ownerList = new HashSet<>();
 
   private int ownerType;
 
   private static final int OWNER_TYPE_ALL = 1;
   private static final int OWNER_TYPE_LIST = 0;
 
-  private String tokenShape;
-  private String tokenType;
-  private String layer;
+  private String tokenShape = TokenShape.SQUARE.toString();
+  private String tokenType = Type.NPC.toString();
+  private String layer = Zone.Layer.TOKEN.toString();
   private transient Zone.Layer actualLayer;
 
   private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
@@ -278,7 +292,7 @@ public class Token extends BaseModel implements Cloneable {
   private transient Color visionOverlayColor;
 
   // Jamz: allow token alpha channel modification
-  private float tokenOpacity = 1.0f;
+  private @Nonnull Float tokenOpacity = 1.0f;
 
   private String speechName = "";
 
@@ -287,7 +301,7 @@ public class Token extends BaseModel implements Cloneable {
     NONE(), // Default, no terrain modifications to pathfinding cost
     MULTIPLY(), // All tokens with this type are added together and multiplied against the Cell cost
     ADD(), // All tokens with this type are added together and added to the cell cost
-    BLOCK(), // Movement through tokens with this type are blocked just as if they had VBL
+    BLOCK(), // Movement through tokens with this type are blocked just as if they had MBL
     FREE(); // Any cell with a token of this type in it has ALL movement costs removed
 
     private final String displayName;
@@ -310,15 +324,15 @@ public class Token extends BaseModel implements Cloneable {
 
   private boolean isFlippedX;
   private boolean isFlippedY;
-  private Boolean isFlippedIso;
+  private Boolean isFlippedIso = false;
 
   private MD5Key charsheetImage;
   private MD5Key portraitImage;
 
-  private List<AttachedLightSource> lightSourceList;
+  private List<AttachedLightSource> lightSourceList = new ArrayList<>();
   private String sightType;
   private boolean hasSight;
-  private Boolean hasImageTable;
+  private Boolean hasImageTable = false;
   private String imageTableName;
 
   private String label;
@@ -326,7 +340,10 @@ public class Token extends BaseModel implements Cloneable {
   /** The notes that are displayed for this token. */
   private String notes;
 
+  private String notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+
   private String gmNotes;
+  private String gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
 
   private String gmName;
 
@@ -334,7 +351,7 @@ public class Token extends BaseModel implements Cloneable {
    * A state properties for this token. This allows state to be added that can change appearance of
    * the token.
    */
-  private Map<String, Object> state;
+  private final Map<String, Object> state = new HashMap<>();
 
   /** Properties */
   // I screwed up. propertyMap was HashMap<String,Object> in pre-1.3b70 (?)
@@ -345,12 +362,12 @@ public class Token extends BaseModel implements Cloneable {
   // help XStream move the data around.
   private Map<String, Object> propertyMap; // 1.3b77 and earlier
 
-  private CaseInsensitiveHashMap<Object> propertyMapCI;
+  private CaseInsensitiveHashMap<Object> propertyMapCI = new CaseInsensitiveHashMap<>();
 
   private Map<String, String> macroMap;
-  private Map<Integer, MacroButtonProperties> macroPropertiesMap;
+  private Map<Integer, MacroButtonProperties> macroPropertiesMap = new HashMap<>();
 
-  private Map<String, String> speechMap;
+  private Map<String, String> speechMap = new HashMap<>();
 
   private HeroLabData heroLabData;
 
@@ -408,11 +425,16 @@ public class Token extends BaseModel implements Cloneable {
     alwaysVisibleTolerance = token.alwaysVisibleTolerance;
     isAlwaysVisible = token.isAlwaysVisible;
     vbl = token.vbl;
+    hillVbl = token.hillVbl;
+    pitVbl = token.pitVbl;
+    mbl = token.mbl;
 
     name = token.name;
     notes = token.notes;
+    notesType = token.notesType;
     gmName = token.gmName;
     gmNotes = token.gmNotes;
+    gmNotesType = token.gmNotesType;
     label = token.label;
 
     isFlippedX = token.isFlippedX;
@@ -443,40 +465,24 @@ public class Token extends BaseModel implements Cloneable {
     }
 
     ownerType = token.ownerType;
-    if (token.ownerList != null) {
-      ownerList = new HashSet<String>();
-      ownerList.addAll(token.ownerList);
-    }
-    if (token.lightSourceList != null) {
-      lightSourceList = new ArrayList<AttachedLightSource>(token.lightSourceList);
-    }
-    if (token.state != null) {
-      state.putAll(token.state);
-    }
-    if (token.propertyMapCI != null) {
-      getPropertyMap().clear();
-      getPropertyMap().putAll(token.propertyMapCI);
-    }
-    if (token.macroPropertiesMap != null) { // Deep copy of the macros
-      macroPropertiesMap = new HashMap<>(token.macroPropertiesMap.size());
-      token.macroPropertiesMap.forEach(
-          (key, value) ->
-              macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
-    }
+    ownerList.addAll(token.ownerList);
+    lightSourceList.addAll(token.lightSourceList);
+    state.putAll(token.state);
+    getPropertyMap().clear();
+    getPropertyMap().putAll(token.propertyMapCI);
+    // Deep copy of the macros
+    token.macroPropertiesMap.forEach(
+        (key, value) ->
+            macroPropertiesMap.put(key, new MacroButtonProperties(this, key, value, false)));
+
     // convert old-style macros
     if (token.macroMap != null) {
-      macroMap = new HashMap<String, String>(token.macroMap);
+      macroMap = new HashMap<>(token.macroMap);
       loadOldMacros();
     }
-    if (token.speechMap != null) {
-      speechMap = new HashMap<String, String>(token.speechMap);
-    }
-    if (token.imageAssetMap != null) {
-      imageAssetMap.putAll(token.imageAssetMap);
-    }
-    if (token.sizeMap != null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>(token.sizeMap);
-    }
+    speechMap.putAll(token.speechMap);
+    imageAssetMap.putAll(token.imageAssetMap);
+    sizeMap.putAll(token.sizeMap);
 
     exposedAreaGUID = token.exposedAreaGUID;
 
@@ -484,27 +490,15 @@ public class Token extends BaseModel implements Cloneable {
     tokenOpacity = token.tokenOpacity;
     terrainModifier = token.terrainModifier;
     terrainModifierOperation = token.terrainModifierOperation;
-
-    if (token.terrainModifiersIgnored != null) {
-      terrainModifiersIgnored = new HashSet<>(token.terrainModifiersIgnored);
-    }
-
-    speechName = token.speechName;
+    terrainModifiersIgnored.addAll(token.terrainModifiersIgnored);
+    speechName = token.speechName != null ? token.speechName : "";
     allowURIAccess = token.allowURIAccess;
   }
 
-  public Token() {
-    imageAssetMap = new HashMap<String, MD5Key>();
-  }
-
-  public Token(MD5Key assetID) {
-    this("", assetID);
-  }
+  public Token() {}
 
   public Token(String name, MD5Key assetId) {
     this.name = name;
-    state = new HashMap<String, Object>();
-    imageAssetMap = new HashMap<String, MD5Key>();
 
     // NULL key is the default
     imageAssetMap.put(null, assetId);
@@ -535,7 +529,7 @@ public class Token extends BaseModel implements Cloneable {
     // lightSourceList?
     macroMap = null;
     // macroPropertiesMap = null;
-    ownerList = null;
+    ownerList.clear();
     // propertyMapCI = null;
     // propertyType = "Basic";
     /**
@@ -568,11 +562,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void setHasImageTable(boolean hasImageTable) {
-    if (hasImageTable) {
-      this.hasImageTable = true;
-    } else {
-      this.hasImageTable = null;
-    }
+    this.hasImageTable = hasImageTable;
   }
 
   public void setImageTableName(String imageTableName) {
@@ -636,6 +626,14 @@ public class Token extends BaseModel implements Cloneable {
     gmNotes = notes;
   }
 
+  public String getGmNotesType() {
+    return gmNotesType;
+  }
+
+  public void setGmNotesType(String type) {
+    gmNotesType = type;
+  }
+
   public String getGMName() {
     if (MapTool.getPlayer().isGM() || MapTool.getParser().isMacroTrusted()) {
       return gmName;
@@ -676,41 +674,27 @@ public class Token extends BaseModel implements Cloneable {
     return haloColor;
   }
 
+  /**
+   * @return The token opacity, in the range [0.0f, 1.0f].
+   */
   public float getTokenOpacity() {
-    if (tokenOpacity <= 0.0f) {
-      tokenOpacity = 1.0f;
-    }
-
     return tokenOpacity;
   }
 
   /**
-   * Set the token opacity from a string trimmed to [0.05f, 1.0f]
-   *
-   * @param alpha the String of the opacity value.
-   * @return the float of the opacity
-   */
-  public float setTokenOpacity(String alpha) {
-    return setTokenOpacity(Float.parseFloat(alpha));
-  }
-
-  /**
-   * Set the token opacity from a float trimmed to [0.05f, 1.0f]
+   * Set the token opacity from a float trimmed to [0.0f, 1.0f]
    *
    * @param alpha the float of the opacity.
-   * @return the float of the opacity trimmed.
    */
-  public float setTokenOpacity(float alpha) {
+  public void setTokenOpacity(float alpha) {
     if (alpha > 1.0f) {
       alpha = 1.0f;
     }
-    if (alpha <= 0.0f) {
-      alpha = 0.05f;
+    if (alpha < 0.0f) {
+      alpha = 0.0f;
     }
 
     tokenOpacity = alpha;
-
-    return tokenOpacity;
   }
 
   /**
@@ -760,10 +744,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public Set<TerrainModifierOperation> getTerrainModifiersIgnored() {
-    if (terrainModifiersIgnored == null) {
-      terrainModifiersIgnored = new HashSet<>();
-    }
-
     if (terrainModifiersIgnored.isEmpty()) {
       terrainModifiersIgnored.add(TerrainModifierOperation.NONE);
     }
@@ -772,7 +752,8 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void setTerrainModifiersIgnored(Set<TerrainModifierOperation> terrainModifiersIgnored) {
-    this.terrainModifiersIgnored = terrainModifiersIgnored;
+    this.terrainModifiersIgnored.clear();
+    this.terrainModifiersIgnored.addAll(terrainModifiersIgnored);
 
     if (this.terrainModifiersIgnored.contains(TerrainModifierOperation.NONE)) {
       terrainModifiersIgnored.clear();
@@ -814,11 +795,9 @@ public class Token extends BaseModel implements Cloneable {
 
   public TokenShape getShape() {
     try {
-      return tokenShape != null ? TokenShape.valueOf(tokenShape) : TokenShape.SQUARE; // TODO:
-      // make
-      // this
-      // a psf
+      return TokenShape.valueOf(tokenShape);
     } catch (IllegalArgumentException iae) {
+      tokenShape = TokenShape.SQUARE.name();
       return TokenShape.SQUARE;
     }
   }
@@ -829,8 +808,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public Type getType() {
     try {
-      // TODO: make this a psf
-      return tokenType != null ? Type.valueOf(tokenType) : Type.NPC;
+      return Type.valueOf(tokenType);
     } catch (IllegalArgumentException iae) {
       tokenType = Type.NPC.name();
       return Type.NPC;
@@ -852,7 +830,7 @@ public class Token extends BaseModel implements Cloneable {
   public Zone.Layer getLayer() {
     try {
       if (actualLayer == null) {
-        actualLayer = layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.TOKEN;
+        actualLayer = Zone.Layer.valueOf(layer);
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
@@ -930,38 +908,29 @@ public class Token extends BaseModel implements Cloneable {
     return imageTableName;
   }
 
-  public void addLightSource(LightSource source, Direction direction) {
-    if (lightSourceList == null) {
-      lightSourceList = new ArrayList<AttachedLightSource>();
-    }
-    if (!lightSourceList.contains(source)) {
-      lightSourceList.add(new AttachedLightSource(source, direction));
-    }
+  public void addLightSource(LightSource source) {
+    lightSourceList.add(new AttachedLightSource(source));
   }
 
   public void removeLightSourceType(LightSource.Type lightType) {
-    if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null && lightSource.getType() == lightType) {
-          i.remove();
-        }
+    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
+      AttachedLightSource als = i.next();
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null && lightSource.getType() == lightType) {
+        i.remove();
       }
     }
   }
 
   public void removeGMAuras() {
-    if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null) {
-          List<Light> lights = lightSource.getLightList();
-          for (Light light : lights) {
-            if (light != null && light.isGM()) {
-              i.remove();
-            }
+    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
+      AttachedLightSource als = i.next();
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null) {
+        List<Light> lights = lightSource.getLightList();
+        for (Light light : lights) {
+          if (light != null && light.isGM()) {
+            i.remove();
           }
         }
       }
@@ -969,16 +938,14 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void removeOwnerOnlyAuras() {
-    if (lightSourceList != null) {
-      for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
-        AttachedLightSource als = i.next();
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null) {
-          List<Light> lights = lightSource.getLightList();
-          for (Light light : lights) {
-            if (light.isOwnerOnly()) {
-              i.remove();
-            }
+    for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
+      AttachedLightSource als = i.next();
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null) {
+        List<Light> lights = lightSource.getLightList();
+        for (Light light : lights) {
+          if (light.isOwnerOnly()) {
+            i.remove();
           }
         }
       }
@@ -986,15 +953,13 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public boolean hasOwnerOnlyAuras() {
-    if (lightSourceList != null) {
-      for (AttachedLightSource als : lightSourceList) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null) {
-          List<Light> lights = lightSource.getLightList();
-          for (Light light : lights) {
-            if (light.isOwnerOnly()) {
-              return true;
-            }
+    for (AttachedLightSource als : lightSourceList) {
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null) {
+        List<Light> lights = lightSource.getLightList();
+        for (Light light : lights) {
+          if (light.isOwnerOnly()) {
+            return true;
           }
         }
       }
@@ -1003,15 +968,13 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public boolean hasGMAuras() {
-    if (lightSourceList != null) {
-      for (AttachedLightSource als : lightSourceList) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null) {
-          List<Light> lights = lightSource.getLightList();
-          for (Light light : lights) {
-            if (light.isGM()) {
-              return true;
-            }
+    for (AttachedLightSource als : lightSourceList) {
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null) {
+        List<Light> lights = lightSource.getLightList();
+        for (Light light : lights) {
+          if (light.isGM()) {
+            return true;
           }
         }
       }
@@ -1020,21 +983,16 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
-    if (lightSourceList != null) {
-      for (AttachedLightSource als : lightSourceList) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
-        if (lightSource != null && lightSource.getType() == lightType) {
-          return true;
-        }
+    for (AttachedLightSource als : lightSourceList) {
+      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      if (lightSource != null && lightSource.getType() == lightType) {
+        return true;
       }
     }
     return false;
   }
 
   public void removeLightSource(LightSource source) {
-    if (lightSourceList == null) {
-      return;
-    }
     lightSourceList.removeIf(
         als ->
             als != null
@@ -1044,14 +1002,11 @@ public class Token extends BaseModel implements Cloneable {
 
   /** Clear the lightSourceList */
   public void clearLightSources() {
-    if (lightSourceList == null) {
-      return;
-    }
-    lightSourceList = null;
+    lightSourceList.clear();
   }
 
   public boolean hasLightSource(LightSource source) {
-    if (lightSourceList == null) {
+    if (lightSourceList.size() == 0) {
       return false;
     }
     for (AttachedLightSource als : lightSourceList) {
@@ -1064,53 +1019,48 @@ public class Token extends BaseModel implements Cloneable {
     return false;
   }
 
-  /** @return false if lightSourceList is null or empty, and true otherwise */
+  /**
+   * @return false if lightSourceList is null or empty, and true otherwise
+   */
   public boolean hasLightSources() {
-    return lightSourceList != null && !lightSourceList.isEmpty();
+    return !lightSourceList.isEmpty();
   }
 
   public List<AttachedLightSource> getLightSources() {
-    return lightSourceList != null
-        ? Collections.unmodifiableList(lightSourceList)
-        : new LinkedList<AttachedLightSource>();
+    return Collections.unmodifiableList(lightSourceList);
   }
 
   public synchronized void addOwner(String playerId) {
     ownerType = OWNER_TYPE_LIST;
-    if (ownerList == null) {
-      ownerList = new HashSet<String>();
-    }
     ownerList.add(playerId);
   }
 
-  /** @return true if the token is owned by all or has explicit owners. */
+  /**
+   * @return true if the token is owned by all or has explicit owners.
+   */
   public synchronized boolean hasOwners() {
-    return ownerType == OWNER_TYPE_ALL || (ownerList != null && !ownerList.isEmpty());
+    return ownerType == OWNER_TYPE_ALL || !ownerList.isEmpty();
   }
 
   public synchronized void removeOwner(String playerId) {
     ownerType = OWNER_TYPE_LIST;
-    if (ownerList == null) {
-      return;
-    }
     ownerList.remove(playerId);
-    if (ownerList.size() == 0) {
-      ownerList = null;
-    }
   }
 
   public synchronized void setOwnedByAll(boolean ownedByAll) {
     if (ownedByAll) {
       ownerType = OWNER_TYPE_ALL;
-      ownerList = null;
+      ownerList.clear();
     } else {
       ownerType = OWNER_TYPE_LIST;
     }
   }
 
-  /** @return the set of owner names of the token. */
+  /**
+   * @return the set of owner names of the token.
+   */
   public Set<String> getOwners() {
-    return ownerList != null ? Collections.unmodifiableSet(ownerList) : new HashSet<>();
+    return Collections.unmodifiableSet(ownerList);
   }
 
   public boolean isOwnedByAll() {
@@ -1118,11 +1068,11 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public synchronized void clearAllOwners() {
-    ownerList = null;
+    ownerList.clear();
   }
 
   public synchronized boolean isOwner(String playerId) {
-    return (ownerType == OWNER_TYPE_ALL || (ownerList != null && ownerList.contains(playerId)));
+    return (ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId));
   }
 
   @Override
@@ -1206,7 +1156,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public Set<MD5Key> getAllImageAssets() {
-    Set<MD5Key> assetSet = new HashSet<MD5Key>(imageAssetMap.values());
+    Set<MD5Key> assetSet = new HashSet<>(imageAssetMap.values());
     assetSet.add(charsheetImage);
     assetSet.add(portraitImage);
 
@@ -1348,12 +1298,16 @@ public class Token extends BaseModel implements Cloneable {
     this.scaleY = scaleY;
   }
 
-  /** @return Returns the snapScale. */
+  /**
+   * @return Returns the snapScale.
+   */
   public boolean isSnapToScale() {
     return snapToScale;
   }
 
-  /** @param snapScale The snapScale to set. */
+  /**
+   * @param snapScale The snapScale to set.
+   */
   public void setSnapToScale(boolean snapScale) {
     this.snapToScale = snapScale;
   }
@@ -1362,17 +1316,23 @@ public class Token extends BaseModel implements Cloneable {
     this.isVisible = visible;
   }
 
-  /** @return isVisible */
+  /**
+   * @return isVisible
+   */
   public boolean isVisible() {
     return isVisible;
   }
 
-  /** @return the visibleOnlyToOwner */
+  /**
+   * @return the visibleOnlyToOwner
+   */
   public boolean isVisibleOnlyToOwner() {
     return visibleOnlyToOwner;
   }
 
-  /** @param visibleOnlyToOwner the visibleOnlyToOwner to set */
+  /**
+   * @param visibleOnlyToOwner the visibleOnlyToOwner to set
+   */
   public void setVisibleOnlyToOwner(boolean visibleOnlyToOwner) {
     this.visibleOnlyToOwner = visibleOnlyToOwner;
   }
@@ -1410,40 +1370,83 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   /**
-   * Set the VBL of the token. If vbl null, set vblAplphaSensitivity to -1.
+   * Return the area of the token for the requested type of topology.
    *
-   * @param vbl the VBL to set.
+   * @param topologyType The type of topology to return.
+   * @return the current topology of the token.
    */
-  public void setVBL(Area vbl) {
-    this.vbl = vbl;
-    if (vbl == null) {
+  public Area getTopology(Zone.TopologyType topologyType) {
+    return switch (topologyType) {
+      case WALL_VBL -> vbl;
+      case HILL_VBL -> hillVbl;
+      case PIT_VBL -> pitVbl;
+      case MBL -> mbl;
+    };
+  }
+
+  /**
+   * Transform the token's topology according to the token's scale, position, rotation and flipping.
+   *
+   * @param topologyType The type of topology to transform.
+   * @return the transformed topology for the token
+   */
+  public Area getTransformedTopology(Zone.TopologyType topologyType) {
+    return getTransformedTopology(getTopology(topologyType));
+  }
+
+  /**
+   * Set the topology of the given type for the token.
+   *
+   * <p>If no topology remains on the token, set {@link #vblColorSensitivity} to -1.
+   *
+   * @param topologyType The type of topology to set.
+   * @param topology the topology area to set.
+   */
+  public void setTopology(Zone.TopologyType topologyType, @Nullable Area topology) {
+    switch (topologyType) {
+      case WALL_VBL -> vbl = topology;
+      case HILL_VBL -> hillVbl = topology;
+      case PIT_VBL -> pitVbl = topology;
+      case MBL -> mbl = topology;
+    }
+    ;
+
+    if (!hasAnyTopology()) {
       vblColorSensitivity = -1;
     }
   }
 
   /**
-   * Return the vbl area of the token
+   * Return the existence of the requested type of topology.
    *
-   * @return the current VBL of the token
+   * @param topologyType The type of topology to check for.
+   * @return true if the token has the given type of topology.
    */
-  public Area getVBL() {
-    return vbl;
-  }
-
-  public Area getTransformedVBL() {
-    return getTransformedVBL(vbl);
+  public boolean hasTopology(Zone.TopologyType topologyType) {
+    return getTopology(topologyType) != null;
   }
 
   /**
-   * This method returns the vbl stored on the token with AffineTransformations applied for scale,
-   * position, rotation, &amp; flipping.
+   * Return the existence of any type of topology.
    *
-   * @param areaToTransform transformations to apply to the VBL
-   * @return the transformed VBL for the token
+   * @return true if the token has any kind of topology.
+   */
+  public boolean hasAnyTopology() {
+    return Arrays.stream(Zone.TopologyType.values())
+        .map(this::getTopology)
+        .anyMatch(Objects::nonNull);
+  }
+
+  /**
+   * This method transforms an area (meant to be one of the token's topologies) with
+   * AffineTransformations applied for scale, position, rotation, &amp; flipping.
+   *
+   * @param areaToTransform The area to apply transformations tos.
+   * @return the transformed area for the token
    * @author Jamz
    * @since 1.4.1.5
    */
-  public Area getTransformedVBL(Area areaToTransform) {
+  public Area getTransformedTopology(Area areaToTransform) {
     if (areaToTransform == null) {
       return null;
     }
@@ -1512,15 +1515,6 @@ public class Token extends BaseModel implements Cloneable {
     return new Area(atArea.createTransformedShape(areaToTransform));
   }
 
-  /**
-   * Return the existence of the token's VBL
-   *
-   * @return true if the token's vbl is not null, and false otherwise
-   */
-  public boolean hasVBL() {
-    return vbl != null;
-  }
-
   public void setIsAlwaysVisible(boolean isAlwaysVisible) {
     this.isAlwaysVisible = isAlwaysVisible;
   }
@@ -1530,7 +1524,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public String getName() {
-    return name != null ? name : "";
+    return name;
   }
 
   public Rectangle getBounds(Zone zone) {
@@ -1539,8 +1533,8 @@ public class Token extends BaseModel implements Cloneable {
     Rectangle footprintBounds =
         footprint.getBounds(grid, grid.convert(new ZonePoint(getX(), getY())));
 
-    double w = footprintBounds.width;
-    double h = footprintBounds.height;
+    double w;
+    double h;
 
     // Sizing
     if (!isSnapToScale()) {
@@ -1685,7 +1679,9 @@ public class Token extends BaseModel implements Cloneable {
     return new Point2D.Double(offsetX, offsetY);
   }
 
-  /** @return the String of the sightType */
+  /**
+   * @return the String of the sightType
+   */
   public String getSightType() {
     return sightType;
   }
@@ -1701,21 +1697,18 @@ public class Token extends BaseModel implements Cloneable {
    * @return Returns the size.
    */
   public TokenFootprint getFootprint(Grid grid) {
-    return grid.getFootprint(getSizeMap().get(grid.getClass()));
+    return grid.getFootprint(getSizeMap().get(grid.getClass().getName()));
   }
 
   public TokenFootprint setFootprint(Grid grid, TokenFootprint footprint) {
-    return grid.getFootprint(getSizeMap().put(grid.getClass(), footprint.getId()));
+    return grid.getFootprint(getSizeMap().put(grid.getClass().getName(), footprint.getId()));
   }
 
   public Set<CellPoint> getOccupiedCells(Grid grid) {
     return getFootprint(grid).getOccupiedCells(grid.convert(new ZonePoint(getX(), getY())));
   }
 
-  private Map<Class<? extends Grid>, GUID> getSizeMap() {
-    if (sizeMap == null) {
-      sizeMap = new HashMap<Class<? extends Grid>, GUID>();
-    }
+  private Map<String, GUID> getSizeMap() {
     return sizeMap;
   }
 
@@ -1745,9 +1738,19 @@ public class Token extends BaseModel implements Cloneable {
    * @return The original value of the state, if any.
    */
   public Object setState(String aState, Object aValue) {
+    // the GUI sends null to mean remove a state/bar
     if (aValue == null) {
       return state.remove(aState);
     }
+    // setBarVisible sends a boolean to show/hide a bar
+    if (aValue instanceof Boolean) {
+      if ((Boolean) aValue) {
+        return state.put(aState, aValue);
+      } else {
+        return state.remove(aState);
+      }
+    }
+    // Either enable a state or set the value of a bar
     return state.put(aState, aValue);
   }
 
@@ -1771,7 +1774,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public Object getProperty(String key) {
-    Object value = getPropertyMap().get(key);
 
     // // Short name ?
     // if (value == null) {
@@ -1782,7 +1784,7 @@ public class Token extends BaseModel implements Cloneable {
     // }
     // }
     // }
-    return value;
+    return getPropertyMap().get(key);
   }
 
   public Object getEvaluatedProperty(String key) {
@@ -1873,20 +1875,21 @@ public class Token extends BaseModel implements Cloneable {
     return val;
   }
 
-  /** @return all property names, all in lowercase. */
+  /**
+   * @return all property names, all in lowercase.
+   */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /** @return all property names, preserving their case. */
+  /**
+   * @return all property names, preserving their case.
+   */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }
 
   private CaseInsensitiveHashMap<Object> getPropertyMap() {
-    if (propertyMapCI == null) {
-      propertyMapCI = new CaseInsensitiveHashMap<Object>();
-    }
     return propertyMapCI;
   }
 
@@ -1909,9 +1912,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public int getMacroNextIndex() {
-    if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<Integer, MacroButtonProperties>();
-    }
     Set<Integer> indexSet = macroPropertiesMap.keySet();
     int maxIndex = 0;
     for (int index : indexSet) {
@@ -1929,9 +1929,6 @@ public class Token extends BaseModel implements Cloneable {
    * @return the map
    */
   public Map<Integer, MacroButtonProperties> getMacroPropertiesMap(boolean secure) {
-    if (macroPropertiesMap == null) {
-      macroPropertiesMap = new HashMap<>();
-    }
     if (macroMap != null) {
       loadOldMacros();
     }
@@ -1967,7 +1964,7 @@ public class Token extends BaseModel implements Cloneable {
    */
   public List<MacroButtonProperties> getMacroList(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
-    List<MacroButtonProperties> list = new ArrayList<MacroButtonProperties>();
+    List<MacroButtonProperties> list = new ArrayList<>();
     for (int key : keys) {
       list.add(macroPropertiesMap.get(key));
     }
@@ -2014,7 +2011,7 @@ public class Token extends BaseModel implements Cloneable {
 
   public List<String> getMacroNames(boolean secure) {
     Set<Integer> keys = getMacroPropertiesMap(secure).keySet();
-    List<String> list = new ArrayList<String>();
+    List<String> list = new ArrayList<>();
     for (int key : keys) {
       MacroButtonProperties prop = macroPropertiesMap.get(key);
       list.add(prop.getLabel());
@@ -2044,9 +2041,6 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   private Map<String, String> getSpeechMap() {
-    if (speechMap == null) {
-      speechMap = new HashMap<String, String>();
-    }
     return speechMap;
   }
 
@@ -2066,7 +2060,7 @@ public class Token extends BaseModel implements Cloneable {
    * @return The set of state property names that match the passed value.
    */
   public Set<String> getStatePropertyNames(Object value) {
-    Map<String, Object> matches = new HashMap(state);
+    Map<String, Object> matches = new HashMap<>(state);
     for (Map.Entry<String, Object> entry : state.entrySet()) {
       if (!value.equals(entry.getValue())) {
         matches.remove(entry.getKey());
@@ -2075,14 +2069,26 @@ public class Token extends BaseModel implements Cloneable {
     return matches.keySet();
   }
 
-  /** @return Getter for notes */
+  /**
+   * @return Getter for notes
+   */
   public String getNotes() {
     return notes;
   }
 
-  /** @param aNotes Setter for notes */
+  /**
+   * @param aNotes Setter for notes
+   */
   public void setNotes(String aNotes) {
     notes = aNotes;
+  }
+
+  public String getNotesType() {
+    return notesType;
+  }
+
+  public void setNotesType(String type) {
+    notesType = type;
   }
 
   public boolean isFlippedY() {
@@ -2109,11 +2115,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void setFlippedIso(boolean isFlippedIso) {
-    if (isFlippedIso) {
-      this.isFlippedIso = true;
-    } else {
-      this.isFlippedIso = null;
-    }
+    this.isFlippedIso = isFlippedIso;
   }
 
   public Color getVisionOverlayColor() {
@@ -2154,7 +2156,9 @@ public class Token extends BaseModel implements Cloneable {
     return anchorY;
   }
 
-  /** @return the scale of the token layout */
+  /**
+   * @return the scale of the token layout
+   */
   public double getSizeScale() {
     return sizeScale;
   }
@@ -2222,8 +2226,6 @@ public class Token extends BaseModel implements Cloneable {
    * @param td Read the values from this transfer object.
    */
   public Token(TokenTransferData td) {
-    imageAssetMap = new HashMap<String, MD5Key>();
-    state = new HashMap<String, Object>();
     if (td.getLocation() != null) {
       x = td.getLocation().x;
       y = td.getLocation().y;
@@ -2235,10 +2237,12 @@ public class Token extends BaseModel implements Cloneable {
     isVisible = td.isVisible();
     visibleOnlyToOwner = getBoolean(td, TokenTransferData.VISIBLE_OWNER_ONLY, false);
     name = td.getName();
-    ownerList = td.getPlayers();
+    ownerList.addAll(td.getPlayers());
     ownerType =
         getInt(
-            td, TokenTransferData.OWNER_TYPE, ownerList == null ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
+            td,
+            TokenTransferData.OWNER_TYPE,
+            ownerList.isEmpty() ? OWNER_TYPE_ALL : OWNER_TYPE_LIST);
     tokenShape = (String) td.get(TokenTransferData.TOKEN_TYPE);
     facing = td.getFacing();
     notes = (String) td.get(TokenTransferData.NOTES);
@@ -2258,7 +2262,7 @@ public class Token extends BaseModel implements Cloneable {
     // Get the macros
     @SuppressWarnings("unchecked")
     Map<String, Object> macros = (Map<String, Object>) td.get(TokenTransferData.MACROS);
-    macroMap = new HashMap<String, String>();
+    macroMap = new HashMap<>();
     for (var entry : macros.entrySet()) {
       String macroName = entry.getKey();
       Object macro = entry.getValue();
@@ -2392,8 +2396,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void deleteMacroGroup(String macroGroup, Boolean secure) {
-    List<MacroButtonProperties> tempMacros =
-        new ArrayList<MacroButtonProperties>(getMacroList(true));
+    List<MacroButtonProperties> tempMacros = new ArrayList<>(getMacroList(true));
 
     for (MacroButtonProperties nextProp : tempMacros) {
       if (macroGroup.equals(nextProp.getGroup())) {
@@ -2406,8 +2409,7 @@ public class Token extends BaseModel implements Cloneable {
   }
 
   public void deleteAllMacros(Boolean secure) {
-    List<MacroButtonProperties> tempMacros =
-        new ArrayList<MacroButtonProperties>(getMacroList(true));
+    List<MacroButtonProperties> tempMacros = new ArrayList<>(getMacroList(true));
     for (MacroButtonProperties nextProp : tempMacros) {
       // Lee: maybe erasing the command will suffice to fix the hotkey bug.
       nextProp.setCommand("");
@@ -2449,22 +2451,18 @@ public class Token extends BaseModel implements Cloneable {
         return Integer.compare(o1.z, o2.z);
       };
 
-  @Override
   protected Object readResolve() {
-    super.readResolve();
     // FJE: If the propertyMap field has something in it, it could be:
     // a pre-1.3b66 token that contains a HashMap<?,?>, or
     // a pre-1.3b78 token that actually has the CaseInsensitiveHashMap<?>.
     // Newer tokens will use propertyMapCI so we only need to make corrections
     // if the old field has data in it.
+    if (propertyMapCI == null) {
+      propertyMapCI = new CaseInsensitiveHashMap<>();
+    }
     if (propertyMap != null) {
-      if (propertyMap instanceof CaseInsensitiveHashMap) {
-        propertyMapCI = (CaseInsensitiveHashMap<Object>) propertyMap;
-      } else {
-        propertyMapCI = new CaseInsensitiveHashMap<Object>();
-        propertyMapCI.putAll(propertyMap);
-        propertyMap.clear(); // It'll never be written out, but we should free the memory.
-      }
+      propertyMapCI.putAll(propertyMap);
+      propertyMap.clear(); // It'll never be written out, but we should free the memory.
       propertyMap = null;
     }
     // 1.3 b77
@@ -2472,15 +2470,90 @@ public class Token extends BaseModel implements Cloneable {
       exposedAreaGUID = new GUID();
     }
 
+    // Fix for pre 1.11.3 campaigns and token size issues
+    if (sizeMap != null && sizeMap.size() > 0) {
+      Map<Object, GUID> oldSizeMap = new HashMap<>(sizeMap);
+      sizeMap.clear();
+      for (var entry : oldSizeMap.entrySet()) {
+        var key = entry.getKey();
+        if (key instanceof Class<?> cl) {
+          sizeMap.put(cl.getName(), entry.getValue());
+        } else {
+          sizeMap.put(key.toString(), entry.getValue());
+        }
+      }
+    }
+
+    if (ownerList == null) {
+      ownerList = new HashSet<>();
+    }
+    if (lightSourceList == null) {
+      lightSourceList = new ArrayList<>();
+    }
+    if (macroPropertiesMap == null) {
+      macroPropertiesMap = new HashMap<>();
+    }
+    if (speechMap == null) {
+      speechMap = new HashMap<>();
+    }
+    if (isFlippedIso == null) {
+      isFlippedIso = false;
+    }
+    if (hasImageTable == null) {
+      hasImageTable = false;
+    }
+    if (tokenShape == null) {
+      tokenShape = TokenShape.SQUARE.toString();
+    }
+    if (tokenType == null) {
+      tokenType = Type.NPC.toString();
+    }
+    if (speechName == null) {
+      speechName = "";
+    }
+    if (terrainModifiersIgnored == null) {
+      terrainModifiersIgnored =
+          new HashSet<>(Collections.singletonList(TerrainModifierOperation.NONE));
+    }
+    if (terrainModifierOperation == null) {
+      terrainModifierOperation = TerrainModifierOperation.NONE;
+    }
+    if (sizeMap == null) {
+      sizeMap = new HashMap<>();
+    }
+
+    // Check to make sure lastPath has valid data
+    if (lastPath != null && lastPath.getCellPath().isEmpty()) {
+      lastPath = null;
+    }
+
+    if (notesType == null) {
+      notesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+    }
+
+    if (gmNotesType == null) {
+      gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
+    }
+
+    // Pre 1.13
+    if (tokenOpacity == null) {
+      tokenOpacity = 1.f;
+    }
+    tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+
     return this;
   }
 
-  /** @param exposedAreaGUID the exposedAreaGUID to set */
+  /**
+   * @param exposedAreaGUID the exposedAreaGUID to set
+   */
   public void setExposedAreaGUID(GUID exposedAreaGUID) {
     this.exposedAreaGUID = exposedAreaGUID;
   }
 
-  /** @return the exposedAreaGUID */
+  /**
+   * @return the exposedAreaGUID
+   */
   public GUID getExposedAreaGUID() {
     return exposedAreaGUID;
   }
@@ -2499,7 +2572,9 @@ public class Token extends BaseModel implements Cloneable {
     }
   }
 
-  /** @return is token an image/lib token */
+  /**
+   * @return is token an image/lib token
+   */
   public boolean isImgOrLib() {
     return (getName().toLowerCase().startsWith("image:")
         || getName().toLowerCase().startsWith("lib:"));
@@ -2517,23 +2592,28 @@ public class Token extends BaseModel implements Cloneable {
    * Call the relevant setter from methodName with an array of parameters Called by
    * ClientMethodHandler to deal with sent change to token
    *
-   * @param update The method to be used
    * @param zone The zone where the token is
+   * @param update The method to be used
    * @param parameters An array of parameters
    */
-  public void updateProperty(Zone zone, Update update, Object[] parameters) {
+  public void updateProperty(Zone zone, Update update, List<TokenPropertyValueDto> parameters) {
     boolean lightChanged = false;
     boolean macroChanged = false;
     boolean panelLookChanged = false; // appearance of token in a panel changed
     switch (update) {
       case setState:
-        setState(parameters[0].toString(), parameters[1]);
+        var state = parameters.get(0).getStringValue();
+        var stateValue = parameters.get(1);
+        if (stateValue.hasBoolValue()) setState(state, stateValue.getBoolValue());
+        else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setAllStates:
-        setAllStates(parameters[0]);
+        stateValue = parameters.get(0);
+        if (stateValue.hasBoolValue()) setAllStates(stateValue.getBoolValue());
+        else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
         break;
       case setPropertyType:
-        setPropertyType(parameters[0].toString());
+        setPropertyType(parameters.get(0).getStringValue());
         break;
       case setPC:
         setType(Type.PC);
@@ -2542,155 +2622,179 @@ public class Token extends BaseModel implements Cloneable {
         setType(Type.NPC);
         break;
       case setLayer:
-        setLayer((Zone.Layer) parameters[0]);
+        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
         break;
       case setLayerShape:
-        setLayer((Zone.Layer) parameters[0]);
-        setShape((TokenShape) parameters[1]);
+        setLayer(Zone.Layer.valueOf(parameters.get(0).getStringValue()));
+        setShape(TokenShape.valueOf(parameters.get(1).getStringValue()));
         break;
       case setShape:
-        setShape((TokenShape) parameters[0]);
+        setShape(TokenShape.valueOf(parameters.get(0).getStringValue()));
         break;
       case setSnapToScale:
-        setSnapToScale((Boolean) parameters[0]);
+        setSnapToScale(parameters.get(0).getBoolValue());
         break;
       case setSnapToGrid:
-        setSnapToGrid((Boolean) parameters[0]);
+        setSnapToGrid(parameters.get(0).getBoolValue());
         break;
       case setSnapToGridAndXY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setSnapToGrid((boolean) parameters[0]);
-        setX((int) parameters[1]);
-        setY((int) parameters[2]);
+        setSnapToGrid(parameters.get(0).getBoolValue());
+        setX(parameters.get(1).getIntValue());
+        setY(parameters.get(2).getIntValue());
         break;
       case setFootprint:
         setSnapToScale(true);
-        setFootprint((Grid) parameters[0], (TokenFootprint) parameters[1]);
+        setFootprint(
+            Grid.fromDto(parameters.get(0).getGrid()),
+            TokenFootprint.fromDto(parameters.get(1).getTokenFootPrint()));
         break;
       case setProperty:
-        setProperty(parameters[0].toString(), parameters[1].toString());
+        setProperty(parameters.get(0).getStringValue(), parameters.get(1).getStringValue());
         break;
       case resetProperty:
-        resetProperty(parameters[0].toString());
+        resetProperty(parameters.get(0).getStringValue());
         break;
       case setZOrder:
-        setZOrder((int) parameters[0]);
+        setZOrder(parameters.get(0).getIntValue());
         zone.sortZOrder(); // update new ZOrder
         break;
       case setFacing:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setFacing((Integer) parameters[0]);
+        setFacing(parameters.get(0).getIntValue());
+        break;
+      case removeFacing:
+        setFacing(null);
         break;
       case clearAllOwners:
         clearAllOwners();
         panelLookChanged = true;
         break;
       case setOwnedByAll:
-        setOwnedByAll((Boolean) parameters[0]);
+        setOwnedByAll(parameters.get(0).getBoolValue());
         panelLookChanged = true;
         break;
       case addOwner:
-        addOwner(parameters[0].toString());
+        addOwner(parameters.get(0).getStringValue());
         break;
       case setScaleX:
         setSnapToScale(false);
-        setScaleX((double) parameters[0]);
+        setScaleX(parameters.get(0).getDoubleValue());
         break;
       case setScaleY:
         setSnapToScale(false);
-        setScaleY((double) parameters[0]);
+        setScaleY(parameters.get(0).getDoubleValue());
         break;
       case setScaleXY:
         setSnapToScale(false);
-        setScaleX((double) parameters[0]);
-        setScaleY((double) parameters[1]);
+        setScaleX(parameters.get(0).getDoubleValue());
+        setScaleY(parameters.get(1).getDoubleValue());
         break;
       case setNotes:
-        setNotes(parameters[0].toString());
+        setNotes(parameters.get(0).getStringValue());
         break;
       case setGMNotes:
-        setGMNotes(parameters[0].toString());
+        setGMNotes(parameters.get(0).getStringValue());
         break;
       case setX:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setX((int) parameters[0]);
+        setX(parameters.get(0).getIntValue());
         break;
       case setY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setY((int) parameters[0]);
+        setY(parameters.get(0).getIntValue());
         break;
       case setXY:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setX((int) parameters[0]);
-        setY((int) parameters[1]);
+        setX(parameters.get(0).getIntValue());
+        setY(parameters.get(1).getIntValue());
         break;
       case setHaloColor:
-        setHaloColor((Color) parameters[0]);
+        setHaloColor(
+            parameters.size() > 0 ? new Color(parameters.get(0).getIntValue(), true) : null);
         break;
       case setLabel:
-        setLabel((String) parameters[0]);
+        setLabel(parameters.get(0).getStringValue());
         break;
       case setName:
-        setName((String) parameters[0]);
+        setName(parameters.get(0).getStringValue());
         panelLookChanged = true;
         break;
       case setGMName:
-        setGMName((String) parameters[0]);
+        setGMName(parameters.get(0).getStringValue());
         panelLookChanged = true;
         break;
       case setSpeechName:
-        setSpeechName((String) parameters[0]);
+        setSpeechName(parameters.get(0).getStringValue());
         break;
       case setVisible:
-        setVisible((boolean) parameters[0]);
+        setVisible(parameters.get(0).getBoolValue());
         break;
       case setVisibleOnlyToOwner:
-        setVisibleOnlyToOwner((boolean) parameters[0]);
+        setVisibleOnlyToOwner(parameters.get(0).getBoolValue());
         break;
       case setIsAlwaysVisible:
-        setIsAlwaysVisible((boolean) parameters[0]);
+        setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
       case setTokenOpacity:
-        setTokenOpacity((String) parameters[0]);
+        setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifier:
-        setTerrainModifier((double) parameters[0]);
+        setTerrainModifier(parameters.get(0).getDoubleValue());
         break;
       case setTerrainModifierOperation:
-        setTerrainModifierOperation((TerrainModifierOperation) parameters[0]);
+        setTerrainModifierOperation(
+            TerrainModifierOperation.valueOf(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifiersIgnored:
-        setTerrainModifiersIgnored((Set<TerrainModifierOperation>) parameters[0]);
+        setTerrainModifiersIgnored(
+            parameters.get(0).getStringValues().getValuesList().stream()
+                .map(TerrainModifierOperation::valueOf)
+                .collect(Collectors.toSet()));
         break;
-      case setVBL:
-        setVBL((Area) parameters[0]);
-        if (!hasVBL()) { // if VBL removed
-          zone.tokenTopologyChanged(); // if token lost VBL, TOKEN_CHANGED won't update topology
+      case setTopology:
+        {
+          final var topologyType = Zone.TopologyType.valueOf(parameters.get(0).getTopologyType());
+          setTopology(topologyType, Mapper.map(parameters.get(1).getArea()));
+          if (!hasTopology(topologyType)) { // if topology removed
+            zone.tokenTopologyChanged(); // if token lost topology, TOKEN_CHANGED won't update
+            // topology
+          }
+          break;
         }
-        break;
       case setImageAsset:
-        setImageAsset((String) parameters[0], (MD5Key) parameters[1]);
+        setImageAsset(
+            parameters.get(0).hasStringValue() ? parameters.get(0).getStringValue() : null,
+            new MD5Key(parameters.get(1).getStringValue()));
         panelLookChanged = true;
         break;
       case setPortraitImage:
-        setPortraitImage((MD5Key) parameters[0]);
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setPortraitImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setPortraitImage(null);
+        }
         break;
       case setCharsheetImage:
-        setCharsheetImage((MD5Key) parameters[0]);
+        if (parameters.get(0).hasStringValue() && !parameters.get(0).getStringValue().isEmpty()) {
+          setCharsheetImage(new MD5Key(parameters.get(0).getStringValue()));
+        } else {
+          setCharsheetImage(null);
+        }
         break;
       case setLayout:
-        setSizeScale((Double) parameters[0]);
-        setAnchor((int) parameters[1], (int) parameters[2]);
+        setSizeScale(parameters.get(0).getDoubleValue());
+        setAnchor(parameters.get(1).getIntValue(), parameters.get(2).getIntValue());
         break;
       case clearLightSources:
         if (hasLightSources()) {
@@ -2702,34 +2806,38 @@ public class Token extends BaseModel implements Cloneable {
         if (hasLightSources()) {
           lightChanged = true;
         }
-        removeLightSource((LightSource) parameters[0]);
+        removeLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
         break;
       case addLightSource:
         lightChanged = true;
-        addLightSource((LightSource) parameters[0], (Direction) parameters[1]);
+        addLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
         break;
       case setHasSight:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setHasSight((boolean) parameters[0]);
+        setHasSight(parameters.get(0).getBoolValue());
         break;
       case setSightType:
         if (hasLightSources()) {
           lightChanged = true;
         }
-        setSightType((String) parameters[0]);
+        setSightType(parameters.get(0).getStringValue());
         break;
       case saveMacro:
-        saveMacro((MacroButtonProperties) parameters[0]);
+        saveMacro(MacroButtonProperties.fromDto(parameters.get(0).getMacros().getMacros(0)));
         macroChanged = true;
         break;
       case saveMacroList:
-        saveMacroList((List<MacroButtonProperties>) parameters[0], (boolean) parameters[1]);
+        saveMacroList(
+            parameters.get(0).getMacros().getMacrosList().stream()
+                .map(MacroButtonProperties::fromDto)
+                .collect(Collectors.toList()),
+            parameters.get(1).getBoolValue());
         macroChanged = true;
         break;
       case deleteMacro:
-        deleteMacro((int) parameters[0]);
+        deleteMacro(parameters.get(0).getIntValue());
         macroChanged = true;
         break;
       case flipX:
@@ -2752,5 +2860,237 @@ public class Token extends BaseModel implements Cloneable {
       zone.tokenPanelChanged(this);
     }
     zone.tokenChanged(this); // fire Event.TOKEN_CHANGED, which updates topology if token has VBL
+  }
+
+  public static Token fromDto(TokenDto dto) {
+    var token = new Token();
+    token.id = GUID.valueOf(dto.getId());
+    token.beingImpersonated = dto.getBeingImpersonated();
+    token.exposedAreaGUID = GUID.valueOf(dto.getExposedAreaGuid());
+    var assetMap = dto.getImageAssetMapMap();
+    for (var key : assetMap.keySet()) {
+      var nullKey = key.equals("") ? null : key;
+      token.imageAssetMap.put(nullKey, new MD5Key(assetMap.get(key)));
+    }
+    token.currentImageAsset =
+        dto.hasCurrentImageAsset() ? dto.getCurrentImageAsset().getValue() : null;
+    token.lastX = dto.getLastX();
+    token.x = dto.getX();
+    token.lastY = dto.getLastY();
+    token.y = dto.getY();
+    token.z = dto.getZ();
+    token.anchorX = dto.getAnchorX();
+    token.anchorY = dto.getAnchorY();
+    token.sizeScale = dto.getSizeScale();
+    token.lastPath = dto.hasLastPath() ? Path.fromDto(dto.getLastPath()) : null;
+    token.snapToScale = dto.getSnapToScale();
+    token.width = dto.getWidth();
+    token.height = dto.getHeight();
+    token.isoWidth = dto.getIsoWidth();
+    token.isoHeight = dto.getIsoHeight();
+    token.scaleX = dto.getScaleX();
+    token.scaleY = dto.getScaleY();
+    dto.getSizeMapMap().forEach((k, v) -> token.sizeMap.put(k, GUID.valueOf(v)));
+    token.snapToGrid = dto.getSnapToGrid();
+    token.isVisible = dto.getIsVisible();
+    token.visibleOnlyToOwner = dto.getVisibleOnlyToOwner();
+    token.vblColorSensitivity = dto.getVblColorSensitivity();
+    token.alwaysVisibleTolerance = dto.getAlwaysVisibleTolerance();
+    token.isAlwaysVisible = dto.getIsAlwaysVisible();
+    token.vbl = dto.hasVbl() ? Mapper.map(dto.getVbl()) : null;
+    token.hillVbl = dto.hasHillVbl() ? Mapper.map(dto.getHillVbl()) : null;
+    token.pitVbl = dto.hasPitVbl() ? Mapper.map(dto.getPitVbl()) : null;
+    token.mbl = dto.hasMbl() ? Mapper.map(dto.getMbl()) : null;
+    token.name = dto.getName();
+    token.ownerList.addAll(dto.getOwnerListList());
+    token.ownerType = dto.getOwnerType();
+    token.tokenShape = dto.getTokenShape();
+    token.tokenType = dto.getTokenType();
+    token.layer = dto.getLayer();
+    token.propertyType = dto.getPropertyType();
+    token.facing = dto.hasFacing() ? dto.getFacing().getValue() : null;
+    token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor().getValue() : null;
+    token.visionOverlayColorValue =
+        dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor().getValue() : null;
+    token.tokenOpacity = dto.getTokenOpacity();
+    token.speechName = dto.getSpeechName();
+    token.terrainModifier = dto.getTerrainModifier();
+    token.terrainModifierOperation =
+        Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name());
+    token.terrainModifiersIgnored.addAll(
+        dto.getTerrainModifiersIgnoredList().stream()
+            .map(m -> Token.TerrainModifierOperation.valueOf(m.name()))
+            .collect(Collectors.toList()));
+    token.isFlippedX = dto.getIsFlippedX();
+    token.isFlippedY = dto.getIsFlippedY();
+    token.isFlippedIso = dto.getIsFlippedIso();
+    token.charsheetImage =
+        dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
+    token.portraitImage =
+        dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage().getValue()) : null;
+    token.lightSourceList.addAll(
+        dto.getLightSourcesList().stream()
+            .map(AttachedLightSource::fromDto)
+            .collect(Collectors.toList()));
+    token.sightType = dto.hasSightType() ? dto.getSightType().getValue() : null;
+    token.hasSight = dto.getHasSight();
+    token.hasImageTable = dto.getHasImageTable();
+    token.imageTableName = dto.hasImageTableName() ? dto.getImageTableName().getValue() : null;
+    token.label = dto.hasLabel() ? dto.getLabel().getValue() : null;
+    token.notes = dto.hasNotes() ? dto.getNotes().getValue() : "";
+    token.gmNotes = dto.hasGmNotes() ? dto.getGmNotes().getValue() : "";
+    token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
+    token.notesType = dto.getNotesType();
+    token.gmNotesType = dto.getGmNotesType();
+
+    dto.getStateMap()
+        .forEach(
+            (key, stateDto) -> {
+              switch (stateDto.getStateTypeCase()) {
+                case BOOL_VALUE -> {
+                  var value = stateDto.getBoolValue();
+                  token.setState(key, value ? Boolean.TRUE : null);
+                }
+                case DOUBLE_VALUE -> token.setState(key, new BigDecimal(stateDto.getDoubleValue()));
+                default -> log.warn("unknown state type:" + stateDto.getStateTypeCase());
+              }
+            });
+    dto.getPropertiesMap().forEach((k, v) -> token.propertyMapCI.put(k, v.equals("") ? null : v));
+    dto.getMacroPropertiesMap()
+        .forEach(
+            (key, value) ->
+                token.macroPropertiesMap.put(key, MacroButtonProperties.fromDto(value)));
+    token.speechMap.putAll(dto.getSpeechMap());
+    token.heroLabData = dto.hasHeroLabData() ? HeroLabData.fromDto(dto.getHeroLabData()) : null;
+    token.allowURIAccess = dto.getAllowUriAccess();
+    return token;
+  }
+
+  public TokenDto toDto() {
+    var dto = TokenDto.newBuilder();
+    dto.setId(id.toString());
+    dto.setBeingImpersonated(beingImpersonated);
+    dto.setExposedAreaGuid(exposedAreaGUID.toString());
+    for (var key : imageAssetMap.keySet()) {
+      var notNullKey = key == null ? "" : key;
+      dto.putImageAssetMap(notNullKey, imageAssetMap.get(key).toString());
+    }
+    if (currentImageAsset != null) {
+      dto.setCurrentImageAsset(StringValue.of(currentImageAsset));
+    }
+    dto.setLastX(lastX);
+    dto.setX(x);
+    dto.setLastY(lastY);
+    dto.setY(y);
+    dto.setZ(z);
+    dto.setAnchorX(anchorX);
+    dto.setAnchorY(anchorY);
+    dto.setSizeScale(sizeScale);
+    if (lastPath != null) {
+      dto.setLastPath(lastPath.toDto());
+    }
+    dto.setSnapToScale(snapToScale);
+    dto.setWidth(width);
+    dto.setHeight(height);
+    dto.setIsoWidth(isoWidth);
+    dto.setIsoHeight(isoHeight);
+    dto.setScaleX(scaleX);
+    dto.setScaleY(scaleY);
+    sizeMap.forEach((k, v) -> dto.putSizeMap(k, v.toString()));
+    dto.setSnapToGrid(snapToGrid);
+    dto.setIsVisible(isVisible);
+    dto.setVisibleOnlyToOwner(visibleOnlyToOwner);
+    dto.setVblColorSensitivity(vblColorSensitivity);
+    dto.setAlwaysVisibleTolerance(alwaysVisibleTolerance);
+    dto.setIsAlwaysVisible(isAlwaysVisible);
+    if (vbl != null) {
+      dto.setVbl(Mapper.map(vbl));
+    }
+    if (hillVbl != null) {
+      dto.setHillVbl(Mapper.map(hillVbl));
+    }
+    if (pitVbl != null) {
+      dto.setPitVbl(Mapper.map(pitVbl));
+    }
+    if (mbl != null) {
+      dto.setMbl(Mapper.map(mbl));
+    }
+    dto.setName(name);
+    dto.addAllOwnerList(ownerList);
+    dto.setOwnerType(ownerType);
+    dto.setTokenShape(tokenShape);
+    dto.setTokenType(tokenType);
+    dto.setLayer(layer);
+    dto.setPropertyType(propertyType);
+    if (facing != null) {
+      dto.setFacing(Int32Value.of(facing));
+    }
+    if (haloColorValue != null) {
+      dto.setHaloColor(Int32Value.of(haloColorValue));
+    }
+    if (visionOverlayColorValue != null) {
+      dto.setVisionOverlayColor(Int32Value.of(visionOverlayColorValue));
+    }
+    dto.setTokenOpacity(tokenOpacity);
+    dto.setSpeechName(speechName);
+    dto.setTerrainModifier(terrainModifier);
+    dto.setTerrainModifierOperation(
+        TerrainModifierOperationDto.valueOf(terrainModifierOperation.name()));
+    dto.addAllTerrainModifiersIgnored(
+        terrainModifiersIgnored.stream()
+            .map(m -> TerrainModifierOperationDto.valueOf(m.name()))
+            .collect(Collectors.toList()));
+    dto.setIsFlippedX(isFlippedX);
+    dto.setIsFlippedY(isFlippedY);
+    dto.setIsFlippedIso(isFlippedIso);
+    if (charsheetImage != null) {
+      dto.setCharsheetImage(StringValue.of(charsheetImage.toString()));
+    }
+    if (portraitImage != null) {
+      dto.setPortraitImage(StringValue.of(portraitImage.toString()));
+    }
+    dto.addAllLightSources(
+        lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
+    if (sightType != null) {
+      dto.setSightType(StringValue.of(sightType));
+    }
+    dto.setHasSight(hasSight);
+    dto.setHasImageTable(hasImageTable);
+    if (imageTableName != null) {
+      dto.setImageTableName(StringValue.of(imageTableName));
+    }
+    if (label != null) {
+      dto.setLabel(StringValue.of(label));
+    }
+    if (notes != null) {
+      dto.setNotes(StringValue.of(notes));
+    }
+    dto.setNotesType(notesType);
+    if (gmNotes != null) {
+      dto.setGmNotes(StringValue.of(gmNotes));
+    }
+    dto.setGmNotesType(gmNotesType);
+    if (gmName != null) {
+      dto.setGmName(StringValue.of(gmName));
+    }
+    state.forEach(
+        (key, state) -> {
+          if (state instanceof Boolean bstate) {
+            dto.putState(key, TokenDto.State.newBuilder().setBoolValue(bstate).build());
+          } else if (state instanceof Number nstate) {
+            dto.putState(
+                key, TokenDto.State.newBuilder().setDoubleValue(nstate.doubleValue()).build());
+          } else {
+            log.warn("unknown state type:" + state.getClass());
+          }
+        });
+    propertyMapCI.forEach((k, v) -> dto.putProperties(k, v != null ? v.toString() : ""));
+    macroPropertiesMap.forEach((k, v) -> dto.putMacroProperties(k, v.toDto()));
+    dto.putAllSpeech(speechMap);
+    if (heroLabData != null) {
+      dto.setHeroLabData(heroLabData.toDto());
+    }
+    dto.setAllowUriAccess(allowURIAccess);
+    return dto.build();
   }
 }
