@@ -72,7 +72,10 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     return switch (columnIndex) {
       case 0 -> property.getName();
       case 1 -> property.getShortName();
-      case 2 -> property.getDisplayName();
+      case 2 -> {
+        var displayName = property.getDisplayName();
+        yield displayName == null || displayName.isBlank() ? null : displayName;
+      }
       case 3 -> property.isShowOnStatSheet();
       case 4 -> property.isGMOnly() & property.isShowOnStatSheet();
       case 5 -> property.isOwnerOnly() & property.isShowOnStatSheet();
@@ -110,7 +113,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     var properties = tokenTypeMap.get(tokenType);
     var tokenProperty = properties.get(rowIndex);
     return switch (columnIndex) {
-      case 3, 4 -> tokenProperty
+      case 4, 5 -> tokenProperty
           .isShowOnStatSheet(); // GM, Owner only editable if show on stat sheet is set
       default -> true;
     };
