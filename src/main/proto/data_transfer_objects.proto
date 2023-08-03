@@ -150,6 +150,7 @@ message TokenPropertyDto {
   bool owner_only = 4;
   bool gm_only = 5;
   google.protobuf.StringValue default_value = 6;
+  google.protobuf.StringValue display_name = 7;
 }
 
 message TokenOverlayDto {
