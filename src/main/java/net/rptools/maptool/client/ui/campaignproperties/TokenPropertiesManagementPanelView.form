@@ -3,19 +3,11 @@
   <grid id="26b35" binding="mainPanel" layout-manager="GridLayoutManager" row-count="6" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="10" y="10" width="909" height="476"/>
+      <xy x="10" y="10" width="1023" height="474"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <component id="f5d05" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="0" column="4" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.list"/>
-        </properties>
-      </component>
       <scrollpane id="814eb">
         <constraints>
           <grid row="3" column="3" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -27,6 +19,7 @@
             <constraints/>
             <properties>
               <name value="propertiesTable"/>
+              <preferredScrollableViewportSize width="550" height="400"/>
             </properties>
           </component>
         </children>
@@ -44,6 +37,7 @@
             <constraints/>
             <properties>
               <name value="tokenTypeList"/>
+              <selectionMode value="0"/>
             </properties>
           </component>
         </children>

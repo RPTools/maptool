@@ -62,7 +62,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
   @Override
   public int getColumnCount() {
-    return 6;
+    return 7;
   }
 
   @Override
@@ -72,10 +72,11 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     return switch (columnIndex) {
       case 0 -> property.getName();
       case 1 -> property.getShortName();
-      case 2 -> property.isShowOnStatSheet();
-      case 3 -> property.isGMOnly() & property.isShowOnStatSheet();
-      case 4 -> property.isOwnerOnly() & property.isShowOnStatSheet();
-      case 5 -> property.getDefaultValue();
+      case 2 -> property.getDisplayName();
+      case 3 -> property.isShowOnStatSheet();
+      case 4 -> property.isGMOnly() & property.isShowOnStatSheet();
+      case 5 -> property.isOwnerOnly() & property.isShowOnStatSheet();
+      case 6 -> property.getDefaultValue();
       default -> null;
     };
   }
@@ -85,10 +86,11 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     return switch (column) {
       case 0 -> I18N.getText("campaignPropertiesTable.column.name");
       case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
-      case 2 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
-      case 3 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
-      case 4 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
-      case 5 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
+      case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
+      case 3 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+      case 6 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
       default -> null;
     };
   }
@@ -96,9 +98,9 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return switch (columnIndex) {
-      case 0, 1 -> String.class;
-      case 2, 3, 4 -> Boolean.class;
-      case 5 -> LargeEditableText.class;
+      case 0, 1, 2 -> String.class;
+      case 3, 4, 5 -> Boolean.class;
+      case 6 -> LargeEditableText.class;
       default -> null;
     };
   }
@@ -121,13 +123,14 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     switch (columnIndex) {
       case 0 -> tokenProperty.setName((String) aValue);
       case 1 -> tokenProperty.setShortName((String) aValue);
-      case 2 -> {
+      case 2 -> tokenProperty.setDisplayName((String) aValue);
+      case 3 -> {
         tokenProperty.setShowOnStatSheet((Boolean) aValue);
         fireTableRowsUpdated(rowIndex, rowIndex);
       }
-      case 3 -> tokenProperty.setGMOnly((Boolean) aValue);
-      case 4 -> tokenProperty.setOwnerOnly((Boolean) aValue);
-      case 5 -> tokenProperty.setDefaultValue((String) aValue);
+      case 4 -> tokenProperty.setGMOnly((Boolean) aValue);
+      case 5 -> tokenProperty.setOwnerOnly((Boolean) aValue);
+      case 6 -> tokenProperty.setDefaultValue((String) aValue);
     }
   }
 

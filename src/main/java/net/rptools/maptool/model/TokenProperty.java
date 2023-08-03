@@ -80,6 +80,7 @@ public class TokenProperty implements Serializable {
     this.ownerOnly = prop.ownerOnly;
     this.gmOnly = prop.gmOnly;
     this.defaultValue = prop.defaultValue;
+    this.displayName = prop.displayName;
   }
 
   public boolean isOwnerOnly() {
@@ -136,6 +137,10 @@ public class TokenProperty implements Serializable {
 
   public void setDefaultValue(String defaultValue) {
     this.defaultValue = defaultValue;
+  }
+
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
   }
 
   public static TokenProperty fromDto(TokenPropertyDto dto) {

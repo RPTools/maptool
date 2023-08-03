@@ -260,6 +260,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
               button.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
             });
     propertyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    propertyTable.getColumnModel().getColumn(0).setPreferredWidth(80);
+    propertyTable.getColumnModel().getColumn(2).setPreferredWidth(100);
   }
 
   public void initTokenTypeName() {
