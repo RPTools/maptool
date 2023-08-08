@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
@@ -1109,7 +1110,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("ZoneRenderer-getVisibleArea");
 
       timer.start("createTransformedArea");
-      if (a != null && !a.isEmpty()) {
+      if (!a.isEmpty()) {
         visibleScreenArea = a.createTransformedArea(af);
       }
       timer.stop("createTransformedArea");
@@ -1120,7 +1121,7 @@ public class ZoneRenderer extends JComponent
     {
       // renderMoveSelectionSet() requires exposedFogArea to be properly set
       exposedFogArea = new Area(zone.getExposedArea());
-      if (exposedFogArea != null && zone.hasFog()) {
+      if (zone.hasFog()) {
         if (visibleScreenArea != null && !visibleScreenArea.isEmpty()) {
           exposedFogArea.intersect(visibleScreenArea);
         } else {
@@ -1194,6 +1195,8 @@ public class ZoneRenderer extends JComponent
       renderAuras(g2d, view);
       timer.stop("auras");
     }
+
+    renderPlayerDarkness(g2d, view);
 
     /**
      * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by
@@ -1424,23 +1427,8 @@ public class ZoneRenderer extends JComponent
           overlayBlending,
           view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
-          Color.black,
           overlayFillColor);
       timer.stop("renderLights:renderLightOverlay");
-    }
-
-    if (!view.isGMView()) {
-      // Note that the ZoneView has already restricted the darkness to its affected areas.
-      final var darknessLights =
-          drawableLights.stream().filter(light -> light.getLumens() <= 0).toList();
-      renderLightOverlay(
-          g,
-          new SolidColorComposite(0xff000000),
-          AlphaComposite.SrcOver,
-          LightOverlayClipStyle.CLIP_TO_NOT_VISIBLE_AREA,
-          darknessLights,
-          Color.black,
-          new Color(0, 0, 0, 0));
     }
 
     if (AppState.isShowLumensOverlay()) {
@@ -1474,7 +1462,6 @@ public class ZoneRenderer extends JComponent
         AlphaComposite.SrcOver,
         view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         drawableAuras,
-        new Color(255, 255, 255, 150),
         new Color(0, 0, 0, 0));
     timer.stop("renderAuras:renderAuraOverlay");
   }
@@ -1591,7 +1578,6 @@ public class ZoneRenderer extends JComponent
    * @param clipStyle How to clip the overlay relative to the visible area. Set to null for no extra
    *     clipping.
    * @param lights The lights that will be rendered and blended.
-   * @param defaultPaint A default paint for lights without a paint.
    */
   private void renderLightOverlay(
       Graphics2D g,
@@ -1599,7 +1585,6 @@ public class ZoneRenderer extends JComponent
       Composite overlayBlending,
       @Nullable LightOverlayClipStyle clipStyle,
       Collection<DrawableLight> lights,
-      Paint defaultPaint,
       Paint backgroundFill) {
     if (lights.isEmpty()) {
       // No point spending resources accomplishing nothing.
@@ -1642,8 +1627,7 @@ public class ZoneRenderer extends JComponent
       // Draw lights onto the buffer image so the map doesn't affect how they blend
       timer.start("renderLightOverlay:drawLights");
       for (var light : lights) {
-        var paint = light.getPaint() != null ? light.getPaint().getPaint() : defaultPaint;
-        newG.setPaint(paint);
+        newG.setPaint(light.getPaint().getPaint());
         timer.start("renderLightOverlay:fillLight");
         newG.fill(light.getArea());
         timer.stop("renderLightOverlay:fillLight");
@@ -1656,6 +1640,43 @@ public class ZoneRenderer extends JComponent
       g.setComposite(overlayBlending);
       g.drawImage(lightOverlay, null, 0, 0);
       timer.stop("renderLightOverlay:drawBuffer");
+    }
+  }
+
+  /**
+   * Draws a solid black overlay wherever a non-GM player should see darkness.
+   *
+   * <p>If {@code view} is a GM view, this renders nothing.
+   *
+   * @param g The graphics object used to render the zone.
+   * @param view The player view.
+   */
+  private void renderPlayerDarkness(Graphics2D g, PlayerView view) {
+    if (view.isGMView()) {
+      // GMs see the darkness rendered as lights, not as blackness.
+      return;
+    }
+
+    final var darkness = zoneView.getIllumination(view).getDarkenedArea();
+    if (darkness.isEmpty()) {
+      // Skip the rendering work if it isn't necessary.
+      return;
+    }
+
+    g = (Graphics2D) g.create();
+    try {
+      timer.start("renderPlayerDarkness:setTransform");
+      AffineTransform af = new AffineTransform();
+      af.translate(getViewOffsetX(), getViewOffsetY());
+      af.scale(getScale(), getScale());
+      g.setTransform(af);
+      timer.stop("renderPlayerDarkness:setTransform");
+
+      g.setComposite(AlphaComposite.Src);
+      g.setPaint(Color.black);
+      g.fill(darkness);
+    } finally {
+      g.dispose();
     }
   }
 
@@ -1864,10 +1885,10 @@ public class ZoneRenderer extends JComponent
   }
 
   private void renderFogArea(
-      final Graphics2D buffG, final PlayerView view, Area softFog, Area visibleArea) {
+      final Graphics2D buffG, final PlayerView view, Area softFog, @Nonnull Area visibleArea) {
     if (zoneView.isUsingVision()) {
       buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-      if (visibleArea != null && !visibleArea.isEmpty()) {
+      if (!visibleArea.isEmpty()) {
         buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
 
         // Fill in the exposed area
@@ -1889,9 +1910,10 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private void renderFogOutline(final Graphics2D buffG, PlayerView view, Area visibleArea) {
+  private void renderFogOutline(
+      final Graphics2D buffG, PlayerView view, @Nonnull Area visibleArea) {
     // If there is no visible area, there is no outline that needs rendering.
-    if (zoneView.isUsingVision() && visibleArea != null && !visibleArea.isEmpty()) {
+    if (zoneView.isUsingVision() && !visibleArea.isEmpty()) {
       // Transform the area (not G2D) because we want the drawn line to remain thin.
       AffineTransform af = new AffineTransform();
       af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());

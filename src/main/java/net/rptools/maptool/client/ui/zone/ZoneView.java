@@ -189,7 +189,7 @@ public class ZoneView {
    * @param view the PlayerView
    * @return the visible area
    */
-  public Area getVisibleArea(PlayerView view) {
+  public @Nonnull Area getVisibleArea(PlayerView view) {
     return visibleAreaMap.computeIfAbsent(
         view,
         view2 -> {
@@ -333,7 +333,7 @@ public class ZoneView {
             getTopologyTree(Zone.TopologyType.WALL_VBL),
             getTopologyTree(Zone.TopologyType.HILL_VBL),
             getTopologyTree(Zone.TopologyType.PIT_VBL));
-    if (lightSourceVisibleArea == null) {
+    if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
     }
@@ -520,7 +520,7 @@ public class ZoneView {
     return personalLights;
   }
 
-  private Illumination getIllumination(PlayerView view) {
+  public Illumination getIllumination(PlayerView view) {
     var illumination = illuminationsPerView.get(view);
     if (illumination == null) {
       // Not yet calculated. Do so now.
@@ -591,8 +591,6 @@ public class ZoneView {
               getTopologyTree(Zone.TopologyType.WALL_VBL),
               getTopologyTree(Zone.TopologyType.HILL_VBL),
               getTopologyTree(Zone.TopologyType.PIT_VBL));
-      // Can be null if no visibility.
-      tokenVisibleArea = Objects.requireNonNullElse(tokenVisibleArea, new Area());
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
@@ -627,14 +625,14 @@ public class ZoneView {
     // perspective.
     final var singleTokenView = new PlayerView(view.getRole(), Collections.singletonList(token));
     final var illumination = getIllumination(singleTokenView);
-    final var visibleArea = illumination.getVisibleArea();
-    visibleArea.intersect(tokenVisibleArea);
+    final var litArea = illumination.getLitArea();
+    litArea.intersect(tokenVisibleArea);
 
-    tokenVisionCache.put(token.getId(), visibleArea);
+    tokenVisionCache.put(token.getId(), litArea);
 
     // log.info("getVisibleArea: \t\t" + stopwatch);
 
-    return visibleArea;
+    return litArea;
   }
 
   /**
@@ -752,6 +750,18 @@ public class ZoneView {
                   .filter(laud -> laud.lightInfo() != null)
                   .map(
                       (ContributedLight laud) -> {
+                        var isDarkness = laud.litArea().lumens() < 0;
+                        if (isDarkness && !view.isGMView()) {
+                          // Non-GM players do not render the light aspect of darkness.
+                          return null;
+                        }
+
+                        // Lights without a colour are "clear" and should not be rendered.
+                        var paint = laud.lightInfo().light().getPaint();
+                        if (paint == null) {
+                          return null;
+                        }
+
                         // Make sure each drawable light is restricted to the area it covers,
                         // accounting for darkness effects.
                         final var obscuredArea = new Area(laud.litArea().area());
@@ -763,13 +773,10 @@ public class ZoneView {
                         }
 
                         obscuredArea.intersect(
-                            laud.litArea().lumens() < 0
+                            isDarkness
                                 ? lumensLevel.get().darknessArea()
                                 : lumensLevel.get().lightArea());
-                        return new DrawableLight(
-                            laud.lightInfo().light().getPaint(),
-                            obscuredArea,
-                            laud.litArea().lumens());
+                        return new DrawableLight(paint, obscuredArea, laud.litArea().lumens());
                       })
                   .filter(Objects::nonNull)
                   .toList();

@@ -435,9 +435,7 @@ public class PersistenceUtil {
     PersistedCampaign persistedCampaign = null;
 
     // Try the new way first
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(campaignFile);
+    try (PackedFile pakFile = new PackedFile(campaignFile)) {
       pakFile.setModelVersionManager(campaignVersionManager);
 
       // Sanity check
@@ -453,7 +451,14 @@ public class PersistenceUtil {
       } catch (ConversionException ce) {
         // Ignore the exception and check for "campaign == null" below...
         MapTool.showError("PersistenceUtil.error.campaignVersion", ce);
+      } catch (ClassCastException cce) {
+        // Ignore the exception and check for "campaign == null" below...
+        MapTool.showWarning(
+            I18N.getText(
+                "PersistenceUtil.warn.campaignWrongFileType",
+                pakFile.getContent().getClass().getSimpleName()));
       }
+
       if (persistedCampaign != null) {
         // Now load up any images that we need
         // Note that the values are all placeholders
@@ -480,19 +485,12 @@ public class PersistenceUtil {
     } catch (OutOfMemoryError oom) {
       MapTool.showError("Out of memory while reading campaign.", oom);
       return null;
-    } catch (ClassCastException cce) {
-      MapTool.showWarning(
-          I18N.getText(
-              "PersistenceUtil.warn.campaignWrongFileType",
-              pakFile.getContent().getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
       // Probably an issue with XStream not being able to instantiate a given class
       // The old legacy technique probably won't work, but we should at least try...
       MapTool.showError("PersistenceUtil.error.unknown", e);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
 
     // No longer try to load a legacy (very early 1.3 and before) campaign
@@ -511,7 +509,7 @@ public class PersistenceUtil {
 
   public static BufferedImage getTokenThumbnail(File file) throws Exception {
     BufferedImage thumb;
-    try (PackedFile pakFile = new PackedFile(file); ) {
+    try (PackedFile pakFile = new PackedFile(file)) {
       // Jamz: Lets use the Large thumbnail if needed
       String thumbFileName = getThumbFilename(pakFile);
 
@@ -857,9 +855,7 @@ public class PersistenceUtil {
   }
 
   public static CampaignProperties loadCampaignProperties(File file) {
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
       CampaignProperties props = null;
@@ -879,10 +875,8 @@ public class PersistenceUtil {
       return props;
     } catch (IOException e) {
       try {
-        if (pakFile != null)
-          pakFile.close(); // first close PackedFile (if it was opened) 'cuz some stupid OSes won't
-        // allow a file to be opened twice (ugh).
-        pakFile = null;
+        // Some OSes won't allow a file to be opened twice (ugh). But we're okay here since
+        // try-with-resources ensures that .close() was already called by this point.
         return loadLegacyCampaignProperties(file);
       } catch (IOException ioe) {
         MapTool.showError("PersistenceUtil.error.campaignPropertiesLegacy", ioe);

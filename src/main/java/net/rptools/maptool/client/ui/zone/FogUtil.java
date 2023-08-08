@@ -28,6 +28,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.GeometryUtil;
@@ -74,7 +75,7 @@ public class FogUtil {
    * @param topology the VBL topology.
    * @return the visible area.
    */
-  public static Area calculateVisibility(
+  public static @Nonnull Area calculateVisibility(
       Point origin, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
     // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
     final var visionGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vision));
@@ -98,7 +99,7 @@ public class FogUtil {
       final var isVisionCompletelyBlocked = consumer.apply(accumulator);
       if (!isVisionCompletelyBlocked) {
         // Vision has been completely blocked by this topology. Short circuit.
-        return null;
+        return new Area();
       }
 
       final var visibleArea =

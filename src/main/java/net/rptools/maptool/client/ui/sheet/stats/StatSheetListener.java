@@ -39,7 +39,6 @@ public class StatSheetListener {
    */
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
-    System.out.println("TokenHoverListener.onHoverEnter");
     if (AppPreferences.getShowStatSheet()
         && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
@@ -69,7 +68,6 @@ public class StatSheetListener {
    */
   @Subscribe
   public void onHoverExit(TokenHoverExit event) {
-    System.out.println("TokenHoverListener.onHoverLeave");
     MapTool.getFrame().showControlPanel();
     if (statSheet != null) {
       statSheet.clearContent();
