@@ -496,6 +496,9 @@ dependencies {
 
     implementation 'com.github.jknack:handlebars:4.3.1'
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'
+
+    // File watcher library to work around some inconsistencies with java.nio.file.WatchService
+    implementation 'io.methvin:directory-watcher:0.18.0'
 }
 
 

@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -152,12 +153,20 @@ public class AddOnLibrary implements Library {
   private final Set<StatSheet> statSheets = new HashSet<>();
 
   /**
+   * The directory that the library is in for development mode, or null if the add-on is not in
+   * development mode.
+   */
+  private final Path backingDirectory;
+
+  /**
    * Class used to represent Drop In Libraries.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param eventsDto The MTScript Events Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
+   * @param backingDirectory The directory that the library is in for development mode, or null if
+   *     the add-on is not in development mode.
    */
   private AddOnLibrary(
       MD5Key libraryAssetKey,
@@ -165,7 +174,8 @@ public class AddOnLibrary implements Library {
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
       AddOnStatSheetsDto statSheetsDto,
-      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
+      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap,
+      Path backingDirectory) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -247,6 +257,8 @@ public class AddOnLibrary implements Library {
     readMeFile = dto.getReadMeFile();
 
     jsContextName = JS_CONTEXT_PREFIX + namespace;
+
+    this.backingDirectory = backingDirectory;
   }
 
   /**
@@ -267,7 +279,31 @@ public class AddOnLibrary implements Library {
       AddOnStatSheetsDto statSheetsDto,
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap);
+    return fromDto(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap, null);
+  }
+
+  /**
+   * Creates a new Drop In Library from the given {@link AddOnLibraryDto}, {@link
+   * MTScriptPropertiesDto}, and file path assets map.
+   *
+   * @param dto The Drop In Libraries Data Transfer Object.
+   * @param mtsDto The MTScript Properties Data Transfer Object.
+   * @param eventsDto The Events Data Transfer Object.
+   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
+   * @param backingDirectory The directory that the library is in for development mode, or null if
+   *     the add-on is not in development mode.
+   * @return the new Add on library.
+   */
+  public static AddOnLibrary fromDto(
+      MD5Key libraryAssetKey,
+      AddOnLibraryDto dto,
+      MTScriptPropertiesDto mtsDto,
+      AddOnLibraryEventsDto eventsDto,
+      AddOnStatSheetsDto statSheetsDto,
+      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap,
+      Path backingDirectory) {
+    return new AddOnLibrary(
+        libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap, backingDirectory);
   }
 
   @Override
@@ -305,7 +341,8 @@ public class AddOnLibrary implements Library {
             shortDescription,
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile));
+            licenseFile.isEmpty() ? null : licenseFile,
+            backingDirectory));
   }
 
   /**
@@ -645,6 +682,12 @@ public class AddOnLibrary implements Library {
         .join();
   }
 
+  /**
+   * Returns the DataValue for the specified path in the add-on library.
+   *
+   * @param path the path to the file to read.
+   * @return the DataValue for the specified path in the add-on library.
+   */
   CompletableFuture<DataValue> readFile(String path) {
     return CompletableFuture.supplyAsync(
         () -> {
@@ -656,5 +699,25 @@ public class AddOnLibrary implements Library {
           Asset asset = AssetManager.getAsset(val.getValue0());
           return DataValueFactory.fromAsset(filePath, asset);
         });
+  }
+
+  /**
+   * Returns if the add-on library is in development mode or not.
+   *
+   * @return <code>true</code> if the add-on library is in development mode, <code>false</code>
+   *     otherwise.
+   */
+  public boolean isInDevelopmentMode() {
+    return backingDirectory != null;
+  }
+
+  /**
+   * Returns the directory that the library is in for development mode, or null if the add-on is not
+   * in development mode.
+   *
+   * @return the directory for the add-on.
+   */
+  public Path getBackingDirectory() {
+    return backingDirectory;
   }
 }

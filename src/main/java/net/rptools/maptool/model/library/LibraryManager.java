@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.library;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -71,6 +72,52 @@ public class LibraryManager {
 
   static {
     libraryTokenManager.init();
+    addOnLibraryManager.init();
+  }
+
+  /**
+   * Returns the list of external add-on libraries.
+   *
+   * @return the list of external add-on libraries.
+   */
+  public List<LibraryInfo> getExternalAddOnLibraries() {
+    return addOnLibraryManager.getExternalAddOnLibraries();
+  }
+
+  /**
+   * Returns if external add-on libraries are enabled.
+   *
+   * @return if external add-on libraries are enabled.
+   */
+  public boolean externalLibrariesEnabled() {
+    return addOnLibraryManager.externalLibrariesEnabled();
+  }
+
+  /**
+   * Sets if external add-on libraries are enabled.
+   *
+   * @param enabled if external add-on libraries are enabled.
+   */
+  public void setExternalLibrariesEnabled(boolean enabled) {
+    addOnLibraryManager.setExternalLibrariesEnabled(enabled);
+  }
+
+  /**
+   * Returns the path to the external add-on libraries.
+   *
+   * @return the path to the external add-on libraries.
+   */
+  public Path getEternalLibraryPath() {
+    return addOnLibraryManager.getExternalLibraryPath();
+  }
+
+  /**
+   * Sets the path to the external add-on libraries.
+   *
+   * @param path the path to the external add-on libraries.
+   */
+  public void setExternalLibraryPath(Path path) {
+    addOnLibraryManager.setExternalLibraryPath(path);
   }
 
   /**
