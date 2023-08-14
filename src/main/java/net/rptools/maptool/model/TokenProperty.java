@@ -26,6 +26,8 @@ public class TokenProperty implements Serializable {
   private boolean gmOnly;
   private String defaultValue;
 
+  private String displayName;
+
   public TokenProperty() {
     // For serialization
   }
@@ -78,6 +80,7 @@ public class TokenProperty implements Serializable {
     this.ownerOnly = prop.ownerOnly;
     this.gmOnly = prop.gmOnly;
     this.defaultValue = prop.defaultValue;
+    this.displayName = prop.displayName;
   }
 
   public boolean isOwnerOnly() {
@@ -98,6 +101,14 @@ public class TokenProperty implements Serializable {
 
   public String getName() {
     return name;
+  }
+
+  public boolean hasDisplayName() {
+    return displayName != null;
+  }
+
+  public String getDisplayName() {
+    return displayName;
   }
 
   public void setName(String name) {
@@ -128,6 +139,10 @@ public class TokenProperty implements Serializable {
     this.defaultValue = defaultValue;
   }
 
+  public void setDisplayName(String displayName) {
+    this.displayName = displayName;
+  }
+
   public static TokenProperty fromDto(TokenPropertyDto dto) {
     var prop = new TokenProperty();
     prop.name = dto.getName();
@@ -136,17 +151,25 @@ public class TokenProperty implements Serializable {
     prop.ownerOnly = dto.getOwnerOnly();
     prop.gmOnly = dto.getGmOnly();
     prop.defaultValue = dto.hasDefaultValue() ? dto.getDefaultValue().getValue() : null;
+    prop.displayName = dto.hasDisplayName() ? dto.getDisplayName().getValue() : null;
     return prop;
   }
 
   public TokenPropertyDto toDto() {
     var dto = TokenPropertyDto.newBuilder();
     dto.setName(name);
-    if (shortName != null) dto.setShortName(StringValue.of(shortName));
+    if (shortName != null) {
+      dto.setShortName(StringValue.of(shortName));
+    }
     dto.setHighPriority(highPriority);
     dto.setOwnerOnly(ownerOnly);
     dto.setGmOnly(gmOnly);
-    if (defaultValue != null) dto.setDefaultValue(StringValue.of(defaultValue));
+    if (defaultValue != null) {
+      dto.setDefaultValue(StringValue.of(defaultValue));
+    }
+    if (hasDisplayName()) {
+      dto.setDisplayName(StringValue.of(displayName));
+    }
     return dto.build();
   }
 }

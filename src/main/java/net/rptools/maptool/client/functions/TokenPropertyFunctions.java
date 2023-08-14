@@ -119,7 +119,8 @@ public class TokenPropertyFunctions extends AbstractFunction {
         "setTokenSnapToGrid",
         "getAllowsURIAccess",
         "setAllowsURIAccess",
-        "getDefaultPropertyType");
+        "getDefaultPropertyType",
+        "getPropertyDisplayName");
   }
 
   public static TokenPropertyFunctions getInstance() {
@@ -1022,6 +1023,33 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
       FunctionUtil.blockUntrustedMacro(functionName);
       return MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
+    }
+
+    /*
+     * getPropertyDisplayName(Token Type Name, Property Name)
+     */
+    if (functionName.equalsIgnoreCase("getPropertyDisplayName")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+      var props = MapTool.getCampaign().getTokenTypeMap().get(parameters.get(0).toString());
+      if (props == null) {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.general.unknownPropertyType",
+                functionName,
+                parameters.get(0).toString()));
+      }
+      final var propName = parameters.get(1).toString();
+      for (var prop : props) {
+        if (prop.getName().equals(propName)) {
+          return prop.hasDisplayName() ? prop.getDisplayName() : prop.getName();
+        }
+      }
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.unknownProperty",
+              functionName,
+              parameters.get(1).toString(),
+              parameters.get(0).toString()));
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));

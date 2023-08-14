@@ -17,6 +17,7 @@ package net.rptools.maptool.model.sheet.stats;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
@@ -34,6 +35,9 @@ public class StatSheetContext {
   /** Class that represents a token property on a stat sheet. */
   static class Property {
     /** Name of the property. */
+    private final String name;
+
+    /** Display Name of the property. */
     private final String displayName;
     /** Value of the property. */
     private final Object value;
@@ -46,13 +50,15 @@ public class StatSheetContext {
     /**
      * Creates a new instance of the class.
      *
-     * @param displayName Name of the property.
+     * @param name Name of the property.
+     * @param displayName Display Name of the property.
      * @param value Value of the property.
      * @param gmOnly True if the property is GM only.
      * @note GM only properties are only extracted if the player is a GM.
      */
-    Property(String displayName, String shortName, Object value, boolean gmOnly) {
-      this.displayName = displayName;
+    Property(String name, String displayName, String shortName, Object value, boolean gmOnly) {
+      this.name = name;
+      this.displayName = Objects.requireNonNullElse(displayName, name);
       this.shortName = shortName;
       this.value = value;
       this.gmOnly = gmOnly;
@@ -62,6 +68,15 @@ public class StatSheetContext {
      * Returns the name of the property.
      *
      * @return The name of the property.
+     */
+    public String getName() {
+      return name;
+    }
+
+    /**
+     * Returns the display name of the property.
+     *
+     * @return The display name of the property.
      */
     public String getDisplayName() {
       return displayName;
@@ -193,7 +208,13 @@ public class StatSheetContext {
                     return;
                   }
                 }
-                properties.add(new Property(tp.getName(), tp.getShortName(), value, tp.isGMOnly()));
+                properties.add(
+                    new Property(
+                        tp.getName(),
+                        tp.getDisplayName(),
+                        tp.getShortName(),
+                        value,
+                        tp.isGMOnly()));
               }
             });
 
