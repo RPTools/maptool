@@ -111,7 +111,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
    * @return the MacroEditorDialog.
    */
   public static MacroEditorDialog createMacroButtonDialog() {
-    return new MacroEditorDialog(false, true, null);
+    return new MacroEditorDialog(false, true, s -> {});
   }
 
   /**
@@ -127,7 +127,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     return new MacroEditorDialog(true, false, callback);
   }
 
-  private MacroEditorDialog(boolean isModal, boolean isMacroButton, Consumer<String> callback) {
+  private MacroEditorDialog(
+      boolean isModal, boolean isMacroButton, @Nonnull Consumer<String> callback) {
     super(MapTool.getFrame(), "", true);
     if (!isModal) {
       this.setModalityType(ModalityType.MODELESS);
@@ -740,9 +741,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
 
   private void save(boolean closeDialog) {
     if (button == null) {
-      if (callback != null) {
-        callback.accept(getCommandTextArea().getText());
-      }
+      callback.accept(getCommandTextArea().getText());
     } else {
       String hotKey = getHotKeyCombo().getSelectedItem().toString();
       button.getHotKeyManager().assignKeyStroke(hotKey);
