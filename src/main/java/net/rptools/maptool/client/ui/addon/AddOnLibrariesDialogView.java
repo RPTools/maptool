@@ -230,10 +230,11 @@ public class AddOnLibrariesDialogView extends JDialog {
               .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
         });
 
-    browseButton.addActionListener( e -> {
-      JFileChooser chooser = new JFileChooser();
-      chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
-    });
+    browseButton.addActionListener(
+        e -> {
+          JFileChooser chooser = new JFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+        });
 
     LibraryManager libraryManager = new LibraryManager();
     enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
