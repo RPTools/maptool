@@ -498,6 +498,7 @@ public class Token implements Cloneable {
     terrainModifiersIgnored.addAll(token.terrainModifiersIgnored);
     speechName = token.speechName != null ? token.speechName : "";
     allowURIAccess = token.allowURIAccess;
+    statSheet = token.statSheet;
   }
 
   public Token() {}
