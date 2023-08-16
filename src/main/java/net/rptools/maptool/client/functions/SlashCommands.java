@@ -18,6 +18,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import java.util.List;
 import net.rptools.maptool.client.macro.MacroManager;
+import net.rptools.maptool.client.macro.MacroManager.Scope;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -57,7 +58,7 @@ public class SlashCommands extends AbstractFunction {
    */
   private Object setSlashAlias(List<Object> args) throws ParserException {
     FunctionUtil.checkNumberParam("slash.setAlias", args, 2, 2);
-    MacroManager.setAlias(args.get(0).toString(), args.get(1).toString());
+    MacroManager.setAlias(args.get(0).toString(), args.get(1).toString(), Scope.CAMPAIGN);
     return "";
   }
 

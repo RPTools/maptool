@@ -33,19 +33,38 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * @author drice
+ * This class manages the slash commands for the client.
+ *
+ * @note The reference to macro in this class is actually a slash command and not a macro function
+ *     for the parser.
  */
 public class MacroManager {
 
+  /** The logger instance for this class. */
   private static final Logger log = LogManager.getLogger(MacroManager.class);
 
+  /** The maximum number of times a macro can recurse before it is considered an error. */
   private static final int MAX_RECURSE_COUNT = 10;
 
-  private static Macro UNDEFINED_MACRO = new UndefinedMacro();
+  /** An empty macro that is returned when a macro is not found. */
+  private static final Macro UNDEFINED_MACRO = new UndefinedMacro();
 
-  private static Map<String, Macro> MACROS = new HashMap<String, Macro>();
+  /** Map of all slash commands that have been registered. */
+  private static final Map<String, Macro> MACROS = new HashMap<>();
 
-  private static Map<String, String> aliasMap = new HashMap<String, String>();
+  /** Map of all slash command aliases that have been registered. */
+  private static final Map<String, String> aliasMap = new HashMap<>();
+
+  /** Set of all slash command aliases that have been registered as campaign scoped macros. */
+  private static final Set<String> campaignAliases = new HashSet<>();
+
+  /** Enum for the scope of the validity of the slash command. */
+  public enum Scope {
+    /** Not tied to the campaign and persists between campaigns. */
+    CLIENT,
+    /** Tied to the campaign and does not persist between campaign loads. */
+    CAMPAIGN
+  }
 
   static {
     registerMacro(new SayMacro());
@@ -85,34 +104,87 @@ public class MacroManager {
     registerMacro(UNDEFINED_MACRO);
   }
 
-  public static void setAlias(String key, String value) {
-    aliasMap.put(key, value);
+  /**
+   * This method is used to set the alias for a slash command.
+   *
+   * @param alias The key to use for the alias.
+   * @param value The value to use for the alias.
+   * @param scope The scope of the alias.
+   */
+  public static void setAlias(String alias, String value, Scope scope) {
+    aliasMap.put(alias, value);
+    if (scope == Scope.CAMPAIGN) {
+      campaignAliases.add(alias);
+    } else { // remove in case it was previously set
+      campaignAliases.remove(alias);
+    }
   }
 
-  public static void removeAlias(String key) {
-    aliasMap.remove(key);
+  /**
+   * This method is used to remove an alias.
+   *
+   * @param alias The alias to remove.
+   */
+  public static void removeAlias(String alias) {
+    aliasMap.remove(alias);
+    campaignAliases.remove(alias);
   }
 
+  /** This method is used to remove all aliases. */
   public static void removeAllAliases() {
     aliasMap.clear();
+    campaignAliases.clear();
   }
 
+  /**
+   * Returns the scope of the alias.
+   *
+   * @param alias The alias to get the scope for.
+   * @return The scope of the alias.
+   */
+  public static Scope getAliasScope(String alias) {
+    return campaignAliases.contains(alias) ? Scope.CAMPAIGN : Scope.CLIENT;
+  }
+
+  /**
+   * This method is used to get the alias map.
+   *
+   * @return The alias map.
+   */
   public static Map<String, String> getAliasMap() {
     return Collections.unmodifiableMap(aliasMap);
   }
 
+  /**
+   * This method is used to get the alias map for a given scope.
+   *
+   * @return The alias map.
+   */
   public static Set<Macro> getRegisteredMacros() {
     Set<Macro> ret = new HashSet<Macro>(MACROS.values());
     return ret;
   }
 
-  public static Macro getRegisteredMacro(String name) {
+  /**
+   * Returns the registered macro with the given name.
+   *
+   * @param name The name of the macro to get.
+   * @return The macro with the given name.
+   */
+  private static Macro getRegisteredMacro(String name) {
     Macro ret = MACROS.get(name);
-    if (ret == null) return UNDEFINED_MACRO;
+    if (ret == null) {
+      return UNDEFINED_MACRO;
+    }
     return ret;
   }
 
-  public static void registerMacro(Macro macro) {
+  /**
+   * Registers a macro with the given name.
+   *
+   * @param macro The macro to register.
+   */
+  private static void registerMacro(Macro macro) {
     MacroDefinition def = macro.getClass().getAnnotation(MacroDefinition.class);
 
     if (def == null) return;
@@ -123,10 +195,21 @@ public class MacroManager {
     }
   }
 
+  /**
+   * This method is used to execute a macro.
+   *
+   * @param command The command to execute.
+   */
   public static void executeMacro(String command) {
     executeMacro(command, null);
   }
 
+  /**
+   * This method is used to execute a macro.
+   *
+   * @param command The command to execute.
+   * @param macroExecutionContext The context in which the macro is being executed.
+   */
   public static void executeMacro(String command, MapToolMacroContext macroExecutionContext) {
     MacroContext context = new MacroContext();
     context.addTransform(command);
@@ -222,12 +305,24 @@ public class MacroManager {
     MapTool.addLocalMessage(I18N.getText("macromanager.tooManyResolves", command));
   }
 
-  static String postprocess(String command) {
+  /**
+   * Perform post processing on the command.
+   *
+   * @param command The command to perform the post processing on.
+   * @return The post processed output.
+   */
+  private static String postprocess(String command) {
     command = command.replace("\n", "<br>");
 
     return command;
   }
 
+  /**
+   * Perform pre-processing on the command.
+   *
+   * @param command The command to perform the pre-processing on.
+   * @return The pre-processed output.
+   */
   static String preprocess(String command) {
     return command;
   }
@@ -238,10 +333,19 @@ public class MacroManager {
     return performSubstitution(aliasText, details);
   }
 
+  /** This pattern is used to find the substitution variables in the alias text. */
   private static final Pattern SUBSTITUTION_PATTERN =
       Pattern.compile("\\$\\{([^\\}]+)\\}|\\$(\\w+)");
 
   // Package level for testing
+
+  /**
+   * This method performs the substitution of the alias text.
+   *
+   * @param text The text to perform the substitution on.
+   * @param details The details to use for the substitution.
+   * @return The substituted text.
+   */
   static String performSubstitution(String text, String details) {
 
     List<String> detailList = split(details);
@@ -336,6 +440,20 @@ public class MacroManager {
     return list;
   }
 
+  /** Clear all campaign scoped aliases. */
+  public static void clearCampaignAliases() {
+    campaignAliases.forEach(name -> aliasMap.remove(name));
+    campaignAliases.clear();
+  }
+
+  /**
+   * Execute the macro.
+   *
+   * @param context The macro context.
+   * @param macro The macro to execute.
+   * @param parameter The parameter to pass to the macro.
+   * @param executionContext The execution context.
+   */
   private static void executeMacro(
       MacroContext context, Macro macro, String parameter, MapToolMacroContext executionContext) {
     if (log.isDebugEnabled()) {

@@ -19,8 +19,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +29,7 @@ import net.rptools.maptool.client.macro.Macro;
 import net.rptools.maptool.client.macro.MacroContext;
 import net.rptools.maptool.client.macro.MacroDefinition;
 import net.rptools.maptool.client.macro.MacroManager;
+import net.rptools.maptool.client.macro.MacroManager.Scope;
 import net.rptools.maptool.language.I18N;
 import org.apache.commons.io.FileUtils;
 
@@ -70,8 +69,12 @@ public class SaveAliasesMacro implements Macro {
           .append("\n\n");
 
       Map<String, String> aliasMap = MacroManager.getAliasMap();
-      List<String> aliasList = new ArrayList<String>(aliasMap.keySet());
-      Collections.sort(aliasList);
+      List<String> aliasList =
+          aliasMap.keySet().stream()
+              .filter(name -> MacroManager.getAliasScope(name) == Scope.CLIENT)
+              .sorted()
+              .toList();
+
       for (String key : aliasList) {
         String value = aliasMap.get(key);
         builder
