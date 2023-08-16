@@ -588,7 +588,7 @@ test {
 }
 
 task createWrapper(type: Wrapper) {
-    gradleVersion = '7.6'
+    gradleVersion = '8.2.1'
 }
 
 // Configure current release tag in Sentry.io properties
