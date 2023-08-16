@@ -59,6 +59,9 @@ public class AddOnLibraryImporter {
   /** The name of the file with the stat sheets. */
   public static final String STATS_SHEET_FILE = "stat_sheets.json";
 
+  /** The name of the file with the slash commands. */
+  public static final String SLASH_COMMAND_FILE = "slash_commands.json";
+
   /** The directory where metadata from the root dir of the zip directory is copied to. */
   public static final String METADATA_DIR = "metadata/";
 
@@ -178,6 +181,9 @@ public class AddOnLibraryImporter {
             .ignoringUnknownFields()
             .merge(new InputStreamReader(zip.getInputStream(statSheetEntry)), statSheetsBuilder);
       }
+
+      // Slash commands
+      //var slashCommandsBuilder = AddOnSlashCommandsDto.newBuilder();
 
       // Copy Metadata
       addMetaData(builder.getNamespace(), zip, pathAssetMap);

@@ -75,7 +75,7 @@ public class LoadAliasesMacro implements Macro {
         }
         if (value != null) {
           MapTool.addLocalMessage("&nbsp;&nbsp;&nbsp;'" + name + "'");
-          MacroManager.setAlias(name, value, Scope.CLIENT);
+          MacroManager.setAlias(name, value, Scope.CLIENT, "");
         } else {
           MapTool.addLocalMessage(
               "&nbsp;&nbsp;&nbsp;" + I18N.getText("loadaliases.ignoring", name));

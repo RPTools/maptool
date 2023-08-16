@@ -59,7 +59,7 @@ public class AliasMacro implements Macro {
       name = macro.substring(0, split);
       value = macro.substring(split).trim();
     }
-    MacroManager.setAlias(name, value, Scope.CLIENT);
+    MacroManager.setAlias(name, value, Scope.CLIENT, "");
     if (value != null) {
       MapTool.addLocalMessage(I18N.getText("alias.added", name));
     } else {

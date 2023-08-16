@@ -31,7 +31,7 @@ public class SlashCommands extends AbstractFunction {
 
   /** Creates a new {@code PlayerFunctions} object. */
   public SlashCommands() {
-    super(0, 2, "slash.setAlias", "slash.getAliases", "slash.clearAlias");
+    super(0, 3, "slash.setAlias", "slash.getAliases", "slash.clearAlias");
   }
 
   @Override
@@ -57,8 +57,14 @@ public class SlashCommands extends AbstractFunction {
    * @throws ParserException if the number of arguments is incorrect.
    */
   private Object setSlashAlias(List<Object> args) throws ParserException {
-    FunctionUtil.checkNumberParam("slash.setAlias", args, 2, 2);
-    MacroManager.setAlias(args.get(0).toString(), args.get(1).toString(), Scope.CAMPAIGN);
+    FunctionUtil.checkNumberParam("slash.setAlias", args, 2, 3);
+    String desc;
+    if (args.size() == 3) {
+      desc = args.get(2).toString();
+    } else {
+      desc = "";
+    }
+    MacroManager.setAlias(args.get(0).toString(), args.get(1).toString(), Scope.CAMPAIGN, desc);
     return "";
   }
 

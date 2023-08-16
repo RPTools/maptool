@@ -15,8 +15,10 @@
 package net.rptools.maptool.client.macro;
 
 import java.util.*;
+import java.util.Map.Entry;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.AboutMacro;
@@ -53,10 +55,7 @@ public class MacroManager {
   private static final Map<String, Macro> MACROS = new HashMap<>();
 
   /** Map of all slash command aliases that have been registered. */
-  private static final Map<String, String> aliasMap = new HashMap<>();
-
-  /** Set of all slash command aliases that have been registered as campaign scoped macros. */
-  private static final Set<String> campaignAliases = new HashSet<>();
+  private static final Map<String, MacroDetails> aliasMap = new HashMap<>();
 
   /** Enum for the scope of the validity of the slash command. */
   public enum Scope {
@@ -65,6 +64,8 @@ public class MacroManager {
     /** Tied to the campaign and does not persist between campaign loads. */
     CAMPAIGN
   }
+
+  private record MacroDetails(String name, String command, String description, Scope scope) {}
 
   static {
     registerMacro(new SayMacro());
@@ -110,14 +111,11 @@ public class MacroManager {
    * @param alias The key to use for the alias.
    * @param value The value to use for the alias.
    * @param scope The scope of the alias.
+   * @param description The description of the alias.
    */
-  public static void setAlias(String alias, String value, Scope scope) {
-    aliasMap.put(alias, value);
-    if (scope == Scope.CAMPAIGN) {
-      campaignAliases.add(alias);
-    } else { // remove in case it was previously set
-      campaignAliases.remove(alias);
-    }
+  public static void setAlias(String alias, String value, Scope scope, String description) {
+    description = Objects.requireNonNullElse(description, "");
+    aliasMap.put(alias, new MacroDetails(alias, value, description, scope));
   }
 
   /**
@@ -127,13 +125,11 @@ public class MacroManager {
    */
   public static void removeAlias(String alias) {
     aliasMap.remove(alias);
-    campaignAliases.remove(alias);
   }
 
   /** This method is used to remove all aliases. */
   public static void removeAllAliases() {
     aliasMap.clear();
-    campaignAliases.clear();
   }
 
   /**
@@ -143,7 +139,11 @@ public class MacroManager {
    * @return The scope of the alias.
    */
   public static Scope getAliasScope(String alias) {
-    return campaignAliases.contains(alias) ? Scope.CAMPAIGN : Scope.CLIENT;
+    MacroDetails def = aliasMap.get(alias);
+    if (def == null) {
+      return null;
+    }
+    return def.scope();
   }
 
   /**
@@ -152,11 +152,13 @@ public class MacroManager {
    * @return The alias map.
    */
   public static Map<String, String> getAliasMap() {
-    return Collections.unmodifiableMap(aliasMap);
+    return aliasMap.entrySet().stream()
+        .map(e -> Map.entry(e.getKey(), e.getValue().command()))
+        .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
   }
 
   /**
-   * This method is used to get the alias map for a given scope.
+   * This method is used to get the registered macros.
    *
    * @return The alias map.
    */
@@ -272,11 +274,12 @@ public class MacroManager {
         }
 
         // Is it an alias ?
-        String alias = aliasMap.get(key);
-        if (alias == null) {
+        MacroDetails mdet = aliasMap.get(key);
+        if (mdet == null) {
           executeMacro(context, UNDEFINED_MACRO, command, macroExecutionContext);
           return;
         }
+        String alias = mdet.command();
         command = resolveAlias(alias, details);
         context.addTransform(command);
         continue;
@@ -371,9 +374,11 @@ public class MacroManager {
         } catch (NumberFormatException nfe) {
 
           // Try an alias lookup
-          replacement = aliasMap.get(replIndexStr);
-          if (replacement == null) {
+          MacroDetails mdet = aliasMap.get(replIndexStr);
+          if (mdet == null) {
             replacement = I18N.getText("macromanager.alias.indexNotFound", replIndexStr);
+          } else {
+            replacement = mdet.command();
           }
         }
       }
@@ -442,8 +447,12 @@ public class MacroManager {
 
   /** Clear all campaign scoped aliases. */
   public static void clearCampaignAliases() {
-    campaignAliases.forEach(name -> aliasMap.remove(name));
-    campaignAliases.clear();
+    List<String> campaignAliases =
+        aliasMap.entrySet().stream()
+            .filter(e -> e.getValue().scope() == Scope.CAMPAIGN)
+            .map(Entry::getKey)
+            .toList();
+    campaignAliases.forEach(aliasMap::remove);
   }
 
   /**

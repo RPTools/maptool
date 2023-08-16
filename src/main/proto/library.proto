@@ -61,3 +61,12 @@ message AddOnStatSheetsDto {
 
   repeated AddOnStatSheet stat_sheets = 1;
 }
+
+message AddonSlashCommandsDto {
+  message AddOnSlashCommand {
+    string name = 1;
+    string description = 2;
+    string command = 3;
+  }
+  repeated AddOnSlashCommand slash_commands = 1;
+}
