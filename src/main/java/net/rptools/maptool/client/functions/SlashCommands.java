@@ -29,7 +29,7 @@ import net.rptools.parser.function.AbstractFunction;
 /** Class that implements slash command alias functions. */
 public class SlashCommands extends AbstractFunction {
 
-  /** Creates a new {@code PlayerFunctions} object. */
+  /** Creates a new {@code SlashCommands} object. */
   public SlashCommands() {
     super(0, 3, "slash.setAlias", "slash.getAliases", "slash.clearAlias");
   }
