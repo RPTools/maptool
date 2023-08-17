@@ -68,7 +68,7 @@ public class SaveAliasesMacro implements Macro {
           .append(new SimpleDateFormat().format(new Date()))
           .append("\n\n");
 
-      Map<String, String> aliasMap = MacroManager.getAliasMap();
+      Map<String, String> aliasMap = MacroManager.getAliasCommandMap();
       List<String> aliasList =
           aliasMap.keySet().stream()
               .filter(name -> MacroManager.getAliasScope(name) == Scope.CLIENT)

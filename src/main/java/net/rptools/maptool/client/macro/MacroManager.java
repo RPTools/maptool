@@ -178,10 +178,29 @@ public class MacroManager {
    *
    * @return The alias map.
    */
-  public static Map<String, String> getAliasMap() {
+  public static Map<String, String> getAliasCommandMap() {
     return aliasMap.entrySet().stream()
         .map(e -> Map.entry(e.getKey(), e.getValue().command()))
         .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+  }
+
+  /**
+   * This method is used to get the details of the defined aliases.
+   *
+   * @return The details of the defined aliases.
+   */
+  public static Map<String, MacroDetails> getAliasDetails() {
+    return Map.copyOf(aliasMap);
+  }
+
+  /**
+   * This method is used to get the details of the defined aliases.
+   *
+   * @param alias The alias to get the details for.
+   * @return The details of the defined aliases.
+   */
+  public static MacroDetails getAliasDetails(String alias) {
+    return aliasMap.get(alias);
   }
 
   /**

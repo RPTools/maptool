@@ -75,7 +75,7 @@ public class SlashCommands extends AbstractFunction {
    */
   private JsonElement getSlashAliases() {
     Gson gson = new Gson();
-    return gson.toJsonTree(MacroManager.getAliasMap());
+    return gson.toJsonTree(MacroManager.getAliasCommandMap());
   }
 
   /**
