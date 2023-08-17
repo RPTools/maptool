@@ -62,10 +62,28 @@ public class MacroManager {
     /** Not tied to the campaign and persists between campaigns. */
     CLIENT,
     /** Tied to the campaign and does not persist between campaign loads. */
-    CAMPAIGN
+    CAMPAIGN,
+    /** Tied to an addon. */
+    ADDON
   }
 
-  private record MacroDetails(String name, String command, String description, Scope scope) {}
+  /**
+   * This record is used to store the details of a slash command.
+   *
+   * @param name The name of the slash command.
+   * @param command The command to execute.
+   * @param description The description of the slash command.
+   * @param scope The scope of the slash command.
+   * @param addOnNamespace The namespace of the add on the slash command is tied to.
+   * @param addOnName The name of the add on the slash command is tied to.
+   */
+  public record MacroDetails(
+      String name,
+      String command,
+      String description,
+      Scope scope,
+      String addOnNamespace,
+      String addOnName) {}
 
   static {
     registerMacro(new SayMacro());
@@ -115,7 +133,16 @@ public class MacroManager {
    */
   public static void setAlias(String alias, String value, Scope scope, String description) {
     description = Objects.requireNonNullElse(description, "");
-    aliasMap.put(alias, new MacroDetails(alias, value, description, scope));
+    aliasMap.put(alias, new MacroDetails(alias, value, description, scope, "", ""));
+  }
+
+  /**
+   * This method is used to set the alias for a slash command.
+   *
+   * @param details The details of the alias.
+   */
+  public static void setAlias(MacroDetails details) {
+    aliasMap.put(details.name(), details);
   }
 
   /**
@@ -446,10 +473,24 @@ public class MacroManager {
   }
 
   /** Clear all campaign scoped aliases. */
-  public static void clearCampaignAliases() {
+  public static void removeCampaignAliases() {
     List<String> campaignAliases =
         aliasMap.entrySet().stream()
             .filter(e -> e.getValue().scope() == Scope.CAMPAIGN)
+            .map(Entry::getKey)
+            .toList();
+    campaignAliases.forEach(aliasMap::remove);
+  }
+
+  /**
+   * Clear all aliases for the given add on namespace.
+   *
+   * @param namespace The namespace to clear the aliases for.
+   */
+  public static void removeAddOnAliases(String namespace) {
+    List<String> campaignAliases =
+        aliasMap.entrySet().stream()
+            .filter(e -> namespace.equalsIgnoreCase(e.getValue().addOnNamespace()))
             .map(Entry::getKey)
             .toList();
     campaignAliases.forEach(aliasMap::remove);

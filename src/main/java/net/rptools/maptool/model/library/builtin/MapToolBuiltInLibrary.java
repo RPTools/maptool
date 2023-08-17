@@ -21,6 +21,7 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Function;
@@ -28,6 +29,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
@@ -270,4 +272,9 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
 
   @Override
   public void cleanup() {}
+
+  @Override
+  public Set<MacroDetails> getSlashCommands() {
+    return Set.of();
+  }
 }

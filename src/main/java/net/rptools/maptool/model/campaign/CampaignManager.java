@@ -38,6 +38,6 @@ public class CampaignManager {
     new LibraryManager().deregisterAllLibraries();
     new DataStoreManager().getDefaultDataStoreForRemoteUpdate().clear();
     UserDefinedMacroFunctions.getInstance().clearUserDefinedFunctions();
-    MacroManager.clearCampaignAliases();
+    MacroManager.removeCampaignAliases();
   }
 }

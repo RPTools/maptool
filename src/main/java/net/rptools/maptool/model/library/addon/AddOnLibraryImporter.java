@@ -34,6 +34,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
+import net.rptools.maptool.model.library.proto.AddonSlashCommandsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -183,7 +184,15 @@ public class AddOnLibraryImporter {
       }
 
       // Slash commands
-      //var slashCommandsBuilder = AddOnSlashCommandsDto.newBuilder();
+      var slashCommandsBuilder = AddonSlashCommandsDto.newBuilder();
+      ZipEntry slashCommandsEntry = zip.getEntry(SLASH_COMMAND_FILE);
+      if (slashCommandsEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(
+                new InputStreamReader(zip.getInputStream(slashCommandsEntry)),
+                slashCommandsBuilder);
+      }
 
       // Copy Metadata
       addMetaData(builder.getNamespace(), zip, pathAssetMap);
@@ -199,6 +208,7 @@ public class AddOnLibraryImporter {
           mtsPropBuilder.build(),
           eventPropBuilder.build(),
           statSheetsBuilder.build(),
+          slashCommandsBuilder.build(),
           pathAssetMap);
     }
   }
