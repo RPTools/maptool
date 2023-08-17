@@ -15,10 +15,10 @@
 package net.rptools.maptool.client.macro.impl;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
@@ -28,6 +28,7 @@ import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.client.macro.MacroManager.Scope;
 import net.rptools.maptool.language.I18N;
+import org.javatuples.Pair;
 
 /**
  * Macro to clear the message panel
@@ -109,21 +110,21 @@ public class AliasMacro implements Macro {
   }
 
   private void handlePrintAddOnAliases() {
-    var list =
+    Map<String, String> addons =
         MacroManager.getAliasDetails().values().stream()
             .filter(mdet -> mdet.scope() == Scope.ADDON)
+            .map(mdet -> new Pair<>(mdet.addOnNamespace(), mdet.addOnName()))
             .distinct()
-            .sorted(Comparator.comparing(MacroDetails::addOnName))
-            .toList();
-    list.forEach(
-        slash ->
+            .collect(Collectors.toMap(Pair::getValue0, Pair::getValue1));
+    addons.forEach(
+        (addOnNamespace, addOnName) ->
             handlePrintAliases(
-                I18N.getText("alias.addon.title", slash.addOnName()),
+                I18N.getText("alias.addon.title", addOnName),
                 name -> {
                   var mdet = MacroManager.getAliasDetails(name);
                   return mdet != null
                       && mdet.scope() == Scope.ADDON
-                      && mdet.addOnNamespace().equals(slash.addOnNamespace());
+                      && mdet.addOnNamespace().equals(addOnNamespace);
                 }));
   }
 
