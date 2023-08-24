@@ -2512,6 +2512,12 @@ public class AppActions {
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File campaignFile = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var openDir = campaignFile.toPath().getParent().toAbsolutePath();
+            if (openDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.loadCampaignFromInstallDir");
+              return;
+            }
             loadCampaign(campaignFile);
           }
         }
@@ -2763,10 +2769,22 @@ public class AppActions {
   }
 
   public static void doSaveCampaignAs(Runnable onSuccess) {
-    JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
-    int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
-    if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(chooser.getSelectedFile(), onSuccess);
+    boolean tryAgain = true;
+    while (tryAgain) {
+      JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
+      int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
+      if (saveStatus == JFileChooser.APPROVE_OPTION) {
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveCampaignToInstallDir");
+        } else {
+          tryAgain = false;
+          saveAndUpdateCampaignName(chooser.getSelectedFile(), onSuccess);
+        }
+      } else {
+        tryAgain = false;
+      }
     }
   }
 
