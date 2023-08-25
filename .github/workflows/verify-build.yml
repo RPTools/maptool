@@ -61,4 +61,4 @@ jobs:
       - name: Build with Gradle
         uses: GabrielBB/xvfb-action@v1.0
         with: 
-          run: ./gradlew build
+          run: ./gradlew build --no-daemon
