@@ -197,6 +197,33 @@ public class AddOnLibraryImporter {
     }
   }
 
+  public AddOnLibrary importFromClassPath(String path) throws IOException {
+    // Copy the data to temporary file, its a bit hacky, but it works, and we can't create a
+    // ZipFile from anything but a file.
+    if (!path.startsWith("/")) {
+      path = "/" + path;
+    }
+
+    File tempFile = File.createTempFile("mtlib", "tmp");
+    tempFile.deleteOnExit();
+
+    try (var outputStream = Files.newOutputStream(tempFile.toPath())) {
+      try (var inputStream = AddOnLibraryImporter.class.getResourceAsStream(path)) {
+        inputStream.transferTo(outputStream);
+      }
+    }
+
+    return importFromFile(tempFile);
+  }
+
+  /**
+   * Adds the metadata from the root directory of the zip file to the metadata directory.
+   *
+   * @param namespace namespace of the add-on library.
+   * @param zip the zipfile containing the add-on library.
+   * @param pathAssetMap the map of asset paths and asset details.
+   * @throws IOException
+   */
   private void addMetaData(
       String namespace, ZipFile zip, Map<String, Pair<MD5Key, Type>> pathAssetMap)
       throws IOException {

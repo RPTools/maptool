@@ -16,3 +16,9 @@ include 'services:webservice'
 */
 
 rootProject.name = 'MapTool'
+
+sourceControl {
+    gitRepository("https://github.com/cwisniew/maptool-builtin-addons.git") {
+        producesModule("net.rptools.maptool.addon:maptool-builtin-addons")
+    }
+}

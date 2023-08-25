@@ -14,13 +14,23 @@
  */
 package net.rptools.maptool.model.library.builtin;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.LibraryType;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 
 /** Class for managing {@link AddOnLibrary} objects. */
 public class BuiltInLibraryManager {
@@ -115,6 +125,51 @@ public class BuiltInLibraryManager {
       return getLibrary(path.getHost());
     } else {
       return null;
+    }
+  }
+
+  /** Initializes the built in libraries. */
+  public void loadBuiltIns() {
+    var addonPath = "net/rptools/maptool/libraries/builtin";
+    var classLoader = Thread.currentThread().getContextClassLoader();
+
+    URI uri;
+    try {
+      uri = classLoader.getResource(addonPath).toURI();
+    } catch (URISyntaxException e) {
+      // TODO: CDW
+      throw new RuntimeException(e);
+    }
+
+    try (var fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+      var resourcePath = fs.getPath(addonPath);
+      var libs = Files.walk(resourcePath, 1).filter(p -> p.toString().endsWith(".mtlib")).toList();
+
+      libs.stream().forEach(System.out::println);
+      var importer = new AddOnLibraryImporter();
+      libs.stream()
+          .forEach(
+              l -> {
+                try {
+                  var lib = importer.importFromClassPath(l.toString());
+                  var clib = new ClassPathAddOnLibrary(l.toString(), lib);
+                  registerLibrary(clib);
+                  clib.initialize();
+
+                } catch (Exception e) {
+                  // TODO: CDW
+                  e.printStackTrace();
+                }
+              });
+      new LibraryManager()
+          .getLibraries(LibraryType.ADD_ON).stream()
+              .forEach(
+                  l -> {
+                    System.out.println("Library: " + l.namespace());
+                  });
+    } catch (IOException | ExecutionException | InterruptedException e) {
+      // TODO: CDW
+      e.printStackTrace();
     }
   }
 }

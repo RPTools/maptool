@@ -71,6 +71,7 @@ public class LibraryManager {
 
   static {
     libraryTokenManager.init();
+    builtInLibraryManager.loadBuiltIns();
   }
 
   /**
