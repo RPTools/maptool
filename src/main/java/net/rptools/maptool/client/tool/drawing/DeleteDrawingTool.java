@@ -33,7 +33,6 @@ import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawnElement;
 
@@ -45,8 +44,6 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
   private static final Set<GUID> selectedDrawings = new HashSet<>();
   private static final DrawPanelPopupMenu.DeleteDrawingAction deleteAction =
       new DrawPanelPopupMenu.DeleteDrawingAction(selectedDrawings);
-
-  private static Layer selectedLayer = Layer.TOKEN;
 
   public DeleteDrawingTool() {
     new MapToolEventBus().getMainEventBus().register(this);
@@ -91,7 +88,7 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
 
     if (!multiSelect) selectedDrawings.clear();
 
-    var drawableList = zone.getDrawnElements(selectedLayer);
+    var drawableList = zone.getDrawnElements(getSelectedLayer());
     for (var element : drawableList) {
       var drawable = element.getDrawable();
       var id = drawable.getId();
