@@ -26,9 +26,11 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryData;
 import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnSlashCommandManager;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.library.builtin.BuiltInLibraryManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
@@ -69,9 +71,14 @@ public class LibraryManager {
   /** Library Tokens. */
   private static final LibraryTokenManager libraryTokenManager = new LibraryTokenManager();
 
+  /** Listener for dealing with add-on slash commands. */
+  private static final AddOnSlashCommandManager addOnSlashCommandManager =
+      new AddOnSlashCommandManager();
+
   static {
     libraryTokenManager.init();
     builtInLibraryManager.loadBuiltIns();
+    new MapToolEventBus().getMainEventBus().register(addOnSlashCommandManager);
   }
 
   /**

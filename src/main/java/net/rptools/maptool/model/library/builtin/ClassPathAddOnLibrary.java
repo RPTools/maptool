@@ -19,9 +19,11 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.LibraryInfo;
@@ -63,6 +65,11 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
   @Override
   public CompletableFuture<String> readAsString(URL location) throws IOException {
     return addOnLibrary.readAsString(location);
+  }
+
+  @Override
+  public CompletableFuture<String> readAsHTMLContent(URL location) throws IOException {
+    return BuiltInLibrary.super.readAsHTMLContent(location);
   }
 
   @Override
@@ -168,6 +175,11 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
   @Override
   public void cleanup() {
     addOnLibrary.cleanup();
+  }
+
+  @Override
+  public Set<MacroDetails> getSlashCommands() {
+    return addOnLibrary.getSlashCommands();
   }
 
   public String getClassPath() {

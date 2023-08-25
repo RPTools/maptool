@@ -36,6 +36,8 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.macro.MacroManager;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.client.script.javascript.JSScriptEngine;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -151,13 +153,20 @@ public class AddOnLibrary implements Library {
   /** The Stat Sheets defined by the add-on library. */
   private final Set<StatSheet> statSheets = new HashSet<>();
 
+  /** The mapping between slash command names and slash command details. */
+  private final Map<String, MacroDetails> slashCommands = new HashMap<>();
+
+  /** The information about the add-on library. */
+  private final LibraryInfo libraryInfo;
+
   /**
    * Class used to represent Drop In Libraries.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param eventsDto The MTScript Events Data Transfer Object.
-   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
+   * @param slashCommandsDto The Slash Commands Data Transfer Object.
+   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Type}s.
    */
   private AddOnLibrary(
       MD5Key libraryAssetKey,
@@ -165,7 +174,8 @@ public class AddOnLibrary implements Library {
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
       AddOnStatSheetsDto statSheetsDto,
-      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
+      AddonSlashCommandsDto slashCommandsDto,
+      Map<String, Pair<MD5Key, Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -247,6 +257,33 @@ public class AddOnLibrary implements Library {
     readMeFile = dto.getReadMeFile();
 
     jsContextName = JS_CONTEXT_PREFIX + namespace;
+
+    libraryInfo =
+        new LibraryInfo(
+            name,
+            namespace,
+            version,
+            website,
+            gitUrl,
+            authors,
+            license,
+            description,
+            shortDescription,
+            allowsUriAccess,
+            readMeFile.isEmpty() ? null : readMeFile,
+            licenseFile.isEmpty() ? null : licenseFile);
+
+    for (var s : slashCommandsDto.getSlashCommandsList()) {
+      slashCommands.put(
+          s.getName(),
+          new MacroDetails(
+              s.getName(),
+              s.getCommand(),
+              s.getDescription(),
+              MacroManager.Scope.ADDON,
+              namespace,
+              name));
+    }
   }
 
   /**
@@ -256,7 +293,8 @@ public class AddOnLibrary implements Library {
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param eventsDto The Events Data Transfer Object.
-   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
+   * @param slashCommandsDto The Slash Commands Data Transfer Object.
+   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Type}s.
    * @return the new Add on library.
    */
   public static AddOnLibrary fromDto(
@@ -265,9 +303,11 @@ public class AddOnLibrary implements Library {
       MTScriptPropertiesDto mtsDto,
       AddOnLibraryEventsDto eventsDto,
       AddOnStatSheetsDto statSheetsDto,
-      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap) {
+      AddonSlashCommandsDto slashCommandsDto,
+      Map<String, Pair<MD5Key, Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, pathAssetMap);
+    return new AddOnLibrary(
+        libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, slashCommandsDto, pathAssetMap);
   }
 
   @Override
@@ -292,20 +332,7 @@ public class AddOnLibrary implements Library {
    */
   @Override
   public CompletableFuture<LibraryInfo> getLibraryInfo() {
-    return CompletableFuture.completedFuture(
-        new LibraryInfo(
-            name,
-            namespace,
-            version,
-            website,
-            gitUrl,
-            authors,
-            license,
-            description,
-            shortDescription,
-            allowsUriAccess,
-            readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile));
+    return CompletableFuture.completedFuture(libraryInfo);
   }
 
   /**
@@ -410,6 +437,11 @@ public class AddOnLibrary implements Library {
     if (JSScriptEngine.hasAddOnContext(jsContextName)) {
       JSScriptEngine.removeAddOnContext(jsContextName);
     }
+  }
+
+  @Override
+  public Set<MacroDetails> getSlashCommands() {
+    return Set.copyOf(slashCommands.values());
   }
 
   @Override

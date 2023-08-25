@@ -34,6 +34,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
+import net.rptools.maptool.model.library.proto.AddonSlashCommandsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
@@ -58,6 +59,9 @@ public class AddOnLibraryImporter {
 
   /** The name of the file with the stat sheets. */
   public static final String STATS_SHEET_FILE = "stat_sheets.json";
+
+  /** The name of the file with the slash commands. */
+  public static final String SLASH_COMMAND_FILE = "slash_commands.json";
 
   /** The directory where metadata from the root dir of the zip directory is copied to. */
   public static final String METADATA_DIR = "metadata/";
@@ -179,6 +183,17 @@ public class AddOnLibraryImporter {
             .merge(new InputStreamReader(zip.getInputStream(statSheetEntry)), statSheetsBuilder);
       }
 
+      // Slash commands
+      var slashCommandsBuilder = AddonSlashCommandsDto.newBuilder();
+      ZipEntry slashCommandsEntry = zip.getEntry(SLASH_COMMAND_FILE);
+      if (slashCommandsEntry != null) {
+        JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(
+                new InputStreamReader(zip.getInputStream(slashCommandsEntry)),
+                slashCommandsBuilder);
+      }
+
       // Copy Metadata
       addMetaData(builder.getNamespace(), zip, pathAssetMap);
 
@@ -193,6 +208,7 @@ public class AddOnLibraryImporter {
           mtsPropBuilder.build(),
           eventPropBuilder.build(),
           statSheetsBuilder.build(),
+          slashCommandsBuilder.build(),
           pathAssetMap);
     }
   }
