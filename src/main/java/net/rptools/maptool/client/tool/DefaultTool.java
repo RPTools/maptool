@@ -82,6 +82,7 @@ public abstract class DefaultTool extends Tool
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     this.renderer = renderer;
+    selectedLayer = renderer.getActiveLayer();
     layerSelectionDialog.updateViewList();
   }
 
