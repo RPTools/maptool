@@ -83,7 +83,7 @@ public abstract class DefaultTool extends Tool
     super.attachTo(renderer);
     this.renderer = renderer;
     selectedLayer = renderer.getActiveLayer();
-    layerSelectionDialog.updateViewList();
+    layerSelectionDialog.setSelectedLayer(selectedLayer);
   }
 
   @Override
