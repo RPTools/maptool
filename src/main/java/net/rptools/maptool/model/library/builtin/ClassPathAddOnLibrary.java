@@ -33,14 +33,24 @@ import net.rptools.maptool.model.library.data.LibraryData;
 
 public class ClassPathAddOnLibrary implements BuiltInLibrary {
 
-  private final String classPath;
+  private final String resourceFilePath;
 
   private final AddOnLibrary addOnLibrary;
 
-  public ClassPathAddOnLibrary(String classPath, AddOnLibrary addOnLibrary) {
-    this.classPath = classPath;
+  /**
+   * Creates a new instance of {@link ClassPathAddOnLibrary}.
+   * @param resourceFilePath the resource path for the library.
+   * @param addOnLibrary the add-on library that was loaded.
+   */
+  public ClassPathAddOnLibrary(String resourceFilePath, AddOnLibrary addOnLibrary) {
+    this.resourceFilePath = resourceFilePath;
     this.addOnLibrary = addOnLibrary;
   }
+
+  /**
+   * The directory on the class path for the built in libraries.
+   */
+  public static final String BUILTIN_LIB_CLASSPATH_DIR = "net/rptools/maptool/libraries/builtin";
 
   @Override
   public CompletableFuture<String> getVersion() {
@@ -182,8 +192,8 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
     return addOnLibrary.getSlashCommands();
   }
 
-  public String getClassPath() {
-    return classPath;
+  public String getResourceFilePath() {
+    return resourceFilePath;
   }
 
   void initialize() {
