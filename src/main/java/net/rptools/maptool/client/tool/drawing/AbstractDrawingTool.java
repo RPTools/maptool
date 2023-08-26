@@ -333,7 +333,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       return;
     }
     if (MapTool.getPlayer().isGM()) {
-      drawable.setLayer(renderer.getActiveLayer());
+      drawable.setLayer(getSelectedLayer());
     } else {
       drawable.setLayer(Layer.TOKEN);
     }

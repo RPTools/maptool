@@ -139,7 +139,7 @@ public class PointerTool extends DefaultTool {
     }
     htmlRenderer.attach(renderer);
 
-    if (renderer.getActiveLayer() != Zone.Layer.TOKEN) {
+    if (getSelectedLayer() != Zone.Layer.TOKEN) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
