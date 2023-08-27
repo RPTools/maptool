@@ -49,7 +49,6 @@ import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.*;
-import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.*;
 
@@ -78,11 +77,6 @@ public class HTMLWebViewManager {
 
   /** The bridge from Javascript to Java. */
   private final JavaBridge bridge;
-
-  // Event listener for the href macro link clicks.
-  private final EventListener listenerA = this::fixHref;
-  // Event listener for form submission.
-  private final EventListener listenerSubmit = this::getDataAndSubmit;
 
   /** Represents a bridge from Javascript to Java. */
   public class JavaBridge {
@@ -152,11 +146,11 @@ public class HTMLWebViewManager {
         if (addedNode instanceof EventTarget) {
           EventTarget target = (EventTarget) addedNode;
           if (addedNode instanceof HTMLAnchorElement || addedNode instanceof HTMLAreaElement) {
-            target.addEventListener("click", listenerA, true);
+            target.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
           } else if (target instanceof HTMLFormElement) {
-            target.addEventListener("submit", listenerSubmit, true);
+            target.addEventListener("submit", HTMLWebViewManager.this::getDataAndSubmit, true);
           } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
-            target.addEventListener("click", listenerSubmit, true);
+            target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
           }
         }
 
@@ -167,34 +161,34 @@ public class HTMLWebViewManager {
         nodeList = addedNode.getElementsByTagName("a");
         for (int i = 0; i < nodeList.getLength(); i++) {
           EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", listenerA, true);
+          node.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
         }
 
         // Add event handlers for hyperlinks for maps.
         nodeList = addedNode.getElementsByTagName("area");
         for (int i = 0; i < nodeList.getLength(); i++) {
           EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", listenerA, true);
+          node.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
         }
 
         // Set the "submit" handler to get the data on submission not based on buttons
         nodeList = addedNode.getElementsByTagName("form");
         for (int i = 0; i < nodeList.getLength(); i++) {
           EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("submit", listenerSubmit, true);
+          target.addEventListener("submit", HTMLWebViewManager.this::getDataAndSubmit, true);
         }
 
         // Set the "submit" handler to get the data on submission based on input
         nodeList = addedNode.getElementsByTagName("input");
         for (int i = 0; i < nodeList.getLength(); i++) {
           EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, true);
+          target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
         }
         // Set the "submit" handler to get the data on submission based on button
         nodeList = addedNode.getElementsByTagName("button");
         for (int i = 0; i < nodeList.getLength(); i++) {
           EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, true);
+          target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
         }
       }
     }
