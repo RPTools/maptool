@@ -2512,12 +2512,6 @@ public class AppActions {
 
           if (chooser.showOpenDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
             File campaignFile = chooser.getSelectedFile();
-            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-            var openDir = campaignFile.toPath().getParent().toAbsolutePath();
-            if (openDir.startsWith(installDir)) {
-              MapTool.showWarning("msg.warning.loadCampaignFromInstallDir");
-              return;
-            }
             loadCampaign(campaignFile);
           }
         }
@@ -2550,6 +2544,12 @@ public class AppActions {
     if (AppState.testBackgroundTaskLock()) {
       MapTool.showError("msg.error.failedLoadCampaignLock");
       return;
+    }
+
+    var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+    var openDir = campaignFile.toPath().getParent().toAbsolutePath();
+    if (openDir.startsWith(installDir)) {
+      MapTool.showWarning("msg.warning.loadCampaignFromInstallDir");
     }
 
     new CampaignLoader(campaignFile).execute();
@@ -2695,6 +2695,13 @@ public class AppActions {
 
   public static void doSaveCampaign(Runnable onSuccess) {
     if (AppState.getCampaignFile() == null) {
+      doSaveCampaignAs(onSuccess);
+      return;
+    }
+    var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+    var saveDir = AppState.getCampaignFile().toPath().getParent().toAbsolutePath();
+    if (saveDir.startsWith(installDir)) {
+      MapTool.showWarning("msg.warning.saveCampaignToInstallDir");
       doSaveCampaignAs(onSuccess);
       return;
     }
