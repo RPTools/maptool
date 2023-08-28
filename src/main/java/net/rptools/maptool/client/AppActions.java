@@ -250,9 +250,19 @@ public class AppActions {
 
           JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 
-          // Get target location
-          if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-            return;
+          boolean tryAgain = true;
+          while (tryAgain) {
+            // Get target location
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              return;
+            }
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.exportRepoToInstallDir");
+            } else {
+              tryAgain = false;
+            }
           }
 
           // Default extension
