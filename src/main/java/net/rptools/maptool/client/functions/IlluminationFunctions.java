@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
+import com.google.gson.JsonNull;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -67,29 +68,35 @@ public class IlluminationFunctions extends AbstractFunction {
       // No tokens specified, use the current view.
       playerView = renderer.getPlayerView();
     } else {
-      // Tokens for the view passed as a JSON array.
-      final var jsonList =
-          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(3).toString());
-      if (!jsonList.isJsonArray()) {
-        // Whoops, we need an array.
-        throw new ParserException(
-            I18N.getText("macro.function.general.argumentTypeA", functionName));
-      }
-      final var jsonArray = jsonList.getAsJsonArray();
-
-      final var tokens = new ArrayList<Token>();
-      for (final var element : jsonArray) {
-        final var identifier = JSONMacroFunctions.getInstance().jsonToScriptString(element);
-        final var token = renderer.getZone().resolveToken(identifier);
-        if (token == null) {
+      final var parameter = parameters.get(3);
+      if (parameter instanceof JsonNull) {
+        // Explicitly requesting without token view.
+        playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole());
+      } else {
+        // Tokens for the view passed as a JSON array.
+        final var jsonList =
+            JSONMacroFunctions.getInstance().asJsonElement(parameters.get(3).toString());
+        if (!jsonList.isJsonArray()) {
+          // Whoops, we need an array.
           throw new ParserException(
-              I18N.getText("macro.function.general.unknownToken", functionName, identifier));
+              I18N.getText("macro.function.general.argumentTypeA", functionName));
+        }
+        final var jsonArray = jsonList.getAsJsonArray();
+
+        final var tokens = new ArrayList<Token>();
+        for (final var element : jsonArray) {
+          final var identifier = JSONMacroFunctions.getInstance().jsonToScriptString(element);
+          final var token = renderer.getZone().resolveToken(identifier);
+          if (token == null) {
+            throw new ParserException(
+                I18N.getText("macro.function.general.unknownToken", functionName, identifier));
+          }
+
+          tokens.add(token);
         }
 
-        tokens.add(token);
+        playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole(), tokens);
       }
-
-      playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole(), tokens);
     }
 
     for (final var lumensLevel :
