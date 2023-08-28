@@ -17,9 +17,7 @@ package net.rptools.maptool.client.functions;
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
 import java.util.List;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
@@ -52,14 +50,10 @@ public class IlluminationFunctions extends AbstractFunction {
 
   private int getIllumination(String functionName, List<Object> parameters) throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
-    FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+    FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
     final var x = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
     final var y = FunctionUtil.paramAsInteger(functionName, parameters, 1, false);
-
-    ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-    if (renderer == null) {
-      throw new ParserException(I18N.getText("macro.function.map.none", functionName));
-    }
+    final var renderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
 
     PlayerView playerView = renderer.getPlayerView();
     final var point = new Point2D.Double(x, y);
