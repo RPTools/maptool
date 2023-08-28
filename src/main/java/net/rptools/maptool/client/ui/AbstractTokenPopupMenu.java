@@ -554,17 +554,43 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (showSaveDialog) {
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-          if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-            return;
+          boolean tryAgain = true;
+          while (tryAgain) {
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              return;
+            }
+
+            saveDirectory = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.saveTokenToInstallDir");
+            } else {
+              tryAgain = false;
+            }
           }
 
           tokenSaveFile = chooser.getSelectedFile();
         } else {
           if (saveDirectory == null) {
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
-            if (chooser.getFileFilter() == tokenFilterGM) saveAsGmName = true;
-            saveDirectory = chooser.getSelectedFile();
+            boolean tryAgain = true;
+            while (tryAgain) {
+              chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                return;
+              }
+              if (chooser.getFileFilter() == tokenFilterGM) {
+                saveAsGmName = true;
+              }
+              saveDirectory = chooser.getSelectedFile();
+              var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+              var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+              if (saveDir.startsWith(installDir)) {
+                MapTool.showWarning("msg.warning.saveTokenToInstallDir");
+              } else {
+                tryAgain = false;
+              }
+            }
           }
 
           if (saveAsGmName) {
