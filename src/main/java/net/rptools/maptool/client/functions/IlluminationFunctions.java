@@ -16,9 +16,13 @@ package net.rptools.maptool.client.functions;
 
 import java.awt.geom.Point2D;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
+import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -50,13 +54,43 @@ public class IlluminationFunctions extends AbstractFunction {
 
   private int getIllumination(String functionName, List<Object> parameters) throws ParserException {
     FunctionUtil.blockUntrustedMacro(functionName);
-    FunctionUtil.checkNumberParam(functionName, parameters, 2, 3);
+    FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);
+
     final var x = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
     final var y = FunctionUtil.paramAsInteger(functionName, parameters, 1, false);
+    final var point = new Point2D.Double(x, y);
+
     final var renderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
 
-    PlayerView playerView = renderer.getPlayerView();
-    final var point = new Point2D.Double(x, y);
+    final PlayerView playerView;
+    if (parameters.size() < 4) {
+      // No tokens specified, use the current view.
+      playerView = renderer.getPlayerView();
+    } else {
+      // Tokens for the view passed as a JSON array.
+      final var jsonList =
+          JSONMacroFunctions.getInstance().asJsonElement(parameters.get(3).toString());
+      if (!jsonList.isJsonArray()) {
+        // Whoops, we need an array.
+        throw new ParserException(
+            I18N.getText("macro.function.general.argumentTypeA", functionName));
+      }
+      final var jsonArray = jsonList.getAsJsonArray();
+
+      final var tokens = new ArrayList<Token>();
+      for (final var element : jsonArray) {
+        final var identifier = JSONMacroFunctions.getInstance().jsonToScriptString(element);
+        final var token = renderer.getZone().resolveToken(identifier);
+        if (token == null) {
+          throw new ParserException(
+              I18N.getText("macro.function.general.unknownToken", functionName, identifier));
+        }
+
+        tokens.add(token);
+      }
+
+      playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole(), tokens);
+    }
 
     for (final var lumensLevel :
         renderer.getZoneView().getDisjointObscuredLumensLevels(playerView)) {
