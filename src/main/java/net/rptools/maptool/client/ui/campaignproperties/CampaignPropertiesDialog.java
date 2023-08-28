@@ -36,6 +36,7 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -904,7 +905,19 @@ public class CampaignPropertiesDialog extends JDialog {
               // END HACK
 
               JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
-              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
+              boolean tryAgain = true;
+              while (tryAgain) {
+                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                  return;
+                }
+                var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                if (saveDir.startsWith(installDir)) {
+                  MapTool.showWarning("msg.warning.savePropToInstallDir");
+                } else {
+                  tryAgain = false;
+                }
+              }
 
               File selectedFile = chooser.getSelectedFile();
               if (selectedFile.exists()) {
