@@ -880,6 +880,10 @@ public class ZoneRenderer extends JComponent
               ? zone.getOwnedTokensWithSight(MapTool.getPlayer())
               : zone.getPlayerTokensWithSight();
     }
+    if (selectedTokens == null || selectedTokens.isEmpty()) {
+      return new PlayerView(role);
+    }
+
     return new PlayerView(role, selectedTokens);
   }
 
