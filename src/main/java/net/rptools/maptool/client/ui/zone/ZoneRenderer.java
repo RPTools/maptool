@@ -1516,9 +1516,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderLumensOverlay:setTransform");
 
       timer.start("renderLumensOverlay:drawLumens");
-      // Lumens are ordered to be weak to strong. That works for us as we will draw the stronger
-      // areas overtop the weaker areas using `AlphaComposite.Src` to make sure the stronger one
-      // "wins".
       for (final var lumensLevel : disjointLumensLevels) {
         final var lumensStrength = lumensLevel.lumensStrength();
 
