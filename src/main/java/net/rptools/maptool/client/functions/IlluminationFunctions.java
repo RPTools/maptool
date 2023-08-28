@@ -22,6 +22,7 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.PlayerView;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -62,42 +63,7 @@ public class IlluminationFunctions extends AbstractFunction {
     final var point = new Point2D.Double(x, y);
 
     final var renderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 2);
-
-    final PlayerView playerView;
-    if (parameters.size() < 4) {
-      // No tokens specified, use the current view.
-      playerView = renderer.getPlayerView();
-    } else {
-      final var parameter = parameters.get(3);
-      if (parameter instanceof JsonNull) {
-        // Explicitly requesting without token view.
-        playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole());
-      } else {
-        // Tokens for the view passed as a JSON array.
-        final var jsonList =
-            JSONMacroFunctions.getInstance().asJsonElement(parameters.get(3).toString());
-        if (!jsonList.isJsonArray()) {
-          // Whoops, we need an array.
-          throw new ParserException(
-              I18N.getText("macro.function.general.argumentTypeA", functionName));
-        }
-        final var jsonArray = jsonList.getAsJsonArray();
-
-        final var tokens = new ArrayList<Token>();
-        for (final var element : jsonArray) {
-          final var identifier = JSONMacroFunctions.getInstance().jsonToScriptString(element);
-          final var token = renderer.getZone().resolveToken(identifier);
-          if (token == null) {
-            throw new ParserException(
-                I18N.getText("macro.function.general.unknownToken", functionName, identifier));
-          }
-
-          tokens.add(token);
-        }
-
-        playerView = new PlayerView(MapTool.getPlayer().getEffectiveRole(), tokens);
-      }
-    }
+    final var playerView = getPlayerView(functionName, renderer, parameters, 3);
 
     for (final var lumensLevel :
         renderer.getZoneView().getDisjointObscuredLumensLevels(playerView)) {
@@ -109,5 +75,54 @@ public class IlluminationFunctions extends AbstractFunction {
     }
 
     return 0;
+  }
+
+  /**
+   * Builds a player view for `getIllumination()`
+   *
+   * @param functionName
+   * @param renderer
+   * @param parameters
+   * @param tokenListIndex
+   * @return If the token list is not provided, the current view for the zone. If `json.null` is
+   *     provided, a non-token view. If a token ID list is provided, a token view containing the
+   *     identified tokens. is returned. If the token ID list is empty, a token view with no in it.
+   * @throws ParserException
+   */
+  private PlayerView getPlayerView(
+      String functionName, ZoneRenderer renderer, List<Object> parameters, int tokenListIndex)
+      throws ParserException {
+    if (parameters.size() <= tokenListIndex) {
+      return renderer.getPlayerView();
+    }
+
+    final var parameter = parameters.get(tokenListIndex);
+    if (parameter instanceof JsonNull) {
+      // Explicitly requesting without token view.
+      return new PlayerView(MapTool.getPlayer().getEffectiveRole());
+    }
+
+    // Tokens for the view passed as a JSON array.
+    final var jsonList =
+        JSONMacroFunctions.getInstance().asJsonElement(parameters.get(3).toString());
+    if (!jsonList.isJsonArray()) {
+      // Whoops, we need an array.
+      throw new ParserException(I18N.getText("macro.function.general.argumentTypeA", functionName));
+    }
+    final var jsonArray = jsonList.getAsJsonArray();
+
+    final var tokens = new ArrayList<Token>();
+    for (final var element : jsonArray) {
+      final var identifier = JSONMacroFunctions.getInstance().jsonToScriptString(element);
+      final var token = renderer.getZone().resolveToken(identifier);
+      if (token == null) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.unknownToken", functionName, identifier));
+      }
+
+      tokens.add(token);
+    }
+
+    return new PlayerView(MapTool.getPlayer().getEffectiveRole(), tokens);
   }
 }
