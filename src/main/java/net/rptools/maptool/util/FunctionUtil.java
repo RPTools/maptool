@@ -203,6 +203,9 @@ public class FunctionUtil {
     ZoneRenderer zoneRenderer;
     if (map == null) {
       zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+      if (zoneRenderer == null) {
+        throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+      }
     } else {
       zoneRenderer = getZoneRenderer(functionName, map);
     }
