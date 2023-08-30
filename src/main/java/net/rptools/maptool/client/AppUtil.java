@@ -203,6 +203,34 @@ public class AppUtil {
   }
 
   /**
+   * This function tries to determine the installation directory of the application. This can differ
+   * from the directory the application is running from as returned by {@link
+   * #getAppInstallLocation()}.
+   *
+   * @return the installation directory of the application.
+   */
+  public static Path getInstallDirectory() {
+    var path = Path.of(getAppInstallLocation());
+    if (MapTool.isDevelopment()) {
+      // remove build/classes/java
+      path = path.getParent().getParent().getParent().getParent();
+    } else {
+      while (path != null) {
+        if (path.getFileName().toString().matches("(?i).*maptool.*")) {
+          path = path.getParent();
+          break;
+        }
+        path = path.getParent();
+      }
+    }
+    if (path == null) {
+      return Path.of(getAppInstallLocation());
+    } else {
+      return path;
+    }
+  }
+
+  /**
    * Returns a File path representing the configuration file in the base directory that the
    * application is running from. e.g. C:\Users\Troll\AppData\Local\MapTool\app
    *

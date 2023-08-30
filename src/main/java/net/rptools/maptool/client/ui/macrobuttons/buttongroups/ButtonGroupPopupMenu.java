@@ -497,8 +497,18 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
       JFileChooser chooser = MapTool.getFrame().getSaveMacroSetFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile = chooser.getSelectedFile();
@@ -632,8 +642,18 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
 
       JFileChooser chooser = MapTool.getFrame().getSaveMacroSetFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile = chooser.getSelectedFile();
