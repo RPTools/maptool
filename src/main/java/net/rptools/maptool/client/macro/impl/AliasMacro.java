@@ -84,25 +84,28 @@ public class AliasMacro implements Macro {
         .append(I18N.getText("alias.descriptionHeader"))
         .append("</b></td></tr>");
 
-    Map<String, MacroDetails> aliasMap = MacroManager.getAliasDetails();
+    Map<String, List<MacroDetails>> aliasMap = MacroManager.getAliasDetails();
     List<String> nameList = new ArrayList<String>(aliasMap.keySet());
     nameList.stream()
         .sorted()
         .filter(filter)
         .forEach(
             name -> {
-              MacroDetails mdet = aliasMap.get(name);
+              var mdet = aliasMap.get(name);
               if (mdet != null) {
-                String command = mdet.command().replace("<", "&lt;").replace(">", "&gt;");
-                String desc = mdet.description().replace("<", "&lt;").replace(">", "&gt;");
-                builder
-                    .append("<tr><td>")
-                    .append(name)
-                    .append("</td><td>")
-                    .append(command)
-                    .append("</td><td>")
-                    .append(desc)
-                    .append("</td></tr>");
+                mdet.forEach(
+                    d -> {
+                      String command = d.command().replace("<", "&lt;").replace(">", "&gt;");
+                      String desc = d.description().replace("<", "&lt;").replace(">", "&gt;");
+                      builder
+                          .append("<tr><td>")
+                          .append(name)
+                          .append("</td><td>")
+                          .append(command)
+                          .append("</td><td>")
+                          .append(desc)
+                          .append("</td></tr>");
+                    });
               }
             });
     builder.append("</table>");
@@ -111,7 +114,8 @@ public class AliasMacro implements Macro {
 
   private void handlePrintAddOnAliases() {
     Map<String, String> addons =
-        MacroManager.getAliasDetails().values().stream()
+        MacroManager.getAliasDetails().entrySet().stream()
+            .flatMap(e -> e.getValue().stream())
             .filter(mdet -> mdet.scope() == Scope.ADDON)
             .map(mdet -> new Pair<>(mdet.addOnNamespace(), mdet.addOnName()))
             .distinct()
@@ -119,9 +123,13 @@ public class AliasMacro implements Macro {
     addons.forEach(
         (addOnNamespace, addOnName) ->
             handlePrintAliases(
-                I18N.getText("alias.addon.title", addOnName),
+                I18N.getText("alias.addon.title", addOnName, addOnNamespace),
                 name -> {
-                  var mdet = MacroManager.getAliasDetails(name);
+                  var mdet =
+                      MacroManager.getAliasDetails(name).stream()
+                          .filter(m -> m.addOnNamespace().equalsIgnoreCase(addOnNamespace))
+                          .findFirst()
+                          .orElse(null);
                   return mdet != null
                       && mdet.scope() == Scope.ADDON
                       && mdet.addOnNamespace().equals(addOnNamespace);
