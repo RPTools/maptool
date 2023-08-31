@@ -183,7 +183,7 @@ public final class Illumination {
    * <p>This is useful for rendering the lumens levels, so that well-defined boundaries exist
    * between each lumens level.
    *
-   * @return The obscured lumens levels.
+   * @return The obscured lumens levels, ordered from strong to weak lumens.
    */
   public @Nonnull List<LumensLevel> getDisjointObscuredLumensLevels() {
     if (disjointObscuredLumensLevels == null) {

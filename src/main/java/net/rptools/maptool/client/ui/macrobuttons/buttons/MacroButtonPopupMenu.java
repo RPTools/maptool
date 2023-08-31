@@ -329,8 +329,18 @@ public class MacroButtonPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent event) {
       JFileChooser chooser = MapTool.getFrame().getSaveMacroFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile =

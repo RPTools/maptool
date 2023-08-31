@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui;
 import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DefaultDockableHolder;
 import com.jidesoft.docking.DockableFrame;
+import com.jidesoft.docking.DockingManager;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -71,6 +72,7 @@ import net.rptools.maptool.client.ui.assetpanel.AssetDirectory;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
+import net.rptools.maptool.client.ui.docking.MapToolDockingManager;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelPopupMenu;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeCellRenderer;
 import net.rptools.maptool.client.ui.drawpanel.DrawPanelTreeModel;
@@ -617,6 +619,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public DockableFrame getFrame(MTFrame frame) {
     return frameMap.get(frame);
+  }
+
+  @Override
+  protected DockingManager createDockingManager(Container container) {
+    return new MapToolDockingManager(this, container);
   }
 
   private void initializeFrames() {
