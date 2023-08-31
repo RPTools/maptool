@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.campaignproperties;
 
 import java.io.Serial;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -174,6 +175,28 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     var properties = tokenTypeMap.get(tokenType);
     properties.remove(selectedRow);
     fireTableRowsDeleted(selectedRow, selectedRow);
+  }
+
+  public void movePropertyUp(int selectedRow) {
+    var properties = tokenTypeMap.get(tokenType);
+    if (selectedRow <= 0 || selectedRow >= properties.size()) {
+      // Either already at the top or a nonsense index.
+      throw new ArrayIndexOutOfBoundsException(selectedRow);
+    }
+
+    Collections.swap(properties, selectedRow - 1, selectedRow);
+    fireTableRowsUpdated(selectedRow - 1, selectedRow);
+  }
+
+  public void movePropertyDown(int selectedRow) {
+    var properties = tokenTypeMap.get(tokenType);
+    if (selectedRow < 0 || selectedRow >= properties.size() - 1) {
+      // Either already at the bottom or a nonsense index.
+      throw new ArrayIndexOutOfBoundsException(selectedRow);
+    }
+
+    Collections.swap(properties, selectedRow, selectedRow + 1);
+    fireTableRowsUpdated(selectedRow, selectedRow + 1);
   }
 
   /**
