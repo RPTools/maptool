@@ -63,7 +63,9 @@ public class MapFunctions extends AbstractFunction {
         "copyMap",
         "createMap",
         "getMapName",
-        "setMapSelectButton");
+        "setMapSelectButton",
+        "getMapVision",
+        "setMapVision");
   }
 
   public static MapFunctions getInstance() {
@@ -397,6 +399,29 @@ public class MapFunctions extends AbstractFunction {
       return (MapTool.getFrame().getToolbarPanel().getMapselect().isVisible()
           ? BigDecimal.ONE
           : BigDecimal.ZERO);
+    } else if ("setMapVision".equalsIgnoreCase(functionName)) {
+      FunctionUtil.blockUntrustedMacro(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
+      Zone currentZR = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+      if (parameters.get(0).toString().equalsIgnoreCase("off")) {
+        MapTool.serverCommand().setVisionType(currentZR.getId(), Zone.VisionType.OFF);
+      } else if (parameters.get(0).toString().equalsIgnoreCase("day")) {
+        MapTool.serverCommand().setVisionType(currentZR.getId(), Zone.VisionType.DAY);
+      } else if (parameters.get(0).toString().equalsIgnoreCase("night")) {
+        MapTool.serverCommand().setVisionType(currentZR.getId(), Zone.VisionType.NIGHT);
+      }
+      /*  else if (!parameters.get(0).toString().isBlank()) {
+        throw new ParameterException(
+            I18N.getText("macro.function.general.argumentTypeInvalid", functionName));
+      }  */
+      if (currentZR == null) {
+        throw new ParserException(I18N.getText("macro.function.map.none", functionName));
+      }
+      return "";
+    } else if ("getMapVision".equalsIgnoreCase(functionName)) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 0);
+      ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+      return currentZR.getZone().getVisionType().toString();
     }
 
     throw new ParserException(I18N.getText("macro.function.general.unknownFunction", functionName));
