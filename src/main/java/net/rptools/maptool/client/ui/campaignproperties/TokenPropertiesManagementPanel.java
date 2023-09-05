@@ -104,6 +104,14 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     return (JButton) getComponent("typeDeleteButton");
   }
 
+  public JButton getPropertyMoveUpButton() {
+    return (JButton) getComponent("propertyMoveUpButton");
+  }
+
+  public JButton getPropertyMoveDownButton() {
+    return (JButton) getComponent("propertyMoveDownButton");
+  }
+
   public JButton getPropertyAddButton() {
     return (JButton) getComponent("propertyAddButton");
   }
@@ -219,6 +227,40 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     button.setEnabled(false);
   }
 
+  public void initPropertyMoveUpButton() {
+    var button = getPropertyMoveUpButton();
+    button.addActionListener(
+        l -> {
+          var selectedRow = getTokenPropertiesTable().getSelectedRow();
+          if (selectedRow <= 0) {
+            return;
+          }
+
+          var model = getTokenPropertiesTableModel();
+          model.movePropertyUp(selectedRow);
+          --selectedRow;
+          getTokenPropertiesTable().setRowSelectionInterval(selectedRow, selectedRow);
+        });
+    button.setEnabled(false);
+  }
+
+  public void initPropertyMoveDownButton() {
+    var button = getPropertyMoveDownButton();
+    button.addActionListener(
+        l -> {
+          var selectedRow = getTokenPropertiesTable().getSelectedRow();
+          if (selectedRow < 0 || selectedRow >= getTokenPropertiesTable().getRowCount() - 1) {
+            return;
+          }
+
+          var model = getTokenPropertiesTableModel();
+          model.movePropertyDown(selectedRow);
+          ++selectedRow;
+          getTokenPropertiesTable().setRowSelectionInterval(selectedRow, selectedRow);
+        });
+    button.setEnabled(false);
+  }
+
   public void initPropertyAddButton() {
     var button = getPropertyAddButton();
     button.addActionListener(
@@ -256,8 +298,17 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                 return;
               }
 
-              var button = getPropertyDeleteButton();
-              button.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
+              var deleteButton = getPropertyDeleteButton();
+              deleteButton.setEnabled(getTokenPropertiesTable().getSelectedRow() >= 0);
+
+              var moveUpButton = getPropertyMoveUpButton();
+              moveUpButton.setEnabled(getTokenPropertiesTable().getSelectedRow() > 0);
+
+              var moveDownButton = getPropertyMoveDownButton();
+              // Note: this works even if selection is empty (getSelectedRow() == -1).
+              moveDownButton.setEnabled(
+                  getTokenPropertiesTable().getSelectedRow()
+                      < getTokenPropertiesTable().getRowCount() - 1);
             });
     propertyTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
     propertyTable.getColumnModel().getColumn(0).setPreferredWidth(80);

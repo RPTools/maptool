@@ -34,13 +34,13 @@ public class RessourceManager {
       new HashMap<>() {
         {
           // This icons don't exist in classic.
-          put(Icons.ACTION_EXPORT, "");
-          put(Icons.ACTION_IMPORT, "");
-          put(Icons.PROPERTIES_TABLE_ALPHABETIC, "");
-          put(Icons.PROPERTIES_TABLE_CATEGORIES, "");
-          put(Icons.PROPERTIES_TABLE_COLLAPSE, "");
-          put(Icons.PROPERTIES_TABLE_EXPAND, "");
-          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, "");
+          put(Icons.ACTION_EXPORT, null);
+          put(Icons.ACTION_IMPORT, null);
+          put(Icons.PROPERTIES_TABLE_ALPHABETIC, null);
+          put(Icons.PROPERTIES_TABLE_CATEGORIES, null);
+          put(Icons.PROPERTIES_TABLE_COLLAPSE, null);
+          put(Icons.PROPERTIES_TABLE_EXPAND, null);
+          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, null);
 
           put(Icons.ACTION_CANCEL, IMAGE_DIR + "cancel_sm.png");
           put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
@@ -509,6 +509,8 @@ public class RessourceManager {
     for (var map : maps) {
       if (map.containsKey(key)) {
         ressourcePath = map.get(key);
+      }
+      if (ressourcePath != null) {
         break;
       }
     }
@@ -544,7 +546,11 @@ public class RessourceManager {
 
   public static void checkMissingFiles() {
     String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
-    for (String value : Set.copyOf(images.values())) {
+    for (String value : images.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
       var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
 
@@ -552,14 +558,22 @@ public class RessourceManager {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(classicIcons.values())) {
+    for (String value : classicIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(rodIcons.values())) {
+    for (String value : rodIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {

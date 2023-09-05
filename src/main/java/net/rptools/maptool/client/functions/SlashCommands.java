@@ -87,7 +87,7 @@ public class SlashCommands extends AbstractFunction {
    */
   private Object clearSlashAlias(List<Object> args) throws ParserException {
     FunctionUtil.checkNumberParam("server.clearAlias", args, 1, 1);
-    MacroManager.removeAlias(args.get(0).toString());
+    MacroManager.removeAlias(args.get(0).toString(), Scope.CAMPAIGN);
     return "";
   }
 }

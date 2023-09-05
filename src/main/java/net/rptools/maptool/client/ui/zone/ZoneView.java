@@ -549,7 +549,7 @@ public class ZoneView {
    *
    * @param view
    * @return The various lumens levels, with any stronger lumens areas being subtracted from weaker
-   *     lumens areas.
+   *     lumens areas and ordered from strong to weak lumens.
    */
   public List<LumensLevel> getDisjointObscuredLumensLevels(PlayerView view) {
     final var illumination = getIllumination(view);
