@@ -150,9 +150,20 @@ public class MacroManager {
    * This method is used to remove an alias.
    *
    * @param alias The alias to remove.
+   * @param scope The scope of the alias.
    */
-  public static void removeAlias(String alias) {
-    aliasMap.remove(alias);
+  public static boolean removeAlias(String alias, Scope scope) {
+    var aliases = aliasMap.get(alias);
+    if (aliases == null || aliases.isEmpty()) {
+      return false;
+    }
+    var toRemove =
+        aliases.stream().filter(m -> m.scope() == scope && m.name().equals(alias)).toList();
+    if (toRemove.isEmpty()) {
+      return false;
+    }
+    aliasMap.get(alias).removeAll(toRemove);
+    return true;
   }
 
   /** This method is used to remove all aliases. */
@@ -333,7 +344,7 @@ public class MacroManager {
         }
 
         // Is it an alias ?
-        var mdet = aliasMap.get(key);
+        var mdet = findAlias(key);
         if (mdet == null || mdet.isEmpty()) {
           executeMacro(context, UNDEFINED_MACRO, command, macroExecutionContext);
           return;
@@ -341,7 +352,6 @@ public class MacroManager {
 
         if (mdet.size() > 1) {
           printAmbiguousAliasMessage(key);
-          MapTool.addLocalMessage(I18N.getText("macromanager.ambiguous", key));
           return;
         }
         String alias = mdet.get(0).command();
@@ -373,28 +383,48 @@ public class MacroManager {
     MapTool.addLocalMessage(I18N.getText("macromanager.tooManyResolves", command));
   }
 
+  private static List<MacroDetails> findAlias(String key) {
+    // First check for a complete match
+    if (aliasMap.containsKey(key)) {
+      return aliasMap.get(key);
+    }
+
+    // Next try separating the namespace from the name
+    var ret = new ArrayList<MacroDetails>();
+    var split = key.split(":");
+    if (split.length == 2) {
+      var namespace = split[0];
+      var name = split[1];
+      for (var entry : aliasMap.entrySet()) {
+        for (var details : entry.getValue()) {
+          if (details.scope() == Scope.ADDON
+              && namespace.equalsIgnoreCase(details.addOnNamespace())
+              && name.equalsIgnoreCase(details.name())) {
+            ret.add(details);
+          }
+        }
+      }
+    }
+    return ret;
+  }
+
   private static void printAmbiguousAliasMessage(String alias) {
     MapTool.addLocalMessage(I18N.getText("macromanager.ambiguous", alias));
     var def = aliasMap.get(alias);
     var sb = new StringBuilder();
-    sb.append("<li>");
+    sb.append("<ul>");
     for (var details : def) {
       switch (details.scope()) {
-        case CLIENT -> sb.append("<ul>/:").append(details.command()).append("</ul>");
-        case ADDON -> sb.append("<ul>/")
+        case CLIENT -> sb.append("<li>/:").append(details.command()).append("</li>");
+        case ADDON -> sb.append("<li>/")
             .append(details.addOnNamespace())
             .append(":")
             .append(details.name())
-            .append("</ul>");
+            .append("</li>");
         case CAMPAIGN -> {} // Do nothing
       }
-      sb.append("<ul>")
-          .append(details.scope())
-          .append(":")
-          .append(details.command())
-          .append("</ul>");
     }
-    sb.append("</li>");
+    sb.append("</l>");
     MapTool.addLocalMessage(sb.toString());
   }
 
@@ -537,11 +567,22 @@ public class MacroManager {
 
   /** Clear all campaign scoped aliases. */
   public static void removeCampaignAliases() {
+    // First gather a list of what we want to remove, so we don't get a concurrent modification
+    var toRemove = new HashMap<String, List<MacroDetails>>();
     for (var entry : aliasMap.entrySet()) {
       for (var details : entry.getValue()) {
         if (details.scope() == Scope.CAMPAIGN) {
-          aliasMap.get(entry.getKey()).remove(details);
+          toRemove.putIfAbsent(entry.getKey(), new ArrayList<>());
+          var list = toRemove.get(entry.getKey());
+          list.add(details);
         }
+      }
+    }
+
+    // Now remove them
+    for (var entry : toRemove.entrySet()) {
+      for (var details : entry.getValue()) {
+        aliasMap.get(entry.getKey()).remove(details);
       }
     }
   }
@@ -552,12 +593,23 @@ public class MacroManager {
    * @param namespace The namespace to clear the aliases for.
    */
   public static void removeAddOnAliases(String namespace) {
+    // First gather a list of what we want to remove, so we don't get a concurrent modification
+    var toRemove = new HashMap<String, List<MacroDetails>>();
     for (var entry : aliasMap.entrySet()) {
       for (var details : entry.getValue()) {
         if (details.scope() == Scope.ADDON
             && namespace.equalsIgnoreCase(details.addOnNamespace())) {
-          aliasMap.get(entry.getKey()).remove(details);
+          toRemove.putIfAbsent(entry.getKey(), new ArrayList<>());
+          var list = toRemove.get(entry.getKey());
+          list.add(details);
         }
+      }
+    }
+
+    // Now remove them
+    for (var entry : toRemove.entrySet()) {
+      for (var details : entry.getValue()) {
+        aliasMap.get(entry.getKey()).remove(details);
       }
     }
   }

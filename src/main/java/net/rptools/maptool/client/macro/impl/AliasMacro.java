@@ -14,11 +14,7 @@
  */
 package net.rptools.maptool.client.macro.impl;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.Macro;
@@ -62,15 +58,19 @@ public class AliasMacro implements Macro {
       name = macro.substring(0, split);
       value = macro.substring(split).trim();
     }
-    MacroManager.setAlias(name, value, Scope.CLIENT, "");
     if (value != null) {
+      MacroManager.setAlias(name, value, Scope.CLIENT, "");
       MapTool.addLocalMessage(I18N.getText("alias.added", name));
     } else {
-      MapTool.addLocalMessage(I18N.getText("alias.removed", name));
+      if (MacroManager.removeAlias(name, Scope.CLIENT)) {
+        MapTool.addLocalMessage(I18N.getText("alias.removed", name));
+      } else {
+        MapTool.addLocalMessage(I18N.getText("alias.notFound", name));
+      }
     }
   }
 
-  private void handlePrintAliases(String title, Predicate<String> filter) {
+  private void handlePrintAliases(String title, List<MacroDetails> macros) {
     StringBuilder builder = new StringBuilder();
     builder.append("<b>").append(title).append("</b><br/>");
     builder.append("<table border='1'>");
@@ -84,65 +84,62 @@ public class AliasMacro implements Macro {
         .append(I18N.getText("alias.descriptionHeader"))
         .append("</b></td></tr>");
 
-    Map<String, List<MacroDetails>> aliasMap = MacroManager.getAliasDetails();
-    List<String> nameList = new ArrayList<String>(aliasMap.keySet());
-    nameList.stream()
-        .sorted()
-        .filter(filter)
-        .forEach(
-            name -> {
-              var mdet = aliasMap.get(name);
-              if (mdet != null) {
-                mdet.forEach(
-                    d -> {
-                      String command = d.command().replace("<", "&lt;").replace(">", "&gt;");
-                      String desc = d.description().replace("<", "&lt;").replace(">", "&gt;");
-                      builder
-                          .append("<tr><td>")
-                          .append(name)
-                          .append("</td><td>")
-                          .append(command)
-                          .append("</td><td>")
-                          .append(desc)
-                          .append("</td></tr>");
-                    });
-              }
-            });
+    macros.forEach(
+        d -> {
+          String command = d.command().replace("<", "&lt;").replace(">", "&gt;");
+          String desc = d.description().replace("<", "&lt;").replace(">", "&gt;");
+          builder
+              .append("<tr><td>")
+              .append(d.name())
+              .append("</td><td>")
+              .append(command)
+              .append("</td><td>")
+              .append(desc)
+              .append("</td></tr>");
+        });
     builder.append("</table>");
     MapTool.addLocalMessage(builder.toString());
   }
 
   private void handlePrintAddOnAliases() {
-    Map<String, String> addons =
-        MacroManager.getAliasDetails().entrySet().stream()
-            .flatMap(e -> e.getValue().stream())
-            .filter(mdet -> mdet.scope() == Scope.ADDON)
-            .map(mdet -> new Pair<>(mdet.addOnNamespace(), mdet.addOnName()))
+    var addons =
+        MacroManager.getAliasDetails().values().stream()
+            .flatMap(List::stream)
+            .filter(m -> m.scope() == Scope.ADDON)
+            .map(m -> new Pair<>(m.addOnName(), m.addOnNamespace()))
             .distinct()
-            .collect(Collectors.toMap(Pair::getValue0, Pair::getValue1));
+            .sorted((a, b) -> a.getValue0().compareToIgnoreCase(b.getValue0()))
+            .toList();
+
     addons.forEach(
-        (addOnNamespace, addOnName) ->
-            handlePrintAliases(
-                I18N.getText("alias.addon.title", addOnName, addOnNamespace),
-                name -> {
-                  var mdet =
-                      MacroManager.getAliasDetails(name).stream()
-                          .filter(m -> m.addOnNamespace().equalsIgnoreCase(addOnNamespace))
-                          .findFirst()
-                          .orElse(null);
-                  return mdet != null
-                      && mdet.scope() == Scope.ADDON
-                      && mdet.addOnNamespace().equals(addOnNamespace);
-                }));
+        p -> {
+          var addOnName = p.getValue0();
+          var addOnNamespace = p.getValue1();
+          handlePrintAliases(
+              I18N.getText("alias.addon.title", addOnName, addOnNamespace),
+              MacroManager.getAliasDetails().values().stream()
+                  .flatMap(List::stream)
+                  .filter(m -> m.scope() == Scope.ADDON)
+                  .filter(m -> m.addOnNamespace().equals(addOnNamespace))
+                  .sorted((a, b) -> a.name().compareToIgnoreCase(b.name()))
+                  .distinct()
+                  .toList());
+        });
   }
 
   private void handlePrintAliases() {
     handlePrintAliases(
         I18N.getText("alias.client.title"),
-        name -> MacroManager.getAliasScope(name) == Scope.CLIENT);
+        MacroManager.getAliasDetails().values().stream()
+            .flatMap(List::stream)
+            .filter(m -> m.scope() == Scope.CLIENT)
+            .toList());
     handlePrintAliases(
         I18N.getText("alias.campaign.title"),
-        name -> MacroManager.getAliasScope(name) == Scope.CAMPAIGN);
+        MacroManager.getAliasDetails().values().stream()
+            .flatMap(List::stream)
+            .filter(m -> m.scope() == Scope.CAMPAIGN)
+            .toList());
     handlePrintAddOnAliases();
   }
 }
