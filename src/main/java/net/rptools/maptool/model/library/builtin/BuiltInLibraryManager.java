@@ -25,24 +25,19 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.Library;
-import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.library.LibraryType;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 
 /** Class for managing {@link AddOnLibrary} objects. */
 public class BuiltInLibraryManager {
 
-
   /** "Protocol" for built in add-on libraries. */
   private static final String LIBRARY_PROTOCOL = "lib";
 
   /** The add-on libraries that are registered. */
   private final Map<String, Library> namespaceLibraryMap = new ConcurrentHashMap<>();
-
 
   public BuiltInLibraryManager() {
     registerLibrary(new MapToolBuiltInLibrary());
@@ -146,7 +141,9 @@ public class BuiltInLibraryManager {
     try (var fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
       var resourcePath = fs.getPath(ClassPathAddOnLibrary.BUILTIN_LIB_CLASSPATH_DIR);
       var libs =
-          Files.walk(resourcePath, 1).filter(p -> p.toString().endsWith(AddOnLibraryImporter.DROP_IN_LIBRARY_EXTENSION)).toList();
+          Files.walk(resourcePath, 1)
+              .filter(p -> p.toString().endsWith(AddOnLibraryImporter.DROP_IN_LIBRARY_EXTENSION))
+              .toList();
 
       libs.stream().forEach(System.out::println);
       var importer = new AddOnLibraryImporter();

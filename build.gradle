@@ -499,7 +499,7 @@ dependencies {
 
 
     // Built In Add-on Libraries
-    implementation 'net.rptools.maptool.addon:maptool-builtin-addons:1.1'
+    implementation 'net.rptools.maptool.addon:maptool-builtin-addons:1.2'
 }
 
 

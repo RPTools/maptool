@@ -39,6 +39,7 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
 
   /**
    * Creates a new instance of {@link ClassPathAddOnLibrary}.
+   *
    * @param resourceFilePath the resource path for the library.
    * @param addOnLibrary the add-on library that was loaded.
    */
@@ -47,9 +48,7 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
     this.addOnLibrary = addOnLibrary;
   }
 
-  /**
-   * The directory on the class path for the built in libraries.
-   */
+  /** The directory on the class path for the built in libraries. */
   public static final String BUILTIN_LIB_CLASSPATH_DIR = "net/rptools/maptool/libraries/builtin";
 
   @Override
