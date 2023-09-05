@@ -31,6 +31,7 @@ import java.util.stream.Stream;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -377,6 +378,11 @@ class LibraryToken implements Library {
   @Override
   public void cleanup() {
     // No cleanup needed
+  }
+
+  @Override
+  public Set<MacroDetails> getSlashCommands() {
+    return Set.of();
   }
 
   /**

@@ -109,7 +109,8 @@ public class MapToolExpressionParser extends ExpressionParser {
               new PlayerFunctions(),
               new LibraryFunctions(),
               new DataFunctions(),
-              new ServerFunctions())
+              new ServerFunctions(),
+              new SlashCommands())
           .collect(Collectors.toList());
 
   public MapToolExpressionParser() {
