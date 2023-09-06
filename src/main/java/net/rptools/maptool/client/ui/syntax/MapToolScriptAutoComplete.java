@@ -14,16 +14,13 @@
  */
 package net.rptools.maptool.client.ui.syntax;
 
-import java.net.URL;
 import java.util.ResourceBundle;
-import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.AdditionalFunctionDescription;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang.StringUtils;
 import org.apache.logging.log4j.LogManager;
@@ -59,15 +56,6 @@ public class MapToolScriptAutoComplete {
               macro,
               htmlTagRemover.remove(getShortDescription(macro)),
               getSummary(macro)));
-
-    /*
-     * Protocol handlers, we need to register lib: protocol handler so that the UDF auto-complete
-     * doesn't pause with a dialog box containing an error message during tests as now tests
-     * wont run without any add-on loaded
-     */
-    RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
-    factory.registerProtocol("lib", new LibraryURLStreamHandler());
-    URL.setURLStreamHandlerFactory(factory);
 
     // Add UDFs
     UserDefinedMacroFunctions udfManager = UserDefinedMacroFunctions.getInstance();
