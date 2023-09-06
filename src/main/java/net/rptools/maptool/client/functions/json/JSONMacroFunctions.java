@@ -18,6 +18,7 @@ import com.google.gson.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import java.math.BigDecimal;
@@ -886,7 +887,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
