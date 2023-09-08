@@ -207,11 +207,17 @@ public class ExpressionParser {
         new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
 
-        // SW FFG
-        new String[] {"\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)\\b", "swffg('$1')"},
+        // SW Genesys
+        new String[] {"\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)\\b", "swgenesys('$1')"},
+        new String[] {"\\bsw#details\\b", "swgenesysLastDetails()"},
+        new String[] {"\\bsw#rolls\\b", "swgenesysLastRolls()"},
+        new String[] {"\\bsw#grouped\\b", "swgenesysLastGrouped()"},
 
-        // FFG
-        new String[] {"\\bffg#(([bBsSaAdDpPcC]\\d+)+)\\b", "ffg('$1')"},
+        // Genesys
+        new String[] {"\\bgs#(([bBsSaAdDpPcC]\\d+)+)\\b", "genesys('$1')"},
+        new String[] {"\\bgs#details\\b", "genesysLastDetails()"},
+        new String[] {"\\bgs#rolls\\b", "genesysLastRolls()"},
+        new String[] {"\\bgs#grouped\\b", "genesysLastGrouped()"},
       };
 
   private final Parser parser;
