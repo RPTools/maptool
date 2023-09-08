@@ -21,6 +21,7 @@ import net.rptools.dicelib.expression.function.DropRoll;
 import net.rptools.dicelib.expression.function.ExplodeDice;
 import net.rptools.dicelib.expression.function.ExplodingSuccessDice;
 import net.rptools.dicelib.expression.function.FudgeRoll;
+import net.rptools.dicelib.expression.function.GeneSysDice;
 import net.rptools.dicelib.expression.function.HeroKillingRoll;
 import net.rptools.dicelib.expression.function.HeroRoll;
 import net.rptools.dicelib.expression.function.If;
@@ -205,6 +206,12 @@ public class ExpressionParser {
         new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
         new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
+
+        // SW FFG
+        new String[] {"\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)\\b", "swffg('$1')"},
+
+        // FFG
+        new String[] {"\\bffg#(([bBsSaAdDpPcC]\\d+)+)\\b", "ffg('$1')"},
       };
 
   private final Parser parser;
@@ -238,6 +245,7 @@ public class ExpressionParser {
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
     parser.addFunction(new ArsMagicaStress());
+    parser.addFunction(new GeneSysDice());
 
     parser.addFunction(new If());
 
