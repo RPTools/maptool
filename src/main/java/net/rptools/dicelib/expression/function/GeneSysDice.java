@@ -20,8 +20,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.StreamSupport;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -37,39 +39,39 @@ public class GeneSysDice extends AbstractFunction {
   /** Enumeration of the possible results of a die roll. */
   enum ResultType {
     /** A single success. */
-    SUCCESS(1, 0, 0, 0, 0, 0, 0, 0, "s"),
+    SUCCESS(1, 0, 0, 0, 0, 0, 0, 0, "s", 1),
     /** A single failure. */
-    FAILURE(0, 1, 0, 0, 0, 0, 0, 0, "f"),
+    FAILURE(0, 1, 0, 0, 0, 0, 0, 0, "f", 2),
     /** A single advantage. */
-    ADVANTAGE(0, 0, 1, 0, 0, 0, 0, 0, "a"),
+    ADVANTAGE(0, 0, 1, 0, 0, 0, 0, 0, "a", 3),
     /** A single threat. */
-    THREAT(0, 0, 0, 1, 0, 0, 0, 0, "h"),
+    THREAT(0, 0, 0, 1, 0, 0, 0, 0, "h", 4),
     /** A single triumph. */
-    TRIUMPH(1, 0, 0, 0, 1, 0, 0, 0, "t"),
+    TRIUMPH(1, 0, 0, 0, 1, 0, 0, 0, "t", 5),
     /** A single despair. */
-    DESPAIR(0, 1, 0, 0, 0, 1, 0, 0, "d"),
+    DESPAIR(0, 1, 0, 0, 0, 1, 0, 0, "d", 6),
     /* A single light side point. */
-    LIGHT(0, 0, 0, 0, 0, 0, 1, 0, "Z"),
+    LIGHT(0, 0, 0, 0, 0, 0, 1, 0, "Z", 7),
     /** A single dark side point. */
-    DARK(0, 0, 0, 0, 0, 0, 0, 1, "z"),
+    DARK(0, 0, 0, 0, 0, 0, 0, 1, "z", 8),
     /** No result. */
-    NONE(0, 0, 0, 0, 0, 0, 0, 0, " "),
+    NONE(0, 0, 0, 0, 0, 0, 0, 0, " ", 99),
     /** A single success and a single advantage. */
-    SUCCESS_ADVANTAGE(1, 0, 1, 0, 0, 0, 0, 0, "sa"),
+    SUCCESS_ADVANTAGE(1, 0, 1, 0, 0, 0, 0, 0, "sa", 99),
     /** Two Advantages. */
-    ADVANTAGE_ADVANTAGE(0, 0, 2, 0, 0, 0, 0, 0, "aa"),
+    ADVANTAGE_ADVANTAGE(0, 0, 2, 0, 0, 0, 0, 0, "aa", 99),
     /** Two Successes. */
-    SUCCESS_SUCCESS(2, 0, 0, 0, 0, 0, 0, 0, "ss"),
+    SUCCESS_SUCCESS(2, 0, 0, 0, 0, 0, 0, 0, "ss", 99),
     /* A single failure and a single threat. */
-    FAILURE_THREAT(0, 1, 0, 1, 0, 0, 0, 0, "fh"),
+    FAILURE_THREAT(0, 1, 0, 1, 0, 0, 0, 0, "fh", 99),
     /** Two Failures. */
-    FAILURE_FAILURE(0, 2, 0, 0, 0, 0, 0, 0, "ff"),
+    FAILURE_FAILURE(0, 2, 0, 0, 0, 0, 0, 0, "ff", 99),
     /** Two Threats. */
-    THREAT_THREAT(0, 0, 0, 2, 0, 0, 0, 0, "hh"),
+    THREAT_THREAT(0, 0, 0, 2, 0, 0, 0, 0, "hh", 99),
     /** Two Light Side Points. */
-    LIGHT_LIGHT(0, 0, 0, 0, 0, 0, 2, 0, "ZZ"),
+    LIGHT_LIGHT(0, 0, 0, 0, 0, 0, 2, 0, "ZZ", 99),
     /** Two Dark Side Points. */
-    DARK_DARK(0, 0, 0, 0, 0, 0, 0, 2, "zz");
+    DARK_DARK(0, 0, 0, 0, 0, 0, 0, 2, "zz", 99);
 
     /** The number of successes this result represents. */
     private final int success;
@@ -91,6 +93,9 @@ public class GeneSysDice extends AbstractFunction {
     /** The font characters that represent this result. */
     private final String fontCharacters;
 
+    /** The sort order of the result when grouped. */
+    private final int groupSort;
+
     /**
      * Constructor.
      *
@@ -103,6 +108,7 @@ public class GeneSysDice extends AbstractFunction {
      * @param light the number of light side points this result represents.
      * @param dark the number of dark side points this result represents.
      * @param fontCharacters the font characters that represent this result.
+     * @param groupSort the sort order of the result when grouped.
      */
     ResultType(
         int success,
@@ -113,7 +119,8 @@ public class GeneSysDice extends AbstractFunction {
         int despair,
         int light,
         int dark,
-        String fontCharacters) {
+        String fontCharacters,
+        int groupSort) {
       this.success = success;
       this.failure = failure;
       this.advantage = advantage;
@@ -123,6 +130,7 @@ public class GeneSysDice extends AbstractFunction {
       this.light = light;
       this.dark = dark;
       this.fontCharacters = fontCharacters;
+      this.groupSort = groupSort;
     }
 
     /**
@@ -195,6 +203,15 @@ public class GeneSysDice extends AbstractFunction {
      */
     public int getDark() {
       return dark;
+    }
+
+    /**
+     * Get the font characters that represent this result.
+     *
+     * @return the font characters that represent this result.
+     */
+    public int getGroupSort() {
+      return groupSort;
     }
   }
 
@@ -370,6 +387,34 @@ public class GeneSysDice extends AbstractFunction {
     }
   }
 
+  /** Enumeration of the possible options for the dice roll. */
+  private enum Options {
+    /** Group the rolls by die type. */
+    FORMAT_GROUP_DICE("d"),
+    /** Group the rolls by result. */
+    FORMAT_GROUP_RESULTS("g"),
+    /** print out the rolls in expanded format. */
+    EXPANDED_FORMAT("e"),
+    /** Return the results as JSON. */
+    FORMAT_JSON("j");
+
+    /** The string used to represent this option. */
+    private final String optionString;
+
+    Options(String optionString) {
+      this.optionString = optionString;
+    }
+
+    /**
+     * Get the string used to represent this option.
+     *
+     * @return the string used to represent this option.
+     */
+    public String getOptionString() {
+      return optionString;
+    }
+  }
+
   /** Map of font names for the different systems. */
   private static final Map<String, String> GS_FONT_NAME_MAP =
       Map.of("swgenesys", "EotE Symbol", "genesys", "Genesys Glyphs and Dice");
@@ -380,18 +425,7 @@ public class GeneSysDice extends AbstractFunction {
 
   /** Constructor. */
   public GeneSysDice() {
-    super(
-        0,
-        1,
-        false,
-        "swgenesys",
-        "genesys",
-        "swgenesyslastdetails",
-        "genesyslastdetails",
-        "swgenesyslastrolls",
-        "genesyslastrolls",
-        "swgenesyslastgrouped",
-        "genesyslastgrouped");
+    super(1, 2, false, "swgenesys", "genesys", "swgenesyslast", "genesyslast");
   }
 
   @Override
@@ -399,17 +433,43 @@ public class GeneSysDice extends AbstractFunction {
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
 
+    var options = new HashSet<Options>();
+    if (parameters.size() > 1) {
+      var optionsString = parameters.get(1).toString().toLowerCase();
+      for (var option : Options.values()) {
+        if (optionsString.contains(option.getOptionString())) {
+          options.add(option);
+        }
+      }
+    }
+
     return switch (functionName.toLowerCase()) {
-      case "swgenesys", "genesys" -> performRoll(functionName, resolver, parameters);
-      case "swgenesyslastdetails", "genesyslastdetails" -> returnDetails(
-          functionName.toLowerCase().replace("lastdetails", ""), resolver);
-      case "swgenesyslastrolls", "genesyslastrolls" -> renderRolls(
-          functionName.toLowerCase().replace("lastrolls", ""), resolver);
-      case "swgenesyslastgrouped", "genesyslastgrouped" -> renderGrouped(
-          functionName.toLowerCase().replace("lastgrouped", ""), resolver);
+      case "swgenesys", "genesys" -> performRoll(functionName, resolver, parameters, options);
+      case "swgenesyslast", "genesyslast" -> render(
+          functionName.toLowerCase().replace("last", ""), resolver, options);
       default -> // Should never happen
       throw new ParserException("Invalid function name: " + functionName);
     };
+  }
+
+  /**
+   * Render the results of the roll string saved in the variables.
+   *
+   * @param functionName the name of the function.
+   * @param resolver the variable resolver.
+   * @param options the options for the roll.
+   * @return the rendered results.
+   * @throws ParserException if an error occurs.
+   */
+  private Object render(String functionName, VariableResolver resolver, Set<Options> options)
+      throws ParserException {
+    if (options.contains(Options.FORMAT_JSON)) {
+      return returnDetails(functionName, resolver);
+    } else if (options.contains(Options.FORMAT_GROUP_DICE)) {
+      return renderGrouped(functionName, resolver, options);
+    } else {
+      return renderRolls(functionName, resolver, options);
+    }
   }
 
   /**
@@ -417,10 +477,11 @@ public class GeneSysDice extends AbstractFunction {
    *
    * @param functionName the name of the function.
    * @param resolver the variable resolver.
+   * @param options the options for the roll.
    * @return the rendered results.
    * @throws ParserException if an error occurs.
    */
-  private String renderGrouped(String functionName, VariableResolver resolver)
+  private String renderGrouped(String functionName, VariableResolver resolver, Set<Options> options)
       throws ParserException {
     var rollResults = (JsonObject) resolver.getVariable(ROLL_VARIABLE_MAP.get(functionName));
     var rollsMap = new HashMap<String, List<String>>();
@@ -432,20 +493,36 @@ public class GeneSysDice extends AbstractFunction {
               .toList();
       rollsMap.put(dieName, rolls);
     }
-    return renderGrouped(functionName, rollsMap);
+    return renderGrouped(
+        functionName, rollResults.get("diceString").getAsString(), rollsMap, options);
   }
 
   /**
    * Render the results of a roll to a string.
    *
    * @param functionName the name of the function.
+   * @param diceString the string representing the dice rolled.
    * @param rolls the rolls to render.
+   * @param options the options for the roll.
    * @return the rendered results.
    */
-  private String renderGrouped(String functionName, Map<String, List<String>> rolls) {
+  private String renderGrouped(
+      String functionName,
+      String diceString,
+      Map<String, List<String>> rolls,
+      Set<Options> options) {
     var gray = ThemeSupport.getThemeColorHexString(ThemeColor.GREY);
     var sb = new StringBuilder();
+
+    // We don't want to pass the expanded format option to the renderRolls method as we deal with
+    // it here.
+    var passedOptions = new HashSet<>(options);
+    passedOptions.remove(Options.EXPANDED_FORMAT);
+
     sb.append("<span style='color:").append(gray).append("'>");
+    if (options.contains(Options.EXPANDED_FORMAT)) {
+      sb.append(diceString).append(" = ");
+    }
     var dieTypes =
         Arrays.stream(DiceType.values())
             .sorted(Comparator.comparingInt(DiceType::getGroupSort))
@@ -461,10 +538,10 @@ public class GeneSysDice extends AbstractFunction {
         sb.append(dieName).append(": ");
         var dieRolls =
             rolls.get(dieName).stream().map(r -> ResultType.valueOf(r.toUpperCase())).toList();
-        sb.append(renderRolls(functionName, dieRolls));
+        sb.append(renderRolls(functionName, diceString, dieRolls, passedOptions));
       }
-      sb.append("</span>");
     }
+    sb.append("</span>");
     return sb.toString();
   }
 
@@ -473,10 +550,11 @@ public class GeneSysDice extends AbstractFunction {
    *
    * @param functionName the name of the function.
    * @param resolver the variable resolver.
+   * @param options the options for the roll.
    * @return the rendered results.
    * @throws ParserException if an error occurs.
    */
-  private String renderRolls(String functionName, VariableResolver resolver)
+  private String renderRolls(String functionName, VariableResolver resolver, Set<Options> options)
       throws ParserException {
     var rollResults = (JsonObject) resolver.getVariable(ROLL_VARIABLE_MAP.get(functionName));
     var rolls =
@@ -490,7 +568,7 @@ public class GeneSysDice extends AbstractFunction {
                 false)
             .map(r -> ResultType.valueOf(r.getAsString().toUpperCase()))
             .toList();
-    return renderRolls(functionName, rolls);
+    return renderRolls(functionName, rollResults.get("diceString").getAsString(), rolls, options);
   }
 
   /**
@@ -512,11 +590,12 @@ public class GeneSysDice extends AbstractFunction {
    * @param functionName the name of the function.
    * @param resolver the variable resolver.
    * @param parameters the parameters to the function.
+   * @param options the options for the roll.
    * @return the rendered results.
    * @throws ParserException if an error occurs.
    */
-  private String performRoll(
-      String functionName, VariableResolver resolver, List<Object> parameters)
+  private Object performRoll(
+      String functionName, VariableResolver resolver, List<Object> parameters, Set<Options> options)
       throws ParserException {
 
     var diceString = parameters.get(0).toString().toLowerCase();
@@ -599,32 +678,77 @@ public class GeneSysDice extends AbstractFunction {
     gson.add("rolls", new Gson().toJsonTree(individualResults).getAsJsonObject());
     gson.add("counters", new Gson().toJsonTree(counters).getAsJsonObject());
     gson.add("result", new Gson().toJsonTree(result).getAsJsonObject());
+    gson.addProperty("diceString", diceString);
 
     resolver.setVariable(ROLL_VARIABLE_MAP.get(functionName), gson);
 
-    return renderRolls(functionName, results);
+    if (options.contains(Options.FORMAT_JSON)) {
+      return returnDetails(functionName, resolver);
+    } else if (options.contains(Options.FORMAT_GROUP_DICE)) {
+      return renderGrouped(functionName, diceString, individualResults, options);
+    } else {
+      return renderRolls(functionName, diceString, results, options);
+    }
   }
 
   /**
    * Render the results of a roll to a string.
    *
    * @param functionName the name of the function.
+   * @param diceString the string representing the dice rolled.
    * @param results the results to render.
+   * @param options the options for the roll.
    * @return the rendered results.
    */
-  private String renderRolls(String functionName, List<ResultType> results) {
+  private String renderRolls(
+      String functionName, String diceString, List<ResultType> results, Set<Options> options) {
     var gray = ThemeSupport.getThemeColorHexString(ThemeColor.GREY);
 
+    List<ResultType> toDisplay = results;
+    if (options.contains(Options.FORMAT_GROUP_RESULTS)) {
+      toDisplay =
+          results.stream()
+              .map(this::explode)
+              .flatMap(List::stream)
+              .filter(rt -> rt != ResultType.NONE)
+              .sorted(Comparator.comparingInt(ResultType::getGroupSort))
+              .toList();
+    }
     var sb = new StringBuilder();
+    sb.append("<span style='color:").append(gray).append("'>");
+    if (options.contains(Options.EXPANDED_FORMAT)) {
+      sb.append(diceString).append(" = ");
+    }
     sb.append("<font face='")
         .append(GS_FONT_NAME_MAP.get(functionName))
         .append("' size ='+1' color='")
         .append(gray)
         .append("'>");
-    for (var result : results) {
+    for (var result : toDisplay) {
       sb.append(result.fontCharacters);
     }
     sb.append("</font>");
+    sb.append("</span>");
     return sb.toString();
+  }
+
+  /**
+   * Explode the result type by expanding doubles to their component parts.`
+   *
+   * @param resultType the result type to simplify.
+   * @return the exploded result type.
+   */
+  private List<ResultType> explode(ResultType resultType) {
+    return switch (resultType) {
+      case SUCCESS_ADVANTAGE -> List.of(ResultType.SUCCESS, ResultType.ADVANTAGE);
+      case ADVANTAGE_ADVANTAGE -> List.of(ResultType.ADVANTAGE, ResultType.ADVANTAGE);
+      case SUCCESS_SUCCESS -> List.of(ResultType.SUCCESS, ResultType.SUCCESS);
+      case FAILURE_THREAT -> List.of(ResultType.FAILURE, ResultType.THREAT);
+      case FAILURE_FAILURE -> List.of(ResultType.FAILURE, ResultType.FAILURE);
+      case THREAT_THREAT -> List.of(ResultType.THREAT, ResultType.THREAT);
+      case LIGHT_LIGHT -> List.of(ResultType.LIGHT, ResultType.LIGHT);
+      case DARK_DARK -> List.of(ResultType.DARK, ResultType.DARK);
+      default -> List.of(resultType);
+    };
   }
 }

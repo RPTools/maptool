@@ -208,16 +208,16 @@ public class ExpressionParser {
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
 
         // SW Genesys
-        new String[] {"\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)\\b", "swgenesys('$1')"},
-        new String[] {"\\bsw#details\\b", "swgenesysLastDetails()"},
-        new String[] {"\\bsw#rolls\\b", "swgenesysLastRolls()"},
-        new String[] {"\\bsw#grouped\\b", "swgenesysLastGrouped()"},
+        new String[] {
+          "\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)(\\.(([eEgGdDjJ])+))?\\b", "swgenesys('$1', '$4')"
+        },
+        new String[] {"\\bsw#last(\\.(([eEgGdDjJ])+))*\\b", "swgenesysLast('last', '$2')"},
 
         // Genesys
-        new String[] {"\\bgs#(([bBsSaAdDpPcC]\\d+)+)\\b", "genesys('$1')"},
-        new String[] {"\\bgs#details\\b", "genesysLastDetails()"},
-        new String[] {"\\bgs#rolls\\b", "genesysLastRolls()"},
-        new String[] {"\\bgs#grouped\\b", "genesysLastGrouped()"},
+        new String[] {
+          "\\bgs#(([bBsSaAdDpPcCjJ]\\d+)+)(\\.(([eEgGdD])+))?\\b", "genesys('$1', " + "'$4')"
+        },
+        new String[] {"\\bgs#last(\\.(([eEgGdDj])+))*\\b", "genesysLast('last', '$2')"}
       };
 
   private final Parser parser;
