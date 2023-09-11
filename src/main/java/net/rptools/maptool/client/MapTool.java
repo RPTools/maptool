@@ -80,6 +80,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.ZoneLoadedListener;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -158,6 +159,7 @@ public class MapTool {
   private static List<Player> playerList;
   private static LocalPlayer player;
   private static PlayerZoneListener playerZoneListener;
+  private static ZoneLoadedListener zoneLoadedListener;
 
   private static MapToolConnection conn;
   private static ClientMessageHandler handler;
@@ -679,6 +681,7 @@ public class MapTool {
     try {
       player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
       playerZoneListener = new PlayerZoneListener();
+      zoneLoadedListener = new ZoneLoadedListener();
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // This was previously being done in the server thread and didn't always get done
       // before the campaign was accessed by the postInitialize() method below.
