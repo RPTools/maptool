@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.maptool.client.functions.MapFunctions.ON_CHANGE_MAP_CALLBACK;
+
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -498,6 +500,12 @@ public class AppActions {
           }
 
           MapTool.serverCommand().enforceZone(renderer.getZone().getId());
+          List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_CHANGE_MAP_CALLBACK);
+          String prefix = ON_CHANGE_MAP_CALLBACK + "@";
+          for (Token handler : libTokens) {
+            EventMacroUtil.callEventHandlerOld(
+                prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
+          }
         }
       };
 

@@ -14,12 +14,17 @@
  */
 package net.rptools.maptool.model.player;
 
+import static net.rptools.maptool.client.functions.MapFunctions.ON_CHANGE_MAP_CALLBACK;
+
 import com.google.common.eventbus.Subscribe;
+import java.util.Collections;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PlayerStatusChanged;
 import net.rptools.maptool.client.events.ZoneLoaded;
 import net.rptools.maptool.client.events.ZoneLoading;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.EventMacroUtil;
 
 public class PlayerZoneListener {
   public PlayerZoneListener() {
@@ -54,6 +59,8 @@ public class PlayerZoneListener {
 
   @Subscribe
   public void OnZoneLoaded(ZoneLoaded event) {
+    var libTokens = EventMacroUtil.getEventMacroTokens(ON_CHANGE_MAP_CALLBACK);
+    String prefix = ON_CHANGE_MAP_CALLBACK + "@";
     var player = MapTool.getPlayer();
     player.setLoaded(true);
     player.setZoneId(event.zone().getId());
@@ -76,5 +83,9 @@ public class PlayerZoneListener {
     eventBus.post(new PlayerStatusChanged(player));
 
     MapTool.serverCommand().updatePlayerStatus(player);
+    for (Token handler : libTokens) {
+      EventMacroUtil.callEventHandlerOld(
+          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
+    }
   }
 }

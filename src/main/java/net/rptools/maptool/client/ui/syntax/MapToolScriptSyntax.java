@@ -97,6 +97,7 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
   static String[] RESERVED_WORDS_2 = {
     "onCampaignLoad",
+    "onChangeMap",
     "onChangeSelection",
     "onMouseOverEvent",
     TokenMoveFunctions.ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK,

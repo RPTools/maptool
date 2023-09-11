@@ -91,7 +91,7 @@ public class LibTokenConverter {
                   macroScriptNameMap.put(macroName, macroName + ".mts");
                   legacyEventNameMap.put(macroName, macroName);
                 }
-                case "onCampaignLoad" -> {
+                case "onCampaignLoad", "onChangeMap" -> {
                   macroScriptNameMap.put(macroName, macroName + ".mts");
                   eventNameMap.put(macroName, macroName);
                 }
