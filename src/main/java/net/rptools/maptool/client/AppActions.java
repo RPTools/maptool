@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import static net.rptools.maptool.client.functions.MapFunctions.ON_CHANGE_MAP_CALLBACK;
-
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
 import java.awt.event.ActionEvent;
