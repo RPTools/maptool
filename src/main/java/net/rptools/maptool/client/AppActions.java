@@ -500,12 +500,6 @@ public class AppActions {
           }
 
           MapTool.serverCommand().enforceZone(renderer.getZone().getId());
-          List<Token> libTokens = EventMacroUtil.getEventMacroTokens(ON_CHANGE_MAP_CALLBACK);
-          String prefix = ON_CHANGE_MAP_CALLBACK + "@";
-          for (Token handler : libTokens) {
-            EventMacroUtil.callEventHandlerOld(
-                prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
-          }
         }
       };
 
