@@ -206,6 +206,13 @@ public class MacroJavaScriptBridge extends AbstractFunction implements DefinesSp
           return jPrim.getAsString();
         }
       }
+    } else if (obj instanceof BigDecimal) {
+      BigDecimal bd = (BigDecimal) obj;
+      try {
+        return Long.valueOf(bd.longValueExact());
+      } catch (ArithmeticException e) {
+        return Double.valueOf(bd.doubleValue());
+      }
     }
     return obj;
   }
