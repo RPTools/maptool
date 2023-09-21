@@ -113,4 +113,17 @@ public class JSAPITokens implements MapToolJSAPIInterface {
     }
     return null;
   }
+
+  @HostAccess.Export
+  public JSAPIToken getMapTokenByID(String uuid) {
+    JSAPIToken token = null;
+    Token findToken =
+            MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
+    if (findToken != null
+            && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
+      token = new JSAPIToken(findToken);
+    }
+    return token;
+  }
 }
+
