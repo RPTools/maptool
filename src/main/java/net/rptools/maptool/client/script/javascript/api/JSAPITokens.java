@@ -19,6 +19,7 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.HostAccess;
 
@@ -91,8 +92,23 @@ public class JSAPITokens implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public JSAPIToken getTokenByID(String uuid) {
-    JSAPIToken token = new JSAPIToken(uuid);
-    if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
+    JSAPIToken token = null;
+    Token findToken =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
+    if (findToken != null) {
+      token = new JSAPIToken(findToken);
+    } else {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        findToken = zr.getZone().resolveToken(uuid);
+        if(findToken!=null){
+          token = new JSAPIToken(findToken);
+          break;
+        }
+      }
+    }
+    if (token != null
+        && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
       return token;
     }
     return null;
