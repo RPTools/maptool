@@ -177,4 +177,11 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   public boolean isOwner(String playerID) {
     return this.token.isOwner(playerID);
   }
+
+  @HostAccess.Export
+  public boolean isOnCurrentMap() {
+    Token findToken =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(this.getId()));
+    return this.token == findToken;
+  }
 }
