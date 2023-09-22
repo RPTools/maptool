@@ -153,43 +153,6 @@ public class HTMLWebViewManager {
             target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
           }
         }
-
-        // Add listeners to the node's descendant as they don't trigger mutation observer.
-        NodeList nodeList;
-
-        // Add event handlers for <a> hyperlinks.
-        nodeList = addedNode.getElementsByTagName("a");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
-        }
-
-        // Add event handlers for hyperlinks for maps.
-        nodeList = addedNode.getElementsByTagName("area");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
-        }
-
-        // Set the "submit" handler to get the data on submission not based on buttons
-        nodeList = addedNode.getElementsByTagName("form");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("submit", HTMLWebViewManager.this::getDataAndSubmit, true);
-        }
-
-        // Set the "submit" handler to get the data on submission based on input
-        nodeList = addedNode.getElementsByTagName("input");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
-        }
-        // Set the "submit" handler to get the data on submission based on button
-        nodeList = addedNode.getElementsByTagName("button");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
-        }
       }
     }
   }

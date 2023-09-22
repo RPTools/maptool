@@ -39,6 +39,7 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class MapFunctions extends AbstractFunction {
+  public static final String ON_CHANGE_MAP_CALLBACK = "onChangeMap";
   private static final MapFunctions instance = new MapFunctions();
 
   private MapFunctions() {
