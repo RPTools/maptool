@@ -16,7 +16,10 @@ package net.rptools.maptool.client.ui.syntax;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+import java.net.URL;
 import java.util.List;
+import net.rptools.lib.net.RPTURLStreamHandlerFactory;
+import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import org.fife.ui.autocomplete.BasicCompletion;
 import org.fife.ui.autocomplete.Completion;
 import org.fife.ui.autocomplete.DefaultCompletionProvider;
@@ -26,6 +29,15 @@ class MapToolScriptAutoCompleteTest {
 
   @Test
   void tagsAreStrippedFromAShortDesc() {
+    /*
+     * Protocol handlers, we need to register lib: protocol handler so that the UDF auto-complete
+     * doesn't pause with a dialog box containing an error message during tests as now tests
+     * wont run without any add-on loaded
+     */
+    RPTURLStreamHandlerFactory factory = new RPTURLStreamHandlerFactory();
+    factory.registerProtocol("lib", new LibraryURLStreamHandler());
+    URL.setURLStreamHandlerFactory(factory);
+
     MapToolScriptAutoComplete mapToolScriptAutoComplete = new MapToolScriptAutoComplete();
     DefaultCompletionProvider completionProvider =
         (DefaultCompletionProvider) mapToolScriptAutoComplete.get();
