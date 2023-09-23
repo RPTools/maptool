@@ -69,6 +69,12 @@ public class TopologyModeSelectionPanel extends JToolBar {
         "tools.topology_mode_selection.pit_vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
+        Zone.TopologyType.COVER_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF,
+        "tools.topology_mode_selection.cover_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
         Zone.TopologyType.MBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
