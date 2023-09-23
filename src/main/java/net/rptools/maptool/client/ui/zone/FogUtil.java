@@ -76,7 +76,12 @@ public class FogUtil {
    * @return the visible area.
    */
   public static @Nonnull Area calculateVisibility(
-      Point origin, Area vision, AreaTree topology, AreaTree hillVbl, AreaTree pitVbl) {
+      Point origin,
+      Area vision,
+      AreaTree topology,
+      AreaTree hillVbl,
+      AreaTree pitVbl,
+      AreaTree coverVbl) {
     // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
     final var visionGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vision));
 
@@ -93,6 +98,7 @@ public class FogUtil {
     topologyConsumers.add(acc -> acc.addWallBlocking(topology));
     topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
     topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
+    topologyConsumers.add(acc -> acc.addCoverBlocking(coverVbl));
     for (final var consumer : topologyConsumers) {
       final var accumulator =
           new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
