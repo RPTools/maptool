@@ -200,6 +200,8 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON, IMAGE_DIR + "tool/mbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF, IMAGE_DIR + "tool/pit-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, IMAGE_DIR + "tool/pit-vbl-only.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF, IMAGE_DIR + "tool/cover-vbl-only-off.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, IMAGE_DIR + "tool/cover-vbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, IMAGE_DIR + "tool/wall-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, IMAGE_DIR + "tool/wall-vbl-only.png");
           put(Icons.TOOLBAR_VOLUME_OFF, IMAGE_DIR + "audio/mute.png");

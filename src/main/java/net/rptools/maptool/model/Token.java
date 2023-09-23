@@ -270,6 +270,7 @@ public class Token implements Cloneable {
   private Area vbl;
   private Area hillVbl;
   private Area pitVbl;
+  private Area coverVbl;
   private Area mbl;
 
   private String name = "";
@@ -432,6 +433,7 @@ public class Token implements Cloneable {
     vbl = token.vbl;
     hillVbl = token.hillVbl;
     pitVbl = token.pitVbl;
+    coverVbl = token.coverVbl;
     mbl = token.mbl;
 
     name = token.name;
@@ -1388,6 +1390,7 @@ public class Token implements Cloneable {
       case WALL_VBL -> vbl;
       case HILL_VBL -> hillVbl;
       case PIT_VBL -> pitVbl;
+      case COVER_VBL -> coverVbl;
       case MBL -> mbl;
     };
   }
@@ -1415,6 +1418,7 @@ public class Token implements Cloneable {
       case WALL_VBL -> vbl = topology;
       case HILL_VBL -> hillVbl = topology;
       case PIT_VBL -> pitVbl = topology;
+      case COVER_VBL -> coverVbl = topology;
       case MBL -> mbl = topology;
     }
     ;
@@ -2901,6 +2905,7 @@ public class Token implements Cloneable {
     token.vbl = dto.hasVbl() ? Mapper.map(dto.getVbl()) : null;
     token.hillVbl = dto.hasHillVbl() ? Mapper.map(dto.getHillVbl()) : null;
     token.pitVbl = dto.hasPitVbl() ? Mapper.map(dto.getPitVbl()) : null;
+    token.coverVbl = dto.hasCoverVbl() ? Mapper.map(dto.getCoverVbl()) : null;
     token.mbl = dto.hasMbl() ? Mapper.map(dto.getMbl()) : null;
     token.name = dto.getName();
     token.ownerList.addAll(dto.getOwnerListList());
@@ -3015,6 +3020,9 @@ public class Token implements Cloneable {
     }
     if (pitVbl != null) {
       dto.setPitVbl(Mapper.map(pitVbl));
+    }
+    if (coverVbl != null) {
+      dto.setCoverVbl(Mapper.map(coverVbl));
     }
     if (mbl != null) {
       dto.setMbl(Mapper.map(mbl));
