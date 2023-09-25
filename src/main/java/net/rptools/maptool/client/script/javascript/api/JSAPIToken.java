@@ -21,6 +21,7 @@ import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
 
@@ -33,6 +34,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   private final Token token;
   private Set<String> names;
   private Iterator<String> names_iter;
+  private Zone map;
 
   public JSAPIToken(Token token) {
     this.token = token;
@@ -130,6 +132,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setProperty(name, value.toString());
+      this.map.putToken(this.token);
     }
   }
 
@@ -183,5 +186,15 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     Token findToken =
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(this.getId()));
     return this.token == findToken;
+  }
+
+  @HostAccess.Export
+  public void setMap(Zone m) {
+    this.map = m;
+  }
+
+  @HostAccess.Export
+  public String getMapName() {
+    return this.map.getDisplayName();
   }
 }
