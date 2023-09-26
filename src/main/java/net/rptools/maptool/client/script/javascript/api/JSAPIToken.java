@@ -134,7 +134,6 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
       this.token.setProperty(name, value.toString());
-      // this.map.putToken(this.token);
       MapTool.serverCommand()
           .updateTokenProperty(token, Token.Update.setProperty, name, value.toString());
     }
@@ -192,7 +191,6 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     return this.token == findToken;
   }
 
-  @HostAccess.Export
   public void setMap(Zone m) {
     this.map = m;
   }
