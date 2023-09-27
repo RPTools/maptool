@@ -97,12 +97,14 @@ public class JSAPITokens implements MapToolJSAPIInterface {
         MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
     if (findToken != null) {
       token = new JSAPIToken(findToken);
+      token.setMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
     } else {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         findToken = zr.getZone().resolveToken(uuid);
         if (findToken != null) {
           token = new JSAPIToken(findToken);
+          token.setMap(zr.getZone());
           break;
         }
       }
@@ -122,6 +124,7 @@ public class JSAPITokens implements MapToolJSAPIInterface {
     if (findToken != null
         && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
       token = new JSAPIToken(findToken);
+      token.setMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
     }
     return token;
   }
