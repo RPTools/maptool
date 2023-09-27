@@ -412,6 +412,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
     getPitVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
 
+    getCoverVblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.COVER_VBL));
+    getCoverVblToggle()
+        .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON));
+    getCoverVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON));
+
     getMblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.MBL));
     getMblToggle().setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
@@ -1082,6 +1088,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JToggleButton) getComponent("pitVblToggle");
   }
 
+  public JToggleButton getCoverVblToggle() {
+    return (JToggleButton) getComponent("coverVblToggle");
+  }
+
   public JToggleButton getMblToggle() {
     return (JToggleButton) getComponent("mblToggle");
   }
@@ -1285,6 +1295,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 getTokenTopologyPanel()
                     .setTopologyTypeSelected(
                         Zone.TopologyType.PIT_VBL, ((AbstractButton) e.getSource()).isSelected()));
+    getCoverVblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.COVER_VBL,
+                        ((AbstractButton) e.getSource()).isSelected()));
     getMblToggle()
         .addActionListener(
             e ->

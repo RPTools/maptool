@@ -69,6 +69,14 @@ import net.rptools.parser.function.AbstractFunction;
  *
  * <p>getPitVBL(jsonArray) :: Get the Pit VBL for a given area and return as array of points
  *
+ * <p>drawCoverVBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a
+ * Shape in Cover VBL
+ *
+ * <p>eraseCoverVBL(jsonArray) :: Takes an array of JSON Objects containing information to erase a
+ * Shape in Cover VBL
+ *
+ * <p>getCoverVBL(jsonArray) :: Get the Cover VBL for a given area and return as array of points
+ *
  * <p>drawMBL(jsonArray) :: Takes an array of JSON Objects containing information to draw a Shape in
  * MBL
  *
@@ -101,6 +109,14 @@ import net.rptools.parser.function.AbstractFunction;
  * <p>transferPitVBL(direction[, delete][, tokenId] :: move or copy Pit VBL between token and Pit
  * VBL layer
  *
+ * <p>getTokenCoverVBL(tokenId) :: Get the Pit Cover attached to a token
+ *
+ * <p>setTokenCoverVBL(jsonArray, tokenId) :: Sets the token's Cover VBL to the information contains
+ * in the JSON Objects.
+ *
+ * <p>transferCoverVBL(direction[, delete][, tokenId] :: move or copy Cover VBL between token and
+ * Pit VBL layer
+ *
  * <p>getTokenMBL(tokenId) :: Get the MBL attached to a token
  *
  * <p>setTokenMBL(jsonArray, tokenId) :: Sets the token's MBL to the information contains in the
@@ -127,20 +143,26 @@ public class Topology_Functions extends AbstractFunction {
         "drawPitVBL",
         "erasePitVBL",
         "getPitVBL",
+        "drawCoverVBL",
+        "eraseCoverVBL",
+        "getCoverVBL",
         "drawMBL",
         "eraseMBL",
         "getMBL",
         "getTokenVBL",
         "getTokenHillVBL",
         "getTokenPitVBL",
+        "getTokenCoverVBL",
         "getTokenMBL",
         "setTokenVBL",
         "setTokenHillVBL",
         "setTokenPitVBL",
+        "setTokenCoverVBL",
         "setTokenMBL",
         "transferVBL",
         "transferHillVBL",
         "transferPitVBL",
+        "transferCoverVBL",
         "transferMBL");
   }
 
@@ -160,22 +182,27 @@ public class Topology_Functions extends AbstractFunction {
         || functionName.equalsIgnoreCase("eraseHillVBL")
         || functionName.equalsIgnoreCase("drawPitVBL")
         || functionName.equalsIgnoreCase("erasePitVBL")
+        || functionName.equalsIgnoreCase("drawCoverVBL")
+        || functionName.equalsIgnoreCase("eraseCoverVBL")
         || functionName.equalsIgnoreCase("drawMBL")
         || functionName.equalsIgnoreCase("eraseMBL")) {
       childEvaluateDrawEraseTopology(functionName, parameters);
     } else if (functionName.equalsIgnoreCase("getVBL")
         || functionName.equalsIgnoreCase("getHillVBL")
         || functionName.equalsIgnoreCase("getPitVBL")
+        || functionName.equalsIgnoreCase("getCoverVBL")
         || functionName.equalsIgnoreCase("getMBL")) {
       return childEvaluateGetTopology(functionName, parameters);
     } else if (functionName.equalsIgnoreCase("getTokenVBL")
         || functionName.equalsIgnoreCase("getTokenHillVBL")
         || functionName.equalsIgnoreCase("getTokenPitVBL")
+        || functionName.equalsIgnoreCase("getTokenCoverVBL")
         || functionName.equalsIgnoreCase("getTokenMBL")) {
       return childEvaluateGetTokenTopology(resolver, functionName, parameters).toString();
     } else if (functionName.equalsIgnoreCase("setTokenVBL")
         || functionName.equalsIgnoreCase("setTokenHillVBL")
         || functionName.equalsIgnoreCase("setTokenPitVBL")
+        || functionName.equalsIgnoreCase("setTokenCoverVBL")
         || functionName.equalsIgnoreCase("setTokenMBL")) {
       var results = childEvaluateSetTokenTopology(resolver, functionName, parameters);
       if (results >= 0) {
@@ -184,6 +211,7 @@ public class Topology_Functions extends AbstractFunction {
     } else if (functionName.equalsIgnoreCase("transferVBL")
         || functionName.equalsIgnoreCase("transferHillVBL")
         || functionName.equalsIgnoreCase("transferPitVBL")
+        || functionName.equalsIgnoreCase("transferCoverVBL")
         || functionName.equalsIgnoreCase("transferMBL")) {
       childEvaluateTransferTopology(resolver, functionName, parameters);
     } else {
@@ -210,6 +238,7 @@ public class Topology_Functions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("eraseVBL")
         || functionName.equalsIgnoreCase("eraseHillVBL")
         || functionName.equalsIgnoreCase("erasePitVBL")
+        || functionName.equalsIgnoreCase("eraseCoverVBL")
         || functionName.equalsIgnoreCase("eraseMBL")) {
       erase = true;
     }
@@ -244,6 +273,9 @@ public class Topology_Functions extends AbstractFunction {
       } else if (functionName.equalsIgnoreCase("drawPitVBL")
           || functionName.equalsIgnoreCase("erasePitVBL")) {
         topologyType = Zone.TopologyType.PIT_VBL;
+      } else if (functionName.equalsIgnoreCase("drawCoverVBL")
+          || functionName.equalsIgnoreCase("eraseCoverVBL")) {
+        topologyType = Zone.TopologyType.COVER_VBL;
       } else {
         topologyType = Zone.TopologyType.MBL;
       }
@@ -273,6 +305,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("getPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("getCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -345,6 +379,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("getTokenPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("getTokenCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -392,6 +428,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("setTokenPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("setTokenCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }
@@ -496,6 +534,8 @@ public class Topology_Functions extends AbstractFunction {
       topologyType = Zone.TopologyType.HILL_VBL;
     } else if (functionName.equalsIgnoreCase("transferPitVBL")) {
       topologyType = Zone.TopologyType.PIT_VBL;
+    } else if (functionName.equalsIgnoreCase("transferCoverVBL")) {
+      topologyType = Zone.TopologyType.COVER_VBL;
     } else {
       topologyType = Zone.TopologyType.MBL;
     }

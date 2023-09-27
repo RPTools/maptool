@@ -234,22 +234,35 @@ public final class VisionBlockingAccumulator {
      */
 
     if (container instanceof final AreaIsland island) {
-      /*
-       * Since we're in an island, vision is entirely unblocked, and we do nothing.
-       */
+
+      final var parentOcean = island.getParentOcean();
+
+      final var grandparentIsland = parentOcean.getParentIsland();
+      if (grandparentIsland != null) {
+        addVisionBlockingSegments(grandparentIsland, true);
+      }
+
+      for (final var siblingIsland : parentOcean.getIslands()) {
+        if (siblingIsland == island) {
+          continue;
+        }
+        addVisionBlockingSegments(siblingIsland, true);
+      }
+      for (final var childOcean : island.getOceans()) {
+        for (final var grandchildIsland : childOcean.getIslands()) {
+          addVisionBlockingSegments(grandchildIsland, true);
+        }
+        addVisionBlockingSegments(childOcean, false);
+      }
+      addVisionBlockingSegments(parentOcean, false);
+
     } else if (container instanceof AreaOcean ocean) {
       final var parentIsland = ocean.getParentIsland();
       if (parentIsland != null) {
-        // The near edge of the island blocks vision, which is the same as the boundary of this
-        // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
-        // back side.
-
-        addVisionBlockingSegments(ocean, false);
+        addVisionBlockingSegments(ocean, true);
       }
 
-      // Check each contained island.
       for (var containedIsland : ocean.getIslands()) {
-        // The front side of wall VBL blocks vision.
         addVisionBlockingSegments(containedIsland, true);
       }
     }
