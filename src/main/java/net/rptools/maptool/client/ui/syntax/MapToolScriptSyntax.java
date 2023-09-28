@@ -20,8 +20,10 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.functions.DefinesSpecialVariables;
+import net.rptools.maptool.client.functions.MapFunctions;
 import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
+import net.rptools.maptool.events.OnMouseOverListener;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.TokenProperty;
 import net.rptools.parser.function.Function;
@@ -97,9 +99,10 @@ public class MapToolScriptSyntax extends MapToolScriptTokenMaker {
 
   static String[] RESERVED_WORDS_2 = {
     "onCampaignLoad",
-    "onChangeMap",
     "onChangeSelection",
     "onMouseOverEvent",
+    OnMouseOverListener.ON_MOUSE_OVER_CALLBACK,
+    MapFunctions.ON_CHANGE_MAP_CALLBACK,
     TokenMoveFunctions.ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK,
     TokenMoveFunctions.ON_TOKEN_MOVE_COMPLETE_CALLBACK,
     InitiativeList.ON_INITIATIVE_CHANGE_VETOABLE_MACRO_CALLBACK,
