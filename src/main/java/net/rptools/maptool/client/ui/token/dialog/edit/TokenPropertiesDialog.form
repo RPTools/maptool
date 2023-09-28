@@ -3,7 +3,7 @@
   <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="4" left="4" bottom="4" right="4"/>
     <constraints>
-      <xy x="10" y="10" width="2190" height="842"/>
+      <xy x="10" y="10" width="1092" height="842"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
@@ -97,7 +97,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.vbl"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -556,7 +556,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.config"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -1295,7 +1295,7 @@
                 </constraints>
                 <properties>
                   <alignmentY value="0.0"/>
-                  <iconTextGap value="4"/>
+                  <iconTextGap value="2"/>
                   <name value="refreshDataButton"/>
                   <text value=""/>
                   <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.hero.refresh.tooltip.off"/>
