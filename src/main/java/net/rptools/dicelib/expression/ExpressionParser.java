@@ -23,7 +23,6 @@ import net.rptools.dicelib.expression.function.DropRoll;
 import net.rptools.dicelib.expression.function.ExplodeDice;
 import net.rptools.dicelib.expression.function.ExplodingSuccessDice;
 import net.rptools.dicelib.expression.function.FudgeRoll;
-import net.rptools.dicelib.expression.function.GeneSysDice;
 import net.rptools.dicelib.expression.function.HeroKillingRoll;
 import net.rptools.dicelib.expression.function.HeroRoll;
 import net.rptools.dicelib.expression.function.If;
@@ -248,7 +247,6 @@ public class ExpressionParser {
     parser.addFunction(new DropHighestRoll());
     parser.addFunction(new KeepLowestRoll());
     parser.addFunction(new ArsMagicaStress());
-    parser.addFunction(new GeneSysDice());
     parser.addFunction(new AdvancedDiceRolls());
 
     parser.addFunction(new If());
