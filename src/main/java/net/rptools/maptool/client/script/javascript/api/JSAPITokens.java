@@ -19,6 +19,7 @@ import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import org.graalvm.polyglot.HostAccess;
 
@@ -91,10 +92,40 @@ public class JSAPITokens implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public JSAPIToken getTokenByID(String uuid) {
-    JSAPIToken token = new JSAPIToken(uuid);
-    if (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName())) {
+    JSAPIToken token = null;
+    Token findToken =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
+    if (findToken != null) {
+      token = new JSAPIToken(findToken);
+      token.setMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+    } else {
+      List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
+      for (ZoneRenderer zr : zrenderers) {
+        findToken = zr.getZone().resolveToken(uuid);
+        if (findToken != null) {
+          token = new JSAPIToken(findToken);
+          token.setMap(zr.getZone());
+          break;
+        }
+      }
+    }
+    if (token != null
+        && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
       return token;
     }
     return null;
+  }
+
+  @HostAccess.Export
+  public JSAPIToken getMapTokenByID(String uuid) {
+    JSAPIToken token = null;
+    Token findToken =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(new GUID(uuid));
+    if (findToken != null
+        && (JSScriptEngine.inTrustedContext() || token.isOwner(MapTool.getPlayer().getName()))) {
+      token = new JSAPIToken(findToken);
+      token.setMap(MapTool.getFrame().getCurrentZoneRenderer().getZone());
+    }
+    return token;
   }
 }

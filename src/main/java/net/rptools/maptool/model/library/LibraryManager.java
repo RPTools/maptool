@@ -77,6 +77,7 @@ public class LibraryManager {
 
   static {
     libraryTokenManager.init();
+    builtInLibraryManager.loadBuiltIns();
     new MapToolEventBus().getMainEventBus().register(addOnSlashCommandManager);
   }
 

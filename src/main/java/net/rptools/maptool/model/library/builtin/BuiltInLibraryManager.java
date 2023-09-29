@@ -14,13 +14,21 @@
  */
 package net.rptools.maptool.model.library.builtin;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 
 /** Class for managing {@link AddOnLibrary} objects. */
 public class BuiltInLibraryManager {
@@ -115,6 +123,45 @@ public class BuiltInLibraryManager {
       return getLibrary(path.getHost());
     } else {
       return null;
+    }
+  }
+
+  /** Initializes the built in libraries. */
+  public void loadBuiltIns() {
+    var classLoader = Thread.currentThread().getContextClassLoader();
+
+    URI uri;
+    try {
+      uri = classLoader.getResource(ClassPathAddOnLibrary.BUILTIN_LIB_CLASSPATH_DIR).toURI();
+    } catch (URISyntaxException e) {
+      MapTool.showError("msg.error.library.builtin.path", e);
+      return;
+    }
+
+    try (var fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
+      var resourcePath = fs.getPath(ClassPathAddOnLibrary.BUILTIN_LIB_CLASSPATH_DIR);
+      var libs =
+          Files.walk(resourcePath, 1)
+              .filter(p -> p.toString().endsWith(AddOnLibraryImporter.DROP_IN_LIBRARY_EXTENSION))
+              .toList();
+
+      libs.stream().forEach(System.out::println);
+      var importer = new AddOnLibraryImporter();
+      libs.stream()
+          .forEach(
+              l -> {
+                try {
+                  var lib = importer.importFromClassPath(l.toString());
+                  var clib = new ClassPathAddOnLibrary(l.toString(), lib);
+                  registerLibrary(clib);
+                  clib.initialize();
+
+                } catch (Exception e) {
+                  MapTool.showError("msg.error.library.builtin.load", e);
+                }
+              });
+    } catch (IOException e) {
+      MapTool.showError("msg.error.library.builtin.load", e);
     }
   }
 }
