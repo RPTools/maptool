@@ -498,7 +498,7 @@ dependencies {
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'
 
     // For advanced dice roller
-    implementation 'com.github.RPTools:advanced-dice-roller:0.1.4'
+    implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
 
 
 

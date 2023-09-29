@@ -14,6 +14,8 @@
  */
 package net.rptools.dicelib.expression;
 
+import java.util.List;
+import java.util.regex.Pattern;
 import net.rptools.dicelib.expression.function.ArsMagicaStress;
 import net.rptools.dicelib.expression.function.CountSuccessDice;
 import net.rptools.dicelib.expression.function.DropHighestRoll;
@@ -37,9 +39,11 @@ import net.rptools.dicelib.expression.function.ShadowRun4ExplodeDice;
 import net.rptools.dicelib.expression.function.ShadowRun5Dice;
 import net.rptools.dicelib.expression.function.ShadowRun5ExplodeDice;
 import net.rptools.dicelib.expression.function.UbiquityRoll;
+import net.rptools.dicelib.expression.function.advanced.AdvancedDiceRolls;
 import net.rptools.parser.*;
 import net.rptools.parser.transform.RegexpStringTransformer;
 import net.rptools.parser.transform.StringLiteralTransformer;
+import org.javatuples.Pair;
 
 public class ExpressionParser {
   private static String[][] DICE_PATTERNS =
@@ -206,21 +210,14 @@ public class ExpressionParser {
         new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
         new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
-
-        // SW Genesys
-        new String[] {
-          "\\bsw#(([bBsSaAdDpPcCfF]\\d+)+)(\\.(([eEgGdDjJ])+))?\\b", "swgenesys('$1', '$4')"
-        },
-        new String[] {"\\bsw#last(\\.(([eEgGdDjJ])+))*\\b", "swgenesysLast('last', '$2')"},
-
-        // Genesys
-        new String[] {
-          "\\bgs#(([bBsSaAdDpPcCjJ]\\d+)+)(\\.(([eEgGdD])+))?\\b", "genesys('$1', " + "'$4')"
-        },
-        new String[] {"\\bgs#last(\\.(([eEgGdDj])+))*\\b", "genesysLast('last', '$2')"}
       };
 
   private final Parser parser;
+
+  private final List<Pair<Pattern, String>> preprocessPatterns =
+      List.of(
+          new Pair<>(Pattern.compile("([A-z]+)!\"([^\"]*)\""), "advancedRoll('$1', " + "'$2')"),
+          new Pair<>(Pattern.compile("([A-z]+)!'([^']*)'"), "advancedRoll('$1', " + "'$2')"));
 
   public ExpressionParser() {
     this(DICE_PATTERNS);
@@ -252,6 +249,7 @@ public class ExpressionParser {
     parser.addFunction(new KeepLowestRoll());
     parser.addFunction(new ArsMagicaStress());
     parser.addFunction(new GeneSysDice());
+    parser.addFunction(new AdvancedDiceRolls());
 
     parser.addFunction(new If());
 
@@ -291,6 +289,9 @@ public class ExpressionParser {
       }
       RunData.setCurrent(newRunData);
 
+      // Some patterns need pre-processing before the parser is called otherwise the parser
+      // creation will fail
+      expression = preProcess(expression);
       synchronized (parser) {
         final Expression xp =
             makeDeterministic
@@ -305,5 +306,21 @@ public class ExpressionParser {
     }
 
     return ret;
+  }
+
+  /**
+   * Pre-process the expression before it is parsed. This is used to convert some patterns into
+   * function calls that the parser can handle.
+   *
+   * @param expression The expression to pre-process
+   * @return The pre-processed expression
+   */
+  private String preProcess(String expression) {
+    for (Pair<Pattern, String> p : preprocessPatterns) {
+      if (p.getValue0().matcher(expression).find()) {
+        return p.getValue0().matcher(expression).replaceAll(p.getValue1());
+      }
+    }
+    return expression;
   }
 }
