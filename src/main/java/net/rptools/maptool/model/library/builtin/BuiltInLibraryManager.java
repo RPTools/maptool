@@ -138,6 +138,7 @@ public class BuiltInLibraryManager {
       return;
     }
 
+    MapTool.showInformation(uri.toString());
     try (var fs = FileSystems.newFileSystem(uri, Collections.emptyMap())) {
       var resourcePath = fs.getPath(ClassPathAddOnLibrary.BUILTIN_LIB_CLASSPATH_DIR);
       var libs =
