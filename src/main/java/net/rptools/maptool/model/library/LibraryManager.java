@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
 public class LibraryManager {
 
   /** Class for logging messages. */
-  private static final Logger log = LogManager.getLogger(AppActions.class);
+  private static final Logger log = LogManager.getLogger(LibraryManager.class);
 
   /** The reserved library name prefixes. */
   private static final Set<String> RESERVED_PREFIXES =
