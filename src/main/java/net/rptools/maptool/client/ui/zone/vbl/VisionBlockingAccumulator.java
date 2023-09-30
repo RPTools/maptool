@@ -237,6 +237,11 @@ public final class VisionBlockingAccumulator {
 
       final var parentOcean = island.getParentOcean();
 
+      final var grandparentIsland = parentOcean.getParentIsland();
+      if (grandparentIsland != null) {
+        addVisionBlockingSegments(grandparentIsland, true);
+      }
+
       for (final var siblingIsland : parentOcean.getIslands()) {
         if (siblingIsland == island) {
           continue;
