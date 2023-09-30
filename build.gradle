@@ -232,8 +232,7 @@ runtime {
                    "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
                    "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
                    "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED",
-                   "--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED"
+                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"
           ]
 
         imageOptions = []
