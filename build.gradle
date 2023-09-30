@@ -217,7 +217,8 @@ runtime {
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
                'jdk.crypto.cryptoki',
-               'jdk.crypto.ec'
+               'jdk.crypto.ec',
+               'jdk.zipfs'
     ]
 
 
@@ -231,7 +232,9 @@ runtime {
                    "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
                    "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
                    "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED",
+                   "--add-opens jdk.zipfs/jdk.nio.zipfs=ALL-UNNAMED"
+          ]
 
         imageOptions = []
         imageName = project.name + developerRelease
