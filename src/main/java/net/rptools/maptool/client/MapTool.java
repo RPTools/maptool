@@ -1807,6 +1807,33 @@ public class MapTool {
       System.exit(1);
     }
 
+    /*
+     * Load GenSys and SW RPG fonts
+     */
+    try {
+      var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      var genFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
+      genv.registerFont(genFont);
+      var swGenFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
+      genv.registerFont(swGenFont);
+    } catch (Exception e) {
+      log.error("msg.error.genesysFont", e);
+    }
+
     /**
      * This is a tweak that makes the Chinese version work better.
      *
