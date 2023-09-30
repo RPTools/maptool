@@ -500,6 +500,14 @@ dependencies {
 
     // Built In Add-on Libraries
     implementation 'com.github.RPTools:maptool-builtin-addons:1.3'
+
+    // For advanced dice roller
+    implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
+
+
+
+
+
 }
 
 
