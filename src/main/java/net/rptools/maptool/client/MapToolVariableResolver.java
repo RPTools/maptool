@@ -276,7 +276,7 @@ public class MapToolVariableResolver implements VariableResolver {
       result =
           JOptionPane.showInputDialog(
               MapTool.getFrame(),
-              I18N.getText("lineParser.dialogValueFor") + " " + name,
+              I18N.getText("lineParser.dialogValueFor", name),
               DialogTitle,
               JOptionPane.QUESTION_MESSAGE,
               null,
