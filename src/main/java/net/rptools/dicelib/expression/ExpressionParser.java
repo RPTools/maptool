@@ -215,8 +215,8 @@ public class ExpressionParser {
 
   private final List<Pair<Pattern, String>> preprocessPatterns =
       List.of(
-          new Pair<>(Pattern.compile("([A-z]+)!\"([^\"]*)\""), "advancedRoll('$1', " + "'$2')"),
-          new Pair<>(Pattern.compile("([A-z]+)!'([^']*)'"), "advancedRoll('$1', " + "'$2')"));
+          new Pair<>(Pattern.compile("^([A-z]+)!\"([^\"]*)\"$"), "advancedRoll('$1', " + "'$2')"),
+          new Pair<>(Pattern.compile("^([A-z]+)!'([^']*)'$"), "advancedRoll('$1', " + "'$2')"));
 
   public ExpressionParser() {
     this(DICE_PATTERNS);
@@ -314,9 +314,10 @@ public class ExpressionParser {
    * @return The pre-processed expression
    */
   private String preProcess(String expression) {
+    var trimmed = expression.trim();
     for (Pair<Pattern, String> p : preprocessPatterns) {
-      if (p.getValue0().matcher(expression).find()) {
-        return p.getValue0().matcher(expression).replaceAll(p.getValue1());
+      if (p.getValue0().matcher(trimmed).find()) {
+        return p.getValue0().matcher(trimmed).replaceAll(p.getValue1());
       }
     }
     return expression;
