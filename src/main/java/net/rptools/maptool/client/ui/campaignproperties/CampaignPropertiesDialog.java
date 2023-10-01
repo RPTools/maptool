@@ -203,7 +203,6 @@ public class CampaignPropertiesDialog extends JDialog {
           .forEach(
               (o, n) -> {
                 campaign.renameTokenTypes(o, n);
-                System.out.println("Renaming " + o + " to " + n);
               });
       MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
