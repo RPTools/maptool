@@ -30,8 +30,6 @@ public class TokenHoverListener {
   public static final String ON_MOUSE_OVER_CALLBACK = "onMouseOver";
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
 
-  public TokenHoverListener() {}
-
   @Subscribe
   public void onMouseOverEnter(TokenHoverEnter event) {
     var token = event.token();
