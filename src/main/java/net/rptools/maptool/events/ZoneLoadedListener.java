@@ -18,11 +18,19 @@ import static net.rptools.maptool.client.functions.MapFunctions.ON_CHANGE_MAP_CA
 
 import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
+import java.util.concurrent.ExecutionException;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneLoaded;
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.util.EventMacroUtil;
+import org.apache.log4j.LogManager;
+import org.apache.log4j.Logger;
 
 public class ZoneLoadedListener {
+  private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
 
   public ZoneLoadedListener() {
     new MapToolEventBus().getMainEventBus().register(this);
@@ -30,12 +38,26 @@ public class ZoneLoadedListener {
 
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
-    var libTokens = EventMacroUtil.getEventMacroTokens(ON_CHANGE_MAP_CALLBACK);
-    String prefix = ON_CHANGE_MAP_CALLBACK + "@";
-
-    for (Token handler : libTokens) {
-      EventMacroUtil.callEventHandlerOld(
-          prefix + handler.getName(), "", handler, Collections.emptyMap(), true);
+    ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+    try {
+      var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
+      if (!libs.isEmpty()) {
+        for (Library handler : libs) {
+          try {
+            String libraryNamespace = handler.getNamespace().get();
+            EventMacroUtil.callEventHandler(
+                ON_CHANGE_MAP_CALLBACK,
+                libraryNamespace,
+                currentZR.getZone().getId().toString() + "," + currentZR.getZone().toString(),
+                null,
+                Collections.emptyMap());
+          } catch (InterruptedException | ExecutionException e) {
+            throw new AssertionError("Error retrieving library namespace");
+          }
+        }
+      }
+    } catch (InterruptedException | ExecutionException e) {
+      LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
     }
   }
 }
