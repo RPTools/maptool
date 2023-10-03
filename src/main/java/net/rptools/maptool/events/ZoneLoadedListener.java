@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.events;
 
-import static net.rptools.maptool.client.functions.MapFunctions.ON_CHANGE_MAP_CALLBACK;
-
 import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
 import java.util.concurrent.ExecutionException;
@@ -31,6 +29,7 @@ import org.apache.log4j.Logger;
 
 public class ZoneLoadedListener {
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
+  public static final String ON_CHANGE_MAP_CALLBACK = "onChangeMap";
 
   public ZoneLoadedListener() {
     new MapToolEventBus().getMainEventBus().register(this);
