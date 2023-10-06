@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.script.javascript.api;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
@@ -198,5 +199,55 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   @HostAccess.Export
   public String getMapName() {
     return this.map.getDisplayName();
+  }
+
+  @HostAccess.Export
+  public boolean getState(String stateName) {
+    Object currentState = this.token.getState(stateName);
+    return (currentState instanceof Boolean && (Boolean) currentState);
+  }
+
+  @HostAccess.Export
+  public void setState(String stateName, boolean aValue) {
+    this.token.setState(stateName, aValue);
+  }
+
+  @HostAccess.Export
+  public void setAllStates(Object aValue) {
+    this.token.setAllStates(aValue);
+  }
+
+  @HostAccess.Export
+  public List<String> getSetStates() {
+    return this.token.getSetStates();
+  }
+
+  @HostAccess.Export
+  public boolean isPC() {
+    return this.token.getType() == Token.Type.PC;
+  }
+
+  @HostAccess.Export
+  public void setPC() {
+    this.token.setType(Token.Type.PC);
+  }
+
+  @HostAccess.Export
+  public boolean isNPC() {
+    return this.token.getType() == Token.Type.NPC;
+  }
+
+  @HostAccess.Export
+  public void setNPC() {
+    this.token.setType(Token.Type.NPC);
+  }
+
+  @HostAccess.Export
+  public String getType() {
+    if (this.token.getType() == Token.Type.PC) {
+      return "PC";
+    } else {
+      return "NPC";
+    }
   }
 }
