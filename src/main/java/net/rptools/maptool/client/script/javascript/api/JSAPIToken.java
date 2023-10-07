@@ -209,12 +209,22 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setState(String stateName, boolean aValue) {
-    this.token.setState(stateName, aValue);
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(stateName, aValue);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, stateName, aValue);
+    }
   }
 
   @HostAccess.Export
-  public void setAllStates(Object aValue) {
-    this.token.setAllStates(aValue);
+  public void setAllStates(boolean aValue) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setAllStates(aValue);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setAllStates, aValue);
+    }
   }
 
   @HostAccess.Export
@@ -229,7 +239,12 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setPC() {
-    this.token.setType(Token.Type.PC);
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setType(Token.Type.PC);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPC);
+    }
   }
 
   @HostAccess.Export
@@ -239,7 +254,12 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public void setNPC() {
-    this.token.setType(Token.Type.NPC);
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setType(Token.Type.NPC);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setNPC);
+    }
   }
 
   @HostAccess.Export
