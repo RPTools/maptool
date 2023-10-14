@@ -40,19 +40,19 @@ public class ZoneLoadedListener {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
-      if (!libs.isEmpty()) {
-        for (Library handler : libs) {
-          try {
-            String libraryNamespace = handler.getNamespace().get();
-            EventMacroUtil.callEventHandler(
-                ON_CHANGE_MAP_CALLBACK,
-                libraryNamespace,
-                currentZR.getZone().getId().toString() + "," + currentZR.getZone().toString(),
-                null,
-                Collections.emptyMap());
-          } catch (InterruptedException | ExecutionException e) {
-            throw new AssertionError("Error retrieving library namespace");
-          }
+      if (libs.isEmpty()) return;
+      for (Library handler : libs) {
+        try {
+          String libraryNamespace = handler.getNamespace().get();
+          EventMacroUtil.callEventHandler(
+              ON_CHANGE_MAP_CALLBACK,
+              libraryNamespace,
+              currentZR.getZone().getId().toString() + "," + currentZR.getZone().toString(),
+              null,
+              Collections.emptyMap());
+        } catch (InterruptedException | ExecutionException e) {
+          LOGGER.error(I18N.getText("library.error.notFound"), e);
+          throw new AssertionError("Error retrieving library namespace");
         }
       }
     } catch (InterruptedException | ExecutionException e) {
