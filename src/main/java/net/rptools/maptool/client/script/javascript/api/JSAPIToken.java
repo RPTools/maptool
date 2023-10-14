@@ -228,7 +228,7 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
-  public List<String> getSetStates() {
+  public List<String> getActiveStates() {
     return this.token.getSetStates();
   }
 
@@ -264,10 +264,6 @@ public class JSAPIToken implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public String getType() {
-    if (this.token.getType() == Token.Type.PC) {
-      return "PC";
-    } else {
-      return "NPC";
-    }
+    return this.token.getType().name();
   }
 }
