@@ -2870,6 +2870,8 @@ public class AppActions {
                   MapTool.showError("msg.error.failedSaveMap", ioe);
                 }
               }
+            } else {
+                tryAgain = false;
             }
           }
         }
