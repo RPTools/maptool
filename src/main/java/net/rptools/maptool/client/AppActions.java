@@ -2848,30 +2848,27 @@ public class AppActions {
           chooser.setSelectedFile(new File(zr.getZone().getName()));
           boolean tryAgain = true;
           while (tryAgain) {
-            if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-              File mapFile = chooser.getSelectedFile();
-              var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-              var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
-              if (saveDir.startsWith(installDir)) {
-                MapTool.showWarning("msg.warning.saveMapToInstallDir");
-              } else {
-                tryAgain = false;
-                try {
-                  mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
-                  if (mapFile.exists()) {
-                    if (!MapTool.confirm("msg.confirm.fileExists")) {
-                      return;
-                    }
-                  }
-                  PersistenceUtil.saveMap(zr.getZone(), mapFile);
-                  AppPreferences.setSaveMapDir(mapFile.getParentFile());
-                  MapTool.showInformation("msg.info.mapSaved");
-                } catch (IOException ioe) {
-                  MapTool.showError("msg.error.failedSaveMap", ioe);
-                }
-              }
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) break;
+            File mapFile = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.saveMapToInstallDir");
             } else {
               tryAgain = false;
+              try {
+                mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+                if (mapFile.exists()) {
+                  if (!MapTool.confirm("msg.confirm.fileExists")) {
+                    return;
+                  }
+                }
+                PersistenceUtil.saveMap(zr.getZone(), mapFile);
+                AppPreferences.setSaveMapDir(mapFile.getParentFile());
+                MapTool.showInformation("msg.info.mapSaved");
+              } catch (IOException ioe) {
+                MapTool.showError("msg.error.failedSaveMap", ioe);
+              }
             }
           }
         }
