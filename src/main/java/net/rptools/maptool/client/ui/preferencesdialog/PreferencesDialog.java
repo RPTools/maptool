@@ -464,6 +464,9 @@ public class PreferencesDialog extends JDialog {
       }
     }
 
+    final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
+    installDirTextField.setText(AppUtil.getInstallDirectory().toString());
+
     File appCfgFile = AppUtil.getAppCfgFile();
     String copyInfo = "";
     if (appCfgFile != null) { // Don't try to display message if running from dev.
