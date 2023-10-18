@@ -138,7 +138,7 @@ sourceSets {
 run {
     args = ['-v=' + appSemVer]
     applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
-                                 "-Dpolyglot.engine.WarnInterpreterOnly=false",
+                                 "-Dpolyglot.engine.WarnInterpreterOnly=false","-DRUN_FROM_IDE=true",
                                  "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
                                  "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
                                  "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
@@ -217,7 +217,8 @@ runtime {
                'jdk.unsupported.desktop',
                'jdk.xml.dom',
                'jdk.crypto.cryptoki',
-               'jdk.crypto.ec'
+               'jdk.crypto.ec',
+               'jdk.zipfs'
     ]
 
 
@@ -231,7 +232,8 @@ runtime {
                    "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
                    "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
                    "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"
+          ]
 
         imageOptions = []
         imageName = project.name + developerRelease
@@ -500,6 +502,14 @@ dependencies {
 
     // Built In Add-on Libraries
     implementation 'com.github.RPTools:maptool-builtin-addons:1.3'
+
+    // For advanced dice roller
+    implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
+
+
+
+
+
 }
 
 

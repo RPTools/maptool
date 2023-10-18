@@ -741,10 +741,7 @@ public class MapTool {
   }
 
   public static boolean isDevelopment() {
-    return "DEVELOPMENT".equals(version)
-        || "@buildNumber@".equals(version)
-        || "0.0.1".equals(version)
-        || (version != null && version.startsWith("SNAPSHOT"));
+    return System.getProperty("RUN_FROM_IDE") != null;
   }
 
   public static ServerPolicy getServerPolicy() {
@@ -1805,6 +1802,33 @@ public class MapTool {
     } catch (Exception e) {
       MapTool.showError("msg.error.lafSetup", e);
       System.exit(1);
+    }
+
+    /*
+     * Load GenSys and SW RPG fonts
+     */
+    try {
+      var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      var genFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
+      genv.registerFont(genFont);
+      var swGenFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
+      genv.registerFont(swGenFont);
+    } catch (Exception e) {
+      log.error("msg.error.genesysFont", e);
     }
 
     /**

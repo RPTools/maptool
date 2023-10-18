@@ -190,7 +190,11 @@ public class CampaignProperties {
    */
   public void setTokenTypeDefaultStatSheet(
       String propertyType, StatSheetProperties statSheetProperties) {
-    tokenTypeStatSheetMap.put(propertyType, statSheetProperties);
+    if (statSheetProperties == null) {
+      tokenTypeStatSheetMap.remove(propertyType);
+    } else {
+      tokenTypeStatSheetMap.put(propertyType, statSheetProperties);
+    }
   }
 
   public Map<String, SightType> getSightTypeMap() {

@@ -182,7 +182,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           var type = (String) getTokenTypeList().getSelectedValue();
           if (type != null) {
             JPanel renameToPanel = new JPanel();
-            // renameToPanel.setLayout(new BoxLayout(renameToPanel, BoxLayout.PAGE_AXIS));
             JComboBox<String> types =
                 new JComboBox<>(
                     tokenTypeMap.keySet().stream()
@@ -332,6 +331,7 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             var oldName = (String) ttList.getSelectedValue();
             var newName = field.getText();
             tokenTypeMap.put(newName, tokenTypeMap.remove(oldName));
+            tokenTypeStatSheetMap.put(newName, tokenTypeStatSheetMap.remove(oldName));
             ttList.setSelectedValue(newName, true);
             updateExistingTokenTypes(oldName, newName);
           }
