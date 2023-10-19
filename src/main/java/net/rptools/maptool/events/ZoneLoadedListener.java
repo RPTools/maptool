@@ -40,14 +40,16 @@ public class ZoneLoadedListener {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
-      if (libs.isEmpty()) return;
+      if (libs.isEmpty()) {
+        return;
+      }
       for (Library handler : libs) {
         try {
           String libraryNamespace = handler.getNamespace().get();
           EventMacroUtil.callEventHandler(
               ON_CHANGE_MAP_CALLBACK,
               libraryNamespace,
-              currentZR.getZone().getId().toString() + "," + currentZR.getZone().toString(),
+              currentZR.getZone().getId().toString(),
               null,
               Collections.emptyMap());
         } catch (InterruptedException | ExecutionException e) {
