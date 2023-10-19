@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
-import java.awt.*;
 import javax.swing.*;
 
 public class PreferencesDialogView {
