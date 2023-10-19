@@ -199,7 +199,7 @@ public class PreferencesDialog extends JDialog {
   private final ColorWell npcTokenLabelFG;
   private final ColorWell npcTokenLabelBG;
   private final ColorWell nonVisTokenLabelFG;
-  private final ColorWell nonVisTokenLabelBg;
+  private final ColorWell nonVisTokenLabelBG;
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
@@ -430,6 +430,13 @@ public class PreferencesDialog extends JDialog {
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
 
     startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
+    pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
+    npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
+    npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
+    nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
+    nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
 
     {
       final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");

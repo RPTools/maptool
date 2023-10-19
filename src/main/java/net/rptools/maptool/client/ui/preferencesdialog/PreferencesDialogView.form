@@ -1042,7 +1042,7 @@
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
-                      <name value="pcTokenLabelFG"/>
+                      <name value="pcTokenLabelBG"/>
                     </properties>
                   </component>
                   <component id="93ef0" class="net.rptools.maptool.client.swing.ColorWell">
@@ -1051,7 +1051,7 @@
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
-                      <name value="pcTokenLabelBG"/>
+                      <name value="pcTokenLabelFG"/>
                     </properties>
                   </component>
                   <component id="bdd65" class="net.rptools.maptool.client.swing.ColorWell">
@@ -1060,7 +1060,7 @@
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
-                      <name value="npcTokenLabelFG"/>
+                      <name value="npcTokenLabelBG"/>
                     </properties>
                   </component>
                   <component id="6899a" class="net.rptools.maptool.client.swing.ColorWell">
@@ -1069,7 +1069,7 @@
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
-                      <name value="npcTokenLabelBG"/>
+                      <name value="npcTokenLabelFG"/>
                     </properties>
                   </component>
                   <component id="9edc6" class="net.rptools.maptool.client.swing.ColorWell">
@@ -1078,7 +1078,7 @@
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
-                      <name value="nonVisTokenLabelFG"/>
+                      <name value="nonVisTokenLabelBG"/>
                     </properties>
                   </component>
                   <component id="a4ba2" class="net.rptools.maptool.client.swing.ColorWell">
