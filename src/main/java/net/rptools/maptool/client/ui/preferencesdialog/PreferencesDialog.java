@@ -192,6 +192,14 @@ public class PreferencesDialog extends JDialog {
   private boolean jvmValuesChanged = false;
 
   private boolean themeChanged = false;
+
+  // Map Token Labels
+  private final ColorWell pcTokenLabelFG;
+  private final ColorWell pcTokenLabelBG;
+  private final ColorWell npcTokenLabelFG;
+  private final ColorWell npcTokenLabelBG;
+  private final ColorWell nonVisTokenLabelFG;
+  private final ColorWell nonVisTokenLabelBg;
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),

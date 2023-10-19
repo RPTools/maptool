@@ -46,6 +46,7 @@ import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.Tool;
@@ -2881,6 +2882,7 @@ public class ZoneRenderer extends JComponent
   protected void renderTokens(
       Graphics2D g, List<Token> tokenList, PlayerView view, boolean figuresOnly) {
     Graphics2D clippedG = g;
+    var imageLabelFactory = new FlatImageLabelFactory();
 
     boolean isGMView = view.isGMView(); // speed things up
 
@@ -3565,54 +3567,36 @@ public class ZoneRenderer extends JComponent
           name += " (" + token.getGMName() + ")";
         }
         if (!view.equals(lastView) || !labelRenderingCache.containsKey(tokId)) {
-          // if ((lastView != null && !lastView.equals(view)) ||
-          // !labelRenderingCache.containsKey(tokId)) {
           boolean hasLabel = false;
 
-          // Calculate image dimensions
-          FontMetrics fm = g.getFontMetrics();
-          Font f = g.getFont();
-          int strWidth = SwingUtilities.computeStringWidth(fm, name);
+          var flatImgLabel = imageLabelFactory.getMapImageLabel(token);
 
-          int width = strWidth + GraphicsUtil.BOX_PADDINGX * 2;
-          int height = fm.getHeight() + GraphicsUtil.BOX_PADDINGY * 2;
-          int labelHeight = height;
-
+          var nameDimension = flatImgLabel.getDimensions(g, name);
+          var labelDimension = new Dimension(0, 0);
           // If token has a label (in addition to name).
-          if (token.getLabel() != null && token.getLabel().trim().length() > 0) {
+          if (token.getLabel() != null && !token.getLabel().trim().isEmpty()) {
             hasLabel = true;
-            height = height * 2; // Double the image height for two boxed strings.
-            int labelWidth =
-                SwingUtilities.computeStringWidth(fm, token.getLabel())
-                    + GraphicsUtil.BOX_PADDINGX * 2;
-            width = Math.max(width, labelWidth);
+            labelDimension = flatImgLabel.getDimensions(g, token.getLabel());
           }
-
-          // Set up the image
-          BufferedImage labelRender = new BufferedImage(width, height, Transparency.TRANSLUCENT);
+          int width = (int) Math.max(nameDimension.getWidth(), labelDimension.getWidth());
+          int height = (int) (nameDimension.getHeight() + labelDimension.getHeight()) + 4;
+          var labelRender = new BufferedImage(width, height, Transparency.TRANSLUCENT);
           Graphics2D gLabelRender = labelRender.createGraphics();
-          gLabelRender.setFont(f); // Match font used in the main graphics context.
-          gLabelRender.setRenderingHints(g.getRenderingHints()); // Match rendering style.
+          gLabelRender.setRenderingHints(g.getRenderingHints());
 
           // Draw name and label to image
           if (hasLabel) {
-            GraphicsUtil.drawBoxedString(
+            flatImgLabel.render(
                 gLabelRender,
-                token.getLabel(),
-                width / 2,
-                height - (labelHeight / 2),
-                SwingUtilities.CENTER,
-                background,
-                foreground);
+                (width - labelDimension.width) / 2,
+                nameDimension.height + 4,
+                token.getLabel());
           }
-          GraphicsUtil.drawBoxedString(
-              gLabelRender,
-              name,
-              width / 2,
-              labelHeight / 2,
-              SwingUtilities.CENTER,
-              background,
-              foreground);
+          /**
+           * TODO: CDW GraphicsUtil.drawBoxedString( gLabelRender, name, width / 2, labelHeight / 2,
+           * SwingUtilities.CENTER, background, foreground);
+           */
+          flatImgLabel.render(gLabelRender, (width - nameDimension.width) / 2, 0, name);
 
           // Add image to cache
           labelRenderingCache.put(tokId, labelRender);
