@@ -213,18 +213,17 @@ public class AppUtil {
     var path = Path.of(getAppInstallLocation());
     if (MapTool.isDevelopment()) {
       // remove build/classes/java
-      path = path.getParent().getParent().getParent().getParent();
-    } else {
+      path = path.getParent().getParent().getParent();
+    } else { // First try to find MapTool* directory in path
       while (path != null) {
         if (path.getFileName().toString().matches("(?i).*maptool.*")) {
-          path = path.getParent();
           break;
         }
         path = path.getParent();
       }
     }
-    if (path == null) {
-      return Path.of(getAppInstallLocation());
+    if (path == null) { // if not found then just return the parent of the app subdir
+      return Path.of(getAppInstallLocation()).resolve("..").toAbsolutePath();
     } else {
       return path;
     }
