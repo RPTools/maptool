@@ -446,6 +446,26 @@ public class AppPreferences {
   private static final String KEY_PLAY_STREAMS = "playStreams";
   private static final boolean DEFAULT_PLAY_STREAMS = true;
 
+  private static final String KEY_NPC_MAP_LABEL_BG_COLOR = "npcMapLabelBG";
+  private static final String KEY_NPC_MAP_LABEL_FG_COLOR = "npcMapLabelFG";
+
+  private static final String KEY_PC_MAP_LABEL_BG_COLOR = "pcMapLabelBG";
+  private static final String KEY_PC_MAP_LABEL_FG_COLOR = "pcMapLabelFG";
+
+  private static final String KEY_NONVIS_MAP_LABEL_BG_COLOR = "nonVisMapLabelBG";
+  private static final String KEY_NONVIS_MAP_LABEL_FG_COLOR = "nonVisMapLabelFG";
+
+  private static final String KEY_MAP_LABEL_FONT_SIZE = "mapLabelFontSize";
+
+  private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
+  private static final Color DEFAULT_NPC_MAP_LABEL_FG_COLOR = Color.BLACK;
+  private static final Color DEFAULT_PC_MAP_LABEL_BG_COLOR = Color.WHITE;
+  private static final Color DEFAULT_PC_MAP_LABEL_FG_COLOR = Color.BLUE;
+  private static final Color DEFAULT_NONVIS_MAP_LABEL_BG_COLOR = Color.BLACK;
+  private static final Color DEFAULT_NONVIS_MAP_LABEL_FG_COLOR = Color.WHITE;
+
+  private static final int DEFAULT_MAP_LABEL_FONT_SIZE = AppStyle.labelFont.getSize();
+
   public static void setHaloLineWidth(int size) {
     prefs.putInt(KEY_HALO_LINE_WIDTH, size);
   }
@@ -538,8 +558,6 @@ public class AppPreferences {
 
   private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
 
-  private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.LOW_SCALING;
-
   public enum RenderQuality {
     LOW_SCALING,
     PIXEL_ART_SCALING,
@@ -606,9 +624,9 @@ public class AppPreferences {
     if (renderQuality == null) {
       try {
         renderQuality =
-            RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, DEFAULT_RENDER_QUALITY.name()));
+            RenderQuality.valueOf(prefs.get(KEY_RENDER_QUALITY, RenderQuality.LOW_SCALING.name()));
       } catch (Exception e) {
-        renderQuality = DEFAULT_RENDER_QUALITY;
+        renderQuality = RenderQuality.LOW_SCALING;
       }
     }
     return renderQuality;
@@ -1466,5 +1484,139 @@ public class AppPreferences {
     } else {
       prefs.put(KEY_TOPOLOGY_TYPES, types.toString());
     }
+  }
+
+  /**
+   * Returns the background color to use for NPC Map Labels.
+   *
+   * @return the background color to use for NPC Map Labels.
+   */
+  public static Color getNPCMapLabelBG() {
+    return new Color(
+        prefs.getInt(KEY_NPC_MAP_LABEL_BG_COLOR, DEFAULT_NPC_MAP_LABEL_BG_COLOR.getRGB()), true);
+  }
+
+  /**
+   * Sets the background color to use for NPC Map Labels.
+   *
+   * @param color the background color to use for NPC Map Labels.
+   */
+  public static void setNPCMapLabelBG(Color color) {
+    prefs.putInt(KEY_NPC_MAP_LABEL_BG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the foreground color to use for NPC Map Labels.
+   *
+   * @return the foreground color to use for NPC Map Labels.
+   */
+  public static Color getNPCMapLabelFG() {
+    return new Color(
+        prefs.getInt(KEY_NPC_MAP_LABEL_FG_COLOR, DEFAULT_NPC_MAP_LABEL_FG_COLOR.getRGB()), true);
+  }
+
+  /**
+   * Sets the foreground color to use for NPC Map Labels.
+   *
+   * @param color the foreground color to use for NPC Map Labels.
+   */
+  public static void setNPCMapLabelFG(Color color) {
+    prefs.putInt(KEY_NPC_MAP_LABEL_FG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the background color to use for PC Map Labels.
+   *
+   * @return the background color to use for PC Map Labels.
+   */
+  public static Color getPCMapLabelBG() {
+    return new Color(
+        prefs.getInt(KEY_PC_MAP_LABEL_BG_COLOR, DEFAULT_PC_MAP_LABEL_BG_COLOR.getRGB()), true);
+  }
+
+  /**
+   * Sets the background color to use for PC Map Labels.
+   *
+   * @param color the background color to use for PC Map Labels.
+   */
+  public static void setPCMapLabelBG(Color color) {
+    prefs.putInt(KEY_PC_MAP_LABEL_BG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the foreground color to use for PC Map Labels.
+   *
+   * @return the foreground color to use for PC Map Labels.
+   */
+  public static Color getPCMapLabelFG() {
+    return new Color(
+        prefs.getInt(KEY_PC_MAP_LABEL_FG_COLOR, DEFAULT_PC_MAP_LABEL_FG_COLOR.getRGB()), true);
+  }
+
+  /**
+   * Sets the foreground color to use for PC Map Labels.
+   *
+   * @param color the foreground color to use for PC Map Labels.
+   */
+  public static void setPCMapLabelFG(Color color) {
+    prefs.putInt(KEY_PC_MAP_LABEL_FG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the background color to use for Non-Visible Token Map Labels.
+   *
+   * @return the background color to use for Non-Visible Token Map Labels.
+   */
+  public static Color getNonVisMapLabelBG() {
+    return new Color(
+        prefs.getInt(KEY_NONVIS_MAP_LABEL_BG_COLOR, DEFAULT_NONVIS_MAP_LABEL_BG_COLOR.getRGB()),
+        true);
+  }
+
+  /**
+   * Sets the background color to use for Non-Visible Token Map Labels.
+   *
+   * @param color the background color to use for Non-Visible Token Map Labels.
+   */
+  public static void setNonVisMapLabelBG(Color color) {
+    prefs.putInt(KEY_NONVIS_MAP_LABEL_BG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the foreground color to use for Non-Visible Token Map Labels.
+   *
+   * @return the foreground color to use for Non-Visible Token Map Labels.
+   */
+  public static Color getNonVisMapLabelFG() {
+    return new Color(
+        prefs.getInt(KEY_NONVIS_MAP_LABEL_FG_COLOR, DEFAULT_NONVIS_MAP_LABEL_FG_COLOR.getRGB()),
+        true);
+  }
+
+  /**
+   * Sets the foreground color to use for Non-Visible Token Map Labels.
+   *
+   * @param color the foreground color to use for Non-Visible Token Map Labels.
+   */
+  public static void setNonVisMapLabelFG(Color color) {
+    prefs.putInt(KEY_NONVIS_MAP_LABEL_FG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the font size to use for Map Token Labels.
+   *
+   * @return the font size to use for Map Token Labels.
+   */
+  public static int getMapLabelFontSize() {
+    return prefs.getInt(KEY_MAP_LABEL_FONT_SIZE, DEFAULT_MAP_LABEL_FONT_SIZE);
+  }
+
+  /**
+   * Sets the font size to use for Map Token Labels.
+   *
+   * @param size the font size to use for Map Token Labels.
+   */
+  public static void setMapLabelFontSize(int size) {
+    prefs.putInt(KEY_MAP_LABEL_FONT_SIZE, size);
   }
 }

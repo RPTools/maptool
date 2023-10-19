@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
-import java.awt.*;
 import javax.swing.*;
 
 public class PreferencesDialogView {
@@ -26,7 +25,6 @@ public class PreferencesDialogView {
   private JPanel developerOptionToggles;
   private JPanel developerTab;
   private JLabel developerTabWarning;
-  private JSpinner spinner2;
 
   public JComponent getRootComponent() {
     return mainPanel;

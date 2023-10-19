@@ -200,6 +200,8 @@ public class PreferencesDialog extends JDialog {
   private final ColorWell npcTokenLabelBG;
   private final ColorWell nonVisTokenLabelFG;
   private final ColorWell nonVisTokenLabelBG;
+
+  private final JSpinner labelFontSizeSpinner;
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
@@ -398,6 +400,9 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
 
+    final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
+    installDirTextField.setText(AppUtil.getInstallDirectory().toString());
+
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
     copyPublicKey = (JButton) panel.getButton("copyKey");
@@ -432,11 +437,20 @@ public class PreferencesDialog extends JDialog {
     startupInfoLabel = panel.getLabel("startupInfoLabel");
 
     pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
+    pcTokenLabelFG.setColor(AppPreferences.getPCMapLabelFG());
     pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
+    pcTokenLabelBG.setColor(AppPreferences.getPCMapLabelBG());
     npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
+    npcTokenLabelFG.setColor(AppPreferences.getNPCMapLabelFG());
     npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
+    npcTokenLabelBG.setColor(AppPreferences.getNPCMapLabelBG());
     nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
+    nonVisTokenLabelFG.setColor(AppPreferences.getNonVisMapLabelFG());
     nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
+    nonVisTokenLabelBG.setColor(AppPreferences.getNonVisMapLabelBG());
+
+    labelFontSizeSpinner = (JSpinner) panel.getComponent("labelFontSizeSpinner");
+    labelFontSizeSpinner.setValue(AppPreferences.getMapLabelFontSize());
 
     {
       final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");
@@ -857,6 +871,44 @@ public class PreferencesDialog extends JDialog {
                 return StringUtil.parseInteger(value);
               }
             });
+
+    npcTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelBG(npcTokenLabelBG.getColor());
+        });
+
+    npcTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelFG(npcTokenLabelFG.getColor());
+        });
+
+    pcTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelBG(pcTokenLabelBG.getColor());
+        });
+
+    pcTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelFG(pcTokenLabelFG.getColor());
+        });
+
+    nonVisTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelBG(nonVisTokenLabelBG.getColor());
+        });
+
+    nonVisTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelFG(nonVisTokenLabelFG.getColor());
+        });
+
+    labelFontSizeSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelFontSize(value);
+          }
+        });
 
     fitGMView.addActionListener(e -> AppPreferences.setFitGMView(fitGMView.isSelected()));
     hideNPCs.addActionListener(e -> AppPreferences.setInitHideNpcs(hideNPCs.isSelected()));

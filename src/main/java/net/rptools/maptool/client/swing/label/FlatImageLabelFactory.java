@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.swing.label;
 
-import java.awt.Color;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.swing.label.FlatImageLabel.Justification;
 import net.rptools.maptool.model.Token;
@@ -22,19 +22,25 @@ import net.rptools.maptool.model.Token.Type;
 
 public class FlatImageLabelFactory {
 
-  private static FlatImageLabel npcImageLabel;
-  private static FlatImageLabel pcImageLabel;
-  private static FlatImageLabel nonVisibleImageLabel;
+  private final FlatImageLabel npcImageLabel;
+  private final FlatImageLabel pcImageLabel;
+  private final FlatImageLabel nonVisibleImageLabel;
 
-  static {
+  public FlatImageLabelFactory() {
+    var npcBackground = AppPreferences.getNPCMapLabelBG();
+    var npcForeground = AppPreferences.getNPCMapLabelFG();
+    var pcBackground = AppPreferences.getPCMapLabelBG();
+    var pcForeground = AppPreferences.getPCMapLabelFG();
+    var nonVisBackground = AppPreferences.getNonVisMapLabelBG();
+    var nonVisForeground = AppPreferences.getNonVisMapLabelFG();
+    int fontSize = AppPreferences.getMapLabelFontSize();
+    var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), fontSize);
+
     npcImageLabel =
-        new FlatImageLabel(4, 4, Color.blue, Color.white, AppStyle.labelFont, Justification.Center);
-    pcImageLabel =
-        new FlatImageLabel(
-            4, 4, Color.lightGray, Color.lightGray, AppStyle.labelFont, Justification.Center);
+        new FlatImageLabel(4, 4, npcForeground, npcBackground, font, Justification.Center);
+    pcImageLabel = new FlatImageLabel(4, 4, pcForeground, pcBackground, font, Justification.Center);
     nonVisibleImageLabel =
-        new FlatImageLabel(
-            4, 4, Color.white, Color.darkGray, AppStyle.labelFont, Justification.Center);
+        new FlatImageLabel(4, 4, nonVisForeground, nonVisBackground, font, Justification.Center);
   }
 
   public FlatImageLabel getMapImageLabel(Token token) {

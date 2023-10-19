@@ -3,7 +3,7 @@
   <grid id="3f87d" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="1027" height="721"/>
+      <xy x="10" y="10" width="1027" height="841"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -958,39 +958,37 @@
                   <text value=""/>
                 </properties>
               </component>
-              <grid id="85d76" layout-manager="GridLayoutManager" row-count="8" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="85d76" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
-                <border type="none"/>
+                <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.access.tokenLabel">
+                  <font/>
+                  <title-color color="-13538620"/>
+                </border>
                 <children>
-                  <component id="ff8d7" class="javax.swing.JLabel">
-                    <constraints>
-                      <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel"/>
-                    </properties>
-                  </component>
                   <component id="8e6c3" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.size"/>
                     </properties>
                   </component>
-                  <component id="59257" class="javax.swing.JSpinner" binding="spinner2" default-binding="true">
+                  <component id="59257" class="javax.swing.JSpinner" default-binding="true">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
                     </constraints>
-                    <properties/>
+                    <properties>
+                      <name value="labelFontSizeSpinner"/>
+                      <opaque value="false"/>
+                    </properties>
                   </component>
                   <component id="4fce9" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.pcBackground"/>
@@ -998,7 +996,7 @@
                   </component>
                   <component id="f4912" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.pcForeground"/>
@@ -1006,7 +1004,7 @@
                   </component>
                   <component id="1c56f" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.npcBackground"/>
@@ -1014,7 +1012,7 @@
                   </component>
                   <component id="bf81b" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.npcForeground"/>
@@ -1022,7 +1020,7 @@
                   </component>
                   <component id="e7462" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.nonVisBackground"/>
@@ -1030,7 +1028,7 @@
                   </component>
                   <component id="f8c81" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.nonVisForeground"/>
@@ -1038,7 +1036,7 @@
                   </component>
                   <component id="64fca" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1047,7 +1045,7 @@
                   </component>
                   <component id="93ef0" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1056,7 +1054,7 @@
                   </component>
                   <component id="bdd65" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1065,7 +1063,7 @@
                   </component>
                   <component id="6899a" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1074,7 +1072,7 @@
                   </component>
                   <component id="9edc6" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1083,7 +1081,7 @@
                   </component>
                   <component id="a4ba2" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1104,7 +1102,7 @@
             </properties>
             <border type="none"/>
             <children>
-              <grid id="aba93" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="aba93" layout-manager="GridLayoutManager" row-count="8" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="4" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -1424,14 +1422,44 @@
                   </grid>
                   <vspacer id="2d390">
                     <constraints>
-                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
                   <vspacer id="eff99">
                     <constraints>
-                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
+                  <grid id="7afd" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="0" left="0" bottom="0" right="0"/>
+                    <constraints>
+                      <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
+                    </constraints>
+                    <properties/>
+                    <border type="none" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Preferences.label.installDir">
+                      <font name="Dialog" size="12" style="1"/>
+                      <title-color color="-13538620"/>
+                      <color color="-6710887"/>
+                    </border>
+                    <children>
+                      <component id="57d9" class="javax.swing.JTextField" default-binding="true">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false">
+                            <preferred-size width="150" height="-1"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <name value="InstallDirTextField"/>
+                          <requestFocusEnabled value="false"/>
+                        </properties>
+                      </component>
+                      <vspacer id="f7894">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </vspacer>
+                    </children>
+                  </grid>
                 </children>
               </grid>
               <grid id="b7224" layout-manager="GridLayoutManager" row-count="3" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
@@ -2186,9 +2214,9 @@
                       <editable value="false"/>
                       <horizontalAlignment value="4"/>
                       <name value="jvmXmxTextField"/>
-                      <scrollOffset value="18"/>
-                      <selectionEnd value="0"/>
-                      <selectionStart value="0"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
                       <text value="4G"/>
                       <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.language.tooltip"/>
                     </properties>
@@ -2201,9 +2229,9 @@
                       <editable value="false"/>
                       <horizontalAlignment value="4"/>
                       <name value="jvmXmsTextField"/>
-                      <scrollOffset value="18"/>
-                      <selectionEnd value="0"/>
-                      <selectionStart value="0"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
                       <text value="4G"/>
                       <toolTipText value="Oracle recommends setting the minimum heap size (-Xms) equal to the maximum heap size (-Xmx) to minimize garbage collections."/>
                     </properties>
@@ -2225,9 +2253,9 @@
                       <editable value="false"/>
                       <horizontalAlignment value="4"/>
                       <name value="jvmXssTextField"/>
-                      <scrollOffset value="20"/>
-                      <selectionEnd value="0"/>
-                      <selectionStart value="0"/>
+                      <scrollOffset value="1"/>
+                      <selectionEnd value="2"/>
+                      <selectionStart value="2"/>
                       <text value="4M"/>
                       <toolTipText value="Thread stacks are memory areas allocated for each Java thread for their internal use. This is where the thread stores its local execution state."/>
                     </properties>
@@ -2366,8 +2394,8 @@
                       <editable value="false"/>
                       <horizontalAlignment value="2"/>
                       <name value="dataDirTextField"/>
-                      <selectionEnd value="0"/>
-                      <selectionStart value="0"/>
+                      <selectionEnd value="14"/>
+                      <selectionStart value="14"/>
                       <text value=".maptool-nerps"/>
                       <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.options.directory.tooltip"/>
                     </properties>
