@@ -18,13 +18,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.language.I18N;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class DeveloperOptions {
-  private static final Logger log = LogManager.getLogger(DeveloperOptions.class);
   private static final Preferences prefs =
-      Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+      Preferences.userRoot().node(AppConstants.APP_NAME + "/dev");
 
   public enum Toggle {
     /**
@@ -57,7 +54,7 @@ public class DeveloperOptions {
     }
 
     public boolean isEnabled() {
-      return prefs.getBoolean(key, true);
+      return prefs.getBoolean(key, false);
     }
 
     public void setEnabled(boolean enabled) {

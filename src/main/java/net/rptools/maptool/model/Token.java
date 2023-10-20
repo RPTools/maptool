@@ -1742,6 +1742,18 @@ public class Token implements Cloneable {
     return state.get(property);
   }
 
+  public List<String> getSetStates() {
+    List<String> setStates = new ArrayList<String>();
+    for (Map.Entry<String, Object> entry : state.entrySet()) {
+      if (entry.getValue() instanceof Boolean) {
+        if ((Boolean) entry.getValue()) {
+          setStates.add(entry.getKey());
+        }
+      }
+    }
+    return setStates;
+  }
+
   /**
    * Set the value of state for this Token.
    *
