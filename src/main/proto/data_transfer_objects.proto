@@ -671,7 +671,7 @@ message TokenPropertyValueDto {
     string string_value = 3;
     double double_value = 4;
     MacroButtonPropertiesListDto macros = 5;
-    LightSourceDto light_source = 6;
+    string light_source_id = 6;
     AreaDto area = 7;
     StringListDto string_values = 8;
     GridDto grid = 9;

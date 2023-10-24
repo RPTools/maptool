@@ -466,9 +466,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         if (token.hasLightSource(lightSource)) {
-          token.removeLightSource(lightSource);
+          token.removeLightSource(lightSource.getId());
         } else {
-          token.addLightSource(lightSource);
+          token.addLightSource(lightSource.getId());
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
 
