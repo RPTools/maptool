@@ -294,8 +294,7 @@ public class ZoneView {
     final var result = new ArrayList<ContributedLight>();
 
     for (final var attachedLightSource : lightSourceToken.getLightSources()) {
-      LightSource lightSource =
-          MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
+      LightSource lightSource = attachedLightSource.resolve(MapTool.getCampaign());
       if (lightSource == null) {
         continue;
       }
@@ -653,7 +652,7 @@ public class ZoneView {
         Point p = FogUtil.calculateVisionCenter(token, zone);
 
         for (AttachedLightSource als : token.getLightSources()) {
-          LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+          LightSource lightSource = als.resolve(MapTool.getCampaign());
           if (lightSource == null) {
             continue;
           }
@@ -721,7 +720,7 @@ public class ZoneView {
       if (token.hasLightSources() && token.isVisible()) {
         if (!token.isVisibleOnlyToOwner() || AppUtil.playerOwns(token)) {
           for (AttachedLightSource als : token.getLightSources()) {
-            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+            LightSource lightSource = als.resolve(MapTool.getCampaign());
             if (lightSource == null) {
               continue;
             }
@@ -911,7 +910,7 @@ public class ZoneView {
     for (Token token : event.tokens()) {
       if (token.hasAnyTopology()) tokenChangedTopology = true;
       for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+        LightSource lightSource = als.resolve(MapTool.getCampaign());
         if (lightSource == null) {
           continue;
         }
@@ -966,7 +965,7 @@ public class ZoneView {
           token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
       if (token.hasAnyTopology()) hasTopology = true;
       for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = c.getLightSource(als.getLightSourceId());
+        LightSource lightSource = als.resolve(c);
         if (lightSource != null) {
           Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
           if (hasLightSource) {
