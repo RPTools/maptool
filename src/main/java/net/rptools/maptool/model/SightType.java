@@ -15,6 +15,7 @@
 package net.rptools.maptool.model;
 
 import java.awt.geom.Area;
+import javax.annotation.Nullable;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
 import net.rptools.maptool.server.proto.SightTypeDto;
 
@@ -64,12 +65,12 @@ public class SightType {
     // For serialization
   }
 
-  public SightType(String name, double multiplier, LightSource personalLightSource) {
+  public SightType(String name, double multiplier, @Nullable LightSource personalLightSource) {
     this(name, multiplier, personalLightSource, ShapeType.CIRCLE);
   }
 
   public SightType(
-      String name, double multiplier, LightSource personalLightSource, ShapeType shape) {
+      String name, double multiplier, @Nullable LightSource personalLightSource, ShapeType shape) {
     this.name = name;
     this.multiplier = multiplier;
     this.personalLightSource = personalLightSource;

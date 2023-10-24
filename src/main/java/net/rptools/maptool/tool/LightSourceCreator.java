@@ -21,6 +21,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import net.rptools.lib.FileUtil;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
@@ -57,28 +58,33 @@ public class LightSourceCreator {
   }
 
   private static LightSource createLightSource(String name, double radius, double arcAngle) {
-    LightSource source = new LightSource(name);
-    // source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
-    source.add(new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false));
-    return source;
+    return LightSource.createRegular(
+        name,
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        List.of(
+            // new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50)))
+            new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false)));
   }
 
   private static LightSource createD20LightSource(String name, double radius, double arcAngle) {
-    LightSource source = new LightSource(name);
-
-    // source.add(new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50))));
-    source.add(new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false));
-    source.add(
-        new Light(
-            ShapeType.CIRCLE,
-            0,
-            radius * 2,
-            arcAngle,
-            new DrawableColorPaint(new Color(0, 0, 0, 100)),
-            100,
-            false,
-            false));
-
-    return source;
+    return LightSource.createRegular(
+        name,
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        List.of(
+            // new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50)))
+            new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false),
+            new Light(
+                ShapeType.CIRCLE,
+                0,
+                radius * 2,
+                arcAngle,
+                new DrawableColorPaint(new Color(0, 0, 0, 100)),
+                100,
+                false,
+                false)));
   }
 }
