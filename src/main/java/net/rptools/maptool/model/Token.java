@@ -211,6 +211,8 @@ public class Token implements Cloneable {
     setPortraitImage,
     setCharsheetImage,
     setLayout,
+    createUniqueLightSource,
+    deleteUniqueLightSource,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -335,6 +337,7 @@ public class Token implements Cloneable {
   private MD5Key charsheetImage;
   private MD5Key portraitImage;
 
+  private Map<GUID, LightSource> uniqueLightSources = new LinkedHashMap<>();
   private List<AttachedLightSource> lightSourceList = new ArrayList<>();
   private String sightType;
   private boolean hasSight;
@@ -473,7 +476,10 @@ public class Token implements Cloneable {
 
     ownerType = token.ownerType;
     ownerList.addAll(token.ownerList);
+
+    uniqueLightSources.putAll(token.uniqueLightSources);
     lightSourceList.addAll(token.lightSourceList);
+
     state.putAll(token.state);
     getPropertyMap().clear();
     getPropertyMap().putAll(token.propertyMapCI);
@@ -918,6 +924,22 @@ public class Token implements Cloneable {
     return imageTableName;
   }
 
+  public @Nonnull Collection<LightSource> getUniqueLightSources() {
+    return uniqueLightSources.values();
+  }
+
+  public @Nullable LightSource getUniqueLightSource(GUID lightSourceId) {
+    return uniqueLightSources.getOrDefault(lightSourceId, null);
+  }
+
+  public void addUniqueLightSource(LightSource source) {
+    uniqueLightSources.put(source.getId(), source);
+  }
+
+  public void removeUniqueLightSource(GUID lightSourceId) {
+    uniqueLightSources.remove(lightSourceId);
+  }
+
   public void addLightSource(GUID lightSourceId) {
     lightSourceList.add(new AttachedLightSource(lightSourceId));
   }
@@ -925,7 +947,7 @@ public class Token implements Cloneable {
   public void removeLightSourceType(LightSource.Type lightType) {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null && lightSource.getType() == lightType) {
         i.remove();
       }
@@ -935,7 +957,7 @@ public class Token implements Cloneable {
   public void removeGMAuras() {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -950,7 +972,7 @@ public class Token implements Cloneable {
   public void removeOwnerOnlyAuras() {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -964,7 +986,7 @@ public class Token implements Cloneable {
 
   public boolean hasOwnerOnlyAuras() {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -979,7 +1001,7 @@ public class Token implements Cloneable {
 
   public boolean hasGMAuras() {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -994,7 +1016,7 @@ public class Token implements Cloneable {
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = als.resolve(MapTool.getCampaign());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null && lightSource.getType() == lightType) {
         return true;
       }
@@ -2500,6 +2522,9 @@ public class Token implements Cloneable {
     if (ownerList == null) {
       ownerList = new HashSet<>();
     }
+    if (uniqueLightSources == null) {
+      uniqueLightSources = new LinkedHashMap<>();
+    }
     if (lightSourceList == null) {
       lightSourceList = new ArrayList<>();
     }
@@ -2813,6 +2838,14 @@ public class Token implements Cloneable {
         setSizeScale(parameters.get(0).getDoubleValue());
         setAnchor(parameters.get(1).getIntValue(), parameters.get(2).getIntValue());
         break;
+      case createUniqueLightSource:
+        lightChanged = true;
+        addUniqueLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
+        break;
+      case deleteUniqueLightSource:
+        lightChanged = true;
+        removeUniqueLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
+        break;
       case clearLightSources:
         if (hasLightSources()) {
           lightChanged = true;
@@ -2946,6 +2979,10 @@ public class Token implements Cloneable {
         dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
     token.portraitImage =
         dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage().getValue()) : null;
+
+    dto.getUniqueLightSourcesList().stream()
+        .map(LightSource::fromDto)
+        .forEach(source -> token.uniqueLightSources.put(source.getId(), source));
     token.lightSourceList.addAll(
         dto.getLightSourcesList().stream()
             .map(AttachedLightSource::fromDto)
@@ -3073,6 +3110,8 @@ public class Token implements Cloneable {
     if (portraitImage != null) {
       dto.setPortraitImage(StringValue.of(portraitImage.toString()));
     }
+    dto.addAllUniqueLightSources(
+        uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
     if (sightType != null) {

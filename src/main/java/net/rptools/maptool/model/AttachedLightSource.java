@@ -28,13 +28,19 @@ public final class AttachedLightSource {
   }
 
   /**
-   * Obtain the attached {@code LightSource} from the campaign.
+   * Obtain the attached {@code LightSource} from the token or campaign.
    *
+   * @param token The token in which to look up light source IDs.
    * @param campaign The campaign in which to look up light source IDs.
    * @return The {@code LightSource} referenced by this {@code AttachedLightSource}, or {@code null}
    *     if no such light source exists.
    */
-  public @Nullable LightSource resolve(Campaign campaign) {
+  public @Nullable LightSource resolve(Token token, Campaign campaign) {
+    final var uniqueLightSource = token.getUniqueLightSource(lightSourceId);
+    if (uniqueLightSource != null) {
+      return uniqueLightSource;
+    }
+
     for (Map<GUID, LightSource> map : campaign.getLightSourcesMap().values()) {
       if (map.containsKey(lightSourceId)) {
         return map.get(lightSourceId);

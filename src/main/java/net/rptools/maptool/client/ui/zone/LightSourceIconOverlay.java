@@ -34,7 +34,7 @@ public class LightSourceIconOverlay implements ZoneOverlay {
       if (token.hasLightSources()) {
         boolean foundNormalLight = false;
         for (AttachedLightSource attachedLightSource : token.getLightSources()) {
-          LightSource lightSource = attachedLightSource.resolve(MapTool.getCampaign());
+          LightSource lightSource = attachedLightSource.resolve(token, MapTool.getCampaign());
           if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
             foundNormalLight = true;
             break;

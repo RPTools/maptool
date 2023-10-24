@@ -22,7 +22,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -143,17 +143,46 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
       menu.addSeparator();
     }
+
+    // Add unique light sources for the token.
+    {
+      JMenu subMenu = new JMenu("Unique");
+
+      List<LightSource> lightSources = new ArrayList<>(tokenUnderMouse.getUniqueLightSources());
+      Collections.sort(lightSources);
+
+      LIGHTSOURCES:
+      for (LightSource lightSource : lightSources) {
+        for (Light light : lightSource.getLightList()) {
+          // TODO Shouldn't we only skip if *all* child lights are GM only. And what about owner
+          //  only?
+          if (light.isGM() && !MapTool.getPlayer().isGM()) {
+            continue LIGHTSOURCES;
+          }
+        }
+        JCheckBoxMenuItem menuItem =
+            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
+        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
+        subMenu.add(menuItem);
+      }
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+        menu.addSeparator();
+      }
+    }
+
     for (Entry<String, Map<GUID, LightSource>> entry :
         MapTool.getCampaign().getLightSourcesMap().entrySet()) {
       JMenu subMenu = new JMenu(entry.getKey());
 
-      List<LightSource> lightSources = new ArrayList<LightSource>(entry.getValue().values());
-      LightSource[] lightSourceList = new LightSource[entry.getValue().size()];
-      lightSources.toArray(lightSourceList);
-      Arrays.sort(lightSourceList);
+      List<LightSource> lightSources = new ArrayList<>(entry.getValue().values());
+      Collections.sort(lightSources);
+
       LIGHTSOURCES:
-      for (LightSource lightSource : lightSourceList) {
+      for (LightSource lightSource : lightSources) {
         for (Light light : lightSource.getLightList()) {
+          // TODO Shouldn't we only skip if *all* child lights are GM only. And what about owner
+          //  only?
           if (light.isGM() && !MapTool.getPlayer().isGM()) {
             continue LIGHTSOURCES;
           }
