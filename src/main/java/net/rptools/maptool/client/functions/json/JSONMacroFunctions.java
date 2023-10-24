@@ -872,7 +872,12 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The resulting json data.
    */
   private JsonElement jsonPathDelete(JsonElement json, String path) {
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -906,7 +911,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathSet(JsonElement json, String path, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
