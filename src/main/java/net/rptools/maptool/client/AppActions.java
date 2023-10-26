@@ -2848,7 +2848,9 @@ public class AppActions {
           chooser.setSelectedFile(new File(zr.getZone().getName()));
           boolean tryAgain = true;
           while (tryAgain) {
-            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) break;
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              break;
+            }
             File mapFile = chooser.getSelectedFile();
             var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
             var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
