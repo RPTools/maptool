@@ -392,6 +392,9 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
 
+    final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
+    installDirTextField.setText(AppUtil.getInstallDirectory().toString());
+
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
     copyPublicKey = (JButton) panel.getButton("copyKey");
