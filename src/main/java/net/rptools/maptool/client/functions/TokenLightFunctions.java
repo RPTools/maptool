@@ -15,14 +15,19 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.awt.Color;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -35,7 +40,19 @@ public class TokenLightFunctions extends AbstractFunction {
   private static final String TOKEN_CATEGORY = "$unique";
 
   private TokenLightFunctions() {
-    super(0, 5, "hasLightSource", "clearLights", "setLight", "getLights");
+    super(
+        0,
+        5,
+        "hasLightSource",
+        "clearLights",
+        "setLight",
+        "getLights",
+        "createUniqueLightSource",
+        "updateUniqueLightSource",
+        "deleteUniqueLightSource",
+        "getUniqueLightSource",
+        "getUniqueLightSources",
+        "getUniqueLightSourceNames");
   }
 
   public static TokenLightFunctions getInstance() {
@@ -77,6 +94,49 @@ public class TokenLightFunctions extends AbstractFunction {
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
       return getLights(token, type, delim);
+    }
+    if (functionName.equalsIgnoreCase("createUniqueLightSource")) {
+      FunctionUtil.blockUntrustedMacro(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+
+      JsonObject lightSource = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return createUniqueLightSource(lightSource, token, false).getName();
+    }
+    if (functionName.equalsIgnoreCase("updateUniqueLightSource")) {
+      FunctionUtil.blockUntrustedMacro(functionName);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+
+      JsonObject lightSource = FunctionUtil.paramAsJsonObject(functionName, parameters, 0);
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return createUniqueLightSource(lightSource, token, true).getName();
+    }
+    if (functionName.equalsIgnoreCase("deleteUniqueLightSource")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+
+      String name = parameters.get(0).toString();
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      deleteUniqueLightSource(name, token);
+      return "";
+    }
+    if (functionName.equalsIgnoreCase("getUniqueLightSource")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
+
+      String name = parameters.get(0).toString();
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return Objects.requireNonNullElse(getUniqueLightSource(name, token), "");
+    }
+    if (functionName.equalsIgnoreCase("getUniqueLightSources")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return getUniqueLightSources(token);
+    }
+    if (functionName.equalsIgnoreCase("getUniqueLightSourceNames")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
+
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
+      return getUniqueLightSourceNames(token);
     }
     return null;
   }
@@ -231,5 +291,200 @@ public class TokenLightFunctions extends AbstractFunction {
     }
 
     return false;
+  }
+
+  private static LightSource createUniqueLightSource(
+      JsonObject lightSourceDef, Token token, boolean isUpdate) throws ParserException {
+    if (!lightSourceDef.has("name")) {
+      throw new ParserException(I18N.getText("The light source must have a name."));
+    }
+    final String name = lightSourceDef.get("name").getAsString();
+
+    // Modifications require the light source to exist. Creation requires it to not exists.
+    final Optional<LightSource> existingSource =
+        token.getUniqueLightSources().stream()
+            .filter(source -> name.equals(source.getName()))
+            .findFirst();
+    if (isUpdate && existingSource.isEmpty()) {
+      throw new ParserException(
+          I18N.getText(
+              "Light source %s is not defined for token %s", name, token.getId().toString()));
+    }
+    if (!isUpdate && existingSource.isPresent()) {
+      throw new ParserException(
+          I18N.getText(
+              "Light source %s is already defined for token %s", name, token.getId().toString()));
+    }
+
+    final LightSource.Type type =
+        lightSourceDef.has("type")
+            ? LightSource.Type.valueOf(lightSourceDef.get("type").getAsString().toUpperCase())
+            : LightSource.Type.NORMAL;
+    final boolean scaleWithToken =
+        lightSourceDef.has("scale") ? lightSourceDef.get("scale").getAsBoolean() : false;
+    final JsonArray lightDefs =
+        lightSourceDef.has("lights") ? lightSourceDef.getAsJsonArray("lights") : new JsonArray();
+
+    final var lights = new ArrayList<Light>();
+    for (final var light : lightDefs) {
+      lights.add(parseLightJson(light.getAsJsonObject(), type));
+    }
+
+    final var lightSource =
+        LightSource.createRegular(
+            name,
+            existingSource.isPresent() ? existingSource.get().getId() : new GUID(),
+            type,
+            scaleWithToken,
+            lights);
+    token.addUniqueLightSource(lightSource);
+    MapTool.serverCommand()
+        .updateTokenProperty(token, Token.Update.createUniqueLightSource, lightSource);
+    return lightSource;
+  }
+
+  private static void deleteUniqueLightSource(String name, Token token) {
+    final var sourcesToRemove = new ArrayList<LightSource>();
+    for (final LightSource source : token.getUniqueLightSources()) {
+      if (name.equals(source.getName())) {
+        sourcesToRemove.add(source);
+      }
+    }
+
+    for (final LightSource source : sourcesToRemove) {
+      token.removeUniqueLightSource(source.getId());
+      MapTool.serverCommand()
+          .updateTokenProperty(token, Token.Update.deleteUniqueLightSource, source);
+    }
+  }
+
+  private static JsonObject getUniqueLightSource(String name, Token token) {
+    for (final LightSource source : token.getUniqueLightSources()) {
+      if (name.equals(source.getName())) {
+        return lightSourceToJson(source);
+      }
+    }
+
+    return null;
+  }
+
+  private static JsonArray getUniqueLightSources(Token token) {
+    final var result = new JsonArray();
+
+    for (final LightSource source : token.getUniqueLightSources()) {
+      result.add(lightSourceToJson(source));
+    }
+
+    return result;
+  }
+
+  private static JsonArray getUniqueLightSourceNames(Token token) {
+    final var result = new JsonArray();
+
+    for (final LightSource source : token.getUniqueLightSources()) {
+      result.add(source.getName());
+    }
+
+    return result;
+  }
+
+  private static Light parseLightJson(JsonObject lightDef, LightSource.Type lightSourceType)
+      throws ParserException {
+    if (!lightDef.has("range")) {
+      throw new ParserException(I18N.getText("A range must be provided for each light"));
+    }
+    final var range = lightDef.get("range").getAsDouble();
+
+    final var shape =
+        lightDef.has("shape")
+            ? ShapeType.valueOf(lightDef.get("shape").getAsString())
+            : ShapeType.CIRCLE;
+    // Cones permit the fields arc and offset, but no other shape accepts them.
+    if (shape != ShapeType.CONE) {
+      if (lightDef.has("offset")) {
+        throw new ParserException(
+            I18N.getText("Facing offset provided but the shape is not a cone"));
+      }
+      if (lightDef.has("arc")) {
+        throw new ParserException(I18N.getText("Arc provided but the shape is not a cone"));
+      }
+    }
+    final var offset = lightDef.has("offset") ? lightDef.get("offset").getAsDouble() : 0;
+    final var arc = lightDef.has("arc") ? lightDef.get("arc").getAsDouble() : 0;
+
+    // Auras permit the gmOnly and ownerOnly flags, but no other type accepts them.
+    if (lightSourceType != LightSource.Type.AURA) {
+      if (lightDef.has("gmOnly")) {
+        throw new ParserException(I18N.getText("gmOnly flag provided but the type is not an aura"));
+      }
+      if (lightDef.has("ownerOnly")) {
+        throw new ParserException(
+            I18N.getText("ownerOnly flag provided but the type is not an aura"));
+      }
+    }
+    final var gmOnly = lightDef.has("gmOnly") ? !lightDef.get("gmOnly").getAsBoolean() : false;
+    final var ownerOnly =
+        lightDef.has("ownerOnly") ? !lightDef.get("ownerOnly").getAsBoolean() : false;
+
+    final DrawableColorPaint colorPaint;
+    if (lightDef.has("color")) {
+      var colorString = lightDef.get("color").getAsString();
+      if (!colorString.startsWith("#")) {
+        // Make sure it is parsed as a hex color string, not something else.
+        colorString = "#" + colorString;
+      }
+
+      colorPaint = new DrawableColorPaint(Color.decode(colorString));
+    } else {
+      colorPaint = null;
+    }
+
+    final var lumens = lightDef.has("lumens") ? lightDef.get("lumens").getAsInt() : 100;
+    if (lumens == 0) {
+      throw new ParserException(I18N.getText("Lumens must be non-zero."));
+    }
+
+    return new Light(shape, offset, range, arc, colorPaint, lumens, gmOnly, ownerOnly);
+  }
+
+  private static JsonObject lightSourceToJson(LightSource source) {
+    final var lightSourceDef = new JsonObject();
+    lightSourceDef.addProperty("name", source.getName());
+    lightSourceDef.addProperty("type", source.getType().toString());
+    lightSourceDef.addProperty("scale", source.isScaleWithToken());
+
+    final var lightDefs = new JsonArray();
+    for (final Light light : source.getLightList()) {
+      lightDefs.add(lightToJson(source, light));
+    }
+    lightSourceDef.add("lights", lightDefs);
+    return lightSourceDef;
+  }
+
+  private static JsonObject lightToJson(LightSource source, Light light) {
+    final var lightDef = new JsonObject();
+    lightDef.addProperty("shape", light.getShape().toString());
+
+    if (light.getShape() == ShapeType.CONE) {
+      lightDef.addProperty("offset", light.getFacingOffset());
+      lightDef.addProperty("arc", light.getArcAngle());
+    }
+
+    if (source.getType() == LightSource.Type.AURA) {
+      lightDef.addProperty("gmOnly", light.isGM());
+      lightDef.addProperty("ownerOnly", light.isOwnerOnly());
+    }
+
+    lightDef.addProperty("range", light.getRadius());
+    if (light.getPaint() instanceof DrawableColorPaint paint) {
+      lightDef.addProperty("color", toHex(paint.getColor()));
+    }
+    lightDef.addProperty("lumens", light.getLumens());
+
+    return lightDef;
+  }
+
+  private static String toHex(int rgb) {
+    return String.format("#%06X", rgb & 0x00FFFFFF);
   }
 }
