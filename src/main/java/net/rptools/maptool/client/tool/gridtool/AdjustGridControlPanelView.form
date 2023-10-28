@@ -14,6 +14,7 @@
         </constraints>
         <properties>
           <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size"/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid.size.tooltip"/>
         </properties>
       </component>
       <component id="4491d" class="javax.swing.JSpinner">
