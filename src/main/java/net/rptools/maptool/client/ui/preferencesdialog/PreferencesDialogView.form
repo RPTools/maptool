@@ -3,7 +3,7 @@
   <grid id="3f87d" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="1101" height="751"/>
+      <xy x="10" y="10" width="1127" height="751"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -35,7 +35,7 @@
             <properties/>
             <border type="none"/>
             <children>
-              <grid id="b641a" layout-manager="GridLayoutManager" row-count="17" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="b641a" layout-manager="GridLayoutManager" row-count="16" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="2" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="true"/>
@@ -329,27 +329,9 @@
                   </component>
                   <vspacer id="a9eb4">
                     <constraints>
-                      <grid row="16" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                      <grid row="15" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                     </constraints>
                   </vspacer>
-                  <component id="60bed" class="javax.swing.JLabel">
-                    <constraints>
-                      <grid row="15" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.stack.hide"/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.tokens.stack.hide.tooltip"/>
-                    </properties>
-                  </component>
-                  <component id="93234" class="javax.swing.JCheckBox">
-                    <constraints>
-                      <grid row="15" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-                    </constraints>
-                    <properties>
-                      <name value="hideTokenStackIndicator"/>
-                      <text value="&#9;"/>
-                    </properties>
-                  </component>
                 </children>
               </grid>
               <grid id="f38d9" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
