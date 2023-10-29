@@ -26,11 +26,11 @@ public class AppState {
   private static final Logger log = LogManager.getLogger(AppState.class);
   public static final String USE_DOUBLE_WIDE_PROP_NAME = "useDoubleWide";
 
-  private static boolean showGrid = false;
-  private static boolean showCoordinates = false;
+  private static boolean showGrid = true;
+  private static boolean showCoordinates = true;
   private static boolean showTokenNames = false;
   private static boolean linkPlayerViews = false;
-  private static boolean useDoubleWideLine = true;
+  private static boolean useDoubleWideLine = false;
   private static boolean showMovementMeasurements = true;
   private static boolean showTextLabels = true;
   private static boolean enforceNotification = false;

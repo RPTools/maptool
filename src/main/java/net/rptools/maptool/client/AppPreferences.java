@@ -408,7 +408,7 @@ public class AppPreferences {
   }
 
   private static final String KEY_DEFAULT_GRID_TYPE = "defaultGridType";
-  private static final String DEFAULT_DEFAULT_GRID_TYPE = GridFactory.SQUARE;
+  private static final String DEFAULT_DEFAULT_GRID_TYPE = GridFactory.HEX_VERT;
 
   private static final String KEY_FACE_VERTEX = "faceVertex";
   private static final boolean DEFAULT_FACE_VERTEX = false;
@@ -420,7 +420,7 @@ public class AppPreferences {
   private static final int DEFAULT_DEFAULT_GRID_SIZE = 100;
 
   private static final String KEY_DEFAULT_GRID_COLOR = "defaultGridColor";
-  private static final int DEFAULT_DEFAULT_GRID_COLOR = Color.black.getRGB();
+  private static final int DEFAULT_DEFAULT_GRID_COLOR = new Color(200, 200, 0, 80).getRGB();
 
   private static final String KEY_DEFAULT_UNITS_PER_CELL = "unitsPerCell";
   private static final int DEFAULT_DEFAULT_UNITS_PER_CELL = 5;

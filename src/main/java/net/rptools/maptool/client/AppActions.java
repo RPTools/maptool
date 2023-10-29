@@ -1647,7 +1647,6 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-
           MapTool.getFrame().getToolbox().setSelectedTool(GridTool.class);
         }
       };
@@ -3058,10 +3057,10 @@ public class AppActions {
         }
       };
 
-  public static class GridSizeAction extends DefaultClientAction {
+  public static class GridLineWeightAction extends DefaultClientAction {
     private final int size;
 
-    public GridSizeAction(int size) {
+    public GridLineWeightAction(int size) {
       putValue(Action.NAME, Integer.toString(size));
       this.size = size;
     }

@@ -15,16 +15,8 @@
 package net.rptools.maptool.model;
 
 import com.google.common.base.Stopwatch;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -486,16 +478,65 @@ public abstract class Grid implements Cloneable {
     return distance;
   }
 
+  protected Area createCellArea(int sides, double radius, double x, double y, double rotation) {
+    floatPoint translationOffset = new floatPoint(x, y);
+    return createCellArea(sides, radius, translationOffset, rotation);
+  }
+
+  protected Area createCellArea(
+      int sides, double radius, floatPoint translationOffset, double rotation) {
+    Shape cellPath = createCellPath(sides, radius, rotation, translationOffset);
+    return (Area) cellPath;
+  }
+
+  protected Path2D.Float createCellPath(
+      int sides, double radius, double x, double y, double rotation) {
+    floatPoint translationOffset = new floatPoint(x, y);
+    return createCellPath(sides, radius, rotation, translationOffset);
+  }
+
+  protected Path2D.Float createCellPath(
+      int sides, double radius, double rotation, floatPoint translationOffset) {
+    AffineTransform at = new AffineTransform();
+    Path2D.Float cellPath = new Path2D.Float();
+    cellPath.moveTo(radius, 0);
+    double arc = Math.PI * 2 / sides;
+    // int halfway = (int) Math.ceil(sides/2f);
+    at.rotate(Math.toRadians(rotation));
+    for (int i = 0; i < sides - 1; i++) {
+      at.rotate(arc);
+      cellPath.transform(at);
+      cellPath.lineTo(radius, 0);
+    }
+    cellPath.closePath();
+    at.translate(translationOffset.getX(), translationOffset.getY());
+    cellPath.transform(at);
+    return cellPath;
+  }
+
+  class floatPoint extends Point2D.Float {
+    public floatPoint(double x_, double y_) {
+      this.x = (float) x_;
+      this.y = (float) y_;
+    }
+
+    public floatPoint(ZonePoint zp) {
+      this.x = (float) zp.x;
+      this.y = (float) zp.y;
+    }
+  }
+
   protected Area createHex(double x, double y, double radius, double rotation) {
-    GeneralPath hexPath = new GeneralPath();
+    return createCellArea(6, radius, x, y, rotation);
+    /* GeneralPath hexPath = new GeneralPath();
 
     for (int i = 0; i < 6; i++) {
       if (i == 0) {
         hexPath.moveTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
+                x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
       } else {
         hexPath.lineTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
+                x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
       }
     }
 
@@ -504,7 +545,7 @@ public abstract class Grid implements Cloneable {
       return new Area(atArea.createTransformedShape(hexPath));
     } else {
       return new Area(hexPath);
-    }
+    }*/
   }
 
   private void fireGridChanged() {
@@ -520,6 +561,7 @@ public abstract class Grid implements Cloneable {
    * @param bounds the bounds of the drawing area.
    */
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
+    float scale = (float) renderer.getScale();
     // Do nothing
   }
 

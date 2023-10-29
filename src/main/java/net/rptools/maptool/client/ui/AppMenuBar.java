@@ -245,11 +245,15 @@ public class AppMenuBar extends JMenuBar {
     // LATER: This needs to be genericized, but it seems to constant, and so
     // short, that I
     // didn't feel compelled to do that in this impl
-    JMenu gridSizeMenu = I18N.createMenu("action.gridSize");
-    JCheckBoxMenuItem gridSize1 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(1), menu);
-    JCheckBoxMenuItem gridSize2 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(2), menu);
-    JCheckBoxMenuItem gridSize3 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(3), menu);
-    JCheckBoxMenuItem gridSize5 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(5), menu);
+    JMenu gridSizeMenu = I18N.createMenu("action.gridLineWeight");
+    JCheckBoxMenuItem gridSize1 =
+        new RPCheckBoxMenuItem(new AppActions.GridLineWeightAction(1), menu);
+    JCheckBoxMenuItem gridSize2 =
+        new RPCheckBoxMenuItem(new AppActions.GridLineWeightAction(2), menu);
+    JCheckBoxMenuItem gridSize3 =
+        new RPCheckBoxMenuItem(new AppActions.GridLineWeightAction(3), menu);
+    JCheckBoxMenuItem gridSize5 =
+        new RPCheckBoxMenuItem(new AppActions.GridLineWeightAction(5), menu);
 
     ButtonGroup sizeGroup = new ButtonGroup();
     sizeGroup.add(gridSize1);

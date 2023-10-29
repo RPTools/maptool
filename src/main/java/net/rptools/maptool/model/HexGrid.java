@@ -283,11 +283,10 @@ public abstract class HexGrid extends Grid {
   private GeneralPath createHalfShape(
       double minorRadius, double edgeProjection, double edgeLength) {
     GeneralPath hex = new GeneralPath();
-    hex.moveTo(0, (int) minorRadius);
-    hex.lineTo((int) edgeProjection, 0);
-    hex.lineTo((int) (edgeProjection + edgeLength), 0);
-    hex.lineTo((int) (edgeProjection + edgeLength + edgeProjection), (int) minorRadius);
-
+    hex.moveTo(0, minorRadius);
+    hex.lineTo(edgeProjection, 0);
+    hex.lineTo(edgeProjection + edgeLength, 0);
+    hex.lineTo(edgeProjection + edgeLength + edgeProjection, minorRadius);
     orientHex(hex);
     return hex;
   }
@@ -405,15 +404,38 @@ public abstract class HexGrid extends Grid {
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    createShape(renderer.getScale());
+    float scale = (float) renderer.getScale();
+    createShape(scale);
+    float[] dashes = new float[] {scale * 8f, scale * 2f};
+    float lineWidth = (float) AppState.getGridLineWeight() * 3;
+    float[] rgbComp = new float[] {0, 0, 0, 0};
+    Color topColour = new Color(getZone().getGridColor());
+    topColour = new Color(topColour.getRed(), topColour.getGreen(), topColour.getBlue(), 200);
+    Color underColour = Color.black;
+    underColour =
+        new Color(underColour.getRed(), underColour.getGreen(), underColour.getBlue(), 120);
 
+    BasicStroke topStroke =
+        new BasicStroke(
+            Math.max(lineWidth * 0.4f * scale, 0.6f),
+            BasicStroke.CAP_BUTT,
+            BasicStroke.JOIN_MITER,
+            10f,
+            dashes,
+            0f);
+    BasicStroke underStroke =
+        new BasicStroke(
+            Math.max(0.8f, lineWidth * 1.0f * scale),
+            BasicStroke.CAP_BUTT,
+            BasicStroke.JOIN_MITER,
+            10f,
+            dashes,
+            0f);
     int offU = getOffU(renderer);
     int offV = getOffV(renderer);
     int count = 0;
 
     Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
-    g.setColor(new Color(getZone().getGridColor()));
-    g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
 
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < getRendererSizeV(renderer);
@@ -428,6 +450,11 @@ public abstract class HexGrid extends Grid {
       double incr = 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
       for (double u = start; u < end; u += incr) {
         setGridDrawTranslation(g, u + offsetU, v);
+        g.setColor(underColour);
+        g.setStroke(underStroke);
+        g.draw(scaledHex);
+        g.setColor(topColour);
+        g.setStroke(topStroke);
         g.draw(scaledHex);
         setGridDrawTranslation(g, -(u + offsetU), -v);
       }
