@@ -3068,12 +3068,12 @@ public class AppActions {
 
     @Override
     public boolean isSelected() {
-      return AppState.getGridSize() == size;
+      return AppState.getGridLineWeight() == size;
     }
 
     @Override
     protected void executeAction() {
-      AppState.setGridSize(size);
+      AppState.setGridLineWeight(size);
       MapTool.getFrame().refresh();
     }
   }

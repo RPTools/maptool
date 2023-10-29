@@ -331,24 +331,24 @@ public class SquareGrid extends Grid {
     int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
 
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      if (AppState.getGridSize() == 1) {
+      if (AppState.getGridLineWeight() == 1) {
         g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
       } else {
         g.fillRect(
             bounds.x,
-            (int) (row + offY - (AppState.getGridSize() / 2)),
+            (int) (row + offY - (AppState.getGridLineWeight() / 2)),
             bounds.width,
-            AppState.getGridSize());
+            AppState.getGridLineWeight());
       }
     }
     for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-      if (AppState.getGridSize() == 1) {
+      if (AppState.getGridLineWeight() == 1) {
         g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
       } else {
         g.fillRect(
-            (int) (col + offX - (AppState.getGridSize() / 2)),
+            (int) (col + offX - (AppState.getGridLineWeight() / 2)),
             bounds.y,
-            AppState.getGridSize(),
+            AppState.getGridLineWeight(),
             bounds.height);
       }
     }

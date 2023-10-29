@@ -35,7 +35,7 @@ public class AppState {
   private static boolean showTextLabels = true;
   private static boolean enforceNotification = false;
   private static File campaignFile;
-  private static int gridSize = 1;
+  private static int gridLineWeight = 1;
   private static boolean showLumensOverlay;
   private static boolean showLights;
   private static boolean showAsPlayer = false;
@@ -79,12 +79,12 @@ public class AppState {
     isLoggingToConsole = flag;
   }
 
-  public static int getGridSize() {
-    return gridSize;
+  public static int getGridLineWeight() {
+    return gridLineWeight;
   }
 
-  public static void setGridSize(int size) {
-    gridSize = size;
+  public static void setGridLineWeight(int size) {
+    gridLineWeight = size;
   }
 
   public static boolean useDoubleWideLine() {

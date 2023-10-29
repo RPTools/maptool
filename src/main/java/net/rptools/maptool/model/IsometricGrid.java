@@ -461,7 +461,7 @@ public class IsometricGrid extends Grid {
   private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
     double isoWidth = getSize() * renderer.getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
-    g.setStroke(new BasicStroke(AppState.getGridSize()));
+    g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
     g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);
     g.drawLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize);
   }

@@ -413,7 +413,7 @@ public abstract class HexGrid extends Grid {
 
     Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
     g.setColor(new Color(getZone().getGridColor()));
-    g.setStroke(new BasicStroke(AppState.getGridSize()));
+    g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
 
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < getRendererSizeV(renderer);
