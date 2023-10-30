@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.grid;
 
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -35,6 +35,7 @@ import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarVertHexEuclideanWalker;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 
 /*
@@ -138,7 +139,7 @@ public class HexGridVertical extends HexGrid {
    *
    * @formatter:on
    * (non-Javadoc)
-   * @see net.rptools.maptool.model.Grid#installMovementKeys(net.rptools.maptool.client.tool.PointerTool, java.util.Map)
+   * @see net.rptools.maptool.model.grid.Grid#installMovementKeys(net.rptools.maptool.client.tool.PointerTool, java.util.Map)
    */
   @Override
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {

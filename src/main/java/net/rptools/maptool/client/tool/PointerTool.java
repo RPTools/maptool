@@ -52,6 +52,7 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.model.grid.Grid;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;

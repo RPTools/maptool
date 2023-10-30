@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.grid;
 
 /**
  * Given a string describing the type of desired grid, this factory creates and returns an object of

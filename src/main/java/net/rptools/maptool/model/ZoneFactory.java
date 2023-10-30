@@ -22,6 +22,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
+import net.rptools.maptool.model.grid.GridFactory;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.io.FileUtils;
 

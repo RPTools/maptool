@@ -27,6 +27,7 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
+import net.rptools.maptool.model.grid.Grid;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
 

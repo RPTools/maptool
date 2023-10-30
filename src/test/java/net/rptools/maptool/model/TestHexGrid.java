@@ -16,6 +16,8 @@ package net.rptools.maptool.model;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import net.rptools.maptool.model.grid.HexGrid;
+import net.rptools.maptool.model.grid.HexGridHorizontal;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

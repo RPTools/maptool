@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 
 import java.awt.geom.Area;
 import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.grid.Grid;
+import net.rptools.maptool.model.grid.SquareGrid;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;

@@ -36,11 +36,11 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
-import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.grid.GridFactory;
 import org.apache.commons.io.FilenameUtils;
 
 /** Class for importing Dungeondraft Universal VTT export format. */
