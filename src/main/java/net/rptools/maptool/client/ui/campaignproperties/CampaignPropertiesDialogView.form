@@ -269,7 +269,7 @@
                 </constraints>
                 <properties>
                   <name value="tokenStatesColorLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.color"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Grid.colour.main"/>
                 </properties>
               </component>
               <component id="f7698" class="net.rptools.maptool.client.swing.ColorWell">
@@ -358,7 +358,7 @@
                 </constraints>
                 <properties>
                   <name value="tokenStatesFlowGridLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Grid.size"/>
                 </properties>
               </component>
               <component id="583cd" class="javax.swing.JLabel">

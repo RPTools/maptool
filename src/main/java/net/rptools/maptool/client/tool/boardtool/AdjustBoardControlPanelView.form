@@ -65,7 +65,7 @@
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.x"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="offset.x"/>
         </properties>
       </component>
       <component id="3cfe1" class="javax.swing.JTextField">
@@ -83,7 +83,7 @@
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.y"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="offset.y"/>
         </properties>
       </component>
       <component id="e163a" class="javax.swing.JTextField">

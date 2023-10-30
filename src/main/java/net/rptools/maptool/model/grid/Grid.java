@@ -51,7 +51,6 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class Grid implements Cloneable {
 
-  public static final GridRenderStyle gridRenderStyle = new GridRenderStyle();
   /**
    * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
    * for determining whether a given square cell can be entered due to fog blocking the cell is

@@ -14,84 +14,101 @@
  */
 package net.rptools.maptool.model.grid;
 
-public enum GridDrawLineStyle {
-  SOLID("Solid", 0),
-  DASHED("Dashed", 1),
-  DOTTED("Dotted", 2),
-  INTERSECTION("Intersection", 3),
-  INTERSECTION_MIDPOINT("Intersection & Mid-point", 4);
-  private final String friendly;
-  private final int index;
-  private float dashUnit = 1;
-  private float sideLength = 1;
+import net.rptools.maptool.language.I18N;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-  private float[][] dashArray;
-  final float[][][] dashArrays =
+public enum GridDrawLineStyle {
+  SOLID("Grid.line.style.solid", 0),
+  DASHED("Grid.line.style.dashed", 1),
+  DOTTED("Grid.line.style.dotted", 2),
+  INTERSECTION("Grid.line.style.intersection", 3),
+  INTERSECTION_MIDPOINT("Grid.line.style.intersection_mid-point", 4);
+
+  private final String friendlyKey;
+  private final int index;
+  private static float dashUnit = 1;
+
+  private static float sideLength = -1;
+
+  private static final float[][][] rawAllDashArrays =
       new float[][][] {
         { // solid
-          {sideLength}, {sideLength}, {sideLength}, {sideLength}, {sideLength}
+          {32}, {32}, {32}, {32}, {32}
         },
         { // dashed
-          {1.1f * dashUnit, 1.8f * dashUnit, 1.1f * dashUnit},
-          {0.9f * dashUnit, 2.2f * dashUnit, 0.9f * dashUnit},
-          {0.8f * dashUnit, 2.4f * dashUnit, 0.8f * dashUnit},
-          {0.6f * dashUnit, 2.6f * dashUnit, 0.6f * dashUnit},
-          {0.5f * dashUnit, 2.8f * dashUnit, 0.6f * dashUnit},
+          {1.1f, 1.8f, 1.1f},
+          {0.9f, 2.2f, 0.9f},
+          {0.8f, 2.4f, 0.8f},
+          {0.6f, 2.6f, 0.6f},
+          {0.5f, 2.8f, 0.6f},
         },
         { // dotted
           {dashUnit, dashUnit},
-          {0.94f * dashUnit, 1.06f * dashUnit},
-          {0.88f * dashUnit, 1.12f * dashUnit},
-          {0.82f * dashUnit, 1.18f * dashUnit},
-          {0.76f * dashUnit, 1.24f * dashUnit}
+          {0.94f, 1.06f},
+          {0.88f, 1.12f},
+          {0.82f, 1.18f},
+          {0.76f, 1.24f}
         },
         { // intersection
-          {2.0f * dashUnit, 28 * dashUnit, 2.0f * dashUnit, 0},
-          {4.0f * dashUnit, 24 * dashUnit, 4.0f * dashUnit, 0},
-          {5.5f * dashUnit, 21 * dashUnit, 5.5f * dashUnit, 0},
-          {7 * dashUnit, 18 * dashUnit, 7 * dashUnit, 0},
-          {9 * dashUnit, 14 * dashUnit, 9 * dashUnit, 0}
+          {2.0f, 28, 2.0f, 0},
+          {4.0f, 24, 4.0f, 0},
+          {5.5f, 21, 5.5f, 0},
+          {7, 18, 7, 0},
+          {9, 14, 9, 0}
         },
         { // intersection & midpoint
-          {
-            2.0f * dashUnit,
-            13.75f * dashUnit,
-            0.5f * dashUnit,
-            13.75f * dashUnit,
-            2.0f * dashUnit,
-            0
-          },
-          {
-            4.0f * dashUnit,
-            11.515f * dashUnit,
-            0.7f * dashUnit,
-            11.515f * dashUnit,
-            4.0f * dashUnit,
-            0
-          },
-          {5.5f * dashUnit, 15f * dashUnit, 1f * dashUnit, 15f * dashUnit, 5.5f * dashUnit, 0},
-          {7f * dashUnit, 8.25f * dashUnit, 1.5f * dashUnit, 8.25f * dashUnit, 7f * dashUnit, 0},
-          {9f * dashUnit, 6f * dashUnit, 2f * dashUnit, 6f * dashUnit, 9f * dashUnit, 0}
+          {2.0f, 13.75f, 0.5f, 13.75f, 2.0f, 0f},
+          {4.0f, 11.515f, 0.7f, 11.515f, 4.0f, 0f},
+          {5.5f, 15f, 1f, 15f, 5.5f, 0f},
+          {7f, 8.25f, 1.5f, 8.25f, 7f, 0f},
+          {9f, 6f, 2f, 6f, 9f, 0f}
         }
       };
+  private float[][] styleDashArrays = null;
+  private float lastScale = 1;
+  protected static final Logger log = LogManager.getLogger();
 
-  GridDrawLineStyle(String friendly, int index) {
-    this.friendly = friendly;
-    this.index = index;
+  private void updateDashArrays() {
+    float[][] tmpArray = rawAllDashArrays[index];
+    for (int i = 0; i < 5; i++) {
+      int l = tmpArray[i].length;
+      for (int ii = 0; ii < l; ii++) {
+        tmpArray[i][ii] = dashUnit * rawAllDashArrays[index][i][ii];
+      }
+      log.debug("Dash array - " + tmpArray[i].toString());
+    }
+    styleDashArrays = tmpArray;
   }
 
-  public int index() {
+  GridDrawLineStyle(String friendly_, int index_) {
+    this.friendlyKey = friendly_;
+    this.index = index_;
+  }
+
+  public String getName() {
+    return I18N.getText(friendlyKey);
+  }
+
+  public int getIndex() {
     return index;
   }
 
-  public float[][] dashArray() {
-    dashUnit = 1;
-    return dashArrays[index];
+  public float[] getLineDashArray(int i) {
+    return styleDashArrays[i];
   }
 
-  public float[][] dashArray(float sideLength) {
-    dashUnit = sideLength / 32;
-    return dashArrays[index];
+  public static float getSideLength() {
+    return sideLength;
   }
-  ;
+
+  public void setSideLength(float sideLength_) {
+    if (sideLength != sideLength_ || styleDashArrays == null) {
+      lastScale = sideLength_ / sideLength;
+      sideLength = sideLength_;
+      dashUnit = sideLength / 32;
+      styleDashArrays = rawAllDashArrays[index];
+      updateDashArrays();
+    }
+  }
 }

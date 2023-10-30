@@ -13,7 +13,7 @@
           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Grid.size"/>
           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.grid.new.tooltip"/>
         </properties>
       </component>
@@ -32,7 +32,7 @@
         <properties>
           <horizontalAlignment value="4"/>
           <name value="gridSecondDimensionLabel"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size.second"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Grid.size.second"/>
         </properties>
       </component>
       <component id="fc376" class="javax.swing.JTextField">
@@ -50,7 +50,7 @@
           <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.x"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="offset.x"/>
         </properties>
       </component>
       <component id="cbe69" class="javax.swing.JTextField">
@@ -68,7 +68,7 @@
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.offset.y"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="offset.y"/>
         </properties>
       </component>
       <component id="fc6e2" class="javax.swing.JLabel">
@@ -76,7 +76,7 @@
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.color"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Grid.colour.main"/>
         </properties>
       </component>
       <component id="47354" class="net.rptools.maptool.client.swing.ColorWell">

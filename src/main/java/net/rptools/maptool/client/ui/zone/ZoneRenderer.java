@@ -274,6 +274,10 @@ public class ZoneRenderer extends JComponent
     return zoneScale;
   }
 
+  public Graphics2D getGraphics2D() {
+    return (Graphics2D) this.getGraphics();
+  }
+
   public void setZoneScale(Scale scale) {
     zoneScale = scale;
     invalidateCurrentViewCache();

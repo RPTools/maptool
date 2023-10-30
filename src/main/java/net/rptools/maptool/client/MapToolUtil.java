@@ -211,6 +211,12 @@ public class MapToolUtil {
     return System.getProperty("MAPTOOL_DEV") != null;
   }
 
+  public static <T extends Comparable<? super T>> T constrainToRange(T o, T min, T max) {
+    if (o.compareTo(min) < 0) return min;
+    if (o.compareTo(max) > 0) return max;
+    return o;
+  }
+
   public static boolean isValidColor(String name) {
     return COLOR_MAP.containsKey(name);
   }
