@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.model.grid;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -26,8 +24,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
@@ -63,7 +60,7 @@ public class HexGridVertical extends HexGrid {
   private static int[]
       FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static List<TokenFootprint> footprintList;
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   public HexGridVertical() {
     super();
@@ -145,7 +142,7 @@ public class HexGridVertical extends HexGrid {
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(16); // parameter is 9/0.75 (load factor)
-      Rectangle r = getCellShape().getBounds();
+      Rectangle r = getCellArea().getBounds();
       double w = r.width * 0.707;
       double h = r.height * 0.707;
       movementKeys.put(
@@ -242,11 +239,27 @@ public class HexGridVertical extends HexGrid {
 
   @Override
   protected int getOffV(ZoneRenderer renderer) {
+    if (extraLogsFlag)
+      log.info(
+          "renderer.getViewOffsetY() + getOffsetY() * renderer.getScale() = "
+              + renderer.getViewOffsetY()
+              + " + "
+              + getOffsetY()
+              + " * "
+              + renderer.getScale());
     return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
   }
 
   @Override
   protected int getOffU(ZoneRenderer renderer) {
+    if (extraLogsFlag)
+      log.info(
+          "renderer.getViewOffsetX() + getOffsetX() * renderer.getScale() = "
+              + renderer.getViewOffsetX()
+              + " + "
+              + getOffsetX()
+              + " * "
+              + renderer.getScale());
     return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
   }
 
@@ -303,7 +316,7 @@ public class HexGridVertical extends HexGrid {
     final double coordinateOffsetX;
     final double coordinateOffsetY;
 
-    if ((shortFootprintSide / getSize()) % 2 == 0) {
+    if ((shortFootprintSide / getSizeInPixels()) % 2 == 0) {
       coordinateOffsetX = getCellWidth() * -1.375;
       coordinateOffsetY = getCellHeight() * -1.5;
     } else {

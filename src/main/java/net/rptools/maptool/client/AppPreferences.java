@@ -37,7 +37,8 @@ import org.apache.logging.log4j.Logger;
 public class AppPreferences {
 
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
-  private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+  private static final Preferences prefs =
+      Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
   private static RenderQuality renderQuality;
 
@@ -420,7 +421,7 @@ public class AppPreferences {
   private static final int DEFAULT_DEFAULT_GRID_SIZE = 100;
 
   private static final String KEY_DEFAULT_GRID_COLOR = "defaultGridColor";
-  private static final int DEFAULT_DEFAULT_GRID_COLOR = new Color(200, 200, 0, 80).getRGB();
+  private static final int DEFAULT_DEFAULT_GRID_COLOR = Color.yellow.getRGB();
 
   private static final String KEY_DEFAULT_UNITS_PER_CELL = "unitsPerCell";
   private static final int DEFAULT_DEFAULT_UNITS_PER_CELL = 5;

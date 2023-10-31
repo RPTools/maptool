@@ -51,6 +51,22 @@ public class GridFactory {
     throw new IllegalArgumentException("Unknown grid type: " + type);
   }
 
+  public static int getGridCellFaceCount(Grid grid) {
+    switch (getGridType(grid)) {
+      case (ISOMETRIC_HEX):
+      case (HEX_HORI):
+      case (HEX_VERT):
+        return 6;
+      case (SQUARE):
+      case (ISOMETRIC):
+        return 4;
+      case (NONE):
+        return 0;
+      default:
+        throw new IllegalArgumentException("Don't know type of grid: " + grid.getClass().getName());
+    }
+  }
+
   public static String getGridType(Grid grid) {
     if (grid instanceof HexGridVertical) {
       if (grid.isIsometric()) return ISOMETRIC_HEX;

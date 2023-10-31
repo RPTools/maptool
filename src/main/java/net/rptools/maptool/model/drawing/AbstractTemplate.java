@@ -197,7 +197,7 @@ public abstract class AbstractTemplate extends AbstractDrawing {
     }
 
     // Find the proper distance
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     for (int y = 0; y < radius; y++) {
       for (int x = 0; x < radius; x++) {
 

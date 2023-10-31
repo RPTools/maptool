@@ -55,7 +55,7 @@ public class IsometricGrid extends Grid {
   private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
   private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight =
+  private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
   public IsometricGrid() {
@@ -87,12 +87,12 @@ public class IsometricGrid extends Grid {
    */
   @Override
   public double getCellWidth() {
-    return getSize() * 2;
+    return getSizeInPixels() * 2;
   }
 
   @Override
   public double getCellHeight() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   @Override
@@ -101,11 +101,11 @@ public class IsometricGrid extends Grid {
   }
 
   public double getCellWidthHalf() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   public double getCellHeightHalf() {
-    return getSize() / 2;
+    return getSizeInPixels() / 2;
   }
 
   public static double degreesFromIso(double facing) {
@@ -224,7 +224,7 @@ public class IsometricGrid extends Grid {
   @Override
   public Rectangle getBounds(CellPoint cp) {
     ZonePoint zp = convert(cp);
-    return new Rectangle(zp.x - getSize(), zp.y, getSize() * 2, getSize());
+    return new Rectangle(zp.x - getSizeInPixels(), zp.y, getSizeInPixels() * 2, getSizeInPixels());
   }
 
   @Override
@@ -246,19 +246,19 @@ public class IsometricGrid extends Grid {
     return GRID_CAPABILITIES;
   }
 
-  @Override
+  /* @Override
   protected Area createCellShape(int size) {
     int x[] = {size, size * 2, size, 0};
     int y[] = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
-  }
+  }*/
 
   @Override
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
     System.out.println("install iso movement keys");
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
-      int size = getSize();
+      int size = getSizeInPixels();
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new MovementKey(callback, -size, -size));
       movementKeys.put(
@@ -325,7 +325,7 @@ public class IsometricGrid extends Grid {
     }
     int visionDistance = getZone().getTokenVisionInPixels();
     double visionRange =
-        (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
+        (range == 0) ? visionDistance : range * getSizeInPixels() / getZone().getUnitsPerCell();
 
     if (scaleWithToken) {
       Rectangle footprint = token.getFootprint(this).getBounds(this);
@@ -347,8 +347,8 @@ public class IsometricGrid extends Grid {
                 -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
         break;
       case SQUARE:
-        int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
+        int[] x = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
+        int[] y = {(int) -visionRange, 0, (int) visionRange, 0};
         visibleArea = new Area(new Polygon(x, y, 4));
         break;
       case CONE:
@@ -430,9 +430,9 @@ public class IsometricGrid extends Grid {
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
     double scale = renderer.getScale();
-    double gridSize = getSize() * scale;
-    double isoHeight = getSize() * scale;
-    double isoWidth = getSize() * 2 * scale;
+    double gridSize = getSizeInPixels() * scale;
+    double isoHeight = getSizeInPixels() * scale;
+    double isoWidth = getSizeInPixels() * 2 * scale;
 
     g.setColor(new Color(getZone().getGridColor()));
 
@@ -460,7 +460,7 @@ public class IsometricGrid extends Grid {
   }
 
   private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
-    double isoWidth = getSize() * renderer.getScale();
+    double isoWidth = getSizeInPixels() * renderer.getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
     g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
     g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);

@@ -156,7 +156,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   protected void paintCursor(Graphics2D g, Paint paint, float thickness, ZonePoint vertex) {
     g.setPaint(paint);
     g.setStroke(new BasicStroke(thickness));
-    int grid = renderer.getZone().getGrid().getSize();
+    int grid = renderer.getZone().getGrid().getSizeInPixels();
     g.drawRect(vertex.x, vertex.y, grid, grid);
 
     if (1 == 1) return;

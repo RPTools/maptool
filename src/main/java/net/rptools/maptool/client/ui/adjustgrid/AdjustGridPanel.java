@@ -65,7 +65,7 @@ public class AdjustGridPanel extends JComponent
   private int dragOffsetX;
   private int dragOffsetY;
 
-  private Color gridColor = Color.darkGray;
+  private Color gridColor = Color.yellow;
 
   private BufferedImage image;
 

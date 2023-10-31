@@ -271,7 +271,7 @@ public class ConeTemplate extends RadiusTemplate {
       setZoneId(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
     }
 
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSizeInPixels();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
 
     // Find the x,y loc
@@ -315,7 +315,7 @@ public class ConeTemplate extends RadiusTemplate {
     if (zone == null) {
       return new Area();
     }
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int r = getRadius();
     ZonePoint vertex = getVertex();
     Area result = new Area();

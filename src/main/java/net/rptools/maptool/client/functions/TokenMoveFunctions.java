@@ -394,8 +394,7 @@ public class TokenMoveFunctions extends AbstractFunction {
         log.debug(
             "...in getLastPathList.  Converting each path item to a cell point or zone point.");
 
-        if (pathCell instanceof CellPoint) {
-          CellPoint cp = (CellPoint) pathCell;
+        if (pathCell instanceof CellPoint cp) {
           if (useDistancePerCell) {
             zp = zone.getGrid().convert((CellPoint) pathCell);
           } else {
@@ -499,8 +498,7 @@ public class TokenMoveFunctions extends AbstractFunction {
     }
 
     if (useTerrainModifiers && !returnFractionOnly) {
-      if (source.getLastPath().getLastWaypoint() instanceof CellPoint) {
-        CellPoint cp = (CellPoint) source.getLastPath().getLastWaypoint();
+      if (source.getLastPath().getLastWaypoint() instanceof CellPoint cp) {
         double trueDistance = cp.getDistanceTraveled(zone);
 
         return new BigDecimal(trueDistance).stripTrailingZeros().toPlainString();
@@ -547,7 +545,7 @@ public class TokenMoveFunctions extends AbstractFunction {
         c += Math.hypot(a, b);
         lastPoint = zp;
       }
-      c /= zone.getGrid().getSize(); // Number of "cells"
+      c /= zone.getGrid().getSizeInPixels(); // Number of "cells"
       c *= zone.getUnitsPerCell(); // "actual" distance traveled
       return NumberFormat.getInstance().format(c);
     }

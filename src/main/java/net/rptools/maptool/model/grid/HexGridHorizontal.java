@@ -14,8 +14,7 @@
  */
 package net.rptools.maptool.model.grid;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -27,8 +26,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
@@ -67,7 +65,7 @@ public class HexGridHorizontal extends HexGrid {
   private static int[]
       FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static List<TokenFootprint> footprintList;
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   public HexGridHorizontal() {
     super();
@@ -328,7 +326,7 @@ public class HexGridHorizontal extends HexGrid {
     final double coordinateOffsetX;
     final double coordinateOffsetY;
 
-    if ((shortFootprintSide / getSize()) % 2 != 0) {
+    if ((shortFootprintSide / getSizeInPixels()) % 2 != 0) {
       coordinateOffsetX = -getCellWidth();
       coordinateOffsetY = getCellOffsetU() * 2;
     } else {

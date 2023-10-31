@@ -21,7 +21,6 @@ import java.awt.FontMetrics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -53,8 +52,9 @@ import net.rptools.maptool.server.proto.SquareGridDto;
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
-  private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
-  private static BufferedImage pathHighlightAlt =
+  private static final BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
+  private static final BufferedImage pathHighlightAlt =
       RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
 
   private static List<TokenFootprint> footprintList;
@@ -109,7 +109,7 @@ public class SquareGrid extends Grid {
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
-      int size = getSize();
+      int size = getSizeInPixels();
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0), new MovementKey(callback, -size, -size));
       movementKeys.put(
@@ -244,7 +244,10 @@ public class SquareGrid extends Grid {
   @Override
   public Rectangle getBounds(CellPoint cp) {
     return new Rectangle(
-        cp.x * getSize() + getOffsetX(), cp.y * getSize() + getOffsetY(), getSize(), getSize());
+        cp.x * getSizeInPixels() + getOffsetX(),
+        cp.y * getSizeInPixels() + getOffsetY(),
+        getSizeInPixels(),
+        getSizeInPixels());
   }
 
   @Override
@@ -252,10 +255,10 @@ public class SquareGrid extends Grid {
     return pathHighlight;
   }
 
-  @Override
+  /*@Override
   protected Area createCellShape(int size) {
     return new Area(new Rectangle(0, 0, size, size));
-  }
+  }*/
 
   @Override
   public Dimension getCellOffset() {
@@ -264,12 +267,12 @@ public class SquareGrid extends Grid {
 
   @Override
   public double getCellHeight() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   @Override
   public double getCellWidth() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   @Override
@@ -288,11 +291,11 @@ public class SquareGrid extends Grid {
 
   @Override
   public CellPoint convert(ZonePoint zp) {
-    double calcX = (zp.x - getOffsetX()) / (float) getSize();
-    double calcY = (zp.y - getOffsetY()) / (float) getSize();
+    double calcX = (zp.x - getOffsetX()) / (float) getSizeInPixels();
+    double calcY = (zp.y - getOffsetY()) / (float) getSizeInPixels();
 
-    boolean exactCalcX = (zp.x - getOffsetX()) % getSize() == 0;
-    boolean exactCalcY = (zp.y - getOffsetY()) % getSize() == 0;
+    boolean exactCalcX = (zp.x - getOffsetX()) % getSizeInPixels() == 0;
+    boolean exactCalcY = (zp.y - getOffsetY()) % getSizeInPixels() == 0;
 
     int newX = (int) (calcX < 0 && !exactCalcX ? calcX - 1 : calcX);
     int newY = (int) (calcY < 0 && !exactCalcY ? calcY - 1 : calcY);
@@ -313,7 +316,8 @@ public class SquareGrid extends Grid {
 
   @Override
   public ZonePoint convert(CellPoint cp) {
-    return new ZonePoint((cp.x * getSize() + getOffsetX()), (cp.y * getSize() + getOffsetY()));
+    return new ZonePoint(
+        (cp.x * getSizeInPixels() + getOffsetX()), (cp.y * getSizeInPixels() + getOffsetY()));
   }
 
   @Override
@@ -324,7 +328,7 @@ public class SquareGrid extends Grid {
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
     double scale = renderer.getScale();
-    double gridSize = getSize() * scale;
+    double gridSize = getSizeInPixels() * scale;
 
     g.setColor(new Color(getZone().getGridColor()));
 

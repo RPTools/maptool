@@ -154,7 +154,7 @@ public class getInfoFunction extends AbstractFunction {
     ginfo.addProperty("cell width", zone.getGrid().getCellWidth());
     ginfo.addProperty("cell offset width", zone.getGrid().getCellOffset().getWidth());
     ginfo.addProperty("cell offset height", zone.getGrid().getCellOffset().getHeight());
-    ginfo.addProperty("size", zone.getGrid().getSize());
+    ginfo.addProperty("size", zone.getGrid().getSizeInPixels());
     ginfo.addProperty("x offset", zone.getGrid().getOffsetX());
     ginfo.addProperty("y offset", zone.getGrid().getOffsetY());
     ginfo.addProperty("second dimension", grid.getSecondDimension());
@@ -182,7 +182,7 @@ public class getInfoFunction extends AbstractFunction {
     }
     {
       final var mapAsset = zone.getMapAssetId();
-      minfo.addProperty("map asset", mapAsset == null ? null : "asset://" + mapAsset.toString());
+      minfo.addProperty("map asset", mapAsset == null ? null : "asset://" + mapAsset);
     }
 
     return minfo;
@@ -468,8 +468,7 @@ public class getInfoFunction extends AbstractFunction {
 
     // Currently, just the color info is returned.
     for (Map.Entry<Object, Object> entry : UIManager.getDefaults().entrySet()) {
-      if (entry.getValue() instanceof Color) {
-        Color color = (Color) entry.getValue();
+      if (entry.getValue() instanceof Color color) {
         theme.addProperty((String) entry.getKey(), Integer.toHexString(color.getRGB()));
       }
     }

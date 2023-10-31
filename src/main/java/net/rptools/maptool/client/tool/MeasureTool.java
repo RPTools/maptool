@@ -136,7 +136,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       //
       // c += Math.sqrt(a*a + b*b)/zone.getUnitsPerCell();
 
-      c /= renderer.getZone().getGrid().getSize();
+      c /= renderer.getZone().getGrid().getSizeInPixels();
       c *= renderer.getZone().getUnitsPerCell();
 
       String distance = NumberFormat.getInstance().format(c);

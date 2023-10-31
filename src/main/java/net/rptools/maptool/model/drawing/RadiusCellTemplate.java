@@ -23,7 +23,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
-import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.RadiusCellTemplateDto;
 
@@ -166,7 +165,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (zone == null) return;
 
     // Find the proper distance
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     for (int y = 0; y < radius; y++) {
       for (int x = 0; x < radius; x++) {
 
@@ -233,7 +232,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (zone == null) {
       return new Rectangle();
     }
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
     ZonePoint vertex = getVertex();
 
@@ -260,7 +259,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     }
     if (zone == null) return;
 
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     Rectangle r = (Rectangle) vertexRenderer.getShape();
     r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
     r = (Rectangle) renderer.getShape();
@@ -313,7 +312,7 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (zone == null) {
       return new Area();
     }
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int r = getRadius();
     ZonePoint vertex = getVertex();
     Area result = new Area();

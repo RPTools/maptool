@@ -133,7 +133,7 @@ public class LineTemplate extends AbstractTemplate {
     if (calcPath() == null) return;
 
     // Paint each element in the path
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSizeInPixels();
     ListIterator<CellPoint> i = path.listIterator();
     while (i.hasNext()) {
       CellPoint p = i.next();
@@ -392,7 +392,7 @@ public class LineTemplate extends AbstractTemplate {
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
       return new Rectangle();
     }
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSizeInPixels();
     ZonePoint vertex = getVertex();
 
     // Find the point that is farthest away in the path, then adjust
@@ -462,7 +462,7 @@ public class LineTemplate extends AbstractTemplate {
     }
     // Create an area by merging all the squares along the path
     Area result = new Area();
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     Quadrant q = getQuadrant();
 
     // Mimic paintArea to get the correct area

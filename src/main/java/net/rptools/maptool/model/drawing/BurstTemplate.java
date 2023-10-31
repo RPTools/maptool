@@ -69,7 +69,7 @@ public class BurstTemplate extends RadiusTemplate {
     }
     if (zone == null) return;
 
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     Rectangle r = (Rectangle) vertexRenderer.getShape();
     r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
     r = (Rectangle) renderer.getShape();

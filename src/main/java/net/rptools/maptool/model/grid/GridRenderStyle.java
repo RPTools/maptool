@@ -36,21 +36,24 @@ public class GridRenderStyle {
 
   private float lastScale = 1;
   private float lastEdgeLength = 100;
-  public GridDrawLineStyle lineStyle = GridDrawLineStyle.INTERSECTION_MIDPOINT;
+  public GridLineStyle lineStyle = new GridLineStyle(GridLineStyleType.INTERSECTION_MIDPOINT);
   public GridDrawBlendComposite blendComposite = GridDrawBlendComposite.NONE;
   public float opacity = 0.8f; // max opacity
   public double lineOffset = 0;
   public double lineWeight = AppState.getGridLineWeight();
-  private final float[] fixedLineWidths = new float[] {0.3f, 0.5f, 0.78f, 1.0f, 1.2f};
+  private final float[] fixedLineWidths = new float[] {5f, 5f, 3f, 2f, 1f};
   private float[] lineWidths = fixedLineWidths; // widths scaled to zoom setting
-  public Color topColour = AppPreferences.getDefaultGridColor();
-  public Color underColour =
-      new ColourTools(topColour).getComplementaryColor(); // default to a contrasting colour
-  private Color midColour =
-      new ColourTools(topColour)
-          .mixColors(underColour, 0.5f); // find a colour perceptually between both
+  public Color colour1 = AppPreferences.getDefaultGridColor();
+  public Color colour2 = new ColourTools(colour1).setTransparency(0.5f);
 
-  private Color[] colours = {underColour, underColour, midColour, topColour, topColour};
+  public Color colour4 =
+      new ColourTools(colour1).getComplementaryColor(); // default to a contrasting colour
+  public Color colour5 = new ColourTools(colour4).setTransparency(0.5f);
+
+  private final Color colour3 =
+      new ColourTools(colour1).mixColors(colour4, 0.5f); // find a colour perceptually between both
+
+  private final Color[] colours = {colour5, colour4, colour3, colour2, colour1};
   private BasicStroke[] strokes;
   public boolean exposedOnly = true;
   public boolean overFog = false;
@@ -58,23 +61,25 @@ public class GridRenderStyle {
   public boolean twoColour = true;
 
   public void update(float scale, float edgelength) {
+    log.debug(
+        "Update GridRenderStyle - last scale: "
+            + lastScale
+            + ", last edge length: "
+            + lastEdgeLength
+            + ", new scale: "
+            + scale
+            + ", new edge length: "
+            + edgelength);
     if (edgelength != lastEdgeLength || lineStyle.getSideLength() == -1) {
       lineStyle.setSideLength(edgelength);
       lastEdgeLength = edgelength;
     }
     if (lastScale != scale) {
+      log.debug("Update GridRenderStyle -  scaleLineWidths(scale)");
       scaleLineWidths(scale);
     }
     if (edgelength != lastEdgeLength || lastScale != scale || strokes == null) {
       setBasicStrokes();
-    }
-  }
-
-  public void kachunkachunk(Graphics2D g, Shape s) {
-    for (int i = 0; i < 5; i++) {
-      g.setColor(colours[i]);
-      g.setStroke(strokes[i]);
-      g.draw(s);
     }
   }
 
@@ -83,29 +88,33 @@ public class GridRenderStyle {
   }
 
   public void scaleLineWidths(float newScale) {
+    log.debug("scale line widths");
     // we don't want lines to disappear or get ridiculously big so limit the acceptable range
     float tmpScale = constrainToRange(newScale, 0.334f, 15.0f);
-    log.debug("Last: " + lastScale + " New: " + newScale  + " Constrained: " + tmpScale);
+    log.info("Last: " + lastScale + " New: " + newScale + " Constrained: " + tmpScale);
     // only change things if it is different
     if (tmpScale != lastScale) {
       lastScale = tmpScale;
       // scale the line widths to match.
+      float[] newArr = new float[5];
       for (int count = 0; count < 5; count++) {
-        lineWidths[count] = (float) (lastScale * lineWeight * fixedLineWidths[count]);
+        float newVal = (float) (lastScale * lineWeight * fixedLineWidths[count]);
+        newArr[count] = newVal;
+        log.info("Line widths: " + count + " " + newArr[count]);
       }
+      this.lineWidths = newArr;
     }
-    log.debug("Line widths: " + lineWidths.toString());
   }
 
   public BasicStroke[] setBasicStrokes() {
+    log.debug("Create array of Basic Strokes");
     this.strokes = new BasicStroke[5];
     for (int i = 0; i < 5; i++) {
-      log.debug("setBasicStrokes - Line dash array: " + lineStyle.getLineDashArray(i).toString());
-      log.debug("setBasicStrokes - Line width: " + lineWidths[i]);
+      log.info("setBasicStrokes - Line width: " + lineWidths[i]);
       strokes[i] =
           new BasicStroke(
               lineWidths[i],
-              BasicStroke.CAP_BUTT,
+              BasicStroke.CAP_ROUND,
               BasicStroke.JOIN_MITER,
               10f,
               lineStyle.getLineDashArray(i),
@@ -125,17 +134,15 @@ class ColourTools extends Color {
   }
 
   double brightness;
-  private final ColorSpace cs;
+  private final ColorSpace cs = this.getColorSpace();
 
   ColourTools(Color c) {
     super(c.hashCode());
-    cs = c.getColorSpace();
     this.brightness = perceivedLightness(c);
   }
 
   ColourTools(float[] comp) {
     super(ColorSpace.getInstance(ColorSpace.CS_sRGB), comp, 0f);
-    cs = this.getColorSpace();
     this.brightness = perceivedLightness(this);
   }
 
@@ -193,5 +200,11 @@ class ColourTools extends Color {
     int bluePart = (int) (color1.getBlue() * percent + color2.getBlue() * inverse_percent);
     int alphaPart = (int) (color1.getAlpha() * percent + color2.getAlpha() * inverse_percent);
     return new Color(redPart, greenPart, bluePart, alphaPart);
+  }
+
+  public Color setTransparency(float v) {
+    float[] comp = new float[3];
+    this.getColorComponents(comp);
+    return new Color(cs, comp, v);
   }
 }

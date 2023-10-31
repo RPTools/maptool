@@ -420,7 +420,7 @@ public class ServerMessageHandler implements MessageHandler {
         () -> {
           Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
           Grid grid = zone.getGrid();
-          grid.setSize(msg.getSize());
+          grid.setSizeInPixels(msg.getSize());
           grid.setOffset(msg.getXOffset(), msg.getYOffset());
           zone.setGridColor(msg.getColor());
         });

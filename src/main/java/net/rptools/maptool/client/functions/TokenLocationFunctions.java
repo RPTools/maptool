@@ -344,7 +344,7 @@ public class TokenLocationFunctions extends AbstractFunction {
 
       double a = (int) (sourceCenterX - targetCenterX);
       double b = (int) (sourceCenterY - targetCenterY);
-      distance = Math.sqrt(a * a + b * b) / grid.getSize();
+      distance = Math.sqrt(a * a + b * b) / grid.getSizeInPixels();
       if (units) distance *= zone.getUnitsPerCell();
     }
     return distance;
@@ -420,7 +420,7 @@ public class TokenLocationFunctions extends AbstractFunction {
       double sourceCenterY = sourceBounds.y + sourceBounds.height / 2.0;
       double a = (int) (sourceCenterX - targetX);
       double b = (int) (sourceCenterY - targetY);
-      double h = Math.sqrt(a * a + b * b) / grid.getSize();
+      double h = Math.sqrt(a * a + b * b) / grid.getSizeInPixels();
       if (units) h *= zone.getUnitsPerCell();
       return h;
     }

@@ -124,7 +124,7 @@ public class Zone {
     OBJECT(),
     BACKGROUND();
 
-    private String displayName;
+    private final String displayName;
 
     Layer() {
       displayName = I18N.getString("layer." + name().toLowerCase());
@@ -180,7 +180,7 @@ public class Zone {
     WALL_VBL,
     HILL_VBL,
     PIT_VBL,
-    MBL;
+    MBL
   }
 
   public static final class TopologyTypeSet implements Iterable<TopologyType> {
@@ -234,10 +234,10 @@ public class Zone {
   }
 
   public static final int DEFAULT_TOKEN_VISION_DISTANCE = 250; // In units
-  public static final int DEFAULT_PIXELS_CELL = 50;
+  // public static final int DEFAULT_PIXELS_CELL = 50;
   public static final int DEFAULT_UNITS_PER_CELL = 5;
 
-  public static final DrawablePaint DEFAULT_FOG = new DrawableColorPaint(Color.black);
+  public static final DrawablePaint DEFAULT_FOG = new DrawableColorPaint(Color.DARK_GRAY);
 
   // The zones should be ordered. We could have the server assign each zone
   // an incrementing number as new zones are created, but that would take a lot
@@ -250,7 +250,7 @@ public class Zone {
   private GUID id = new GUID(); // Ideally would be 'final', but that complicates imported()
 
   private Grid grid;
-  private int gridColor = Color.black.getRGB();
+  private int gridColor = Color.yellow.getRGB();
   private float imageScaleX = 1;
   private float imageScaleY = 1;
 
@@ -395,7 +395,8 @@ public class Zone {
       // TODO: This is here to provide transition between pre 1.3b19 an 1.3b19. Remove later
       tokenVisionDistance = DEFAULT_TOKEN_VISION_DISTANCE;
     }
-    return Double.valueOf(tokenVisionDistance * grid.getSize() / getUnitsPerCell()).intValue();
+    return Double.valueOf(tokenVisionDistance * grid.getSizeInPixels() / getUnitsPerCell())
+        .intValue();
   }
 
   public void setFogPaint(DrawablePaint paint) {
@@ -469,10 +470,8 @@ public class Zone {
    * <p>JFJ 2010-10-27 Don't forget that since there are new zones AND new tokens created here from
    * the old one being passed in, if you have any data that needs to transfer over, you will need to
    * manually copy it as is done below for various items.
-   */
-
-  /**
-   * Create a new zone with old zone's properties and with new token ids.
+   *
+   * <p>Create a new zone with old zone's properties and with new token ids.
    *
    * @param zone The zone to copy.
    */
@@ -1342,17 +1341,10 @@ public class Zone {
 
   public void addDrawable(DrawnElement drawnElement) {
     switch (drawnElement.getDrawable().getLayer()) {
-      case OBJECT:
-        objectDrawables.add(drawnElement);
-        break;
-      case BACKGROUND:
-        backgroundDrawables.add(drawnElement);
-        break;
-      case GM:
-        gmDrawables.add(drawnElement);
-        break;
-      default:
-        drawables.add(drawnElement);
+      case OBJECT -> objectDrawables.add(drawnElement);
+      case BACKGROUND -> backgroundDrawables.add(drawnElement);
+      case GM -> gmDrawables.add(drawnElement);
+      default -> drawables.add(drawnElement);
     }
     new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
@@ -1446,8 +1438,7 @@ public class Zone {
         new MapToolEventBus().getMainEventBus().post(new DrawableRemoved(this, drawable));
         return;
       }
-      if (drawable.getDrawable() instanceof DrawablesGroup) {
-        DrawablesGroup dg = (DrawablesGroup) drawable.getDrawable();
+      if (drawable.getDrawable() instanceof DrawablesGroup dg) {
         removeDrawable(dg.getDrawableList(), drawableId);
       }
     }
@@ -1899,7 +1890,7 @@ public class Zone {
   public List<Token> getTokensOwnedByAllWithSight(Player p) {
     return getTokensFiltered(
         new Filter() {
-          String playerId = MapTool.getPlayer().getName();
+          final String playerId = MapTool.getPlayer().getName();
 
           public boolean matchToken(Token t) {
             return (t.getHasSight()
@@ -1945,9 +1936,9 @@ public class Zone {
   }
 
   /** Interface for matchToken. */
-  public static interface Filter {
+  public interface Filter {
 
-    public boolean matchToken(Token t);
+    boolean matchToken(Token t);
   }
 
   /** The TokenZOrderComparator used to order token lists. */
@@ -2129,7 +2120,7 @@ public class Zone {
     }
     // 1.3b70 -> 1.3b71
     // These two variables were added
-    if (drawBoard == false) {
+    if (!drawBoard) {
       // this should check the file version, not the value
       drawBoard = true;
     }

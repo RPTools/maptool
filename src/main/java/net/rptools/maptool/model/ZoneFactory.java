@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.Color;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import net.rptools.lib.MD5Key;
@@ -70,7 +70,7 @@ public class ZoneFactory {
             AppPreferences.getFaceEdge(),
             AppPreferences.getFaceVertex()));
     zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
-    zone.getGrid().setSize(AppPreferences.getDefaultGridSize());
+    zone.getGrid().setSizeInPixels(AppPreferences.getDefaultGridSize());
     zone.getGrid().setOffset(0, 0);
 
     return zone;

@@ -41,7 +41,7 @@ public class BlastTemplate extends ConeTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
+  private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
 
   private int offsetX;
   private int offsetY;
@@ -72,7 +72,7 @@ public class BlastTemplate extends ConeTemplate {
     }
     if (zone == null) return;
 
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int size = getRadius() * gridSize;
 
     Rectangle r = (Rectangle) renderer.getShape();

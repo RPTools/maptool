@@ -98,7 +98,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   private int dragStartX;
   private int dragStartY;
 
-  private BufferedImage resizeImg = RessourceManager.getImage(Images.RESIZE);
+  private final BufferedImage resizeImg = RessourceManager.getImage(Images.RESIZE);
 
   public StampTool() {}
 
@@ -624,8 +624,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           && tokenBeingResized.isSnapToGrid()
           && !tokenBeingResized.isBackgroundStamp()) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
-        newWidth += renderer.getZone().getGrid().getSize();
-        newHeight += renderer.getZone().getGrid().getSize();
+        newWidth += renderer.getZone().getGrid().getSizeInPixels();
+        newHeight += renderer.getZone().getGrid().getSizeInPixels();
       }
       // take into account rotated stamps
       if (isRotated) {
@@ -1149,7 +1149,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     if (selectionBoundBox != null) {
       if (renderer.isAutoResizeStamp()) {
         Stroke stroke = g.getStroke();
-        final float dash1[] = {10.0f, 5.0f};
+        final float[] dash1 = {10.0f, 5.0f};
         final BasicStroke dashed =
             new BasicStroke(2.0f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10.0f, dash1, 0.0f);
         g.setStroke(dashed);
@@ -1338,7 +1338,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         && selectedHeight > 0
         && cellWidthSelected > 0
         && cellHeightSelected > 0) {
-      double gridSize = renderer.getZone().getGrid().getSize();
+      double gridSize = renderer.getZone().getGrid().getSizeInPixels();
       double zoneScale = renderer.getScale();
       double newScaleX =
           ((gridSize * cellWidthSelected) / (selectedWidth / zoneScale)) * currentScaleX;
@@ -1360,7 +1360,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   public void adjustAnchor(double scaleX, double scaleY) {
     ZonePoint selectionTr =
         ScreenPoint.convertToZone(renderer, selectionBoundBox.getX(), selectionBoundBox.getY());
-    int gridSize = renderer.getZone().getGrid().getSize();
+    int gridSize = renderer.getZone().getGrid().getSizeInPixels();
     int tokenX = tokenUnderMouse.getX() + tokenUnderMouse.getAnchor().x;
     int tokenY = tokenUnderMouse.getY() + tokenUnderMouse.getAnchor().y;
 
@@ -1376,7 +1376,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   public Point getAdjustedAnchor(double scaleX, double scaleY) {
     ZonePoint selectionTr =
         ScreenPoint.convertToZone(renderer, selectionBoundBox.getX(), selectionBoundBox.getY());
-    int gridSize = renderer.getZone().getGrid().getSize();
+    int gridSize = renderer.getZone().getGrid().getSizeInPixels();
     int tokenX = tokenUnderMouse.getX() + tokenUnderMouse.getAnchor().x;
     int tokenY = tokenUnderMouse.getY() + tokenUnderMouse.getAnchor().y;
 

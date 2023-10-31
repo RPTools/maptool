@@ -61,8 +61,8 @@ public class BoardTool extends DefaultTool {
   private static boolean oldShowGrid;
 
   // Status variables
-  private static Point boardPosition = new Point(0, 0);
-  private static Dimension snap = new Dimension(1, 1);
+  private static final Point boardPosition = new Point(0, 0);
+  private static final Dimension snap = new Dimension(1, 1);
 
   // Action control variables
   private Point dragStart;
@@ -215,7 +215,7 @@ public class BoardTool extends DefaultTool {
     // default to keeping that same alignment.
     final int offset = zone.getBoardX();
     final Dimension tileSize = getTileSize();
-    final int gridSize = zone.getGrid().getSize();
+    final int gridSize = zone.getGrid().getSizeInPixels();
 
     if ((tileSize != null) && ((offset % tileSize.width) == 0)) {
       setSnap(tileSize.width, tileSize.height);
@@ -292,7 +292,7 @@ public class BoardTool extends DefaultTool {
     Right,
     Up,
     Down
-  };
+  }
 
   /** Constructs actions to attach to key-presses. */
   @SuppressWarnings("serial")
@@ -347,7 +347,7 @@ public class BoardTool extends DefaultTool {
 
   private void enforceButtonRules() {
     if (snapGridButton.isSelected()) {
-      final int gridSize = zone.getGrid().getSize();
+      final int gridSize = zone.getGrid().getSizeInPixels();
       setSnap(gridSize, gridSize);
     } else if (snapTileButton.isSelected()) {
       final Dimension tileSize = getTileSize();

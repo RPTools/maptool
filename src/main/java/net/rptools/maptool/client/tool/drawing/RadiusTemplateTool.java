@@ -134,9 +134,11 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     ZonePoint working = renderer.getZone().getGrid().convert(cp);
 
     // If the mouse is over half way to the next vertex, move it there (both X & Y)
-    int grid = (int) (renderer.getZone().getGrid().getSize() * renderer.getScale());
-    if (mouse.x - working.x >= grid / 2) working.x += renderer.getZone().getGrid().getSize();
-    if (mouse.y - working.y >= grid / 2) working.y += renderer.getZone().getGrid().getSize();
+    int grid = (int) (renderer.getZone().getGrid().getSizeInPixels() * renderer.getScale());
+    if (mouse.x - working.x >= grid / 2)
+      working.x += renderer.getZone().getGrid().getSizeInPixels();
+    if (mouse.y - working.y >= grid / 2)
+      working.y += renderer.getZone().getGrid().getSizeInPixels();
     return working;
   }
 

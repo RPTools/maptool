@@ -103,8 +103,8 @@ public class ZoneRenderer extends JComponent
   /** Is the noise filter on for disrupting pattens in background tiled textures. */
   private boolean bgTextureNoiseFilterOn = false;
 
-  public static final int MIN_GRID_SIZE = 10;
-  private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
+  public static final int MIN_GRID_SIZE = 9;
+  private static final LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
   /** The zone the ZoneRenderer was built from. */
   protected final Zone zone;
 
@@ -128,7 +128,7 @@ public class ZoneRenderer extends JComponent
   private final List<TokenLocation> markerLocationList = new ArrayList<TokenLocation>();
   private GeneralPath facingArrow;
   private final List<Token> showPathList = new ArrayList<Token>();
-  private boolean showAllPaths = true; // Jamz: new option to show path
+  private final boolean showAllPaths = true; // Jamz: new option to show path
   // Optimizations
   private final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
@@ -149,6 +149,11 @@ public class ZoneRenderer extends JComponent
   private int lastX;
   private int lastY;
   private double lastScale;
+
+  public Area getVisibleScreenArea() {
+    return visibleScreenArea;
+  }
+
   private Area visibleScreenArea;
   private final List<ItemRenderer> itemRenderList = new LinkedList<ItemRenderer>();
   private PlayerView lastView;
@@ -706,7 +711,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public void moveViewByCells(int dx, int dy) {
-    int gridSize = (int) (zone.getGrid().getSize() * getScale());
+    int gridSize = (int) (zone.getGrid().getSizeInPixels() * getScale());
 
     int rawXOffset = getViewOffsetX() + dx * gridSize;
     int rawYOffset = getViewOffsetY() + dy * gridSize;
@@ -2050,7 +2055,7 @@ public class ZoneRenderer extends JComponent
   }
 
   protected void renderGrid(Graphics2D g, PlayerView view) {
-    int gridSize = (int) (zone.getGrid().getSize() * getScale());
+    int gridSize = (int) (zone.getGrid().getSizeInPixels() * getScale());
     if (!AppState.isShowGrid() || gridSize < MIN_GRID_SIZE) {
       return;
     }
@@ -2360,7 +2365,7 @@ public class ZoneRenderer extends JComponent
                     c += Math.hypot(a, b);
                     lastPoint = zp;
                   }
-                  c /= zone.getGrid().getSize(); // Number of "cells"
+                  c /= zone.getGrid().getSizeInPixels(); // Number of "cells"
                   c *= zone.getUnitsPerCell(); // "actual" distance traveled
                   distance = NumberFormat.getInstance().format(c);
                 }
@@ -2745,7 +2750,8 @@ public class ZoneRenderer extends JComponent
     int cellY = (int) (sp.y - iheight / 2);
 
     // Draw distance for each cell
-    double fontScale = (double) grid.getSize() / 50; // Font size of 12 at grid size 50 is default
+    double fontScale =
+        (double) grid.getSizeInPixels() / 50; // Font size of 12 at grid size 50 is default
     int fontSize = (int) (getScale() * 12 * fontScale);
     int textOffset = (int) (getScale() * 7 * fontScale); // 7 pixels at 100% zoom & grid size of 50
 
@@ -3311,7 +3317,7 @@ public class ZoneRenderer extends JComponent
           case FIGURE:
             if (token.getHasImageTable()
                 && token.hasFacing()
-                && AppPreferences.getForceFacingArrow() == false) {
+                && !AppPreferences.getForceFacingArrow()) {
               break;
             }
             Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
@@ -3335,7 +3341,7 @@ public class ZoneRenderer extends JComponent
             tokenG.translate(-fx, -fy);
             break;
           case TOP_DOWN:
-            if (AppPreferences.getForceFacingArrow() == false) {
+            if (!AppPreferences.getForceFacingArrow()) {
               break;
             }
           case CIRCLE:
@@ -3705,15 +3711,12 @@ public class ZoneRenderer extends JComponent
 
     // Jamz: Always Visible tokens will get rendered fully to place on top of FoW
     // if we can see a portion of the stamp/token, defaults to 2/9ths, don't clip at all
-    if (token.isAlwaysVisible()
-        && zone.getGrid()
+    return !token.isAlwaysVisible()
+        || !zone.getGrid()
             .checkRegion(
-                tokenCellArea.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance())) {
-      return false;
-    }
+                tokenCellArea.getBounds(), visibleScreenArea, token.getAlwaysVisibleTolerance());
 
     // clipping needed
-    return true;
   }
 
   private boolean canSeeMarker(Token token) {
@@ -3930,7 +3933,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public void adjustGridSize(int delta) {
-    zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
+    zone.getGrid().setSizeInPixels(Math.max(0, zone.getGrid().getSizeInPixels() + delta));
     repaintDebouncer.dispatch();
   }
 
@@ -3994,7 +3997,7 @@ public class ZoneRenderer extends JComponent
 
   public double getScaledGridSize() {
     // Optimize: only need to calc this when grid size or scale changes
-    return getScale() * zone.getGrid().getSize();
+    return getScale() * zone.getGrid().getSizeInPixels();
   }
 
   /** This makes sure that any image updates get refreshed. This could be a little smarter. */
@@ -4006,7 +4009,7 @@ public class ZoneRenderer extends JComponent
 
   private interface ItemRenderer {
 
-    public void render(Graphics2D g);
+    void render(Graphics2D g);
   }
 
   /** Represents a delayed label render */
@@ -4106,7 +4109,7 @@ public class ZoneRenderer extends JComponent
     private int offsetY;
 
     private RenderPathWorker renderPathTask;
-    private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
+    private final ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
 
     /**
      * @param playerId The ID of the player performing the movement.
@@ -4788,7 +4791,7 @@ public class ZoneRenderer extends JComponent
   @SuppressWarnings("unused")
   @Override
   public void setCursor(Cursor cursor) {
-    if (false && cursor == Cursor.getDefaultCursor()) {
+    if (false) {
       custom = createCustomCursor("image/cursor.png", "Group");
       cursor = custom;
     }

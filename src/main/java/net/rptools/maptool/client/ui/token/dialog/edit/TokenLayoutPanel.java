@@ -126,7 +126,7 @@ public class TokenLayoutPanel extends JPanel {
 
             Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
 
-            int gridSize = zone.getGrid().getSize();
+            int gridSize = zone.getGrid().getSizeInPixels();
             int halfGridSize = gridSize / 2;
             int maxXoff = Math.max(halfGridSize, token.getBounds(zone).width - gridSize);
             int maxYoff = Math.max(halfGridSize, token.getBounds(zone).height - gridSize);
@@ -203,7 +203,7 @@ public class TokenLayoutPanel extends JPanel {
 
     // Grid
     if (zone.getGrid().getCapabilities().isSnapToGridSupported()) {
-      Area gridShape = zone.getGrid().getCellShape();
+      Area gridShape = zone.getGrid().getCellArea();
       int offsetX = (size.width - gridShape.getBounds().width) / 2;
       int offsetY = (size.height - gridShape.getBounds().height) / 2;
       g2d.setColor(Color.black);

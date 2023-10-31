@@ -142,7 +142,7 @@ public class GridTool extends DefaultTool {
     colorWell.setColor(new Color(zone.getGridColor()));
     // Setting the size must be done last as it triggers a ChangeEvent
     // which causes copyControlPanelToGrid() to be called.
-    gridSizeSpinner.setValue(grid.getSize());
+    gridSizeSpinner.setValue(grid.getSizeInPixels());
 
     resetZoomSlider();
   }
@@ -174,7 +174,7 @@ public class GridTool extends DefaultTool {
     updateSecondDimension(grid, true);
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
-    grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
+    grid.setSizeInPixels(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
   }
 
   @Override
@@ -249,7 +249,7 @@ public class GridTool extends DefaultTool {
             zone.getId(),
             zone.getGrid().getOffsetX(),
             zone.getGrid().getOffsetY(),
-            zone.getGrid().getSize(),
+            zone.getGrid().getSizeInPixels(),
             zone.getGridColor());
 
     super.detachFrom(renderer);
@@ -265,8 +265,8 @@ public class GridTool extends DefaultTool {
       int x = zp.x - renderer.getZone().getGrid().getOffsetX();
       int y = zp.y - renderer.getZone().getGrid().getOffsetY();
 
-      dragOffsetX = x % renderer.getZone().getGrid().getSize();
-      dragOffsetY = y % renderer.getZone().getGrid().getSize();
+      dragOffsetX = x % renderer.getZone().getGrid().getSizeInPixels();
+      dragOffsetY = y % renderer.getZone().getGrid().getSizeInPixels();
     } else {
       super.mousePressed(e);
     }
@@ -281,7 +281,7 @@ public class GridTool extends DefaultTool {
       int x = zp.x - dragOffsetX;
       int y = zp.y - dragOffsetY;
 
-      int gridSize = renderer.getZone().getGrid().getSize();
+      int gridSize = renderer.getZone().getGrid().getSizeInPixels();
 
       x %= gridSize;
       y %= gridSize;
@@ -345,14 +345,14 @@ public class GridTool extends DefaultTool {
     if (cell == null) {
       return;
     }
-    int oldGridSize = renderer.getZone().getGrid().getSize();
+    int oldGridSize = renderer.getZone().getGrid().getSizeInPixels();
 
     switch (direction) {
       case Increase:
         renderer.adjustGridSize(1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
-        if (renderer.getZone().getGrid().getSize() != oldGridSize) {
+        if (renderer.getZone().getGrid().getSizeInPixels() != oldGridSize) {
           renderer.moveGridBy(-cell.x, -cell.y);
         }
         break;
@@ -360,7 +360,7 @@ public class GridTool extends DefaultTool {
         renderer.adjustGridSize(-1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
-        if (renderer.getZone().getGrid().getSize() != oldGridSize) {
+        if (renderer.getZone().getGrid().getSizeInPixels() != oldGridSize) {
           renderer.moveGridBy(cell.x, cell.y);
         }
         break;

@@ -30,7 +30,7 @@ public class ConeTemplateAreaTest {
     Campaign testCampaign = new Campaign();
     Zone testZone = new Zone();
     Grid testGrid = new SquareGrid();
-    testGrid.setSize(50);
+    testGrid.setSizeInPixels(50);
     testZone.setGrid(testGrid);
     testCampaign.putZone(testZone);
 

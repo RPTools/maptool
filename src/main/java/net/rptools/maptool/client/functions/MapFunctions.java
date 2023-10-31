@@ -251,7 +251,7 @@ public class MapFunctions extends AbstractFunction {
             gridConfig.has("size")
                 ? gridConfig.getAsJsonPrimitive("size").getAsInt()
                 : AppPreferences.getDefaultGridSize();
-        grid.setSize(gridSize);
+        grid.setSizeInPixels(gridSize);
 
         final var gridOffsetX =
             gridConfig.has("x offset") ? gridConfig.getAsJsonPrimitive("x offset").getAsInt() : 0;

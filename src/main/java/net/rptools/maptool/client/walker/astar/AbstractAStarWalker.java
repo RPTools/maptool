@@ -69,7 +69,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   protected int crossY = 0;
   private Area vbl = new Area();
   private Area fowExposedArea = new Area();
-  private double cell_cost = zone.getUnitsPerCell();
+  private final double cell_cost = zone.getUnitsPerCell();
   private double distance = -1;
   private PreparedGeometry vblGeometry = null;
   private PreparedGeometry fowExposedAreaGeometry = null;
@@ -78,8 +78,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   // private long retrievalCount;
   // private long testCount;
   private TokenFootprint footprint = new TokenFootprint();
-  private Map<CellPoint, Map<CellPoint, Boolean>> vblBlockedMovesByGoal = new ConcurrentHashMap<>();
-  private Map<CellPoint, Map<CellPoint, Boolean>> fowBlockedMovesByGoal = new ConcurrentHashMap<>();
+  private final Map<CellPoint, Map<CellPoint, Boolean>> vblBlockedMovesByGoal =
+      new ConcurrentHashMap<>();
+  private final Map<CellPoint, Map<CellPoint, Boolean>> fowBlockedMovesByGoal =
+      new ConcurrentHashMap<>();
   private final Map<CellPoint, List<TerrainModifier>> terrainCells = new HashMap<>();
 
   /**
@@ -696,7 +698,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       return;
     }
 
-    final int basis = zone.getGrid().getSize() / 10;
+    final int basis = zone.getGrid().getSizeInPixels() / 10;
     final int xOffset = basis * (node.isOddStepOfOneTwoOneMovement ? 7 : 3);
 
     Rectangle cellBounds = zone.getGrid().getBounds(node.position);
@@ -709,7 +711,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     gScore.setLabel(f.format(node.g));
     gScore.setX(cellBounds.x + xOffset);
-    gScore.setY(cellBounds.y + 1 * basis);
+    gScore.setY(cellBounds.y + basis);
 
     hScore.setLabel(f.format(node.h));
     hScore.setX(cellBounds.x + xOffset);

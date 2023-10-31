@@ -73,7 +73,7 @@ import org.apache.logging.log4j.Logger;
 public class PointerTool extends DefaultTool {
   private static final long serialVersionUID = 8606021718606275084L;
   private static final Logger log = LogManager.getLogger(PointerTool.class);
-  private BufferedImage panelTexture = RessourceManager.getImage(Images.TEXTURE_PANEL);
+  private final BufferedImage panelTexture = RessourceManager.getImage(Images.TEXTURE_PANEL);
 
   private boolean isShowingTokenStackPopup;
   private boolean isShowingPointer;
@@ -104,8 +104,8 @@ public class PointerTool extends DefaultTool {
   private BufferedImage statSheet;
   private Token tokenOnStatSheet;
 
-  private static int PADDING = 7;
-  private static int STATSHEET_EXTERIOR_PADDING = 5;
+  private static final int PADDING = 7;
+  private static final int STATSHEET_EXTERIOR_PADDING = 5;
 
   // Offset from token's X,Y when dragging. Values are in zone coordinates.
   private int dragOffsetX = 0;
@@ -909,7 +909,7 @@ public class PointerTool extends DefaultTool {
     }
     // Make sure it's a valid move
     boolean isValid;
-    if (grid.getSize() >= 9)
+    if (grid.getSizeInPixels() >= 9)
       isValid = validateMove(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint, dx, dy);
     else
       isValid = validateMove_legacy(tokenBeingDragged, renderer.getSelectedTokenSet(), zonePoint);
@@ -993,7 +993,7 @@ public class PointerTool extends DefaultTool {
         return true;
       }
       isVisible = false;
-      int fudgeSize = Math.max(Math.min((zone.getGrid().getSize() - 2) / 3 - 1, 8), 0);
+      int fudgeSize = Math.max(Math.min((zone.getGrid().getSizeInPixels() - 2) / 3 - 1, 8), 0);
       int deltaX = point.x - leadToken.getX();
       int deltaY = point.y - leadToken.getY();
       Rectangle bounds = new Rectangle();
@@ -1439,7 +1439,7 @@ public class PointerTool extends DefaultTool {
       if (tokenBeingDragged.isSnapToGrid()) {
         // Move in grid size increments. Allows tokens set snap-to-grid on gridless maps
         // to move in whole cell size increments.
-        moveFactor = grid.getSize();
+        moveFactor = grid.getSizeInPixels();
       }
       int x = dragStartX + (int) (dx * moveFactor);
       int y = dragStartY + (int) (dy * moveFactor);

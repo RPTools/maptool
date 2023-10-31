@@ -130,7 +130,7 @@ public class RadiusTemplate extends AbstractTemplate {
     if (zone == null) {
       return new Rectangle();
     }
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
     ZonePoint vertex = getVertex();
     return new Rectangle(
@@ -149,7 +149,7 @@ public class RadiusTemplate extends AbstractTemplate {
     if (zone == null) {
       return new Area();
     }
-    int gridSize = zone.getGrid().getSize();
+    int gridSize = zone.getGrid().getSizeInPixels();
     int r = getRadius();
     ZonePoint vertex = getVertex();
     Area result = new Area();

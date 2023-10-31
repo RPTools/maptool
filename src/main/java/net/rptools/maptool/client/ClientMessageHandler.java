@@ -536,7 +536,7 @@ public class ClientMessageHandler implements MessageHandler {
           int color = msg.getColor();
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.getGrid().setSize(size);
+          zone.getGrid().setSizeInPixels(size);
           zone.getGrid().setOffset(xOffset, yOffset);
           zone.setGridColor(color);
 

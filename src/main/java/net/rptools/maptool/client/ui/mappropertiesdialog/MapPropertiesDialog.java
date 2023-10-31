@@ -287,7 +287,7 @@ public class MapPropertiesDialog extends JDialog {
     getPlayerAliasTextField().setText(zone.getPlayerAlias());
     // Localizes units per cell, using the proper separator. Fixes #507.
     getDistanceTextField().setText(StringUtil.formatDecimal(zone.getUnitsPerCell(), 1));
-    getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSize()));
+    getPixelsPerCellTextField().setText(Integer.toString(zone.getGrid().getSizeInPixels()));
     getDefaultVisionTextField().setText(Integer.toString(zone.getTokenVisionDistance()));
     getHexVerticalRadio().setSelected(zone.getGrid() instanceof HexGridVertical);
     getIsometricRadio().setSelected(zone.getGrid() instanceof IsometricGrid);
@@ -581,7 +581,8 @@ public class MapPropertiesDialog extends JDialog {
     if (getNoGridRadio().isSelected()) {
       grid = GridFactory.createGrid(GridFactory.NONE);
     }
-    grid.setSize(StringUtil.parseInteger(getPixelsPerCellTextField().getText(), grid.getSize()));
+    grid.setSizeInPixels(
+        StringUtil.parseInteger(getPixelsPerCellTextField().getText(), grid.getSizeInPixels()));
 
     grid.setOffset(gridOffsetX, gridOffsetY);
 

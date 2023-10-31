@@ -89,7 +89,7 @@ public class GridlessGrid extends Grid {
   public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
     int dX = cellA.x - cellB.x;
     int dY = cellA.y - cellB.y;
-    return Math.sqrt(dX * dX + dY * dY) / this.getSize(); // returns in cell units
+    return Math.sqrt(dX * dX + dY * dY) / this.getSizeInPixels(); // returns in cell units
   }
 
   /*
@@ -145,7 +145,7 @@ public class GridlessGrid extends Grid {
 
   @Override
   public Rectangle getBounds(CellPoint cp) {
-    return new Rectangle(cp.x, cp.y, getSize(), getSize());
+    return new Rectangle(cp.x, cp.y, getSizeInPixels(), getSizeInPixels());
   }
 
   @Override
@@ -159,24 +159,18 @@ public class GridlessGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
-    // Doesn't do this
-    return null;
-  }
-
-  @Override
   public GridCapabilities getCapabilities() {
     return GRID_CAPABILITIES;
   }
 
   @Override
   public double getCellWidth() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   @Override
   public double getCellHeight() {
-    return getSize();
+    return getSizeInPixels();
   }
 
   @Override
