@@ -23,7 +23,7 @@ plugins {
     id 'org.beryx.runtime' version '1.13.0'
     id "com.google.protobuf" version "0.9.3"
     id 'io.github.file5.guidesigner' version '1.0.2'
-
+    id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
 // Definitions
@@ -526,14 +526,14 @@ task configSentryRelease(type: Copy) {
     inputs.properties(tokens)
 }
 
-task uberJar(type: Jar) {
-    group = 'distribution'
+shadowJar {
     zip64 = true
-    description = 'Create uber jar for native installers'
+    mergeServiceFiles()
 
     archiveBaseName = project.name + '-' + tagVersion
     destinationDirectory = file("$rootDir/releases")
     duplicatesStrategy = DuplicatesStrategy.INCLUDE
+    archiveClassifier = null
 
     manifest {
         attributes 'Implementation-Title': project.name + developerRelease,
@@ -550,13 +550,6 @@ task uberJar(type: Jar) {
                 'Multi-Release': true
     }
 
-    from {
-        configurations.runtimeClasspath.collect {
-            it.isDirectory() ? it : zipTree(it)
-        }
-    }
-    with jar
-    exclude 'META-INF/*.RSA', 'META-INF/*.SF','META-INF/*.DSA'	// Jamz: This is needed to prevent org.bouncycastle:bcmail resigning and security errors
     exclude 'module-info.class' //This is to make sure maptool doesn't become a module by including module-info of dependencies. Probably needs to be fixed before we go to jdk 11+
 }
 
