@@ -42,7 +42,7 @@ public class DiamondTool extends AbstractDrawingTool implements MouseMotionListe
 
   @Override
   public String getTooltip() {
-    return "tool.diamond.tooltip";
+    return "tool.isorectangle.tooltip";
   }
 
   @Override
