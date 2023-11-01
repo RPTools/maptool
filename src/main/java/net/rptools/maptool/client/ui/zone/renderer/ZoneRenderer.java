@@ -70,6 +70,7 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.zones.*;
+import net.rptools.maptool.util.CollectionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
@@ -109,10 +110,8 @@ public class ZoneRenderer extends JComponent
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final DrawableRenderer backgroundDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer objectDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer tokenDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer gmDrawableRenderer = new PartitionedDrawableRenderer();
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
+      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -288,10 +287,9 @@ public class ZoneRenderer extends JComponent
    * up, add the drawable renderer as a listener
    */
   public void flushDrawableRenderer() {
-    backgroundDrawableRenderer.flush();
-    objectDrawableRenderer.flush();
-    tokenDrawableRenderer.flush();
-    gmDrawableRenderer.flush();
+    for (final var renderer : drawableRenderers.values()) {
+      renderer.flush();
+    }
   }
 
   public ScreenPoint getPointUnderMouse() {
@@ -915,11 +913,11 @@ public class ZoneRenderer extends JComponent
     }
     // next, extents of drawing objects
     List<DrawnElement> drawableList = new LinkedList<DrawnElement>();
-    drawableList.addAll(zone.getBackgroundDrawnElements());
-    drawableList.addAll(zone.getObjectDrawnElements());
-    drawableList.addAll(zone.getDrawnElements());
+    drawableList.addAll(zone.getDrawnElements(Layer.BACKGROUND));
+    drawableList.addAll(zone.getDrawnElements(Layer.OBJECT));
+    drawableList.addAll(zone.getDrawnElements(Layer.TOKEN));
     if (view.isGMView()) {
-      drawableList.addAll(zone.getGMDrawnElements());
+      drawableList.addAll(zone.getDrawnElements(Layer.GM));
     }
     for (DrawnElement element : drawableList) {
       Drawable drawable = element.getDrawable();
@@ -1149,10 +1147,10 @@ public class ZoneRenderer extends JComponent
       timer.stop("board");
     }
     if (Zone.Layer.BACKGROUND.isEnabled()) {
-      List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.BACKGROUND);
       // if (!drawables.isEmpty()) {
       timer.start("drawableBackground");
-      renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.BACKGROUND), view, drawables);
       timer.stop("drawableBackground");
       // }
       List<Token> background = zone.getBackgroundStamps(false);
@@ -1164,10 +1162,10 @@ public class ZoneRenderer extends JComponent
     }
     if (Zone.Layer.OBJECT.isEnabled()) {
       // Drawables on the object layer are always below the grid, and...
-      List<DrawnElement> drawables = zone.getObjectDrawnElements();
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.OBJECT);
       // if (!drawables.isEmpty()) {
       timer.start("drawableObjects");
-      renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.OBJECT), view, drawables);
       timer.stop("drawableObjects");
       // }
     }
@@ -1218,18 +1216,18 @@ public class ZoneRenderer extends JComponent
      * </ol>
      */
     if (Zone.Layer.TOKEN.isEnabled()) {
-      List<DrawnElement> drawables = zone.getDrawnElements();
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.TOKEN);
       // if (!drawables.isEmpty()) {
       timer.start("drawableTokens");
-      renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.TOKEN), view, drawables);
       timer.stop("drawableTokens");
       // }
 
       if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
-        drawables = zone.getGMDrawnElements();
+        drawables = zone.getDrawnElements(Layer.GM);
         // if (!drawables.isEmpty()) {
         timer.start("drawableGM");
-        renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        renderDrawableOverlay(g2d, drawableRenderers.get(Layer.GM), view, drawables);
         timer.stop("drawableGM");
         // }
         List<Token> stamps = zone.getGMStamps(false);
@@ -4337,12 +4335,7 @@ public class ZoneRenderer extends JComponent
   }
 
   private void markDrawableLayerDirty(Layer layer) {
-    switch (layer) {
-      case TOKEN -> tokenDrawableRenderer.setDirty();
-      case GM -> gmDrawableRenderer.setDirty();
-      case OBJECT -> objectDrawableRenderer.setDirty();
-      case BACKGROUND -> backgroundDrawableRenderer.setDirty();
-    }
+    drawableRenderers.get(layer).setDirty();
   }
 
   @Subscribe

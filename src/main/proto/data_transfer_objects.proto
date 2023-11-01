@@ -493,6 +493,10 @@ message LabelDto {
   int32 foreground_color = 6;
 }
 
+message DrawnElementListDto {
+  repeated DrawnElementDto drawnElements = 1;
+}
+
 message ZoneDto {
   enum TokenSelectionDto {
     PC = 0;
@@ -524,10 +528,7 @@ message ZoneDto {
   double units_per_cell = 8;
   AStarRoundingOptionsDto a_star_rounding = 9;
   repeated TopologyTypeDto topologyTypes = 10;
-  repeated DrawnElementDto drawables = 11;
-  repeated DrawnElementDto gm_drawables = 12;
-  repeated DrawnElementDto object_drawables = 13;
-  repeated DrawnElementDto background_drawables = 14;
+  map<string, DrawnElementListDto> drawables = 11;
   repeated LabelDto labels = 15;
   repeated TokenDto tokens = 16;
   map<string, AreaDto> exposed_area_meta = 17;

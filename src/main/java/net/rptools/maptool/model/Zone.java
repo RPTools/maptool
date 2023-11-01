@@ -62,6 +62,7 @@ import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.TopologyChanged;
 import net.rptools.maptool.server.Mapper;
+import net.rptools.maptool.server.proto.DrawnElementListDto;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
 import net.rptools.maptool.server.proto.ZoneDto;
 import net.rptools.maptool.util.StringUtil;
@@ -260,10 +261,20 @@ public class Zone {
   private AStarRoundingOptions aStarRounding = AStarRoundingOptions.NONE;
   private TopologyTypeSet topologyTypes = null; // get default from AppPreferences
 
-  private LinkedList<DrawnElement> drawables = new LinkedList<DrawnElement>();
-  private LinkedList<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
-  private LinkedList<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
-  private LinkedList<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
+  // region Keeping these for serialization only. Otherwise, use {@link #drawablesByLayer} instead.
+  @Deprecated private @Nonnull LinkedList<DrawnElement> drawables = new LinkedList<DrawnElement>();
+
+  @Deprecated
+  private @Nonnull LinkedList<DrawnElement> gmDrawables = new LinkedList<DrawnElement>();
+
+  @Deprecated
+  private @Nonnull LinkedList<DrawnElement> objectDrawables = new LinkedList<DrawnElement>();
+
+  @Deprecated
+  private @Nonnull LinkedList<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
+  // endregion
+  // Contains the above lists, but in an easily accessible map.
+  private transient @Nonnull Map<Layer, LinkedList<DrawnElement>> drawablesByLayer;
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
   /** Map each token GUID to the corresponding token. */
@@ -332,6 +343,14 @@ public class Zone {
   private int width;
 
   private transient Map<String, Integer> tokenNumberCache;
+
+  {
+    drawablesByLayer = new EnumMap<>(Layer.class);
+    drawablesByLayer.put(Layer.TOKEN, drawables);
+    drawablesByLayer.put(Layer.GM, gmDrawables);
+    drawablesByLayer.put(Layer.OBJECT, objectDrawables);
+    drawablesByLayer.put(Layer.BACKGROUND, backgroundDrawables);
+  }
 
   /**
    * Note: When adding new fields to this class, make sure to update all constructors, {@link
@@ -516,60 +535,12 @@ public class Zone {
     imageScaleY = zone.imageScaleY;
     playerAlias = zone.playerAlias;
 
-    // In the following blocks we allocate a new linked list then fill it with null values
-    // because the Collections.copy() method requires the destination list to already be
-    // of a large enough size. I couldn't find any method that would copy individual
-    // elements as it populated the new linked lists except those from the Apache Commons
-    // library that use a Transformer and that seemed like a lot more work. :-/
-    if (zone.drawables != null && !zone.drawables.isEmpty()) {
-      drawables = new LinkedList<DrawnElement>();
-      drawables.addAll(Collections.nCopies(zone.drawables.size(), null));
-      Collections.copy(drawables, zone.drawables);
-
-      // Classes that extend Abstract template have a zone id so we need to make sure to update it
-      for (DrawnElement de : drawables) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
+    for (final var entry : drawablesByLayer.entrySet()) {
+      entry.getValue().addAll(zone.drawablesByLayer.get(entry.getKey()));
     }
-    if (zone.objectDrawables != null && !zone.objectDrawables.isEmpty()) {
-      objectDrawables = new LinkedList<DrawnElement>();
-      objectDrawables.addAll(Collections.nCopies(zone.objectDrawables.size(), null));
-      Collections.copy(objectDrawables, zone.objectDrawables);
+    validateTemplateZoneIds();
 
-      // Classes that extend Abstract template have a zone id so we need to make sure to update it
-      for (DrawnElement de : objectDrawables) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
-    }
-    if (zone.backgroundDrawables != null && !zone.backgroundDrawables.isEmpty()) {
-      backgroundDrawables = new LinkedList<DrawnElement>();
-      backgroundDrawables.addAll(Collections.nCopies(zone.backgroundDrawables.size(), null));
-      Collections.copy(backgroundDrawables, zone.backgroundDrawables);
-
-      // Classes that extend Abstract template have a zone id so we need to make sure to update it
-      for (DrawnElement de : backgroundDrawables) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
-    }
-    if (zone.gmDrawables != null && !zone.gmDrawables.isEmpty()) {
-      gmDrawables = new LinkedList<DrawnElement>();
-      gmDrawables.addAll(Collections.nCopies(zone.gmDrawables.size(), null));
-      Collections.copy(gmDrawables, zone.gmDrawables);
-
-      // Classes that extend Abstract template have a zone id so we need to make sure to update it
-      for (DrawnElement de : gmDrawables) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
-    }
-    if (zone.labels != null && !zone.labels.isEmpty()) {
+    if (!zone.labels.isEmpty()) {
       for (GUID guid : zone.labels.keySet()) {
         this.putLabel(new Label(zone.labels.get(guid)));
       }
@@ -822,14 +793,9 @@ public class Zone {
   }
 
   public boolean isEmpty() {
-    // @formatter:off
-    return (drawables == null || drawables.isEmpty())
-        && (gmDrawables == null || gmDrawables.isEmpty())
-        && (objectDrawables == null || objectDrawables.isEmpty())
-        && (backgroundDrawables == null || backgroundDrawables.isEmpty())
-        && (tokenOrderedList == null || tokenOrderedList.isEmpty())
-        && (labels == null || labels.isEmpty());
-    // @formatter:on
+    return drawablesByLayer.values().stream().allMatch(List::isEmpty)
+        && tokenOrderedList.isEmpty()
+        && labels.isEmpty();
   }
 
   /**
@@ -1348,100 +1314,39 @@ public class Zone {
   ///////////////////////////////////////////////////////////////////////////
 
   public void addDrawable(DrawnElement drawnElement) {
-    switch (drawnElement.getDrawable().getLayer()) {
-      case OBJECT:
-        objectDrawables.add(drawnElement);
-        break;
-      case BACKGROUND:
-        backgroundDrawables.add(drawnElement);
-        break;
-      case GM:
-        gmDrawables.add(drawnElement);
-        break;
-      default:
-        drawables.add(drawnElement);
-    }
+    drawablesByLayer.get(drawnElement.getDrawable().getLayer()).add(drawnElement);
     new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
   public void updateDrawable(DrawnElement drawnElement, Pen pen) {
-    if (drawnElement.getDrawable().getLayer() == Layer.OBJECT) {
-      updatePen(objectDrawables, drawnElement, pen);
-    } else if (drawnElement.getDrawable().getLayer() == Layer.BACKGROUND) {
-      updatePen(backgroundDrawables, drawnElement, pen);
-    } else if (drawnElement.getDrawable().getLayer() == Layer.GM) {
-      updatePen(gmDrawables, drawnElement, pen);
-    } else {
-      updatePen(drawables, drawnElement, pen);
-    }
-    new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
-  }
-
-  private void updatePen(List<DrawnElement> elementList, DrawnElement drawnElement, Pen pen) {
+    final var elementList = drawablesByLayer.get(drawnElement.getDrawable().getLayer());
     for (DrawnElement de : elementList) {
       if (de.getDrawable().getId().equals(drawnElement.getDrawable().getId())) {
         de.setPen(new Pen(pen));
         break;
       }
     }
+    new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
   public void addDrawableRear(DrawnElement drawnElement) {
     // Since the list is drawn in order
     // items that are drawn first are at the "back"
-    switch (drawnElement.getDrawable().getLayer()) {
-      case OBJECT:
-        objectDrawables.addFirst(drawnElement);
-        break;
-      case BACKGROUND:
-        backgroundDrawables.addFirst(drawnElement);
-        break;
-      case GM:
-        gmDrawables.addFirst(drawnElement);
-        break;
-      default:
-        drawables.addFirst(drawnElement);
-    }
+    drawablesByLayer.get(drawnElement.getDrawable().getLayer()).addFirst(drawnElement);
     new MapToolEventBus().getMainEventBus().post(new DrawableAdded(this, drawnElement));
   }
 
-  public List<DrawnElement> getDrawnElements() {
-    return getDrawnElements(Zone.Layer.TOKEN);
-  }
-
-  public List<DrawnElement> getObjectDrawnElements() {
-    return getDrawnElements(Zone.Layer.OBJECT);
-  }
-
-  public List<DrawnElement> getGMDrawnElements() {
-    return getDrawnElements(Zone.Layer.GM);
-  }
-
-  public List<DrawnElement> getBackgroundDrawnElements() {
-    return getDrawnElements(Zone.Layer.BACKGROUND);
-  }
-
   public List<DrawnElement> getDrawnElements(Zone.Layer layer) {
-    switch (layer) {
-      case OBJECT:
-        return objectDrawables;
-      case GM:
-        return gmDrawables;
-      case BACKGROUND:
-        return backgroundDrawables;
-      default:
-        return drawables;
-    }
+    return Collections.unmodifiableList(drawablesByLayer.get(layer));
   }
 
   public void removeDrawable(GUID drawableId) {
     // Since we don't know anything about the drawable, look through all the layers
     // Do we need to remove it from the Undo manager as well? Probably. Perhaps some
     // UndoPerZone method that searches and deletes the drawable ID?
-    removeDrawable(drawables, drawableId);
-    removeDrawable(backgroundDrawables, drawableId);
-    removeDrawable(objectDrawables, drawableId);
-    removeDrawable(gmDrawables, drawableId);
+    for (var list : drawablesByLayer.values()) {
+      removeDrawable(list, drawableId);
+    }
   }
 
   private void removeDrawable(List<DrawnElement> drawableList, GUID drawableId) {
@@ -1470,6 +1375,17 @@ public class Zone {
 
   public void addDrawable(Pen pen, Drawable drawable) {
     undo.addDrawable(pen, drawable);
+  }
+
+  private void validateTemplateZoneIds() {
+    // Classes that extend Abstract template have a zone id so we need to make sure to update it
+    for (var list : drawablesByLayer.values()) {
+      for (var de : list) {
+        if (de.getDrawable() instanceof AbstractTemplate at) {
+          at.setZoneId(id);
+        }
+      }
+    }
   }
 
   public boolean canUndo() {
@@ -1662,13 +1578,10 @@ public class Zone {
   }
 
   public List<DrawnElement> getAllDrawnElements() {
-    List<DrawnElement> list = new ArrayList<DrawnElement>();
-
-    list.addAll(getDrawnElements());
-    list.addAll(getObjectDrawnElements());
-    list.addAll(getBackgroundDrawnElements());
-    list.addAll(getGMDrawnElements());
-
+    var list = new ArrayList<DrawnElement>();
+    for (var deList : drawablesByLayer.values()) {
+      list.addAll(deList);
+    }
     return list;
   }
 
@@ -2072,10 +1985,9 @@ public class Zone {
    * happen when you can't undo your changes and re-expose a drawable, typically at load.
    */
   private void collapseDrawables() {
-    collapseDrawableLayer(drawables);
-    collapseDrawableLayer(gmDrawables);
-    collapseDrawableLayer(objectDrawables);
-    collapseDrawableLayer(backgroundDrawables);
+    for (var list : drawablesByLayer.values()) {
+      collapseDrawableLayer(list);
+    }
   }
 
   private void collapseDrawableLayer(List<DrawnElement> layer) {
@@ -2122,6 +2034,7 @@ public class Zone {
 
   ////
   // Backward compatibility
+  @SuppressWarnings("ConstantConditions")
   protected Object readResolve() {
     if ("".equals(playerAlias) || name.equals(playerAlias)) {
       // Don't keep redundant player aliases around. The display name will default to the name if
@@ -2208,12 +2121,24 @@ public class Zone {
       tokenSelection = TokenSelection.ALL;
     }
 
-    // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (DrawnElement de : drawables) {
-      if (de.getDrawable() instanceof AbstractTemplate at) {
-        at.setZoneId(id);
-      }
+    if (drawables == null) {
+      drawables = new LinkedList<>();
     }
+    if (gmDrawables == null) {
+      gmDrawables = new LinkedList<>();
+    }
+    if (objectDrawables == null) {
+      objectDrawables = new LinkedList<>();
+    }
+    if (backgroundDrawables == null) {
+      backgroundDrawables = new LinkedList<>();
+    }
+    drawablesByLayer = new EnumMap<>(Layer.class);
+    drawablesByLayer.put(Layer.TOKEN, drawables);
+    drawablesByLayer.put(Layer.GM, gmDrawables);
+    drawablesByLayer.put(Layer.OBJECT, objectDrawables);
+    drawablesByLayer.put(Layer.BACKGROUND, backgroundDrawables);
+    validateTemplateZoneIds();
 
     return this;
   }
@@ -2293,22 +2218,14 @@ public class Zone {
         dto.getTopologyTypesList().stream()
             .map(t -> TopologyType.valueOf(t.name()))
             .collect(Collectors.toList()));
-    zone.drawables =
-        dto.getDrawablesList().stream()
-            .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toCollection(LinkedList::new));
-    zone.gmDrawables =
-        dto.getGmDrawablesList().stream()
-            .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toCollection(LinkedList::new));
-    zone.objectDrawables =
-        dto.getObjectDrawablesList().stream()
-            .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toCollection(LinkedList::new));
-    zone.backgroundDrawables =
-        dto.getBackgroundDrawablesList().stream()
-            .map(d -> DrawnElement.fromDto(d))
-            .collect(Collectors.toCollection(LinkedList::new));
+
+    dto.getDrawablesMap()
+        .forEach(
+            (layerName, listDto) -> {
+              var list = zone.drawablesByLayer.get(Layer.valueOf(layerName));
+              listDto.getDrawnElementsList().stream().map(DrawnElement::fromDto).forEach(list::add);
+            });
+
     dto.getLabelsList().stream()
         .map(d -> Label.fromDto(d))
         .forEach(l -> zone.labels.put(l.getId(), l));
@@ -2348,12 +2265,9 @@ public class Zone {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
-    // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (DrawnElement de : zone.drawables) {
-      if (de.getDrawable() instanceof AbstractTemplate at) {
-        at.setZoneId(zone.id);
-      }
-    }
+
+    zone.validateTemplateZoneIds();
+
     return zone;
   }
 
@@ -2378,12 +2292,15 @@ public class Zone {
               .map(t -> TopologyTypeDto.valueOf(t.name()))
               .collect(Collectors.toList()));
     }
-    dto.addAllDrawables(drawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllGmDrawables(gmDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllObjectDrawables(
-        objectDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
-    dto.addAllBackgroundDrawables(
-        backgroundDrawables.stream().map(d -> d.toDto()).collect(Collectors.toList()));
+
+    drawablesByLayer.forEach(
+        (layer, drawables) ->
+            dto.putDrawables(
+                layer.name(),
+                DrawnElementListDto.newBuilder()
+                    .addAllDrawnElements(drawables.stream().map(de -> de.toDto()).toList())
+                    .build()));
+
     dto.addAllLabels(labels.values().stream().map(l -> l.toDto()).collect(Collectors.toList()));
     dto.addAllTokens(tokenMap.values().stream().map(t -> t.toDto()).collect(Collectors.toList()));
     exposedAreaMeta.forEach(
