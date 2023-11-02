@@ -63,9 +63,7 @@ public class LightSourceCreator {
         new GUID(),
         LightSource.Type.NORMAL,
         false,
-        List.of(
-            // new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50)))
-            new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false)));
+        List.of(new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false)));
   }
 
   private static LightSource createD20LightSource(String name, double radius, double arcAngle) {
@@ -75,7 +73,6 @@ public class LightSourceCreator {
         LightSource.Type.NORMAL,
         false,
         List.of(
-            // new Light(0, 5, arcAngle, new DrawableColorPaint(new Color(255, 255, 0, 50)))
             new Light(ShapeType.CIRCLE, 0, radius, arcAngle, null, 100, false, false),
             new Light(
                 ShapeType.CIRCLE,
