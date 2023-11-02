@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -146,25 +147,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     // Add unique light sources for the token.
     {
-      JMenu subMenu = new JMenu("Unique");
-
-      List<LightSource> lightSources = new ArrayList<>(tokenUnderMouse.getUniqueLightSources());
-      Collections.sort(lightSources);
-
-      LIGHTSOURCES:
-      for (LightSource lightSource : lightSources) {
-        for (Light light : lightSource.getLightList()) {
-          // TODO Shouldn't we only skip if *all* child lights are GM only. And what about owner
-          //  only?
-          if (light.isGM() && !MapTool.getPlayer().isGM()) {
-            continue LIGHTSOURCES;
-          }
-        }
-        JCheckBoxMenuItem menuItem =
-            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
-        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
-        subMenu.add(menuItem);
-      }
+      JMenu subMenu = createLightCategoryMenu("Unique", tokenUnderMouse.getUniqueLightSources());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
         menu.addSeparator();
@@ -173,30 +156,34 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
     for (Entry<String, Map<GUID, LightSource>> entry :
         MapTool.getCampaign().getLightSourcesMap().entrySet()) {
-      JMenu subMenu = new JMenu(entry.getKey());
-
-      List<LightSource> lightSources = new ArrayList<>(entry.getValue().values());
-      Collections.sort(lightSources);
-
-      LIGHTSOURCES:
-      for (LightSource lightSource : lightSources) {
-        for (Light light : lightSource.getLightList()) {
-          // TODO Shouldn't we only skip if *all* child lights are GM only. And what about owner
-          //  only?
-          if (light.isGM() && !MapTool.getPlayer().isGM()) {
-            continue LIGHTSOURCES;
-          }
-        }
-        JCheckBoxMenuItem menuItem =
-            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
-        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
-        subMenu.add(menuItem);
-      }
+      JMenu subMenu = createLightCategoryMenu(entry.getKey(), entry.getValue().values());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
       }
     }
     return menu;
+  }
+
+  protected JMenu createLightCategoryMenu(String categoryName, Collection<LightSource> sources) {
+    JMenu subMenu = new JMenu(categoryName);
+
+    List<LightSource> lightSources = new ArrayList<>(sources);
+    Collections.sort(lightSources);
+
+    for (LightSource lightSource : lightSources) {
+      // Don't include light sources that don't have lights visible to the player. Note that the
+      // player must be an owner to use the popup, so don't bother checking `::isOwner()`.
+      boolean include =
+          MapTool.getPlayer().isGM() || !lightSource.getLightList().stream().allMatch(Light::isGM);
+      if (include) {
+        JCheckBoxMenuItem menuItem =
+            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
+        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
+        subMenu.add(menuItem);
+      }
+    }
+
+    return subMenu;
   }
 
   protected Token getTokenUnderMouse() {
