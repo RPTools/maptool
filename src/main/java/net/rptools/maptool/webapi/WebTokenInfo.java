@@ -115,7 +115,7 @@ public class WebTokenInfo {
   private Zone findZoneTokenIsOn(Token token) {
     List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
     for (ZoneRenderer zr : zrenderers) {
-      if (zr.getZone().getTokens().contains(token)) {
+      if (zr.getZone().getAllTokens().contains(token)) {
         return zr.getZone();
       }
     }

@@ -97,7 +97,7 @@ public class GridTool extends DefaultTool {
           resetTool();
           // Lee: just to make the light sources snap to their owners after the tool is closed
           Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-          z.putTokens(z.getTokens());
+          z.putTokens(z.getAllTokens());
         });
     zoomSlider = (JSlider) controlPanel.getComponent("zoomSlider");
     zoomSlider.setMinimum(0);

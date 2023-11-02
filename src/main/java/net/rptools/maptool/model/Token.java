@@ -1125,7 +1125,7 @@ public class Token implements Cloneable {
   public void validateName(String name) throws ParserException {
     if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
       Zone curZone = getZoneRenderer().getZone();
-      List<Token> tokensList = curZone.getTokens();
+      List<Token> tokensList = curZone.getAllTokens();
 
       for (Token token : tokensList) {
         String curTokenName = token.getName();
