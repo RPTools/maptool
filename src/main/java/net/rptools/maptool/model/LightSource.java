@@ -48,6 +48,20 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   private final @Nullable GUID id;
   private final @Nonnull Type type;
   private final boolean scaleWithToken;
+
+  /**
+   * This light segments that make up the light source.
+   *
+   * <p>In practice this will be an {@code ImmutableList} during runtime. However, previously
+   * serialized {@code LightSource} instances may have specified that it must be a {@code
+   * LinkedList} or other specific {@code List} implementation. So we need to keep this as a {@code
+   * List} in order to deserialize those.
+   *
+   * <p>There is also one case where it won't be an {@code ImmutableList}, and that is during
+   * serialization. At such a time, a temporary {@code LightSource} is created with an {@code
+   * ArrayList} instead. (see {@link #writeReplace()}) so that the XML does not depend on the use of
+   * {@code ImmutableList} or any other particular {@code List} implementation.
+   */
   private final @Nonnull List<Light> lightList;
 
   // Lumens are now in the individual Lights. This field is only here for backwards compatibility
