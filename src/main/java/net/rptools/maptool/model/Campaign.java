@@ -850,7 +850,7 @@ public class Campaign {
    */
   public void renameTokenTypes(@Nonnull String oldName, @Nonnull String newName) {
     for (Zone zone : getZones()) {
-      zone.getTokens()
+      zone.getAllTokens()
           .forEach(
               t -> {
                 if (oldName.equals(t.getPropertyType())) {

@@ -1091,7 +1091,7 @@ public class AppActions {
     // Create a set of all tokenExposedAreaGUID's to make searching by GUID much faster.
     Set<GUID> allTokensSet = null;
     {
-      List<Token> allTokensList = zone.getTokens();
+      List<Token> allTokensList = zone.getAllTokens();
       if (!allTokensList.isEmpty()) {
         allTokensSet = new HashSet<GUID>(allTokensList.size());
         for (Token token : allTokensList) {
