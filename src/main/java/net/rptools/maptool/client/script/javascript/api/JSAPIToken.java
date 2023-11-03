@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.script.javascript.api;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.script.javascript.*;
@@ -198,5 +199,71 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   @HostAccess.Export
   public String getMapName() {
     return this.map.getDisplayName();
+  }
+
+  @HostAccess.Export
+  public boolean getState(String stateName) {
+    Object currentState = this.token.getState(stateName);
+    return (currentState instanceof Boolean && (Boolean) currentState);
+  }
+
+  @HostAccess.Export
+  public void setState(String stateName, boolean aValue) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(stateName, aValue);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, stateName, aValue);
+    }
+  }
+
+  @HostAccess.Export
+  public void setAllStates(boolean aValue) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setAllStates(aValue);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setAllStates, aValue);
+    }
+  }
+
+  @HostAccess.Export
+  public List<String> getActiveStates() {
+    return this.token.getSetStates();
+  }
+
+  @HostAccess.Export
+  public boolean isPC() {
+    return this.token.getType() == Token.Type.PC;
+  }
+
+  @HostAccess.Export
+  public void setPC() {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setType(Token.Type.PC);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setPC);
+    }
+  }
+
+  @HostAccess.Export
+  public boolean isNPC() {
+    return this.token.getType() == Token.Type.NPC;
+  }
+
+  @HostAccess.Export
+  public void setNPC() {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setType(Token.Type.NPC);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setNPC);
+    }
+  }
+
+  @HostAccess.Export
+  public String getType() {
+    return this.token.getType().name();
   }
 }

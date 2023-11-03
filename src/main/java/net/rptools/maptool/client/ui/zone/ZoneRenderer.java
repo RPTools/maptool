@@ -176,9 +176,7 @@ public class ZoneRenderer extends JComponent
     }
     this.zone = zone;
 
-    // The interval, in milliseconds, during which calls to repaint() will be debounced.
-    int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
-    repaintDebouncer = new DebounceExecutor(repaintDebounceInterval, this::repaint);
+    repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
     setZoneScale(new Scale());
@@ -221,6 +219,10 @@ public class ZoneRenderer extends JComponent
     // fps.start();
 
     new MapToolEventBus().getMainEventBus().register(this);
+  }
+
+  public void setFrameRateCap(int cap) {
+    this.repaintDebouncer.setDelay(1000 / cap);
   }
 
   public void setAutoResizeStamp(boolean value) {
@@ -3636,7 +3638,9 @@ public class ZoneRenderer extends JComponent
     // Stacks
     if (!tokenList.isEmpty()
         && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
-      if (tokenStackMap != null) { // FIXME Needed to prevent NPE but how can it be null?
+      boolean hideTSI = AppPreferences.getHideTokenStackIndicator();
+      if (tokenStackMap != null
+          && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
           Area bounds = getTokenBounds(token);
           if (bounds == null) {
@@ -4196,6 +4200,7 @@ public class ZoneRenderer extends JComponent
                 token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.PIT_VBL),
+                token.getTransformedTopology(Zone.TopologyType.COVER_VBL),
                 token.getTransformedTopology(Zone.TopologyType.MBL),
                 ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);

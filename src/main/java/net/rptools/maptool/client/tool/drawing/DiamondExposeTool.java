@@ -83,6 +83,6 @@ public class DiamondExposeTool extends DiamondTool {
 
   @Override
   public String getTooltip() {
-    return "tool.diamondexpose.tooltip";
+    return "tool.isorectangleexpose.tooltip";
   }
 }

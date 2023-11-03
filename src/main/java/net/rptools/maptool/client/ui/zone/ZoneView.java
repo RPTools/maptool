@@ -332,7 +332,8 @@ public class ZoneView {
             lightSourceArea,
             getTopologyTree(Zone.TopologyType.WALL_VBL),
             getTopologyTree(Zone.TopologyType.HILL_VBL),
-            getTopologyTree(Zone.TopologyType.PIT_VBL));
+            getTopologyTree(Zone.TopologyType.PIT_VBL),
+            getTopologyTree(Zone.TopologyType.COVER_VBL));
     if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
@@ -590,7 +591,8 @@ public class ZoneView {
               visibleArea,
               getTopologyTree(Zone.TopologyType.WALL_VBL),
               getTopologyTree(Zone.TopologyType.HILL_VBL),
-              getTopologyTree(Zone.TopologyType.PIT_VBL));
+              getTopologyTree(Zone.TopologyType.PIT_VBL),
+              getTopologyTree(Zone.TopologyType.COVER_VBL));
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
@@ -668,7 +670,8 @@ public class ZoneView {
                   lightSourceArea,
                   getTopologyTree(Zone.TopologyType.WALL_VBL),
                   getTopologyTree(Zone.TopologyType.HILL_VBL),
-                  getTopologyTree(Zone.TopologyType.PIT_VBL));
+                  getTopologyTree(Zone.TopologyType.PIT_VBL),
+                  getTopologyTree(Zone.TopologyType.COVER_VBL));
 
           // This needs to be cached somehow
           for (Light light : lightSource.getLightList()) {
