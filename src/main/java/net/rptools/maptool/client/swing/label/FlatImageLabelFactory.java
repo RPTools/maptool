@@ -14,9 +14,11 @@
  */
 package net.rptools.maptool.client.swing.label;
 
+import java.awt.Color;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.swing.label.FlatImageLabel.Justification;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 
@@ -50,6 +52,22 @@ public class FlatImageLabelFactory {
       return npcImageLabel;
     } else {
       return pcImageLabel;
+    }
+  }
+
+  public FlatImageLabel getMapImageLabel(Label label) {
+    if (label.isShowBackground()) {
+      // TODO: CDW
+      return new FlatImageLabel(
+          4, 4, label.getForegroundColor(), Color.GRAY, AppStyle.labelFont, Justification.Center);
+    } else {
+      return new FlatImageLabel(
+          4,
+          4,
+          label.getForegroundColor(),
+          new Color(0, 0, 0, 0),
+          AppStyle.labelFont,
+          Justification.Center);
     }
   }
 }
