@@ -80,6 +80,7 @@ import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.TokenHoverListener;
 import net.rptools.maptool.events.ZoneLoadedListener;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -1396,6 +1397,7 @@ public class MapTool {
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
+    new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
 
     final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
     if (!enabledDeveloperOptions.isEmpty()) {

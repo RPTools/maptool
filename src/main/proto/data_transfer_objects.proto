@@ -263,6 +263,7 @@ enum TopologyTypeDto {
   WALL_VBL = 0;
   HILL_VBL = 1;
   PIT_VBL = 2;
+  COVER_VBL = 4;
   MBL = 3;
 }
 
@@ -319,6 +320,7 @@ message TokenDto {
   AreaDto vbl = 29;
   AreaDto hillVbl = 65;
   AreaDto pitVbl = 66;
+  AreaDto coverVbl = 71;
   AreaDto mbl = 67;
   string name = 30;
   repeated string owner_list = 31;
@@ -535,6 +537,7 @@ message ZoneDto {
   AreaDto topology = 22;
   AreaDto hill_vbl = 23;
   AreaDto pit_vbl = 24;
+  AreaDto cover_vbl = 39;
   AreaDto topology_terrain = 25;
   DrawablePaintDto background_paint = 26;
   google.protobuf.StringValue map_asset = 27;

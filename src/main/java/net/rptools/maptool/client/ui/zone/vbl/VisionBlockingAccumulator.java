@@ -212,4 +212,56 @@ public final class VisionBlockingAccumulator {
 
     return true;
   }
+
+  /**
+   * Finds all cover topology segments that can take part in blocking vision.
+   *
+   * @param topology The topology to treat as Cover VBL.
+   * @return false if the vision has been completely blocked by topology, or true if vision can be
+   *     blocked by particular segments.
+   */
+  public boolean addCoverBlocking(AreaTree topology) {
+    final AreaContainer container = topology.getContainerAt(origin);
+    if (container == null) {
+      // Should never happen since the global ocean should catch everything.
+      return false;
+    }
+
+    /*
+     * There are two cases for Cover VBL:
+     * 1. A token inside Cover VBL can see everything, unobstructed by the cover.
+     * 2. A token outside Cover VBL can see nothing, as if it were wall.
+     */
+
+    if (container instanceof final AreaIsland island) {
+
+      final var parentOcean = island.getParentOcean();
+
+      for (final var siblingIsland : parentOcean.getIslands()) {
+        if (siblingIsland == island) {
+          continue;
+        }
+        addVisionBlockingSegments(siblingIsland, true);
+      }
+      for (final var childOcean : island.getOceans()) {
+        for (final var grandchildIsland : childOcean.getIslands()) {
+          addVisionBlockingSegments(grandchildIsland, true);
+        }
+        addVisionBlockingSegments(childOcean, false);
+      }
+      addVisionBlockingSegments(parentOcean, false);
+
+    } else if (container instanceof AreaOcean ocean) {
+      final var parentIsland = ocean.getParentIsland();
+      if (parentIsland != null) {
+        addVisionBlockingSegments(ocean, true);
+      }
+
+      for (var containedIsland : ocean.getIslands()) {
+        addVisionBlockingSegments(containedIsland, true);
+      }
+    }
+
+    return true;
+  }
 }
