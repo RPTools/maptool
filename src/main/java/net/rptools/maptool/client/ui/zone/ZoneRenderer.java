@@ -176,9 +176,7 @@ public class ZoneRenderer extends JComponent
     }
     this.zone = zone;
 
-    // The interval, in milliseconds, during which calls to repaint() will be debounced.
-    int repaintDebounceInterval = 1000 / AppPreferences.getFrameRateCap();
-    repaintDebouncer = new DebounceExecutor(repaintDebounceInterval, this::repaint);
+    repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
     setZoneScale(new Scale());
@@ -221,6 +219,10 @@ public class ZoneRenderer extends JComponent
     // fps.start();
 
     new MapToolEventBus().getMainEventBus().register(this);
+  }
+
+  public void setFrameRateCap(int cap) {
+    this.repaintDebouncer.setDelay(1000 / cap);
   }
 
   public void setAutoResizeStamp(boolean value) {

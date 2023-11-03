@@ -50,7 +50,7 @@ public class DebounceExecutor {
       Executors.newSingleThreadScheduledExecutor(threadFactory);
 
   /** The time, in milliseconds, during which to throttle subsequent requests to run the task. */
-  private final long delay;
+  private final AtomicLong delay;
 
   /** A {@link Runnable} representing the task to be managed. */
   private final Runnable task;
@@ -71,14 +71,20 @@ public class DebounceExecutor {
    * @param task The task to be executed after the <i>delay</i> elapses.
    */
   public DebounceExecutor(long delay, @Nonnull Runnable task) {
-    this.delay = delay;
+    this.delay = new AtomicLong(delay);
     this.task = task;
+  }
+
+  public void setDelay(long delay) {
+    this.delay.set(delay);
   }
 
   /** Dispatches a task to be executed by this {@link DebounceExecutor} instance. */
   public void dispatch() {
-    if (this.delay < 1) {
-      this.task.run();
+    final var delay = this.delay.get();
+    if (delay < 1) {
+      // Have to run via the executor otherwise it's possible the task runs in parallel with itself.
+      this.executor.schedule(this.task, 0, TimeUnit.MILLISECONDS);
       return;
     }
 
@@ -93,7 +99,7 @@ public class DebounceExecutor {
     final var now = System.currentTimeMillis();
     if (now >= taskScheduledTime) {
       // This request is not redundant, so we need to schedule it.
-      final var nextTargetTime = Math.max(now, taskScheduledTime + this.delay);
+      final var nextTargetTime = Math.max(now, taskScheduledTime + delay);
       // If this check fails, that means someone beat us to the punch and our task is now redundant.
       if (this.taskScheduledTime.compareAndSet(taskScheduledTime, nextTargetTime)) {
         this.executor.schedule(this.task, nextTargetTime - now, TimeUnit.MILLISECONDS);
