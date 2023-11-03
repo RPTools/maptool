@@ -216,6 +216,11 @@ public class AppUtil {
       path = path.getParent().getParent().getParent();
     } else { // First try to find MapTool* directory in path
       while (path != null) {
+        if (path.getFileName() == null) {
+          // We have gone too far!
+          path = null;
+          break;
+        }
         if (path.getFileName().toString().matches("(?i).*maptool.*")) {
           break;
         }
