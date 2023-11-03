@@ -14,19 +14,19 @@
  */
 package net.rptools.maptool.model.grid;
 
-import java.awt.*;
-import java.awt.geom.*;
-import net.rptools.maptool.model.*;
-
 /*
 
 */
-/** These settings represent specific settings for the map and are just a stand-in *//*
+/**
+ * These settings represent specific settings for the map and are just a stand-in TODO: add
+ * constants/preferences/menu items/class/etc. for settings TODO: create hierarchical check for
+ * default style, GM preset style, client zone-specific style, client override style, etc. etc.
+ *//*
 
-                                                                                     class ClientZoneGridSettings extends GridRenderStyle {
-                                                                                       public ClientZoneGridSettings(ZoneRenderer renderer) {
-                                                                                         GUID zoneId = renderer.getZone().getId();
-                                                                                         */
+   class ClientZoneGridSettings extends GridRenderStyle {
+     public ClientZoneGridSettings(ZoneRenderer renderer) {
+       GUID zoneId = renderer.getZone().getId();
+       */
 /*try {
   clientGridSettings = AppState.getClientGridSettings();
   this = clientGridSettings.getZoneGridSettings(zoneId); }

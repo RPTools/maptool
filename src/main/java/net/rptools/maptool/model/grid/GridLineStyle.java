@@ -21,8 +21,8 @@ public class GridLineStyle {
   protected static final Logger log = LogManager.getLogger();
   GridLineStyleType lineStyleType = GridLineStyleType.SOLID;
   private static float dashFactor = 1;
-  private static float edgeLength = -1;
-  private float lastScale = 1;
+  private static double edgeLength = -1;
+  private double lastScale = 1;
   private float[][] scaledDashes = lineStyleType.dashArray;
 
   public GridLineStyle(GridLineStyleType styleType) {
@@ -41,18 +41,18 @@ public class GridLineStyle {
     scaledDashes = tmpArray;
   }
 
-  public void setSideLength(float sideLength_) {
+  public void setSideLength(double sideLength_) {
     log.debug("Update Line Style -  lineStyle.setSideLength");
     if (edgeLength != sideLength_ || scaledDashes == null) {
       lastScale = sideLength_ / edgeLength;
       edgeLength = sideLength_;
-      dashFactor = edgeLength / 32;
+      dashFactor = (float) (edgeLength / 32);
       scaledDashes = lineStyleType.dashArray;
       updateDashArrays();
     }
   }
 
-  public float getSideLength() {
+  public double getSideLength() {
     return edgeLength;
   }
 

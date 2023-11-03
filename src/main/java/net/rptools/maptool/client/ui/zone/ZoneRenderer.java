@@ -268,7 +268,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public ZonePoint getCenterPoint() {
-    return new ScreenPoint(getSize().width / 2, getSize().height / 2).convertToZone(this);
+    return new ScreenPoint(getSize().width / 2.0, getSize().height / 2.0).convertToZone(this);
   }
 
   public boolean isPathShowing(Token token) {
@@ -774,7 +774,7 @@ public class ZoneRenderer extends JComponent
   }
 
   public void forcePlayersView() {
-    ZonePoint zp = new ScreenPoint(getWidth() / 2, getHeight() / 2).convertToZone(this);
+    ZonePoint zp = new ScreenPoint(getWidth() / 2.0, getHeight() / 2.0).convertToZone(this);
     MapTool.serverCommand()
         .enforceZoneView(getZone().getId(), zp.x, zp.y, getScale(), getWidth(), getHeight());
   }
@@ -2264,8 +2264,8 @@ public class ZoneRenderer extends JComponent
         if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
           at.rotate(
               Math.toRadians(-token.getFacing() - 90),
-              scaledWidth / 2 - token.getAnchor().x * scale - offsetx,
-              scaledHeight / 2
+              scaledWidth / 2.0 - token.getAnchor().x * scale - offsetx,
+              scaledHeight / 2.0
                   - token.getAnchor().y * scale
                   - offsety); // facing defaults to down, or -90 degrees
         }
@@ -2536,15 +2536,15 @@ public class ZoneRenderer extends JComponent
           lastPoint =
               ScreenPoint.fromZonePointRnd(
                   this,
-                  zp.x + (footprintBounds.width / 2) * footprint.getScale(),
-                  zp.y + (footprintBounds.height / 2) * footprint.getScale());
+                  zp.x + (footprintBounds.width / 2.0) * footprint.getScale(),
+                  zp.y + (footprintBounds.height / 2.0) * footprint.getScale());
           continue;
         }
         ScreenPoint nextPoint =
             ScreenPoint.fromZonePoint(
                 this,
-                zp.x + (footprintBounds.width / 2) * footprint.getScale(),
-                zp.y + (footprintBounds.height / 2) * footprint.getScale());
+                zp.x + (footprintBounds.width / 2.0) * footprint.getScale(),
+                zp.y + (footprintBounds.height / 2.0) * footprint.getScale());
 
         g.setColor(highlight);
         g.setStroke(highlightStroke);

@@ -14,12 +14,7 @@
  */
 package net.rptools.maptool.model.grid;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
@@ -27,8 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.Action;
-import javax.swing.KeyStroke;
+import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
@@ -105,7 +99,7 @@ public class IsometricGrid extends Grid {
   }
 
   public double getCellHeightHalf() {
-    return getSizeInPixels() / 2;
+    return getSizeInPixels() / 2.0;
   }
 
   public static double degreesFromIso(double facing) {
@@ -385,7 +379,7 @@ public class IsometricGrid extends Grid {
         Area cellShape = getZone().getGrid().createCellShape(footprint.height);
         // convert the area to isometric view
         AffineTransform mtx = new AffineTransform();
-        mtx.translate(-footprint.width / 2, -footprint.height / 2);
+        mtx.translate(-footprint.width / 2.0, -footprint.height / 2.0);
         cellShape.transform(mtx);
         // join cell footprint and cone to create viewable area
         visibleArea.add(cellShape);
@@ -490,8 +484,8 @@ public class IsometricGrid extends Grid {
     // Rotate image 45 degrees
     BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = rotateImage.createGraphics();
-    g.translate((neww - w) / 2, (newh - h) / 2);
-    g.rotate(Math.toRadians(45), w / 2, h / 2);
+    g.translate((neww - w) / 2.0, (newh - h) / 2.0);
+    g.rotate(Math.toRadians(45), w / 2.0, h / 2.0);
     g.drawRenderedImage(planImage, null);
     g.dispose();
     // scale image to half height
@@ -529,8 +523,8 @@ public class IsometricGrid extends Grid {
     int neww = (int) Math.floor(w * cos + h * sin);
     int newh = (int) Math.floor(h * cos + w * sin);
 
-    double scaleX = neww / w;
-    double scaleY = newh / h;
+    double scaleX = (double) neww / w;
+    double scaleY = (double) newh / h;
 
     int tx = (neww - w) / 2;
     int ty = (newh - h) / 2;
@@ -538,7 +532,7 @@ public class IsometricGrid extends Grid {
     // Rotate Area 45 degrees
     AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
     atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2, h / 2));
+    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2.0, h / 2.0));
 
     return new Area(atArea.createTransformedShape(planArea));
   }

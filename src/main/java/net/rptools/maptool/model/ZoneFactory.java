@@ -67,10 +67,11 @@ public class ZoneFactory {
     zone.setGrid(
         GridFactory.createGrid(
             AppPreferences.getDefaultGridType(),
+            AppPreferences.getDefaultGridSize(),
             AppPreferences.getFaceEdge(),
             AppPreferences.getFaceVertex()));
     zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
-    zone.getGrid().setSizeInPixels(AppPreferences.getDefaultGridSize());
+    // zone.getGrid().setSizeInPixels(AppPreferences.getDefaultGridSize());
     zone.getGrid().setOffset(0, 0);
 
     return zone;

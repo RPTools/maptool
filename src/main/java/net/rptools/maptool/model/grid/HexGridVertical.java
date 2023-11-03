@@ -239,27 +239,15 @@ public class HexGridVertical extends HexGrid {
 
   @Override
   protected int getOffV(ZoneRenderer renderer) {
-    if (extraLogsFlag)
-      log.info(
-          "renderer.getViewOffsetY() + getOffsetY() * renderer.getScale() = "
-              + renderer.getViewOffsetY()
-              + " + "
-              + getOffsetY()
-              + " * "
-              + renderer.getScale());
+    // if (extraLogsFlag) log.info("renderer.getViewOffsetY() + getOffsetY() * renderer.getScale() =
+    // " + renderer.getViewOffsetY() + " + " + getOffsetY() + " * " + renderer.getScale());
     return (int) (renderer.getViewOffsetY() + getOffsetY() * renderer.getScale());
   }
 
   @Override
   protected int getOffU(ZoneRenderer renderer) {
-    if (extraLogsFlag)
-      log.info(
-          "renderer.getViewOffsetX() + getOffsetX() * renderer.getScale() = "
-              + renderer.getViewOffsetX()
-              + " + "
-              + getOffsetX()
-              + " * "
-              + renderer.getScale());
+    // if (extraLogsFlag) log.info("renderer.getViewOffsetX() + getOffsetX() * renderer.getScale() =
+    // " + renderer.getViewOffsetX() + " + " + getOffsetX() + " * " + renderer.getScale());
     return (int) (renderer.getViewOffsetX() + getOffsetX() * renderer.getScale());
   }
 

@@ -21,13 +21,7 @@ import com.google.gson.TypeAdapter;
 import com.google.gson.stream.JsonReader;
 import com.google.protobuf.Int32Value;
 import com.google.protobuf.StringValue;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
@@ -37,11 +31,11 @@ import java.io.Serializable;
 import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
+import javax.swing.*;
 import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
@@ -1628,6 +1622,7 @@ public class Token implements Cloneable {
       return new ZonePoint((int) newX, (int) newY);
     }
   }
+
   /**
    * Gets the point where the token should go, if it were to be unsnapped from the grid.
    *

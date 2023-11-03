@@ -163,8 +163,8 @@ public interface PlayerDatabase {
 
   /**
    * Returns the public key for a player that matches the MD5Key specified. The MD5Key is generated
-   * based on the text representation of the public key as returned by * {@link
-   * CipherUtil#getEncodedPublicKeyText()}
+   * based on the text representation of the public key as returned by
+   * * @linkCipherUtil#getEncodedPublicKeyText()
    *
    * @param player The player to get the public key for.
    * @param md5key The {@link MD5Key} of the public key.

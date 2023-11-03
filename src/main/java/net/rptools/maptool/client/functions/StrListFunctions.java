@@ -425,7 +425,7 @@ public class StrListFunctions extends AbstractFunction {
    * @param listStr the String of the list
    * @param lastParam the last parameter
    * @return A new list with <code>target</code> inserted before the item at position <code>index
-   *     </code>
+   * </code>
    * @throws ParameterException when an error occurs.
    */
   public Object listInsert(List<Object> parameters, String listStr, String lastParam)

@@ -14,6 +14,10 @@
  */
 package net.rptools.maptool.model.grid;
 
+import net.rptools.maptool.client.AppPreferences;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 /**
  * Given a string describing the type of desired grid, this factory creates and returns an object of
  * the appropriate type.
@@ -21,6 +25,7 @@ package net.rptools.maptool.model.grid;
  * <p>(Ugh. This really should use an SPI-like factory interface.)
  */
 public class GridFactory {
+  protected static final Logger log = LogManager.getLogger();
   public static final String HEX_VERT = "Vertical Hex";
   public static final String HEX_HORI = "Horizontal Hex";
   public static final String SQUARE = "Square";
@@ -32,38 +37,65 @@ public class GridFactory {
     return createGrid(type, true, false);
   }
 
+  public static Grid createGrid(
+      String type, int gridSize, boolean faceEdges, boolean faceVertices) {
+    log.info(type);
+
+    Grid tmpGrid = null;
+    switch (GridUpdates.moderniseName(type)) {
+      case "GRIDLESS" -> tmpGrid = new GridlessGrid();
+      case "HEX_H" -> tmpGrid = new HexGridHorizontal(faceEdges, faceVertices);
+      case "HEX_V" -> tmpGrid = new HexGridVertical(faceEdges, faceVertices);
+      case "ISOMETRIC_HEX" -> tmpGrid = new GridlessGrid();
+      case "ISOMETRIC_SQUARE" -> tmpGrid = new IsometricGrid(faceEdges, faceVertices);
+      case "ISOMETRIC_TRIANGLE" -> new HexGridVertical(faceEdges, faceVertices);
+      case "SQUARE" -> tmpGrid = new SquareGrid(faceEdges, faceVertices);
+      case "TRIANGLE" -> tmpGrid = new HexGridVertical(faceEdges, faceVertices);
+    }
+    GridCellType cellType = new GridCellType(AppPreferences.getDefaultGridSize(), type);
+    if (tmpGrid != null) tmpGrid.setCellType(cellType);
+    return tmpGrid;
+  }
+
   public static Grid createGrid(String type, boolean faceEdges, boolean faceVertices) {
+    Grid tmpGrid;
+    String tmpName;
     if (isHexVertical(type)) {
-      return new HexGridVertical(faceEdges, faceVertices);
+      tmpGrid = new HexGridVertical(faceEdges, faceVertices);
+      tmpName = HEX_VERT;
+    } else if (isHexHorizontal(type)) {
+      tmpGrid = new HexGridHorizontal(faceEdges, faceVertices);
+      tmpName = HEX_HORI;
+    } else if (isSquare(type)) {
+      tmpGrid = new SquareGrid(faceEdges, faceVertices);
+      tmpName = SQUARE;
+    } else if (isIsometric(type)) {
+      tmpGrid = new IsometricGrid(faceEdges, faceVertices);
+      tmpName = ISOMETRIC;
+    } else if (isNone(type)) {
+      tmpGrid = new GridlessGrid();
+      tmpName = NONE;
+    } else {
+      throw new IllegalArgumentException("Unknown grid type: " + type);
     }
-    if (isHexHorizontal(type)) {
-      return new HexGridHorizontal(faceEdges, faceVertices);
-    }
-    if (isSquare(type)) {
-      return new SquareGrid(faceEdges, faceVertices);
-    }
-    if (isIsometric(type)) {
-      return new IsometricGrid(faceEdges, faceVertices);
-    }
-    if (isNone(type)) {
-      return new GridlessGrid();
-    }
-    throw new IllegalArgumentException("Unknown grid type: " + type);
+    tmpGrid.setGridTypeName(tmpName);
+    tmpGrid.setCellType(new GridCellType(AppPreferences.getDefaultGridSize(), tmpName));
+    return tmpGrid;
   }
 
   public static int getGridCellFaceCount(Grid grid) {
     switch (getGridType(grid)) {
-      case (ISOMETRIC_HEX):
-      case (HEX_HORI):
-      case (HEX_VERT):
+      case ISOMETRIC_HEX, HEX_HORI, HEX_VERT -> {
         return 6;
-      case (SQUARE):
-      case (ISOMETRIC):
+      }
+      case SQUARE, ISOMETRIC -> {
         return 4;
-      case (NONE):
+      }
+      case NONE -> {
         return 0;
-      default:
-        throw new IllegalArgumentException("Don't know type of grid: " + grid.getClass().getName());
+      }
+      default -> throw new IllegalArgumentException(
+          "Don't know type of grid: " + grid.getClass().getName());
     }
   }
 

@@ -14,16 +14,8 @@
  */
 package net.rptools.maptool.client.tool.gridtool;
 
-import java.awt.Color;
-import java.awt.EventQueue;
-import java.awt.event.ActionEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.KeyListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseWheelEvent;
+import java.awt.*;
+import java.awt.event.*;
 import java.util.Map;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
@@ -174,7 +166,8 @@ public class GridTool extends DefaultTool {
     updateSecondDimension(grid, true);
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
-    grid.setSizeInPixels(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
+    grid.setSizeInPixels(
+        Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE_IN_PIXELS));
   }
 
   @Override

@@ -210,7 +210,8 @@ public class HexGridHorizontal extends HexGrid {
   public BufferedImage getCellHighlight() {
     // rotate the default path highlight 90 degrees
     AffineTransform at = new AffineTransform();
-    at.rotate(Math.toRadians(90.0), pathHighlight.getHeight() / 2, pathHighlight.getHeight() / 2);
+    at.rotate(
+        Math.toRadians(90.0), pathHighlight.getHeight() / 2.0, pathHighlight.getHeight() / 2.0);
 
     AffineTransformOp atOp = new AffineTransformOp(at, AffineTransformOp.TYPE_BILINEAR);
 

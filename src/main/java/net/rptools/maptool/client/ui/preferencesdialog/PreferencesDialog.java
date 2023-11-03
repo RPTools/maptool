@@ -17,9 +17,7 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
-import java.awt.GridBagConstraints;
-import java.awt.Insets;
-import java.awt.Toolkit;
+import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
 import java.awt.event.FocusEvent;
@@ -38,12 +36,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.DeveloperOptions;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -1233,7 +1227,7 @@ public class PreferencesDialog extends JDialog {
     Integer typingVal = null;
     if (rawVal != null
         && rawVal > 99) { // backward compatibility -- used to be stored in ms, now in seconds
-      double dbl = rawVal / 1000;
+      double dbl = rawVal / 1000.0;
       if (dbl >= 1) {
         long fixedUp = Math.round(dbl);
         typingVal = (int) fixedUp;

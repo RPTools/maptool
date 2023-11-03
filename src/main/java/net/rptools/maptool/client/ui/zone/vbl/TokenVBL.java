@@ -15,9 +15,7 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import com.google.common.base.Stopwatch;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
@@ -405,7 +403,7 @@ public class TokenVBL {
     int deltaB = a.getBlue() - b.getBlue();
     int deltaAlpha = a.getAlpha() - b.getAlpha();
 
-    double rgbDistanceSquared = (deltaR * deltaR + deltaG * deltaG + deltaB * deltaB) / 3;
+    double rgbDistanceSquared = (deltaR * deltaR + deltaG * deltaG + deltaB * deltaB) / 3.0;
 
     double result =
         deltaAlpha * deltaAlpha / 2.0

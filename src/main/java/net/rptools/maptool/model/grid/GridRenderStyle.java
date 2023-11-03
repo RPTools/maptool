@@ -30,21 +30,21 @@ public class GridRenderStyle {
     update(lastScale, lastEdgeLength);
   }
 
-  GridRenderStyle(float scale, float edgelength) {
+  GridRenderStyle(double scale, double edgelength) {
     update(scale, edgelength);
   }
 
-  private float lastScale = 1;
-  private float lastEdgeLength = 100;
+  private double lastScale = 1;
+  private double lastEdgeLength = 100;
   public GridLineStyle lineStyle = new GridLineStyle(GridLineStyleType.INTERSECTION_MIDPOINT);
   public GridDrawBlendComposite blendComposite = GridDrawBlendComposite.NONE;
   public float opacity = 0.8f; // max opacity
   public double lineOffset = 0;
   public double lineWeight = AppState.getGridLineWeight();
-  private final float[] fixedLineWidths = new float[] {5f, 5f, 3f, 2f, 1f};
+  private final float[] fixedLineWidths = new float[] {5f, 4f, 3f, 2f, 1f};
   private float[] lineWidths = fixedLineWidths; // widths scaled to zoom setting
-  public Color colour1 = AppPreferences.getDefaultGridColor();
-  public Color colour2 = new ColourTools(colour1).setTransparency(0.5f);
+  public Color colour2 = AppPreferences.getDefaultGridColor();
+  public Color colour1 = new ColourTools(colour2).setTransparency(0.5f);
 
   public Color colour4 =
       new ColourTools(colour1).getComplementaryColor(); // default to a contrasting colour
@@ -60,22 +60,15 @@ public class GridRenderStyle {
   public boolean softEdge = true;
   public boolean twoColour = true;
 
-  public void update(float scale, float edgelength) {
-    log.debug(
-        "Update GridRenderStyle - last scale: "
-            + lastScale
-            + ", last edge length: "
-            + lastEdgeLength
-            + ", new scale: "
-            + scale
-            + ", new edge length: "
-            + edgelength);
+  public void update(double scale, double edgelength) {
+    // log.debug("Update GridRenderStyle - last scale: " + lastScale + ", last edge length: " +
+    // lastEdgeLength + ", new scale: " + scale + ", new edge length: " + edgelength);
     if (edgelength != lastEdgeLength || lineStyle.getSideLength() == -1) {
       lineStyle.setSideLength(edgelength);
       lastEdgeLength = edgelength;
     }
     if (lastScale != scale) {
-      log.debug("Update GridRenderStyle -  scaleLineWidths(scale)");
+      // log.debug("Update GridRenderStyle -  scaleLineWidths(scale)");
       scaleLineWidths(scale);
     }
     if (edgelength != lastEdgeLength || lastScale != scale || strokes == null) {
@@ -87,30 +80,30 @@ public class GridRenderStyle {
     return colours;
   }
 
-  public void scaleLineWidths(float newScale) {
-    log.debug("scale line widths");
+  public void scaleLineWidths(double newScale) {
+    // log.debug("scale line widths");
     // we don't want lines to disappear or get ridiculously big so limit the acceptable range
-    float tmpScale = constrainToRange(newScale, 0.334f, 15.0f);
-    log.info("Last: " + lastScale + " New: " + newScale + " Constrained: " + tmpScale);
+    double tmpScale = constrainToRange(newScale, 0.334, 5.0);
+    // log.info("Last: " + lastScale + " New: " + newScale + " Constrained: " + tmpScale);
     // only change things if it is different
     if (tmpScale != lastScale) {
       lastScale = tmpScale;
       // scale the line widths to match.
       float[] newArr = new float[5];
       for (int count = 0; count < 5; count++) {
-        float newVal = (float) (lastScale * lineWeight * fixedLineWidths[count]);
+        float newVal = (float) (lastScale * lineWeight / 2 * fixedLineWidths[count]);
         newArr[count] = newVal;
-        log.info("Line widths: " + count + " " + newArr[count]);
+        // log.info("Line widths: " + count + " " + newArr[count]);
       }
       this.lineWidths = newArr;
     }
   }
 
   public BasicStroke[] setBasicStrokes() {
-    log.debug("Create array of Basic Strokes");
+    // log.debug("Create array of Basic Strokes");
     this.strokes = new BasicStroke[5];
     for (int i = 0; i < 5; i++) {
-      log.info("setBasicStrokes - Line width: " + lineWidths[i]);
+      // log.info("setBasicStrokes - Line width: " + lineWidths[i]);
       strokes[i] =
           new BasicStroke(
               lineWidths[i],

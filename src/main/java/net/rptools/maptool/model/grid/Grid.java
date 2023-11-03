@@ -50,57 +50,7 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public abstract class Grid implements Cloneable {
-
-  /**
-   * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
-   * for determining whether a given square cell can be entered due to fog blocking the cell is
-   * based on the cell being split into 3x3, then the center further being split into 3x3; thus at
-   * least 9 pixels horizontally and vertically are required.
-   */
-  public static final int MIN_GRID_SIZE = 9;
-
-  public static final int MAX_GRID_SIZE = 350;
   protected static final Logger log = LogManager.getLogger();
-  protected static final int CIRCLE_SEGMENTS = 60;
-
-  private static final Dimension NO_DIM = new Dimension();
-  private static final DirectionCalculator calculator = new DirectionCalculator();
-  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
-  protected Map<KeyStroke, Action> movementKeys = null;
-  private int offsetX = 0;
-  private int offsetY = 0;
-  public volatile GridRenderStyle renderStyle = new GridRenderStyle();
-  private int sizeInPixels;
-  public double lastScale = -1;
-  private Zone zone;
-
-  public GridRenderStyle getRenderStyle() {
-    return renderStyle;
-  }
-
-  public Path2D.Float getHalfCellPath() {
-    return halfCellPath;
-  }
-
-  public Path2D.Float getClosedCellPath() {
-    return closedCellPath;
-  }
-
-  public Area getVisibleArea() {
-    return visibleArea;
-  }
-
-  public Area getExposedFogArea() {
-    return exposedFogArea;
-  }
-
-  private Area cellArea;
-  public transient Path2D.Float scaledShape;
-  private Path2D.Float halfCellPath;
-  private Path2D.Float closedCellPath;
-  private Area visibleArea;
-  private Area exposedFogArea;
-  boolean extraLogsFlag = true;
 
   public Grid() {
     setSizeInPixels(AppPreferences.getDefaultGridSize());
@@ -108,16 +58,52 @@ public abstract class Grid implements Cloneable {
 
   public Grid(Grid grid) {
     setSizeInPixels(grid.getSizeInPixels());
+    if ((int) this.cellType.polygonProperties.inradius != (int) this.sizeInPixels
+        || !this.getGridTypeName().equals(grid.getGridTypeName())) {
+      cellType = new GridCellType(getSizeInPixels(), getGridTypeName());
+    }
     setOffset(grid.offsetX, grid.offsetY);
   }
+
+  /**
+   * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
+   * for determining whether a given square cell can be entered due to fog blocking the cell is
+   * based on the cell being split into 3x3, then the center further being split into 3x3; thus at
+   * least 9 pixels horizontally and vertically are required.
+   */
+  public static final int MIN_GRID_SIZE_IN_PIXELS = 9;
+
+  public static final int MAX_GRID_SIZE_IN_PIXELS = 350;
+  protected static final int CIRCLE_SEGMENTS = 60;
+  private final Dimension NO_DIM = new Dimension();
+  private final DirectionCalculator calculator = new DirectionCalculator();
+  private static Area cellArea;
+  private final int cellEdgeCount = GridFactory.getGridCellFaceCount(this);
+  public double lastScale = -1;
+  private GridCellType cellType;
+  private GeneralPath closedCellPath;
+  private Area exposedFogArea;
+  private GeneralPath halfCellPath;
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   protected synchronized Map<Integer, Area> getGridShapeCache() {
     return gridShapeCache;
   }
 
+  private String gridTypeName;
+  protected Map<KeyStroke, Action> movementKeys = null;
+  private static int offsetX = 0;
+  private static int offsetY = 0;
+  private final GridRenderStyle renderStyle = new GridRenderStyle();
+  public volatile GeneralPath scaledShape;
+  private static int sizeInPixels;
+  private Area visibleArea;
+
+  private Zone zone;
+
   protected synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
     final AffineTransform at = new AffineTransform();
-    final double gridScale = (double) MAX_GRID_SIZE / getSizeInPixels();
+    final double gridScale = (double) MAX_GRID_SIZE_IN_PIXELS / getSizeInPixels();
     at.scale(gridScale, gridScale);
 
     getGridShapeCache().put(gridRadius, newGridArea.createTransformedArea(at));
@@ -132,6 +118,38 @@ public abstract class Grid implements Cloneable {
 
   public void drawCoordinatesOverlay(Graphics2D g, ZoneRenderer renderer) {
     // Do nothing -- my default
+  }
+
+  public String getGridTypeName() {
+    return gridTypeName;
+  }
+
+  public GridCellType getCellType() {
+    return cellType;
+  }
+
+  public void setCellType(GridCellType cellType_) {
+    cellType = cellType_;
+  }
+
+  public GridRenderStyle getRenderStyle() {
+    return renderStyle;
+  }
+
+  public GeneralPath getHalfCellPath() {
+    return halfCellPath;
+  }
+
+  public GeneralPath getClosedCellPath() {
+    return closedCellPath;
+  }
+
+  public Area getVisibleArea() {
+    return visibleArea;
+  }
+
+  public Area getExposedFogArea() {
+    return exposedFogArea;
   }
 
   /**
@@ -339,10 +357,10 @@ public abstract class Grid implements Cloneable {
 
   public void createScaledShape(double scale) {
     if (scaledShape != null && scale == lastScale && cellArea != null) return;
-    if (cellArea == null) createCellPaths(this.getSizeInPixels());
+    if (cellArea == null || closedCellPath == null) createCellPaths(this.getSizeInPixels());
     AffineTransform at = new AffineTransform();
-    at.scale(scale, scale);
-    scaledShape = closedCellPath;
+    //    at.scale(scale, scale);
+    AffineTransform.getScaleInstance(scale, scale);
     scaledShape.transform(at);
   }
 
@@ -357,10 +375,10 @@ public abstract class Grid implements Cloneable {
    * @return The size after it has been constrained.
    */
   protected final int constrainSize(int size) {
-    if (size < MIN_GRID_SIZE) {
-      size = MIN_GRID_SIZE;
-    } else if (size > MAX_GRID_SIZE) {
-      size = MAX_GRID_SIZE;
+    if (size < MIN_GRID_SIZE_IN_PIXELS) {
+      size = MIN_GRID_SIZE_IN_PIXELS;
+    } else if (size > MAX_GRID_SIZE_IN_PIXELS) {
+      size = MAX_GRID_SIZE_IN_PIXELS;
     }
     return size;
   }
@@ -378,14 +396,22 @@ public abstract class Grid implements Cloneable {
   /**
    * Sets the grid size and creates the grid cell shape
    *
-   * @param sizeInPixels The size of the grid<br>
+   * @param sizeInPixels_ The size of the grid<br>
    *     <i>SquareGrid</i> - edge length<br>
    *     <i>HexGrid</i> - edge to edge diameter
    */
-  public void setSizeInPixels(int sizeInPixels) {
-    this.sizeInPixels = constrainSize(sizeInPixels);
-    cellArea = createCellShape(sizeInPixels);
-    fireGridChanged();
+  public void setSizeInPixels(int sizeInPixels_) {
+    if (getSizeInPixels() != sizeInPixels_) {
+      if (gridTypeName != null) {
+        int constrained = constrainSize(sizeInPixels_);
+        if (getSizeInPixels() != constrained) {
+          sizeInPixels = constrained;
+          if (cellType == null) cellType = new GridCellType(constrained, gridTypeName);
+          cellArea = createCellShape(constrained);
+          fireGridChanged();
+        }
+      }
+    }
   }
 
   /**
@@ -527,18 +553,18 @@ public abstract class Grid implements Cloneable {
 
   protected Area createCellArea(int sides, double radius, double x, double y, double rotation) {
     if (sides == 0) return null;
-    createCellPaths(sides, radius, x, y, rotation, this.isIsometric());
+    createCellPaths(sides, radius, x, y, rotation, isIsometric());
     Shape s = closedCellPath;
     return (Area) s;
   }
 
   private void createCellPaths(int size) {
-    String thisIs = GridFactory.getGridType(this);
-    int sides = GridFactory.getGridCellFaceCount(this);
-    boolean isIso = thisIs.contains("ISO");
-    boolean isHor = thisIs.contains("HOR");
+    String typeName = getGridTypeName();
+    int sides = getCellEdgeCount();
+    boolean isIso = isIsometric();
+    boolean isHor = typeName.toLowerCase().contains("horiz");
     createCellPaths(
-        sides,
+        geCellEdgeCount(),
         size,
         getOffsetX(),
         getOffsetY(),
@@ -546,19 +572,74 @@ public abstract class Grid implements Cloneable {
         isIso);
   }
 
+  private int getCellEdgeCount() {
+    return this.cellEdgeCount;
+  }
+
+  private int geCellEdgeCount() {
+    return this.cellEdgeCount;
+  }
+
   protected void createCellPaths(
       int sides, double radius, double x, double y, double rotation, boolean squish) {
+    if (cellType == null) {
+      log.info("!!!");
+      cellType = new GridCellType(sizeInPixels, gridTypeName);
+    }
+    if (cellType.polygonProperties == null
+        || (int) cellType.polygonProperties.circumradius != (int) radius) {
+      cellType.setPixelsPerCell(radius);
+      cellType.setPolygonProperties();
+    }
+    GeneralPath pth = cellType.polygonProperties.polygonPath;
+    GeneralPath pth_half = cellType.polygonProperties.polygonHalfPath;
+    //    int halfway = (int) Math.ceil(sides / 2);
+    //    for (int i = 0; i < sides - 1; i++) {
+    //      if (i == halfway) pth_half = pth;
+    //      if (i == 0) {
+    //        pth.moveTo(
+    //            radius * Math.cos(i * Math.TAU / sides), radius * Math.sin(i * Math.TAU / sides));
+    //      } else {
+    //        pth.lineTo(
+    //            radius * Math.cos(i * 2 * Math.TAU / sides),
+    //            radius * Math.sin(i * 2 * Math.TAU / sides));
+    //      }
+    //    }
+    //
+    //    pth.closePath();
+
     AffineTransform at = new AffineTransform();
-    Path2D.Float tmpPath = new Path2D.Float();
-    Path2D.Float tmpPath_half = tmpPath;
+    if (rotation != 0) at.rotate(Math.toRadians(rotation));
+    if (squish) at.scale(1, 0.5);
+    at.translate(x, y);
+    cellArea = (Area) at.createTransformedShape(pth);
+    pth.transform(at);
+    pth_half.transform(at);
+    closedCellPath = pth;
+    scaledShape = closedCellPath;
+    halfCellPath = pth_half;
+
+    PathIterator pi = closedCellPath.getPathIterator(at);
+    String strOut = "";
+    while (!pi.isDone()) {
+      double[] coords = new double[6];
+      // strOut += " -> " + coords[0] + ":" + coords[1] + ", ";
+      pi.next();
+    }
+    // log.info("Cell path " + strOut);
+    /*
+    AffineTransform at           = new AffineTransform();
+    Path2D.Float    tmpPath      = new Path2D.Float();
+
     tmpPath.moveTo(radius, 0);
-    double arc = Math.PI * 2 / sides;
-    int halfway = (int) Math.ceil(sides / 2);
+    double arc     = Math.TAU / sides;
+    int    halfway = (int) Math.ceil(sides / 2);
 
     at.rotate(Math.toRadians(rotation));
     for (int i = 0; i < sides - 1; i++) {
       at.rotate(arc);
-      tmpPath.transform(at);
+      tmpPath = (Path2D.Float) at.createTransformedShape(tmpPath);
+      // tmpPath.transform(at);
       tmpPath.lineTo(radius, 0);
       if (i == halfway) tmpPath_half = tmpPath;
     }
@@ -571,18 +652,17 @@ public abstract class Grid implements Cloneable {
     tmpPath_half.transform(at);
     closedCellPath = tmpPath;
     halfCellPath = tmpPath_half;
-  }
 
-  class floatPoint extends Point2D.Float {
-    public floatPoint(double x_, double y_) {
-      this.x = (float) x_;
-      this.y = (float) y_;
+    PathIterator pi         = closedCellPath.getPathIterator(at);
+    double[]     lastCoords = new double[6];
+    String       strOut     = "";
+    while (!pi.isDone()) {
+      double[] coords = new double[6];
+      int      type   = pi.currentSegment(coords);
+      strOut += " - " + coords[0] + ":" + coords[1] + ", ";
+      pi.next();
     }
-
-    public floatPoint(ZonePoint zp) {
-      this.x = (float) zp.x;
-      this.y = (float) zp.y;
-    }
+    log.info("Cell path " + strOut);*/
   }
 
   protected Area createHex(double x, double y, double radius, double rotation) {
@@ -620,7 +700,7 @@ public abstract class Grid implements Cloneable {
    * @param bounds the bounds of the drawing area.
    */
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    float scale = (float) renderer.getScale();
+    double scale = renderer.getScale();
     exposedFogArea = zone.getExposedArea();
     visibleArea = renderer.getVisibleScreenArea();
     // Do nothing
@@ -917,7 +997,7 @@ public abstract class Grid implements Cloneable {
 
     final AffineTransform at = new AffineTransform();
     if ((footprintWidth / getSizeInPixels()) % 2 != 0) {
-      double coordinateOffset = getSizeInPixels() / -2;
+      double coordinateOffset = getSizeInPixels() / -2f;
       at.translate(coordinateOffset, coordinateOffset);
     }
     return at;
@@ -1019,7 +1099,7 @@ public abstract class Grid implements Cloneable {
       createGridArea(gridRadius);
     }
 
-    double rescale = getSizeInPixels() / (double) MAX_GRID_SIZE;
+    double rescale = getSizeInPixels() / (double) MAX_GRID_SIZE_IN_PIXELS;
     final AffineTransform at = new AffineTransform();
     at.scale(rescale, rescale);
 
@@ -1036,13 +1116,13 @@ public abstract class Grid implements Cloneable {
       case SQUARE_GRID -> grid = new SquareGrid();
       case ISOMETRIC_GRID -> grid = new IsometricGrid();
     }
-    grid.offsetX = dto.getOffsetX();
-    grid.offsetY = dto.getOffsetY();
-    grid.sizeInPixels = dto.getSize();
+    Grid.offsetX = dto.getOffsetX();
+    Grid.offsetY = dto.getOffsetY();
+    Grid.sizeInPixels = dto.getSize();
     if (dto.hasCellShape()) {
-      grid.cellArea = Mapper.map(dto.getCellShape());
+      Grid.cellArea = Mapper.map(dto.getCellShape());
     } else {
-      grid.cellArea = null;
+      Grid.cellArea = null;
     }
     return grid;
   }
@@ -1061,8 +1141,12 @@ public abstract class Grid implements Cloneable {
     return dto.build();
   }
 
-  static class DirectionCalculator {
+  public void setGridTypeName(String typeName) {
+    this.gridTypeName = typeName;
+  }
 
+  class DirectionCalculator {
+    // TODO: modify for grid types and axial coordinates
     private static final int NW = 1;
     private static final int N = 2;
     private static final int NE = 4;
