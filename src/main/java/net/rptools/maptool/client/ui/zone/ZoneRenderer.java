@@ -4196,6 +4196,7 @@ public class ZoneRenderer extends JComponent
                 token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
                 token.getTransformedTopology(Zone.TopologyType.PIT_VBL),
+                token.getTransformedTopology(Zone.TopologyType.COVER_VBL),
                 token.getTransformedTopology(Zone.TopologyType.MBL),
                 ZoneRenderer.this);
         renderPathThreadPool.execute(renderPathTask);
