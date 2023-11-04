@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.common.collect.ImmutableList;
 import com.google.protobuf.StringValue;
 import java.awt.geom.Area;
 import java.io.IOException;
@@ -23,6 +22,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,35 +33,16 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.server.proto.LightSourceDto;
 import org.apache.commons.lang.math.NumberUtils;
 
-/**
- * Represents a light source that can be attached to tokens.
- *
- * <p>This class is immutable.
- */
-public final class LightSource implements Comparable<LightSource>, Serializable {
+public class LightSource implements Comparable<LightSource>, Serializable {
   public enum Type {
     NORMAL,
     AURA
   }
 
-  private final @Nullable String name;
-  private final @Nullable GUID id;
-  private final @Nonnull Type type;
-  private final boolean scaleWithToken;
-
-  /**
-   * This light segments that make up the light source.
-   *
-   * <p>In practice this will be an {@code ImmutableList} during runtime. However, previously
-   * serialized {@code LightSource} instances may have specified that it must be a {@code
-   * LinkedList} or other specific {@code List} implementation. So we need to keep this as a {@code
-   * List} in order to deserialize those.
-   *
-   * <p>There is also one case where it won't be an {@code ImmutableList}, and that is during
-   * serialization. At such a time, a temporary {@code LightSource} is created with an {@code
-   * ArrayList} instead. (see {@link #writeReplace()}) so that the XML does not depend on the use of
-   * {@code ImmutableList} or any other particular {@code List} implementation.
-   */
+  private @Nullable String name;
+  private @Nullable GUID id;
+  private @Nonnull Type type;
+  private boolean scaleWithToken;
   private final @Nonnull List<Light> lightList;
 
   // Lumens are now in the individual Lights. This field is only here for backwards compatibility
@@ -73,32 +54,21 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
    *
    * <p>Since a personal light source is directly attached to a specific sight type, they do not
    * need (or have) names and GUIDs.
-   *
-   * @param scaleWithToken if {@code true}, the size of the lights will scale with the token size.
-   * @param lights The set of lights that constitute the personal light source.
    */
-  public static LightSource createPersonal(boolean scaleWithToken, Collection<Light> lights) {
-    return new LightSource(null, null, Type.NORMAL, scaleWithToken, ImmutableList.copyOf(lights));
+  public LightSource() {
+    this(null, null, Type.NORMAL, false, Collections.emptyList());
   }
 
   /**
    * Constructs a non-personal light source.
    *
-   * <p>These light sources are referenced both by name and GUID, and thus need both.
+   * <p>These light sources are referenced both by name and GUID, and thus need both. A new GUID
+   * will be created automatically.
    *
    * @param name The name of the light source.
-   * @param id The unique ID of the light source.
-   * @param type The type of light, whether a normal light or an aura.
-   * @param scaleWithToken if {@code true}, the size of the lights will scale with the token size.
-   * @param lights The set of lights that constitute the personal light source.
    */
-  public static LightSource createRegular(
-      @Nonnull String name,
-      @Nonnull GUID id,
-      @Nonnull Type type,
-      boolean scaleWithToken,
-      @Nonnull Collection<Light> lights) {
-    return new LightSource(name, id, type, scaleWithToken, ImmutableList.copyOf(lights));
+  public LightSource(@Nonnull String name) {
+    this(name, new GUID(), Type.NORMAL, false, Collections.emptyList());
   }
 
   private LightSource(
@@ -106,19 +76,14 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       @Nullable GUID id,
       @Nonnull Type type,
       boolean scaleWithToken,
-      @Nonnull List<Light> lights) {
+      @Nonnull Collection<Light> lights) {
     this.name = name;
     this.id = id;
     this.type = type;
     this.scaleWithToken = scaleWithToken;
-    this.lightList = lights;
-  }
 
-  @Serial
-  public Object writeReplace() {
-    // Make sure XStream keeps the serialization nice. We don't need the XML to contain
-    // implementation details of the ImmutableList in use.
-    return new LightSource(name, id, type, scaleWithToken, new ArrayList<>(lightList));
+    this.lightList = new LinkedList<>();
+    this.lightList.addAll(lights);
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -128,7 +93,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
         Objects.requireNonNullElse(lightList, Collections.emptyList());
     final List<Light> lights;
     if (lumens == Integer.MIN_VALUE) {
-      // This is an up-to-date LightSource with lumens already stored in the Lights.
+      // This is an up-to-date Lightsource with lumens already stored in the Lights.
       lights = originalLights;
     } else {
       // This is an old light source with a lumens value that needs to be pushed into the individual
@@ -155,7 +120,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
         this.id,
         Objects.requireNonNullElse(this.type, Type.NORMAL),
         this.scaleWithToken,
-        ImmutableList.copyOf(lights));
+        lights);
   }
 
   @Override
@@ -179,6 +144,10 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
     return Objects.hashCode(id);
   }
 
+  public void setId(@Nonnull GUID id) {
+    this.id = id;
+  }
+
   public @Nullable GUID getId() {
     return id;
   }
@@ -187,15 +156,35 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
     return name;
   }
 
+  public void setName(@Nonnull String name) {
+    this.name = name;
+  }
+
+  public void add(@Nonnull Light source) {
+    lightList.add(source);
+  }
+
+  public void remove(@Nonnull Light source) {
+    lightList.remove(source);
+  }
+
   /**
-   * @return A read-only list of lights belonging to this LightSource
+   * @return the lights belonging to this LightSource.
    */
   public @Nonnull List<Light> getLightList() {
-    return lightList;
+    return Collections.unmodifiableList(lightList);
   }
 
   public @Nonnull Type getType() {
     return type;
+  }
+
+  public void setType(@Nonnull Type type) {
+    this.type = type;
+  }
+
+  public void setScaleWithToken(boolean scaleWithToken) {
+    this.scaleWithToken = scaleWithToken;
   }
 
   public boolean isScaleWithToken() {
@@ -266,7 +255,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
         dto.hasId() ? GUID.valueOf(dto.getId().getValue()) : null,
         Type.valueOf(dto.getType().name()),
         dto.getScaleWithToken(),
-        dto.getLightsList().stream().map(Light::fromDto).collect(ImmutableList.toImmutableList()));
+        dto.getLightsList().stream().map(Light::fromDto).toList());
   }
 
   public @Nonnull LightSourceDto toDto() {

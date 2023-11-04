@@ -204,6 +204,8 @@ public interface ServerCommand {
 
   void updateTokenProperty(Token token, Token.Update update, LightSource value);
 
+  void updateTokenProperty(Token token, Token.Update update, LightSource value1, String value2);
+
   void updateTokenProperty(Token token, Token.Update update, int value1, int value2);
 
   void updateTokenProperty(Token token, Token.Update update, boolean value);

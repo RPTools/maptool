@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.text.ParseException;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -489,8 +488,7 @@ public class CampaignPropertiesDialog extends JDialog {
         }
         // Parse Details
         double magnifier = 1;
-        // If null, no personal light has been defined.
-        List<Light> personalLightLights = null;
+        LightSource personalLight = null;
 
         String[] args = value.split("\\s+");
         ShapeType shape = ShapeType.CIRCLE;
@@ -545,10 +543,11 @@ public class CampaignPropertiesDialog extends JDialog {
                   }
                 }
 
-                if (personalLightLights == null) {
-                  personalLightLights = new ArrayList<>();
+                if (personalLight == null) {
+                  personalLight = new LightSource();
+                  personalLight.setType(LightSource.Type.NORMAL);
                 }
-                personalLightLights.add(
+                personalLight.add(
                     new Light(
                         shape,
                         0,
@@ -560,6 +559,7 @@ public class CampaignPropertiesDialog extends JDialog {
                         perRangeLumens,
                         false,
                         false));
+                personalLight.setScaleWithToken(scaleWithToken);
               } else {
                 throw new ParseException(
                     String.format("Unrecognized personal light syntax: %s", arg), 0);
@@ -588,11 +588,6 @@ public class CampaignPropertiesDialog extends JDialog {
             errlog.add(I18N.getText(errmsg, reader.getLineNumber(), toBeParsed));
           }
         }
-
-        LightSource personalLight =
-            personalLightLights == null
-                ? null
-                : LightSource.createPersonal(scaleWithToken, personalLightLights);
         SightType sight =
             new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
         sight.setDistance(range);
@@ -675,22 +670,14 @@ public class CampaignPropertiesDialog extends JDialog {
           continue;
         }
 
-        // region Light source properties.
         String name = line.substring(0, split).trim();
-        GUID id = new GUID();
-        LightSource.Type type = LightSource.Type.NORMAL;
-        boolean scaleWithToken = false;
-        List<Light> lights = new ArrayList<>();
-        // endregion
-        // region Individual light properties
+        LightSource lightSource = new LightSource(name);
         ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
         double arc = 0;
         double offset = 0;
         boolean gmOnly = false;
         boolean owner = false;
         String distance = null;
-        // endregion
-
         for (String arg : line.substring(split + 1).split("\\s+")) {
           arg = arg.trim();
           if (arg.length() == 0) {
@@ -708,7 +695,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
           // Scale with token designation
           if (arg.equalsIgnoreCase("SCALE")) {
-            scaleWithToken = true;
+            lightSource.setScaleWithToken(true);
             continue;
           }
           // Shape designation ?
@@ -721,7 +708,8 @@ public class CampaignPropertiesDialog extends JDialog {
 
           // Type designation ?
           try {
-            type = LightSource.Type.valueOf(arg.toUpperCase());
+            LightSource.Type type = LightSource.Type.valueOf(arg.toUpperCase());
+            lightSource.setType(type);
             continue;
           } catch (IllegalArgumentException iae) {
             // Expected when not defining a shape
@@ -782,7 +770,7 @@ public class CampaignPropertiesDialog extends JDialog {
             }
           }
 
-          boolean isAura = type == LightSource.Type.AURA;
+          boolean isAura = lightSource.getType() == LightSource.Type.AURA;
           if (!isAura && (gmOnly || owner)) {
             errlog.add(I18N.getText("msg.error.mtprops.light.gmOrOwner", reader.getLineNumber()));
             gmOnly = false;
@@ -800,26 +788,24 @@ public class CampaignPropertiesDialog extends JDialog {
                     perRangeLumens,
                     gmOnly,
                     owner);
-            lights.add(t);
+            lightSource.add(t);
           } catch (ParseException pe) {
             errlog.add(
                 I18N.getText("msg.error.mtprops.light.distance", reader.getLineNumber(), distance));
           }
         }
-        // Keep ID the same if modifying existing light. This avoids tokens losing their lights when
-        // the light definition is modified.
+        // Keep ID the same if modifying existing light
+        // TODO FJE Why? Is there some benefit to doing so? Changes to light sources require the map
+        // to be re-rendered anyway, don't they?
         if (originalLightSourcesMap.containsKey(currentGroupName)) {
           for (LightSource ls : originalLightSourcesMap.get(currentGroupName).values()) {
             if (ls.getName().equalsIgnoreCase(name)) {
-              assert ls.getId() != null;
-              id = ls.getId();
+              lightSource.setId(ls.getId());
               break;
             }
           }
         }
-
-        final var source = LightSource.createRegular(name, id, type, scaleWithToken, lights);
-        lightSourceMap.put(source.getId(), source);
+        lightSourceMap.put(lightSource.getId(), lightSource);
       }
       // Last group
       if (currentGroupName != null) {

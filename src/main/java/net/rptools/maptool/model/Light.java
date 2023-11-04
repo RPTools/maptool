@@ -23,7 +23,7 @@ import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.server.proto.LightDto;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
 
-public final class Light implements Serializable {
+public class Light implements Serializable {
   private final @Nonnull ShapeType shape;
   private final double facingOffset;
   private final double radius;
