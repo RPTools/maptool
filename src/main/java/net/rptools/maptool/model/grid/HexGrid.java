@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model;
+package net.rptools.maptool.model.grid;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -33,6 +33,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
@@ -352,7 +353,7 @@ public abstract class HexGrid extends Grid {
   /*
    * (non-Javadoc)
    *
-   * @see net.rptools.maptool.model.Grid#validateMove(java.awt.Rectangle, int, int, java.awt.geom.Area)
+   * @see net.rptools.maptool.model.grid.Grid#validateMove(java.awt.Rectangle, int, int, java.awt.geom.Area)
    */
 
   private boolean checkOneSlice(ZonePoint zp, int dir, Area exposedFog) {

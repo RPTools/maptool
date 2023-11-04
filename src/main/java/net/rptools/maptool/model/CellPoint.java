@@ -16,6 +16,7 @@ package net.rptools.maptool.model;
 
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.model.grid.Grid;
 
 /**
  * This class represents a location based on the grid coordinates of a zone.

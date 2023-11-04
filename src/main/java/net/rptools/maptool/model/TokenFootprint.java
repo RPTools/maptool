@@ -19,6 +19,7 @@ import java.awt.Rectangle;
 import java.util.*;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.grid.Grid;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TokenFootPrintDto;
 
