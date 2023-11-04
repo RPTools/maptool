@@ -542,16 +542,6 @@ public class AppPreferences {
   private static final String KEY_RENDER_QUALITY = "renderScaleQuality";
 
   private static final RenderQuality DEFAULT_RENDER_QUALITY = RenderQuality.LOW_SCALING;
-  private static final String KEY_HIDE_TOKEN_STACK_INDICATOR = "hideTokenStackIndicator";
-  private static final boolean DEFAULT_HIDE_TOKEN_STACK_INDICATOR = false;
-
-  public static boolean getHideTokenStackIndicator() {
-    return prefs.getBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, DEFAULT_HIDE_TOKEN_STACK_INDICATOR);
-  }
-
-  public static void setHideTokenStackIndicator(boolean hideTokenStackIndicator) {
-    prefs.putBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, hideTokenStackIndicator);
-  }
 
   public enum RenderQuality {
     LOW_SCALING,
