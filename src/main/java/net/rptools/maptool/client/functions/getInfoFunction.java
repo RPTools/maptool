@@ -273,7 +273,7 @@ public class getInfoFunction extends AbstractFunction {
     JsonObject libInfo = new JsonObject();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
-      for (Token token : zone.getTokens()) {
+      for (Token token : zone.getAllTokens()) {
         if (token.getName().toLowerCase().startsWith(prefix)) {
           if (token.getProperty(versionProperty) != null) {
             libInfo.addProperty(token.getName(), token.getProperty(versionProperty).toString());

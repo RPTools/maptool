@@ -304,6 +304,11 @@ public class TokenTopologyPanel extends JPanel {
       g2d.fill(
           atArea.createTransformedShape(
               tokenTopologiesOptimized.getOrDefault(Zone.TopologyType.PIT_VBL, new Area())));
+
+      g2d.setColor(getTopologyColor(AppStyle.tokenCoverVblColor));
+      g2d.fill(
+          atArea.createTransformedShape(
+              tokenTopologiesOptimized.getOrDefault(Zone.TopologyType.COVER_VBL, new Area())));
     }
 
     // Draw the number of points generated

@@ -45,7 +45,7 @@ public class JSAPITokens implements MapToolJSAPIInterface {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     zr.getZone()
-        .getTokens()
+        .getAllTokens()
         .forEach(
             (t -> {
               if (trusted || t.isOwner(playerId)) {

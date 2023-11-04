@@ -126,7 +126,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     }
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    List<Token> allTokens = zone.getTokens();
+    List<Token> allTokens = zone.getAllTokens();
     Token t = new Token(name, new MD5Key(tokenImage));
 
     // Make sure the exposedAreaGUID stays unique
@@ -174,7 +174,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     List<String> newTokens = new ArrayList<>(nCopies);
-    List<Token> allTokens = zone.getTokens();
+    List<Token> allTokens = zone.getAllTokens();
     for (int i = 0; i < nCopies; i++) {
       Token t = new Token(token);
 

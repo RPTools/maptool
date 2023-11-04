@@ -604,6 +604,10 @@ public class PreferencesDialog extends JDialog {
               @Override
               protected void storeNumericValue(Integer value) {
                 AppPreferences.setFrameRateCap(value);
+
+                for (final var renderer : MapTool.getFrame().getZoneRenderers()) {
+                  renderer.setFrameRateCap(value);
+                }
               }
 
               @Override

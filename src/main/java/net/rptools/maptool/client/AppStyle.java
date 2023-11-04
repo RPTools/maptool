@@ -42,9 +42,11 @@ public class AppStyle {
   public static Color topologyRemoveColor = new Color(255, 255, 255, 128);
   public static Color hillVblColor = new Color(0, 255, 255, 128);
   public static Color pitVblColor = new Color(104, 255, 0, 128);
+  public static Color coverVblColor = new Color(245, 0, 0, 128);
   public static Color topologyTerrainColor = new Color(255, 0, 255, 128);
   public static Color tokenTopologyColor = new Color(255, 255, 0, 128);
   public static Color tokenHillVblColor = new Color(255, 136, 0, 128);
   public static Color tokenPitVblColor = new Color(255, 0, 0, 128);
+  public static Color tokenCoverVblColor = new Color(245, 0, 0, 128);
   public static Color tokenMblColor = new Color(255, 128, 255, 128);
 }

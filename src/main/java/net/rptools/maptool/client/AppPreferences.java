@@ -147,6 +147,9 @@ public class AppPreferences {
       "hideMousePointerWhileDragging";
   private static final boolean DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING = true;
 
+  private static final String KEY_HIDE_TOKEN_STACK_INDICATOR = "hideTokenStackIndicator";
+  private static final boolean DEFAULT_KEY_HIDE_TOKEN_STACK_INDICATOR = false;
+
   private static final String KEY_OBJECTS_START_SNAP_TO_GRID = "newStampsStartSnapToGrid";
   private static final boolean DEFAULT_OBJECTS_START_SNAP_TO_GRID = false;
 
@@ -968,6 +971,14 @@ public class AppPreferences {
   public static boolean getHideMousePointerWhileDragging() {
     return prefs.getBoolean(
         KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING, DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING);
+  }
+
+  public static void setHideTokenStackIndicator(boolean flag) {
+    prefs.putBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, flag);
+  }
+
+  public static boolean getHideTokenStackIndicator() {
+    return prefs.getBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, DEFAULT_KEY_HIDE_TOKEN_STACK_INDICATOR);
   }
 
   public static void setObjectsStartSnapToGrid(boolean flag) {

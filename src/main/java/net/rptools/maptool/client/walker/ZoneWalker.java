@@ -38,6 +38,7 @@ public interface ZoneWalker {
       Area tokenWallVbl,
       Area tokenHillVbl,
       Area tokenPitVbl,
+      Area tokenCoverVbl,
       Area tokenMbl);
 
   public boolean isWaypoint(CellPoint point);

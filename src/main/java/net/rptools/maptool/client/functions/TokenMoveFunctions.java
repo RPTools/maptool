@@ -593,7 +593,8 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
     } catch (InterruptedException | ExecutionException e) {
       log.error(
-          I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
+          I18N.getText(
+              "library.error.retrievingEventHandler", ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK),
           e.getCause());
     }
     return moveDenied;

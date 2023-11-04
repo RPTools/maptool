@@ -488,7 +488,9 @@ public class ServerMessageHandler implements MessageHandler {
           server.getCampaign().removeZone(zoneGUID);
 
           // Now we have fire off adding the tokens in the zone
-          new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+          new MapToolEventBus()
+              .getMainEventBus()
+              .post(new TokensRemoved(zone, zone.getAllTokens()));
           new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
         });
   }
@@ -544,7 +546,7 @@ public class ServerMessageHandler implements MessageHandler {
 
           // Now we have fire off adding the tokens in the zone
           new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
-          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
         });
   }
 
