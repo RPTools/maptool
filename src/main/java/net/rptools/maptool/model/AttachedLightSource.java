@@ -28,6 +28,19 @@ public final class AttachedLightSource {
   }
 
   /**
+   * Get the ID of the attached light source.
+   *
+   * <p>If you're trying to use this to look up a {@link net.rptools.maptool.model.LightSource},
+   * consider using {@link #resolve(Token, Campaign)} instead. If you're trying to compare to
+   * another {@code GUID}, consider using {@link #matches(GUID)}.
+   *
+   * @return The ID of the attached light source.
+   */
+  public GUID getId() {
+    return lightSourceId;
+  }
+
+  /**
    * Obtain the attached {@code LightSource} from the token or campaign.
    *
    * @param token The token in which to look up light source IDs.
