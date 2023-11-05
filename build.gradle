@@ -342,7 +342,10 @@ dependencies {
 
     // parsing of configuration data
     implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.9.0'
-
+    // Specialized collections: ReferenceMap, LinkedMap.
+    implementation 'org.apache.commons:commons-collections4:4.4'
+    // Various file utilities
+    implementation 'commons-io:commons-io:2.15.0'
     // ftp client
     implementation 'commons-net:commons-net:3.9.0'
     // commandline parsing
@@ -459,7 +462,7 @@ dependencies {
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
 
     // Apache Tika Parsers for determining file type
-    implementation 'com.github.lafa.tikaNoExternal:tika-parsers:1.0.18'
+    implementation 'org.apache.tika:tika-core:2.9.1'
 
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
