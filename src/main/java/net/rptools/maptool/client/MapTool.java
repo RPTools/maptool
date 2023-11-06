@@ -878,23 +878,6 @@ public class MapTool {
 
   /**
    * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
-   * and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
-   * <code>separator</code>.
-   *
-   * @param message message to be sent
-   * @param targets string specifying clients to send the message to (spaces are trimmed)
-   * @param separator the separator between entries in <code>targets</code>
-   */
-  public static void addGlobalMessage(String message, String targets, String separator) {
-    List<String> list = new LinkedList<String>();
-    for (String target : targets.split(separator)) {
-      list.add(target.trim());
-    }
-    addGlobalMessage(message, list);
-  }
-
-  /**
-   * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
    * and addMessage(GM, ...).
    *
    * @param message message to be sent
