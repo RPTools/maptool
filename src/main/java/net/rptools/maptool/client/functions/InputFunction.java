@@ -75,6 +75,7 @@ import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -394,7 +395,7 @@ public class InputFunction extends AbstractFunction {
             }
           }
         } else {
-          String[] values = valueString.split(delim);
+          String[] values = StringUtil.split(valueString, delim);
           for (String s : values) {
             ret.add(s.trim());
           }

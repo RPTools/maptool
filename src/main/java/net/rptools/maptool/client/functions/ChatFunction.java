@@ -23,6 +23,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -93,7 +94,9 @@ public class ChatFunction extends AbstractFunction {
           jarray = JsonParser.parseString(temp).getAsJsonArray();
         else {
           jarray = new JsonArray();
-          for (String t : temp.split(delim)) jarray.add(t.trim());
+          for (String t : StringUtil.split(temp, delim)) {
+            jarray.add(t.trim());
+          }
         }
         if (jarray.size() == 0) {
           return ""; // dont send to empty lists
