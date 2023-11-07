@@ -28,6 +28,7 @@ import net.rptools.maptool.client.ui.zone.callout.CalloutArgumentBuilder;
 import net.rptools.maptool.client.ui.zone.callout.CalloutArguments;
 import net.rptools.maptool.client.ui.zone.callout.SpeechBubbleRenderer;
 import net.rptools.maptool.client.ui.zone.callout.ThoughtBubbleRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;

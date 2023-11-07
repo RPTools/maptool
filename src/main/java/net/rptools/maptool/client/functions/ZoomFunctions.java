@@ -19,7 +19,7 @@ import java.awt.Rectangle;
 import java.util.List;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.ZonePoint;
