@@ -271,7 +271,8 @@
               <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.cell.pixels"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.sizeInPixels"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.maps.gridSize.tooltip"/>
             </properties>
           </component>
           <component id="ef934" class="javax.swing.JTextField">

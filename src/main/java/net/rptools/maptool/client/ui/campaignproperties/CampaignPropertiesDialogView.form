@@ -358,7 +358,7 @@
                 </constraints>
                 <properties>
                   <name value="tokenStatesFlowGridLabel"/>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.size"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="GridControlPanel.sizeInPixels"/>
                 </properties>
               </component>
               <component id="583cd" class="javax.swing.JLabel">
