@@ -24,6 +24,7 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 import org.apache.commons.lang.StringUtils;
 import org.fife.ui.rsyntaxtextarea.SyntaxConstants;
 
@@ -318,5 +319,17 @@ public class StringUtil {
       case SyntaxConstants.SYNTAX_STYLE_MARKDOWN -> markDownToHtml(input);
       default -> input;
     };
+  }
+
+  /**
+   * Splits a string using a literal delimiter.
+   *
+   * <p>Unlike {@link String#split(String)}, {@code delim} is not a regular expression.
+   *
+   * @return
+   */
+  public static String[] split(String string, String delim) {
+    var pattern = Pattern.quote(delim);
+    return string.split(pattern);
   }
 }

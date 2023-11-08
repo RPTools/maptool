@@ -144,7 +144,9 @@ public class MacroLinkFunction extends AbstractFunction {
         jsonTargets = JSONMacroFunctions.getInstance().asJsonElement(strTargets).getAsJsonArray();
       else {
         jsonTargets = new JsonArray();
-        for (String t : strTargets.split(delim)) jsonTargets.add(t.trim());
+        for (String t : StringUtil.split(strTargets, delim)) {
+          jsonTargets.add(t.trim());
+        }
       }
       if (jsonTargets.size() == 0) {
         return ""; // dont send to empty lists
