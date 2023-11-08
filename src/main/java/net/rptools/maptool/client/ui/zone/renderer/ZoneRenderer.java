@@ -2950,7 +2950,7 @@ public class ZoneRenderer extends JComponent
       }
       timer.start("tokenlist-1.1");
       TokenLocation location = tokenLocationCache.get(token);
-      if (location != null && !location.maybeOnscreen(this, viewport)) {
+      if (location != null && !location.maybeOnscreen(viewport)) {
         timer.stop("tokenlist-1.1");
         continue;
       }
@@ -3005,7 +3005,6 @@ public class ZoneRenderer extends JComponent
       try {
         location =
             new TokenLocation(
-                this,
                 tokenBounds,
                 origBounds,
                 token,
@@ -3835,7 +3834,7 @@ public class ZoneRenderer extends JComponent
   public Area getTokenBounds(Token token) {
     TokenLocation location = tokenLocationCache.get(token);
     if (location != null
-        && !location.maybeOnscreen(this, new Rectangle(0, 0, getSize().width, getSize().height))) {
+        && !location.maybeOnscreen(new Rectangle(0, 0, getSize().width, getSize().height))) {
       location = null;
     }
     return location != null ? location.bounds : null;
@@ -4264,6 +4263,75 @@ public class ZoneRenderer extends JComponent
 
     public String getPlayerId() {
       return playerId;
+    }
+  }
+
+  private class TokenLocation {
+
+    public Area bounds;
+    public Token token;
+    public Rectangle boundsCache;
+    public double scaledHeight;
+    public double scaledWidth;
+    public double x;
+    public double y;
+    public int offsetX;
+    public int offsetY;
+
+    /**
+     * Construct a TokenLocation object that caches where images are stored and what their size is
+     * so that the next rendering pass can use that information to optimize the drawing.
+     *
+     * @param bounds
+     * @param origBounds (unused)
+     * @param token
+     * @param x
+     * @param y
+     * @param width (unused)
+     * @param height (unused)
+     * @param scaledWidth
+     * @param scaledHeight
+     */
+    public TokenLocation(
+        Area bounds,
+        Rectangle2D origBounds,
+        Token token,
+        double x,
+        double y,
+        int width,
+        int height,
+        double scaledWidth,
+        double scaledHeight) {
+      this.bounds = bounds;
+      this.token = token;
+      this.scaledWidth = scaledWidth;
+      this.scaledHeight = scaledHeight;
+      this.x = x;
+      this.y = y;
+
+      offsetX = getViewOffsetX();
+      offsetY = getViewOffsetY();
+
+      boundsCache = bounds.getBounds();
+    }
+
+    public boolean maybeOnscreen(Rectangle viewport) {
+      int deltaX = getViewOffsetX() - offsetX;
+      int deltaY = getViewOffsetY() - offsetY;
+
+      boundsCache.x += deltaX;
+      boundsCache.y += deltaY;
+
+      offsetX = getViewOffsetX();
+      offsetY = getViewOffsetY();
+
+      timer.start("maybeOnsceen");
+      if (!boundsCache.intersects(viewport)) {
+        timer.stop("maybeOnsceen");
+        return false;
+      }
+      timer.stop("maybeOnsceen");
+      return true;
     }
   }
 
