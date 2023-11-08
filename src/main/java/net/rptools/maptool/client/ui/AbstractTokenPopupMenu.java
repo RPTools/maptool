@@ -22,7 +22,8 @@ import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -143,31 +144,46 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
       menu.addSeparator();
     }
+
+    // Add unique light sources for the token.
+    {
+      JMenu subMenu = createLightCategoryMenu("Unique", tokenUnderMouse.getUniqueLightSources());
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+        menu.addSeparator();
+      }
+    }
+
     for (Entry<String, Map<GUID, LightSource>> entry :
         MapTool.getCampaign().getLightSourcesMap().entrySet()) {
-      JMenu subMenu = new JMenu(entry.getKey());
-
-      List<LightSource> lightSources = new ArrayList<LightSource>(entry.getValue().values());
-      LightSource[] lightSourceList = new LightSource[entry.getValue().size()];
-      lightSources.toArray(lightSourceList);
-      Arrays.sort(lightSourceList);
-      LIGHTSOURCES:
-      for (LightSource lightSource : lightSourceList) {
-        for (Light light : lightSource.getLightList()) {
-          if (light.isGM() && !MapTool.getPlayer().isGM()) {
-            continue LIGHTSOURCES;
-          }
-        }
-        JCheckBoxMenuItem menuItem =
-            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
-        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
-        subMenu.add(menuItem);
-      }
+      JMenu subMenu = createLightCategoryMenu(entry.getKey(), entry.getValue().values());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
       }
     }
     return menu;
+  }
+
+  protected JMenu createLightCategoryMenu(String categoryName, Collection<LightSource> sources) {
+    JMenu subMenu = new JMenu(categoryName);
+
+    List<LightSource> lightSources = new ArrayList<>(sources);
+    Collections.sort(lightSources);
+
+    for (LightSource lightSource : lightSources) {
+      // Don't include light sources that don't have lights visible to the player. Note that the
+      // player must be an owner to use the popup, so don't bother checking `::isOwner()`.
+      boolean include =
+          MapTool.getPlayer().isGM() || !lightSource.getLightList().stream().allMatch(Light::isGM);
+      if (include) {
+        JCheckBoxMenuItem menuItem =
+            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
+        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
+        subMenu.add(menuItem);
+      }
+    }
+
+    return subMenu;
   }
 
   protected Token getTokenUnderMouse() {
@@ -466,9 +482,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         if (token.hasLightSource(lightSource)) {
-          token.removeLightSource(lightSource);
+          token.removeLightSource(lightSource.getId());
         } else {
-          token.addLightSource(lightSource);
+          token.addLightSource(lightSource.getId());
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
 
