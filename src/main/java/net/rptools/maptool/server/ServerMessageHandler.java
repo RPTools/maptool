@@ -45,7 +45,6 @@ import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.utils.ExceptionUtils;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -262,8 +261,7 @@ public class ServerMessageHandler implements MessageHandler {
       }
       log.debug("from " + id + " handled: " + msgType);
     } catch (Exception e) {
-      log.error(ExceptionUtils.getStackTrace(e));
-      MapTool.showError(ExceptionUtils.getStackTrace(e));
+      MapTool.showError("Unexpected error during message handling", e);
     }
   }
 
