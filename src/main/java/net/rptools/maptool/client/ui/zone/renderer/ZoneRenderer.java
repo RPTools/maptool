@@ -31,8 +31,6 @@ import java.awt.image.BufferedImage;
 import java.text.NumberFormat;
 import java.util.*;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -67,7 +65,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
-import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
@@ -128,7 +125,7 @@ public class ZoneRenderer extends JComponent
   private final List<Token> showPathList = new ArrayList<Token>();
   private boolean showAllPaths = true; // Jamz: new option to show path
   // Optimizations
-  private final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
+  final Map<GUID, BufferedImage> labelRenderingCache = new HashMap<GUID, BufferedImage>();
   private final Map<Token, BufferedImage> flipImageMap = new HashMap<Token, BufferedImage>();
   private final Map<Token, BufferedImage> flipIsoImageMap = new HashMap<Token, BufferedImage>();
   private Token tokenUnderMouse;
@@ -151,7 +148,7 @@ public class ZoneRenderer extends JComponent
   private final List<ItemRenderer> itemRenderList = new LinkedList<ItemRenderer>();
   private PlayerView lastView;
   private Set<GUID> visibleTokenSet = new HashSet<>();
-  private CodeTimer timer;
+  CodeTimer timer;
 
   private boolean autoResizeStamp = false;
 
@@ -159,12 +156,6 @@ public class ZoneRenderer extends JComponent
   private double previousScale;
 
   private ZonePoint previousZonePoint;
-
-  public enum TokenMoveCompletion {
-    TRUE,
-    FALSE,
-    OTHER
-  }
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -322,7 +313,7 @@ public class ZoneRenderer extends JComponent
 
   public void addMoveSelectionSet(String playerId, GUID keyToken, Set<GUID> tokenList) {
     // I'm not supposed to be moving a token when someone else is already moving it
-    selectionSetMap.put(keyToken, new SelectionSet(playerId, keyToken, tokenList));
+    selectionSetMap.put(keyToken, new SelectionSet(this, playerId, keyToken, tokenList));
     repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
 
@@ -1388,11 +1379,6 @@ public class ZoneRenderer extends JComponent
     }
   }
 
-  private enum LightOverlayClipStyle {
-    CLIP_TO_VISIBLE_AREA,
-    CLIP_TO_NOT_VISIBLE_AREA,
-  }
-
   /**
    * Cache of images for rendering overlays.
    *
@@ -1432,7 +1418,7 @@ public class ZoneRenderer extends JComponent
           g,
           LightingComposite.BlendedLights,
           overlayBlending,
-          view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+          view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           drawableLights,
           overlayFillColor);
       timer.stop("renderLights:renderLightOverlay");
@@ -1444,7 +1430,7 @@ public class ZoneRenderer extends JComponent
       renderLumensOverlay(
           g,
           view,
-          view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+          view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
           AppPreferences.getLumensOverlayOpacity() / 255.0f);
       timer.stop("renderLights:renderLumensOverlay");
     }
@@ -1467,7 +1453,7 @@ public class ZoneRenderer extends JComponent
         g,
         AlphaComposite.SrcOver.derive(AppPreferences.getAuraOverlayOpacity() / 255.0f),
         AlphaComposite.SrcOver,
-        view.isGMView() ? null : LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
+        view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
         drawableAuras,
         new Color(0, 0, 0, 0));
     timer.stop("renderAuras:renderAuraOverlay");
@@ -1476,7 +1462,7 @@ public class ZoneRenderer extends JComponent
   private void renderLumensOverlay(
       Graphics2D g,
       PlayerView view,
-      @Nullable LightOverlayClipStyle clipStyle,
+      @Nullable ZoneRendererConstants.LightOverlayClipStyle clipStyle,
       float overlayOpacity) {
     g = (Graphics2D) g.create();
 
@@ -1587,7 +1573,7 @@ public class ZoneRenderer extends JComponent
       Graphics2D g,
       Composite lightBlending,
       Composite overlayBlending,
-      @Nullable LightOverlayClipStyle clipStyle,
+      @Nullable ZoneRendererConstants.LightOverlayClipStyle clipStyle,
       Collection<DrawableLight> lights,
       Paint backgroundFill) {
     if (lights.isEmpty()) {
@@ -2361,12 +2347,12 @@ public class ZoneRenderer extends JComponent
                   distance = NumberFormat.getInstance().format(c);
                 }
                 if (!distance.isEmpty()) {
-                  delayRendering(new LabelRenderer(distance, x, y));
+                  delayRendering(new LabelRenderer(this, distance, x, y));
                   y += 20;
                 }
               }
               if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
-                delayRendering(new LabelRenderer(set.getPlayerId(), x, y));
+                delayRendering(new LabelRenderer(this, set.getPlayerId(), x, y));
               }
             } // !token.isStamp()
           } // showLabels
@@ -3005,6 +2991,7 @@ public class ZoneRenderer extends JComponent
       try {
         location =
             new TokenLocation(
+                this,
                 tokenBounds,
                 origBounds,
                 token,
@@ -3624,6 +3611,7 @@ public class ZoneRenderer extends JComponent
         Rectangle r = bounds.getBounds();
         delayRendering(
             new LabelRenderer(
+                this,
                 name,
                 r.x + r.width / 2,
                 r.y + r.height + offset,
@@ -4000,350 +3988,6 @@ public class ZoneRenderer extends JComponent
   public boolean imageUpdate(Image img, int infoflags, int x, int y, int w, int h) {
     repaintDebouncer.dispatch();
     return super.imageUpdate(img, infoflags, x, y, w, h);
-  }
-
-  private interface ItemRenderer {
-
-    public void render(Graphics2D g);
-  }
-
-  /** Represents a delayed label render */
-  private class LabelRenderer implements ItemRenderer {
-
-    private final String text;
-    private int x;
-    private final int y;
-    private final int align;
-    private final Color foreground;
-    private final ImageLabel background;
-
-    // Used for drawing from label cache.
-    private final GUID tokenId;
-    private int width, height;
-
-    public LabelRenderer(String text, int x, int y) {
-      this(text, x, y, null);
-    }
-
-    public LabelRenderer(String text, int x, int y, GUID tId) {
-      this.text = text;
-      this.x = x;
-      this.y = y;
-
-      // Defaults
-      this.align = SwingUtilities.CENTER;
-      this.background = GraphicsUtil.GREY_LABEL;
-      this.foreground = Color.black;
-      tokenId = tId;
-      if (tokenId != null) {
-        width = labelRenderingCache.get(tokenId).getWidth();
-        height = labelRenderingCache.get(tokenId).getHeight();
-      }
-    }
-
-    @SuppressWarnings("unused")
-    public LabelRenderer(
-        String text, int x, int y, int align, ImageLabel background, Color foreground) {
-      this(text, x, y, align, background, foreground, null);
-    }
-
-    public LabelRenderer(
-        String text, int x, int y, int align, ImageLabel background, Color foreground, GUID tId) {
-      this.text = text;
-      this.x = x;
-      this.y = y;
-      this.align = align;
-      this.foreground = foreground;
-      this.background = background;
-      tokenId = tId;
-      if (tokenId != null) {
-        width = labelRenderingCache.get(tokenId).getWidth();
-        height = labelRenderingCache.get(tokenId).getHeight();
-      }
-    }
-
-    public void render(Graphics2D g) {
-      if (tokenId != null) { // Use cached image.
-        switch (align) {
-          case SwingUtilities.CENTER:
-            x = x - width / 2;
-            break;
-          case SwingUtilities.RIGHT:
-            x = x - width;
-            break;
-          case SwingUtilities.LEFT:
-            break;
-        }
-        BufferedImage img = labelRenderingCache.get(tokenId);
-        if (img != null) {
-          g.drawImage(img, x, y, width, height, null);
-        } else { // Draw as normal
-          GraphicsUtil.drawBoxedString(g, text, x, y, align, background, foreground);
-        }
-      } else { // Draw as normal.
-        GraphicsUtil.drawBoxedString(g, text, x, y, align, background, foreground);
-      }
-    }
-  }
-
-  /** Represents a movement set */
-  public class SelectionSet {
-
-    private final Logger log = LogManager.getLogger(ZoneRenderer.SelectionSet.class);
-
-    private final Set<GUID> selectionSet = new HashSet<GUID>();
-    private final GUID keyToken;
-    private final String playerId;
-    private ZoneWalker walker;
-    private final Token token;
-
-    private Path<ZonePoint> gridlessPath;
-    /** Pixel distance (x) from keyToken's origin. */
-    private int offsetX;
-    /** Pixel distance (y) from keyToken's origin. */
-    private int offsetY;
-
-    private RenderPathWorker renderPathTask;
-    private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
-
-    /**
-     * @param playerId The ID of the player performing the movement.
-     * @param tokenGUID The ID of the leader token, i.e., the token that will pathfind.
-     * @param selectionList The IDs of all tokens being moved.
-     */
-    public SelectionSet(String playerId, GUID tokenGUID, Set<GUID> selectionList) {
-      selectionSet.addAll(selectionList);
-      keyToken = tokenGUID;
-      this.playerId = playerId;
-
-      token = zone.getToken(tokenGUID);
-
-      if (token.isSnapToGrid() && zone.getGrid().getCapabilities().isSnapToGridSupported()) {
-        if (zone.getGrid().getCapabilities().isPathingSupported()) {
-          CellPoint tokenPoint = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
-
-          walker = zone.getGrid().createZoneWalker();
-          walker.setFootprint(token.getFootprint(zone.getGrid()));
-          walker.setWaypoints(tokenPoint, tokenPoint);
-        }
-      } else {
-        gridlessPath = new Path<ZonePoint>();
-        gridlessPath.addPathCell(new ZonePoint(token.getX(), token.getY()));
-      }
-    }
-
-    /**
-     * @return path computation.
-     */
-    public Path<ZonePoint> getGridlessPath() {
-      return gridlessPath;
-    }
-
-    public ZoneWalker getWalker() {
-      return walker;
-    }
-
-    public GUID getKeyToken() {
-      return keyToken;
-    }
-
-    public Set<GUID> getTokens() {
-      return selectionSet;
-    }
-
-    public boolean contains(Token token) {
-      return selectionSet.contains(token.getId());
-    }
-
-    // This is called when movement is committed/done. It'll let the last thread either finish or
-    // timeout
-    public void renderFinalPath() {
-      if (ZoneRenderer.this.zone.getGrid().getCapabilities().isPathingSupported()
-          && token.isSnapToGrid()
-          && renderPathTask != null) {
-        while (!renderPathTask.isDone()) {
-          log.trace("Waiting on Path Rendering... ");
-          try {
-            Thread.sleep(10);
-          } catch (InterruptedException e) {
-            e.printStackTrace();
-          }
-        }
-      }
-    }
-
-    public void setOffset(int x, int y) {
-      offsetX = x;
-      offsetY = y;
-
-      ZonePoint zp = new ZonePoint(token.getX() + x, token.getY() + y);
-      if (ZoneRenderer.this.zone.getGrid().getCapabilities().isPathingSupported()
-          && token.isSnapToGrid()) {
-        CellPoint point = zone.getGrid().convert(zp);
-        // walker.replaceLastWaypoint(point, restrictMovement); // OLD WAY
-
-        // New way threaded, off the swing UI thread...
-        if (renderPathTask != null) {
-          renderPathTask.cancel(true);
-        }
-
-        boolean restrictMovement =
-            MapTool.getServerPolicy().isUsingAstarPathfinding() && !token.isStamp();
-
-        Set<TerrainModifierOperation> terrainModifiersIgnored = token.getTerrainModifiersIgnored();
-
-        renderPathTask =
-            new RenderPathWorker(
-                walker,
-                point,
-                restrictMovement,
-                terrainModifiersIgnored,
-                token.getTransformedTopology(Zone.TopologyType.WALL_VBL),
-                token.getTransformedTopology(Zone.TopologyType.HILL_VBL),
-                token.getTransformedTopology(Zone.TopologyType.PIT_VBL),
-                token.getTransformedTopology(Zone.TopologyType.COVER_VBL),
-                token.getTransformedTopology(Zone.TopologyType.MBL),
-                ZoneRenderer.this);
-        renderPathThreadPool.execute(renderPathTask);
-      } else {
-        if (gridlessPath.getCellPath().size() > 1) {
-          gridlessPath.replaceLastPoint(zp);
-        } else {
-          gridlessPath.addPathCell(zp);
-        }
-      }
-    }
-
-    /**
-     * Add the waypoint if it is a new waypoint. If it is an old waypoint remove it.
-     *
-     * @param location The point where the waypoint is toggled.
-     */
-    public void toggleWaypoint(ZonePoint location) {
-      if (walker != null && token.isSnapToGrid() && getZone().getGrid() != null) {
-        walker.toggleWaypoint(getZone().getGrid().convert(location));
-      } else {
-        gridlessPath.addWayPoint(location);
-        gridlessPath.addPathCell(location);
-      }
-    }
-
-    /**
-     * Retrieves the last waypoint, or if there isn't one then the start point of the first path
-     * segment.
-     *
-     * @return the ZonePoint.
-     */
-    public ZonePoint getLastWaypoint() {
-      ZonePoint zp;
-      if (walker != null && token.isSnapToGrid() && getZone().getGrid() != null) {
-        CellPoint cp = walker.getLastPoint();
-
-        if (cp == null) {
-          // log.info("cellpoint is null! FIXME! You have Walker class updating outside of
-          // thread..."); // Why not save last waypoint to this class?
-          cp = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
-          // log.info("So I set it to: " + cp);
-        }
-
-        zp = getZone().getGrid().convert(cp);
-      } else {
-        zp = gridlessPath.getLastJunctionPoint();
-      }
-      return zp;
-    }
-
-    public int getOffsetX() {
-      return offsetX;
-    }
-
-    public int getOffsetY() {
-      return offsetY;
-    }
-
-    public String getPlayerId() {
-      return playerId;
-    }
-  }
-
-  private class TokenLocation {
-
-    public Area bounds;
-    public Token token;
-    public Rectangle boundsCache;
-    public double scaledHeight;
-    public double scaledWidth;
-    public double x;
-    public double y;
-    public int offsetX;
-    public int offsetY;
-
-    /**
-     * Construct a TokenLocation object that caches where images are stored and what their size is
-     * so that the next rendering pass can use that information to optimize the drawing.
-     *
-     * @param bounds
-     * @param origBounds (unused)
-     * @param token
-     * @param x
-     * @param y
-     * @param width (unused)
-     * @param height (unused)
-     * @param scaledWidth
-     * @param scaledHeight
-     */
-    public TokenLocation(
-        Area bounds,
-        Rectangle2D origBounds,
-        Token token,
-        double x,
-        double y,
-        int width,
-        int height,
-        double scaledWidth,
-        double scaledHeight) {
-      this.bounds = bounds;
-      this.token = token;
-      this.scaledWidth = scaledWidth;
-      this.scaledHeight = scaledHeight;
-      this.x = x;
-      this.y = y;
-
-      offsetX = getViewOffsetX();
-      offsetY = getViewOffsetY();
-
-      boundsCache = bounds.getBounds();
-    }
-
-    public boolean maybeOnscreen(Rectangle viewport) {
-      int deltaX = getViewOffsetX() - offsetX;
-      int deltaY = getViewOffsetY() - offsetY;
-
-      boundsCache.x += deltaX;
-      boundsCache.y += deltaY;
-
-      offsetX = getViewOffsetX();
-      offsetY = getViewOffsetY();
-
-      timer.start("maybeOnsceen");
-      if (!boundsCache.intersects(viewport)) {
-        timer.stop("maybeOnsceen");
-        return false;
-      }
-      timer.stop("maybeOnsceen");
-      return true;
-    }
-  }
-
-  private static class LabelLocation {
-
-    public Rectangle bounds;
-    public Label label;
-
-    public LabelLocation(Rectangle bounds, Label label) {
-      this.bounds = bounds;
-      this.label = label;
-    }
   }
 
   //
