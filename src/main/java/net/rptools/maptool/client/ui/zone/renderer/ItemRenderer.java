@@ -12,13 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package net.rptools.maptool.client.ui.zone.renderer;
 
-import java.awt.Graphics2D;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import java.awt.*;
 
-/** */
-public interface ZoneOverlay {
+interface ItemRenderer {
 
-  public void paintOverlay(ZoneRenderer renderer, Graphics2D g);
+  public void render(Graphics2D g);
 }

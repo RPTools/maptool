@@ -12,13 +12,18 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.zone;
+package net.rptools.maptool.client.ui.zone.renderer;
 
-import java.awt.Graphics2D;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import java.awt.*;
+import net.rptools.maptool.model.Label;
 
-/** */
-public interface ZoneOverlay {
+class LabelLocation {
 
-  public void paintOverlay(ZoneRenderer renderer, Graphics2D g);
+  public Rectangle bounds;
+  public net.rptools.maptool.model.Label label;
+
+  public LabelLocation(Rectangle bounds, Label label) {
+    this.bounds = bounds;
+    this.label = label;
+  }
 }

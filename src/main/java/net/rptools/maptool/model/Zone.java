@@ -30,8 +30,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -1250,7 +1250,7 @@ public class Zone {
     }
     for (Token tok : view.getTokens()) {
       // Don't need this IF statement; see
-      // net.rptools.maptool.client.ui.zone.ZoneRenderer.getPlayerView(Role)
+      // net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer.getPlayerView(Role)
       // if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
       // continue;
       // }

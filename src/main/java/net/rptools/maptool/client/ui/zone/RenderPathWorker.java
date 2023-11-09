@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.zone;
 import java.awt.geom.Area;
 import java.util.Set;
 import javax.swing.SwingWorker;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;

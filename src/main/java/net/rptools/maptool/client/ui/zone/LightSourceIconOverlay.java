@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;

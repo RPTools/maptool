@@ -21,7 +21,7 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Cross;
 import net.rptools.maptool.model.drawing.Pen;

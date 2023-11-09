@@ -21,7 +21,7 @@ import java.awt.geom.Rectangle2D;
 import java.util.List;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** Abstract class containing reusable logic for call out rendering. */
 public abstract class AbstractCalloutRenderer implements CalloutRenderer {
