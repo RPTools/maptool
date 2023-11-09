@@ -126,7 +126,7 @@
                   </component>
                 </children>
               </grid>
-              <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -136,7 +136,7 @@
                 <children>
                   <component id="e4b0f" class="javax.swing.JToggleButton">
                     <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <name value="mblToggle"/>
@@ -172,6 +172,16 @@
                       <name value="pitVblToggle"/>
                       <text value=""/>
                       <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movepbltoggle.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="2b7ed" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="coverVblToggle"/>
+                      <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movecbltoggle.tooltip"/>
                     </properties>
                   </component>
                 </children>

@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import static org.apache.tika.metadata.TikaCoreProperties.RESOURCE_NAME_KEY;
+
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import com.google.protobuf.ByteString;
@@ -729,7 +731,7 @@ public final class Asset {
 
   private static MediaType getMediaType(String filename, TikaInputStream tis) throws IOException {
     Metadata metadata = new Metadata();
-    metadata.set(Metadata.RESOURCE_NAME_KEY, filename);
+    metadata.set(RESOURCE_NAME_KEY, filename);
     try {
       TikaConfig tika = new TikaConfig();
       MediaType mediaType = tika.getDetector().detect(tis, metadata);

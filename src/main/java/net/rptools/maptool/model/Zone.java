@@ -30,8 +30,8 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
 import net.rptools.maptool.client.ui.zone.ZoneView;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -179,6 +179,7 @@ public class Zone {
     WALL_VBL,
     HILL_VBL,
     PIT_VBL,
+    COVER_VBL,
     MBL;
   }
 
@@ -293,6 +294,9 @@ public class Zone {
 
   /** The Pit VBL topology of the zone. Does not include token Pit VBL. */
   private Area pitVbl = new Area();
+
+  /** The Cover VBL topology of the zone. Does not include token Cover VBL. */
+  private Area coverVbl = new Area();
 
   /** The MBL topology of the zone. Does not include token MBL. Should really be called mbl. */
   private Area topologyTerrain = new Area();
@@ -632,6 +636,7 @@ public class Zone {
     topology = (Area) zone.topology.clone();
     hillVbl = (Area) zone.hillVbl.clone();
     pitVbl = (Area) zone.pitVbl.clone();
+    coverVbl = (Area) zone.coverVbl.clone();
     topologyTerrain = (Area) zone.topologyTerrain.clone();
     aStarRounding = zone.aStarRounding;
     topologyTypes = zone.topologyTypes;
@@ -925,6 +930,7 @@ public class Zone {
       case WALL_VBL -> topology;
       case HILL_VBL -> hillVbl;
       case PIT_VBL -> pitVbl;
+      case COVER_VBL -> coverVbl;
       case MBL -> topologyTerrain;
     };
   }
@@ -941,6 +947,7 @@ public class Zone {
           case WALL_VBL -> this.topology;
           case HILL_VBL -> hillVbl;
           case PIT_VBL -> pitVbl;
+          case COVER_VBL -> coverVbl;
           case MBL -> topologyTerrain;
         };
     topology.add(area);
@@ -966,6 +973,7 @@ public class Zone {
           case WALL_VBL -> this.topology;
           case HILL_VBL -> hillVbl;
           case PIT_VBL -> pitVbl;
+          case COVER_VBL -> coverVbl;
           case MBL -> topologyTerrain;
         };
     topology.subtract(area);
@@ -1242,7 +1250,7 @@ public class Zone {
     }
     for (Token tok : view.getTokens()) {
       // Don't need this IF statement; see
-      // net.rptools.maptool.client.ui.zone.ZoneRenderer.getPlayerView(Role)
+      // net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer.getPlayerView(Role)
       // if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
       // continue;
       // }
@@ -2184,6 +2192,9 @@ public class Zone {
     if (pitVbl == null) {
       pitVbl = new Area();
     }
+    if (coverVbl == null) {
+      coverVbl = new Area();
+    }
     // Movement Blocking Layer
     if (topologyTerrain == null) {
       topologyTerrain = new Area();
@@ -2321,6 +2332,7 @@ public class Zone {
     zone.topology = Mapper.map(dto.getTopology());
     zone.hillVbl = Mapper.map(dto.getHillVbl());
     zone.pitVbl = Mapper.map(dto.getPitVbl());
+    zone.coverVbl = Mapper.map(dto.getCoverVbl());
     zone.topologyTerrain = Mapper.map(dto.getTopologyTerrain());
     zone.backgroundPaint = DrawablePaint.fromDto(dto.getBackgroundPaint());
     zone.mapAsset = dto.hasMapAsset() ? new MD5Key(dto.getMapAsset().getValue()) : null;
@@ -2392,6 +2404,7 @@ public class Zone {
     }
     dto.setHillVbl(Mapper.map(hillVbl));
     dto.setPitVbl(Mapper.map(pitVbl));
+    dto.setCoverVbl(Mapper.map(coverVbl));
     dto.setTopologyTerrain(Mapper.map(topologyTerrain));
     dto.setBackgroundPaint(backgroundPaint.toDto());
     if (mapAsset != null) {

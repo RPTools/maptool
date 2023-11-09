@@ -33,7 +33,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.language.I18N;
@@ -593,7 +593,8 @@ public class TokenMoveFunctions extends AbstractFunction {
       }
     } catch (InterruptedException | ExecutionException e) {
       log.error(
-          I18N.getText("library.error.retrievingEventHandler", ON_TOKEN_MOVE_COMPLETE_CALLBACK),
+          I18N.getText(
+              "library.error.retrievingEventHandler", ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK),
           e.getCause());
     }
     return moveDenied;

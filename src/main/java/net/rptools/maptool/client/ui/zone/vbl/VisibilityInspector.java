@@ -42,7 +42,7 @@ public class VisibilityInspector extends JPanel {
   private static final Logger log = LogManager.getLogger(VisibilityInspector.class);
   private static final double VISION_RANGE_CHANGE_RATE = 15.;
 
-  private AreaTree wallVblTree, hillVblTree, pitVblTree;
+  private AreaTree wallVblTree, hillVblTree, pitVblTree, coverVblTree;
   private AffineTransform affineTransform;
   private Point2D point;
   private double visionRange;
@@ -82,15 +82,17 @@ public class VisibilityInspector extends JPanel {
         });
   }
 
-  public void setTopology(Area wallVbl, Area hillVbl, Area pitVbl) {
+  public void setTopology(Area wallVbl, Area hillVbl, Area pitVbl, Area coverVbl) {
     wallVbl = new Area(wallVbl);
     hillVbl = new Area(hillVbl);
     pitVbl = new Area(pitVbl);
+    coverVbl = new Area(coverVbl);
 
     final var dimensions = getSize();
     final var bounds = wallVbl.getBounds();
     bounds.add(hillVbl.getBounds());
     bounds.add(pitVbl.getBounds());
+    bounds.add(coverVbl.getBounds());
     affineTransform = AffineTransform.getTranslateInstance(-bounds.getX(), -bounds.getY());
     final var scaleX = dimensions.getWidth() / bounds.getWidth();
     final var scaleY = dimensions.getHeight() / bounds.getHeight();
@@ -103,6 +105,7 @@ public class VisibilityInspector extends JPanel {
     wallVblTree = new AreaTree(wallVbl);
     hillVblTree = new AreaTree(hillVbl);
     pitVblTree = new AreaTree(pitVbl);
+    coverVblTree = new AreaTree(coverVbl);
   }
 
   @Override
@@ -129,6 +132,8 @@ public class VisibilityInspector extends JPanel {
     g2d.draw(hillVblTree.getArea());
     g2d.setColor(Color.green);
     g2d.draw(pitVblTree.getArea());
+    g2d.setColor(Color.red);
+    g2d.draw(coverVblTree.getArea());
 
     final var CIRCLE_SEGMENTS = 60;
     final var unobstructedVision =
@@ -144,7 +149,8 @@ public class VisibilityInspector extends JPanel {
             unobstructedVision,
             wallVblTree,
             hillVblTree,
-            pitVblTree);
+            pitVblTree,
+            coverVblTree);
 
     final var obstructedVision = new Area(unobstructedVision);
 
@@ -211,7 +217,7 @@ public class VisibilityInspector extends JPanel {
         }
       }
     }
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
   }
 
   private static void buildTripleIntersectionTopology(VisibilityInspector visibilityInspector) {
@@ -225,7 +231,7 @@ public class VisibilityInspector extends JPanel {
     hillArea.add(new Area(new Polygon(new int[] {250, 450, 450}, new int[] {450, 450, 250}, 3)));
     pitArea.add(new Area(new Polygon(new int[] {275, 325, 325}, new int[] {350, 150, 550}, 3)));
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
   }
 
   private static void buildSinglePillarTopology(VisibilityInspector visibilityInspector) {
@@ -238,6 +244,6 @@ public class VisibilityInspector extends JPanel {
     final var pillar = new Area(new Rectangle(300, 300, 50, 50));
     wallArea.add(pillar);
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
   }
 }

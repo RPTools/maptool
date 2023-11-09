@@ -68,7 +68,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.transferprogressdialog.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -1091,7 +1091,7 @@ public class AppActions {
     // Create a set of all tokenExposedAreaGUID's to make searching by GUID much faster.
     Set<GUID> allTokensSet = null;
     {
-      List<Token> allTokensList = zone.getTokens();
+      List<Token> allTokensList = zone.getAllTokens();
       if (!allTokensList.isEmpty()) {
         allTokensSet = new HashSet<GUID>(allTokensList.size());
         for (Token token : allTokensList) {
@@ -2848,27 +2848,28 @@ public class AppActions {
           chooser.setSelectedFile(new File(zr.getZone().getName()));
           boolean tryAgain = true;
           while (tryAgain) {
-            if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-              File mapFile = chooser.getSelectedFile();
-              var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-              var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
-              if (saveDir.startsWith(installDir)) {
-                MapTool.showWarning("msg.warning.saveMapToInstallDir");
-              } else {
-                tryAgain = false;
-                try {
-                  mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
-                  if (mapFile.exists()) {
-                    if (!MapTool.confirm("msg.confirm.fileExists")) {
-                      return;
-                    }
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              break;
+            }
+            File mapFile = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.saveMapToInstallDir");
+            } else {
+              tryAgain = false;
+              try {
+                mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+                if (mapFile.exists()) {
+                  if (!MapTool.confirm("msg.confirm.fileExists")) {
+                    return;
                   }
-                  PersistenceUtil.saveMap(zr.getZone(), mapFile);
-                  AppPreferences.setSaveMapDir(mapFile.getParentFile());
-                  MapTool.showInformation("msg.info.mapSaved");
-                } catch (IOException ioe) {
-                  MapTool.showError("msg.error.failedSaveMap", ioe);
                 }
+                PersistenceUtil.saveMap(zr.getZone(), mapFile);
+                AppPreferences.setSaveMapDir(mapFile.getParentFile());
+                MapTool.showInformation("msg.info.mapSaved");
+              } catch (IOException ioe) {
+                MapTool.showError("msg.error.failedSaveMap", ioe);
               }
             }
           }

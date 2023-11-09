@@ -263,6 +263,7 @@ enum TopologyTypeDto {
   WALL_VBL = 0;
   HILL_VBL = 1;
   PIT_VBL = 2;
+  COVER_VBL = 4;
   MBL = 3;
 }
 
@@ -319,6 +320,7 @@ message TokenDto {
   AreaDto vbl = 29;
   AreaDto hillVbl = 65;
   AreaDto pitVbl = 66;
+  AreaDto coverVbl = 71;
   AreaDto mbl = 67;
   string name = 30;
   repeated string owner_list = 31;
@@ -340,6 +342,7 @@ message TokenDto {
   bool is_flipped_iso = 47;
   google.protobuf.StringValue charsheet_image = 48;
   google.protobuf.StringValue portrait_image = 49;
+  repeated LightSourceDto unique_light_sources = 72;
   repeated AttachedLightSourceDto light_sources = 50;
   google.protobuf.StringValue sight_type = 51;
   bool has_sight = 52;
@@ -535,6 +538,7 @@ message ZoneDto {
   AreaDto topology = 22;
   AreaDto hill_vbl = 23;
   AreaDto pit_vbl = 24;
+  AreaDto cover_vbl = 39;
   AreaDto topology_terrain = 25;
   DrawablePaintDto background_paint = 26;
   google.protobuf.StringValue map_asset = 27;
@@ -641,16 +645,18 @@ enum TokenUpdateDto {
     setPortraitImage = 43;
     setCharsheetImage = 44;
     setLayout = 45;
-    clearLightSources = 46;
-    removeLightSource = 47;
-    addLightSource = 48;
-    setHasSight = 49;
-    setSightType = 50;
-    flipX = 51;
-    flipY = 52;
-    flipIso = 53;
-    setSpeechName = 54;
-    removeFacing = 55;
+    createUniqueLightSource = 46;
+    deleteUniqueLightSource = 47;
+    clearLightSources = 48;
+    removeLightSource = 49;
+    addLightSource = 50;
+    setHasSight = 51;
+    setSightType = 52;
+    flipX = 53;
+    flipY = 54;
+    flipIso = 55;
+    setSpeechName = 56;
+    removeFacing = 57;
 }
 
 message AssetTransferHeaderDto {
@@ -671,12 +677,13 @@ message TokenPropertyValueDto {
     string string_value = 3;
     double double_value = 4;
     MacroButtonPropertiesListDto macros = 5;
-    LightSourceDto light_source = 6;
-    AreaDto area = 7;
-    StringListDto string_values = 8;
-    GridDto grid = 9;
-    TokenFootPrintDto token_foot_print = 10;
-    string topology_type = 11;
+    string light_source_id = 6;
+    LightSourceDto light_source = 7;
+    AreaDto area = 8;
+    StringListDto string_values = 9;
+    GridDto grid = 10;
+    TokenFootPrintDto token_foot_print = 11;
+    string topology_type = 12;
   }
 }
 

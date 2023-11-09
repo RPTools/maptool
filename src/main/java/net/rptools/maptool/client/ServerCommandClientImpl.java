@@ -674,18 +674,16 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   @Override
   public void updateTokenProperty(Token token, Token.Update update, LightSource value) {
-    updateTokenProperty(
-        token, update, TokenPropertyValueDto.newBuilder().setLightSource(value.toDto()).build());
-  }
-
-  @Override
-  public void updateTokenProperty(
-      Token token, Token.Update update, LightSource value1, String value2) {
-    updateTokenProperty(
-        token,
-        update,
-        TokenPropertyValueDto.newBuilder().setLightSource(value1.toDto()).build(),
-        TokenPropertyValueDto.newBuilder().setStringValue(value2).build());
+    if (update == Token.Update.createUniqueLightSource) {
+      // This case requires sending the full light source definition.
+      updateTokenProperty(
+          token, update, TokenPropertyValueDto.newBuilder().setLightSource(value.toDto()).build());
+    } else {
+      updateTokenProperty(
+          token,
+          update,
+          TokenPropertyValueDto.newBuilder().setLightSourceId(value.getId().toString()).build());
+    }
   }
 
   @Override

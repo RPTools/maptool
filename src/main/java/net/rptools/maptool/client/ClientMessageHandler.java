@@ -32,8 +32,8 @@ import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.tokenpanel.InitiativePanel;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -684,7 +684,9 @@ public class ClientMessageHandler implements MessageHandler {
           MapTool.getFrame().removeZoneRenderer(renderer);
 
           // Now we have fire off adding the tokens in the zone
-          new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+          new MapToolEventBus()
+              .getMainEventBus()
+              .post(new TokensRemoved(zone, zone.getAllTokens()));
           new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
         });
   }
@@ -752,7 +754,7 @@ public class ClientMessageHandler implements MessageHandler {
 
           new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
           // Now we have fire off adding the tokens in the zone
-          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
         });
   }
 

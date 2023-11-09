@@ -19,7 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Rectangle2D;
 import java.util.Map;
 import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** Class that implements the renderer for a callout for a speech bubble. */
 public class SpeechBubbleRenderer extends AbstractCalloutRenderer {

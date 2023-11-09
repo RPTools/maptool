@@ -329,23 +329,6 @@ public class Campaign {
   }
 
   /**
-   * Convenience method that iterates through {@link #getLightSourcesMap()} and returns the value
-   * for the key <code>lightSourceId</code>.
-   *
-   * @param lightSourceId the id to look for
-   * @return the {@link LightSource} or null if not found
-   */
-  public LightSource getLightSource(GUID lightSourceId) {
-
-    for (Map<GUID, LightSource> map : getLightSourcesMap().values()) {
-      if (map.containsKey(lightSourceId)) {
-        return map.get(lightSourceId);
-      }
-    }
-    return null;
-  }
-
-  /**
    * Stub that calls <code>campaignProperties.getLightSourcesMap()</code>.
    *
    * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
@@ -850,7 +833,7 @@ public class Campaign {
    */
   public void renameTokenTypes(@Nonnull String oldName, @Nonnull String newName) {
     for (Zone zone : getZones()) {
-      zone.getTokens()
+      zone.getAllTokens()
           .forEach(
               t -> {
                 if (oldName.equals(t.getPropertyType())) {

@@ -79,6 +79,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox tokensStartSnapToGridCheckBox;
   private final JCheckBox tokensSnapWhileDraggingCheckBox;
   private final JCheckBox hideMousePointerWhileDraggingCheckBox;
+  private final JCheckBox hideTokenStackIndicatorCheckBox;
   private final JCheckBox newMapsVisibleCheckBox;
   private final JCheckBox newTokensVisibleCheckBox;
   private final JCheckBox tokensStartFreeSizeCheckBox;
@@ -333,6 +334,7 @@ public class PreferencesDialog extends JDialog {
     tokensStartSnapToGridCheckBox = panel.getCheckBox("tokensStartSnapToGridCheckBox");
     tokensSnapWhileDraggingCheckBox = panel.getCheckBox("tokensSnapWhileDragging");
     hideMousePointerWhileDraggingCheckBox = panel.getCheckBox("hideMousePointerWhileDragging");
+    hideTokenStackIndicatorCheckBox = panel.getCheckBox("hideTokenStackIndicator");
     newMapsVisibleCheckBox = panel.getCheckBox("newMapsVisibleCheckBox");
     newTokensVisibleCheckBox = panel.getCheckBox("newTokensVisibleCheckBox");
     stampsStartFreeSizeCheckBox = panel.getCheckBox("stampsStartFreeSize");
@@ -628,6 +630,10 @@ public class PreferencesDialog extends JDialog {
               @Override
               protected void storeNumericValue(Integer value) {
                 AppPreferences.setFrameRateCap(value);
+
+                for (final var renderer : MapTool.getFrame().getZoneRenderers()) {
+                  renderer.setFrameRateCap(value);
+                }
               }
 
               @Override
@@ -683,6 +689,10 @@ public class PreferencesDialog extends JDialog {
         e ->
             AppPreferences.setHideMousePointerWhileDragging(
                 hideMousePointerWhileDraggingCheckBox.isSelected()));
+    hideTokenStackIndicatorCheckBox.addActionListener(
+        e ->
+            AppPreferences.setHideTokenStackIndicator(
+                hideTokenStackIndicatorCheckBox.isSelected()));
     newMapsVisibleCheckBox.addActionListener(
         e -> AppPreferences.setNewMapsVisible(newMapsVisibleCheckBox.isSelected()));
     newTokensVisibleCheckBox.addActionListener(
@@ -1198,6 +1208,7 @@ public class PreferencesDialog extends JDialog {
     tokensSnapWhileDraggingCheckBox.setSelected(AppPreferences.getTokensSnapWhileDragging());
     hideMousePointerWhileDraggingCheckBox.setSelected(
         AppPreferences.getHideMousePointerWhileDragging());
+    hideTokenStackIndicatorCheckBox.setSelected(AppPreferences.getHideTokenStackIndicator());
     newMapsVisibleCheckBox.setSelected(AppPreferences.getNewMapsVisible());
     newTokensVisibleCheckBox.setSelected(AppPreferences.getNewTokensVisible());
     stampsStartFreeSizeCheckBox.setSelected(AppPreferences.getObjectsStartFreesize());

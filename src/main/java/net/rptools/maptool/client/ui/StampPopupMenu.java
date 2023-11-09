@@ -18,7 +18,7 @@ import java.util.Set;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;

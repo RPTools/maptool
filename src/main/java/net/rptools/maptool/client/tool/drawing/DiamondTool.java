@@ -21,7 +21,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.tool.ToolHelper;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
@@ -42,7 +42,7 @@ public class DiamondTool extends AbstractDrawingTool implements MouseMotionListe
 
   @Override
   public String getTooltip() {
-    return "tool.diamond.tooltip";
+    return "tool.isorectangle.tooltip";
   }
 
   @Override
