@@ -22,7 +22,6 @@ plugins {
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
     id "com.google.protobuf" version "0.9.3"
-    id 'io.github.file5.guidesigner' version '1.0.2'
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
@@ -37,6 +36,10 @@ mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
 applicationDefaultJvmArgs = ["-Xss8M"]
 def appSemVer = ""
 def winUpgradeUUID = UUID.randomUUID().toString();
+
+configurations {
+    forms.extendsFrom implementation
+}
 
 // Custom properties
 ext {
@@ -157,38 +160,36 @@ run {
     }
 }
 
-tasks.register('deleteUiClasses') {
-    doFirst {
-        // add all classes generated from intellij forms xml here to force rebuild of them.
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/colorpicker/ColorPanelView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/swing/htmleditorsplit/HtmlEditorSplitGui.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/boardtool/AdjustBoardControlPanelView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/gridtool/AdjustGridControlPanelView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/layerselectiondialog/LayerSelectionDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/tool/texttool/EditLabelDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/addresource/AddResourcesDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/CampaignPropertiesDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/campaignproperties/TokenPropertiesManagementPanelView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connectioninfodialog/ConnectionInfoDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/connecttoserverdialog/ConnectToServerDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/exportdialog/ExportDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/CampaignItemListView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/io/UpdateRepoDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/EditLookupTablePanelView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/lookuptable/LookupTablePaneView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/macrobuttons/dialog/MacroButtonDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/mappropertiesdialog/MapPropertiesDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/preferencesdialog/PreferencesDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/startserverdialog/StartServerDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/create/NewTokenDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/token/dialog/edit/TokenPropertiesDialog.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/transferprogressdialog/TransferProgressDialogView.class")
-        delete("${buildDir}/classes/java/main/net/rptools/maptool/client/ui/addon/AddOnLibrariesDialogView.class")
+compileJava.configure {
+    // Keep the uninstrumented .class files out of the final destination directory. Otherwise we
+    // might instrument the same file twice, resulting in duplicate methods.
+    destinationDirectory = file("$buildDir/classes/java/main-uninstrumented")
+}
+
+def instrumentForms = tasks.register('instrumentForms', Sync) {
+    dependsOn compileJava
+
+    from compileJava.destinationDirectory
+    into sourceSets.main.java.destinationDirectory
+
+    doLast {
+        ant.echo "Instrumenting IntelliJ GUI forms"
+        ant.taskdef(
+                name: "javac2",
+                classname: "com.intellij.ant.InstrumentIdeaExtensions",
+                classpath: configurations.forms.asPath
+        )
+        ant.javac2(
+                includeantruntime: false,
+                srcdir: sourceSets.main.allSource.sourceDirectories.asPath,
+                destdir: sourceSets.main.java.destinationDirectory.get(),
+                classpath: configurations.forms.asPath
+        )
     }
 }
 
-compileJava {
-    dependsOn(deleteUiClasses)
+classes.configure {
+    dependsOn instrumentForms
 }
 
 // Badass Runtime Plugin Options
@@ -313,11 +314,14 @@ repositories {
     maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://jitpack.io' }
     maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
 
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '223.7571.182'
+
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
@@ -508,11 +512,6 @@ dependencies {
 
     // For advanced dice roller
     implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
-
-
-
-
-
 }
 
 
