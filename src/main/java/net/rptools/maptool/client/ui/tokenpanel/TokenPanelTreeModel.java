@@ -116,8 +116,8 @@ public class TokenPanelTreeModel implements TreeModel {
     // It would be useful to have this list be static, but it's really not that big of a memory
     // footprint
     // TODO: refactor to more tightly couple the View enum and the corresponding filter
-    filterList.add(new NPCTokenFilter());
     filterList.add(new PlayerTokenFilter());
+    filterList.add(new NPCTokenFilter());
     filterList.add(new GMFilter());
     filterList.add(new ObjectFilter());
     filterList.add(new BackgroundFilter());
