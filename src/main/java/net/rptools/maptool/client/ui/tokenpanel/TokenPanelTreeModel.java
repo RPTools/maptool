@@ -47,7 +47,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
   private static final Logger log = LogManager.getLogger(TokenPanelTreeModel.class);
 
-  private static final String _TOKENS = "panel.MapExplorer.View.TOKENS";
+  private static final String _NPCS = "panel.MapExplorer.View.NPCS";
   private static final String _PLAYERS = "panel.MapExplorer.View.PLAYERS";
   private static final String _GROUPS = "panel.MapExplorer.View.GROUPS";
   private static final String _GM = "panel.MapExplorer.View.GM";
@@ -59,7 +59,7 @@ public class TokenPanelTreeModel implements TreeModel {
   public enum View {
     // @formatter:off
     // I18N key						Zone.Layer					Req'd?	isAdmin?
-    TOKENS(_TOKENS, Zone.Layer.TOKEN, false, false),
+    NPCS(_NPCS, Zone.Layer.TOKEN, false, false),
     PLAYERS(_PLAYERS, Zone.Layer.TOKEN, false, false),
     GROUPS(_GROUPS, Zone.Layer.TOKEN, false, false),
     GM(_GM, Zone.Layer.GM, false, true),
@@ -116,7 +116,7 @@ public class TokenPanelTreeModel implements TreeModel {
     // It would be useful to have this list be static, but it's really not that big of a memory
     // footprint
     // TODO: refactor to more tightly couple the View enum and the corresponding filter
-    filterList.add(new TokenTokenFilter());
+    filterList.add(new NPCTokenFilter());
     filterList.add(new PlayerTokenFilter());
     filterList.add(new GMFilter());
     filterList.add(new ObjectFilter());
@@ -264,7 +264,7 @@ public class TokenPanelTreeModel implements TreeModel {
             this,
             new Object[] {getRoot()},
             new int[] {currentViewList.size() - 1},
-            new Object[] {View.TOKENS}));
+            new Object[] {View.NPCS}));
     // @formatter:on
     while (expandedPaths != null && expandedPaths.hasMoreElements()) {
       tree.expandPath(expandedPaths.nextElement());
@@ -408,10 +408,10 @@ public class TokenPanelTreeModel implements TreeModel {
    *   <li>Otherwise, return true.
    * </ol>
    */
-  private class TokenTokenFilter extends TokenFilter {
+  private class NPCTokenFilter extends TokenFilter {
     /** Accepts only NPC tokens (GM) or tokens owned by current player. */
-    public TokenTokenFilter() {
-      super(View.TOKENS);
+    public NPCTokenFilter() {
+      super(View.NPCS);
     }
 
     @Override
