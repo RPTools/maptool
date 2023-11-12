@@ -124,7 +124,7 @@ public class Zone {
     OBJECT(),
     BACKGROUND();
 
-    private String displayName;
+    private final String displayName;
 
     Layer() {
       displayName = I18N.getString("layer." + name().toLowerCase());
@@ -133,20 +133,6 @@ public class Zone {
     @Override
     public String toString() {
       return displayName;
-    }
-
-    /** A simple interface to allow layers to be turned on/off */
-    private boolean drawEnabled = true;
-
-    /**
-     * @return drawEnabled
-     */
-    public boolean isEnabled() {
-      return drawEnabled;
-    }
-
-    public void setEnabled(boolean enabled) {
-      drawEnabled = enabled;
     }
   }
 
@@ -2056,10 +2042,6 @@ public class Zone {
     if (boardPosition == null) {
       boardPosition = new Point(0, 0);
     }
-    Zone.Layer.TOKEN.setEnabled(true);
-    Zone.Layer.GM.setEnabled(true);
-    Zone.Layer.OBJECT.setEnabled(true);
-    Zone.Layer.BACKGROUND.setEnabled(true);
 
     // 1.3b47 -> 1.3b48
     if (visionType == null) {

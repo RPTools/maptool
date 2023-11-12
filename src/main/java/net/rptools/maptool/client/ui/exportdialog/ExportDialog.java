@@ -94,11 +94,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private static Zone.VisionType savedVision;
   private static boolean savedFog;
   private static boolean savedBoard;
-  // real layers
-  private static boolean savedToken;
-  private static boolean savedHidden;
-  private static boolean savedObject;
-  private static boolean savedBackground;
   // for ZoneRenderer preservation
   private static Rectangle origBounds;
   private static Scale origScale;
@@ -692,7 +687,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * restoreZone()
    */
   private static void setupZoneLayers() throws OutOfMemoryError {
-    final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    final Zone zone = renderer.getZone();
 
     //
     // Preserve settings
@@ -701,11 +696,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     savedVision = zone.getVisionType();
     savedFog = zone.hasFog();
     savedBoard = zone.drawBoard();
-    // real layers
-    savedToken = Zone.Layer.TOKEN.isEnabled();
-    savedHidden = Zone.Layer.GM.isEnabled();
-    savedObject = Zone.Layer.OBJECT.isEnabled();
-    savedBackground = Zone.Layer.BACKGROUND.isEnabled();
 
     //
     // set according to dialog options
@@ -713,10 +703,19 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     zone.setHasFog(ExportLayers.LAYER_FOG.isChecked());
     if (!ExportLayers.LAYER_VISIBILITY.isChecked()) zone.setVisionType(Zone.VisionType.OFF);
     zone.setDrawBoard(ExportLayers.LAYER_BOARD.isChecked());
-    Zone.Layer.TOKEN.setEnabled(ExportLayers.LAYER_TOKEN.isChecked());
-    Zone.Layer.GM.setEnabled(ExportLayers.LAYER_HIDDEN.isChecked());
-    Zone.Layer.OBJECT.setEnabled(ExportLayers.LAYER_OBJECT.isChecked());
-    Zone.Layer.BACKGROUND.setEnabled(ExportLayers.LAYER_BACKGROUND.isChecked());
+
+    if (!ExportLayers.LAYER_TOKEN.isChecked()) {
+      renderer.disableLayer(Zone.Layer.TOKEN);
+    }
+    if (!ExportLayers.LAYER_HIDDEN.isChecked()) {
+      renderer.disableLayer(Zone.Layer.GM);
+    }
+    if (!ExportLayers.LAYER_OBJECT.isChecked()) {
+      renderer.disableLayer(Zone.Layer.OBJECT);
+    }
+    if (!ExportLayers.LAYER_BACKGROUND.isChecked()) {
+      renderer.disableLayer(Zone.Layer.BACKGROUND);
+    }
   }
 
   /** This restores the layer settings on the Zone object. It should follow setupZoneLayers(). */
@@ -724,10 +723,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     zone.setHasFog(savedFog);
     zone.setVisionType(savedVision);
     zone.setDrawBoard(savedBoard);
-    Zone.Layer.TOKEN.setEnabled(savedToken);
-    Zone.Layer.GM.setEnabled(savedHidden);
-    Zone.Layer.OBJECT.setEnabled(savedObject);
-    Zone.Layer.BACKGROUND.setEnabled(savedBackground);
+    renderer.restoreLayers();
   }
 
   /**

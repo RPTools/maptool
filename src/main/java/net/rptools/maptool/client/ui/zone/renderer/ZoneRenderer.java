@@ -156,6 +156,8 @@ public class ZoneRenderer extends JComponent
 
   private ZonePoint previousZonePoint;
 
+  private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
+
   /**
    * Constructor for the ZoneRenderer from a zone.
    *
@@ -1033,6 +1035,18 @@ public class ZoneRenderer extends JComponent
     lastView = null;
   }
 
+  public void restoreLayers() {
+    disabledLayers.clear();
+  }
+
+  public void disableLayer(Layer layer) {
+    disabledLayers.add(layer);
+  }
+
+  private boolean shouldRenderLayer(Layer layer, PlayerView view) {
+    return !disabledLayers.contains(layer) && (view.isGMView() || layer != Layer.GM);
+  }
+
   /**
    * This is the top-level method of the rendering pipeline that coordinates all other calls. {@link
    * #paintComponent(Graphics)} calls this method, then adds the two optional strings, "Map not
@@ -1146,7 +1160,7 @@ public class ZoneRenderer extends JComponent
       renderBoard(g2d, view);
       timer.stop("board");
     }
-    if (Zone.Layer.BACKGROUND.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.BACKGROUND, view)) {
       List<DrawnElement> drawables = zone.getDrawnElements(Layer.BACKGROUND);
       // if (!drawables.isEmpty()) {
       timer.start("drawableBackground");
@@ -1160,7 +1174,7 @@ public class ZoneRenderer extends JComponent
         timer.stop("tokensBackground");
       }
     }
-    if (Zone.Layer.OBJECT.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
       // Drawables on the object layer are always below the grid, and...
       List<DrawnElement> drawables = zone.getDrawnElements(Layer.OBJECT);
       // if (!drawables.isEmpty()) {
@@ -1173,7 +1187,7 @@ public class ZoneRenderer extends JComponent
     renderGrid(g2d, view);
     timer.stop("grid");
 
-    if (Zone.Layer.OBJECT.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
       // ... Images on the object layer are always ABOVE the grid.
       List<Token> stamps = zone.getStampTokens(false);
       if (!stamps.isEmpty()) {
@@ -1182,7 +1196,7 @@ public class ZoneRenderer extends JComponent
         timer.stop("tokensStamp");
       }
     }
-    if (Zone.Layer.TOKEN.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       timer.start("lights");
       renderLights(g2d, view);
       timer.stop("lights");
@@ -1215,7 +1229,7 @@ public class ZoneRenderer extends JComponent
      *   <li>Render Token-layer tokens
      * </ol>
      */
-    if (Zone.Layer.TOKEN.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       List<DrawnElement> drawables = zone.getDrawnElements(Layer.TOKEN);
       // if (!drawables.isEmpty()) {
       timer.start("drawableTokens");
@@ -1223,7 +1237,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("drawableTokens");
       // }
 
-      if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
+      if (shouldRenderLayer(Zone.Layer.GM, view)) {
         drawables = zone.getDrawnElements(Layer.GM);
         // if (!drawables.isEmpty()) {
         timer.start("drawableGM");
@@ -1281,7 +1295,7 @@ public class ZoneRenderer extends JComponent
       renderFog(g2d, view);
     }
 
-    if (Zone.Layer.TOKEN.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
       // For example. this allows a "door" stamp to block vision but still allow you to see the
       // door.
@@ -1347,7 +1361,9 @@ public class ZoneRenderer extends JComponent
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
-    if (Zone.Layer.TOKEN.isEnabled() && view.isGMView() && AppState.isShowLightSources()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)
+        && view.isGMView()
+        && AppState.isShowLightSources()) {
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
