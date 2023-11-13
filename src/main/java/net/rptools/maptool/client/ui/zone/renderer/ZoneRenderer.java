@@ -248,7 +248,7 @@ public class ZoneRenderer extends JComponent
     setActiveLayer(token.getLayer());
     MapTool.getFrame()
         .getToolbox()
-        .setSelectedTool(token.getLayer() == Layer.TOKEN ? PointerTool.class : StampTool.class);
+        .setSelectedTool(!token.getLayer().isStampLayer() ? PointerTool.class : StampTool.class);
 
     selectionModel.replaceSelection(Collections.singletonList(token.getId()));
     requestFocusInWindow();
@@ -2932,7 +2932,7 @@ public class ZoneRenderer extends JComponent
 
       timer.start("tokenlist-1");
       try {
-        if (token.getLayer() != Layer.TOKEN && isTokenMoving(token)) {
+        if (token.getLayer().isStampLayer() && isTokenMoving(token)) {
           continue;
         }
         // Don't bother if it's not visible
@@ -3496,7 +3496,7 @@ public class ZoneRenderer extends JComponent
         double height = footprintBounds.height * getScale();
 
         ImageBorder selectedBorder =
-            token.getLayer() != Layer.TOKEN
+            token.getLayer().isStampLayer()
                 ? AppStyle.selectedStampBorder
                 : AppStyle.selectedBorder;
         if (highlightCommonMacros.contains(token)) {
@@ -3517,7 +3517,7 @@ public class ZoneRenderer extends JComponent
           }
         }
         if (token.hasFacing()
-            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getLayer() != Layer.TOKEN)) {
+            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getLayer().isStampLayer())) {
           AffineTransform oldTransform = clippedG.getTransform();
 
           // Rotated

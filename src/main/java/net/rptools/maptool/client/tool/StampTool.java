@@ -103,9 +103,9 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
   public StampTool() {}
 
   @Override
-  protected void selectedLayerChanged(Zone.Layer layer) {
+  protected void selectedLayerChanged(Layer layer) {
     super.selectedLayerChanged(layer);
-    if (layer == Layer.TOKEN && MapTool.getFrame() != null) {
+    if (!layer.isStampLayer() && MapTool.getFrame() != null) {
       MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
     }
   }
@@ -472,7 +472,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && renderer.getSelectedTokenSet().size() > 0) {
-        if (tokenUnderMouse.getLayer() != Layer.TOKEN) {
+        if (tokenUnderMouse.getLayer().isStampLayer()) {
           new StampPopupMenu(
                   renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
@@ -1199,7 +1199,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         if (token == null) {
           continue;
         }
-        if (token.getLayer() == Layer.TOKEN) {
+        if (!token.getLayer().isStampLayer()) {
           return;
         }
         // Show sizing controls

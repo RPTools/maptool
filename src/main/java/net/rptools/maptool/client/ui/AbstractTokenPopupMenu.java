@@ -408,7 +408,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       String actionText =
           I18N.getText(
               "token.popup.menu.size"
-                  + (tokenUnderMouse.getLayer() != Zone.Layer.TOKEN ? ".free" : ".native"));
+                  + (tokenUnderMouse.getLayer().isStampLayer() ? ".free" : ".native"));
       putValue(Action.NAME, actionText);
     }
 

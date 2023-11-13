@@ -624,7 +624,7 @@ public class Token implements Cloneable {
   }
 
   public boolean isMarker() {
-    return getLayer() != Zone.Layer.TOKEN
+    return getLayer().isStampLayer()
         && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 

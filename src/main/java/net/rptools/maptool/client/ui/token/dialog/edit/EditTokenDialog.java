@@ -78,7 +78,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
@@ -662,7 +661,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
     DefaultComboBoxModel model = new DefaultComboBoxModel(grid.getFootprints().toArray());
     model.insertElementAt(
-        token.getLayer() == Layer.TOKEN
+        !token.getLayer().isStampLayer()
             ? I18N.getString("token.popup.menu.size.native")
             : I18N.getString("token.popup.menu.size.free"),
         0);

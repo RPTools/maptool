@@ -50,7 +50,6 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
@@ -125,7 +124,7 @@ public class PointerTool extends DefaultTool {
   @Override
   protected void selectedLayerChanged(Zone.Layer layer) {
     super.selectedLayerChanged(layer);
-    if (layer != Layer.TOKEN) {
+    if (layer.isStampLayer()) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
@@ -139,7 +138,7 @@ public class PointerTool extends DefaultTool {
     }
     htmlRenderer.attach(renderer);
 
-    if (getSelectedLayer() != Zone.Layer.TOKEN) {
+    if (getSelectedLayer().isStampLayer()) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     }
   }
@@ -639,7 +638,7 @@ public class PointerTool extends DefaultTool {
       }
       final var selectedTokens = renderer.getSelectedTokenSet();
       if (tokenUnderMouse != null && !selectedTokens.isEmpty()) {
-        if (tokenUnderMouse.getLayer() != Layer.TOKEN) {
+        if (tokenUnderMouse.getLayer().isStampLayer()) {
           new StampPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         } else if (AppUtil.playerOwns(tokenUnderMouse)) {

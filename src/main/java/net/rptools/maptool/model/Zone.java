@@ -189,6 +189,18 @@ public class Zone {
     public boolean isTokenLayer() {
       return this == TOKEN;
     }
+
+    /**
+     * Check if this layer is for stamps.
+     *
+     * <p>Although today it is true that `isStampLayer() == !isTokenLayer()`, that may not be true
+     * when new layers are added. Use the method that says what you mean!
+     *
+     * @return {@code true} if {@code Token} instances on this layer are considered stamps.
+     */
+    public boolean isStampLayer() {
+      return this != TOKEN;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */

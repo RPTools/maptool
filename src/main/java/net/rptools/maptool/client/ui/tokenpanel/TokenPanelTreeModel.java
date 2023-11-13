@@ -73,7 +73,7 @@ public class TokenPanelTreeModel implements TreeModel {
     filterList.add(new PlayerTokenFilter());
 
     for (final var layer : Zone.Layer.values()) {
-      if (layer != Zone.Layer.TOKEN) {
+      if (layer.isStampLayer()) {
         filterList.add(new AdminLayerFilter(layer));
       }
     }

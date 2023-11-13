@@ -1297,7 +1297,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                     }
                     if (!selectedTokenSet.isEmpty()) {
                       try {
-                        if (firstToken.getLayer() != Zone.Layer.TOKEN) {
+                        if (firstToken.getLayer().isStampLayer()) {
                           new StampPopupMenu(
                                   selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
                               .showPopup(tree);
