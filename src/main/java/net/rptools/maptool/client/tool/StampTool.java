@@ -1117,7 +1117,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
     isMovingWithKeys = true;
     handleDragToken(zp);
-    if (tokenBeingDragged.getLayer() == Layer.BACKGROUND) {
+    if (tokenBeingDragged.getLayer().oneStepKeyDrag()) {
       stopTokenDrag();
     }
   }

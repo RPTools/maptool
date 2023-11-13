@@ -226,6 +226,18 @@ public class Zone {
     public boolean anchorSnapToGridAtCenter() {
       return this != BACKGROUND;
     }
+
+    /**
+     * Check whether a "drag" via the arrow keys should be ended each step.
+     *
+     * <p>If not, the drag must be ended explicitly with all steps constituting a path just like an
+     * actual drag with the mouse.
+     *
+     * @return {@code true} if key-based drags should be ended each step.
+     */
+    public boolean oneStepKeyDrag() {
+      return this == BACKGROUND;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */
