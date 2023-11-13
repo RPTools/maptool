@@ -43,9 +43,7 @@ import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.util.FunctionUtil;
-import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -1129,36 +1127,6 @@ public class TokenPropertyFunctions extends AbstractFunction {
   }
 
   /**
-   * Get the token shape corresponding to the token and layer. Returns null if can't find match, or
-   * if forceShape is set to false.
-   *
-   * @param token the token to get the new shape of.
-   * @param layer the layer of the token.
-   * @param forceShape should we even get a new shape?
-   * @return the new TokenShape of the token
-   */
-  public static Token.TokenShape getTokenShape(Token token, Zone.Layer layer, boolean forceShape) {
-    Token.TokenShape tokenShape = null;
-    if (forceShape) {
-      switch (layer) {
-        case BACKGROUND:
-        case OBJECT:
-          tokenShape = Token.TokenShape.TOP_DOWN;
-          break;
-        case GM:
-        case TOKEN:
-          Image image = ImageManager.getImage(token.getImageAssetId());
-          if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-            tokenShape = Token.TokenShape.TOP_DOWN;
-          } else {
-            tokenShape = TokenUtil.guessTokenType(image);
-          }
-          break;
-      }
-    }
-    return tokenShape;
-  }
-  /**
    * Sets the layer of the token.
    *
    * @param token The token to move to a different layer.
@@ -1171,14 +1139,16 @@ public class TokenPropertyFunctions extends AbstractFunction {
   private static String setLayer(Token token, String layerName, boolean forceShape)
       throws ParserException {
     Zone.Layer layer = getLayer(layerName);
-    Token.TokenShape tokenShape = getTokenShape(token, layer, forceShape);
+    token.setLayer(layer);
 
-    if (tokenShape != null) {
+    if (forceShape) {
+      final var shape = token.guessAndSetShape();
       MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), tokenShape.name());
+          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), shape.name());
     } else {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer.name());
     }
+
     return layer.name();
   }
 

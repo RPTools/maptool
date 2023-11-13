@@ -74,7 +74,6 @@ import net.rptools.maptool.util.CollectionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -4067,10 +4066,10 @@ public class ZoneRenderer extends JComponent
       // Set the image properties
       if (configureToken) {
         BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
-        token.setShape(TokenUtil.guessTokenType(image));
         token.setWidth(image.getWidth(null));
         token.setHeight(image.getHeight(null));
         token.setFootprint(zone.getGrid(), zone.getGrid().getDefaultFootprint());
+        token.guessAndSetShape();
       }
 
       // Always set the layer

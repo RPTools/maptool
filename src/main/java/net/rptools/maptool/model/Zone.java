@@ -238,6 +238,14 @@ public class Zone {
     public boolean oneStepKeyDrag() {
       return this == BACKGROUND;
     }
+
+    /**
+     * @return {@code true} if tokens added to this layer can have their shape guessed from their
+     *     image.
+     */
+    public boolean supportsGuessingTokenShape() {
+      return this == TOKEN;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */

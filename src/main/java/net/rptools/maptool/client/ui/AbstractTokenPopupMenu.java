@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -61,9 +60,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.FileUtil;
-import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.TokenUtil;
 
 public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   private static final long serialVersionUID = -3741870412603226747L;
@@ -381,20 +378,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         token.setLayer(layer);
-        switch (layer) {
-          case BACKGROUND:
-          case OBJECT:
-            if (token.getShape() != TokenShape.FIGURE) token.setShape(TokenShape.TOP_DOWN);
-            break;
-          case TOKEN:
-            Image image = ImageManager.getImage(token.getImageAssetId());
-            if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-              token.setShape(Token.TokenShape.TOP_DOWN);
-            } else {
-              if (token.getShape() != TokenShape.FIGURE)
-                token.setShape(TokenUtil.guessTokenType(image));
-            }
-            break;
+        if (token.getShape() != TokenShape.FIGURE) {
+          token.guessAndSetShape();
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }

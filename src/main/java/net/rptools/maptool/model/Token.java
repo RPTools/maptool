@@ -61,6 +61,7 @@ import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -794,6 +795,23 @@ public class Token implements Cloneable {
 
   public void setShape(TokenShape type) {
     this.tokenShape = type.name();
+  }
+
+  /**
+   * Sets the shape based on the token's layer and image.
+   *
+   * @return The shape that was decided, possibly the same shape as before.
+   */
+  public TokenShape guessAndSetShape() {
+    var shape = Token.TokenShape.TOP_DOWN;
+    if (getLayer().supportsGuessingTokenShape()) {
+      Image image = ImageManager.getImage(getImageAssetId());
+      if (image != null && image != ImageManager.TRANSFERING_IMAGE) {
+        shape = TokenUtil.guessTokenType(image);
+      }
+    }
+    setShape(shape);
+    return shape;
   }
 
   public Type getType() {
