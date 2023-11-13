@@ -913,14 +913,12 @@ public class ZoneRenderer extends JComponent
               ImageManager.getImage(zone.getMapAssetId(), this).getHeight());
     }
     // next, extents of drawing objects
-    List<DrawnElement> drawableList = new LinkedList<DrawnElement>();
-    drawableList.addAll(zone.getDrawnElements(Layer.BACKGROUND));
-    drawableList.addAll(zone.getDrawnElements(Layer.OBJECT));
-    drawableList.addAll(zone.getDrawnElements(Layer.TOKEN));
-    if (view.isGMView()) {
-      drawableList.addAll(zone.getDrawnElements(Layer.GM));
-    }
+    List<DrawnElement> drawableList = zone.getAllDrawnElements();
     for (DrawnElement element : drawableList) {
+      if (!view.isGMView() && !element.getDrawable().getLayer().isVisibleToPlayers()) {
+        continue;
+      }
+
       Drawable drawable = element.getDrawable();
       Rectangle drawnBounds = new Rectangle(drawable.getBounds());
 
@@ -944,67 +942,45 @@ public class ZoneRenderer extends JComponent
     // now, add the stamps/tokens
     // tokens and stamps are the same thing, just treated differently
 
-    // This loop structure is a hack: but the getStamps-type methods return unmodifiable lists,
-    // so we can't concat them, and there are a fixed number of layers, so its not really extensible
-    // anyway.
-    for (int layer = 0; layer < 4; layer++) {
-      List<Token> stampList = null;
-      switch (layer) {
-        case 0:
-          stampList = zone.getTokensOnLayer(Layer.BACKGROUND);
-          break; // background layer
-        case 1:
-          stampList = zone.getTokensOnLayer(Layer.OBJECT);
-          break; // object layer
-        case 2:
-          if (!view.isGMView()) { // hidden layer
-            continue;
-          } else {
-            stampList = zone.getTokensOnLayer(Layer.GM);
-            break;
+    // Note: order doesn't matter, so don't need to go back-to-front.
+    for (Token element :
+        zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
+      Rectangle drawnBounds = element.getBounds(zone);
+      if (element.hasFacing()) {
+        // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
+        // reason
+        int facing = element.getFacing() + 90;
+        if (facing > 180) {
+          facing -= 360;
+        }
+        // if 90 degrees, just swap w and h
+        // also swap them if rotated more than 90 (optimization for non-90deg rotations)
+        if (facing != 0 && facing != 180) {
+          if (Math.abs(facing) >= 90) {
+            drawnBounds.setSize(drawnBounds.height, drawnBounds.width); // swapping h and w
           }
-        case 3:
-          stampList = zone.getTokensOnLayer(Layer.TOKEN);
-          break; // token layer
+          // if rotated to non-axis direction, assume the worst case 45 deg
+          // also assumes the rectangle rotates around its center
+          // This will usually makes the bounds bigger than necessary, but its quick.
+          // Also, for quickness, we assume its a square token using the larger dimension
+          // At 45 deg, the bounds of the square will be sqrt(2) bigger, and the UL corner will
+          // shift by 1/2 of the length.
+          // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
+          if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
+            int size = Math.max(drawnBounds.width, drawnBounds.height);
+            int x = drawnBounds.x - (int) (0.21 * size);
+            int y = drawnBounds.y - (int) (0.21 * size);
+            int w = drawnBounds.width + (int) (0.42 * size);
+            int h = drawnBounds.height + (int) (0.42 * size);
+            drawnBounds.setBounds(x, y, w, h);
+          }
+        }
       }
-      for (Token element : stampList) {
-        Rectangle drawnBounds = element.getBounds(zone);
-        if (element.hasFacing()) {
-          // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
-          // reason
-          int facing = element.getFacing() + 90;
-          if (facing > 180) {
-            facing -= 360;
-          }
-          // if 90 degrees, just swap w and h
-          // also swap them if rotated more than 90 (optimization for non-90deg rotations)
-          if (facing != 0 && facing != 180) {
-            if (Math.abs(facing) >= 90) {
-              drawnBounds.setSize(drawnBounds.height, drawnBounds.width); // swapping h and w
-            }
-            // if rotated to non-axis direction, assume the worst case 45 deg
-            // also assumes the rectangle rotates around its center
-            // This will usually makes the bounds bigger than necessary, but its quick.
-            // Also, for quickness, we assume its a square token using the larger dimension
-            // At 45 deg, the bounds of the square will be sqrt(2) bigger, and the UL corner will
-            // shift by 1/2 of the length.
-            // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
-            if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-              int size = Math.max(drawnBounds.width, drawnBounds.height);
-              int x = drawnBounds.x - (int) (0.21 * size);
-              int y = drawnBounds.y - (int) (0.21 * size);
-              int w = drawnBounds.width + (int) (0.42 * size);
-              int h = drawnBounds.height + (int) (0.42 * size);
-              drawnBounds.setBounds(x, y, w, h);
-            }
-          }
-        }
-        // TODO: Handle auras here?
-        if (extents == null) {
-          extents = drawnBounds;
-        } else {
-          extents.add(drawnBounds);
-        }
+      // TODO: Handle auras here?
+      if (extents == null) {
+        extents = drawnBounds;
+      } else {
+        extents.add(drawnBounds);
       }
     }
     if (zone.hasFog()) {
@@ -1043,7 +1019,7 @@ public class ZoneRenderer extends JComponent
   }
 
   private boolean shouldRenderLayer(Layer layer, PlayerView view) {
-    return !disabledLayers.contains(layer) && (view.isGMView() || layer != Layer.GM);
+    return !disabledLayers.contains(layer) && (layer.isVisibleToPlayers() || view.isGMView());
   }
 
   /**
@@ -2092,7 +2068,7 @@ public class ZoneRenderer extends JComponent
         continue;
       }
       // Hide the hidden layer
-      if (keyToken.getLayer() == Zone.Layer.GM && !view.isGMView()) {
+      if (!keyToken.getLayer().isVisibleToPlayers() && !view.isGMView()) {
         continue;
       }
       ZoneWalker walker = set.getWalker();
@@ -2938,7 +2914,7 @@ public class ZoneRenderer extends JComponent
         // Don't bother if it's not visible
         // NOTE: Not going to use zone.isTokenVisible as it is very slow. In fact, it's faster
         // to just draw the tokens and let them be clipped
-        if ((!token.isVisible() || token.getLayer() == Layer.GM) && !isGMView) {
+        if ((!token.isVisible() || !token.getLayer().isVisibleToPlayers()) && !isGMView) {
           continue;
         }
         if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {

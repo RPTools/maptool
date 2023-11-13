@@ -203,6 +203,14 @@ public class Zone {
     }
 
     /**
+     * @return {@code true} if this tokens and drawables on this layer should be rendered for
+     *     players.
+     */
+    public boolean isVisibleToPlayers() {
+      return this != GM;
+    }
+
+    /**
      * @return {@code true} if a walker can be used when dragging tokens on this layer.
      */
     public boolean supportsWalker() {
