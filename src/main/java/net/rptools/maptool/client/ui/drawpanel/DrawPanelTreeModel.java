@@ -36,6 +36,7 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.zones.DrawableAdded;
 import net.rptools.maptool.model.zones.DrawableRemoved;
+import net.rptools.maptool.util.CollectionUtil;
 
 public class DrawPanelTreeModel implements TreeModel {
 
@@ -47,19 +48,21 @@ public class DrawPanelTreeModel implements TreeModel {
   private volatile boolean updatePending = false;
   private final List<TreeModelListener> listenerList = new ArrayList<TreeModelListener>();
 
-  public enum View {
-    TOKEN_DRAWINGS("panel.DrawExplorer.View.TOKEN", Zone.Layer.TOKEN),
-    GM_DRAWINGS("panel.DrawExplorer.View.GM", Zone.Layer.GM),
-    OBJECT_DRAWINGS("panel.DrawExplorer.View.OBJECT", Zone.Layer.OBJECT),
-    BACKGROUND_DRAWINGS("panel.DrawExplorer.View.BACKGROUND", Zone.Layer.BACKGROUND);
+  public static final class View {
+    private static final Map<Zone.Layer, View> byLayer =
+        CollectionUtil.newFilledEnumMap(Zone.Layer.class, View::new);
 
-    View(String key, Zone.Layer layer) {
-      this.displayName = I18N.getText(key);
-      this.layer = layer;
+    public static View getByLayer(Zone.Layer layer) {
+      return byLayer.get(layer);
     }
 
-    String displayName;
-    Zone.Layer layer;
+    private final String displayName;
+    private final Zone.Layer layer;
+
+    private View(Zone.Layer layer) {
+      this.displayName = I18N.getText("panel.DrawExplorer.View." + layer.name());
+      this.layer = layer;
+    }
 
     public String getDisplayName() {
       return displayName;
@@ -206,8 +209,9 @@ public class DrawPanelTreeModel implements TreeModel {
     if (zone != null) {
       if (MapTool.getPlayer().isGM()) {
         // GM Sees all drawings
-        for (View v : View.values()) {
-          drawableList = zone.getDrawnElements(v.getLayer());
+        for (var layer : Zone.Layer.values()) {
+          View v = View.getByLayer(layer);
+          drawableList = zone.getDrawnElements(layer);
           if (drawableList.size() > 0) {
             // Reverse the list so that the element drawn last, is shown at the top of the tree
             // Be careful to clone the list so you don't damage the map
@@ -226,20 +230,16 @@ public class DrawPanelTreeModel implements TreeModel {
           List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
           reverseList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
           Collections.reverse(reverseList);
-          viewMap.put(View.TOKEN_DRAWINGS, reverseList);
-          currentViewList.add(View.TOKEN_DRAWINGS);
+          View view = View.getByLayer(Zone.Layer.TOKEN);
+          viewMap.put(view, reverseList);
+          currentViewList.add(view);
         }
       }
     }
 
     Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(new TreePath(root));
 
-    fireStructureChangedEvent(
-        new TreeModelEvent(
-            this,
-            new Object[] {getRoot()},
-            new int[] {currentViewList.size() - 1},
-            new Object[] {View.BACKGROUND_DRAWINGS}));
+    fireStructureChangedEvent(new TreeModelEvent(this, new Object[] {getRoot()}));
     while (expandedPaths != null && expandedPaths.hasMoreElements()) {
       tree.expandPath(expandedPaths.nextElement());
     }
