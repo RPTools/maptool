@@ -148,6 +148,22 @@ public class Zone {
       return BACKGROUND;
     }
 
+    /**
+     * Similar to valueof(), but allows alternative names.
+     *
+     * @param name The name to look up. In addition to the constant names, can also be "HIDDEN".
+     *     Must be uppercase or it will not match anything.
+     * @return The layer matching {@code name}.
+     * @throws java.lang.IllegalArgumentException If {@code name} does not name a layer.
+     */
+    public static Layer getByName(String name) throws IllegalArgumentException {
+      if (name.equals("HIDDEN")) {
+        return GM;
+      }
+
+      return valueOf(name);
+    }
+
     private final String displayName;
 
     Layer() {

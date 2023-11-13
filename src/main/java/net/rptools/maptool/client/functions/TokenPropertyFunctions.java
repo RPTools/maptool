@@ -1118,19 +1118,13 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   public static Zone.Layer getLayer(String layerName) throws ParserException {
     Zone.Layer layer;
-    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.name())) {
-      layer = Zone.Layer.TOKEN;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.name())) {
-      layer = Zone.Layer.BACKGROUND;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.GM.name())
-        || layerName.equalsIgnoreCase("hidden")) {
-      layer = Zone.Layer.GM;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.name())) {
-      layer = Zone.Layer.OBJECT;
-    } else {
+    try {
+      layer = Zone.Layer.getByName(layerName.toUpperCase());
+    } catch (IllegalArgumentException e) {
       throw new ParserException(
           I18N.getText("macro.function.tokenProperty.unknownLayer", "setLayer", layerName));
     }
+
     return layer;
   }
 
