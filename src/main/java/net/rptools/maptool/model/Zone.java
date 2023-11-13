@@ -215,6 +215,17 @@ public class Zone {
     public boolean supportsVision() {
       return this == TOKEN;
     }
+
+    /**
+     * Check if tokens on this layer - when snap-to-grid is enabled - should keep their center fixed
+     * during resizing. Otherwise, the top-left corner is used.
+     *
+     * @return {@code true} if the {@code Token} instances on the layer should be resized relative
+     *     to their center rather than their corner.
+     */
+    public boolean anchorSnapToGridAtCenter() {
+      return this != BACKGROUND;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */

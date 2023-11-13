@@ -606,15 +606,15 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       p = ScreenPoint.fromZonePoint(renderer, zp);
 
       // For snap-to-grid tokens (except background stamps) we anchor at the center of the token.
-      // TODO Named for good diff. Rename to isSnappedAndCenterAnchored
-      final var isSnappedNonBackground =
-          tokenBeingResized.isSnapToGrid() && tokenBeingResized.getLayer() != Layer.BACKGROUND;
-      final var snapToGridMultiplier = isSnappedNonBackground ? 2 : 1;
+      final var isSnapToGridAndAnchoredAtCenter =
+          tokenBeingResized.isSnapToGrid()
+              && tokenBeingResized.getLayer().anchorSnapToGridAtCenter();
+      final var snapToGridMultiplier = isSnapToGridAndAnchoredAtCenter ? 2 : 1;
 
       int newWidth = Math.max(1, (zp.x - tokenBeingResized.getX()) * snapToGridMultiplier);
       int newHeight = Math.max(1, (zp.y - tokenBeingResized.getY()) * snapToGridMultiplier);
 
-      if (SwingUtil.isControlDown(e) && isSnappedNonBackground) {
+      if (SwingUtil.isControlDown(e) && isSnapToGridAndAnchoredAtCenter) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();

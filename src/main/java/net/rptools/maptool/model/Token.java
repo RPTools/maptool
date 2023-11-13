@@ -1561,7 +1561,7 @@ public class Token implements Cloneable {
       footprintBounds.x = getX();
       footprintBounds.y = getY();
     } else {
-      if (getLayer() != Zone.Layer.BACKGROUND) {
+      if (getLayer().anchorSnapToGridAtCenter()) {
         // Center it on the footprint
         footprintBounds.x -= (w - footprintBounds.width) / 2;
         footprintBounds.y -= (h - footprintBounds.height) / 2;
@@ -1589,7 +1589,7 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (getLayer() == Zone.Layer.BACKGROUND || isSnapToScale() || getLayer().isTokenLayer()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale() || getLayer().isTokenLayer()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = getX() + (int) centerOffset.x;
         offsetY = getY() + (int) centerOffset.y;
@@ -1619,7 +1619,7 @@ public class Token implements Cloneable {
     Point2D.Double offset = getSnapToUnsnapOffset(zone);
     double newX = getX() + offset.x;
     double newY = getY() + offset.y;
-    if (grid.getCapabilities().isSnapToGridSupported() || getLayer() == Zone.Layer.BACKGROUND) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
       return grid.convert(
           grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
@@ -1651,13 +1651,13 @@ public class Token implements Cloneable {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported() || getLayer() == Zone.Layer.BACKGROUND) {
-      if (getLayer() == Zone.Layer.BACKGROUND || isSnapToScale()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
         TokenFootprint footprint = getFootprint(grid);
         Rectangle footprintBounds = footprint.getBounds(grid);
         double footprintOffsetX = 0;
         double footprintOffsetY = 0;
-        if (getLayer() != Zone.Layer.BACKGROUND) {
+        if (getLayer().anchorSnapToGridAtCenter()) {
           // Non-background tokens can have an offset from top left corner
           footprintOffsetX = tokenBounds.width - footprintBounds.width;
           footprintOffsetY = tokenBounds.height - footprintBounds.height;
