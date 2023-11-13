@@ -201,6 +201,13 @@ public class Zone {
     public boolean isStampLayer() {
       return this != TOKEN;
     }
+
+    /**
+     * @return {@code true} if a walker can be used when dragging tokens on this layer.
+     */
+    public boolean supportsWalker() {
+      return this == TOKEN;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */

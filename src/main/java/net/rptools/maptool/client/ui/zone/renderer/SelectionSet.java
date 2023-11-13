@@ -130,8 +130,7 @@ public class SelectionSet {
       }
 
       boolean restrictMovement =
-          MapTool.getServerPolicy().isUsingAstarPathfinding()
-              && token.getLayer() == Zone.Layer.TOKEN;
+          MapTool.getServerPolicy().isUsingAstarPathfinding() && token.getLayer().supportsWalker();
 
       Set<Token.TerrainModifierOperation> terrainModifiersIgnored =
           token.getTerrainModifiersIgnored();

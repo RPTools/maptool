@@ -484,7 +484,7 @@ public class ZoneRenderer extends JComponent
 
         // Only add certain tokens to the list to process in the move
         // Macro function(s).
-        if (token.getLayer() == Layer.TOKEN && token.isVisible()) {
+        if (token.getLayer().supportsWalker() && token.isVisible()) {
           filteredTokens.add(tokenGUID);
         }
 
@@ -2167,7 +2167,7 @@ public class ZoneRenderer extends JComponent
         }
         // Show path only on the key token on token layer that are visible to the owner or gm while
         // fow and vision is on
-        if (token == keyToken && token.getLayer() == Layer.TOKEN) {
+        if (token == keyToken && token.getLayer().supportsWalker()) {
           renderPath(
               g,
               walker != null ? walker.getPath() : set.gridlessPath,
@@ -2335,7 +2335,7 @@ public class ZoneRenderer extends JComponent
               y += 10 + scaledHeight;
               x += scaledWidth / 2;
 
-              if (token.getLayer() == Layer.TOKEN && AppState.getShowMovementMeasurements()) {
+              if (token.getLayer().supportsWalker() && AppState.getShowMovementMeasurements()) {
                 String distance = "";
                 if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
                   // grid.isPathingSupported()
