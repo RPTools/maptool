@@ -125,6 +125,18 @@ public class Zone {
     OBJECT(),
     BACKGROUND();
 
+    /**
+     * Gets the layer that players should be on by default.
+     *
+     * <p>This layer is also used a fallback in cases where player behaviour does not have a clear
+     * or correct layer associated with it.
+     *
+     * @return The layer that players should be on by default.
+     */
+    public static Layer getDefaultPlayerLayer() {
+      return TOKEN;
+    }
+
     private final String displayName;
 
     Layer() {

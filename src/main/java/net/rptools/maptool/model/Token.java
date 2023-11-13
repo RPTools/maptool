@@ -285,7 +285,7 @@ public class Token implements Cloneable {
 
   private String tokenShape = TokenShape.SQUARE.toString();
   private String tokenType = Type.NPC.toString();
-  private String layer = Zone.Layer.TOKEN.toString();
+  private String layer = Zone.Layer.getDefaultPlayerLayer().toString();
   private transient Zone.Layer actualLayer;
 
   private String propertyType =
@@ -824,7 +824,7 @@ public class Token implements Cloneable {
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
-      return Zone.Layer.TOKEN;
+      return Zone.Layer.getDefaultPlayerLayer();
     }
   }
 

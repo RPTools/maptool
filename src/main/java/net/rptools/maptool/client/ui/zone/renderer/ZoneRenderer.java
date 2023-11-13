@@ -130,7 +130,7 @@ public class ZoneRenderer extends JComponent
   private Token tokenUnderMouse;
 
   private ScreenPoint pointUnderMouse;
-  private Zone.Layer activeLayer;
+  private @Nonnull Zone.Layer activeLayer = Layer.getDefaultPlayerLayer();
   private String loadingProgress;
   private boolean isLoaded;
 
@@ -2800,17 +2800,17 @@ public class ZoneRenderer extends JComponent
     return list;
   }
 
-  public Zone.Layer getActiveLayer() {
-    return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
+  public @Nonnull Zone.Layer getActiveLayer() {
+    return activeLayer;
   }
 
   /**
-   * Sets the active layer. If keepSelectedTokenSet is true, also clears the selected token list.
+   * Sets the active layer.
    *
    * @param layer the layer to set active
    */
   public void setActiveLayer(Zone.Layer layer) {
-    activeLayer = layer;
+    activeLayer = Objects.requireNonNullElse(layer, Layer.getDefaultPlayerLayer());
     selectionModel.replaceSelection(Collections.emptyList());
     repaintDebouncer.dispatch();
   }

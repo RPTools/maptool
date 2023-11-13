@@ -201,10 +201,11 @@ public class DrawingFunctions extends AbstractFunction {
    * @return Layer
    */
   protected Layer getLayer(String layer) {
-    if ("GM".equalsIgnoreCase(layer)) return Layer.GM;
-    else if ("OBJECT".equalsIgnoreCase(layer)) return Layer.OBJECT;
-    else if ("BACKGROUND".equalsIgnoreCase(layer)) return Layer.BACKGROUND;
-    return Layer.TOKEN;
+    try {
+      return Layer.valueOf(layer.toUpperCase());
+    } catch (IllegalArgumentException e) {
+      return Layer.getDefaultPlayerLayer();
+    }
   }
 
   /**
