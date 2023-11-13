@@ -208,6 +208,13 @@ public class Zone {
     public boolean supportsWalker() {
       return this == TOKEN;
     }
+
+    /**
+     * @return {@code true} if vision and FoW is supported on this layer.
+     */
+    public boolean supportsVision() {
+      return this == TOKEN;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */

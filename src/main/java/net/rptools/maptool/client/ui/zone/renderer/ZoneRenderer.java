@@ -2889,9 +2889,10 @@ public class ZoneRenderer extends JComponent
 
     timer.start("createClip");
     if (!isGMView
+        // TODO Should we actually check zoneView.isUsingVision() for parity with later checks?
         && visibleScreenArea != null
         && !tokenList.isEmpty()
-        && tokenList.get(0).getLayer() == Layer.TOKEN) {
+        && tokenList.get(0).getLayer().supportsVision()) {
       clippedG = (Graphics2D) g.create();
 
       Area visibleArea = new Area(g.getClipBounds());
@@ -3021,7 +3022,7 @@ public class ZoneRenderer extends JComponent
           continue;
         }
         // Vision visibility
-        if (!isGMView && token.getLayer() == Layer.TOKEN && zoneView.isUsingVision()) {
+        if (!isGMView && token.getLayer().supportsVision() && zoneView.isUsingVision()) {
           if (!GraphicsUtil.intersects(visibleScreenArea, location.bounds)) {
             continue;
           }
@@ -3505,7 +3506,7 @@ public class ZoneRenderer extends JComponent
         if (!AppUtil.playerOwns(token)) {
           selectedBorder = AppStyle.selectedUnownedBorder;
         }
-        if (useIF && token.getLayer() == Layer.TOKEN && zoneView.isUsingVision()) {
+        if (useIF && token.getLayer().supportsVision() && zoneView.isUsingVision()) {
           Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
           if (tool
                   instanceof

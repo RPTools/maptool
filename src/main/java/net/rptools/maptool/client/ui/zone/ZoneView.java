@@ -165,7 +165,7 @@ public class ZoneView {
         // have sight (so weren't included in the PlayerView), but could still have previously
         // exposed areas.
         exposed = new Area();
-        for (Token tok : zone.getTokensOnLayer(Zone.Layer.TOKEN)) {
+        for (Token tok : zone.getTokensForLayers(Zone.Layer::supportsVision)) {
           if (!AppUtil.playerOwns(tok)) {
             continue;
           }
@@ -418,7 +418,7 @@ public class ZoneView {
             ? view.getTokens()
             : zone.getTokensFiltered(
                 t ->
-                    t.getLayer() == Zone.Layer.TOKEN
+                    t.getLayer().supportsVision()
                         && t.getHasSight()
                         && (isGMview || t.isVisible()));
 
