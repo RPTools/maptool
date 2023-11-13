@@ -30,7 +30,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -40,63 +39,18 @@ import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.server.ServerPolicy;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class TokenPanelTreeModel implements TreeModel {
 
-  private static final Logger log = LogManager.getLogger(TokenPanelTreeModel.class);
+  public static final class View {
+    private final String displayName;
 
-  private static final String _NPCS = "panel.MapExplorer.View.NPCS";
-  private static final String _PLAYERS = "panel.MapExplorer.View.PLAYERS";
-  private static final String _GROUPS = "panel.MapExplorer.View.GROUPS";
-  private static final String _GM = "panel.MapExplorer.View.GM";
-  private static final String _OBJECT = "panel.MapExplorer.View.OBJECT";
-  private static final String _BACKGROUND = "panel.MapExplorer.View.BACKGROUND";
-  private static final String _CLIPBOARD = "panel.MapExplorer.View.CLIPBOARD";
-  private static final String _LIGHT_SOURCES = "panel.MapExplorer.View.LIGHT_SOURCES";
-
-  public enum View {
-    // @formatter:off
-    // I18N key						Zone.Layer					Req'd?	isAdmin?
-    NPCS(_NPCS, Zone.Layer.TOKEN, false, false),
-    PLAYERS(_PLAYERS, Zone.Layer.TOKEN, false, false),
-    GROUPS(_GROUPS, Zone.Layer.TOKEN, false, false),
-    GM(_GM, Zone.Layer.GM, false, true),
-    OBJECT(_OBJECT, Zone.Layer.OBJECT, false, true),
-    BACKGROUND(_BACKGROUND, Zone.Layer.BACKGROUND, false, true),
-    CLIPBOARD(_CLIPBOARD, Zone.Layer.TOKEN, false, true),
-    LIGHT_SOURCES(_LIGHT_SOURCES, null, false, false);
-    // @formatter:on
-
-    String displayName;
-    String description;
-    boolean required;
-    Zone.Layer layer;
-    boolean isAdmin;
-
-    View(String key, Zone.Layer layer, boolean required, boolean isAdmin) {
-      this.displayName = I18N.getText(key);
-      this.description = null; // I18N.getDescription(key); // TODO Tooltip -- not currently used
-      this.required = required;
-      this.layer = layer;
-      this.isAdmin = isAdmin;
+    private View(String name) {
+      this.displayName = I18N.getText("panel.MapExplorer.View." + name);
     }
 
     public String getDisplayName() {
       return displayName;
-    }
-
-    public String getDescription() {
-      return description;
-    }
-
-    public Zone.Layer getLayer() {
-      return layer;
-    }
-
-    public boolean isRequired() {
-      return required;
     }
   }
 
@@ -115,12 +69,14 @@ public class TokenPanelTreeModel implements TreeModel {
 
     // It would be useful to have this list be static, but it's really not that big of a memory
     // footprint
-    // TODO: refactor to more tightly couple the View enum and the corresponding filter
-    filterList.add(new PlayerTokenFilter());
     filterList.add(new NPCTokenFilter());
-    filterList.add(new GMFilter());
-    filterList.add(new ObjectFilter());
-    filterList.add(new BackgroundFilter());
+    filterList.add(new PlayerTokenFilter());
+
+    for (final var layer : Zone.Layer.values()) {
+      if (layer != Zone.Layer.TOKEN) {
+        filterList.add(new AdminLayerFilter(layer));
+      }
+    }
     filterList.add(new LightSourceFilter());
 
     new MapToolEventBus().getMainEventBus().register(this);
@@ -221,51 +177,33 @@ public class TokenPanelTreeModel implements TreeModel {
     currentViewList.clear();
     viewMap.clear();
 
-    // Plan to show all of the views in order to keep the order
-    for (TokenFilter filter : filterList) {
-      try {
-        if (filter.view.isAdmin && !MapTool.getPlayer().isGM()) {
-          continue;
-        }
-      } catch (NullPointerException e) {
-        // This seems to happen when there was a problem creating the initial window. Lets just
-        // ignore this filter for now.
-        log.warn("NullPointerException encountered while trying to update TokenPanelTreeModel", e);
-        continue;
-      }
-      currentViewList.add(filter.view);
-    }
-
     // Add in the appropriate views
     List<Token> tokenList = new ArrayList<Token>();
     if (zone != null) {
       tokenList = zone.getAllTokens();
     }
-    for (Token token : tokenList) {
-      for (TokenFilter filter : filterList) {
-        filter.filter(token);
+    for (TokenFilter filter : filterList) {
+      if (!filter.checkPlayer()) {
+        continue;
       }
-    }
 
-    // Clear out any view without any tokens
-    currentViewList.removeIf(
-        view -> !view.isRequired() && (viewMap.get(view) == null || viewMap.get(view).size() == 0));
-
-    // Sort
-    for (List<Token> tokens : viewMap.values()) {
-      tokens.sort(NAME_AND_STATE_COMPARATOR);
+      var viewTokens = new ArrayList<Token>();
+      for (Token token : tokenList) {
+        if (filter.accept(token)) {
+          viewTokens.add(token);
+        }
+      }
+      // Don't keep views that don't have any tokens.
+      if (!viewTokens.isEmpty()) {
+        viewTokens.sort(NAME_AND_STATE_COMPARATOR);
+        viewMap.put(filter.view, Collections.unmodifiableList(viewTokens));
+        currentViewList.add(filter.view);
+      }
     }
 
     // Keep the expanded branches consistent
     Enumeration<TreePath> expandedPaths = tree.getExpandedDescendants(new TreePath(root));
-    // @formatter:off
-    fireStructureChangedEvent(
-        new TreeModelEvent(
-            this,
-            new Object[] {getRoot()},
-            new int[] {currentViewList.size() - 1},
-            new Object[] {View.NPCS}));
-    // @formatter:on
+    fireStructureChangedEvent(new TreeModelEvent(this, new Object[] {getRoot()}));
     while (expandedPaths != null && expandedPaths.hasMoreElements()) {
       tree.expandPath(expandedPaths.nextElement());
     }
@@ -279,29 +217,53 @@ public class TokenPanelTreeModel implements TreeModel {
     }
   }
 
-  private void fireNodesInsertedEvent(TreeModelEvent e) {
-    TreeModelListener[] listeners =
-        listenerList.toArray(new TreeModelListener[listenerList.size()]);
-    for (TreeModelListener listener : listeners) {
-      listener.treeNodesInserted(e);
-    }
-  }
-
-  private abstract class TokenFilter {
-    private final View view;
+  private static class TokenFilter {
+    public final View view;
 
     public TokenFilter(View view) {
       this.view = view;
     }
 
-    private void filter(Token token) {
-      if (accept(token)) {
-        List<Token> tokenList = viewMap.computeIfAbsent(view, k -> new ArrayList<Token>());
-        tokenList.add(token);
-      }
+    /**
+     * Checks whether the current player is allowed to see tokens allowed by this filter.
+     *
+     * <p>In other words, check whether the filter could ever be displayed for the current player.
+     *
+     * @return {@code true} if the filter is able to be displayed for the current player.
+     */
+    public boolean checkPlayer() {
+      return true;
     }
 
-    protected abstract boolean accept(Token token);
+    /**
+     * Checks whether the filter matches the token.
+     *
+     * @param token The token to check.
+     * @return {@code true} if the filter matches {@code token}, allowing it to be displayed.
+     */
+    public boolean accept(Token token) {
+      return true;
+    }
+  }
+
+  /** Accepts only tokens on a specified layer, and only if the player is a GM. */
+  private static class AdminLayerFilter extends TokenFilter {
+    public final Zone.Layer layer;
+
+    public AdminLayerFilter(Zone.Layer layer) {
+      super(new View(layer.name()));
+      this.layer = layer;
+    }
+
+    @Override
+    public boolean checkPlayer() {
+      return MapTool.getPlayer().isGM();
+    }
+
+    @Override
+    public boolean accept(Token token) {
+      return this.layer == token.getLayer();
+    }
   }
 
   /**
@@ -318,77 +280,37 @@ public class TokenPanelTreeModel implements TreeModel {
    *   <li>Otherwise, return true.
    * </ol>
    */
-  private class PlayerTokenFilter extends TokenFilter {
+  private static class PlayerTokenFilter extends TokenFilter {
     /** Accepts only PCs tokens owned by the current player. */
     public PlayerTokenFilter() {
-      super(View.PLAYERS);
+      super(new View("PLAYERS"));
     }
 
     @Override
-    protected boolean accept(Token token) {
+    public boolean accept(Token token) {
       if (token.getType() != Token.Type.PC) {
         return false;
       }
       if (MapTool.getPlayer().isGM()) {
         return true;
       }
-      if (MapTool.getServerPolicy().isUseIndividualViews() || token.isVisibleOnlyToOwner()) {
-        if (!AppUtil.playerOwns(token)) {
-          return false;
-        }
+      if (!AppUtil.playerOwns(token)
+          && (MapTool.getServerPolicy().isUseIndividualViews() || token.isVisibleOnlyToOwner())) {
+        return false;
       }
       return token.isVisible() && token.getLayer() != Zone.Layer.GM;
     }
   }
 
-  /** Accepts only tokens on the Object layer and only for the GM. */
-  private class ObjectFilter extends TokenFilter {
-    /** Accepts only tokens on the Object layer and only for the GM. */
-    public ObjectFilter() {
-      super(View.OBJECT);
-    }
-
-    @Override
-    protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.OBJECT;
-    }
-  }
-
-  /** Accepts only tokens on the GM (aka Hidden) layer and only for a GM. */
-  private class GMFilter extends TokenFilter {
-    /** Accepts only tokens on the GM (aka Hidden) layer and only for a GM. */
-    public GMFilter() {
-      super(View.GM);
-    }
-
-    @Override
-    protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.GM;
-    }
-  }
-
-  /** Accepts only tokens on the Background layer and only for a GM. */
-  private class BackgroundFilter extends TokenFilter {
-    /** Accepts only tokens on the Background layer and only for a GM. */
-    public BackgroundFilter() {
-      super(View.BACKGROUND);
-    }
-
-    @Override
-    protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.BACKGROUND;
-    }
-  }
-
   /** Accepts only tokens with an attached light source and only when owned by the user. */
-  private class LightSourceFilter extends TokenFilter {
+  private static class LightSourceFilter extends TokenFilter {
     /** Accepts only tokens with an attached light source and only when owned by the user. */
     public LightSourceFilter() {
-      super(View.LIGHT_SOURCES);
+      super(new View("LIGHT_SOURCES"));
     }
 
     @Override
-    protected boolean accept(Token token) {
+    public boolean accept(Token token) {
       return !token.getLightSources().isEmpty() && AppUtil.playerOwns(token);
     }
   }
@@ -399,7 +321,7 @@ public class TokenPanelTreeModel implements TreeModel {
    *
    * <ol>
    *   <li>If the token is not on the Token layer, return <code>false</code>.
-   *   <li>If the token has type PC, return <code>false</code>.
+   *   <li>If the token is not a NPC, return <code>false</code>.
    *   <li>If the current player is the GM, return <code>true</code>.
    *   <li>If individualized view is on or the token is visible only to owner, and the token is not
    *       owned by the current player, return <code>false</code>. (Takes into account
@@ -408,19 +330,14 @@ public class TokenPanelTreeModel implements TreeModel {
    *   <li>Otherwise, return true.
    * </ol>
    */
-  private class NPCTokenFilter extends TokenFilter {
-    /** Accepts only NPC tokens (GM) or tokens owned by current player. */
+  private static class NPCTokenFilter extends TokenFilter {
     public NPCTokenFilter() {
-      super(View.NPCS);
+      super(new View("NPCS"));
     }
 
     @Override
-    protected boolean accept(Token token) {
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      if (renderer == null) {
-        return false;
-      }
-      if (token.getLayer() != Zone.Layer.TOKEN || token.getType() == Token.Type.PC) {
+    public boolean accept(Token token) {
+      if (token.getLayer() != Zone.Layer.TOKEN || token.getType() != Token.Type.NPC) {
         return false;
       }
       if (MapTool.getPlayer().isGM()) {
