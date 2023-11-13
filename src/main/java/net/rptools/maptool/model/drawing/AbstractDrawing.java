@@ -110,7 +110,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   }
 
   public Zone.Layer getLayer() {
-    return layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.BACKGROUND;
+    return layer != null ? Zone.Layer.valueOf(layer) : Zone.Layer.getDefaultDrawingLayer();
   }
 
   public String getName() {

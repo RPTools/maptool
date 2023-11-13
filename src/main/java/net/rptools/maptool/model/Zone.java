@@ -137,6 +137,17 @@ public class Zone {
       return TOKEN;
     }
 
+    /**
+     * Gets the layer that drawings should be on by default.
+     *
+     * <p>This layer is also used a fallback in cases where the correct layer is not clear.
+     *
+     * @return The layer that drawings should be on by default.
+     */
+    public static Layer getDefaultDrawingLayer() {
+      return BACKGROUND;
+    }
+
     private final String displayName;
 
     Layer() {
