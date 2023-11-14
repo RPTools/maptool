@@ -74,7 +74,7 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
     List<Token> tokens = new ArrayList<Token>();
     boolean all = functionName.equalsIgnoreCase("addAllToInitiative");
     boolean pcs = functionName.equalsIgnoreCase("addAllPCsToInitiative");
-    for (Token token : list.getZone().getTokensOnLayer(Zone.Layer.TOKEN)) {
+    for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
       if (!allowDuplicates && !list.indexOf(token).isEmpty()) {
         continue;
       }

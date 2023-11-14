@@ -2910,7 +2910,7 @@ public class ZoneRenderer extends JComponent
 
     // calculations
     boolean calculateStacks =
-        !tokenList.isEmpty() && tokenList.get(0).getLayer() == Layer.TOKEN && tokenStackMap == null;
+        !tokenList.isEmpty() && tokenList.get(0).getLayer().isTokenLayer() && tokenStackMap == null;
     if (calculateStacks) {
       tokenStackMap = new HashMap<Token, Set<Token>>();
     }
@@ -3642,7 +3642,7 @@ public class ZoneRenderer extends JComponent
     timer.start("tokenlist-13");
     // Stacks
     // TODO: find a cleaner way to indicate token layer
-    if (!tokenList.isEmpty() && tokenList.get(0).getLayer() == Layer.TOKEN) {
+    if (!tokenList.isEmpty() && tokenList.get(0).getLayer().isTokenLayer()) {
       boolean hideTSI = AppPreferences.getHideTokenStackIndicator();
       if (tokenStackMap != null
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?

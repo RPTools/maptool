@@ -1589,9 +1589,7 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (getLayer() == Zone.Layer.BACKGROUND
-          || isSnapToScale()
-          || getLayer() == Zone.Layer.TOKEN) {
+      if (getLayer() == Zone.Layer.BACKGROUND || isSnapToScale() || getLayer().isTokenLayer()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = getX() + (int) centerOffset.x;
         offsetY = getY() + (int) centerOffset.y;

@@ -196,7 +196,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     menu.add(new AddPartyExposedAreaAction());
 
     Zone zone = getRenderer().getZone();
-    List<Token> tokens = zone.getTokensOnLayer(Zone.Layer.TOKEN);
+    List<Token> tokens = zone.getTokensForLayers(Zone.Layer::isTokenLayer);
     if (tokens != null && !tokens.isEmpty()) {
       String tokenViewMenu = I18N.getText("token.popup.menu.fow.tokens");
       JMenu subMenu = new JMenu(tokenViewMenu);
@@ -272,7 +272,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       // This is ALL tokens; perhaps it should be owned tokens? Or just PC tokens? Or only those
       // with HasSight?
       // Or can players not use this feature at all so the above don't matter?
-      List<Token> allToks = zone.getTokensOnLayer(Zone.Layer.TOKEN);
+      List<Token> allToks = zone.getTokensForLayers(Zone.Layer::isTokenLayer);
 
       // First create an Area that includes the exposed areas of all tokens
       Area tokenArea = new Area();

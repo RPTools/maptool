@@ -174,6 +174,21 @@ public class Zone {
     public String toString() {
       return displayName;
     }
+
+    /**
+     * Check if this layer is for tokens.
+     *
+     * <p>A token represents a creature / character / actor rather than something that is part of
+     * the environment. Tokens can be grouped into PCs and NPCs.
+     *
+     * <p>Although today it is true that `isTokenLayer() == !isStampLayer()`, that may not be true
+     * when new layers are added. Use the method that says what you mean!
+     *
+     * @return {@code true} if {@code Token} instances on this layer are considered tokens.
+     */
+    public boolean isTokenLayer() {
+      return this == TOKEN;
+    }
   }
 
   /** The selection type (PC, NPC, ALL, GM). */
@@ -1891,10 +1906,10 @@ public class Zone {
 
       final var o1Layer = o1.getLayer();
       final var o2Layer = o2.getLayer();
-      if (o1Layer != Layer.TOKEN && o2Layer == Layer.TOKEN) {
+      if (!o1Layer.isTokenLayer() && o2Layer.isTokenLayer()) {
         return -1;
       }
-      if (o2Layer != Layer.TOKEN && o1Layer == Layer.TOKEN) {
+      if (!o2Layer.isTokenLayer() && o1Layer.isTokenLayer()) {
         return +1;
       }
       if (o1.getHeight() != o2.getHeight()) {

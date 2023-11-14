@@ -337,7 +337,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
     @Override
     public boolean accept(Token token) {
-      if (token.getLayer() != Zone.Layer.TOKEN || token.getType() != Token.Type.NPC) {
+      if (!token.getLayer().isTokenLayer() || token.getType() != Token.Type.NPC) {
         return false;
       }
       if (MapTool.getPlayer().isGM()) {
