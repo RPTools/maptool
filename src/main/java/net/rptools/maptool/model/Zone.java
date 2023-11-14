@@ -203,6 +203,13 @@ public class Zone {
     }
 
     /**
+     * @return {@code true} if players are allowed to have this layer as their active layer.
+     */
+    public boolean isPlayerLayer() {
+      return this == TOKEN;
+    }
+
+    /**
      * @return {@code true} if this tokens and drawables on this layer should be rendered for
      *     players.
      */

@@ -205,34 +205,27 @@ public class DrawPanelTreeModel implements TreeModel {
   private void updateInternal() {
     currentViewList.clear();
     viewMap.clear();
-    List<DrawnElement> drawableList = new ArrayList<DrawnElement>();
+
     if (zone != null) {
-      if (MapTool.getPlayer().isGM()) {
-        // GM Sees all drawings
-        for (var layer : Zone.Layer.values()) {
-          View v = View.getByLayer(layer);
-          drawableList = zone.getDrawnElements(layer);
-          if (drawableList.size() > 0) {
-            // Reverse the list so that the element drawn last, is shown at the top of the tree
-            // Be careful to clone the list so you don't damage the map
-            List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
-            Collections.reverse(reverseList);
-            viewMap.put(v, reverseList);
-            currentViewList.add(v);
-          }
+      for (final var layer : Zone.Layer.values()) {
+        // Players can only see templates on _player layers_, while GMs see all drawings.
+        if (!MapTool.getPlayer().isGM() && !layer.isPlayerLayer()) {
+          continue;
         }
-      } else {
-        // Players can only see templates on the token layer
-        drawableList = zone.getDrawnElements(Zone.Layer.TOKEN);
+
+        View v = View.getByLayer(layer);
+        var drawableList = zone.getDrawnElements(layer);
         if (drawableList.size() > 0) {
           // Reverse the list so that the element drawn last, is shown at the top of the tree
           // Be careful to clone the list so you don't damage the map
           List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
-          reverseList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
+          // Players can only see _templates_ on player layers.
+          if (!MapTool.getPlayer().isGM()) {
+            reverseList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
+          }
           Collections.reverse(reverseList);
-          View view = View.getByLayer(Zone.Layer.TOKEN);
-          viewMap.put(view, reverseList);
-          currentViewList.add(view);
+          viewMap.put(v, reverseList);
+          currentViewList.add(v);
         }
       }
     }

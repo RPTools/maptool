@@ -249,7 +249,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
       // Include options for all zone layers.
       for (final var layer : Zone.Layer.values()) {
-        values.add(new ExportLayers("LAYER_" + layer.name(), layer == Zone.Layer.TOKEN, layer));
+        values.add(new ExportLayers("LAYER_" + layer.name(), layer.isPlayerLayer(), layer));
       }
 
       // Also control some "pseudo-layers".
