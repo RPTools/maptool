@@ -33,18 +33,20 @@ java {
     targetCompatibility = JavaVersion.VERSION_20
 }
 
+def javaArgs = [
+        "-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
+        "-Dpolyglot.engine.WarnInterpreterOnly=false",
+        "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+        "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
+        "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+        "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
 
 // Used by gradle assemble & run tasks
 application {
     mainClass = 'net.rptools.maptool.client.LaunchInstructions'
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
-                                 "-Dpolyglot.engine.WarnInterpreterOnly=false","-DRUN_FROM_IDE=true",
-                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+    applicationDefaultJvmArgs = javaArgs + ["-DRUN_FROM_IDE=true"]
     if (osdetector.os.is('osx')) {
         applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
     }
@@ -229,15 +231,7 @@ runtime {
 
     jpackage {
         installerOutputDir = file("releases")
-        jvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
-                   "-Dpolyglot.engine.WarnInterpreterOnly=false",
-                   "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-                   "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-                   "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                   "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                   "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                   "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"
-          ]
+        jvmArgs = javaArgs
 
         imageOptions = []
         imageName = project.name + developerRelease
