@@ -166,7 +166,7 @@ run {
 compileJava.configure {
     // Keep the uninstrumented .class files out of the final destination directory. Otherwise we
     // might instrument the same file twice, resulting in duplicate methods.
-    destinationDirectory = file("$buildDir/classes/java/main-uninstrumented")
+    destinationDirectory = file("${layout.buildDirectory.get()}/classes/java/main-uninstrumented")
 }
 
 def instrumentForms = tasks.register('instrumentForms', Sync) {
