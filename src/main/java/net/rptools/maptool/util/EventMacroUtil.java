@@ -222,6 +222,8 @@ public class EventMacroUtil {
       }
     } catch (AbortFunctionException afe) {
       // Do nothing
+    } catch (AssertFunctionException e) {
+      MapTool.addLocalMessage(e.getMessage());
     } catch (ParserException | ExecutionException | InterruptedException e) {
       MapTool.addLocalMessage(
           I18N.getText(
@@ -289,6 +291,8 @@ public class EventMacroUtil {
       }
     } catch (AbortFunctionException afe) {
       // Do nothing
+    } catch (AssertFunctionException e) {
+      MapTool.addLocalMessage(e.getMessage());
     } catch (ParserException e) {
       MapTool.addLocalMessage(
           "Event continuing after error running " + macroTarget + ": " + e.getMessage());
