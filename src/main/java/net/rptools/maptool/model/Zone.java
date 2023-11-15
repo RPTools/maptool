@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.*;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -1652,6 +1653,19 @@ public class Zone {
   public List<Token> getTokensOnLayer(Layer layer, boolean getAlwaysVisible) {
     return getTokensFiltered(
         t -> t.getLayer() == layer && (getAlwaysVisible || !t.isAlwaysVisible()));
+  }
+
+  /**
+   * Looks up tokens for all matching layers.
+   *
+   * <p>Rather than specifying a particular {@link net.rptools.maptool.model.Zone.Layer} constant,
+   * this allows using layers based on their properties.
+   *
+   * @param layerFilter The predicate to match desired layers.
+   * @return A list of all tokens for the given layers.
+   */
+  public List<Token> getTokensForLayers(Predicate<Layer> layerFilter) {
+    return getTokensFiltered(t -> layerFilter.test(t.getLayer()));
   }
 
   public List<Token> getPlayerTokens() {
