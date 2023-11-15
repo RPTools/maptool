@@ -1645,74 +1645,13 @@ public class Zone {
     return Collections.unmodifiableList(copy);
   }
 
-  public List<Token> removeTokens(List<Token> tokensToKeep, List<Token> tokensToRemove) {
-    ArrayList<Token> originalList = new ArrayList<Token>(tokensToKeep);
-    originalList.removeAll(tokensToRemove);
-
-    return Collections.unmodifiableList(originalList);
+  public List<Token> getTokensOnLayer(Layer layer) {
+    return getTokensOnLayer(layer, true);
   }
 
-  /**
-   * @return list of non-stamp tokens, both pc and npc
-   */
-  public List<Token> getTokens() {
-    return getTokens(true);
-  }
-
-  public List<Token> getTokens(boolean getAlwaysVisible) {
+  public List<Token> getTokensOnLayer(Layer layer, boolean getAlwaysVisible) {
     return getTokensFiltered(
-        t -> {
-          if (getAlwaysVisible) {
-            return !t.isStamp();
-          } else {
-            return !t.isStamp() && !t.isAlwaysVisible();
-          }
-        });
-  }
-
-  public List<Token> getGMStamps() {
-    return getGMStamps(true);
-  }
-
-  public List<Token> getGMStamps(boolean getAlwaysVisible) {
-    return getTokensFiltered(
-        t -> {
-          if (getAlwaysVisible) {
-            return t.isGMStamp();
-          } else {
-            return t.isGMStamp() && !t.isAlwaysVisible();
-          }
-        });
-  }
-
-  public List<Token> getStampTokens() {
-    return getStampTokens(true);
-  }
-
-  public List<Token> getStampTokens(boolean getAlwaysVisible) {
-    return getTokensFiltered(
-        t -> {
-          if (getAlwaysVisible) {
-            return t.isObjectStamp();
-          } else {
-            return t.isObjectStamp() && !t.isAlwaysVisible();
-          }
-        });
-  }
-
-  public List<Token> getBackgroundStamps() {
-    return getBackgroundStamps(true);
-  }
-
-  public List<Token> getBackgroundStamps(boolean getAlwaysVisible) {
-    return getTokensFiltered(
-        t -> {
-          if (getAlwaysVisible) {
-            return t.isBackgroundStamp();
-          } else {
-            return t.isBackgroundStamp() && !t.isAlwaysVisible();
-          }
-        });
+        t -> t.getLayer() == layer && (getAlwaysVisible || !t.isAlwaysVisible()));
   }
 
   public List<Token> getPlayerTokens() {
@@ -1896,10 +1835,13 @@ public class Zone {
       if ((v1 - v2) != 0) {
         return v1 - v2;
       }
-      if (!o1.isToken() && o2.isToken()) {
+
+      final var o1Layer = o1.getLayer();
+      final var o2Layer = o2.getLayer();
+      if (o1Layer != Layer.TOKEN && o2Layer == Layer.TOKEN) {
         return -1;
       }
-      if (!o2.isToken() && o1.isToken()) {
+      if (o2Layer != Layer.TOKEN && o1Layer == Layer.TOKEN) {
         return +1;
       }
       if (o1.getHeight() != o2.getHeight()) {

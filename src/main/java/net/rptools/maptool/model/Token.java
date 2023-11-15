@@ -624,7 +624,7 @@ public class Token implements Cloneable {
   }
 
   public boolean isMarker() {
-    return isStamp()
+    return getLayer() != Zone.Layer.TOKEN
         && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
@@ -781,38 +781,6 @@ public class Token implements Cloneable {
       terrainModifiersIgnored.clear();
       this.terrainModifiersIgnored.add(TerrainModifierOperation.NONE);
     }
-  }
-
-  public boolean isObjectStamp() {
-    return getLayer() == Zone.Layer.OBJECT;
-  }
-
-  public boolean isGMStamp() {
-    return getLayer() == Zone.Layer.GM;
-  }
-
-  public boolean isBackgroundStamp() {
-    return getLayer() == Zone.Layer.BACKGROUND;
-  }
-
-  public boolean isOnTokenLayer() {
-    return getLayer() == Zone.Layer.TOKEN;
-  }
-
-  public boolean isStamp() {
-    switch (getLayer()) {
-      case BACKGROUND:
-      case OBJECT:
-      case GM:
-        return true;
-      default:
-        break;
-    }
-    return false;
-  }
-
-  public boolean isToken() {
-    return getLayer() == Zone.Layer.TOKEN;
   }
 
   public TokenShape getShape() {
@@ -1593,7 +1561,7 @@ public class Token implements Cloneable {
       footprintBounds.x = getX();
       footprintBounds.y = getY();
     } else {
-      if (!isBackgroundStamp()) {
+      if (getLayer() != Zone.Layer.BACKGROUND) {
         // Center it on the footprint
         footprintBounds.x -= (w - footprintBounds.width) / 2;
         footprintBounds.y -= (h - footprintBounds.height) / 2;
@@ -1621,7 +1589,9 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+      if (getLayer() == Zone.Layer.BACKGROUND
+          || isSnapToScale()
+          || getLayer() == Zone.Layer.TOKEN) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = getX() + (int) centerOffset.x;
         offsetY = getY() + (int) centerOffset.y;
@@ -1651,7 +1621,7 @@ public class Token implements Cloneable {
     Point2D.Double offset = getSnapToUnsnapOffset(zone);
     double newX = getX() + offset.x;
     double newY = getY() + offset.y;
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || getLayer() == Zone.Layer.BACKGROUND) {
       return grid.convert(
           grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
@@ -1683,13 +1653,13 @@ public class Token implements Cloneable {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
-      if (isBackgroundStamp() || isSnapToScale()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || getLayer() == Zone.Layer.BACKGROUND) {
+      if (getLayer() == Zone.Layer.BACKGROUND || isSnapToScale()) {
         TokenFootprint footprint = getFootprint(grid);
         Rectangle footprintBounds = footprint.getBounds(grid);
         double footprintOffsetX = 0;
         double footprintOffsetY = 0;
-        if (!isBackgroundStamp()) {
+        if (getLayer() != Zone.Layer.BACKGROUND) {
           // Non-background tokens can have an offset from top left corner
           footprintOffsetX = tokenBounds.width - footprintBounds.width;
           footprintOffsetY = tokenBounds.height - footprintBounds.height;

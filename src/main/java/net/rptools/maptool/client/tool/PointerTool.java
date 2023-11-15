@@ -639,7 +639,7 @@ public class PointerTool extends DefaultTool {
       }
       final var selectedTokens = renderer.getSelectedTokenSet();
       if (tokenUnderMouse != null && !selectedTokens.isEmpty()) {
-        if (tokenUnderMouse.isStamp()) {
+        if (tokenUnderMouse.getLayer() != Layer.TOKEN) {
           new StampPopupMenu(selectedTokens, e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
         } else if (AppUtil.playerOwns(tokenUnderMouse)) {

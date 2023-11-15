@@ -337,7 +337,7 @@ public class TokenPanelTreeModel implements TreeModel {
           return false;
         }
       }
-      return token.isVisible() && !token.isGMStamp();
+      return token.isVisible() && token.getLayer() != Zone.Layer.GM;
     }
   }
 
@@ -350,7 +350,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
     @Override
     protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.isObjectStamp();
+      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.OBJECT;
     }
   }
 
@@ -363,7 +363,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
     @Override
     protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.isGMStamp();
+      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.GM;
     }
   }
 
@@ -376,7 +376,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
     @Override
     protected boolean accept(Token token) {
-      return MapTool.getPlayer().isGM() && token.isBackgroundStamp();
+      return MapTool.getPlayer().isGM() && token.getLayer() == Zone.Layer.BACKGROUND;
     }
   }
 
@@ -420,7 +420,7 @@ public class TokenPanelTreeModel implements TreeModel {
       if (renderer == null) {
         return false;
       }
-      if (token.isStamp() || token.getType() == Token.Type.PC) {
+      if (token.getLayer() != Zone.Layer.TOKEN || token.getType() == Token.Type.PC) {
         return false;
       }
       if (MapTool.getPlayer().isGM()) {

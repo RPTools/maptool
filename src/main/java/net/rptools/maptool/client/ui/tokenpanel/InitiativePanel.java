@@ -792,7 +792,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.insertTokens(list.getZone().getTokens());
+          list.insertTokens(list.getZone().getTokensOnLayer(Zone.Layer.TOKEN));
         }
       };
 
@@ -802,7 +802,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
-          for (Token token : list.getZone().getTokens()) {
+          for (Token token : list.getZone().getTokensOnLayer(Zone.Layer.TOKEN)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
@@ -895,7 +895,7 @@ public class InitiativePanel extends JPanel
                 ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                 if (renderer == null
                     || token == null
-                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || (token.getLayer() != Zone.Layer.TOKEN && !MapTool.getPlayer().isGM())
                     || !AppUtil.playerOwns(token)) {
                   return;
                 }

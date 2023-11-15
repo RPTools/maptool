@@ -406,7 +406,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   public class FreeSizeAction extends AbstractAction {
     public FreeSizeAction() {
       String actionText =
-          I18N.getText("token.popup.menu.size" + (tokenUnderMouse.isStamp() ? ".free" : ".native"));
+          I18N.getText(
+              "token.popup.menu.size"
+                  + (tokenUnderMouse.getLayer() != Zone.Layer.TOKEN ? ".free" : ".native"));
       putValue(Action.NAME, actionText);
     }
 

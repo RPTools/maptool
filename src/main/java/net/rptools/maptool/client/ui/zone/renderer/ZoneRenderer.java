@@ -248,7 +248,7 @@ public class ZoneRenderer extends JComponent
     setActiveLayer(token.getLayer());
     MapTool.getFrame()
         .getToolbox()
-        .setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
+        .setSelectedTool(token.getLayer() == Layer.TOKEN ? PointerTool.class : StampTool.class);
 
     selectionModel.replaceSelection(Collections.singletonList(token.getId()));
     requestFocusInWindow();
@@ -484,7 +484,7 @@ public class ZoneRenderer extends JComponent
 
         // Only add certain tokens to the list to process in the move
         // Macro function(s).
-        if (token.isToken() && token.isVisible()) {
+        if (token.getLayer() == Layer.TOKEN && token.isVisible()) {
           filteredTokens.add(tokenGUID);
         }
 
@@ -952,20 +952,20 @@ public class ZoneRenderer extends JComponent
       List<Token> stampList = null;
       switch (layer) {
         case 0:
-          stampList = zone.getBackgroundStamps();
+          stampList = zone.getTokensOnLayer(Layer.BACKGROUND);
           break; // background layer
         case 1:
-          stampList = zone.getStampTokens();
+          stampList = zone.getTokensOnLayer(Layer.OBJECT);
           break; // object layer
         case 2:
           if (!view.isGMView()) { // hidden layer
             continue;
           } else {
-            stampList = zone.getGMStamps();
+            stampList = zone.getTokensOnLayer(Layer.GM);
             break;
           }
         case 3:
-          stampList = zone.getTokens();
+          stampList = zone.getTokensOnLayer(Layer.TOKEN);
           break; // token layer
       }
       for (Token element : stampList) {
@@ -1167,7 +1167,7 @@ public class ZoneRenderer extends JComponent
       renderDrawableOverlay(g2d, drawableRenderers.get(Layer.BACKGROUND), view, drawables);
       timer.stop("drawableBackground");
       // }
-      List<Token> background = zone.getBackgroundStamps(false);
+      List<Token> background = zone.getTokensOnLayer(Layer.BACKGROUND, false);
       if (!background.isEmpty()) {
         timer.start("tokensBackground");
         renderTokens(g2d, background, view);
@@ -1189,7 +1189,7 @@ public class ZoneRenderer extends JComponent
 
     if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
       // ... Images on the object layer are always ABOVE the grid.
-      List<Token> stamps = zone.getStampTokens(false);
+      List<Token> stamps = zone.getTokensOnLayer(Layer.OBJECT, false);
       if (!stamps.isEmpty()) {
         timer.start("tokensStamp");
         renderTokens(g2d, stamps, view);
@@ -1244,14 +1244,14 @@ public class ZoneRenderer extends JComponent
         renderDrawableOverlay(g2d, drawableRenderers.get(Layer.GM), view, drawables);
         timer.stop("drawableGM");
         // }
-        List<Token> stamps = zone.getGMStamps(false);
+        List<Token> stamps = zone.getTokensOnLayer(Layer.GM, false);
         if (!stamps.isEmpty()) {
           timer.start("tokensGM");
           renderTokens(g2d, stamps, view);
           timer.stop("tokensGM");
         }
       }
-      List<Token> tokens = zone.getTokens(false);
+      List<Token> tokens = zone.getTokensOnLayer(Layer.TOKEN, false);
       if (!tokens.isEmpty()) {
         timer.start("tokens");
         renderTokens(g2d, tokens, view);
@@ -2167,7 +2167,7 @@ public class ZoneRenderer extends JComponent
         }
         // Show path only on the key token on token layer that are visible to the owner or gm while
         // fow and vision is on
-        if (token == keyToken && !token.isStamp()) {
+        if (token == keyToken && token.getLayer() == Layer.TOKEN) {
           renderPath(
               g,
               walker != null ? walker.getPath() : set.gridlessPath,
@@ -2335,7 +2335,7 @@ public class ZoneRenderer extends JComponent
               y += 10 + scaledHeight;
               x += scaledWidth / 2;
 
-              if (!token.isStamp() && AppState.getShowMovementMeasurements()) {
+              if (token.getLayer() == Layer.TOKEN && AppState.getShowMovementMeasurements()) {
                 String distance = "";
                 if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
                   // grid.isPathingSupported()
@@ -2891,7 +2891,7 @@ public class ZoneRenderer extends JComponent
     if (!isGMView
         && visibleScreenArea != null
         && !tokenList.isEmpty()
-        && tokenList.get(0).isToken()) {
+        && tokenList.get(0).getLayer() == Layer.TOKEN) {
       clippedG = (Graphics2D) g.create();
 
       Area visibleArea = new Area(g.getClipBounds());
@@ -2910,7 +2910,7 @@ public class ZoneRenderer extends JComponent
 
     // calculations
     boolean calculateStacks =
-        !tokenList.isEmpty() && !tokenList.get(0).isStamp() && tokenStackMap == null;
+        !tokenList.isEmpty() && tokenList.get(0).getLayer() == Layer.TOKEN && tokenStackMap == null;
     if (calculateStacks) {
       tokenStackMap = new HashMap<Token, Set<Token>>();
     }
@@ -2932,13 +2932,13 @@ public class ZoneRenderer extends JComponent
 
       timer.start("tokenlist-1");
       try {
-        if (token.isStamp() && isTokenMoving(token)) {
+        if (token.getLayer() != Layer.TOKEN && isTokenMoving(token)) {
           continue;
         }
         // Don't bother if it's not visible
         // NOTE: Not going to use zone.isTokenVisible as it is very slow. In fact, it's faster
         // to just draw the tokens and let them be clipped
-        if ((!token.isVisible() || token.isGMStamp()) && !isGMView) {
+        if ((!token.isVisible() || token.getLayer() == Layer.GM) && !isGMView) {
           continue;
         }
         if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
@@ -3021,7 +3021,7 @@ public class ZoneRenderer extends JComponent
           continue;
         }
         // Vision visibility
-        if (!isGMView && token.isToken() && zoneView.isUsingVision()) {
+        if (!isGMView && token.getLayer() == Layer.TOKEN && zoneView.isUsingVision()) {
           if (!GraphicsUtil.intersects(visibleScreenArea, location.bounds)) {
             continue;
           }
@@ -3496,14 +3496,16 @@ public class ZoneRenderer extends JComponent
         double height = footprintBounds.height * getScale();
 
         ImageBorder selectedBorder =
-            token.isStamp() ? AppStyle.selectedStampBorder : AppStyle.selectedBorder;
+            token.getLayer() != Layer.TOKEN
+                ? AppStyle.selectedStampBorder
+                : AppStyle.selectedBorder;
         if (highlightCommonMacros.contains(token)) {
           selectedBorder = AppStyle.commonMacroBorder;
         }
         if (!AppUtil.playerOwns(token)) {
           selectedBorder = AppStyle.selectedUnownedBorder;
         }
-        if (useIF && !token.isStamp() && zoneView.isUsingVision()) {
+        if (useIF && token.getLayer() == Layer.TOKEN && zoneView.isUsingVision()) {
           Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
           if (tool
                   instanceof
@@ -3515,7 +3517,7 @@ public class ZoneRenderer extends JComponent
           }
         }
         if (token.hasFacing()
-            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.isStamp())) {
+            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getLayer() != Layer.TOKEN)) {
           AffineTransform oldTransform = clippedG.getTransform();
 
           // Rotated
@@ -3639,8 +3641,8 @@ public class ZoneRenderer extends JComponent
 
     timer.start("tokenlist-13");
     // Stacks
-    if (!tokenList.isEmpty()
-        && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
+    // TODO: find a cleaner way to indicate token layer
+    if (!tokenList.isEmpty() && tokenList.get(0).getLayer() == Layer.TOKEN) {
       boolean hideTSI = AppPreferences.getHideTokenStackIndicator();
       if (tokenStackMap != null
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?

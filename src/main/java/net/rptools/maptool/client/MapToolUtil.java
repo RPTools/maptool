@@ -132,7 +132,7 @@ public class MapToolUtil {
    * @return the new token's algorithmically generated name
    */
   public static String nextTokenId(Zone zone, Token token, boolean force) {
-    boolean isToken = token.isToken();
+    boolean isToken = token.getLayer() == Zone.Layer.TOKEN;
     String baseName = token.getName();
     String newName;
     Integer newNum = null;

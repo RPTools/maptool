@@ -22,6 +22,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -73,7 +74,7 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
     List<Token> tokens = new ArrayList<Token>();
     boolean all = functionName.equalsIgnoreCase("addAllToInitiative");
     boolean pcs = functionName.equalsIgnoreCase("addAllPCsToInitiative");
-    for (Token token : list.getZone().getTokens()) {
+    for (Token token : list.getZone().getTokensOnLayer(Zone.Layer.TOKEN)) {
       if (!allowDuplicates && !list.indexOf(token).isEmpty()) {
         continue;
       }

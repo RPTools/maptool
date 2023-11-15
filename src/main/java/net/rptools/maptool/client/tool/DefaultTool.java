@@ -40,11 +40,7 @@ public abstract class DefaultTool extends Tool
   private static final long serialVersionUID = 3258411729238372921L;
 
   private final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Zone.Layer[] {
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-          },
-          this::selectedLayerChanged);
+      new LayerSelectionDialog(Zone.Layer.values(), this::selectedLayerChanged);
 
   private Zone.Layer selectedLayer;
   private boolean isDraggingMap;

@@ -472,7 +472,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         isNewTokenSelected = false;
       }
       if (tokenUnderMouse != null && renderer.getSelectedTokenSet().size() > 0) {
-        if (tokenUnderMouse.isStamp()) {
+        if (tokenUnderMouse.getLayer() != Layer.TOKEN) {
           new StampPopupMenu(
                   renderer.getSelectedTokenSet(), e.getX(), e.getY(), renderer, tokenUnderMouse)
               .showPopup(renderer);
@@ -605,24 +605,16 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       ZonePoint zp = sp.convertToZone(renderer);
       p = ScreenPoint.fromZonePoint(renderer, zp);
 
-      int newWidth =
-          Math.max(
-              1,
-              (zp.x - tokenBeingResized.getX())
-                  * (tokenBeingResized.isSnapToGrid() && !tokenBeingResized.isBackgroundStamp()
-                      ? 2
-                      : 1));
-      int newHeight =
-          Math.max(
-              1,
-              (zp.y - tokenBeingResized.getY())
-                  * (tokenBeingResized.isSnapToGrid() && !tokenBeingResized.isBackgroundStamp()
-                      ? 2
-                      : 1));
+      // For snap-to-grid tokens (except background stamps) we anchor at the center of the token.
+      // TODO Named for good diff. Rename to isSnappedAndCenterAnchored
+      final var isSnappedNonBackground =
+          tokenBeingResized.isSnapToGrid() && tokenBeingResized.getLayer() != Layer.BACKGROUND;
+      final var snapToGridMultiplier = isSnappedNonBackground ? 2 : 1;
 
-      if (SwingUtil.isControlDown(e)
-          && tokenBeingResized.isSnapToGrid()
-          && !tokenBeingResized.isBackgroundStamp()) {
+      int newWidth = Math.max(1, (zp.x - tokenBeingResized.getX()) * snapToGridMultiplier);
+      int newHeight = Math.max(1, (zp.y - tokenBeingResized.getY()) * snapToGridMultiplier);
+
+      if (SwingUtil.isControlDown(e) && isSnappedNonBackground) {
         // Account for the 1/2 cell on each side of the stamp (since it's anchored in the center)
         newWidth += renderer.getZone().getGrid().getSize();
         newHeight += renderer.getZone().getGrid().getSize();
@@ -648,16 +640,9 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         }
         Rectangle footprintBounds = tokenBeingResized.getBounds(renderer.getZone());
 
-        int changeX =
-            (zp.x - lastResizeZonePoint.x) // zp = mouse location
-                * (tokenBeingResized.isSnapToGrid() && !tokenBeingResized.isBackgroundStamp()
-                    ? 2
-                    : 1);
-        int changeY =
-            (zp.y - lastResizeZonePoint.y)
-                * (tokenBeingResized.isSnapToGrid() && !tokenBeingResized.isBackgroundStamp()
-                    ? 2
-                    : 1);
+        // zp = mouse location
+        int changeX = (zp.x - lastResizeZonePoint.x) * snapToGridMultiplier;
+        int changeY = (zp.y - lastResizeZonePoint.y) * snapToGridMultiplier;
 
         double sinTheta = Math.sin(Math.toRadians(theta));
         double cosTheta = Math.cos(Math.toRadians(theta));
@@ -1132,7 +1117,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
     isMovingWithKeys = true;
     handleDragToken(zp);
-    if (tokenBeingDragged.isBackgroundStamp()) {
+    if (tokenBeingDragged.getLayer() == Layer.BACKGROUND) {
       stopTokenDrag();
     }
   }
@@ -1214,7 +1199,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         if (token == null) {
           continue;
         }
-        if (!token.isStamp()) {
+        if (token.getLayer() == Layer.TOKEN) {
           return;
         }
         // Show sizing controls

@@ -29,6 +29,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.TokenUtil;
 
 /** */
@@ -177,7 +178,7 @@ public class FacingTool extends DefaultTool {
 
   @Override
   protected void resetTool() {
-    if (tokenUnderMouse.isStamp()) {
+    if (tokenUnderMouse.getLayer() != Zone.Layer.TOKEN) {
       MapTool.getFrame().getToolbox().setSelectedTool(StampTool.class);
     } else {
       MapTool.getFrame().getToolbox().setSelectedTool(PointerTool.class);
