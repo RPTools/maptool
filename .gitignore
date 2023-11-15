@@ -27,7 +27,6 @@ out/
 # Automatically Generated
 ################################################################################
 package/windows/MapTool.iss
-src/main/resources/sentry.properties
 
 
 # IDEs

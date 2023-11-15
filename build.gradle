@@ -514,18 +514,18 @@ dependencies {
     implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
 }
 
-
-task configSentryRelease(type: Copy) {
-    from("build-resources/sentry.properties.template")
-    into("src/main/resources/")
-    rename("sentry.properties.template", "sentry.properties")
-    def tokens = [
-            AppVersion : "${tagVersion}",
-            Environment: "${environment}",
-            SentryDSN  : "${sentryDSN}"
-    ]
-    expand(tokens)
-    inputs.properties(tokens)
+processResources {
+    with copySpec {
+        from("build-resources/sentry.properties.template")
+        rename("sentry.properties.template", "sentry.properties")
+        def tokens = [
+                AppVersion : "${tagVersion}",
+                Environment: "${environment}",
+                SentryDSN  : "${sentryDSN}"
+        ]
+        expand(tokens)
+        inputs.properties(tokens)
+    }
 }
 
 shadowJar {
@@ -599,7 +599,3 @@ test {
 task createWrapper(type: Wrapper) {
     gradleVersion = '8.2.1'
 }
-
-// Configure current release tag in Sentry.io properties
-processResources.dependsOn configSentryRelease
-configSentryRelease.dependsOn 'spotlessCheck'
