@@ -625,7 +625,7 @@ public class Token implements Cloneable {
   }
 
   public boolean isMarker() {
-    return getLayer().isStampLayer()
+    return getLayer().isMarkerLayer()
         && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 

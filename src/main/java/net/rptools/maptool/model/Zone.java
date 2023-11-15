@@ -203,6 +203,17 @@ public class Zone {
     }
 
     /**
+     * Check if the layer is for markers.
+     *
+     * <p>A marker is a token that can have its notes displayed when clicked while on a token layer.
+     *
+     * @return {@code true} if {@code Token} instances on this layer can be considered markers.
+     */
+    public boolean isMarkerLayer() {
+      return this != TOKEN;
+    }
+
+    /**
      * @return {@code true} if players are allowed to have this layer as their active layer.
      */
     public boolean isPlayerLayer() {
