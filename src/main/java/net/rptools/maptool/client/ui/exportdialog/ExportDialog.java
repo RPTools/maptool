@@ -236,7 +236,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private enum ExportLayers {
     // enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
     LAYER_TOKEN(true),
-    LAYER_HIDDEN(false),
+    LAYER_GM(false),
     LAYER_OBJECT(false),
     LAYER_BACKGROUND(false),
     LAYER_BOARD(false),
@@ -707,7 +707,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     if (!ExportLayers.LAYER_TOKEN.isChecked()) {
       renderer.disableLayer(Zone.Layer.TOKEN);
     }
-    if (!ExportLayers.LAYER_HIDDEN.isChecked()) {
+    if (!ExportLayers.LAYER_GM.isChecked()) {
       renderer.disableLayer(Zone.Layer.GM);
     }
     if (!ExportLayers.LAYER_OBJECT.isChecked()) {

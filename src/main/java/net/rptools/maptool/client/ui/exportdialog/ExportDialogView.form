@@ -337,7 +337,7 @@
             <properties>
               <actionCommand value="Hidden"/>
               <enabled value="false"/>
-              <name value="LAYER_HIDDEN"/>
+              <name value="LAYER_GM"/>
               <selected value="true"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="panel.MapExplorer.View.GM"/>
               <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.view.layer.tooltip"/>
@@ -352,7 +352,7 @@
               <enabled value="false"/>
               <name value="LAYER_OBJECT"/>
               <selected value="true"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="panel.MapExplorer.View.OBJECTS"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="panel.MapExplorer.View.OBJECT"/>
               <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ExportScreenshot.view.layer.tooltip"/>
             </properties>
           </component>

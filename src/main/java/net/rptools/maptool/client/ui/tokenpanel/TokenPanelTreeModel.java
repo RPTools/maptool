@@ -51,7 +51,7 @@ public class TokenPanelTreeModel implements TreeModel {
   private static final String _PLAYERS = "panel.MapExplorer.View.PLAYERS";
   private static final String _GROUPS = "panel.MapExplorer.View.GROUPS";
   private static final String _GM = "panel.MapExplorer.View.GM";
-  private static final String _OBJECTS = "panel.MapExplorer.View.OBJECTS";
+  private static final String _OBJECT = "panel.MapExplorer.View.OBJECT";
   private static final String _BACKGROUND = "panel.MapExplorer.View.BACKGROUND";
   private static final String _CLIPBOARD = "panel.MapExplorer.View.CLIPBOARD";
   private static final String _LIGHT_SOURCES = "panel.MapExplorer.View.LIGHT_SOURCES";
@@ -63,7 +63,7 @@ public class TokenPanelTreeModel implements TreeModel {
     PLAYERS(_PLAYERS, Zone.Layer.TOKEN, false, false),
     GROUPS(_GROUPS, Zone.Layer.TOKEN, false, false),
     GM(_GM, Zone.Layer.GM, false, true),
-    OBJECTS(_OBJECTS, Zone.Layer.OBJECT, false, true),
+    OBJECT(_OBJECT, Zone.Layer.OBJECT, false, true),
     BACKGROUND(_BACKGROUND, Zone.Layer.BACKGROUND, false, true),
     CLIPBOARD(_CLIPBOARD, Zone.Layer.TOKEN, false, true),
     LIGHT_SOURCES(_LIGHT_SOURCES, null, false, false);
@@ -345,7 +345,7 @@ public class TokenPanelTreeModel implements TreeModel {
   private class ObjectFilter extends TokenFilter {
     /** Accepts only tokens on the Object layer and only for the GM. */
     public ObjectFilter() {
-      super(View.OBJECTS);
+      super(View.OBJECT);
     }
 
     @Override
