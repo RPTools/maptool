@@ -27,13 +27,28 @@ plugins {
 
 // Definitions
 defaultTasks 'clean', 'build'
-sourceCompatibility = 20
-targetCompatibility = 20
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_20
+    targetCompatibility = JavaVersion.VERSION_20
+}
 
 
 // Used by gradle assemble & run tasks
-mainClassName = 'net.rptools.maptool.client.LaunchInstructions'
-applicationDefaultJvmArgs = ["-Xss8M"]
+application {
+    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
+    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
+                                 "-Dpolyglot.engine.WarnInterpreterOnly=false","-DRUN_FROM_IDE=true",
+                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+                                 "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+    if (osdetector.os.is('osx')) {
+        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+    }
+}
 def appSemVer = ""
 def winUpgradeUUID = UUID.randomUUID().toString();
 
@@ -140,20 +155,8 @@ sourceSets {
 
 run {
     args = ['-v=' + appSemVer]
-    applicationDefaultJvmArgs = ["-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Development", "-Dfile.encoding=UTF-8",
-                                 "-Dpolyglot.engine.WarnInterpreterOnly=false","-DRUN_FROM_IDE=true",
-                                 "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-                                 "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-                                 "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/javax.swing=ALL-UNNAMED", "--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-                                 "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
     // Add -Dlog4j2.debug to see log4j2 details
     // Add  -Djavax.net.debug=all to debug networking issues
-
-    if (osdetector.os.is('osx')) {
-        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
-    }
 
     if (System.getProperty("exec.args") != null) {
         args System.getProperty("exec.args").split()
@@ -546,9 +549,9 @@ shadowJar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.sourceCompatibility,
-                'Target-Compatibility': project.targetCompatibility,
-                'Main-Class': project.mainClassName,
+                'Source-Compatibility': project.java.sourceCompatibility,
+                'Target-Compatibility': project.java.targetCompatibility,
+                'Main-Class': project.application.mainClass,
                 'Multi-Release': true
     }
 
@@ -565,9 +568,9 @@ jar {
                 'Built-By': System.getProperty('user.name'),
                 'Built-Date': new Date(),
                 'Built-JDK': System.getProperty('java.version'),
-                'Source-Compatibility': project.sourceCompatibility,
-                'Target-Compatibility': project.targetCompatibility,
-                'Main-Class': project.mainClassName
+                'Source-Compatibility': project.java.sourceCompatibility,
+                'Target-Compatibility': project.java.targetCompatibility,
+                'Main-Class': project.application.mainClass
     }
 }
 
