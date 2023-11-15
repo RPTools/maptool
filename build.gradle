@@ -455,6 +455,7 @@ dependencies {
     // testimplementation dependency to testimplementation 'org.testng:testng:6.8.1' and add
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
