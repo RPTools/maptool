@@ -189,7 +189,7 @@ public class TokenPanelTreeModel implements TreeModel {
 
       var viewTokens = new ArrayList<Token>();
       for (Token token : tokenList) {
-        if (filter.accept(token)) {
+        if (filter.test(token)) {
           viewTokens.add(token);
         }
       }
@@ -241,7 +241,7 @@ public class TokenPanelTreeModel implements TreeModel {
      * @param token The token to check.
      * @return {@code true} if the filter matches {@code token}, allowing it to be displayed.
      */
-    public boolean accept(Token token) {
+    public boolean test(Token token) {
       return true;
     }
   }
@@ -261,7 +261,7 @@ public class TokenPanelTreeModel implements TreeModel {
     }
 
     @Override
-    public boolean accept(Token token) {
+    public boolean test(Token token) {
       return this.layer == token.getLayer();
     }
   }
@@ -281,13 +281,12 @@ public class TokenPanelTreeModel implements TreeModel {
    * </ol>
    */
   private static class PlayerTokenFilter extends TokenFilter {
-    /** Accepts only PCs tokens owned by the current player. */
     public PlayerTokenFilter() {
       super(new View("PLAYERS"));
     }
 
     @Override
-    public boolean accept(Token token) {
+    public boolean test(Token token) {
       if (token.getType() != Token.Type.PC) {
         return false;
       }
@@ -304,13 +303,12 @@ public class TokenPanelTreeModel implements TreeModel {
 
   /** Accepts only tokens with an attached light source and only when owned by the user. */
   private static class LightSourceFilter extends TokenFilter {
-    /** Accepts only tokens with an attached light source and only when owned by the user. */
     public LightSourceFilter() {
       super(new View("LIGHT_SOURCES"));
     }
 
     @Override
-    public boolean accept(Token token) {
+    public boolean test(Token token) {
       return !token.getLightSources().isEmpty() && AppUtil.playerOwns(token);
     }
   }
@@ -336,7 +334,7 @@ public class TokenPanelTreeModel implements TreeModel {
     }
 
     @Override
-    public boolean accept(Token token) {
+    public boolean test(Token token) {
       if (!token.getLayer().isTokenLayer() || token.getType() != Token.Type.NPC) {
         return false;
       }
