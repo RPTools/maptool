@@ -49,7 +49,7 @@ public class LightsRenderer {
     var timer = CodeTimer.get();
     timer.start("renderAuras");
     try {
-      final var drawableAuras = zoneView.getDrawableAuras();
+      final var drawableAuras = zoneView.getDrawableAuras(view);
       if (drawableAuras.isEmpty()) {
         return;
       }
