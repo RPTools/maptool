@@ -225,7 +225,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (ownership == Ownership.NONE) return (!t.hasOwners());
       if (ownership == Ownership.MULTIPLE) return (t.isOwnedByAll() || t.getOwners().size() > 1);
       if (ownership == Ownership.SINGLE) return (!t.isOwnedByAll() && t.getOwners().size() == 1);
-      if (ownership == Ownership.ARRAY) return (!Collections.disjoint(t.getOwners(), ownerList));
+      if (ownership == Ownership.ARRAY) return (t.isOwnedByAny(ownerList));
 
       boolean isOwner = t.isOwner(playerName);
       if (ownership == Ownership.SELF) return (isOwner);
