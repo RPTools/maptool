@@ -190,7 +190,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Note: zoneRenderer will be null if map is not visible to players.
     Area newVbl = new Area();
     Area newFowExposedArea = new Area();
-    final var zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    final var zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
     if (zoneRenderer != null) {
       final var zoneView = zoneRenderer.getZoneView();
 
@@ -229,17 +229,16 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         newVbl = mbl;
       }
 
+      var view = zoneRenderer.getPlayerView();
       newFowExposedArea =
-          zoneRenderer.getZone().hasFog()
-              ? zoneView.getExposedArea(zoneRenderer.getPlayerView())
-              : null;
+          zone.hasFog() && !view.isGMView() ? zoneView.getExposedArea(view) : new Area();
     }
 
-    boolean blockedMovesHasChanged = false;
     if (!newVbl.equals(vbl)) {
-      blockedMovesHasChanged = true;
-      vbl = newVbl;
+      // The move cache may no longer accurately reflect the VBL limitations.
+      this.vblBlockedMovesByGoal.clear();
 
+      vbl = newVbl;
       // VBL has changed. Let's update the JTS geometry to match.
       if (vbl.isEmpty()) {
         this.vblGeometry = null;
@@ -264,11 +263,12 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       // log.info("vblGeometry bounds: " + vblGeometry.toString());
     }
     if (!Objects.equals(newFowExposedArea, fowExposedArea)) {
-      blockedMovesHasChanged = true;
-      fowExposedArea = newFowExposedArea;
+      // The move cache may no longer accurately reflect the FOW limitations.
+      this.fowBlockedMovesByGoal.clear();
 
+      fowExposedArea = newFowExposedArea;
       // FoW has changed. Let's update the JTS geometry to match.
-      if (fowExposedArea == null || fowExposedArea.isEmpty()) {
+      if (fowExposedArea.isEmpty()) {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
@@ -291,10 +291,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
       }
     }
-    if (blockedMovesHasChanged) {
-      // The move cache may no longer accurately reflect the VBL limitations.
-      this.vblBlockedMovesByGoal.clear();
-    }
 
     // Erase previous debug labels.
     EventQueue.invokeLater(
@@ -314,15 +310,21 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     Rectangle pathfindingBounds = this.getPathfindingBounds(start, goal);
 
+    log.debug("Starting pathfinding");
+    log.debug("Pathfinding bounds are {}", pathfindingBounds);
     while (!openList.isEmpty()) {
+      log.debug("Open list has {} elements", openList.size());
+
       if (System.currentTimeMillis() > timeOut + estimatedTimeoutNeeded) {
         log.info("Timing out after " + estimatedTimeoutNeeded);
         break;
       }
 
       currentNode = openList.remove();
+      log.debug("Current node is {}", currentNode.position);
       openSet.remove(currentNode);
       if (currentNode.position.equals(goal)) {
+        log.debug("Achieved our goal at {}", goal);
         break;
       }
 
@@ -348,6 +350,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
         openList.add(currentNeighbor);
         openSet.put(currentNeighbor, currentNeighbor);
+        log.debug("Added neighbor to open set: {}", currentNeighbor.position);
       }
 
       closedSet.add(currentNode);
@@ -359,9 +362,15 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         recent path request. Clearing the list effectively finishes this thread gracefully.
       */
       if (Thread.interrupted()) {
-        // log.info("Thread interrupted!");
+        log.debug("Pathfinding cancelled");
         openList.clear();
       }
+    }
+
+    if (currentNode == null) {
+      log.debug("Failed pathfinding");
+    } else {
+      log.debug("Completed pathfinding at {}", goal);
     }
 
     List<CellPoint> returnedCellPointList = new LinkedList<>();
@@ -416,6 +425,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   protected Rectangle getPathfindingBounds(CellPoint start, CellPoint goal) {
     // Bounding box must contain all VBL/MBL ...
     Rectangle pathfindingBounds = vbl.getBounds();
+    pathfindingBounds = pathfindingBounds.union(fowExposedArea.getBounds());
     // ... and the footprints of all terrain tokens ...
     for (var cellPoint : terrainCells.keySet()) {
       pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(cellPoint));
@@ -452,11 +462,14 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               node.position.x + neighborArray[0],
               node.position.y + neighborArray[1],
               node.isOddStepOfOneTwoOneMovement ^ invertEvenOddDiagonals);
+      log.debug("Checking neighbor: {}", neighbor.position);
       if (closedSet.contains(neighbor)) {
+        log.debug("Rejected neighbor for being in the closed set: {}", neighbor.position);
         continue;
       }
 
       if (!zone.getGrid().getBounds(node.position).intersects(pathfindingBounds)) {
+        log.debug("Rejected neighbor for being out of bounds: {}", neighbor.position);
         // This position is too far out to possibly be part of the optimal path.
         closedSet.add(neighbor);
         continue;
@@ -470,7 +483,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if (tokenFootprintIntersectsVBL(neighbor.position)) {
           // The token would overlap VBL if moved to this position, so it is not a valid position.
           closedSet.add(neighbor);
-          blockNode = true;
+          log.debug("Rejected neighbor for being inside MBL: {}", neighbor.position);
           continue;
         }
 
@@ -481,9 +494,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               new CellPoint(cellPoint.x + neighborArray[0], cellPoint.y + neighborArray[1]);
           if (vblBlocksMovement(cellPoint, cellNeighbor)) {
             blockNode = true;
+            log.debug("MBL blocked movement to neighbor: {}", neighbor.position);
             break;
           }
           if (fowBlocksMovement(cellPoint, cellNeighbor)) {
+            log.debug("FOW blocked movement to neighbor to {}", neighbor.position);
             blockNode = true;
             break;
           }
@@ -522,6 +537,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
+        log.debug("Terrain blocked movement to neighbor to {}", neighbor.position);
         continue;
       }
 
@@ -555,6 +571,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
       }
 
+      log.debug("Accepted neighbor: {}", neighbor.position);
       neighbors.add(neighbor);
     }
 
@@ -638,10 +655,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private boolean fowBlocksMovement(CellPoint start, CellPoint goal) {
-    if (MapTool.getPlayer().isEffectiveGM()) {
-      return false;
-    }
-
     if (fowExposedAreaGeometry == null) {
       return false;
     }
