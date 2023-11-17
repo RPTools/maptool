@@ -197,8 +197,23 @@ classes.configure {
     dependsOn instrumentForms
 }
 
-// Badass Runtime Plugin Options
+// Workaround the runtime plugin's hardcoded dependencies on the shadow plugin. It sneakily
+// (dynamically) adds dependencies when shadow is detected, but we don't want it to do that since we
+// only use shadow for a completely separate build artifact.
+tasks.runtime.configure {
+    dependsOn installDist
+    afterEvaluate {
+        dependsOn -= installShadowDist
+    }
+}
+tasks.jpackageImage.configure {
+    dependsOn installDist
+    afterEvaluate {
+        dependsOn -= installShadowDist
+    }
+}
 runtime {
+    distDir.set(installDist.destinationDir)
     options = ['--strip-debug', '--strip-native-commands', '--compress', '2', '--no-header-files', '--no-man-pages']
     modules = ['java.base',
                'java.compiler',
@@ -227,9 +242,9 @@ runtime {
                'jdk.zipfs'
     ]
 
-
-
     jpackage {
+        mainJar = jar.archiveFile.get().asFile.name
+
         installerOutputDir = file("releases")
         jvmArgs = javaArgs
 
