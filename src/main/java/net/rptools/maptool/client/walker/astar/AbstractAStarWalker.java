@@ -235,11 +235,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               : null;
     }
 
-    boolean blockedMovesHasChanged = false;
     if (!newVbl.equals(vbl)) {
-      blockedMovesHasChanged = true;
-      vbl = newVbl;
+      // The move cache may no longer accurately reflect the VBL limitations.
+      this.vblBlockedMovesByGoal.clear();
 
+      vbl = newVbl;
       // VBL has changed. Let's update the JTS geometry to match.
       if (vbl.isEmpty()) {
         this.vblGeometry = null;
@@ -264,9 +264,10 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       // log.info("vblGeometry bounds: " + vblGeometry.toString());
     }
     if (!Objects.equals(newFowExposedArea, fowExposedArea)) {
-      blockedMovesHasChanged = true;
-      fowExposedArea = newFowExposedArea;
+      // The move cache may no longer accurately reflect the FOW limitations.
+      this.fowBlockedMovesByGoal.clear();
 
+      fowExposedArea = newFowExposedArea;
       // FoW has changed. Let's update the JTS geometry to match.
       if (fowExposedArea == null || fowExposedArea.isEmpty()) {
         this.fowExposedAreaGeometry = null;
@@ -290,10 +291,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
           log.info("FoW Geometry oh oh: ", e);
         }
       }
-    }
-    if (blockedMovesHasChanged) {
-      // The move cache may no longer accurately reflect the VBL limitations.
-      this.vblBlockedMovesByGoal.clear();
     }
 
     // Erase previous debug labels.
@@ -416,6 +413,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   protected Rectangle getPathfindingBounds(CellPoint start, CellPoint goal) {
     // Bounding box must contain all VBL/MBL ...
     Rectangle pathfindingBounds = vbl.getBounds();
+    pathfindingBounds = pathfindingBounds.union(fowExposedArea.getBounds());
     // ... and the footprints of all terrain tokens ...
     for (var cellPoint : terrainCells.keySet()) {
       pathfindingBounds = pathfindingBounds.union(zone.getGrid().getBounds(cellPoint));
