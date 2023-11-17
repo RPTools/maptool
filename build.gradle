@@ -17,7 +17,7 @@ plugins {
     id "application"
     id "base"
     id "java"
-    id "org.ajoberstar.grgit" version "5.0.0"
+    id "org.ajoberstar.grgit" version "5.2.0"
     id "com.diffplug.spotless" version "6.18.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
