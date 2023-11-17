@@ -190,7 +190,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     // Note: zoneRenderer will be null if map is not visible to players.
     Area newVbl = new Area();
     Area newFowExposedArea = new Area();
-    final var zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+    final var zoneRenderer = MapTool.getFrame().getZoneRenderer(zone);
     if (zoneRenderer != null) {
       final var zoneView = zoneRenderer.getZoneView();
 
@@ -229,10 +229,9 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         newVbl = mbl;
       }
 
+      var view = zoneRenderer.getPlayerView();
       newFowExposedArea =
-          zoneRenderer.getZone().hasFog()
-              ? zoneView.getExposedArea(zoneRenderer.getPlayerView())
-              : null;
+          zone.hasFog() && !view.isGMView() ? zoneView.getExposedArea(view) : new Area();
     }
 
     if (!newVbl.equals(vbl)) {
@@ -269,7 +268,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
       fowExposedArea = newFowExposedArea;
       // FoW has changed. Let's update the JTS geometry to match.
-      if (fowExposedArea == null || fowExposedArea.isEmpty()) {
+      if (fowExposedArea.isEmpty()) {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
@@ -656,10 +655,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   private boolean fowBlocksMovement(CellPoint start, CellPoint goal) {
-    if (MapTool.getPlayer().isEffectiveGM()) {
-      return false;
-    }
-
     if (fowExposedAreaGeometry == null) {
       return false;
     }
