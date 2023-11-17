@@ -311,15 +311,21 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     Rectangle pathfindingBounds = this.getPathfindingBounds(start, goal);
 
+    log.debug("Starting pathfinding");
+    log.debug("Pathfinding bounds are {}", pathfindingBounds);
     while (!openList.isEmpty()) {
+      log.debug("Open list has {} elements", openList.size());
+
       if (System.currentTimeMillis() > timeOut + estimatedTimeoutNeeded) {
         log.info("Timing out after " + estimatedTimeoutNeeded);
         break;
       }
 
       currentNode = openList.remove();
+      log.debug("Current node is {}", currentNode.position);
       openSet.remove(currentNode);
       if (currentNode.position.equals(goal)) {
+        log.debug("Achieved our goal at {}", goal);
         break;
       }
 
@@ -345,6 +351,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
         openList.add(currentNeighbor);
         openSet.put(currentNeighbor, currentNeighbor);
+        log.debug("Added neighbor to open set: {}", currentNeighbor.position);
       }
 
       closedSet.add(currentNode);
@@ -356,9 +363,15 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         recent path request. Clearing the list effectively finishes this thread gracefully.
       */
       if (Thread.interrupted()) {
-        // log.info("Thread interrupted!");
+        log.debug("Pathfinding cancelled");
         openList.clear();
       }
+    }
+
+    if (currentNode == null) {
+      log.debug("Failed pathfinding");
+    } else {
+      log.debug("Completed pathfinding at {}", goal);
     }
 
     List<CellPoint> returnedCellPointList = new LinkedList<>();
@@ -450,11 +463,14 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               node.position.x + neighborArray[0],
               node.position.y + neighborArray[1],
               node.isOddStepOfOneTwoOneMovement ^ invertEvenOddDiagonals);
+      log.debug("Checking neighbor: {}", neighbor.position);
       if (closedSet.contains(neighbor)) {
+        log.debug("Rejected neighbor for being in the closed set: {}", neighbor.position);
         continue;
       }
 
       if (!zone.getGrid().getBounds(node.position).intersects(pathfindingBounds)) {
+        log.debug("Rejected neighbor for being out of bounds: {}", neighbor.position);
         // This position is too far out to possibly be part of the optimal path.
         closedSet.add(neighbor);
         continue;
@@ -468,7 +484,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         if (tokenFootprintIntersectsVBL(neighbor.position)) {
           // The token would overlap VBL if moved to this position, so it is not a valid position.
           closedSet.add(neighbor);
-          blockNode = true;
+          log.debug("Rejected neighbor for being inside MBL: {}", neighbor.position);
           continue;
         }
 
@@ -479,9 +495,11 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
               new CellPoint(cellPoint.x + neighborArray[0], cellPoint.y + neighborArray[1]);
           if (vblBlocksMovement(cellPoint, cellNeighbor)) {
             blockNode = true;
+            log.debug("MBL blocked movement to neighbor: {}", neighbor.position);
             break;
           }
           if (fowBlocksMovement(cellPoint, cellNeighbor)) {
+            log.debug("FOW blocked movement to neighbor to {}", neighbor.position);
             blockNode = true;
             break;
           }
@@ -520,6 +538,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
       terrainAdder = terrainAdder / cell_cost;
 
       if (blockNode) {
+        log.debug("Terrain blocked movement to neighbor to {}", neighbor.position);
         continue;
       }
 
@@ -553,6 +572,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         }
       }
 
+      log.debug("Accepted neighbor: {}", neighbor.position);
       neighbors.add(neighbor);
     }
 
