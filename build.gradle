@@ -492,7 +492,7 @@ dependencies {
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.15.4'
     // eventbus
-    implementation 'com.google.guava:guava:31.1-jre'
+    implementation 'com.google.guava:guava:32.1.3-jre'
     // compression of messages between client and server
     implementation 'org.apache.commons:commons-compress:1.23.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-3'
