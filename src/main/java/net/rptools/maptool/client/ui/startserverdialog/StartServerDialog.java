@@ -33,7 +33,9 @@ import net.rptools.maptool.util.PasswordGenerator;
 import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences> {
   private boolean accepted;
 
@@ -56,7 +58,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   private JCheckBox useEasyConnect;
 
   public StartServerDialog() {
-    super(new StartServerDialogView().$$$getRootComponent$$$());
+    super(new StartServerDialogView().getRootComponent());
     panelInit();
   }
 

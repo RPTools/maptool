@@ -81,7 +81,7 @@ public class SetTokenStateMacro implements Macro {
       // and trying to change state figuring out that there is a token there because they are
       // getting a different error message (benefit of the doubt only goes so far ;) )
       if (!MapTool.getPlayer().isGM()
-          && (!zone.isTokenVisible(token) || token.getLayer() == Zone.Layer.GM)) {
+          && (!zone.isTokenVisible(token) || !token.getLayer().isVisibleToPlayers())) {
         token = null;
       }
       if (token

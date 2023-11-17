@@ -17,6 +17,8 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
+import java.awt.GridBagConstraints;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
@@ -40,6 +42,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
@@ -76,6 +79,7 @@ public class PreferencesDialog extends JDialog {
   private final JCheckBox tokensStartSnapToGridCheckBox;
   private final JCheckBox tokensSnapWhileDraggingCheckBox;
   private final JCheckBox hideMousePointerWhileDraggingCheckBox;
+  private final JCheckBox hideTokenStackIndicatorCheckBox;
   private final JCheckBox newMapsVisibleCheckBox;
   private final JCheckBox newTokensVisibleCheckBox;
   private final JCheckBox tokensStartFreeSizeCheckBox;
@@ -257,7 +261,7 @@ public class PreferencesDialog extends JDialog {
         .forEach(lm::addElement);
     lightThemesListModel = lm;
 
-    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().$$$getRootComponent$$$());
+    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().getRootComponent());
 
     JButton okButton = (JButton) panel.getButton("okButton");
     getRootPane().setDefaultButton(okButton);
@@ -320,6 +324,7 @@ public class PreferencesDialog extends JDialog {
     tokensStartSnapToGridCheckBox = panel.getCheckBox("tokensStartSnapToGridCheckBox");
     tokensSnapWhileDraggingCheckBox = panel.getCheckBox("tokensSnapWhileDragging");
     hideMousePointerWhileDraggingCheckBox = panel.getCheckBox("hideMousePointerWhileDragging");
+    hideTokenStackIndicatorCheckBox = panel.getCheckBox("hideTokenStackIndicator");
     newMapsVisibleCheckBox = panel.getCheckBox("newMapsVisibleCheckBox");
     newTokensVisibleCheckBox = panel.getCheckBox("newTokensVisibleCheckBox");
     stampsStartFreeSizeCheckBox = panel.getCheckBox("stampsStartFreeSize");
@@ -387,6 +392,9 @@ public class PreferencesDialog extends JDialog {
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
 
+    final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
+    installDirTextField.setText(AppUtil.getInstallDirectory().toString());
+
     publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
     regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
     copyPublicKey = (JButton) panel.getButton("copyKey");
@@ -419,6 +427,47 @@ public class PreferencesDialog extends JDialog {
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
 
     startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    {
+      final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");
+      final var developerLayout = developerOptionToggles.getLayout();
+
+      final var labelConstraints = new GridBagConstraints();
+      labelConstraints.insets = new Insets(6, 0, 6, 5);
+      labelConstraints.gridx = 0;
+      labelConstraints.gridy = 0;
+      labelConstraints.weightx = 0.;
+      labelConstraints.weighty = 1.;
+      labelConstraints.fill = GridBagConstraints.HORIZONTAL;
+
+      final var checkboxConstraints = new GridBagConstraints();
+      checkboxConstraints.insets = new Insets(6, 5, 6, 0);
+      checkboxConstraints.gridx = 1;
+      checkboxConstraints.gridy = 0;
+      checkboxConstraints.weightx = 0.;
+      checkboxConstraints.weighty = 1.;
+      checkboxConstraints.fill = GridBagConstraints.HORIZONTAL;
+
+      for (final var option : DeveloperOptions.Toggle.values()) {
+        labelConstraints.gridy += 1;
+        checkboxConstraints.gridy += 1;
+
+        final var label = new JLabel(option.getLabel());
+        label.setToolTipText(option.getTooltip());
+        label.setHorizontalAlignment(SwingConstants.LEADING);
+        label.setHorizontalTextPosition(SwingConstants.TRAILING);
+
+        final var checkbox = new JCheckBox();
+        checkbox.setName(option.getKey());
+        checkbox.setModel(new DeveloperToggleModel(option));
+        checkbox.addActionListener(e -> option.setEnabled(!checkbox.isSelected()));
+
+        label.setLabelFor(checkbox);
+
+        developerOptionToggles.add(label, labelConstraints);
+        developerOptionToggles.add(checkbox, checkboxConstraints);
+      }
+    }
 
     File appCfgFile = AppUtil.getAppCfgFile();
     String copyInfo = "";
@@ -555,6 +604,10 @@ public class PreferencesDialog extends JDialog {
               @Override
               protected void storeNumericValue(Integer value) {
                 AppPreferences.setFrameRateCap(value);
+
+                for (final var renderer : MapTool.getFrame().getZoneRenderers()) {
+                  renderer.setFrameRateCap(value);
+                }
               }
 
               @Override
@@ -610,6 +663,10 @@ public class PreferencesDialog extends JDialog {
         e ->
             AppPreferences.setHideMousePointerWhileDragging(
                 hideMousePointerWhileDraggingCheckBox.isSelected()));
+    hideTokenStackIndicatorCheckBox.addActionListener(
+        e ->
+            AppPreferences.setHideTokenStackIndicator(
+                hideTokenStackIndicatorCheckBox.isSelected()));
     newMapsVisibleCheckBox.addActionListener(
         e -> AppPreferences.setNewMapsVisible(newMapsVisibleCheckBox.isSelected()));
     newTokensVisibleCheckBox.addActionListener(
@@ -1087,6 +1144,7 @@ public class PreferencesDialog extends JDialog {
     tokensSnapWhileDraggingCheckBox.setSelected(AppPreferences.getTokensSnapWhileDragging());
     hideMousePointerWhileDraggingCheckBox.setSelected(
         AppPreferences.getHideMousePointerWhileDragging());
+    hideTokenStackIndicatorCheckBox.setSelected(AppPreferences.getHideTokenStackIndicator());
     newMapsVisibleCheckBox.setSelected(AppPreferences.getNewMapsVisible());
     newTokensVisibleCheckBox.setSelected(AppPreferences.getNewTokensVisible());
     stampsStartFreeSizeCheckBox.setSelected(AppPreferences.getObjectsStartFreesize());
@@ -1248,7 +1306,28 @@ public class PreferencesDialog extends JDialog {
     return model;
   }
 
-  /** @author frank */
+  private static class DeveloperToggleModel extends DefaultButtonModel {
+    private final DeveloperOptions.Toggle option;
+
+    public DeveloperToggleModel(DeveloperOptions.Toggle option) {
+      this.option = option;
+    }
+
+    @Override
+    public boolean isSelected() {
+      return option.isEnabled();
+    }
+
+    @Override
+    public void setSelected(boolean b) {
+      option.setEnabled(b);
+      super.setEnabled(b);
+    }
+  }
+
+  /**
+   * @author frank
+   */
   private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
     JTextField comp;
@@ -1285,7 +1364,9 @@ public class PreferencesDialog extends JDialog {
     protected abstract void storeNumericValue(T value);
   }
 
-  /** @author frank */
+  /**
+   * @author frank
+   */
   private abstract static class ChangeListenerProxy implements ChangeListener {
 
     @Override

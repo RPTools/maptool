@@ -41,15 +41,15 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.boardtool.BoardTool;
 import net.rptools.maptool.client.tool.gridtool.GridTool;
 import net.rptools.maptool.client.ui.*;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
-import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialog;
+import net.rptools.maptool.client.ui.addon.AddOnLibrariesDialogView;
 import net.rptools.maptool.client.ui.addresource.AddResourceDialog;
 import net.rptools.maptool.client.ui.assetpanel.AssetPanel;
 import net.rptools.maptool.client.ui.assetpanel.Directory;
-import net.rptools.maptool.client.ui.campaignexportdialog.CampaignExportDialog;
 import net.rptools.maptool.client.ui.campaignproperties.CampaignPropertiesDialog;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
@@ -68,7 +68,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.transferprogressdialog.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -238,22 +238,6 @@ public class AppActions {
         }
       };
 
-  public static final Action EXPORT_CAMPAIGN_AS =
-      new AdminClientAction() {
-        {
-          init("action.exportCampaignAs");
-        }
-
-        @Override
-        protected void executeAction() {
-          try {
-            doCampaignExport();
-          } catch (Exception ex) {
-            MapTool.showError("Cannot create the ExportCampaignDialog object", ex);
-          }
-        }
-      };
-
   public static final Action EXPORT_CAMPAIGN_REPO =
       new AdminClientAction() {
 
@@ -266,9 +250,19 @@ public class AppActions {
 
           JFileChooser chooser = MapTool.getFrame().getSaveFileChooser();
 
-          // Get target location
-          if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-            return;
+          boolean tryAgain = true;
+          while (tryAgain) {
+            // Get target location
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              return;
+            }
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.exportRepoToInstallDir");
+            } else {
+              tryAgain = false;
+            }
           }
 
           // Default extension
@@ -1097,7 +1091,7 @@ public class AppActions {
     // Create a set of all tokenExposedAreaGUID's to make searching by GUID much faster.
     Set<GUID> allTokensSet = null;
     {
-      List<Token> allTokensList = zone.getTokens();
+      List<Token> allTokensList = zone.getAllTokens();
       if (!allTokensList.isEmpty()) {
         allTokensSet = new HashSet<GUID>(allTokensList.size());
         for (Token token : allTokensList) {
@@ -1525,7 +1519,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_LUMENS_OVERLAY =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLumensOverlay");
         }
@@ -1544,7 +1538,7 @@ public class AppActions {
 
   /** This is the menu option turns the lumens overlay on and off. */
   public static final Action TOGGLE_SHOW_LIGHTS =
-      new ZoneAdminClientAction() {
+      new ZoneClientAction() {
         {
           init("action.showLights");
         }
@@ -2562,6 +2556,12 @@ public class AppActions {
       return;
     }
 
+    var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+    var openDir = campaignFile.toPath().getParent().toAbsolutePath();
+    if (openDir.startsWith(installDir)) {
+      MapTool.showWarning("msg.warning.loadCampaignFromInstallDir");
+    }
+
     new CampaignLoader(campaignFile).execute();
   }
 
@@ -2708,32 +2708,33 @@ public class AppActions {
       doSaveCampaignAs(onSuccess);
       return;
     }
+    var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+    var saveDir = AppState.getCampaignFile().toPath().getParent().toAbsolutePath();
+    if (saveDir.startsWith(installDir)) {
+      MapTool.showWarning("msg.warning.saveCampaignToInstallDir");
+      doSaveCampaignAs(onSuccess);
+      return;
+    }
     doSaveCampaign(AppState.getCampaignFile(), onSuccess);
   }
 
   private static void doSaveCampaign(final File file, Runnable onSuccess) {
-    doSaveCampaign(file, null, onSuccess);
-  }
-
-  private static void doSaveCampaign(File file, String campaignVersion, Runnable onSuccess) {
 
     if (AppState.testBackgroundTaskLock()) {
       MapTool.showError("msg.error.failedSaveCampaignLock");
       return;
     }
-    new CampaignSaver(file, campaignVersion, onSuccess).execute();
+    new CampaignSaver(file, onSuccess).execute();
   }
 
   private static class CampaignSaver extends SwingWorker<Object, String> {
 
     private File file;
-    private String campaignVersion;
     private Runnable onSuccess;
     private int maxWaitForLock = 30;
 
-    public CampaignSaver(File file, String campaignVersion, Runnable onSuccess) {
+    public CampaignSaver(File file, Runnable onSuccess) {
       this.file = file;
-      this.campaignVersion = campaignVersion;
       this.onSuccess = onSuccess;
     }
 
@@ -2746,7 +2747,7 @@ public class AppActions {
 
       try {
         long start = System.currentTimeMillis();
-        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file, campaignVersion);
+        PersistenceUtil.saveCampaign(MapTool.getCampaign(), file);
 
         publish(I18N.getString("msg.info.campaignSaved"));
 
@@ -2785,29 +2786,31 @@ public class AppActions {
   }
 
   public static void doSaveCampaignAs(Runnable onSuccess) {
-    JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
-    int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
-    if (saveStatus == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(null, chooser.getSelectedFile(), onSuccess);
+    boolean tryAgain = true;
+    while (tryAgain) {
+      JFileChooser chooser = MapTool.getFrame().getSaveCmpgnFileChooser();
+      int saveStatus = chooser.showSaveDialog(MapTool.getFrame());
+      if (saveStatus == JFileChooser.APPROVE_OPTION) {
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveCampaignToInstallDir");
+        } else {
+          tryAgain = false;
+          saveAndUpdateCampaignName(chooser.getSelectedFile(), onSuccess);
+        }
+      } else {
+        tryAgain = false;
+      }
     }
   }
 
-  public static void doCampaignExport() {
-    CampaignExportDialog dialog = MapTool.getCampaign().getExportCampaignDialog();
-    dialog.setVisible(true);
-
-    if (dialog.getSaveStatus() == JFileChooser.APPROVE_OPTION) {
-      saveAndUpdateCampaignName(dialog.getVersionText(), dialog.getCampaignFile(), null);
-    }
-  }
-
-  private static void saveAndUpdateCampaignName(
-      String campaignVersion, File selectedFile, Runnable onSuccess) {
+  private static void saveAndUpdateCampaignName(File selectedFile, Runnable onSuccess) {
     File campaignFile = getFileWithExtension(selectedFile, AppConstants.CAMPAIGN_FILE_EXTENSION);
     if (campaignFile.exists() && !MapTool.confirm("msg.confirm.overwriteExistingCampaign")) {
       return;
     }
-    doSaveCampaign(campaignFile, campaignVersion, onSuccess);
+    doSaveCampaign(campaignFile, onSuccess);
     AppState.setCampaignFile(campaignFile);
     AppPreferences.setSaveDir(campaignFile.getParentFile());
     AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
@@ -2843,20 +2846,31 @@ public class AppActions {
           chooser.setFileFilter(MapTool.getFrame().getMapFileFilter());
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
           chooser.setSelectedFile(new File(zr.getZone().getName()));
-          if (chooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
-            try {
-              File mapFile = chooser.getSelectedFile();
-              mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
-              if (mapFile.exists()) {
-                if (!MapTool.confirm("msg.confirm.fileExists")) {
-                  return;
+          boolean tryAgain = true;
+          while (tryAgain) {
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              break;
+            }
+            File mapFile = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.saveMapToInstallDir");
+            } else {
+              tryAgain = false;
+              try {
+                mapFile = getFileWithExtension(mapFile, AppConstants.MAP_FILE_EXTENSION);
+                if (mapFile.exists()) {
+                  if (!MapTool.confirm("msg.confirm.fileExists")) {
+                    return;
+                  }
                 }
+                PersistenceUtil.saveMap(zr.getZone(), mapFile);
+                AppPreferences.setSaveMapDir(mapFile.getParentFile());
+                MapTool.showInformation("msg.info.mapSaved");
+              } catch (IOException ioe) {
+                MapTool.showError("msg.error.failedSaveMap", ioe);
               }
-              PersistenceUtil.saveMap(zr.getZone(), mapFile);
-              AppPreferences.setSaveMapDir(mapFile.getParentFile());
-              MapTool.showInformation("msg.info.mapSaved");
-            } catch (IOException ioe) {
-              MapTool.showError("msg.error.failedSaveMap", ioe);
             }
           }
         }
@@ -3244,7 +3258,10 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-          new AddOnLibrariesDialog().show();
+          var dialog = new AddOnLibrariesDialogView();
+          dialog.pack();
+          SwingUtil.centerOver(dialog, MapTool.getFrame());
+          dialog.setVisible(true);
         }
       };
 

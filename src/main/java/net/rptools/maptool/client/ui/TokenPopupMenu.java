@@ -53,7 +53,7 @@ import net.rptools.maptool.client.functions.TokenBarFunction;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ExposedAreaMetaData;
@@ -95,7 +95,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
     add(createHaloMenu());
     addOwnedItem(createArrangeMenu());
-    addGMItem(createChangeToMenu(Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    addGMItem(createChangeToMenu(Zone.Layer.values()));
     add(new JSeparator());
 
     /*
@@ -151,10 +151,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     Map<String, JMenu> groups = new TreeMap<String, JMenu>();
     for (MacroButtonProperties macro : macroList) {
       group = macro.getGroup();
-      group =
-          (group == null || group.isEmpty()
-              ? " General"
-              : group); // leading space makes it come first
+      group = (group.isEmpty() ? " General" : group); // leading space makes it come first
       JMenu submenu = groups.get(group);
       if (submenu == null) {
         submenu = new JMenu(group);
@@ -199,7 +196,8 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     menu.add(new AddPartyExposedAreaAction());
 
     Zone zone = getRenderer().getZone();
-    List<Token> tokens = zone.getTokens();
+    List<Token> tokens =
+        zone.getTokensForLayers(layer -> layer.supportsVision() && layer.isTokenLayer());
     if (tokens != null && !tokens.isEmpty()) {
       String tokenViewMenu = I18N.getText("token.popup.menu.fow.tokens");
       JMenu subMenu = new JMenu(tokenViewMenu);
@@ -275,7 +273,8 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
       // This is ALL tokens; perhaps it should be owned tokens? Or just PC tokens? Or only those
       // with HasSight?
       // Or can players not use this feature at all so the above don't matter?
-      List<Token> allToks = zone.getTokens();
+      List<Token> allToks =
+          zone.getTokensForLayers(layer -> layer.supportsVision() && layer.isTokenLayer());
 
       // First create an Area that includes the exposed areas of all tokens
       Area tokenArea = new Area();

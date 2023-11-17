@@ -18,12 +18,14 @@ import com.google.gson.*;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
+import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
+import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import net.rptools.common.expression.ExpressionParser;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.ExpressionParser;
+import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.language.I18N;
@@ -74,11 +76,15 @@ public class JSONMacroFunctions extends AbstractFunction {
   private static final JSONMacroFunctions instance = new JSONMacroFunctions();
 
   /** Configuration object for JSONPath. */
-  private static final Configuration jaywayConfig =
-      Configuration.builder().jsonProvider(new GsonJsonProvider()).build();
+  private static final Configuration jaywayConfig;
 
-  /** The parser used to parse Json strings into an internal representation. */
-  private static final JsonParser jsonParser = new JsonParser();
+  static {
+    jaywayConfig =
+        Configuration.builder()
+            .jsonProvider(new GsonJsonProvider())
+            .mappingProvider(new GsonMappingProvider())
+            .build();
+  }
 
   /** Creates a new <code>JSONMacroFunctions</code> object. */
   private JSONMacroFunctions() {
@@ -123,7 +129,7 @@ public class JSONMacroFunctions extends AbstractFunction {
         "json.rolls",
         "json.objrolls");
 
-    typeConversion = new JsonMTSTypeConversion(jsonParser);
+    typeConversion = new JsonMTSTypeConversion();
     jsonArrayFunctions = new JsonArrayFunctions(typeConversion);
     jsonObjectFunctions = new JsonObjectFunctions(typeConversion);
   }
@@ -866,7 +872,12 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The resulting json data.
    */
   private JsonElement jsonPathDelete(JsonElement json, String path) {
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).delete(path).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -881,7 +892,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathPut(JsonElement json, String path, String key, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).put(path, key, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**
@@ -895,7 +911,12 @@ public class JSONMacroFunctions extends AbstractFunction {
   private JsonElement jsonPathSet(JsonElement json, String path, Object info) {
     Object value = asJsonElement(info);
 
-    return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    try {
+      return JsonPath.using(jaywayConfig).parse(shallowCopy(json)).set(path, value).json();
+    } catch (PathNotFoundException ex) {
+      // Return original json, this is to preserve backwards compatability pre library update
+      return json;
+    }
   }
 
   /**

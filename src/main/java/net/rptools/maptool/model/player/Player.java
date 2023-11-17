@@ -15,10 +15,13 @@
 package net.rptools.maptool.model.player;
 
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.server.proto.PlayerDto;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class Player {
 
   public enum Role {
@@ -43,6 +46,8 @@ public class Player {
 
   private String name; // Primary Key
   private String role;
+  private GUID zoneId;
+  private boolean loaded;
 
   private transient CipherUtil.Key password;
   private transient Role actualRole;
@@ -55,11 +60,29 @@ public class Player {
     this.name = name;
     this.role = role.name();
     this.password = password;
+    this.zoneId = null;
+    this.loaded = true;
   }
 
   protected void setRole(Role role) {
     this.role = role.name();
     actualRole = role;
+  }
+
+  public GUID getZoneId() {
+    return zoneId;
+  }
+
+  public void setZoneId(GUID zoneId) {
+    this.zoneId = zoneId;
+  }
+
+  public boolean getLoaded() {
+    return loaded;
+  }
+
+  public void setLoaded(boolean loaded) {
+    this.loaded = loaded;
   }
 
   @Override
@@ -79,12 +102,16 @@ public class Player {
     return getRole() == Role.GM;
   }
 
-  /** @return Returns the name. */
+  /**
+   * @return Returns the name.
+   */
   public String getName() {
     return name;
   }
 
-  /** @param name The name to set. */
+  /**
+   * @param name The name to set.
+   */
   public void setName(String name) {
     this.name = name;
   }
@@ -93,7 +120,9 @@ public class Player {
     return password;
   }
 
-  /** @return Returns the role. */
+  /**
+   * @return Returns the role.
+   */
   public Role getRole() {
     if (actualRole == null) {
       actualRole = Role.valueOf(role);
@@ -114,10 +143,19 @@ public class Player {
     var player = new Player();
     player.name = dto.getName();
     player.role = dto.getRole();
+    player.zoneId = dto.getZoneGuid().equals("") ? null : GUID.valueOf(dto.getZoneGuid());
+    player.loaded = dto.getLoaded();
+
     return player;
   }
 
   public PlayerDto toDto() {
-    return PlayerDto.newBuilder().setName(name).setRole(role).build();
+    var builder = PlayerDto.newBuilder().setName(name).setRole(role).setLoaded(loaded);
+
+    if (zoneId != null) {
+      builder.setZoneGuid(zoneId.toString());
+    }
+
+    return builder.build();
   }
 }

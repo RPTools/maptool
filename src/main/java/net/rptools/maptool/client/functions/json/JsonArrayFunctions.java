@@ -27,6 +27,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 
@@ -104,7 +105,7 @@ public class JsonArrayFunctions {
    * @return the string list as a json array.
    */
   public JsonArray fromStringList(String strList, String delim) {
-    String[] list = strList.split(delim);
+    String[] list = StringUtil.split(strList, delim);
 
     // An Empty list should generate an empty JSON array.
     if (list.length == 1 && list[0].length() == 0) {

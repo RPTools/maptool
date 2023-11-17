@@ -26,7 +26,7 @@ import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -164,7 +164,9 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
     return true;
   }
 
-  /** @see Tool#resetTool() */
+  /**
+   * @see Tool#resetTool()
+   */
   @Override
   protected void resetTool() {
     if (line != null) {

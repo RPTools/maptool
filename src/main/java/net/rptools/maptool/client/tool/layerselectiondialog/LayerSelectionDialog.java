@@ -20,7 +20,6 @@ import javax.swing.DefaultListModel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.ListSelectionModel;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.model.Zone;
 
@@ -32,7 +31,7 @@ public class LayerSelectionDialog extends JPanel {
   private final Zone.Layer[] layerList;
 
   public LayerSelectionDialog(Zone.Layer[] layerList, LayerSelectionListener listener) {
-    panel = new AbeillePanel(new LayerSelectionDialogView().$$$getRootComponent$$$());
+    panel = new AbeillePanel(new LayerSelectionDialogView().getRootComponent());
     this.listener = listener;
     this.layerList = layerList;
     setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
@@ -49,11 +48,6 @@ public class LayerSelectionDialog extends JPanel {
     if (index >= 0 && listener != null) {
       listener.layerSelected(list.getModel().getElementAt(index));
     }
-  }
-
-  public void updateViewList() {
-    getLayerList()
-        .setSelectedValue(MapTool.getFrame().getCurrentZoneRenderer().getActiveLayer(), true);
   }
 
   private JList<Zone.Layer> getLayerList() {
@@ -83,7 +77,7 @@ public class LayerSelectionDialog extends JPanel {
   }
 
   public void setSelectedLayer(Zone.Layer layer) {
-    list.setSelectedValue(layer, true);
+    getLayerList().setSelectedValue(layer, true);
   }
 
   public interface LayerSelectionListener {

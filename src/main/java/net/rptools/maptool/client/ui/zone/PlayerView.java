@@ -27,13 +27,31 @@ public class PlayerView {
   // Optimization
   private final String hash;
 
+  /**
+   * Creates a player view that does not use token views.
+   *
+   * <p>Calling `isUsingTokenView()` on the new player view will return {@code false} and {@link
+   * #getTokens()} should not be called.
+   *
+   * @param role The player role for the view.
+   */
   public PlayerView(Player.Role role) {
-    this(role, null);
+    this.role = role;
+    this.tokens = null;
+    hash = calculateHashcode();
   }
 
+  /**
+   * Creates a player view for a token view.
+   *
+   * <p>Calling `isUsingTokenView()` on the new player view will return {@code false} and {@link
+   * #getTokens()} can be called to retrieve the list of tokens.
+   *
+   * @param role The player role for the view.
+   */
   public PlayerView(Player.Role role, List<Token> tokens) {
     this.role = role;
-    this.tokens = tokens != null && !tokens.isEmpty() ? tokens : null;
+    this.tokens = tokens;
     hash = calculateHashcode();
   }
 
@@ -45,11 +63,20 @@ public class PlayerView {
     return role == Player.Role.GM;
   }
 
+  /**
+   * Gets the tokens for this view.
+   *
+   * <p>This method should only be used when {@link #isUsingTokenView()} returns {@code true}.
+   *
+   * @return The tokens for this view.
+   */
   public List<Token> getTokens() {
     return tokens;
   }
 
-  /** @return true if the view is for some tokens only, false if the view is global */
+  /**
+   * @return true if the view is for some tokens only, false if the view is global
+   */
   public boolean isUsingTokenView() {
     return tokens != null;
   }
@@ -72,6 +99,7 @@ public class PlayerView {
     StringBuilder builder = new StringBuilder();
     builder.append(role);
     if (tokens != null) {
+      builder.append('|'); // Distinguishes null and empty case.
       for (Token token : tokens) {
         builder.append(token.getId());
       }

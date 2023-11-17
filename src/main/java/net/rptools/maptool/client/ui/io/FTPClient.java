@@ -14,7 +14,9 @@
  */
 package net.rptools.maptool.client.ui.io;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;

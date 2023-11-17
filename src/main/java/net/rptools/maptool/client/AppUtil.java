@@ -21,7 +21,6 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -124,7 +123,7 @@ public class AppUtil {
         RuntimeException re =
             new RuntimeException(
                 I18N.getText("msg.error.unableToCreateDataDir", path.getAbsolutePath()));
-        if (log != null && log.isInfoEnabled()) {
+        if (log != null) {
           log.info("msg.error.unableToCreateDataDir", re);
         }
         throw re;
@@ -200,6 +199,33 @@ public class AppUtil {
     }
 
     return path;
+  }
+
+  /**
+   * This function tries to determine the installation directory of the application. This can differ
+   * from the directory the application is running from as returned by {@link
+   * #getAppInstallLocation()}.
+   *
+   * @return the installation directory of the application.
+   */
+  public static Path getInstallDirectory() {
+    var path = Path.of(getAppInstallLocation());
+    if (MapTool.isDevelopment()) {
+      // remove build/classes/java
+      path = path.getParent().getParent().getParent();
+    } else { // First try to find MapTool* directory in path
+      while (path != null) {
+        if (path.getFileName().toString().matches("(?i).*maptool.*")) {
+          break;
+        }
+        path = path.getParent();
+      }
+    }
+    if (path == null) { // if not found then just return the parent of the app subdir
+      return Path.of(getAppInstallLocation()).resolve("..").toAbsolutePath();
+    } else {
+      return path;
+    }
   }
 
   /**
@@ -295,16 +321,7 @@ public class AppUtil {
    * @return true if owned by all, or one of the owners is online and not a gm.
    */
   public static boolean ownedByOnePlayer(Token token) {
-    if (token.isOwnedByAll()) {
-      return true;
-    }
-    List<String> players = MapTool.getNonGMs();
-    for (String owner : token.getOwners()) {
-      if (players.contains(owner)) {
-        return true;
-      }
-    }
-    return false;
+    return token.isOwnedByAny(MapTool.getNonGMs());
   }
 
   /**

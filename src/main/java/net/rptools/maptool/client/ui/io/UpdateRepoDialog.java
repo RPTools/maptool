@@ -39,12 +39,14 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author crash */
+/**
+ * @author crash
+ */
 @SuppressWarnings("serial")
 public class UpdateRepoDialog extends JDialog {
   private static final Logger log = LogManager.getLogger(FTPClient.class);
   private static final AbeillePanel form =
-      new AbeillePanel(new UpdateRepoDialogView().$$$getRootComponent$$$());
+      new AbeillePanel(new UpdateRepoDialogView().getRootComponent());
 
   private int status = -1;
   private CheckBoxListWithSelectable list;

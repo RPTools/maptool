@@ -14,8 +14,12 @@
  */
 package net.rptools.clientserver.simple;
 
-/** @author trevor */
+import net.rptools.clientserver.simple.connection.Connection;
+
+/**
+ * @author trevor
+ */
 public interface DisconnectHandler {
 
-  public void handleDisconnect(AbstractConnection conn);
+  public void handleDisconnect(Connection conn);
 }

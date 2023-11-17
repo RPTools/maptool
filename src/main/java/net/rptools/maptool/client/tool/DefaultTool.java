@@ -26,7 +26,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.layerselectiondialog.LayerSelectionDialog;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -40,11 +40,7 @@ public abstract class DefaultTool extends Tool
   private static final long serialVersionUID = 3258411729238372921L;
 
   private final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Zone.Layer[] {
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-          },
-          this::selectedLayerChanged);
+      new LayerSelectionDialog(Zone.Layer.values(), this::selectedLayerChanged);
 
   private Zone.Layer selectedLayer;
   private boolean isDraggingMap;
@@ -56,9 +52,7 @@ public abstract class DefaultTool extends Tool
   protected int mouseY;
 
   // This is to manage overflowing of map move events (keep things snappy)
-  private long lastMoveRedraw;
   private int mapDX, mapDY;
-  private static final int REDRAW_DELAY = 25; // millis
 
   // TBD
   private boolean isTouchScreen = false;
@@ -84,7 +78,8 @@ public abstract class DefaultTool extends Tool
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     this.renderer = renderer;
-    layerSelectionDialog.updateViewList();
+    selectedLayer = renderer.getActiveLayer();
+    layerSelectionDialog.setSelectedLayer(selectedLayer);
   }
 
   @Override
@@ -217,7 +212,9 @@ public abstract class DefaultTool extends Tool
     isDraggingMap = false;
   }
 
-  /** @param isDraggingMap whether the user drags the map */
+  /**
+   * @param isDraggingMap whether the user drags the map
+   */
   void setDraggingMap(boolean isDraggingMap) {
     this.isDraggingMap = isDraggingMap;
   }
@@ -292,16 +289,9 @@ public abstract class DefaultTool extends Tool
 
       setDragStart(mX, mY);
 
-      long now = System.currentTimeMillis();
-      if (now - lastMoveRedraw > REDRAW_DELAY) {
-        // TODO: does it matter to capture the last map move in the series ?
-        // TODO: This should probably be genericized and put into ZoneRenderer to prevent over
-        // zealous repainting
-        renderer.moveViewBy(mapDX, mapDY);
-        mapDX = 0;
-        mapDY = 0;
-        lastMoveRedraw = now;
-      }
+      renderer.moveViewBy(mapDX, mapDY);
+      mapDX = 0;
+      mapDY = 0;
     }
   }
 

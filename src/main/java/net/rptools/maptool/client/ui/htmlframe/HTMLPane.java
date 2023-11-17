@@ -67,13 +67,7 @@ public class HTMLPane extends JEditorPane {
 
     addHyperlinkListener(
         e -> {
-          if (log.isDebugEnabled()) {
-            log.debug(
-                "Responding to hyperlink event: "
-                    + e.getEventType().toString()
-                    + " "
-                    + e.toString());
-          }
+          log.debug("Responding to hyperlink event: {} {}", e.getEventType(), e);
           if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
             if (e.getURL() != null) {
               MapTool.showDocument(e.getURL().toString());
@@ -91,7 +85,9 @@ public class HTMLPane extends JEditorPane {
     ToolTipManager.sharedInstance().registerComponent(this);
   }
 
-  /** @return the rule for the body tag */
+  /**
+   * @return the rule for the body tag
+   */
   public String getRuleBody() {
     return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
   }
@@ -147,10 +143,7 @@ public class HTMLPane extends JEditorPane {
    */
   public void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "submit event: method='" + method + "' action='" + action + "' data='" + data + "'");
-      }
+      log.debug("submit event: method='{}' action='{}' data='{}'", method, action, data);
       actionListeners.actionPerformed(
           new HTMLActionEvent.FormActionEvent(this, method, action, data));
     }
@@ -163,9 +156,7 @@ public class HTMLPane extends JEditorPane {
    */
   private void doChangeTitle(String title) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("changeTitle event: " + title);
-      }
+      log.debug("changeTitle event: {}", title);
       actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
     }
   }
@@ -178,9 +169,7 @@ public class HTMLPane extends JEditorPane {
    */
   private void doRegisterMacro(String type, String link) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("registerMacro event: type='" + type + "' link='" + link + "'");
-      }
+      log.debug("registerMacro event: type='{}' link='{}'", type, link);
       actionListeners.actionPerformed(
           new HTMLActionEvent.RegisterMacroActionEvent(this, type, link));
     }
@@ -194,9 +183,7 @@ public class HTMLPane extends JEditorPane {
    */
   private void handleMetaTag(String name, String content) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("metaTag found: name='" + name + "' content='" + content + "'");
-      }
+      log.debug("metaTag found: name='{}' content='{}'", name, content);
       actionListeners.actionPerformed(new HTMLActionEvent.MetaTagActionEvent(this, name, content));
     }
   }
@@ -230,9 +217,7 @@ public class HTMLPane extends JEditorPane {
     } catch (IOException e) {
       // Do nothing, we should not get an io exception on string
     }
-    if (log.isDebugEnabled()) {
-      log.debug("setting text in HTMLPane: " + text);
-    }
+    log.debug("setting text in HTMLPane: {}", text);
     super.setText(HTMLPanelInterface.fixHTML(text));
   }
 
@@ -273,9 +258,7 @@ public class HTMLPane extends JEditorPane {
 
     @Override
     public void handleError(String errorMsg, int pos) {
-      if (log.isTraceEnabled()) {
-        log.trace("handleError called in client.ui.htmlframe.HTMLPane.ParserCallBack: " + errorMsg);
-      }
+      log.trace("handleError called in client.ui.htmlframe.HTMLPane.ParserCallBack: {}", errorMsg);
     }
 
     /**

@@ -147,6 +147,9 @@ public class AppPreferences {
       "hideMousePointerWhileDragging";
   private static final boolean DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING = true;
 
+  private static final String KEY_HIDE_TOKEN_STACK_INDICATOR = "hideTokenStackIndicator";
+  private static final boolean DEFAULT_KEY_HIDE_TOKEN_STACK_INDICATOR = false;
+
   private static final String KEY_OBJECTS_START_SNAP_TO_GRID = "newStampsStartSnapToGrid";
   private static final boolean DEFAULT_OBJECTS_START_SNAP_TO_GRID = false;
 
@@ -960,6 +963,14 @@ public class AppPreferences {
         KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING, DEFAULT_KEY_HIDE_MOUSE_POINTER_WHILE_DRAGGING);
   }
 
+  public static void setHideTokenStackIndicator(boolean flag) {
+    prefs.putBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, flag);
+  }
+
+  public static boolean getHideTokenStackIndicator() {
+    return prefs.getBoolean(KEY_HIDE_TOKEN_STACK_INDICATOR, DEFAULT_KEY_HIDE_TOKEN_STACK_INDICATOR);
+  }
+
   public static void setObjectsStartSnapToGrid(boolean flag) {
     prefs.putBoolean(KEY_OBJECTS_START_SNAP_TO_GRID, flag);
   }
@@ -1231,9 +1242,7 @@ public class AppPreferences {
         path = file.getCanonicalPath();
       } catch (IOException e) {
         // Probably pretty rare, but we want to know about it
-        if (log.isInfoEnabled()) {
-          log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
-        }
+        log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
         path = file.getPath();
       }
       // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on

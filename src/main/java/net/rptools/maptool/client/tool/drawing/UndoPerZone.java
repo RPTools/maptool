@@ -73,7 +73,9 @@ public class UndoPerZone {
   }
 
   private void checkZone() {
-    if (zone == null && log.isDebugEnabled()) log.debug("zone == null (!)");
+    if (zone == null) {
+      log.debug("zone == null (!)");
+    }
   }
 
   /**
@@ -84,8 +86,7 @@ public class UndoPerZone {
    */
   public void addDrawable(Pen pen, Drawable drawable) {
     checkZone();
-    if (log.isDebugEnabled())
-      log.debug("drawable " + drawable + " being added to zone " + zone.getName());
+    log.debug("drawable {} being added to zone {}", drawable, zone.getName());
     manager.addEdit(new DrawableUndoableEdit(pen, drawable));
     net.rptools.maptool.client.AppActions.UNDO_PER_MAP.isAvailable();
     net.rptools.maptool.client.AppActions.REDO_PER_MAP.isAvailable();
@@ -103,10 +104,10 @@ public class UndoPerZone {
   public void undo() {
     checkZone();
     if (!canUndo()) {
-      if (log.isDebugEnabled()) log.debug("Can't undo from zone " + zone.getName());
+      log.debug("Can't undo from zone {}", zone.getName());
       return;
     }
-    if (log.isDebugEnabled()) log.debug("Undoing last change on zone " + zone.getName());
+    log.debug("Undoing last change on zone {}", zone.getName());
     manager.undo();
   }
 
@@ -114,10 +115,10 @@ public class UndoPerZone {
   public void redo() {
     checkZone();
     if (!canRedo()) {
-      if (log.isDebugEnabled()) log.debug("Can't redo from zone " + zone.getName());
+      log.debug("Can't redo from zone {}", zone.getName());
       return;
     }
-    if (log.isDebugEnabled()) log.debug("Redoing next change on zone " + zone.getName());
+    log.debug("Redoing next change on zone {}", zone.getName());
     manager.redo();
   }
 
@@ -180,7 +181,9 @@ public class UndoPerZone {
       MapTool.serverCommand().undoDraw(zone.getId(), drawable.getId());
     }
 
-    /** @see javax.swing.undo.UndoableEdit#redo() */
+    /**
+     * @see javax.swing.undo.UndoableEdit#redo()
+     */
     @Override
     public void redo() throws CannotRedoException {
       super.redo();

@@ -23,11 +23,13 @@ import net.rptools.maptool.client.AppActions.ZoneAdminClientAction;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -75,17 +77,7 @@ public class FogOfWarFunctions extends AbstractFunction {
               parameters.size()));
     }
 
-    ZoneRenderer zoneRenderer;
-    if (parameters.size() >= 1) {
-      String mapName = parameters.get(0).toString();
-      zoneRenderer = MapTool.getFrame().getZoneRenderer(mapName);
-      if (zoneRenderer == null) {
-        throw new ParserException(
-            I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, mapName));
-      }
-    } else {
-      zoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
-    }
+    final var zoneRenderer = FunctionUtil.getZoneRendererFromParam(functionName, parameters, 0);
 
     /*
      * String empty = exposePCOnlyArea(optional String mapName)
@@ -181,7 +173,7 @@ public class FogOfWarFunctions extends AbstractFunction {
       }
     } else {
       // String List
-      String[] strList = paramStr.split(delim);
+      String[] strList = StringUtil.split(paramStr, delim);
       for (String s : strList) {
         Token t = zone.resolveToken(s.trim());
         if (t != null) {

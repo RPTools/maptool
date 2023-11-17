@@ -20,6 +20,7 @@ import java.awt.image.BufferedImage;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
@@ -34,8 +35,7 @@ public class LightSourceIconOverlay implements ZoneOverlay {
       if (token.hasLightSources()) {
         boolean foundNormalLight = false;
         for (AttachedLightSource attachedLightSource : token.getLightSources()) {
-          LightSource lightSource =
-              MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
+          LightSource lightSource = attachedLightSource.resolve(token, MapTool.getCampaign());
           if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
             foundNormalLight = true;
             break;

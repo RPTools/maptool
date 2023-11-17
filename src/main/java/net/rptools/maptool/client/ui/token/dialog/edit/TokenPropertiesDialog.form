@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.token.edit.TokenPropertiesDialog">
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.token.dialog.edit.TokenPropertiesDialog">
   <grid id="ca1c7" binding="mainPanel" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="4" left="4" bottom="4" right="4"/>
     <constraints>
-      <xy x="10" y="10" width="809" height="781"/>
+      <xy x="10" y="10" width="1092" height="842"/>
     </constraints>
     <properties>
       <name value="mainPanel"/>
@@ -46,6 +46,7 @@
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -64,6 +65,7 @@
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
+                <properties/>
               </component>
             </children>
           </grid>
@@ -124,7 +126,7 @@
                   </component>
                 </children>
               </grid>
-              <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="149c6" layout-manager="GridLayoutManager" row-count="1" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -134,11 +136,12 @@
                 <children>
                   <component id="e4b0f" class="javax.swing.JToggleButton">
                     <constraints>
-                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <name value="mblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movembltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="e2975" class="javax.swing.JToggleButton">
@@ -148,6 +151,7 @@
                     <properties>
                       <name value="wallVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movevbltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="9e8c7" class="javax.swing.JToggleButton">
@@ -157,6 +161,7 @@
                     <properties>
                       <name value="hillVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movehbltoggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="d415c" class="javax.swing.JToggleButton">
@@ -166,6 +171,17 @@
                     <properties>
                       <name value="pitVblToggle"/>
                       <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movepbltoggle.tooltip"/>
+                    </properties>
+                  </component>
+                  <component id="2b7ed" class="javax.swing.JToggleButton">
+                    <constraints>
+                      <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="coverVblToggle"/>
+                      <text value=""/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movecbltoggle.tooltip"/>
                     </properties>
                   </component>
                 </children>
@@ -404,6 +420,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblToMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movetomap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -415,6 +432,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblFromMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movefrommap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -426,7 +444,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.state"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -532,19 +550,19 @@
               </vspacer>
             </children>
           </grid>
-          <grid id="3a658" layout-manager="GridLayoutManager" row-count="7" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+          <grid id="3a658" layout-manager="GridLayoutManager" row-count="8" column-count="10" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
             <margin top="4" left="4" bottom="4" right="4"/>
             <constraints>
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="EditTokenDialog.tab.config"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
               <component id="13844" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.shape"/>
@@ -552,7 +570,7 @@
               </component>
               <component id="eff39" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.snaptogrid"/>
@@ -560,7 +578,7 @@
               </component>
               <component id="1b31d" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@visible"/>
@@ -569,7 +587,7 @@
               </component>
               <component id="3a215" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.size"/>
@@ -577,7 +595,7 @@
               </component>
               <component id="40754" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -586,7 +604,7 @@
               </component>
               <component id="fd1d2" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -595,7 +613,7 @@
               </component>
               <component id="50e1d" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="3" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="visibleOnlyToOwnerLabel"/>
@@ -604,7 +622,7 @@
               </component>
               <component id="bc69d" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="0" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="visibleLabel"/>
@@ -613,7 +631,7 @@
               </component>
               <component id="c605" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="1" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="terrainModifierLabel"/>
@@ -623,7 +641,7 @@
               </component>
               <component id="6612" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="7" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -636,7 +654,7 @@
               </component>
               <component id="5d599" class="javax.swing.JTextField">
                 <constraints>
-                  <grid row="1" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <columns value="4"/>
@@ -647,7 +665,7 @@
               </component>
               <component id="38e08" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.properties"/>
@@ -655,7 +673,7 @@
               </component>
               <component id="ecad1" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="2" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="1" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -664,7 +682,7 @@
               </component>
               <component id="e431c" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="tokenOpacityLabel"/>
@@ -674,7 +692,7 @@
               </component>
               <component id="4f77a" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.sight.has"/>
@@ -682,7 +700,7 @@
               </component>
               <component id="b9654" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@hasSight"/>
@@ -692,7 +710,7 @@
               <grid id="d2ea5" layout-manager="GridLayoutManager" row-count="2" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
-                  <grid row="6" column="0" row-span="1" col-span="9" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="7" column="0" row-span="1" col-span="9" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties/>
                 <border type="none"/>
@@ -791,7 +809,7 @@
               </grid>
               <component id="bdded" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -800,7 +818,7 @@
               </component>
               <component id="2300a" class="javax.swing.JComboBox">
                 <constraints>
-                  <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <actionCommand value="comboBoxChanged"/>
@@ -809,7 +827,7 @@
               </component>
               <component id="752e0" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@hasImageTable"/>
@@ -818,7 +836,7 @@
               </component>
               <component id="44ef" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.image"/>
@@ -826,7 +844,7 @@
               </component>
               <component id="38159" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@visibleOnlyToOwner"/>
@@ -835,7 +853,7 @@
               </component>
               <component id="7d548" class="javax.swing.JCheckBox">
                 <constraints>
-                  <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="@snapToGrid"/>
@@ -844,7 +862,7 @@
               </component>
               <component id="70e96" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="tokenOpacityValueLabel"/>
@@ -853,7 +871,7 @@
               </component>
               <component id="5971d" class="javax.swing.JLabel">
                 <constraints>
-                  <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="ignoreTerrainModifierLabel"/>
@@ -863,7 +881,7 @@
               </component>
               <component id="c1350" class="javax.swing.JList">
                 <constraints>
-                  <grid row="2" column="7" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+                  <grid row="3" column="7" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
                   <name value="terrainModifiersIgnored"/>
@@ -873,12 +891,12 @@
               </component>
               <hspacer id="cde60">
                 <constraints>
-                  <grid row="0" column="9" row-span="1" col-span="1" vsize-policy="1" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                  <grid row="1" column="9" row-span="1" col-span="1" vsize-policy="1" hsize-policy="7" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                 </constraints>
               </hspacer>
               <component id="3401a" class="javax.swing.JSlider">
                 <constraints>
-                  <grid row="2" column="4" row-span="4" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false">
+                  <grid row="3" column="4" row-span="4" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false">
                     <maximum-size width="-1" height="100"/>
                   </grid>
                 </constraints>
@@ -896,9 +914,33 @@
               </component>
               <vspacer id="57cb0">
                 <constraints>
-                  <grid row="5" column="6" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                  <grid row="6" column="6" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
                 </constraints>
               </vspacer>
+              <component id="62fd4" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.label.statSheet"/>
+                </properties>
+              </component>
+              <component id="3e14e" class="javax.swing.JComboBox" binding="comboBox1" default-binding="true">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="3" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="statSheetComboBox"/>
+                </properties>
+              </component>
+              <component id="47c67" class="javax.swing.JComboBox" binding="comboBox2" default-binding="true">
+                <constraints>
+                  <grid row="0" column="4" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <name value="statSheetLocationComboBox"/>
+                </properties>
+              </component>
             </children>
           </grid>
           <grid id="81e06" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">

@@ -22,7 +22,7 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
@@ -56,20 +56,26 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
    * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.LineCellTemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     // No reason to create new instructions
     return "tool.linetemplate.instructions";
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new LineCellTemplate();
@@ -90,8 +96,7 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override

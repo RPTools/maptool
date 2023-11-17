@@ -78,6 +78,12 @@ public class MacroDialogFunctions extends AbstractFunction {
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
       throws ParserException {
+    // Macros can not interact with internal frames/dialogs/overlays
+    if (parameters.size() > 0 && HTMLFrameFactory.isInternalOnly(parameters.get(0).toString())) {
+      throw new ParserException(
+          I18N.getText("msg.error.frame.reservedName", parameters.get(0).toString()));
+    }
+
     if (functionName.equalsIgnoreCase("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())

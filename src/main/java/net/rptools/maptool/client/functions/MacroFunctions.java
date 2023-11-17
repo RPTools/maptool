@@ -173,7 +173,7 @@ public class MacroFunctions extends AbstractFunction {
       props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
       props.addProperty("command", mbp.getCommand());
       props.addProperty("maxWidth", mbp.getMaxWidth());
-      props.addProperty("tooltip", mbp.getToolTip() == null ? "" : mbp.getToolTip());
+      props.addProperty("tooltip", mbp.getToolTip());
       props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
       JsonArray compare = new JsonArray();
@@ -223,7 +223,7 @@ public class MacroFunctions extends AbstractFunction {
       sb.append("minWidth=").append(mbp.getMinWidth()).append(delim);
       sb.append("playerEditable=").append(mbp.getAllowPlayerEdits()).append(delim);
       sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
-      sb.append("tooltip=").append(mbp.getToolTip() == null ? "" : mbp.getToolTip()).append(delim);
+      sb.append("tooltip=").append(mbp.getToolTip()).append(delim);
       sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
       return sb.toString();
     }
@@ -419,8 +419,7 @@ public class MacroFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText(KEY_OUT_OF_RANGE, "getMacroCommand", index, token.getName()));
     }
-    String cmd = mbp.getCommand();
-    return cmd != null ? cmd : "";
+    return mbp.getCommand();
   }
 
   /**

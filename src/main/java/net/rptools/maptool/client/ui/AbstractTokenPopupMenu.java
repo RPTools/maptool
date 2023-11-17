@@ -17,12 +17,12 @@ package net.rptools.maptool.client.ui;
 import java.awt.BorderLayout;
 import java.awt.Cursor;
 import java.awt.Font;
-import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -48,7 +48,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.*;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
@@ -60,9 +60,7 @@ import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.FileUtil;
-import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.TokenUtil;
 
 public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   private static final long serialVersionUID = -3741870412603226747L;
@@ -143,31 +141,46 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
       menu.addSeparator();
     }
+
+    // Add unique light sources for the token.
+    {
+      JMenu subMenu = createLightCategoryMenu("Unique", tokenUnderMouse.getUniqueLightSources());
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+        menu.addSeparator();
+      }
+    }
+
     for (Entry<String, Map<GUID, LightSource>> entry :
         MapTool.getCampaign().getLightSourcesMap().entrySet()) {
-      JMenu subMenu = new JMenu(entry.getKey());
-
-      List<LightSource> lightSources = new ArrayList<LightSource>(entry.getValue().values());
-      LightSource[] lightSourceList = new LightSource[entry.getValue().size()];
-      lightSources.toArray(lightSourceList);
-      Arrays.sort(lightSourceList);
-      LIGHTSOURCES:
-      for (LightSource lightSource : lightSourceList) {
-        for (Light light : lightSource.getLightList()) {
-          if (light.isGM() && !MapTool.getPlayer().isGM()) {
-            continue LIGHTSOURCES;
-          }
-        }
-        JCheckBoxMenuItem menuItem =
-            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
-        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
-        subMenu.add(menuItem);
-      }
+      JMenu subMenu = createLightCategoryMenu(entry.getKey(), entry.getValue().values());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
       }
     }
     return menu;
+  }
+
+  protected JMenu createLightCategoryMenu(String categoryName, Collection<LightSource> sources) {
+    JMenu subMenu = new JMenu(categoryName);
+
+    List<LightSource> lightSources = new ArrayList<>(sources);
+    Collections.sort(lightSources);
+
+    for (LightSource lightSource : lightSources) {
+      // Don't include light sources that don't have lights visible to the player. Note that the
+      // player must be an owner to use the popup, so don't bother checking `::isOwner()`.
+      boolean include =
+          MapTool.getPlayer().isGM() || !lightSource.getLightList().stream().allMatch(Light::isGM);
+      if (include) {
+        JCheckBoxMenuItem menuItem =
+            new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
+        menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
+        subMenu.add(menuItem);
+      }
+    }
+
+    return subMenu;
   }
 
   protected Token getTokenUnderMouse() {
@@ -365,20 +378,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         token.setLayer(layer);
-        switch (layer) {
-          case BACKGROUND:
-          case OBJECT:
-            if (token.getShape() != TokenShape.FIGURE) token.setShape(TokenShape.TOP_DOWN);
-            break;
-          case TOKEN:
-            Image image = ImageManager.getImage(token.getImageAssetId());
-            if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-              token.setShape(Token.TokenShape.TOP_DOWN);
-            } else {
-              if (token.getShape() != TokenShape.FIGURE)
-                token.setShape(TokenUtil.guessTokenType(image));
-            }
-            break;
+        if (token.getShape() != TokenShape.FIGURE) {
+          token.guessAndSetShape();
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
@@ -390,7 +391,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   public class FreeSizeAction extends AbstractAction {
     public FreeSizeAction() {
       String actionText =
-          I18N.getText("token.popup.menu.size" + (tokenUnderMouse.isStamp() ? ".free" : ".native"));
+          I18N.getText(
+              "token.popup.menu.size"
+                  + (tokenUnderMouse.getLayer().isStampLayer() ? ".free" : ".native"));
       putValue(Action.NAME, actionText);
     }
 
@@ -466,9 +469,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           continue;
         }
         if (token.hasLightSource(lightSource)) {
-          token.removeLightSource(lightSource);
+          token.removeLightSource(lightSource.getId());
         } else {
-          token.addLightSource(lightSource);
+          token.addLightSource(lightSource.getId());
         }
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
 
@@ -554,17 +557,43 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (showSaveDialog) {
           chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
 
-          if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-            return;
+          boolean tryAgain = true;
+          while (tryAgain) {
+            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+              return;
+            }
+
+            saveDirectory = chooser.getSelectedFile();
+            var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+            var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+            if (saveDir.startsWith(installDir)) {
+              MapTool.showWarning("msg.warning.saveTokenToInstallDir");
+            } else {
+              tryAgain = false;
+            }
           }
 
           tokenSaveFile = chooser.getSelectedFile();
         } else {
           if (saveDirectory == null) {
-            chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-            if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
-            if (chooser.getFileFilter() == tokenFilterGM) saveAsGmName = true;
-            saveDirectory = chooser.getSelectedFile();
+            boolean tryAgain = true;
+            while (tryAgain) {
+              chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                return;
+              }
+              if (chooser.getFileFilter() == tokenFilterGM) {
+                saveAsGmName = true;
+              }
+              saveDirectory = chooser.getSelectedFile();
+              var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+              var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+              if (saveDir.startsWith(installDir)) {
+                MapTool.showWarning("msg.warning.saveTokenToInstallDir");
+              } else {
+                tryAgain = false;
+              }
+            }
           }
 
           if (saveAsGmName) {

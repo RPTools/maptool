@@ -47,7 +47,6 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
-import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.lib.BackupManager;
@@ -71,14 +70,17 @@ import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
+import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
 import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.TokenHoverListener;
+import net.rptools.maptool.events.ZoneLoadedListener;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -92,6 +94,7 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
@@ -155,6 +158,8 @@ public class MapTool {
 
   private static List<Player> playerList;
   private static LocalPlayer player;
+  private static PlayerZoneListener playerZoneListener;
+  private static ZoneLoadedListener zoneLoadedListener;
 
   private static MapToolConnection conn;
   private static ClientMessageHandler handler;
@@ -207,6 +212,7 @@ public class MapTool {
     } else {
       msg = I18N.getText(msgKey) + "<br/>" + t.toString();
     }
+    msg = msg.replace("\n", "<br/>");
     return msg;
   }
 
@@ -287,7 +293,7 @@ public class MapTool {
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
-    log.error(I18N.getString(msgKey), t);
+    log.error(I18N.getText(msgKey), t);
     showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
   }
 
@@ -477,10 +483,16 @@ public class MapTool {
    */
   public static void showDocument(String url) {
     if (Desktop.isDesktopSupported()) {
+      String lowerCaseUrl = url.toLowerCase();
+      String urlToBrowse = url;
       Desktop desktop = Desktop.getDesktop();
       URI uri = null;
       try {
-        uri = new URI(url);
+        uri = new URI(urlToBrowse);
+        if (uri.getScheme() == null) {
+          urlToBrowse = "https://" + urlToBrowse;
+        }
+        uri = new URI(urlToBrowse);
         desktop.browse(uri);
       } catch (Exception e) {
         MapTool.showError(I18N.getText("msg.error.browser.cannotStart", uri), e);
@@ -668,6 +680,8 @@ public class MapTool {
 
     try {
       player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
+      playerZoneListener = new PlayerZoneListener();
+      zoneLoadedListener = new ZoneLoadedListener();
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // This was previously being done in the server thread and didn't always get done
       // before the campaign was accessed by the postInitialize() method below.
@@ -727,10 +741,7 @@ public class MapTool {
   }
 
   public static boolean isDevelopment() {
-    return "DEVELOPMENT".equals(version)
-        || "@buildNumber@".equals(version)
-        || "0.0.1".equals(version)
-        || (version != null && version.startsWith("SNAPSHOT"));
+    return System.getProperty("RUN_FROM_IDE") != null;
   }
 
   public static ServerPolicy getServerPolicy() {
@@ -741,7 +752,9 @@ public class MapTool {
     return serverCommand;
   }
 
-  /** @return the server, or null if player is a client. */
+  /**
+   * @return the server, or null if player is a client.
+   */
   public static MapToolServer getServer() {
     return server;
   }
@@ -864,23 +877,6 @@ public class MapTool {
 
   /**
    * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
-   * and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
-   * <code>separator</code>.
-   *
-   * @param message message to be sent
-   * @param targets string specifying clients to send the message to (spaces are trimmed)
-   * @param separator the separator between entries in <code>targets</code>
-   */
-  public static void addGlobalMessage(String message, String targets, String separator) {
-    List<String> list = new LinkedList<String>();
-    for (String target : targets.split(separator)) {
-      list.add(target.trim());
-    }
-    addGlobalMessage(message, list);
-  }
-
-  /**
-   * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
    * and addMessage(GM, ...).
    *
    * @param message message to be sent
@@ -957,7 +953,7 @@ public class MapTool {
       }
       new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
       // Now we have fire off adding the tokens in the zone
-      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1120,7 +1116,7 @@ public class MapTool {
     MapTool.getCampaign().removeZone(zone.getId());
 
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getAllTokens()));
     new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
@@ -1129,18 +1125,27 @@ public class MapTool {
   }
 
   public static void addZone(Zone zone, boolean changeZone) {
+    Zone zoneToRemove = null;
     if (getCampaign().getZones().size() == 1) {
       // Remove the default map
       Zone singleZone = getCampaign().getZones().get(0);
       if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
-        removeZone(singleZone);
+        zoneToRemove = singleZone;
       }
     }
     getCampaign().putZone(zone);
     serverCommand().putZone(zone);
+
+    // Now that clients know about the new zone, we can delete the single empty zone. Otherwise
+    // clients would not have anything to switch to, and they would get all confused.
+    if (zoneToRemove != null) {
+      removeZone(zoneToRemove);
+      changeZone = true;
+    }
+
     new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
 
     // Show the new zone
     if (changeZone) {
@@ -1155,7 +1160,10 @@ public class MapTool {
   }
 
   public static void startPersonalServer(Campaign campaign)
-      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
+      throws IOException,
+          NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          ExecutionException,
           InterruptedException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
 
@@ -1368,6 +1376,33 @@ public class MapTool {
         .getCurrentZoneRenderer()
         .getZone()
         .setTopologyTypes(AppPreferences.getTopologyTypes());
+
+    // Register the instance that will listen for token hover events and create a stat sheet.
+    new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
+    new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
+
+    final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
+    if (!enabledDeveloperOptions.isEmpty()) {
+      final var message = new StringBuilder();
+      message
+          .append("<p>")
+          .append(I18N.getText("Preferences.developer.info.developerOptionsInUse"))
+          .append("</p><ul>");
+      for (final var option : enabledDeveloperOptions) {
+        message.append("<li>").append(option.getLabel()).append("</li>");
+      }
+      message
+          .append("</ul><p>")
+          .append(
+              I18N.getText(
+                  "Preferences.developer.info.developerOptionsInUsePost",
+                  I18N.getText("menu.edit"),
+                  I18N.getText("action.preferences"),
+                  I18N.getText("Preferences.tab.developer")))
+          .append("</p>");
+
+      showWarning(message.toString());
+    }
   }
 
   /**
@@ -1718,11 +1753,6 @@ public class MapTool {
 
     URL.setURLStreamHandlerFactory(factory);
 
-    // Register ImageReaderSpi for jpeg2000 from JAI manually (issue due to uberJar packaging)
-    // https://github.com/jai-imageio/jai-imageio-core/issues/29
-    IIORegistry registry = IIORegistry.getDefaultInstance();
-    registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
-
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());
 
@@ -1751,6 +1781,33 @@ public class MapTool {
     } catch (Exception e) {
       MapTool.showError("msg.error.lafSetup", e);
       System.exit(1);
+    }
+
+    /*
+     * Load GenSys and SW RPG fonts
+     */
+    try {
+      var genv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+      var genFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/GenesysGlyphsAndDice-3.0.otf")));
+      genv.registerFont(genFont);
+      var swGenFont =
+          Font.createFont(
+              Font.TRUETYPE_FONT,
+              Objects.requireNonNull(
+                  MapTool.class
+                      .getClassLoader()
+                      .getResourceAsStream(
+                          "net/rptools/maptool/client/fonts/EotE_Symbol-Regular_v1.otf")));
+      genv.registerFont(swGenFont);
+    } catch (Exception e) {
+      log.error("msg.error.genesysFont", e);
     }
 
     /**

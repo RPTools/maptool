@@ -24,13 +24,15 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class OvalTool extends AbstractDrawingTool implements MouseMotionListener {
   private static final long serialVersionUID = 3258413928311830323L;
 
@@ -145,7 +147,9 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
     }
   }
 
-  /** @see Tool#resetTool() */
+  /**
+   * @see Tool#resetTool()
+   */
   @Override
   protected void resetTool() {
 

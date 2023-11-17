@@ -38,6 +38,7 @@ import java.io.StringReader;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
@@ -50,15 +51,17 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer.SelectionSet;
+import net.rptools.maptool.client.ui.zone.renderer.SelectionSet;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,6 +98,9 @@ public class Token implements Cloneable {
 
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
+
+  /** The stat sheet properties for the token. */
+  @Nullable private StatSheetProperties statSheet;
 
   /** the only way to make Gson apply strict evaluation to JsonObjects, apparently. see #2396 */
   private static final TypeAdapter<JsonObject> strictGsonObjectAdapter =
@@ -206,6 +212,8 @@ public class Token implements Cloneable {
     setPortraitImage,
     setCharsheetImage,
     setLayout,
+    createUniqueLightSource,
+    deleteUniqueLightSource,
     clearLightSources,
     removeLightSource,
     addLightSource,
@@ -265,6 +273,7 @@ public class Token implements Cloneable {
   private Area vbl;
   private Area hillVbl;
   private Area pitVbl;
+  private Area coverVbl;
   private Area mbl;
 
   private String name = "";
@@ -277,10 +286,11 @@ public class Token implements Cloneable {
 
   private String tokenShape = TokenShape.SQUARE.toString();
   private String tokenType = Type.NPC.toString();
-  private String layer = Zone.Layer.TOKEN.toString();
+  private String layer = Zone.Layer.getDefaultPlayerLayer().toString();
   private transient Zone.Layer actualLayer;
 
-  private String propertyType = Campaign.DEFAULT_TOKEN_PROPERTY_TYPE;
+  private String propertyType =
+      MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
   private Integer facing = null;
 
@@ -291,7 +301,7 @@ public class Token implements Cloneable {
   private transient Color visionOverlayColor;
 
   // Jamz: allow token alpha channel modification
-  private float tokenOpacity = 1.0f;
+  private @Nonnull Float tokenOpacity = 1.0f;
 
   private String speechName = "";
 
@@ -328,7 +338,14 @@ public class Token implements Cloneable {
   private MD5Key charsheetImage;
   private MD5Key portraitImage;
 
+  private Map<GUID, LightSource> uniqueLightSources = new LinkedHashMap<>();
+  /**
+   * All light sources attached to the token.
+   *
+   * <p>The elements should be unique, i.e., no two should reference the same light source.
+   */
   private List<AttachedLightSource> lightSourceList = new ArrayList<>();
+
   private String sightType;
   private boolean hasSight;
   private Boolean hasImageTable = false;
@@ -426,6 +443,7 @@ public class Token implements Cloneable {
     vbl = token.vbl;
     hillVbl = token.hillVbl;
     pitVbl = token.pitVbl;
+    coverVbl = token.coverVbl;
     mbl = token.mbl;
 
     name = token.name;
@@ -465,7 +483,10 @@ public class Token implements Cloneable {
 
     ownerType = token.ownerType;
     ownerList.addAll(token.ownerList);
+
+    uniqueLightSources.putAll(token.uniqueLightSources);
     lightSourceList.addAll(token.lightSourceList);
+
     state.putAll(token.state);
     getPropertyMap().clear();
     getPropertyMap().putAll(token.propertyMapCI);
@@ -492,6 +513,7 @@ public class Token implements Cloneable {
     terrainModifiersIgnored.addAll(token.terrainModifiersIgnored);
     speechName = token.speechName != null ? token.speechName : "";
     allowURIAccess = token.allowURIAccess;
+    statSheet = token.statSheet;
   }
 
   public Token() {}
@@ -506,6 +528,8 @@ public class Token implements Cloneable {
     if (macroMap != null) {
       loadOldMacros();
     }
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
   }
 
   /**
@@ -536,7 +560,7 @@ public class Token implements Cloneable {
      * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
      * what is default for new tokens.
      */
-    propertyType = getPropertyType();
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     /**
      * Jamz: Like propertyType, why shouldn't sight be kept if it matches exists? Many creatures
@@ -601,7 +625,7 @@ public class Token implements Cloneable {
   }
 
   public boolean isMarker() {
-    return isStamp()
+    return getLayer().isMarkerLayer()
         && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
@@ -673,31 +697,19 @@ public class Token implements Cloneable {
     return haloColor;
   }
 
+  /**
+   * @return The token opacity, in the range [0.0f, 1.0f].
+   */
   public float getTokenOpacity() {
-    if (tokenOpacity < 0.0f) {
-      tokenOpacity = 1.0f;
-    }
-
     return tokenOpacity;
   }
 
   /**
-   * Set the token opacity from a string trimmed to [0.05f, 1.0f]
-   *
-   * @param alpha the String of the opacity value.
-   * @return the float of the opacity
-   */
-  public float setTokenOpacity(String alpha) {
-    return setTokenOpacity(Float.parseFloat(alpha));
-  }
-
-  /**
-   * Set the token opacity from a float trimmed to [0.05f, 1.0f]
+   * Set the token opacity from a float trimmed to [0.0f, 1.0f]
    *
    * @param alpha the float of the opacity.
-   * @return the float of the opacity trimmed.
    */
-  public float setTokenOpacity(float alpha) {
+  public void setTokenOpacity(float alpha) {
     if (alpha > 1.0f) {
       alpha = 1.0f;
     }
@@ -706,8 +718,6 @@ public class Token implements Cloneable {
     }
 
     tokenOpacity = alpha;
-
-    return tokenOpacity;
   }
 
   /**
@@ -774,38 +784,6 @@ public class Token implements Cloneable {
     }
   }
 
-  public boolean isObjectStamp() {
-    return getLayer() == Zone.Layer.OBJECT;
-  }
-
-  public boolean isGMStamp() {
-    return getLayer() == Zone.Layer.GM;
-  }
-
-  public boolean isBackgroundStamp() {
-    return getLayer() == Zone.Layer.BACKGROUND;
-  }
-
-  public boolean isOnTokenLayer() {
-    return getLayer() == Zone.Layer.TOKEN;
-  }
-
-  public boolean isStamp() {
-    switch (getLayer()) {
-      case BACKGROUND:
-      case OBJECT:
-      case GM:
-        return true;
-      default:
-        break;
-    }
-    return false;
-  }
-
-  public boolean isToken() {
-    return getLayer() == Zone.Layer.TOKEN;
-  }
-
   public TokenShape getShape() {
     try {
       return TokenShape.valueOf(tokenShape);
@@ -817,6 +795,23 @@ public class Token implements Cloneable {
 
   public void setShape(TokenShape type) {
     this.tokenShape = type.name();
+  }
+
+  /**
+   * Sets the shape based on the token's layer and image.
+   *
+   * @return The shape that was decided, possibly the same shape as before.
+   */
+  public TokenShape guessAndSetShape() {
+    var shape = Token.TokenShape.TOP_DOWN;
+    if (getLayer().supportsGuessingTokenShape()) {
+      Image image = ImageManager.getImage(getImageAssetId());
+      if (image != null && image != ImageManager.TRANSFERING_IMAGE) {
+        shape = TokenUtil.guessTokenType(image);
+      }
+    }
+    setShape(shape);
+    return shape;
   }
 
   public Type getType() {
@@ -847,7 +842,7 @@ public class Token implements Cloneable {
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
-      return Zone.Layer.TOKEN;
+      return Zone.Layer.getDefaultPlayerLayer();
     }
   }
 
@@ -921,14 +916,34 @@ public class Token implements Cloneable {
     return imageTableName;
   }
 
-  public void addLightSource(LightSource source) {
-    lightSourceList.add(new AttachedLightSource(source));
+  public @Nonnull Collection<LightSource> getUniqueLightSources() {
+    return uniqueLightSources.values();
+  }
+
+  public @Nullable LightSource getUniqueLightSource(GUID lightSourceId) {
+    return uniqueLightSources.getOrDefault(lightSourceId, null);
+  }
+
+  public void addUniqueLightSource(LightSource source) {
+    uniqueLightSources.put(source.getId(), source);
+  }
+
+  public void removeUniqueLightSource(GUID lightSourceId) {
+    uniqueLightSources.remove(lightSourceId);
+  }
+
+  public void addLightSource(GUID lightSourceId) {
+    if (lightSourceList.stream().anyMatch(source -> source.matches(lightSourceId))) {
+      // Avoid duplicates.
+      return;
+    }
+    lightSourceList.add(new AttachedLightSource(lightSourceId));
   }
 
   public void removeLightSourceType(LightSource.Type lightType) {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null && lightSource.getType() == lightType) {
         i.remove();
       }
@@ -938,7 +953,7 @@ public class Token implements Cloneable {
   public void removeGMAuras() {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -953,7 +968,7 @@ public class Token implements Cloneable {
   public void removeOwnerOnlyAuras() {
     for (ListIterator<AttachedLightSource> i = lightSourceList.listIterator(); i.hasNext(); ) {
       AttachedLightSource als = i.next();
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -967,7 +982,7 @@ public class Token implements Cloneable {
 
   public boolean hasOwnerOnlyAuras() {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -982,7 +997,7 @@ public class Token implements Cloneable {
 
   public boolean hasGMAuras() {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null) {
         List<Light> lights = lightSource.getLightList();
         for (Light light : lights) {
@@ -997,7 +1012,7 @@ public class Token implements Cloneable {
 
   public boolean hasLightSourceType(LightSource.Type lightType) {
     for (AttachedLightSource als : lightSourceList) {
-      LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+      LightSource lightSource = als.resolve(this, MapTool.getCampaign());
       if (lightSource != null && lightSource.getType() == lightType) {
         return true;
       }
@@ -1005,12 +1020,8 @@ public class Token implements Cloneable {
     return false;
   }
 
-  public void removeLightSource(LightSource source) {
-    lightSourceList.removeIf(
-        als ->
-            als != null
-                && als.getLightSourceId() != null
-                && als.getLightSourceId().equals(source.getId()));
+  public void removeLightSource(GUID lightSourceId) {
+    lightSourceList.removeIf(als -> als.matches(lightSourceId));
   }
 
   /** Clear the lightSourceList */
@@ -1019,20 +1030,22 @@ public class Token implements Cloneable {
   }
 
   public boolean hasLightSource(LightSource source) {
-    if (lightSourceList.size() == 0) {
+    if (source.getId() == null) {
+      // Shouldn't happen as this method should only be used with non-personal lights.
       return false;
     }
+
     for (AttachedLightSource als : lightSourceList) {
-      if (als != null
-          && als.getLightSourceId() != null
-          && als.getLightSourceId().equals(source.getId())) {
+      if (als.matches(source.getId())) {
         return true;
       }
     }
     return false;
   }
 
-  /** @return false if lightSourceList is null or empty, and true otherwise */
+  /**
+   * @return false if lightSourceList is null or empty, and true otherwise
+   */
   public boolean hasLightSources() {
     return !lightSourceList.isEmpty();
   }
@@ -1046,7 +1059,9 @@ public class Token implements Cloneable {
     ownerList.add(playerId);
   }
 
-  /** @return true if the token is owned by all or has explicit owners. */
+  /**
+   * @return true if the token is owned by all or has explicit owners.
+   */
   public synchronized boolean hasOwners() {
     return ownerType == OWNER_TYPE_ALL || !ownerList.isEmpty();
   }
@@ -1065,7 +1080,9 @@ public class Token implements Cloneable {
     }
   }
 
-  /** @return the set of owner names of the token. */
+  /**
+   * @return the set of owner names of the token.
+   */
   public Set<String> getOwners() {
     return Collections.unmodifiableSet(ownerList);
   }
@@ -1078,8 +1095,45 @@ public class Token implements Cloneable {
     ownerList.clear();
   }
 
+  /**
+   * Check if the token is owned by the provided player.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players.
+   *
+   * @param playerId The player name to check ownership against.
+   * @return {@code true} if {@code playerId} identifies an owner of the token.
+   */
   public synchronized boolean isOwner(String playerId) {
-    return (ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId));
+    return ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId);
+  }
+
+  /**
+   * Checks if the token is owned by any of the provided players.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players. It is as if
+   * each player was checked individually via {@link #isOwner(String)}, but more convenient and
+   * efficient.
+   *
+   * @param playerIds The player names to check ownership against.
+   * @return {@code true} if there is a player in {@code playerIds} that is an owner of this token.
+   */
+  public synchronized boolean isOwnedByAny(Collection<String> playerIds) {
+    if (playerIds.isEmpty()) {
+      return false;
+    }
+
+    return ownerType == OWNER_TYPE_ALL || !Collections.disjoint(ownerList, playerIds);
+  }
+
+  /**
+   * Checks if the token is not owned by anyone.
+   *
+   * <p>If the token is owned by all players, this will return {@code false}
+   *
+   * @return {@code true} if the token has any owners.
+   */
+  public synchronized boolean isOwnedByNone() {
+    return ownerType != OWNER_TYPE_ALL && ownerList.isEmpty();
   }
 
   @Override
@@ -1124,7 +1178,7 @@ public class Token implements Cloneable {
   public void validateName(String name) throws ParserException {
     if (!MapTool.getPlayer().isGM() && !MapTool.getParser().isMacroTrusted()) {
       Zone curZone = getZoneRenderer().getZone();
-      List<Token> tokensList = curZone.getTokens();
+      List<Token> tokensList = curZone.getAllTokens();
 
       for (Token token : tokensList) {
         String curTokenName = token.getName();
@@ -1305,12 +1359,16 @@ public class Token implements Cloneable {
     this.scaleY = scaleY;
   }
 
-  /** @return Returns the snapScale. */
+  /**
+   * @return Returns the snapScale.
+   */
   public boolean isSnapToScale() {
     return snapToScale;
   }
 
-  /** @param snapScale The snapScale to set. */
+  /**
+   * @param snapScale The snapScale to set.
+   */
   public void setSnapToScale(boolean snapScale) {
     this.snapToScale = snapScale;
   }
@@ -1319,17 +1377,23 @@ public class Token implements Cloneable {
     this.isVisible = visible;
   }
 
-  /** @return isVisible */
+  /**
+   * @return isVisible
+   */
   public boolean isVisible() {
     return isVisible;
   }
 
-  /** @return the visibleOnlyToOwner */
+  /**
+   * @return the visibleOnlyToOwner
+   */
   public boolean isVisibleOnlyToOwner() {
     return visibleOnlyToOwner;
   }
 
-  /** @param visibleOnlyToOwner the visibleOnlyToOwner to set */
+  /**
+   * @param visibleOnlyToOwner the visibleOnlyToOwner to set
+   */
   public void setVisibleOnlyToOwner(boolean visibleOnlyToOwner) {
     this.visibleOnlyToOwner = visibleOnlyToOwner;
   }
@@ -1377,6 +1441,7 @@ public class Token implements Cloneable {
       case WALL_VBL -> vbl;
       case HILL_VBL -> hillVbl;
       case PIT_VBL -> pitVbl;
+      case COVER_VBL -> coverVbl;
       case MBL -> mbl;
     };
   }
@@ -1404,6 +1469,7 @@ public class Token implements Cloneable {
       case WALL_VBL -> vbl = topology;
       case HILL_VBL -> hillVbl = topology;
       case PIT_VBL -> pitVbl = topology;
+      case COVER_VBL -> coverVbl = topology;
       case MBL -> mbl = topology;
     }
     ;
@@ -1550,7 +1616,7 @@ public class Token implements Cloneable {
       footprintBounds.x = getX();
       footprintBounds.y = getY();
     } else {
-      if (!isBackgroundStamp()) {
+      if (getLayer().anchorSnapToGridAtCenter()) {
         // Center it on the footprint
         footprintBounds.x -= (w - footprintBounds.width) / 2;
         footprintBounds.y -= (h - footprintBounds.height) / 2;
@@ -1578,7 +1644,7 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale() || getLayer().isTokenLayer()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = getX() + (int) centerOffset.x;
         offsetY = getY() + (int) centerOffset.y;
@@ -1608,7 +1674,7 @@ public class Token implements Cloneable {
     Point2D.Double offset = getSnapToUnsnapOffset(zone);
     double newX = getX() + offset.x;
     double newY = getY() + offset.y;
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
       return grid.convert(
           grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
@@ -1640,13 +1706,13 @@ public class Token implements Cloneable {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
-      if (isBackgroundStamp() || isSnapToScale()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
         TokenFootprint footprint = getFootprint(grid);
         Rectangle footprintBounds = footprint.getBounds(grid);
         double footprintOffsetX = 0;
         double footprintOffsetY = 0;
-        if (!isBackgroundStamp()) {
+        if (getLayer().anchorSnapToGridAtCenter()) {
           // Non-background tokens can have an offset from top left corner
           footprintOffsetX = tokenBounds.width - footprintBounds.width;
           footprintOffsetY = tokenBounds.height - footprintBounds.height;
@@ -1676,7 +1742,9 @@ public class Token implements Cloneable {
     return new Point2D.Double(offsetX, offsetY);
   }
 
-  /** @return the String of the sightType */
+  /**
+   * @return the String of the sightType
+   */
   public String getSightType() {
     return sightType;
   }
@@ -1723,6 +1791,18 @@ public class Token implements Cloneable {
    */
   public Object getState(String property) {
     return state.get(property);
+  }
+
+  public List<String> getSetStates() {
+    List<String> setStates = new ArrayList<String>();
+    for (Map.Entry<String, Object> entry : state.entrySet()) {
+      if (entry.getValue() instanceof Boolean) {
+        if ((Boolean) entry.getValue()) {
+          setStates.add(entry.getKey());
+        }
+      }
+    }
+    return setStates;
   }
 
   /**
@@ -1841,16 +1921,11 @@ public class Token implements Cloneable {
       }
     }
     try {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "Evaluating property: '"
-                + key
-                + "' for token "
-                + getName()
-                + "("
-                + getId()
-                + ")----------------------------------------------------------------------------------");
-      }
+      log.debug(
+          "Evaluating property: '{}' for token {} ({})----------------------------------------------------------------------------------",
+          key,
+          getName(),
+          getId());
       val = MapTool.getParser().parseLine(resolver, this, val.toString());
     } catch (ParserException pe) {
       log.debug("Ignoring Parse Exception, continuing to evaluate {}", key);
@@ -1870,12 +1945,16 @@ public class Token implements Cloneable {
     return val;
   }
 
-  /** @return all property names, all in lowercase. */
+  /**
+   * @return all property names, all in lowercase.
+   */
   public Set<String> getPropertyNames() {
     return getPropertyMap().keySet();
   }
 
-  /** @return all property names, preserving their case. */
+  /**
+   * @return all property names, preserving their case.
+   */
   public Set<String> getPropertyNamesRaw() {
     return getPropertyMap().keySetRaw();
   }
@@ -1897,9 +1976,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.put(prop.getIndex(), prop);
     }
     macroMap = null;
-    if (log.isDebugEnabled()) {
-      log.debug("Token.loadOldMacros() set up " + macroPropertiesMap.size() + " new macros.");
-    }
+    log.debug("Token.loadOldMacros() set up {} new macros.", macroPropertiesMap.size());
   }
 
   public int getMacroNextIndex() {
@@ -1973,9 +2050,7 @@ public class Token implements Cloneable {
       macroPropertiesMap.clear();
     }
     for (MacroButtonProperties macro : newMacroList) {
-      if (macro.getLabel() == null
-          || macro.getLabel().trim().length() == 0
-          || macro.getCommand().trim().length() == 0) {
+      if (macro.getLabel().trim().length() == 0 || macro.getCommand().trim().length() == 0) {
         continue;
       }
       macroPropertiesMap.put(macro.getIndex(), macro);
@@ -2060,12 +2135,16 @@ public class Token implements Cloneable {
     return matches.keySet();
   }
 
-  /** @return Getter for notes */
+  /**
+   * @return Getter for notes
+   */
   public String getNotes() {
     return notes;
   }
 
-  /** @param aNotes Setter for notes */
+  /**
+   * @param aNotes Setter for notes
+   */
   public void setNotes(String aNotes) {
     notes = aNotes;
   }
@@ -2143,7 +2222,9 @@ public class Token implements Cloneable {
     return anchorY;
   }
 
-  /** @return the scale of the token layout */
+  /**
+   * @return the scale of the token layout
+   */
   public double getSizeScale() {
     return sizeScale;
   }
@@ -2233,6 +2314,8 @@ public class Token implements Cloneable {
     notes = (String) td.get(TokenTransferData.NOTES);
     gmNotes = (String) td.get(TokenTransferData.GM_NOTES);
     gmName = (String) td.get(TokenTransferData.GM_NAME);
+
+    propertyType = MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
     // Get the image and portrait for the token
     Asset asset = createAssetFromIcon(td.getToken());
@@ -2472,9 +2555,22 @@ public class Token implements Cloneable {
     if (ownerList == null) {
       ownerList = new HashSet<>();
     }
-    if (lightSourceList == null) {
-      lightSourceList = new ArrayList<>();
+    if (uniqueLightSources == null) {
+      uniqueLightSources = new LinkedHashMap<>();
     }
+
+    // Remove null and duplicate attached light sources.
+    List<AttachedLightSource> lightSources =
+        Objects.requireNonNullElseGet(lightSourceList, ArrayList::new);
+    lightSourceList = new ArrayList<>();
+    final var seenGuids = new HashSet<GUID>();
+    for (final var source : lightSources) {
+      if (source != null && !seenGuids.contains(source.getId())) {
+        lightSourceList.add(source);
+        seenGuids.add(source.getId());
+      }
+    }
+
     if (macroPropertiesMap == null) {
       macroPropertiesMap = new HashMap<>();
     }
@@ -2520,15 +2616,25 @@ public class Token implements Cloneable {
       gmNotesType = SyntaxConstants.SYNTAX_STYLE_NONE;
     }
 
+    // Pre 1.13
+    if (tokenOpacity == null) {
+      tokenOpacity = 1.f;
+    }
+    tokenOpacity = Math.max(0.f, Math.min(tokenOpacity, 1.f));
+
     return this;
   }
 
-  /** @param exposedAreaGUID the exposedAreaGUID to set */
+  /**
+   * @param exposedAreaGUID the exposedAreaGUID to set
+   */
   public void setExposedAreaGUID(GUID exposedAreaGUID) {
     this.exposedAreaGUID = exposedAreaGUID;
   }
 
-  /** @return the exposedAreaGUID */
+  /**
+   * @return the exposedAreaGUID
+   */
   public GUID getExposedAreaGUID() {
     return exposedAreaGUID;
   }
@@ -2547,7 +2653,9 @@ public class Token implements Cloneable {
     }
   }
 
-  /** @return is token an image/lib token */
+  /**
+   * @return is token an image/lib token
+   */
   public boolean isImgOrLib() {
     return (getName().toLowerCase().startsWith("image:")
         || getName().toLowerCase().startsWith("lib:"));
@@ -2720,7 +2828,7 @@ public class Token implements Cloneable {
         setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
       case setTokenOpacity:
-        setTokenOpacity(parameters.get(0).getStringValue());
+        setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifier:
         setTerrainModifier(parameters.get(0).getDoubleValue());
@@ -2769,6 +2877,14 @@ public class Token implements Cloneable {
         setSizeScale(parameters.get(0).getDoubleValue());
         setAnchor(parameters.get(1).getIntValue(), parameters.get(2).getIntValue());
         break;
+      case createUniqueLightSource:
+        lightChanged = true;
+        addUniqueLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
+        break;
+      case deleteUniqueLightSource:
+        lightChanged = true;
+        removeUniqueLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
+        break;
       case clearLightSources:
         if (hasLightSources()) {
           lightChanged = true;
@@ -2779,11 +2895,11 @@ public class Token implements Cloneable {
         if (hasLightSources()) {
           lightChanged = true;
         }
-        removeLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
+        removeLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
         break;
       case addLightSource:
         lightChanged = true;
-        addLightSource(LightSource.fromDto(parameters.get(0).getLightSource()));
+        addLightSource(GUID.valueOf(parameters.get(0).getLightSourceId()));
         break;
       case setHasSight:
         if (hasLightSources()) {
@@ -2873,6 +2989,7 @@ public class Token implements Cloneable {
     token.vbl = dto.hasVbl() ? Mapper.map(dto.getVbl()) : null;
     token.hillVbl = dto.hasHillVbl() ? Mapper.map(dto.getHillVbl()) : null;
     token.pitVbl = dto.hasPitVbl() ? Mapper.map(dto.getPitVbl()) : null;
+    token.coverVbl = dto.hasCoverVbl() ? Mapper.map(dto.getCoverVbl()) : null;
     token.mbl = dto.hasMbl() ? Mapper.map(dto.getMbl()) : null;
     token.name = dto.getName();
     token.ownerList.addAll(dto.getOwnerListList());
@@ -2901,6 +3018,10 @@ public class Token implements Cloneable {
         dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
     token.portraitImage =
         dto.hasPortraitImage() ? new MD5Key(dto.getPortraitImage().getValue()) : null;
+
+    dto.getUniqueLightSourcesList().stream()
+        .map(LightSource::fromDto)
+        .forEach(source -> token.uniqueLightSources.put(source.getId(), source));
     token.lightSourceList.addAll(
         dto.getLightSourcesList().stream()
             .map(AttachedLightSource::fromDto)
@@ -2936,6 +3057,9 @@ public class Token implements Cloneable {
     token.speechMap.putAll(dto.getSpeechMap());
     token.heroLabData = dto.hasHeroLabData() ? HeroLabData.fromDto(dto.getHeroLabData()) : null;
     token.allowURIAccess = dto.getAllowUriAccess();
+    if (dto.hasStatSheetProperties()) {
+      token.statSheet = StatSheetProperties.fromDto(dto.getStatSheetProperties());
+    }
     return token;
   }
 
@@ -2985,6 +3109,9 @@ public class Token implements Cloneable {
     if (pitVbl != null) {
       dto.setPitVbl(Mapper.map(pitVbl));
     }
+    if (coverVbl != null) {
+      dto.setCoverVbl(Mapper.map(coverVbl));
+    }
     if (mbl != null) {
       dto.setMbl(Mapper.map(mbl));
     }
@@ -3022,6 +3149,8 @@ public class Token implements Cloneable {
     if (portraitImage != null) {
       dto.setPortraitImage(StringValue.of(portraitImage.toString()));
     }
+    dto.addAllUniqueLightSources(
+        uniqueLightSources.values().stream().map(LightSource::toDto).collect(Collectors.toList()));
     dto.addAllLightSources(
         lightSourceList.stream().map(AttachedLightSource::toDto).collect(Collectors.toList()));
     if (sightType != null) {
@@ -3064,6 +3193,46 @@ public class Token implements Cloneable {
       dto.setHeroLabData(heroLabData.toDto());
     }
     dto.setAllowUriAccess(allowURIAccess);
+    if (statSheet != null) {
+      dto.setStatSheetProperties(StatSheetProperties.toDto(statSheet));
+    }
     return dto.build();
+  }
+
+  /**
+   * Returns the Stat Sheet properties for this token. If no stat sheet is set, the default stat for
+   * the token type is returned.
+   *
+   * @return The of the stat sheet for this token.
+   */
+  public StatSheetProperties getStatSheet() {
+    if (statSheet == null) {
+      return MapTool.getCampaign().getTokenTypeDefaultSheetId(propertyType);
+    }
+    return statSheet;
+  }
+
+  /**
+   * Sets the id of the stat sheet for this token. If null, the token will use the default stat
+   * sheet for the token type.
+   *
+   * @param statSheet the stat sheet properties for this token.
+   */
+  public void setStatSheet(StatSheetProperties statSheet) {
+    this.statSheet = statSheet;
+  }
+
+  /**
+   * Returns if the token is using the default stat sheet for its token type.
+   *
+   * @return <code>true</code> if using the default stat sheet.
+   */
+  public boolean usingDefaultStatSheet() {
+    return statSheet == null;
+  }
+
+  /** Use the default stat sheet for the tokens token type. */
+  public void useDefaultStatSheet() {
+    setStatSheet(null);
   }
 }

@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.macrobuttons.panels;
 import com.google.common.eventbus.Subscribe;
 import com.jidesoft.docking.DockableFrame;
 import java.util.*;
+import javax.swing.SwingUtilities;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
@@ -26,7 +27,7 @@ import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -78,7 +79,7 @@ public class SelectionPanel extends AbstractMacroPanel {
     }
     // Set up a code timer to get some performance data
     timer = new CodeTimer("selectionpanel");
-    timer.setEnabled(AppState.isCollectProfilingData() || log.isDebugEnabled());
+    timer.setEnabled(AppState.isCollectProfilingData());
     timer.setThreshold(10);
 
     timer.start("painting");
@@ -107,37 +108,49 @@ public class SelectionPanel extends AbstractMacroPanel {
     }
     timer.stop("painting");
 
-    if (AppState.isCollectProfilingData() || log.isDebugEnabled()) {
-      String results = timer.toString();
-      MapTool.getProfilingNoteFrame().addText(results);
-      if (log.isDebugEnabled()) log.debug(results);
+    if (timer.isEnabled()) {
+      MapTool.getProfilingNoteFrame().addText(timer.toString());
     }
-    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   @Subscribe
   private void onSelectionChanged(SelectionModel.SelectionChanged event) {
-    reset();
+    SwingUtilities.invokeLater(
+        () -> {
+          reset();
+        });
   }
 
   @Subscribe
   private void onTokenMacroChanged(TokenMacroChanged event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokenPanelChanged(TokenPanelChanged event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   @Subscribe
   private void onTokensRemoved(TokensRemoved event) {
-    resetIfSelected(event.tokens());
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(event.tokens());
+        });
   }
 
   @Subscribe
   private void onTokenEdited(TokenEdited event) {
-    resetIfSelected(Collections.singletonList(event.token()));
+    SwingUtilities.invokeLater(
+        () -> {
+          resetIfSelected(Collections.singletonList(event.token()));
+        });
   }
 
   private void resetIfSelected(List<Token> tokenList) {

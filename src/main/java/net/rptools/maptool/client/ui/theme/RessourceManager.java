@@ -34,13 +34,13 @@ public class RessourceManager {
       new HashMap<>() {
         {
           // This icons don't exist in classic.
-          put(Icons.ACTION_EXPORT, "");
-          put(Icons.ACTION_IMPORT, "");
-          put(Icons.PROPERTIES_TABLE_ALPHABETIC, "");
-          put(Icons.PROPERTIES_TABLE_CATEGORIES, "");
-          put(Icons.PROPERTIES_TABLE_COLLAPSE, "");
-          put(Icons.PROPERTIES_TABLE_EXPAND, "");
-          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, "");
+          put(Icons.ACTION_EXPORT, null);
+          put(Icons.ACTION_IMPORT, null);
+          put(Icons.PROPERTIES_TABLE_ALPHABETIC, null);
+          put(Icons.PROPERTIES_TABLE_CATEGORIES, null);
+          put(Icons.PROPERTIES_TABLE_COLLAPSE, null);
+          put(Icons.PROPERTIES_TABLE_EXPAND, null);
+          put(Icons.PROPERTIES_TABLE_HIDE_DESCRIPTION, null);
 
           put(Icons.ACTION_CANCEL, IMAGE_DIR + "cancel_sm.png");
           put(Icons.ACTION_CLOSE, IMAGE_DIR + "collapse.png");
@@ -130,6 +130,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, IMAGE_DIR + "asset-status.png");
           put(Icons.STATUSBAR_FREE_SPACE, IMAGE_DIR + "disk-space.png");
           put(Icons.STATUSBAR_IMAGE_CACHE, IMAGE_DIR + "thumbnail-status.png");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, IMAGE_DIR + "currentIndicator.png");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, IMAGE_DIR + "loading.png");
           put(Icons.STATUSBAR_RECEIVE_OFF, IMAGE_DIR + "activityOff.png");
           put(Icons.STATUSBAR_RECEIVE_ON, IMAGE_DIR + "receiveOn.png");
           put(Icons.STATUSBAR_SERVER_CONNECTED, IMAGE_DIR + "computer_on.png");
@@ -198,6 +200,8 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON, IMAGE_DIR + "tool/mbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF, IMAGE_DIR + "tool/pit-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, IMAGE_DIR + "tool/pit-vbl-only.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF, IMAGE_DIR + "tool/cover-vbl-only-off.png");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON, IMAGE_DIR + "tool/cover-vbl-only.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, IMAGE_DIR + "tool/wall-vbl-only-off.png");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, IMAGE_DIR + "tool/wall-vbl-only.png");
           put(Icons.TOOLBAR_VOLUME_OFF, IMAGE_DIR + "audio/mute.png");
@@ -235,7 +239,7 @@ public class RessourceManager {
           put(Images.DECORATION_RPTOK, IMAGE_DIR + "rptokIcon.png");
           put(Images.EMPTY, IMAGE_DIR + "empty.png");
           put(Images.GRID_BORDER_HEX, IMAGE_DIR + "hexBorder.png");
-          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "hexBorder.png");
+          put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "isoBorder.png");
           put(Images.GRID_BORDER_SQUARE, IMAGE_DIR + "whiteBorder.png");
           put(Images.GRID_BORDER_SQUARE_RED, IMAGE_DIR + "grid-square-red.png");
           put(Images.HEROLABS_PORTRAIT, IMAGE_DIR + "powered_by_hero_lab_small.png");
@@ -318,6 +322,8 @@ public class RessourceManager {
           put(Icons.STATUSBAR_ASSET_CACHE, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_FREE_SPACE, ROD_ICONS + "bottom/Free Space.svg");
           put(Icons.STATUSBAR_IMAGE_CACHE, ROD_ICONS + "bottom/Image Thumbs Cache.svg");
+          put(Icons.STATUSBAR_PLAYERS_DONE_LOADING, ROD_ICONS + "misc/Select All Tokens.svg");
+          put(Icons.STATUSBAR_PLAYERS_LOADING, ROD_ICONS + "bottom/Assets Cache.svg");
           put(Icons.STATUSBAR_RECEIVE_OFF, ROD_ICONS + "bottom/Receive Data - Inactive.svg");
           put(Icons.STATUSBAR_RECEIVE_ON, ROD_ICONS + "bottom/Receive Data - Active.svg");
           put(Icons.STATUSBAR_SERVER_CONNECTED, ROD_ICONS + "bottom/Server Status - Connected.svg");
@@ -505,6 +511,8 @@ public class RessourceManager {
     for (var map : maps) {
       if (map.containsKey(key)) {
         ressourcePath = map.get(key);
+      }
+      if (ressourcePath != null) {
         break;
       }
     }
@@ -540,7 +548,11 @@ public class RessourceManager {
 
   public static void checkMissingFiles() {
     String basedir = "C:\\Users\\tkunze\\Source\\maptool\\src\\main\\resources\\";
-    for (String value : Set.copyOf(images.values())) {
+    for (String value : images.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
       var target = Path.of(basedir, IMAGE_DIR, "images", source.getFileName().toString());
 
@@ -548,14 +560,22 @@ public class RessourceManager {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(classicIcons.values())) {
+    for (String value : classicIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {
         System.out.println(value + " is missing!");
       }
     }
-    for (String value : Set.copyOf(rodIcons.values())) {
+    for (String value : rodIcons.values()) {
+      if (value == null) {
+        continue;
+      }
+
       var source = Path.of(basedir, value);
 
       if (Files.notExists(source)) {

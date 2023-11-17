@@ -151,14 +151,18 @@ public class LineTemplate extends AbstractTemplate {
     } // endfor
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(ZonePoint)
+   */
   @Override
   public void setVertex(ZonePoint vertex) {
     clearPath();
     super.setVertex(vertex);
   }
 
-  /** @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int) */
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
   @Override
   public void setRadius(int squares) {
     if (squares == getRadius()) return;
@@ -362,12 +366,16 @@ public class LineTemplate extends AbstractTemplate {
     doubleWide = aDoubleWide;
   }
 
-  /** @return Getter for path */
+  /**
+   * @return Getter for path
+   */
   public List<CellPoint> getPath() {
     return path;
   }
 
-  /** @param path Setter for the path to set */
+  /**
+   * @param path Setter for the path to set
+   */
   public void setPath(List<CellPoint> path) {
     this.path = path;
   }
@@ -376,7 +384,9 @@ public class LineTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.model.drawing.Drawable#getBounds() */
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
   public Rectangle getBounds() {
     // Get all of the numbers needed for the calculation
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
@@ -476,10 +486,14 @@ public class LineTemplate extends AbstractTemplate {
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
-        .setQuadrant(getQuadrant().name())
         .setMouseSlopeGreater(isMouseSlopeGreater())
-        .setPathVertex(getPathVertex().toDto())
         .setDoubleWide(isDoubleWide());
+    if (getPathVertex() != null) {
+      dto.setPathVertex(getPathVertex().toDto());
+    }
+    if (getQuadrant() != null) {
+      dto.setQuadrant(getQuadrant().name());
+    }
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 

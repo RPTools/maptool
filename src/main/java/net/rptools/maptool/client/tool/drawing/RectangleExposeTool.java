@@ -19,7 +19,7 @@ import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
 import java.util.Set;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
@@ -46,7 +46,7 @@ public class RectangleExposeTool extends RectangleTool {
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     // Hide the drawable color palette
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
   }
 
   @Override

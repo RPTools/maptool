@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
@@ -225,7 +225,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (ownership == Ownership.NONE) return (!t.hasOwners());
       if (ownership == Ownership.MULTIPLE) return (t.isOwnedByAll() || t.getOwners().size() > 1);
       if (ownership == Ownership.SINGLE) return (!t.isOwnedByAll() && t.getOwners().size() == 1);
-      if (ownership == Ownership.ARRAY) return (!Collections.disjoint(t.getOwners(), ownerList));
+      if (ownership == Ownership.ARRAY) return (t.isOwnedByAny(ownerList));
 
       boolean isOwner = t.isOwner(playerName);
       if (ownership == Ownership.SELF) return (isOwner);
@@ -240,22 +240,21 @@ public class FindTokenFunctions extends AbstractFunction {
    * layers).
    */
   private static class LayerFilter implements Zone.Filter {
-    private final JsonArray filterLayers;
+    private final List<Zone.Layer> filterLayers;
 
     public LayerFilter(JsonArray layers) {
-      filterLayers = new JsonArray();
-      for (Object s : layers) {
-        // Can't use .toString() as it wraps in extra quotes - bug in the JSON lib?
-        String name = ((JsonPrimitive) s).getAsString().toUpperCase();
-        name = "HIDDEN".equals(name) ? "GM" : name;
-        name = Zone.Layer.valueOf(name).toString();
-        filterLayers.add(name);
+      filterLayers = new ArrayList<>();
+      for (JsonElement s : layers) {
+        // Can't use .toString() as it wraps in extra quotes per JSON syntax.
+        String name = s.getAsString().toUpperCase();
+        final var layer = Zone.Layer.getByName(name);
+        filterLayers.add(layer);
       }
     }
 
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      return filterLayers.contains(new JsonPrimitive(t.getLayer().toString())) && !t.isImgOrLib();
+      return filterLayers.contains(t.getLayer()) && !t.isImgOrLib();
     }
   }
 
@@ -300,7 +299,9 @@ public class FindTokenFunctions extends AbstractFunction {
         "getVisibleTokenNames");
   }
 
-  /** @return the instance. */
+  /**
+   * @return the instance.
+   */
   public static FindTokenFunctions getInstance() {
     return instance;
   }
@@ -870,21 +871,35 @@ public class FindTokenFunctions extends AbstractFunction {
    * Finds the specified token.
    *
    * @param identifier the identifier of the token (name, GM name, or GUID).
-   * @param zoneName the name of the zone. If null, check current zone.
+   * @param zoneNameOrId the name or ID of the zone. If null, check current zone.
    * @return the token, or null if none found.
    */
-  public static Token findToken(String identifier, String zoneName) {
+  public static Token findToken(String identifier, String zoneNameOrId) {
     if (identifier == null) {
       return null;
     }
-    if (zoneName == null || zoneName.length() == 0) {
+    if (zoneNameOrId == null || zoneNameOrId.length() == 0) {
       ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
       return zr == null ? null : zr.getZone().resolveToken(identifier);
     } else {
+      if (!GUID.isNotGUID(zoneNameOrId)) {
+        try {
+          final var zr = MapTool.getFrame().getZoneRenderer(GUID.valueOf(zoneNameOrId));
+          if (zr != null) {
+            Token token = zr.getZone().resolveToken(identifier);
+            if (token != null) {
+              return token;
+            }
+          }
+        } catch (InvalidGUIDException ignored) {
+          // Wasn't a GUID after all. Fall back to looking up by name.
+        }
+      }
+
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         Zone zone = zr.getZone();
-        if (zone.getName().equalsIgnoreCase(zoneName)) {
+        if (zone.getName().equalsIgnoreCase(zoneNameOrId)) {
           Token token = zone.resolveToken(identifier);
           if (token != null) {
             return token;

@@ -48,7 +48,9 @@ public class UIBuilder extends JDialog {
 
   private static final Logger log = LogManager.getLogger(UIBuilder.class);
 
-  /** @author crash */
+  /**
+   * @author crash
+   */
   public static class TreeModel extends DefaultTreeModel {
     /**
      * @param root the top-level node for the tree
@@ -211,7 +213,7 @@ public class UIBuilder extends JDialog {
   }
 
   private static final AbeillePanel form =
-      new AbeillePanel(new CampaignItemListView().$$$getRootComponent$$$());
+      new AbeillePanel(new CampaignItemListView().getRootComponent());
 
   private final CheckBoxTree tree;
   private final TreeModel dtm;

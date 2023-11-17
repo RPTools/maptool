@@ -30,7 +30,7 @@ import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.MessageHandler;
-import net.rptools.clientserver.simple.client.ClientConnection;
+import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
@@ -71,7 +71,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private final PlayerDatabase playerDatabase;
 
   /** The connection to the client. */
-  private final ClientConnection connection;
+  private final Connection connection;
 
   /** Observers that want to be notified when the status changes. */
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
@@ -116,7 +116,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @param useEasyConnect If true, the client will use the easy connect method.
    */
   public ServerHandshake(
-      ClientConnection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
+      Connection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
     this.connection = connection;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = useEasyConnect;
@@ -133,7 +133,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public synchronized ClientConnection getConnection() {
+  public synchronized Connection getConnection() {
     return connection;
   }
 
@@ -313,9 +313,15 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private void handle(ClientAuthMsg clientAuthMessage)
-      throws NoSuchAlgorithmException, InvalidKeySpecException, ExecutionException,
-          InterruptedException, NoSuchPaddingException, IllegalBlockSizeException,
-          NoSuchAlgorithmException, BadPaddingException, InvalidKeyException,
+      throws NoSuchAlgorithmException,
+          InvalidKeySpecException,
+          ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
           InvalidAlgorithmParameterException {
     byte[] response = clientAuthMessage.getChallengeResponse().toByteArray();
     if (handshakeChallenges.length > 1) {
@@ -374,9 +380,14 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void handle(ClientInitMsg clientInitMsg)
-      throws ExecutionException, InterruptedException, NoSuchPaddingException,
-          IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     var server = MapTool.getServer();
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
       setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
@@ -453,8 +464,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
 
     SecureRandom rnd = new SecureRandom();
@@ -486,8 +501,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private void sendRoleSharedPasswordAuthType()
-      throws NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException,
-          BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException {
+      throws NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     byte[] playerPasswordSalt = playerDatabase.getPlayerPasswordSalt(player.getName());
     String[] password = new String[2];
     password[GM_CHALLENGE] = new PasswordGenerator().getPassword();
@@ -534,9 +553,14 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws InvalidKeyException when there is an error during encryption.
    */
   private State sendAsymmetricKeyAuthType()
-      throws ExecutionException, InterruptedException, NoSuchPaddingException,
-          IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException,
-          InvalidKeyException, InvalidAlgorithmParameterException {
+      throws ExecutionException,
+          InterruptedException,
+          NoSuchPaddingException,
+          IllegalBlockSizeException,
+          NoSuchAlgorithmException,
+          BadPaddingException,
+          InvalidKeyException,
+          InvalidAlgorithmParameterException {
     handshakeChallenges = new HandshakeChallenge[1];
     if (!playerDatabase.hasPublicKey(player, playerPublicKeyMD5).join()) {
       if (useEasyConnect) {

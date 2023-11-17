@@ -23,15 +23,18 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
 
-/** @author drice */
+/**
+ * @author drice
+ */
 public class LineSegment extends AbstractDrawing {
   private final List<Point> points = new ArrayList<Point>();
-  private Float width;
+  private @Nonnull Float width;
   private boolean squareCap;
   private transient int lastPointCount = -1;
   private transient Rectangle cachedBounds;
@@ -46,6 +49,15 @@ public class LineSegment extends AbstractDrawing {
     super(id);
     this.width = width;
     this.squareCap = squareCap;
+  }
+
+  @SuppressWarnings("ConstantValue")
+  private Object readResolve() {
+    if (width == null) {
+      width = 2.f;
+    }
+
+    return this;
   }
 
   /**
@@ -93,17 +105,12 @@ public class LineSegment extends AbstractDrawing {
       }
       gp.lineTo(point.x, point.y);
     }
-    BasicStroke stroke =
-        new BasicStroke(width != null ? width : 2, getStrokeCap(), getStrokeJoin());
+    BasicStroke stroke = new BasicStroke(width, getStrokeCap(), getStrokeJoin());
     return new Area(stroke.createStrokedShape(gp));
   }
 
   @Override
   protected void draw(Graphics2D g) {
-    if (width == null) {
-      // Handle legacy values
-      area = null; // reset, build with new value
-    }
     width = ((BasicStroke) g.getStroke()).getLineWidth();
     squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
     Area area = getArea();
@@ -142,7 +149,7 @@ public class LineSegment extends AbstractDrawing {
     return bounds;
   }
 
-  public Float getWidth() {
+  public float getWidth() {
     return width;
   }
 

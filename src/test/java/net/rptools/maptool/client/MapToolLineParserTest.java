@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 
 import java.math.BigDecimal;
 import java.util.Collections;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;

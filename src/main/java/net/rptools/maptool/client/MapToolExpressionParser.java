@@ -19,11 +19,10 @@ import com.google.common.cache.CacheBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import net.rptools.common.expression.ExpressionParser;
+import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.script.javascript.*;
-import net.rptools.maptool.client.script.javascript.api.*;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -44,6 +43,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               ExecFunction.getInstance(),
               FindTokenFunctions.getInstance(),
               HasImpersonated.getInstance(),
+              IlluminationFunctions.getInstance(),
               InitiativeRoundFunction.getInstance(),
               InputFunction.getInstance(),
               IsTrustedFunction.getInstance(),
@@ -109,7 +109,8 @@ public class MapToolExpressionParser extends ExpressionParser {
               new PlayerFunctions(),
               new LibraryFunctions(),
               new DataFunctions(),
-              new ServerFunctions())
+              new ServerFunctions(),
+              new SlashCommands())
           .collect(Collectors.toList());
 
   public MapToolExpressionParser() {

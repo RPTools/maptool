@@ -87,7 +87,8 @@ public class LibTokenConverter {
                 case "onInitiativeChangeRequest",
                     "onInitiativeChange",
                     "onTokenMove",
-                    "onMultipleTokensMove" -> {
+                    "onMultipleTokensMove",
+                    "onChangeMap" -> {
                   macroScriptNameMap.put(macroName, macroName + ".mts");
                   legacyEventNameMap.put(macroName, macroName);
                 }

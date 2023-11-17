@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.functions;
 
-import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import java.awt.*;
 import java.awt.geom.Point2D;
@@ -22,15 +21,17 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Stream;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -65,6 +66,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         "getTokenY",
         "getTokenDrawOrder",
         "getTokenMap",
+        "getTokenMapIDs",
         "getDistance",
         "moveToken",
         "goto",
@@ -74,7 +76,9 @@ public class TokenLocationFunctions extends AbstractFunction {
         "moveTokenFromMap");
   }
 
-  /** @return instance of TokenLocationFunctions. */
+  /**
+   * @return instance of TokenLocationFunctions.
+   */
   public static TokenLocationFunctions getInstance() {
     return instance;
   }
@@ -109,10 +113,18 @@ public class TokenLocationFunctions extends AbstractFunction {
       return BigDecimal.valueOf(token.getZOrder());
     }
     if (functionName.equalsIgnoreCase("getTokenMap")) {
-      FunctionUtil.checkNumberParam("getDistance", parameters, 1, 2);
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
       String identifier = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
-      return getTokenMap(identifier, delim);
+      final var zoneNames = getTokenZones(identifier).map(Zone::getName).toList();
+      return FunctionUtil.delimitedResult(delim, zoneNames);
+    }
+    if (functionName.equalsIgnoreCase("getTokenMapIDs")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      String identifier = parameters.get(0).toString();
+      String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
+      final var zoneNames = getTokenZones(identifier).map(Zone::getId).map(GUID::toString).toList();
+      return FunctionUtil.delimitedResult(delim, zoneNames);
     }
     if (functionName.equalsIgnoreCase("getDistance")) {
       FunctionUtil.checkNumberParam("getDistance", parameters, 1, 4);
@@ -164,19 +176,9 @@ public class TokenLocationFunctions extends AbstractFunction {
     } else {
       tokens.add((String) tokenString);
     }
-    Zone zone = null;
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    for (ZoneRenderer zr : zrenderers) {
-      Zone z = zr.getZone();
-      if (z.getName().equalsIgnoreCase(map)) {
-        zone = z;
-        break;
-      }
-    }
-    if (zone == null) {
-      throw new ParserException(
-          I18N.getText("macro.function.moveTokenMap.unknownMap", functionName, map));
-    }
+
+    final var zone = FunctionUtil.getZoneRenderer(functionName, map).getZone();
+
     Zone toZone;
     Zone fromZone;
 
@@ -604,32 +606,14 @@ public class TokenLocationFunctions extends AbstractFunction {
   }
 
   /**
-   * Returns a list of maps containing the token.
+   * Returns the zones containing the identified token.
    *
    * @param identifier the identifier of the token.
-   * @param delim the delimiter of the returned list.
-   * @return the list of maps containing the token.
+   * @return all zones containing the token.
    */
-  private Object getTokenMap(String identifier, String delim) {
-    List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
-    List<String> mapList = new ArrayList<>();
-
-    for (final ZoneRenderer zr : zrenderers) {
-      Zone zone = zr.getZone();
-      Token token = zone.resolveToken(identifier);
-      if (token != null) {
-        mapList.add(zr.getZone().getName());
-      }
-    }
-
-    if ("json".equalsIgnoreCase(delim)) {
-      JsonArray jsonArray = new JsonArray();
-      for (String map : mapList) {
-        jsonArray.add(map);
-      }
-      return jsonArray;
-    } else {
-      return String.join(delim, mapList);
-    }
+  private Stream<Zone> getTokenZones(String identifier) {
+    return MapTool.getFrame().getZoneRenderers().stream()
+        .map(ZoneRenderer::getZone)
+        .filter(zone -> zone.resolveToken(identifier) != null);
   }
 }

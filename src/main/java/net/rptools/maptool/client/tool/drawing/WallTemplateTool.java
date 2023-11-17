@@ -45,19 +45,25 @@ public class WallTemplateTool extends BurstTemplateTool {
    * Overridden RadiusTemplateTool methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new WallTemplate();
   }
 
-  /** @see Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.walltemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.walltemplate.instructions";
@@ -133,7 +139,9 @@ public class WallTemplateTool extends BurstTemplateTool {
     } // endif
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#resetTool() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#resetTool()
+   */
   @Override
   protected void resetTool() {
     super.resetTool();

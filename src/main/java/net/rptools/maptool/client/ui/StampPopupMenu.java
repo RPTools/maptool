@@ -18,7 +18,7 @@ import java.util.Set;
 import javax.swing.JMenuItem;
 import javax.swing.JSeparator;
 import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -36,9 +36,7 @@ public class StampPopupMenu extends AbstractTokenPopupMenu {
     add(createFlipMenu());
     add(createSizeMenu());
     add(createArrangeMenu());
-    add(
-        createChangeToMenu(
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    add(createChangeToMenu(Zone.Layer.values()));
     if (getTokenUnderMouse().getCharsheetImage() != null
         && AppUtil.playerOwns(getTokenUnderMouse())) {
       add(new ShowHandoutAction());

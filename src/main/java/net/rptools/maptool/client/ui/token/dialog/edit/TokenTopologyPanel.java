@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.ui.token.edit;
+package net.rptools.maptool.client.ui.token.dialog.edit;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -304,6 +304,11 @@ public class TokenTopologyPanel extends JPanel {
       g2d.fill(
           atArea.createTransformedShape(
               tokenTopologiesOptimized.getOrDefault(Zone.TopologyType.PIT_VBL, new Area())));
+
+      g2d.setColor(getTopologyColor(AppStyle.tokenCoverVblColor));
+      g2d.fill(
+          atArea.createTransformedShape(
+              tokenTopologiesOptimized.getOrDefault(Zone.TopologyType.COVER_VBL, new Area())));
     }
 
     // Draw the number of points generated

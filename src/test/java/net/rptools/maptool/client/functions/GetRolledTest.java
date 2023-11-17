@@ -20,7 +20,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.util.*;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -49,13 +49,13 @@ public class GetRolledTest {
           "[r: macro.return = json.set('', 'priors', priors, 'rolls_1', rolls_1, 'rolls_2', rolls_2, 'all_rolls', getRolled())]");
 
   @BeforeAll
-  private static void setUp() {
+  public static void setUp() {
     parser = MapTool.getParser();
     parser.enterContext("test", "test", true);
   }
 
   @AfterEach
-  private void resetParser() {
+  public void resetParser() {
     parser.clearRolls();
   }
 

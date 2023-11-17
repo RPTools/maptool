@@ -21,7 +21,7 @@ import java.awt.event.MouseMotionListener;
 import java.awt.geom.Area;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
@@ -39,7 +39,7 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
   protected void attachTo(ZoneRenderer renderer) {
     super.attachTo(renderer);
     // Hide the drawable color palette
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
   }
 
   @Override
@@ -49,12 +49,12 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
 
   @Override
   public String getInstructions() {
-    return "tool.recttopology.instructions";
+    return "tool.isorectangletopology.instructions";
   }
 
   @Override
   public String getTooltip() {
-    return "tool.recttopology.tooltip";
+    return "tool.isorectangletopology.tooltip";
   }
 
   @Override

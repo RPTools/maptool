@@ -18,15 +18,14 @@ import com.google.gson.JsonObject;
 import java.awt.Image;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.parser.Parser;
@@ -38,8 +37,6 @@ public class TokenImage extends AbstractFunction {
 
   /** Singleton instance. */
   private static final TokenImage instance = new TokenImage();
-
-  private static final Pattern assetRE = Pattern.compile("asset://([^-]+)");
 
   enum imageType {
     TOKEN_IMAGE(0),
@@ -260,12 +257,8 @@ public class TokenImage extends AbstractFunction {
    * @throws ParserException if assetName not found or assetName doesn't
    */
   public static MD5Key getMD5Key(String assetName, String functionName) throws ParserException {
-    Matcher m = assetRE.matcher(assetName);
-
-    String assetId;
-    if (m.matches()) {
-      assetId = m.group(1);
-    } else if (assetName.toLowerCase().startsWith("image:")) {
+    String assetId = null;
+    if (assetName.toLowerCase().startsWith("image:")) {
       Token imageToken = findImageToken(assetName, functionName);
       if (imageToken == null) {
         throw new ParserException(
@@ -273,10 +266,17 @@ public class TokenImage extends AbstractFunction {
       }
       assetId = imageToken.getImageAssetId().toString();
     } else {
+      var assetKey = new AssetResolver().getAssetKey(assetName);
+      if (assetKey.isPresent()) {
+        assetId = assetKey.get().toString();
+      }
+    }
+    if (assetId == null) {
       throw new ParserException(
           I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
+    } else {
+      return new MD5Key(assetId);
     }
-    return new MD5Key(assetId);
   }
 
   private static void setImage(Token token, String assetName) throws ParserException {

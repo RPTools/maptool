@@ -222,10 +222,10 @@ public class TokenStatesController
   // the order needs to match the AbstractTemplate.Quadrant enum
   private static final List<String> corners =
       List.of(
-          "CampaignPropertiesDialog.combo.states.corner.topRight",
-          "CampaignPropertiesDialog.combo.states.corner.topLeft",
-          "CampaignPropertiesDialog.combo.states.corner.bottomRight",
-          "CampaignPropertiesDialog.combo.states.corner.bottomLeft");
+          "position.corner.topRight",
+          "position.corner.topLeft",
+          "position.corner.bottomRight",
+          "position.corner.bottomLeft");
 
   /**
    * Set up the button listeners, spinner models, list cell renderer and selection listeners
@@ -274,7 +274,9 @@ public class TokenStatesController
     changedUpdate(null);
   }
 
-  /** @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent) */
+  /**
+   * @see java.awt.event.ItemListener#itemStateChanged(java.awt.event.ItemEvent)
+   */
   @Override
   public void itemStateChanged(ItemEvent e) {
     changedUpdate(null);
@@ -465,13 +467,17 @@ public class TokenStatesController
         .setEnabled(hasName && hasUniqueUpdateName && selectedState != null && hasShow);
   }
 
-  /** @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#insertUpdate(javax.swing.event.DocumentEvent)
+   */
   @Override
   public void insertUpdate(DocumentEvent e) {
     changedUpdate(e);
   }
 
-  /** @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent) */
+  /**
+   * @see javax.swing.event.DocumentListener#removeUpdate(javax.swing.event.DocumentEvent)
+   */
   @Override
   public void removeUpdate(DocumentEvent e) {
     changedUpdate(e);
@@ -807,12 +813,16 @@ public class TokenStatesController
     return width;
   }
 
-  /** @return Getter for names */
+  /**
+   * @return Getter for names
+   */
   public Set<String> getNames() {
     return names;
   }
 
-  /** @param names Setter for names */
+  /**
+   * @param names Setter for names
+   */
   public void setNames(Set<String> names) {
     this.names = names;
   }

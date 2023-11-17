@@ -377,3 +377,9 @@ message RemoveDataMsg {
   string namespace = 2;
   string name = 3;
 }
+
+message UpdatePlayerStatusMsg {
+  string player = 1;
+  string zone_guid = 2;
+  bool loaded = 3;
+}

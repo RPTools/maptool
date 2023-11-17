@@ -25,7 +25,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
@@ -63,19 +63,25 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * Overridden RadiusTemplateTool Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.linetemplate.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.linetemplate.instructions";
   }
 
-  /** @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate() */
+  /**
+   * @see net.rptools.maptool.client.tool.drawing.RadiusTemplateTool#createBaseTemplate()
+   */
   @Override
   protected AbstractTemplate createBaseTemplate() {
     return new LineTemplate();
@@ -97,8 +103,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override
@@ -250,7 +255,9 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   public void propertyChange(PropertyChangeEvent aEvt) {
     ((LineTemplate) template).setDoubleWide((Boolean) aEvt.getNewValue());
   }

@@ -32,7 +32,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
@@ -184,12 +184,16 @@ public abstract class HexGrid extends Grid {
     return new Rectangle(zp.x, zp.y, w, h);
   }
 
-  /** @return Distance from the center to edge of a hex */
+  /**
+   * @return Distance from the center to edge of a hex
+   */
   public double getVRadius() {
     return minorRadius;
   }
 
-  /** @return Distance from the center to vertex of a hex */
+  /**
+   * @return Distance from the center to vertex of a hex
+   */
   public double getURadius() {
     return edgeLength / 2 + edgeProjection;
   }

@@ -38,7 +38,7 @@ import javax.annotation.Nonnull;
  *   <li>The obscured lumens levels. For each light area in the basic structure, subtract out any
  *       stronger darknesses, and for each darkness subtract out any stronger lights. The result is
  *       the obscured lit areas arranged by lumens level.
- *   <li>The complete visible area. This is the union of the light areas after the process in (1).
+ *   <li>The complete lit area. This is the union of the light areas after the process in (1).
  *   <li>The disjoint obscured lumens levels. Starting from (1), we can additionally subtract strong
  *       light from weak light and strong darkness from weak darkness so that any given point is
  *       represented only in the strongest lumens level.
@@ -105,7 +105,15 @@ public final class Illumination {
    * <p>This is derived from {@link #obscuredLumensLevels} by unioning all light areas and leaving
    * out all darkness areas.
    */
-  private Area visibleArea = null;
+  private Area litArea = null;
+
+  /**
+   * The complete darkened area.
+   *
+   * <p>This is derived from {@link #obscuredLumensLevels} by unioning all darkness areas and
+   * leaving out all light areas.
+   */
+  private Area darkenedArea = null;
 
   // endregion
 
@@ -113,8 +121,8 @@ public final class Illumination {
    * Create a new {@code Illumination} from a set of base lumens levels.
    *
    * <p>The {@code lumensLevels} should contain the complete areas that <emp>could</emp> be covered
-   * covered by each level of lumens. Obscurement (darkness competing with light) should not already
-   * be calculated, as the {@code Illumination} will handle this.
+   * by each level of lumens. Obscurement (darkness competing with light) should not already be
+   * calculated, as the {@code Illumination} will handle this.
    *
    * @param lumensLevels The base areas covered by each level of lumens.
    */
@@ -175,7 +183,7 @@ public final class Illumination {
    * <p>This is useful for rendering the lumens levels, so that well-defined boundaries exist
    * between each lumens level.
    *
-   * @return The obscured lumens levels.
+   * @return The obscured lumens levels, ordered from strong to weak lumens.
    */
   public @Nonnull List<LumensLevel> getDisjointObscuredLumensLevels() {
     if (disjointObscuredLumensLevels == null) {
@@ -210,18 +218,36 @@ public final class Illumination {
    * Get the total lit area from all lumens levels.
    *
    * <p>After subtracting stronger darkness from weaker lights, the resulting lights are unioned
-   * into a single visible area.
+   * into a single area.
    *
    * @return The lit area.
    */
-  public @Nonnull Area getVisibleArea() {
-    if (visibleArea == null) {
+  public @Nonnull Area getLitArea() {
+    if (litArea == null) {
       final var result = new Area();
       getObscuredLumensLevels().forEach(level -> result.add(level.lightArea()));
-      visibleArea = result;
+      litArea = result;
     }
 
-    return new Area(visibleArea);
+    return new Area(litArea);
+  }
+
+  /**
+   * Get the total dark area from all lumens levels.
+   *
+   * <p>After subtracting stronger lights from weaker darkness, the resulting darknesses are unioned
+   * into a single area.
+   *
+   * @return The darkened area.
+   */
+  public @Nonnull Area getDarkenedArea() {
+    if (darkenedArea == null) {
+      final var result = new Area();
+      getObscuredLumensLevels().forEach(level -> result.add(level.darknessArea()));
+      darkenedArea = result;
+    }
+
+    return new Area(darkenedArea);
   }
 
   /**

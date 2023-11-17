@@ -35,6 +35,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   protected Area tokenWallVbl;
   protected Area tokenHillVbl;
   protected Area tokenPitVbl;
+  protected Area tokenCoverVbl;
   protected Area tokenMbl;
   protected RenderPathWorker renderPathWorker;
 
@@ -74,7 +75,14 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
   public CellPoint replaceLastWaypoint(CellPoint point) {
     return replaceLastWaypoint(
-        point, false, Collections.singleton(TerrainModifierOperation.NONE), null, null, null, null);
+        point,
+        false,
+        Collections.singleton(TerrainModifierOperation.NONE),
+        null,
+        null,
+        null,
+        null,
+        null);
   }
 
   @Override
@@ -85,6 +93,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       Area tokenWallVbl,
       Area tokenHillVbl,
       Area tokenPitVbl,
+      Area tokenCoverVbl,
       Area tokenMbl) {
 
     this.restrictMovement = restrictMovement;
@@ -92,6 +101,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     this.tokenWallVbl = tokenWallVbl;
     this.tokenHillVbl = tokenHillVbl;
     this.tokenPitVbl = tokenPitVbl;
+    this.tokenCoverVbl = tokenCoverVbl;
     this.tokenMbl = tokenMbl;
 
     if (partialPaths.isEmpty()) {
@@ -197,7 +207,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     return true;
   }
 
-  /** @see java.lang.Object#toString() */
+  /**
+   * @see java.lang.Object#toString()
+   */
   @Override
   public String toString() {
     StringBuilder s = new StringBuilder("Path: ");
@@ -229,7 +241,9 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
       }
     }
 
-    /** @see java.lang.Object#toString() */
+    /**
+     * @see java.lang.Object#toString()
+     */
     @Override
     public String toString() {
       StringBuilder s = new StringBuilder("PartialPath([");

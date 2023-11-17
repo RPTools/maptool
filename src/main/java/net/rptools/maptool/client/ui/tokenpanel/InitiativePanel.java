@@ -34,7 +34,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -318,12 +318,16 @@ public class InitiativePanel extends JPanel
     else round.setText("");
   }
 
-  /** @return Getter for list */
+  /**
+   * @return Getter for list
+   */
   public InitiativeList getList() {
     return list;
   }
 
-  /** @param theList Setter for the list to set */
+  /**
+   * @param theList Setter for the list to set
+   */
   public void setList(InitiativeList theList) {
     // Remove the old list
     if (list == theList) return;
@@ -348,22 +352,30 @@ public class InitiativePanel extends JPanel
         });
   }
 
-  /** @return Getter for showTokens */
+  /**
+   * @return Getter for showTokens
+   */
   public boolean isShowTokens() {
     return showTokens;
   }
 
-  /** @return Getter for showTokenStates */
+  /**
+   * @return Getter for showTokenStates
+   */
   public boolean isShowTokenStates() {
     return showTokenStates;
   }
 
-  /** @return Getter for showInitState */
+  /**
+   * @return Getter for showInitState
+   */
   public boolean isShowInitState() {
     return showInitState;
   }
 
-  /** @return Getter for model */
+  /**
+   * @return Getter for model
+   */
   public InitiativeListModel getModel() {
     return model;
   }
@@ -417,23 +429,31 @@ public class InitiativePanel extends JPanel
     return (MapTool.getPlayer() == null || MapTool.getPlayer().isGM());
   }
 
-  /** @return Getter for ownerPermissions */
+  /**
+   * @return Getter for ownerPermissions
+   */
   public boolean isOwnerPermissions() {
     return ownerPermissions;
   }
 
-  /** @param anOwnerPermissions Setter for ownerPermissions */
+  /**
+   * @param anOwnerPermissions Setter for ownerPermissions
+   */
   public void setOwnerPermissions(boolean anOwnerPermissions) {
     ownerPermissions = anOwnerPermissions;
     updateView();
   }
 
-  /** @return Getter for MovementLock */
+  /**
+   * @return Getter for MovementLock
+   */
   public boolean isMovementLock() {
     return movementLock;
   }
 
-  /** @param anMovementLock Setter for MovementLock */
+  /**
+   * @param anMovementLock Setter for MovementLock
+   */
   public void setMovementLock(boolean anMovementLock) {
     movementLock = anMovementLock;
   }
@@ -481,12 +501,16 @@ public class InitiativePanel extends JPanel
     return true;
   }
 
-  /** @return Getter for initStateSecondLine */
+  /**
+   * @return Getter for initStateSecondLine
+   */
   public boolean isInitStateSecondLine() {
     return initStateSecondLine;
   }
 
-  /** @param initStateSecondLine Setter for initStateSecondLine */
+  /**
+   * @param initStateSecondLine Setter for initStateSecondLine
+   */
   public void setInitStateSecondLine(boolean initStateSecondLine) {
     this.initStateSecondLine = initStateSecondLine;
   }
@@ -554,7 +578,9 @@ public class InitiativePanel extends JPanel
    * PropertyChangeListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent) */
+  /**
+   * @see java.beans.PropertyChangeListener#propertyChange(java.beans.PropertyChangeEvent)
+   */
   @Override
   public void propertyChange(PropertyChangeEvent evt) {
     if (evt.getPropertyName().equals(InitiativeList.ROUND_PROP)) {
@@ -766,7 +792,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.insertTokens(list.getZone().getTokens());
+          list.insertTokens(list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer));
         }
       };
 
@@ -776,7 +802,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
-          for (Token token : list.getZone().getTokens()) {
+          for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
@@ -850,7 +876,9 @@ public class InitiativePanel extends JPanel
    */
   private class MouseHandler extends MouseAdapter {
 
-    /** @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent) */
+    /**
+     * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+     */
     @Override
     public void mouseClicked(MouseEvent e) {
 
@@ -867,7 +895,7 @@ public class InitiativePanel extends JPanel
                 ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                 if (renderer == null
                     || token == null
-                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || (!token.getLayer().isTokenLayer() && !MapTool.getPlayer().isGM())
                     || !AppUtil.playerOwns(token)) {
                   return;
                 }

@@ -44,12 +44,13 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
@@ -78,7 +79,9 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class PersistenceUtil {
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
@@ -268,13 +271,12 @@ public class PersistenceUtil {
     return n;
   }
 
-  public static void saveCampaign(Campaign campaign, File campaignFile, String campaignVersion)
-      throws IOException {
+  public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
     CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
     saveTimer = new CodeTimer("CampaignSave");
     saveTimer.setThreshold(5);
-    saveTimer.setEnabled(
-        log.isDebugEnabled()); // Don't bother keeping track if it won't be displayed...
+    // Don't bother keeping track if it won't be displayed...
+    saveTimer.setEnabled(AppState.isCollectProfilingData());
 
     // Strategy: save the file to a tmp location so that if there's a failure the original file
     // won't be touched. Then once we're finished, replace the old with the new.
@@ -323,15 +325,9 @@ public class PersistenceUtil {
       try {
         saveTimer.start("Set content");
 
-        // If we are exporting the campaign, we will strip classes/fields that were added since the
-        // specified campaignVersion
-        if (campaignVersion != null) {
-          pakFile = CampaignExport.stripContent(pakFile, persistedCampaign, campaignVersion);
-        } else {
-          pakFile.setContent(persistedCampaign);
-          pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
-          pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
-        }
+        pakFile.setContent(persistedCampaign);
+        pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
+        pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 
         saveTimer.stop("Set content");
         saveTimer.start("Save");
@@ -349,8 +345,8 @@ public class PersistenceUtil {
         pakFile = null;
         tmpFile.delete(); // Delete the temporary file
         saveTimer.stop("OOM Close");
-        if (log.isDebugEnabled()) {
-          log.debug(saveTimer);
+        if (saveTimer.isEnabled()) {
+          MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
         }
         MapTool.showError("msg.error.failedSaveCampaignOOM");
         return;
@@ -393,8 +389,8 @@ public class PersistenceUtil {
     saveCampaignThumbnail(campaignFile.getName());
     saveTimer.stop("Thumbnail");
 
-    if (log.isDebugEnabled()) {
-      log.debug(saveTimer);
+    if (saveTimer.isEnabled()) {
+      MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
     }
   }
 
@@ -439,9 +435,7 @@ public class PersistenceUtil {
     PersistedCampaign persistedCampaign = null;
 
     // Try the new way first
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(campaignFile);
+    try (PackedFile pakFile = new PackedFile(campaignFile)) {
       pakFile.setModelVersionManager(campaignVersionManager);
 
       // Sanity check
@@ -457,7 +451,14 @@ public class PersistenceUtil {
       } catch (ConversionException ce) {
         // Ignore the exception and check for "campaign == null" below...
         MapTool.showError("PersistenceUtil.error.campaignVersion", ce);
+      } catch (ClassCastException cce) {
+        // Ignore the exception and check for "campaign == null" below...
+        MapTool.showWarning(
+            I18N.getText(
+                "PersistenceUtil.warn.campaignWrongFileType",
+                pakFile.getContent().getClass().getSimpleName()));
       }
+
       if (persistedCampaign != null) {
         // Now load up any images that we need
         // Note that the values are all placeholders
@@ -484,19 +485,12 @@ public class PersistenceUtil {
     } catch (OutOfMemoryError oom) {
       MapTool.showError("Out of memory while reading campaign.", oom);
       return null;
-    } catch (ClassCastException cce) {
-      MapTool.showWarning(
-          I18N.getText(
-              "PersistenceUtil.warn.campaignWrongFileType",
-              pakFile.getContent().getClass().getSimpleName()));
     } catch (RuntimeException rte) {
       MapTool.showError("PersistenceUtil.error.campaignRead", rte);
     } catch (Error e) {
       // Probably an issue with XStream not being able to instantiate a given class
       // The old legacy technique probably won't work, but we should at least try...
       MapTool.showError("PersistenceUtil.error.unknown", e);
-    } finally {
-      if (pakFile != null) pakFile.close();
     }
 
     // No longer try to load a legacy (very early 1.3 and before) campaign
@@ -515,7 +509,7 @@ public class PersistenceUtil {
 
   public static BufferedImage getTokenThumbnail(File file) throws Exception {
     BufferedImage thumb;
-    try (PackedFile pakFile = new PackedFile(file); ) {
+    try (PackedFile pakFile = new PackedFile(file)) {
       // Jamz: Lets use the Large thumbnail if needed
       String thumbFileName = getThumbFilename(pakFile);
 
@@ -861,9 +855,7 @@ public class PersistenceUtil {
   }
 
   public static CampaignProperties loadCampaignProperties(File file) {
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(file);
+    try (PackedFile pakFile = new PackedFile(file)) {
       String progVersion = (String) pakFile.getProperty(PROP_VERSION);
       if (!versionCheck(progVersion)) return null;
       CampaignProperties props = null;
@@ -883,10 +875,8 @@ public class PersistenceUtil {
       return props;
     } catch (IOException e) {
       try {
-        if (pakFile != null)
-          pakFile.close(); // first close PackedFile (if it was opened) 'cuz some stupid OSes won't
-        // allow a file to be opened twice (ugh).
-        pakFile = null;
+        // Some OSes won't allow a file to be opened twice (ugh). But we're okay here since
+        // try-with-resources ensures that .close() was already called by this point.
         return loadLegacyCampaignProperties(file);
       } catch (IOException ioe) {
         MapTool.showError("PersistenceUtil.error.campaignPropertiesLegacy", ioe);

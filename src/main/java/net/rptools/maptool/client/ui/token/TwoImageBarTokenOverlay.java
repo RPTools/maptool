@@ -57,7 +57,9 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     bottomAssetId = theBottomAssetId;
   }
 
-  /** @see AbstractTokenOverlay#clone() */
+  /**
+   * @see AbstractTokenOverlay#clone()
+   */
   @Override
   public Object clone() {
     BarTokenOverlay overlay = new TwoImageBarTokenOverlay(getName(), topAssetId, bottomAssetId);
@@ -142,22 +144,30 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     g.setComposite(tempComposite);
   }
 
-  /** @return Getter for bottomAssetId */
+  /**
+   * @return Getter for bottomAssetId
+   */
   public MD5Key getBottomAssetId() {
     return bottomAssetId;
   }
 
-  /** @param bottomAssetId Setter for bottomAssetId */
+  /**
+   * @param bottomAssetId Setter for bottomAssetId
+   */
   public void setBottomAssetId(MD5Key bottomAssetId) {
     this.bottomAssetId = bottomAssetId;
   }
 
-  /** @return Getter for topAssetId */
+  /**
+   * @return Getter for topAssetId
+   */
   public MD5Key getTopAssetId() {
     return topAssetId;
   }
 
-  /** @param topAssetId Setter for topAssetId */
+  /**
+   * @param topAssetId Setter for topAssetId
+   */
   public void setTopAssetId(MD5Key topAssetId) {
     this.topAssetId = topAssetId;
   }

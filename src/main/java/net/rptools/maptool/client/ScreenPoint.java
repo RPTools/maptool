@@ -15,7 +15,7 @@
 package net.rptools.maptool.client;
 
 import java.awt.geom.Point2D;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 
 public class ScreenPoint extends Point2D.Double {
@@ -149,7 +149,9 @@ public class ScreenPoint extends Point2D.Double {
     return "ScreenPoint" + super.toString();
   }
 
-  /** @see java.lang.Object#equals(java.lang.Object) */
+  /**
+   * @see java.lang.Object#equals(java.lang.Object)
+   */
   @Override
   public boolean equals(Object pt) {
     if (!(pt instanceof ScreenPoint)) return false;

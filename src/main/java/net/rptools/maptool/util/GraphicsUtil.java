@@ -42,7 +42,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** */
 public class GraphicsUtil {

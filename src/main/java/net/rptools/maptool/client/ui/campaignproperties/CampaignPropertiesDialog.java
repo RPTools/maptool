@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -36,10 +37,12 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
@@ -91,7 +94,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initialize() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().$$$getRootComponent$$$());
+    formPanel = new AbeillePanel(new CampaignPropertiesDialogView().getRootComponent());
 
     initTokenPropertiesDialog(formPanel);
     tokenStatesController = new TokenStatesController(formPanel);
@@ -126,11 +129,6 @@ public class CampaignPropertiesDialog extends JDialog {
               }
             });
     getRootPane().setDefaultButton(getOKButton());
-  }
-
-  // need to access update button action in token properties panel
-  public void tokenPropertiesDialogUpdate() {
-    tokenPropertiesPanel.update();
   }
 
   private void initTokenPropertiesDialog(AbeillePanel panel) {
@@ -198,7 +196,16 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void accept() {
     try {
-      tokenPropertiesDialogUpdate(); // update token properties for the forgetful
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+      tokenPropertiesPanel
+          .getRenameTypes()
+          .forEach(
+              (o, n) -> {
+                campaign.renameTokenTypes(o, n);
+              });
+      MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
       status = Status.OK;
@@ -482,7 +489,8 @@ public class CampaignPropertiesDialog extends JDialog {
         }
         // Parse Details
         double magnifier = 1;
-        LightSource personalLight = null;
+        // If null, no personal light has been defined.
+        List<Light> personalLightLights = null;
 
         String[] args = value.split("\\s+");
         ShapeType shape = ShapeType.CIRCLE;
@@ -537,11 +545,10 @@ public class CampaignPropertiesDialog extends JDialog {
                   }
                 }
 
-                if (personalLight == null) {
-                  personalLight = new LightSource();
-                  personalLight.setType(LightSource.Type.NORMAL);
+                if (personalLightLights == null) {
+                  personalLightLights = new ArrayList<>();
                 }
-                personalLight.add(
+                personalLightLights.add(
                     new Light(
                         shape,
                         0,
@@ -553,7 +560,6 @@ public class CampaignPropertiesDialog extends JDialog {
                         perRangeLumens,
                         false,
                         false));
-                personalLight.setScaleWithToken(scaleWithToken);
               } else {
                 throw new ParseException(
                     String.format("Unrecognized personal light syntax: %s", arg), 0);
@@ -582,6 +588,11 @@ public class CampaignPropertiesDialog extends JDialog {
             errlog.add(I18N.getText(errmsg, reader.getLineNumber(), toBeParsed));
           }
         }
+
+        LightSource personalLight =
+            personalLightLights == null
+                ? null
+                : LightSource.createPersonal(scaleWithToken, personalLightLights);
         SightType sight =
             new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
         sight.setDistance(range);
@@ -664,14 +675,22 @@ public class CampaignPropertiesDialog extends JDialog {
           continue;
         }
 
+        // region Light source properties.
         String name = line.substring(0, split).trim();
-        LightSource lightSource = new LightSource(name);
+        GUID id = new GUID();
+        LightSource.Type type = LightSource.Type.NORMAL;
+        boolean scaleWithToken = false;
+        List<Light> lights = new ArrayList<>();
+        // endregion
+        // region Individual light properties
         ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
         double arc = 0;
         double offset = 0;
         boolean gmOnly = false;
         boolean owner = false;
         String distance = null;
+        // endregion
+
         for (String arg : line.substring(split + 1).split("\\s+")) {
           arg = arg.trim();
           if (arg.length() == 0) {
@@ -689,7 +708,7 @@ public class CampaignPropertiesDialog extends JDialog {
           }
           // Scale with token designation
           if (arg.equalsIgnoreCase("SCALE")) {
-            lightSource.setScaleWithToken(true);
+            scaleWithToken = true;
             continue;
           }
           // Shape designation ?
@@ -702,8 +721,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
           // Type designation ?
           try {
-            LightSource.Type type = LightSource.Type.valueOf(arg.toUpperCase());
-            lightSource.setType(type);
+            type = LightSource.Type.valueOf(arg.toUpperCase());
             continue;
           } catch (IllegalArgumentException iae) {
             // Expected when not defining a shape
@@ -764,7 +782,7 @@ public class CampaignPropertiesDialog extends JDialog {
             }
           }
 
-          boolean isAura = lightSource.getType() == LightSource.Type.AURA;
+          boolean isAura = type == LightSource.Type.AURA;
           if (!isAura && (gmOnly || owner)) {
             errlog.add(I18N.getText("msg.error.mtprops.light.gmOrOwner", reader.getLineNumber()));
             gmOnly = false;
@@ -782,24 +800,26 @@ public class CampaignPropertiesDialog extends JDialog {
                     perRangeLumens,
                     gmOnly,
                     owner);
-            lightSource.add(t);
+            lights.add(t);
           } catch (ParseException pe) {
             errlog.add(
                 I18N.getText("msg.error.mtprops.light.distance", reader.getLineNumber(), distance));
           }
         }
-        // Keep ID the same if modifying existing light
-        // TODO FJE Why? Is there some benefit to doing so? Changes to light sources require the map
-        // to be re-rendered anyway, don't they?
+        // Keep ID the same if modifying existing light. This avoids tokens losing their lights when
+        // the light definition is modified.
         if (originalLightSourcesMap.containsKey(currentGroupName)) {
           for (LightSource ls : originalLightSourcesMap.get(currentGroupName).values()) {
             if (ls.getName().equalsIgnoreCase(name)) {
-              lightSource.setId(ls.getId());
+              assert ls.getId() != null;
+              id = ls.getId();
               break;
             }
           }
         }
-        lightSourceMap.put(lightSource.getId(), lightSource);
+
+        final var source = LightSource.createRegular(name, id, type, scaleWithToken, lights);
+        lightSourceMap.put(source.getId(), source);
       }
       // Last group
       if (currentGroupName != null) {
@@ -898,7 +918,19 @@ public class CampaignPropertiesDialog extends JDialog {
               // END HACK
 
               JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
-              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
+              boolean tryAgain = true;
+              while (tryAgain) {
+                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                  return;
+                }
+                var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                if (saveDir.startsWith(installDir)) {
+                  MapTool.showWarning("msg.warning.savePropToInstallDir");
+                } else {
+                  tryAgain = false;
+                }
+              }
 
               File selectedFile = chooser.getSelectedFile();
               if (selectedFile.exists()) {

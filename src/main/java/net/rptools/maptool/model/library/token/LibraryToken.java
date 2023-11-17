@@ -28,8 +28,10 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
+import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
@@ -183,6 +185,16 @@ class LibraryToken implements Library {
   }
 
   @Override
+  public CompletableFuture<Boolean> isAsset(URL location) {
+    return CompletableFuture.completedFuture(Boolean.FALSE);
+  }
+
+  @Override
+  public CompletableFuture<Optional<MD5Key>> getAssetKey(URL location) {
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
   public CompletableFuture<String> readAsString(URL location) throws IOException {
     final var loc = Location.getLocation(location);
     return new ThreadExecutionHelper<String>()
@@ -307,7 +319,7 @@ class LibraryToken implements Library {
                   new MTScriptMacroInfo(
                       macroName,
                       buttonProps.getCommand(),
-                      library.getOwners().size() == 0 || !buttonProps.getAllowPlayerEdits(),
+                      library.isOwnedByNone() || !buttonProps.getAllowPlayerEdits(),
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),
                       buttonProps.getEvaluatedToolTip()));
             });
@@ -366,6 +378,11 @@ class LibraryToken implements Library {
   @Override
   public void cleanup() {
     // No cleanup needed
+  }
+
+  @Override
+  public Set<MacroDetails> getSlashCommands() {
+    return Set.of();
   }
 
   /**

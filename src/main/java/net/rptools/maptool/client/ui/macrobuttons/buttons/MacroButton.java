@@ -41,7 +41,7 @@ import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.AbstractButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.buttongroups.ButtonGroup;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -82,7 +82,6 @@ public class MacroButton extends JButton implements MouseListener {
     }
     this.properties.setTokenId(this.tokenId);
     this.properties.setSaveLocation(this.panelClass);
-    this.properties.setButton(this);
     // we have to call setColor() and setText() here since properties only hold "dumb" data.
     setColor(properties.getColorKey());
     setText(getButtonText());

@@ -29,7 +29,7 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroButtonDialog;
+import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroEditorDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
@@ -171,8 +171,8 @@ public class MacroButtonPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent event) {
       String macroUUID = button.getProperties().getMacroUUID();
       // Don't create new dialog is it is already opened. Fixes #1426 and #1495.
-      if (!MacroButtonDialog.isMacroDialogOpen(macroUUID)) {
-        new MacroButtonDialog().show(button);
+      if (!MacroEditorDialog.isMacroDialogOpen(macroUUID)) {
+        MacroEditorDialog.createMacroButtonDialog().show(button);
       }
     }
   }
@@ -329,8 +329,18 @@ public class MacroButtonPopupMenu extends JPopupMenu {
     public void actionPerformed(ActionEvent event) {
       JFileChooser chooser = MapTool.getFrame().getSaveMacroFileChooser();
 
-      if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-        return;
+      boolean tryAgain = true;
+      while (tryAgain) {
+        if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+          return;
+        }
+        var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+        var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+        if (saveDir.startsWith(installDir)) {
+          MapTool.showWarning("msg.warning.saveMacrosToInstallDir");
+        } else {
+          tryAgain = false;
+        }
       }
 
       final File selectedFile =

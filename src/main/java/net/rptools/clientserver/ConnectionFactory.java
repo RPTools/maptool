@@ -15,13 +15,14 @@
 package net.rptools.clientserver;
 
 import java.io.IOException;
-import net.rptools.clientserver.simple.client.ClientConnection;
-import net.rptools.clientserver.simple.client.SocketClientConnection;
-import net.rptools.clientserver.simple.client.WebRTCClientConnection;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.clientserver.simple.connection.SocketConnection;
+import net.rptools.clientserver.simple.connection.WebRTCConnection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
-import net.rptools.clientserver.simple.server.ServerConnection;
-import net.rptools.clientserver.simple.server.SocketServerConnection;
-import net.rptools.clientserver.simple.server.WebRTCServerConnection;
+import net.rptools.clientserver.simple.server.Server;
+import net.rptools.clientserver.simple.server.SocketServer;
+import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectionFactory {
@@ -31,19 +32,20 @@ public class ConnectionFactory {
     return instance;
   }
 
-  public ClientConnection createClientConnection(String id, ServerConfig config)
-      throws IOException {
+  public Connection createConnection(String id, ServerConfig config) throws IOException {
     if (!config.getUseWebRTC() || config.isPersonalServer())
-      return new SocketClientConnection(id, config.getHostName(), config.getPort());
+      return new SocketConnection(id, config.getHostName(), config.getPort());
 
-    return new WebRTCClientConnection(id, config);
+    return new WebRTCConnection(id, config);
   }
 
-  public ServerConnection createServerConnection(ServerConfig config, HandshakeProvider handshake)
+  public Server createServer(
+      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler)
       throws IOException {
-    if (!config.getUseWebRTC() || config.isPersonalServer())
-      return new SocketServerConnection(config.getPort(), handshake);
+    if (!config.getUseWebRTC() || config.isPersonalServer()) {
+      return new SocketServer(config.getPort(), handshake, messageHandler);
+    }
 
-    return new WebRTCServerConnection(config, handshake);
+    return new WebRTCServer(config, handshake, messageHandler);
   }
 }

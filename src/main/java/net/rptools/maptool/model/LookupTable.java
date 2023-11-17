@@ -19,8 +19,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.rptools.common.expression.ExpressionParser;
-import net.rptools.common.expression.Result;
+import net.rptools.dicelib.expression.ExpressionParser;
+import net.rptools.dicelib.expression.Result;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.proto.LookupEntryDto;
@@ -373,7 +373,9 @@ public class LookupTable {
     private @Nullable String value;
     private @Nullable MD5Key imageId;
 
-    /** @deprecated here to prevent xstream from breaking b24-b25 */
+    /**
+     * @deprecated here to prevent xstream from breaking b24-b25
+     */
     @Deprecated private @Nullable String result;
 
     public LookupEntry(int min, int max, String value, MD5Key imageId) {

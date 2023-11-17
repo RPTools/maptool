@@ -49,7 +49,6 @@ import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.*;
-import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.*;
 
@@ -78,11 +77,6 @@ public class HTMLWebViewManager {
 
   /** The bridge from Javascript to Java. */
   private final JavaBridge bridge;
-
-  // Event listener for the href macro link clicks.
-  private final EventListener listenerA = this::fixHref;
-  // Event listener for form submission.
-  private final EventListener listenerSubmit = this::getDataAndSubmit;
 
   /** Represents a bridge from Javascript to Java. */
   public class JavaBridge {
@@ -152,49 +146,12 @@ public class HTMLWebViewManager {
         if (addedNode instanceof EventTarget) {
           EventTarget target = (EventTarget) addedNode;
           if (addedNode instanceof HTMLAnchorElement || addedNode instanceof HTMLAreaElement) {
-            target.addEventListener("click", listenerA, true);
+            target.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
           } else if (target instanceof HTMLFormElement) {
-            target.addEventListener("submit", listenerSubmit, true);
+            target.addEventListener("submit", HTMLWebViewManager.this::getDataAndSubmit, true);
           } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
-            target.addEventListener("click", listenerSubmit, true);
+            target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
           }
-        }
-
-        // Add listeners to the node's descendant as they don't trigger mutation observer.
-        NodeList nodeList;
-
-        // Add event handlers for <a> hyperlinks.
-        nodeList = addedNode.getElementsByTagName("a");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", listenerA, true);
-        }
-
-        // Add event handlers for hyperlinks for maps.
-        nodeList = addedNode.getElementsByTagName("area");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget node = (EventTarget) nodeList.item(i);
-          node.addEventListener("click", listenerA, true);
-        }
-
-        // Set the "submit" handler to get the data on submission not based on buttons
-        nodeList = addedNode.getElementsByTagName("form");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("submit", listenerSubmit, true);
-        }
-
-        // Set the "submit" handler to get the data on submission based on input
-        nodeList = addedNode.getElementsByTagName("input");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, true);
-        }
-        // Set the "submit" handler to get the data on submission based on button
-        nodeList = addedNode.getElementsByTagName("button");
-        for (int i = 0; i < nodeList.getLength(); i++) {
-          EventTarget target = (EventTarget) nodeList.item(i);
-          target.addEventListener("click", listenerSubmit, true);
         }
       }
     }
@@ -299,9 +256,7 @@ public class HTMLWebViewManager {
   }
 
   public void updateContents(final String html, boolean scrollReset) {
-    if (log.isDebugEnabled()) {
-      log.debug("setting text in WebView: " + html);
-    }
+    log.debug("setting text in WebView: {}", html);
     this.scrollReset = scrollReset;
     // If the WebView has been flushed, the scrolling has already been stored
     if (!scrollReset && !isFlushed) {
@@ -467,9 +422,7 @@ public class HTMLWebViewManager {
    */
   private void doRegisterMacro(String type, String link) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("registerMacro event: type='" + type + "' link='" + link + "'");
-      }
+      log.debug("registerMacro event: type='{}' link='{}'", type, link);
       actionListeners.actionPerformed(
           new HTMLActionEvent.RegisterMacroActionEvent(this, type, link));
     }
@@ -556,9 +509,7 @@ public class HTMLWebViewManager {
    * @param event the href event triggered
    */
   private void fixHref(org.w3c.dom.events.Event event) {
-    if (log.isDebugEnabled()) {
-      log.debug("Responding to hyperlink event: " + event.getType() + " " + event.toString());
-    }
+    log.debug("Responding to hyperlink event: {} {}", event.getType(), event);
 
     final String href = ((Element) event.getCurrentTarget()).getAttribute("href");
     if (href != null && !href.equals("")) {
@@ -586,9 +537,7 @@ public class HTMLWebViewManager {
    */
   private void doChangeTitle(String title) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("changeTitle event: " + title);
-      }
+      log.debug("changeTitle event: {}", title);
       actionListeners.actionPerformed(new HTMLActionEvent.ChangeTitleActionEvent(this, title));
     }
   }
@@ -603,9 +552,7 @@ public class HTMLWebViewManager {
     String content = element.getAttribute("content");
 
     if (actionListeners != null && name != null && content != null) {
-      if (log.isDebugEnabled()) {
-        log.debug("metaTag found: name='" + name + "' content='" + content + "'");
-      }
+      log.debug("metaTag found: name='{}' content='{}'", name, content);
       actionListeners.actionPerformed(new HTMLActionEvent.MetaTagActionEvent(this, name, content));
     }
   }
@@ -790,10 +737,7 @@ public class HTMLWebViewManager {
    */
   private void doSubmit(String method, String action, String data) {
     if (actionListeners != null) {
-      if (log.isDebugEnabled()) {
-        log.debug(
-            "submit event: method='" + method + "' action='" + action + "' data='" + data + "'");
-      }
+      log.debug("submit event: method='{}' action='{}' data='{}'", method, action, data);
       actionListeners.actionPerformed(
           new HTMLActionEvent.FormActionEvent(this, method, action, data));
     }

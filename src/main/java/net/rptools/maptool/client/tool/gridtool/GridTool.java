@@ -36,7 +36,7 @@ import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
@@ -72,7 +72,7 @@ public class GridTool extends DefaultTool {
 
   public GridTool() {
     // Create the control panel
-    controlPanel = new AbeillePanel(new AdjustGridControlPanelView().$$$getRootComponent$$$());
+    controlPanel = new AbeillePanel(new AdjustGridControlPanelView().getRootComponent());
 
     gridSizeSpinner = (JSpinner) controlPanel.getComponent("gridSize");
     gridSizeSpinner.setModel(new SpinnerNumberModel());
@@ -97,7 +97,7 @@ public class GridTool extends DefaultTool {
           resetTool();
           // Lee: just to make the light sources snap to their owners after the tool is closed
           Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-          z.putTokens(z.getTokens());
+          z.putTokens(z.getAllTokens());
         });
     zoomSlider = (JSlider) controlPanel.getComponent("zoomSlider");
     zoomSlider.setMinimum(0);
@@ -239,7 +239,7 @@ public class GridTool extends DefaultTool {
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     AppState.setShowGrid(oldShowGrid);
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     renderer.repaint();
 
     // Commit the grid size change

@@ -276,7 +276,7 @@ public class MapToolVariableResolver implements VariableResolver {
       result =
           JOptionPane.showInputDialog(
               MapTool.getFrame(),
-              I18N.getText("lineParser.dialogValueFor") + " " + name,
+              I18N.getText("lineParser.dialogValueFor", name),
               DialogTitle,
               JOptionPane.QUESTION_MESSAGE,
               null,
@@ -290,9 +290,10 @@ public class MapToolVariableResolver implements VariableResolver {
 
     Object value;
 
-    if (result instanceof JsonArray) {
-      value = result;
-    } else if (result instanceof JsonObject) {
+    if (result instanceof JsonArray
+        || result instanceof JsonObject
+        || result instanceof JsonNull
+        || (result instanceof JsonPrimitive primitive && primitive.isBoolean())) {
       value = result;
     } else if (result instanceof BigDecimal) {
       value = result;

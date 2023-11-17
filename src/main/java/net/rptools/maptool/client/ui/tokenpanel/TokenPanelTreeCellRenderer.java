@@ -108,6 +108,10 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
   @Override
   public Icon getLeafIcon() {
-    return new ImageIcon(image);
+    if (image != null) {
+      return new ImageIcon(image);
+    } else {
+      return null;
+    }
   }
 }

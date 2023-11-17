@@ -33,6 +33,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -119,9 +120,13 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.tokenCopyDelete.noImage"));
     }
     String tokenImage = vals.get("tokenImage").getAsString();
+    var asset = new AssetResolver().getAssetKey(tokenImage);
+    if (asset.isPresent()) {
+      tokenImage = asset.get().toString();
+    }
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-    List<Token> allTokens = zone.getTokens();
+    List<Token> allTokens = zone.getAllTokens();
     Token t = new Token(name, new MD5Key(tokenImage));
 
     // Make sure the exposedAreaGUID stays unique
@@ -169,7 +174,7 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     List<String> newTokens = new ArrayList<>(nCopies);
-    List<Token> allTokens = zone.getTokens();
+    List<Token> allTokens = zone.getAllTokens();
     for (int i = 0; i < nCopies; i++) {
       Token t = new Token(token);
 
@@ -250,10 +255,20 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
         forceShape = !BigDecimal.ZERO.equals(val);
       }
       Zone.Layer layer = TokenPropertyFunctions.getLayer(newVals.get("layer").getAsString());
-      Token.TokenShape tokenShape = TokenPropertyFunctions.getTokenShape(token, layer, forceShape);
       token.setLayer(layer);
-      if (tokenShape != null) {
-        token.setShape(tokenShape);
+      if (forceShape) {
+        token.guessAndSetShape();
+      }
+    }
+
+    // Token Property Type
+    if (newVals.has("propertyType")) {
+      String propType = newVals.get("propertyType").getAsString();
+      if (MapTool.getCampaign().getTokenTypeMap().containsKey(propType)) {
+        token.setPropertyType(propType);
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenCopy.invalidPropertyType", propType));
       }
     }
 

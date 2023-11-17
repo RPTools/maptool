@@ -21,7 +21,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.BevelBorder;
 
-/** @author trevor */
+/**
+ * @author trevor
+ */
 public class StatusPanel extends JPanel {
 
   private JLabel statusLabel;

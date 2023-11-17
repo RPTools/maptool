@@ -22,6 +22,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -43,12 +44,16 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
   /** singleton instance of this function */
   private static final AddAllToInitiativeFunction instance = new AddAllToInitiativeFunction();
 
-  /** @return singleton instance */
+  /**
+   * @return singleton instance
+   */
   public static AddAllToInitiativeFunction getInstance() {
     return instance;
   }
 
-  /** @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List) */
+  /**
+   * @see AbstractFunction#childEvaluate(Parser, VariableResolver, String, List)
+   */
   @Override
   public Object childEvaluate(
       Parser parser, VariableResolver resolver, String functionName, List<Object> args)
@@ -69,7 +74,7 @@ public class AddAllToInitiativeFunction extends AbstractFunction {
     List<Token> tokens = new ArrayList<Token>();
     boolean all = functionName.equalsIgnoreCase("addAllToInitiative");
     boolean pcs = functionName.equalsIgnoreCase("addAllPCsToInitiative");
-    for (Token token : list.getZone().getTokens()) {
+    for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
       if (!allowDuplicates && !list.indexOf(token).isEmpty()) {
         continue;
       }

@@ -20,6 +20,9 @@ class XMLHttpRequest {
 
     get statusText() {
 	let s = this._req.getStatus();
+	if (s == null || s.length == 0) {
+		return 0;
+	}
 	return s.substring(s.indexOf(' ') + 1);
     }
 

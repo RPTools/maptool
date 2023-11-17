@@ -38,7 +38,9 @@ public class SelectionModel {
   /** How long {@link #selectionHistory} can get before old entries are forgotten. */
   private int maxHistoryLength = 20;
 
-  /** @param zone The zone in which selections will be managed. */
+  /**
+   * @param zone The zone in which selections will be managed.
+   */
   public SelectionModel(Zone zone) {
     this.zone = zone;
   }

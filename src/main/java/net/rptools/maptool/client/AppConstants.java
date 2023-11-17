@@ -70,4 +70,27 @@ public class AppConstants {
       (dir, name) -> name.toLowerCase().endsWith(CAMPAIGN_PROPERTIES_FILE_EXTENSION);
   public static final String THEME_CONFIG_FILE =
       AppUtil.getAppHome("config").toPath().resolve("theme.json").toString();
+
+  /**
+   * MapTool internal frame/dialog/overlay prefix. These should only be managed by MapTool code not
+   * macros.
+   */
+  public static final String INTERNAL_FRAME_PREFIX = "MapTool-Internal:";
+
+  /**
+   * Internal overlay for displaying information about what is under the pointer (token stat sheets
+   * for example);
+   */
+  public static final String INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME =
+      INTERNAL_FRAME_PREFIX + "Internal Map Under Pointer Overlay";
+
+  /** CSS used for MT Theme support */
+  public static final String MT_THEME_CSS = "lib://net.rptools.maptool/css/mt-theme.css";
+
+  /** CSS used for MT Stat Sheet Theme support */
+  public static final String MT_THEME_STAT_SHEET_CSS =
+      "lib://net.rptools.maptool/css/mt-stat-sheet.css";
+
+  /** Namespace for built in add-ons. This is used to determine if an add-on is built in or not. */
+  public static final String MT_BUILTIN_ADD_ON_NAMESPACE = "net.rptools.maptool";
 }

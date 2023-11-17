@@ -28,7 +28,7 @@ import javafx.scene.web.WebView;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -69,8 +69,6 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
 
   /** The RGB value for a fully invisible color (alpha = 0). */
   private static final int COLOR_INVISIBLE = new Color(0, 0, 0, 0).getRGB();
-  /** The RGB value for a nearly invisible color (alpha = 1). */
-  private static final int COLOR_VISIBLE = new Color(128, 128, 128, 1).getRGB();
 
   /** The ZOrder of the overlay. */
   private int zOrder;
@@ -96,7 +94,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     super.setupWebView(webView);
   }
 
-  /** @return the zOrder of the overlay. */
+  /**
+   * @return the zOrder of the overlay.
+   */
   public int getZOrder() {
     return zOrder;
   }
@@ -110,7 +110,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     this.zOrder = zOrder;
   }
 
-  /** @return the name of the overlay. */
+  /**
+   * @return the name of the overlay.
+   */
   public String getName() {
     return name;
   }
@@ -127,8 +129,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
 
   @Override
   public void updateContents(final String html, boolean scrollReset) {
-    // Sets the background to be barely visible. Workaround to fix #1976.
-    setPageBackgroundColor(COLOR_VISIBLE);
+    // If we don't set the background to invisible here, we might see a white flash for overlays
+    // whose content is slow to load.
+    setPageBackgroundColor(COLOR_INVISIBLE);
     macroCallbacks.clear();
     super.updateContents(html, scrollReset);
   }
@@ -153,7 +156,9 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     }
   }
 
-  /** @return the rule for an invisible body. */
+  /**
+   * @return the rule for an invisible body.
+   */
   @Override
   String getCSSRule() {
     return String.format(CSS_BODY, AppPreferences.getFontSize())

@@ -26,6 +26,7 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JScrollPane;
+import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.ImagePanel;
@@ -44,7 +45,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private EditLookupTablePanel editorPanel;
 
   public LookupTablePanel() {
-    super(new LookupTablePaneView().$$$getRootComponent$$$());
+    super(new LookupTablePaneView().getRootComponent());
     panelInit();
   }
 
@@ -277,8 +278,18 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
             e -> {
               JFileChooser chooser = MapTool.getFrame().getSaveTableFileChooser();
 
-              if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-                return;
+              boolean tryAgain = true;
+              while (tryAgain) {
+                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                  return;
+                }
+                var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                if (saveDir.startsWith(installDir)) {
+                  MapTool.showWarning("msg.warning.saveTableToInstallDir");
+                } else {
+                  tryAgain = false;
+                }
               }
               final File selectedFile = chooser.getSelectedFile();
               EventQueue.invokeLater(

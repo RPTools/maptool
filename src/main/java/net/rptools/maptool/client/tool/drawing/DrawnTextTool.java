@@ -30,7 +30,7 @@ import javax.swing.KeyStroke;
 import javax.swing.text.Style;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.drawing.DrawnLabel;
 import net.rptools.maptool.model.drawing.Pen;
 
@@ -79,8 +79,7 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override
@@ -90,19 +89,25 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
     aG.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
   }
 
-  /** @see Tool#getTooltip() */
+  /**
+   * @see Tool#getTooltip()
+   */
   @Override
   public String getTooltip() {
     return "tool.text.tooltip";
   }
 
-  /** @see Tool#getInstructions() */
+  /**
+   * @see Tool#getInstructions()
+   */
   @Override
   public String getInstructions() {
     return "tool.text.instructions";
   }
 
-  /** @see Tool#resetTool() */
+  /**
+   * @see Tool#resetTool()
+   */
   @Override
   protected void resetTool() {
     anchorSet = false;
@@ -115,12 +120,16 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
    * MouseListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseClicked(java.awt.event.MouseEvent)
+   */
   public void mouseClicked(MouseEvent event) {
     // Do nothing
   }
 
-  /** @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mousePressed(java.awt.event.MouseEvent)
+   */
   public void mousePressed(MouseEvent event) {
     if (!anchorSet) {
       anchor.x = event.getX();
@@ -149,19 +158,25 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
     }
   }
 
-  /** @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseReleased(java.awt.event.MouseEvent)
+   */
   public void mouseReleased(MouseEvent aE) {
     // TODO Auto-generated method stub
 
   }
 
-  /** @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseEntered(java.awt.event.MouseEvent)
+   */
   public void mouseEntered(MouseEvent aE) {
     // TODO Auto-generated method stub
 
   }
 
-  /** @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseListener#mouseExited(java.awt.event.MouseEvent)
+   */
   public void mouseExited(MouseEvent aE) {
     // TODO Auto-generated method stub
 
@@ -171,7 +186,9 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
    * MouseMotionListener Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /** @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseMotionListener#mouseMoved(java.awt.event.MouseEvent)
+   */
   public void mouseMoved(MouseEvent event) {
     if (!anchorSet) return;
     if (textPane != null) return;
@@ -179,7 +196,9 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
     renderer.repaint();
   }
 
-  /** @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent) */
+  /**
+   * @see java.awt.event.MouseMotionListener#mouseDragged(java.awt.event.MouseEvent)
+   */
   public void mouseDragged(MouseEvent aE) {
     // TODO Auto-generated method stub
 

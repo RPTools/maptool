@@ -39,7 +39,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.tool.DefaultTool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -80,7 +80,7 @@ public class BoardTool extends DefaultTool {
   /** Initialize the panel and set up the actions. */
   public BoardTool() {
     // Create the control panel
-    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().$$$getRootComponent$$$());
+    controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().getRootComponent());
 
     boardPositionXTextField = (JTextField) controlPanel.getComponent("offsetX");
     boardPositionXTextField.addKeyListener(new UpdateBoardListener());
@@ -237,7 +237,7 @@ public class BoardTool extends DefaultTool {
    */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
-    MapTool.getFrame().hideControlPanel();
+    MapTool.getFrame().removeControlPanel();
     MapTool.serverCommand()
         .setBoard(zone.getId(), zone.getMapAssetId(), zone.getBoardX(), zone.getBoardY());
     AppState.setShowGrid(oldShowGrid);
