@@ -480,7 +480,7 @@ dependencies {
         implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:linux-x86_64'
 
     // protobuf
-    implementation "io.grpc:grpc-protobuf:1.47.0"
+    implementation "io.grpc:grpc-protobuf:1.58.0"
     implementation "com.google.protobuf:protobuf-java-util:3.20.0"
 
     // Java Tuples
