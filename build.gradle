@@ -442,7 +442,7 @@ dependencies {
     implementation group: 'com.squareup.okhttp3', name: 'okhttp', version: '4.11.0'
 
     // Better JSON functions...
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.8.9'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
     // Declare the dependency for your favourite test framework you want to use in your tests.
     // TestNG is also supported by the Gradle Test task. Just change the
@@ -451,7 +451,7 @@ dependencies {
     //testCompile 'junit:junit:4.12'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
-    implementation group: 'com.google.code.gson', name: 'gson', version: '2.9.0'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
+    implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.2'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.2'
