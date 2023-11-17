@@ -401,7 +401,7 @@ dependencies {
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
     // serialize to and from xml
-    implementation 'com.thoughtworks.xstream:xstream:1.4.19'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.20'
 
     // themes
     implementation 'com.formdev:flatlaf:3.1.1'
