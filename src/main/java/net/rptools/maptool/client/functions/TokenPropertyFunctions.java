@@ -1301,11 +1301,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @return a string list of the token owners.
    */
   public String getOwners(Token token, String delim) {
-    String[] owners = new String[token.getOwners().size()];
-    token.getOwners().toArray(owners);
+    var owners = new ArrayList<>(token.getOwners());
     if ("json".endsWith(delim)) {
       JsonArray jarr = new JsonArray();
-      Arrays.stream(owners).forEach(o -> jarr.add(new JsonPrimitive(o)));
+      owners.forEach(o -> jarr.add(new JsonPrimitive(o)));
       return jarr.toString();
     } else {
       return StringFunctions.getInstance().join(owners, delim);

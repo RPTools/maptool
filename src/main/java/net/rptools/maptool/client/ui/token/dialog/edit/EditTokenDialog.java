@@ -832,15 +832,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // If we are not a GM and the only non GM owner make sure we can't
       // take our selves off of the owners list
       if (!MapTool.getPlayer().isGM()) {
-        boolean hasPlayer = false;
-        Set<String> owners = token.getOwners();
-        if (owners != null) {
-          for (Player pl : MapTool.getPlayerList()) {
-            if (!pl.isGM() && owners.contains(pl.getName())) {
-              hasPlayer = true;
-            }
-          }
-        }
+        boolean hasPlayer = token.isOwnedByAny(MapTool.getNonGMs());
         if (!hasPlayer) {
           token.addOwner(MapTool.getPlayer().getName());
         }

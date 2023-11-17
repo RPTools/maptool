@@ -1095,8 +1095,45 @@ public class Token implements Cloneable {
     ownerList.clear();
   }
 
+  /**
+   * Check if the token is owned by the provided player.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players.
+   *
+   * @param playerId The player name to check ownership against.
+   * @return {@code true} if {@code playerId} identifies an owner of the token.
+   */
   public synchronized boolean isOwner(String playerId) {
-    return (ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId));
+    return ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId);
+  }
+
+  /**
+   * Checks if the token is owned by any of the provided players.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players. It is as if
+   * each player was checked individually via {@link #isOwner(String)}, but more convenient and
+   * efficient.
+   *
+   * @param playerIds The player names to check ownership against.
+   * @return {@code true} if there is a player in {@code playerIds} that is an owner of this token.
+   */
+  public synchronized boolean isOwnedByAny(Collection<String> playerIds) {
+    if (playerIds.isEmpty()) {
+      return false;
+    }
+
+    return ownerType == OWNER_TYPE_ALL || !Collections.disjoint(ownerList, playerIds);
+  }
+
+  /**
+   * Checks if the token is not owned by anyone.
+   *
+   * <p>If the token is owned by all players, this will return {@code false}
+   *
+   * @return {@code true} if the token has any owners.
+   */
+  public synchronized boolean isOwnedByNone() {
+    return ownerType != OWNER_TYPE_ALL && ownerList.isEmpty();
   }
 
   @Override

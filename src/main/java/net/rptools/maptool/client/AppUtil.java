@@ -21,7 +21,6 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -322,16 +321,7 @@ public class AppUtil {
    * @return true if owned by all, or one of the owners is online and not a gm.
    */
   public static boolean ownedByOnePlayer(Token token) {
-    if (token.isOwnedByAll()) {
-      return true;
-    }
-    List<String> players = MapTool.getNonGMs();
-    for (String owner : token.getOwners()) {
-      if (players.contains(owner)) {
-        return true;
-      }
-    }
-    return false;
+    return token.isOwnedByAny(MapTool.getNonGMs());
   }
 
   /**

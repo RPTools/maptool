@@ -25,7 +25,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,17 +32,6 @@ import org.apache.logging.log4j.Logger;
 /** Utility class to facilitate macro events like onTokenMove and onInitiativeChange. */
 public class EventMacroUtil {
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
-  /**
-   * Scans all maps to find the first Lib:Token containing a macro that matches the given "callback"
-   * string. If more than one token has such a macro, the first one encountered is returned -
-   * because this order is unpredictable, this is very much not encouraged.
-   *
-   * @param macroCallback the macro name to find
-   * @return the first Lib:token found that contains the requested macro, or null if none
-   */
-  public static Token getEventMacroToken(final String macroCallback) {
-    return getEventMacroTokens(macroCallback).stream().findFirst().orElse(null);
-  }
 
   /**
    * Scans all maps to find any Lib:Tokens that contain a macro matching the given "callback" label.
@@ -57,27 +45,16 @@ public class EventMacroUtil {
     for (ZoneRenderer zr : zrenderers) {
       List<Token> tokenList =
           zr.getZone().getTokensFiltered(t -> t.getName().toLowerCase().startsWith("lib:"));
+      var nonGms = MapTool.getNonGMs();
       for (Token token : tokenList) {
-        // If the token is not owned by everyone and all owners are GMs
-        // then we are in
+        // If the token is not owned by everyone and all owners are GMs then we are in
         // its a trusted Lib:token so we can run the macro
-        if (token != null) {
-          if (token.isOwnedByAll()) {
-            continue;
-          } else {
-            Set<String> gmPlayers = new HashSet<String>();
-            for (Object o : MapTool.getPlayerList()) {
-              Player p = (Player) o;
-              if (p.isGM()) {
-                gmPlayers.add(p.getName());
-              }
-            }
-            for (String owner : token.getOwners()) {
-              if (!gmPlayers.contains(owner)) {
-                continue;
-              }
-            }
-          }
+        if (token.isOwnedByAll()) {
+          continue;
+        }
+        if (token.isOwnedByAny(nonGms)) {
+          // Not trusted, don't run.
+          continue;
         }
         if (token.getMacro(macroCallback, false) != null) {
           found.add(token);
