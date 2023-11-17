@@ -255,10 +255,9 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
         forceShape = !BigDecimal.ZERO.equals(val);
       }
       Zone.Layer layer = TokenPropertyFunctions.getLayer(newVals.get("layer").getAsString());
-      Token.TokenShape tokenShape = TokenPropertyFunctions.getTokenShape(token, layer, forceShape);
       token.setLayer(layer);
-      if (tokenShape != null) {
-        token.setShape(tokenShape);
+      if (forceShape) {
+        token.guessAndSetShape();
       }
     }
 

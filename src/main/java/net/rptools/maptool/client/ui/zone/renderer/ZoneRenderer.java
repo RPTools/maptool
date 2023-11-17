@@ -70,10 +70,10 @@ import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.*;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.zones.*;
+import net.rptools.maptool.util.CollectionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -109,10 +109,8 @@ public class ZoneRenderer extends JComponent
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final DrawableRenderer backgroundDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer objectDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer tokenDrawableRenderer = new PartitionedDrawableRenderer();
-  private final DrawableRenderer gmDrawableRenderer = new PartitionedDrawableRenderer();
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
+      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -131,7 +129,7 @@ public class ZoneRenderer extends JComponent
   private Token tokenUnderMouse;
 
   private ScreenPoint pointUnderMouse;
-  private Zone.Layer activeLayer;
+  private @Nonnull Zone.Layer activeLayer = Layer.getDefaultPlayerLayer();
   private String loadingProgress;
   private boolean isLoaded;
 
@@ -156,6 +154,8 @@ public class ZoneRenderer extends JComponent
   private double previousScale;
 
   private ZonePoint previousZonePoint;
+
+  private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -247,7 +247,7 @@ public class ZoneRenderer extends JComponent
     setActiveLayer(token.getLayer());
     MapTool.getFrame()
         .getToolbox()
-        .setSelectedTool(token.isToken() ? PointerTool.class : StampTool.class);
+        .setSelectedTool(!token.getLayer().isStampLayer() ? PointerTool.class : StampTool.class);
 
     selectionModel.replaceSelection(Collections.singletonList(token.getId()));
     requestFocusInWindow();
@@ -288,10 +288,9 @@ public class ZoneRenderer extends JComponent
    * up, add the drawable renderer as a listener
    */
   public void flushDrawableRenderer() {
-    backgroundDrawableRenderer.flush();
-    objectDrawableRenderer.flush();
-    tokenDrawableRenderer.flush();
-    gmDrawableRenderer.flush();
+    for (final var renderer : drawableRenderers.values()) {
+      renderer.flush();
+    }
   }
 
   public ScreenPoint getPointUnderMouse() {
@@ -484,7 +483,7 @@ public class ZoneRenderer extends JComponent
 
         // Only add certain tokens to the list to process in the move
         // Macro function(s).
-        if (token.isToken() && token.isVisible()) {
+        if (token.getLayer().supportsWalker() && token.isVisible()) {
           filteredTokens.add(tokenGUID);
         }
 
@@ -914,14 +913,12 @@ public class ZoneRenderer extends JComponent
               ImageManager.getImage(zone.getMapAssetId(), this).getHeight());
     }
     // next, extents of drawing objects
-    List<DrawnElement> drawableList = new LinkedList<DrawnElement>();
-    drawableList.addAll(zone.getBackgroundDrawnElements());
-    drawableList.addAll(zone.getObjectDrawnElements());
-    drawableList.addAll(zone.getDrawnElements());
-    if (view.isGMView()) {
-      drawableList.addAll(zone.getGMDrawnElements());
-    }
+    List<DrawnElement> drawableList = zone.getAllDrawnElements();
     for (DrawnElement element : drawableList) {
+      if (!view.isGMView() && !element.getDrawable().getLayer().isVisibleToPlayers()) {
+        continue;
+      }
+
       Drawable drawable = element.getDrawable();
       Rectangle drawnBounds = new Rectangle(drawable.getBounds());
 
@@ -945,67 +942,45 @@ public class ZoneRenderer extends JComponent
     // now, add the stamps/tokens
     // tokens and stamps are the same thing, just treated differently
 
-    // This loop structure is a hack: but the getStamps-type methods return unmodifiable lists,
-    // so we can't concat them, and there are a fixed number of layers, so its not really extensible
-    // anyway.
-    for (int layer = 0; layer < 4; layer++) {
-      List<Token> stampList = null;
-      switch (layer) {
-        case 0:
-          stampList = zone.getBackgroundStamps();
-          break; // background layer
-        case 1:
-          stampList = zone.getStampTokens();
-          break; // object layer
-        case 2:
-          if (!view.isGMView()) { // hidden layer
-            continue;
-          } else {
-            stampList = zone.getGMStamps();
-            break;
+    // Note: order doesn't matter, so don't need to go back-to-front.
+    for (Token element :
+        zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
+      Rectangle drawnBounds = element.getBounds(zone);
+      if (element.hasFacing()) {
+        // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
+        // reason
+        int facing = element.getFacing() + 90;
+        if (facing > 180) {
+          facing -= 360;
+        }
+        // if 90 degrees, just swap w and h
+        // also swap them if rotated more than 90 (optimization for non-90deg rotations)
+        if (facing != 0 && facing != 180) {
+          if (Math.abs(facing) >= 90) {
+            drawnBounds.setSize(drawnBounds.height, drawnBounds.width); // swapping h and w
           }
-        case 3:
-          stampList = zone.getTokens();
-          break; // token layer
+          // if rotated to non-axis direction, assume the worst case 45 deg
+          // also assumes the rectangle rotates around its center
+          // This will usually makes the bounds bigger than necessary, but its quick.
+          // Also, for quickness, we assume its a square token using the larger dimension
+          // At 45 deg, the bounds of the square will be sqrt(2) bigger, and the UL corner will
+          // shift by 1/2 of the length.
+          // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
+          if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
+            int size = Math.max(drawnBounds.width, drawnBounds.height);
+            int x = drawnBounds.x - (int) (0.21 * size);
+            int y = drawnBounds.y - (int) (0.21 * size);
+            int w = drawnBounds.width + (int) (0.42 * size);
+            int h = drawnBounds.height + (int) (0.42 * size);
+            drawnBounds.setBounds(x, y, w, h);
+          }
+        }
       }
-      for (Token element : stampList) {
-        Rectangle drawnBounds = element.getBounds(zone);
-        if (element.hasFacing()) {
-          // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
-          // reason
-          int facing = element.getFacing() + 90;
-          if (facing > 180) {
-            facing -= 360;
-          }
-          // if 90 degrees, just swap w and h
-          // also swap them if rotated more than 90 (optimization for non-90deg rotations)
-          if (facing != 0 && facing != 180) {
-            if (Math.abs(facing) >= 90) {
-              drawnBounds.setSize(drawnBounds.height, drawnBounds.width); // swapping h and w
-            }
-            // if rotated to non-axis direction, assume the worst case 45 deg
-            // also assumes the rectangle rotates around its center
-            // This will usually makes the bounds bigger than necessary, but its quick.
-            // Also, for quickness, we assume its a square token using the larger dimension
-            // At 45 deg, the bounds of the square will be sqrt(2) bigger, and the UL corner will
-            // shift by 1/2 of the length.
-            // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
-            if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-              int size = Math.max(drawnBounds.width, drawnBounds.height);
-              int x = drawnBounds.x - (int) (0.21 * size);
-              int y = drawnBounds.y - (int) (0.21 * size);
-              int w = drawnBounds.width + (int) (0.42 * size);
-              int h = drawnBounds.height + (int) (0.42 * size);
-              drawnBounds.setBounds(x, y, w, h);
-            }
-          }
-        }
-        // TODO: Handle auras here?
-        if (extents == null) {
-          extents = drawnBounds;
-        } else {
-          extents.add(drawnBounds);
-        }
+      // TODO: Handle auras here?
+      if (extents == null) {
+        extents = drawnBounds;
+      } else {
+        extents.add(drawnBounds);
       }
     }
     if (zone.hasFog()) {
@@ -1033,6 +1008,18 @@ public class ZoneRenderer extends JComponent
   public void invalidateCurrentViewCache() {
     visibleScreenArea = null;
     lastView = null;
+  }
+
+  public void restoreLayers() {
+    disabledLayers.clear();
+  }
+
+  public void disableLayer(Layer layer) {
+    disabledLayers.add(layer);
+  }
+
+  private boolean shouldRenderLayer(Layer layer, PlayerView view) {
+    return !disabledLayers.contains(layer) && (layer.isVisibleToPlayers() || view.isGMView());
   }
 
   /**
@@ -1148,26 +1135,26 @@ public class ZoneRenderer extends JComponent
       renderBoard(g2d, view);
       timer.stop("board");
     }
-    if (Zone.Layer.BACKGROUND.isEnabled()) {
-      List<DrawnElement> drawables = zone.getBackgroundDrawnElements();
+    if (shouldRenderLayer(Zone.Layer.BACKGROUND, view)) {
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.BACKGROUND);
       // if (!drawables.isEmpty()) {
       timer.start("drawableBackground");
-      renderDrawableOverlay(g2d, backgroundDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.BACKGROUND), view, drawables);
       timer.stop("drawableBackground");
       // }
-      List<Token> background = zone.getBackgroundStamps(false);
+      List<Token> background = zone.getTokensOnLayer(Layer.BACKGROUND, false);
       if (!background.isEmpty()) {
         timer.start("tokensBackground");
         renderTokens(g2d, background, view);
         timer.stop("tokensBackground");
       }
     }
-    if (Zone.Layer.OBJECT.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
       // Drawables on the object layer are always below the grid, and...
-      List<DrawnElement> drawables = zone.getObjectDrawnElements();
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.OBJECT);
       // if (!drawables.isEmpty()) {
       timer.start("drawableObjects");
-      renderDrawableOverlay(g2d, objectDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.OBJECT), view, drawables);
       timer.stop("drawableObjects");
       // }
     }
@@ -1175,16 +1162,16 @@ public class ZoneRenderer extends JComponent
     renderGrid(g2d, view);
     timer.stop("grid");
 
-    if (Zone.Layer.OBJECT.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
       // ... Images on the object layer are always ABOVE the grid.
-      List<Token> stamps = zone.getStampTokens(false);
+      List<Token> stamps = zone.getTokensOnLayer(Layer.OBJECT, false);
       if (!stamps.isEmpty()) {
         timer.start("tokensStamp");
         renderTokens(g2d, stamps, view);
         timer.stop("tokensStamp");
       }
     }
-    if (Zone.Layer.TOKEN.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       timer.start("lights");
       renderLights(g2d, view);
       timer.stop("lights");
@@ -1217,29 +1204,29 @@ public class ZoneRenderer extends JComponent
      *   <li>Render Token-layer tokens
      * </ol>
      */
-    if (Zone.Layer.TOKEN.isEnabled()) {
-      List<DrawnElement> drawables = zone.getDrawnElements();
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      List<DrawnElement> drawables = zone.getDrawnElements(Layer.TOKEN);
       // if (!drawables.isEmpty()) {
       timer.start("drawableTokens");
-      renderDrawableOverlay(g2d, tokenDrawableRenderer, view, drawables);
+      renderDrawableOverlay(g2d, drawableRenderers.get(Layer.TOKEN), view, drawables);
       timer.stop("drawableTokens");
       // }
 
-      if (view.isGMView() && Zone.Layer.GM.isEnabled()) {
-        drawables = zone.getGMDrawnElements();
+      if (shouldRenderLayer(Zone.Layer.GM, view)) {
+        drawables = zone.getDrawnElements(Layer.GM);
         // if (!drawables.isEmpty()) {
         timer.start("drawableGM");
-        renderDrawableOverlay(g2d, gmDrawableRenderer, view, drawables);
+        renderDrawableOverlay(g2d, drawableRenderers.get(Layer.GM), view, drawables);
         timer.stop("drawableGM");
         // }
-        List<Token> stamps = zone.getGMStamps(false);
+        List<Token> stamps = zone.getTokensOnLayer(Layer.GM, false);
         if (!stamps.isEmpty()) {
           timer.start("tokensGM");
           renderTokens(g2d, stamps, view);
           timer.stop("tokensGM");
         }
       }
-      List<Token> tokens = zone.getTokens(false);
+      List<Token> tokens = zone.getTokensOnLayer(Layer.TOKEN, false);
       if (!tokens.isEmpty()) {
         timer.start("tokens");
         renderTokens(g2d, tokens, view);
@@ -1283,7 +1270,7 @@ public class ZoneRenderer extends JComponent
       renderFog(g2d, view);
     }
 
-    if (Zone.Layer.TOKEN.isEnabled()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
       // For example. this allows a "door" stamp to block vision but still allow you to see the
       // door.
@@ -1349,7 +1336,9 @@ public class ZoneRenderer extends JComponent
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
-    if (Zone.Layer.TOKEN.isEnabled() && view.isGMView() && AppState.isShowLightSources()) {
+    if (shouldRenderLayer(Zone.Layer.TOKEN, view)
+        && view.isGMView()
+        && AppState.isShowLightSources()) {
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
@@ -2079,7 +2068,7 @@ public class ZoneRenderer extends JComponent
         continue;
       }
       // Hide the hidden layer
-      if (keyToken.getLayer() == Zone.Layer.GM && !view.isGMView()) {
+      if (!keyToken.getLayer().isVisibleToPlayers() && !view.isGMView()) {
         continue;
       }
       ZoneWalker walker = set.getWalker();
@@ -2153,7 +2142,7 @@ public class ZoneRenderer extends JComponent
         }
         // Show path only on the key token on token layer that are visible to the owner or gm while
         // fow and vision is on
-        if (token == keyToken && !token.isStamp()) {
+        if (token == keyToken && token.getLayer().supportsWalker()) {
           renderPath(
               g,
               walker != null ? walker.getPath() : set.gridlessPath,
@@ -2321,7 +2310,7 @@ public class ZoneRenderer extends JComponent
               y += 10 + scaledHeight;
               x += scaledWidth / 2;
 
-              if (!token.isStamp() && AppState.getShowMovementMeasurements()) {
+              if (token.getLayer().supportsWalker() && AppState.getShowMovementMeasurements()) {
                 String distance = "";
                 if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
                   // grid.isPathingSupported()
@@ -2786,17 +2775,17 @@ public class ZoneRenderer extends JComponent
     return list;
   }
 
-  public Zone.Layer getActiveLayer() {
-    return activeLayer != null ? activeLayer : Zone.Layer.TOKEN;
+  public @Nonnull Zone.Layer getActiveLayer() {
+    return activeLayer;
   }
 
   /**
-   * Sets the active layer. If keepSelectedTokenSet is true, also clears the selected token list.
+   * Sets the active layer.
    *
    * @param layer the layer to set active
    */
   public void setActiveLayer(Zone.Layer layer) {
-    activeLayer = layer;
+    activeLayer = Objects.requireNonNullElse(layer, Layer.getDefaultPlayerLayer());
     selectionModel.replaceSelection(Collections.emptyList());
     repaintDebouncer.dispatch();
   }
@@ -2875,9 +2864,10 @@ public class ZoneRenderer extends JComponent
 
     timer.start("createClip");
     if (!isGMView
+        // TODO Should we actually check zoneView.isUsingVision() for parity with later checks?
         && visibleScreenArea != null
         && !tokenList.isEmpty()
-        && tokenList.get(0).isToken()) {
+        && tokenList.get(0).getLayer().supportsVision()) {
       clippedG = (Graphics2D) g.create();
 
       Area visibleArea = new Area(g.getClipBounds());
@@ -2896,7 +2886,7 @@ public class ZoneRenderer extends JComponent
 
     // calculations
     boolean calculateStacks =
-        !tokenList.isEmpty() && !tokenList.get(0).isStamp() && tokenStackMap == null;
+        !tokenList.isEmpty() && tokenList.get(0).getLayer().isTokenLayer() && tokenStackMap == null;
     if (calculateStacks) {
       tokenStackMap = new HashMap<Token, Set<Token>>();
     }
@@ -2918,13 +2908,13 @@ public class ZoneRenderer extends JComponent
 
       timer.start("tokenlist-1");
       try {
-        if (token.isStamp() && isTokenMoving(token)) {
+        if (token.getLayer().isStampLayer() && isTokenMoving(token)) {
           continue;
         }
         // Don't bother if it's not visible
         // NOTE: Not going to use zone.isTokenVisible as it is very slow. In fact, it's faster
         // to just draw the tokens and let them be clipped
-        if ((!token.isVisible() || token.isGMStamp()) && !isGMView) {
+        if ((!token.isVisible() || !token.getLayer().isVisibleToPlayers()) && !isGMView) {
           continue;
         }
         if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
@@ -3007,7 +2997,7 @@ public class ZoneRenderer extends JComponent
           continue;
         }
         // Vision visibility
-        if (!isGMView && token.isToken() && zoneView.isUsingVision()) {
+        if (!isGMView && token.getLayer().supportsVision() && zoneView.isUsingVision()) {
           if (!GraphicsUtil.intersects(visibleScreenArea, location.bounds)) {
             continue;
           }
@@ -3482,14 +3472,16 @@ public class ZoneRenderer extends JComponent
         double height = footprintBounds.height * getScale();
 
         ImageBorder selectedBorder =
-            token.isStamp() ? AppStyle.selectedStampBorder : AppStyle.selectedBorder;
+            token.getLayer().isStampLayer()
+                ? AppStyle.selectedStampBorder
+                : AppStyle.selectedBorder;
         if (highlightCommonMacros.contains(token)) {
           selectedBorder = AppStyle.commonMacroBorder;
         }
         if (!AppUtil.playerOwns(token)) {
           selectedBorder = AppStyle.selectedUnownedBorder;
         }
-        if (useIF && !token.isStamp() && zoneView.isUsingVision()) {
+        if (useIF && token.getLayer().supportsVision() && zoneView.isUsingVision()) {
           Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
           if (tool
                   instanceof
@@ -3501,7 +3493,7 @@ public class ZoneRenderer extends JComponent
           }
         }
         if (token.hasFacing()
-            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.isStamp())) {
+            && (token.getShape() == Token.TokenShape.TOP_DOWN || token.getLayer().isStampLayer())) {
           AffineTransform oldTransform = clippedG.getTransform();
 
           // Rotated
@@ -3625,8 +3617,8 @@ public class ZoneRenderer extends JComponent
 
     timer.start("tokenlist-13");
     // Stacks
-    if (!tokenList.isEmpty()
-        && !tokenList.get(0).isStamp()) { // TODO: find a cleaner way to indicate token layer
+    // TODO: find a cleaner way to indicate token layer
+    if (!tokenList.isEmpty() && tokenList.get(0).getLayer().isTokenLayer()) {
       boolean hideTSI = AppPreferences.getHideTokenStackIndicator();
       if (tokenStackMap != null
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?
@@ -4050,10 +4042,10 @@ public class ZoneRenderer extends JComponent
       // Set the image properties
       if (configureToken) {
         BufferedImage image = ImageManager.getImageAndWait(token.getImageAssetId());
-        token.setShape(TokenUtil.guessTokenType(image));
         token.setWidth(image.getWidth(null));
         token.setHeight(image.getHeight(null));
         token.setFootprint(zone.getGrid(), zone.getGrid().getDefaultFootprint());
+        token.guessAndSetShape();
       }
 
       // Always set the layer
@@ -4337,12 +4329,7 @@ public class ZoneRenderer extends JComponent
   }
 
   private void markDrawableLayerDirty(Layer layer) {
-    switch (layer) {
-      case TOKEN -> tokenDrawableRenderer.setDirty();
-      case GM -> gmDrawableRenderer.setDirty();
-      case OBJECT -> objectDrawableRenderer.setDirty();
-      case BACKGROUND -> backgroundDrawableRenderer.setDirty();
-    }
+    drawableRenderers.get(layer).setDirty();
   }
 
   @Subscribe
