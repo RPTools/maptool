@@ -531,6 +531,7 @@ processResources {
     with copySpec {
         from("build-resources/sentry.properties.template")
         rename("sentry.properties.template", "sentry.properties")
+        duplicatesStrategy = DuplicatesStrategy.WARN
         def tokens = [
                 AppVersion : "${tagVersion}",
                 Environment: "${environment}",
