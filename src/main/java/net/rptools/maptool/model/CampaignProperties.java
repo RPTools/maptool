@@ -309,6 +309,7 @@ public class CampaignProperties {
         {"Conic Vision", 0.0, 1.0, 120, null, ShapeType.CONE, false},
         {"Darkvision", 0.0, 1.0, 0, null, null, true},
       };
+
   // @formatter:on
 
   private void initSightTypeMap() {

@@ -36,6 +36,7 @@ import org.eclipse.jetty.websocket.servlet.WebSocketServletFactory;
 
 public class MTWebAppServer {
   public static final String WEBAPP_CONTEXT_PATH = "webapi";
+
   /** The port to listen on. */
   private int port = 8000;
 

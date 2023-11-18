@@ -21,6 +21,7 @@ import net.rptools.maptool.model.player.Player;
 public class PlayerView {
   /** The role of the player (GM or PLAYER). */
   private final Player.Role role;
+
   /** Restrict the view to these tokens. Optional. */
   private final List<Token> tokens;
 

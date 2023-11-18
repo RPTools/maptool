@@ -38,8 +38,10 @@ public class SelectionSet {
   private final Token token;
 
   Path<ZonePoint> gridlessPath;
+
   /** Pixel distance (x) from keyToken's origin. */
   int offsetX;
+
   /** Pixel distance (y) from keyToken's origin. */
   int offsetY;
 

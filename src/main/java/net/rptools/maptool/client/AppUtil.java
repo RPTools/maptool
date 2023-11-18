@@ -53,6 +53,7 @@ public class AppUtil {
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
       (System.getProperty("os.name").toLowerCase().startsWith("windows"));
+
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
@@ -255,6 +256,7 @@ public class AppUtil {
 
     return cfgFile;
   }
+
   /**
    * Returns a File path representing configuration file under the app home directory structure.
    *

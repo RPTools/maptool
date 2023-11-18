@@ -84,26 +84,33 @@ public abstract class HexGrid extends Grid {
 
   /** minorRadius / edgeLength */
   private double hexRatio = REGULAR_HEX_RATIO;
+
   /**
    * One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a
    * right triangle.
    */
   private double edgeProjection;
+
   /** Distance from centerpoint to middle of a face. Set to gridSize/2. */
   private double minorRadius;
+
   /**
    * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree
    * cosine to calculate sqrt(3)/2).
    */
   private double edgeLength;
+
   // Hex defining variables scaled for zoom
   private double scaledEdgeProjection;
   private double scaledMinorRadius;
   private double scaledEdgeLength;
+
   /** Cached value from the last request to scale the hex grid */
   private double lastScale = -1;
+
   /** Cached value of the hex shape using <code>lastScale</code> */
   private transient GeneralPath scaledHex;
+
   /**
    * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
    * the cell's bounding rectangle.

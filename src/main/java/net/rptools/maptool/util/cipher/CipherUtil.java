@@ -45,6 +45,7 @@ public class CipherUtil {
 
   /** The algorithm to use for encoding / decoding. */
   private static final String CIPHER_ALGORITHM = "AES/CBC/PKCS5Padding";
+
   /** The size of the block cipher's block size in bytes. */
   public static final int CIPHER_BLOCK_SIZE = 16;
 

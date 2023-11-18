@@ -28,26 +28,37 @@ public abstract class AbstractCalloutRenderer implements CalloutRenderer {
 
   /** The Graphics context to render the callout with. */
   private final Graphics2D g2d;
+
   /** The zone render that this callout will be rendered in. */
   private final ZoneRenderer zoneRenderer;
+
   /** Padding to use either side of the text that is rendered. */
   private final int widthPadding;
+
   /** The lines of text to be rendered. */
   private final List<String> lines;
+
   /** The width of the maximum text line to be rendered. */
   private final int textWidth;
+
   /** The width of the content area. */
   private final int contentWidth;
+
   /** The height of a single line. */
   private final int lineHeight;
+
   /** The padding size for the height of the content area. */
   private final int heightPadding;
+
   /** The height of the content area. */
   private final int contentHeight;
+
   /** The anchor location of the callout. */
   private final CalloutPopupLocation calloutPopupLocation;
+
   /** The X co-ordinate of the top left of the callout. */
   private final int topLeftX;
+
   /** The Y co-ordinate of the top left of the callout. */
   private final int topLeftY;
 

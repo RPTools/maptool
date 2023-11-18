@@ -223,6 +223,7 @@ public class JsonArrayFunctions {
 
     return listToJsonArray(list);
   }
+
   /**
    * Returns a copy of a {@link JsonArray} sorted in descending order. If all of the elements in the
    * array can be converted to numeric then the will be sorted as numbers, otherwise they will be

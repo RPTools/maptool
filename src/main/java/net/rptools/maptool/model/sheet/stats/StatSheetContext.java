@@ -39,8 +39,10 @@ public class StatSheetContext {
 
     /** Display Name of the property. */
     private final String displayName;
+
     /** Value of the property. */
     private final Object value;
+
     /** True if the property is GM only. */
     private final boolean gmOnly;
 
@@ -112,23 +114,31 @@ public class StatSheetContext {
 
   /** The name of the token. */
   private final String name;
+
   /** The GM name of the token. */
   private final String gmName;
+
   /** The label of the token. */
   private final String label;
+
   /** The image asset of the token. */
   private final MD5Key imageAsset;
+
   /** The portrait asset of the token. */
   private final MD5Key portraitAsset;
+
   /** The width of the portrait on the stat sheet. */
   private final int portraitWidth;
+
   /** The height of the portrait stat sheet. */
   private final int portraitHeight;
 
   /** The location of the stat sheet. */
   private final String statSheetLocation;
+
   /** The properties of the token. */
   private final List<Property> properties = new ArrayList<>();
+
   /** The notes of the token. */
   private final String notes;
 
@@ -143,8 +153,10 @@ public class StatSheetContext {
 
   /** The speech name of the token. */
   private final String speechName;
+
   /** The type of the token. */
   private final String tokenType;
+
   /** True if the player is a GM. */
   private final boolean gm;
 

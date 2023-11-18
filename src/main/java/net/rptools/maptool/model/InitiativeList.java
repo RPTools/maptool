@@ -115,6 +115,7 @@ public class InitiativeList implements Serializable {
    *-------------------------------------------------------------------------------------------*/
 
   private InitiativeList() {}
+
   /**
    * Create an initiative list for a zone.
    *
@@ -708,6 +709,7 @@ public class InitiativeList implements Serializable {
       return false; // if we completely fail we should never prevent the change of initiative.
     }
   }
+
   /**
    * Handle the {@value #ON_INITIATIVE_CHANGE_COMMIT_MACRO_CALLBACK} macro event, if any handlers
    * are present. Passes in some relevant info to each qualifying lib:token macro identified.

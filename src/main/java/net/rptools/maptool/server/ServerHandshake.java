@@ -78,6 +78,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   /** The index in the array for the GM handshake challenge, only used for role based auth */
   private static final int GM_CHALLENGE = 0;
+
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
 
@@ -86,6 +87,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
   /** The pin for the new public key easy connect request. */
   private String easyConnectPin;
+
   /** The username for the new public key easy connect request. */
   private String easyConnectName;
 

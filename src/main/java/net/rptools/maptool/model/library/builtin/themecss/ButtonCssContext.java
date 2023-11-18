@@ -26,8 +26,10 @@ public class ButtonCssContext {
 
   /** The button foreground color. */
   private final String foregroundColor;
+
   /** Starting background color for the button background. */
   private final String startBackgroundColor;
+
   /** Ending background color for the button background. */
   private final String endBackgroundColor;
 
