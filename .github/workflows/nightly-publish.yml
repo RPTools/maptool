@@ -2,7 +2,7 @@ name: Nightly Release
 
 on:
   schedule:
-    - cron:  '*/20 * * * *'
+    - cron:  '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
 
 jobs:
   build:
@@ -22,4 +22,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
-          gh release create  nightly-${NIGHTLY-DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}"  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop
+          gh release create  nightly-${NIGHTLY_DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}"  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop
