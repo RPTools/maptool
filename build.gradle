@@ -137,7 +137,7 @@ spotless {
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '20'
+    version = '21'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
