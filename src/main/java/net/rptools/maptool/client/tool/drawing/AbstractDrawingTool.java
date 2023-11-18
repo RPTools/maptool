@@ -33,7 +33,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -279,6 +279,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
       g2.fill(getTokenTopology(Zone.TopologyType.HILL_VBL));
       g2.setColor(AppStyle.tokenPitVblColor);
       g2.fill(getTokenTopology(Zone.TopologyType.PIT_VBL));
+      g2.setColor(AppStyle.tokenCoverVblColor);
+      g2.fill(getTokenTopology(Zone.TopologyType.COVER_VBL));
 
       g2.setColor(AppStyle.topologyTerrainColor);
       g2.fill(zone.getTopology(Zone.TopologyType.MBL));
@@ -291,6 +293,9 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
 
       g2.setColor(AppStyle.pitVblColor);
       g2.fill(zone.getTopology(Zone.TopologyType.PIT_VBL));
+
+      g2.setColor(AppStyle.coverVblColor);
+      g2.fill(zone.getTopology(Zone.TopologyType.COVER_VBL));
 
       g2.dispose();
     }
@@ -335,7 +340,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     if (MapTool.getPlayer().isGM()) {
       drawable.setLayer(getSelectedLayer());
     } else {
-      drawable.setLayer(Layer.TOKEN);
+      drawable.setLayer(Layer.getDefaultPlayerLayer());
     }
 
     // Send new textures

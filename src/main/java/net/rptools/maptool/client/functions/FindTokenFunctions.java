@@ -25,7 +25,7 @@ import java.util.*;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.FunctionUtil;
@@ -225,7 +225,7 @@ public class FindTokenFunctions extends AbstractFunction {
       if (ownership == Ownership.NONE) return (!t.hasOwners());
       if (ownership == Ownership.MULTIPLE) return (t.isOwnedByAll() || t.getOwners().size() > 1);
       if (ownership == Ownership.SINGLE) return (!t.isOwnedByAll() && t.getOwners().size() == 1);
-      if (ownership == Ownership.ARRAY) return (!Collections.disjoint(t.getOwners(), ownerList));
+      if (ownership == Ownership.ARRAY) return (t.isOwnedByAny(ownerList));
 
       boolean isOwner = t.isOwner(playerName);
       if (ownership == Ownership.SELF) return (isOwner);
@@ -240,22 +240,21 @@ public class FindTokenFunctions extends AbstractFunction {
    * layers).
    */
   private static class LayerFilter implements Zone.Filter {
-    private final JsonArray filterLayers;
+    private final List<Zone.Layer> filterLayers;
 
     public LayerFilter(JsonArray layers) {
-      filterLayers = new JsonArray();
-      for (Object s : layers) {
-        // Can't use .toString() as it wraps in extra quotes - bug in the JSON lib?
-        String name = ((JsonPrimitive) s).getAsString().toUpperCase();
-        name = "HIDDEN".equals(name) ? "GM" : name;
-        name = Zone.Layer.valueOf(name).toString();
-        filterLayers.add(name);
+      filterLayers = new ArrayList<>();
+      for (JsonElement s : layers) {
+        // Can't use .toString() as it wraps in extra quotes per JSON syntax.
+        String name = s.getAsString().toUpperCase();
+        final var layer = Zone.Layer.getByName(name);
+        filterLayers.add(layer);
       }
     }
 
     public boolean matchToken(Token t) {
       // Filter out the utility lib: and image: tokens
-      return filterLayers.contains(new JsonPrimitive(t.getLayer().toString())) && !t.isImgOrLib();
+      return filterLayers.contains(t.getLayer()) && !t.isImgOrLib();
     }
   }
 

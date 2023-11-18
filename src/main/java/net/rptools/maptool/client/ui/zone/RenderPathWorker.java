@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.zone;
 import java.awt.geom.Area;
 import java.util.Set;
 import javax.swing.SwingWorker;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -32,6 +33,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
   private final Area tokenWallVbl;
   private final Area tokenHillVbl;
   private final Area tokenPitVbl;
+  private final Area tokenCoverVbl;
   private final Area tokenMbl;
 
   public RenderPathWorker(
@@ -42,6 +44,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
       Area tokenWallVbl,
       Area tokenHillVbl,
       Area tokenPitVbl,
+      Area tokenCoverVbl,
       Area tokenMbl,
       ZoneRenderer zoneRenderer) {
     this.walker = walker;
@@ -52,6 +55,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
     this.tokenWallVbl = tokenWallVbl;
     this.tokenHillVbl = tokenHillVbl;
     this.tokenPitVbl = tokenPitVbl;
+    this.tokenCoverVbl = tokenCoverVbl;
     this.tokenMbl = tokenMbl;
   }
 
@@ -64,6 +68,7 @@ public class RenderPathWorker extends SwingWorker<Void, Void> {
         tokenWallVbl,
         tokenHillVbl,
         tokenPitVbl,
+        tokenCoverVbl,
         tokenMbl);
     return null;
   }

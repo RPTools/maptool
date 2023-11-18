@@ -47,7 +47,6 @@ import java.text.MessageFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
-import javax.imageio.spi.IIORegistry;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.lib.BackupManager;
@@ -77,9 +76,10 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.client.ui.zone.PlayerView;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.ZoneRendererFactory;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRendererFactory;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.events.TokenHoverListener;
 import net.rptools.maptool.events.ZoneLoadedListener;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
@@ -293,7 +293,7 @@ public class MapTool {
    */
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
-    log.error(I18N.getString(msgKey), t);
+    log.error(I18N.getText(msgKey), t);
     showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
   }
 
@@ -877,23 +877,6 @@ public class MapTool {
 
   /**
    * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
-   * and addMessage(GM, ...). The <code>targets</code> is expected do be in a string list built with
-   * <code>separator</code>.
-   *
-   * @param message message to be sent
-   * @param targets string specifying clients to send the message to (spaces are trimmed)
-   * @param separator the separator between entries in <code>targets</code>
-   */
-  public static void addGlobalMessage(String message, String targets, String separator) {
-    List<String> list = new LinkedList<String>();
-    for (String target : targets.split(separator)) {
-      list.add(target.trim());
-    }
-    addGlobalMessage(message, list);
-  }
-
-  /**
-   * Add a message all specified clients will see. This is a shortcut for addMessage(WHISPER, ...)
    * and addMessage(GM, ...).
    *
    * @param message message to be sent
@@ -970,7 +953,7 @@ public class MapTool {
       }
       new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
       // Now we have fire off adding the tokens in the zone
-      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+      new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
     }
     clientFrame.setCurrentZoneRenderer(currRenderer);
     clientFrame.getInitiativePanel().setOwnerPermissions(campaign.isInitiativeOwnerPermissions());
@@ -1133,7 +1116,7 @@ public class MapTool {
     MapTool.getCampaign().removeZone(zone.getId());
 
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getAllTokens()));
     new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
   }
 
@@ -1162,7 +1145,7 @@ public class MapTool {
 
     new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
     // Now we have fire off adding the tokens in the zone
-    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+    new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
 
     // Show the new zone
     if (changeZone) {
@@ -1396,6 +1379,7 @@ public class MapTool {
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
+    new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
 
     final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
     if (!enabledDeveloperOptions.isEmpty()) {
@@ -1768,11 +1752,6 @@ public class MapTool {
     }
 
     URL.setURLStreamHandlerFactory(factory);
-
-    // Register ImageReaderSpi for jpeg2000 from JAI manually (issue due to uberJar packaging)
-    // https://github.com/jai-imageio/jai-imageio-core/issues/29
-    IIORegistry registry = IIORegistry.getDefaultInstance();
-    registry.registerServiceProvider(new com.github.jaiimageio.jpeg2000.impl.J2KImageReaderSpi());
 
     final Toolkit tk = Toolkit.getDefaultToolkit();
     tk.getSystemEventQueue().push(new MapToolEventQueue());

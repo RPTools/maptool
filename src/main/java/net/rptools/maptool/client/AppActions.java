@@ -68,7 +68,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.transferprogressdialog.TransferProgressDialog;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -1091,7 +1091,7 @@ public class AppActions {
     // Create a set of all tokenExposedAreaGUID's to make searching by GUID much faster.
     Set<GUID> allTokensSet = null;
     {
-      List<Token> allTokensList = zone.getTokens();
+      List<Token> allTokensList = zone.getAllTokens();
       if (!allTokensList.isEmpty()) {
         allTokensSet = new HashSet<GUID>(allTokensList.size());
         for (Token token : allTokensList) {

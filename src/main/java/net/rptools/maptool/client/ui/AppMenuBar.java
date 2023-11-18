@@ -30,7 +30,7 @@ import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
@@ -245,7 +245,7 @@ public class AppMenuBar extends JMenuBar {
     // LATER: This needs to be genericized, but it seems to constant, and so
     // short, that I
     // didn't feel compelled to do that in this impl
-    JMenu gridSizeMenu = I18N.createMenu("action.gridSize");
+    JMenu gridSizeMenu = I18N.createMenu("action.gridLineWight");
     JCheckBoxMenuItem gridSize1 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(1), menu);
     JCheckBoxMenuItem gridSize2 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(2), menu);
     JCheckBoxMenuItem gridSize3 = new RPCheckBoxMenuItem(new AppActions.GridSizeAction(3), menu);

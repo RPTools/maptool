@@ -25,6 +25,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
+import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -88,7 +89,7 @@ public class ExecFunction extends AbstractFunction {
       jsonTargets = jsonArrayFunctions.parseJsonArray(strTargets);
     } else {
       jsonTargets = new JsonArray();
-      for (String t : strTargets.split(delim)) {
+      for (String t : StringUtil.split(strTargets, delim)) {
         jsonTargets.add(t.trim());
       }
     }

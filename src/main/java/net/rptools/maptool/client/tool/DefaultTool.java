@@ -26,7 +26,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.layerselectiondialog.LayerSelectionDialog;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
@@ -40,11 +40,7 @@ public abstract class DefaultTool extends Tool
   private static final long serialVersionUID = 3258411729238372921L;
 
   private final LayerSelectionDialog layerSelectionDialog =
-      new LayerSelectionDialog(
-          new Zone.Layer[] {
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND
-          },
-          this::selectedLayerChanged);
+      new LayerSelectionDialog(Zone.Layer.values(), this::selectedLayerChanged);
 
   private Zone.Layer selectedLayer;
   private boolean isDraggingMap;

@@ -165,7 +165,7 @@ public class ZoneView {
         // have sight (so weren't included in the PlayerView), but could still have previously
         // exposed areas.
         exposed = new Area();
-        for (Token tok : zone.getTokens()) {
+        for (Token tok : zone.getTokensForLayers(Zone.Layer::supportsVision)) {
           if (!AppUtil.playerOwns(tok)) {
             continue;
           }
@@ -295,7 +295,7 @@ public class ZoneView {
 
     for (final var attachedLightSource : lightSourceToken.getLightSources()) {
       LightSource lightSource =
-          MapTool.getCampaign().getLightSource(attachedLightSource.getLightSourceId());
+          attachedLightSource.resolve(lightSourceToken, MapTool.getCampaign());
       if (lightSource == null) {
         continue;
       }
@@ -332,7 +332,8 @@ public class ZoneView {
             lightSourceArea,
             getTopologyTree(Zone.TopologyType.WALL_VBL),
             getTopologyTree(Zone.TopologyType.HILL_VBL),
-            getTopologyTree(Zone.TopologyType.PIT_VBL));
+            getTopologyTree(Zone.TopologyType.PIT_VBL),
+            getTopologyTree(Zone.TopologyType.COVER_VBL));
     if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
@@ -416,7 +417,10 @@ public class ZoneView {
         view.isUsingTokenView()
             ? view.getTokens()
             : zone.getTokensFiltered(
-                t -> t.isToken() && t.getHasSight() && (isGMview || t.isVisible()));
+                t ->
+                    t.getLayer().supportsVision()
+                        && t.getHasSight()
+                        && (isGMview || t.isVisible()));
 
     return tokenList.stream()
         .filter(
@@ -590,7 +594,8 @@ public class ZoneView {
               visibleArea,
               getTopologyTree(Zone.TopologyType.WALL_VBL),
               getTopologyTree(Zone.TopologyType.HILL_VBL),
-              getTopologyTree(Zone.TopologyType.PIT_VBL));
+              getTopologyTree(Zone.TopologyType.PIT_VBL),
+              getTopologyTree(Zone.TopologyType.COVER_VBL));
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
@@ -648,10 +653,18 @@ public class ZoneView {
         if (token == null) {
           continue;
         }
+        if (!token.isVisible() && !MapTool.getPlayer().isEffectiveGM()) {
+          continue;
+        }
+        if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
+          continue;
+        }
+        boolean isOwner = token.isOwner(MapTool.getPlayer().getName());
+
         Point p = FogUtil.calculateVisionCenter(token, zone);
 
         for (AttachedLightSource als : token.getLightSources()) {
-          LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+          LightSource lightSource = als.resolve(token, MapTool.getCampaign());
           if (lightSource == null) {
             continue;
           }
@@ -668,7 +681,8 @@ public class ZoneView {
                   lightSourceArea,
                   getTopologyTree(Zone.TopologyType.WALL_VBL),
                   getTopologyTree(Zone.TopologyType.HILL_VBL),
-                  getTopologyTree(Zone.TopologyType.PIT_VBL));
+                  getTopologyTree(Zone.TopologyType.PIT_VBL),
+                  getTopologyTree(Zone.TopologyType.COVER_VBL));
 
           // This needs to be cached somehow
           for (Light light : lightSource.getLightList()) {
@@ -677,14 +691,7 @@ public class ZoneView {
             if (light.getPaint() == null) {
               continue;
             }
-            boolean isOwner = token.getOwners().contains(MapTool.getPlayer().getName());
             if ((light.isGM() && !MapTool.getPlayer().isEffectiveGM())) {
-              continue;
-            }
-            if ((!token.isVisible()) && !MapTool.getPlayer().isEffectiveGM()) {
-              continue;
-            }
-            if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
               continue;
             }
             if (light.isOwnerOnly() && !isOwner && !MapTool.getPlayer().isEffectiveGM()) {
@@ -718,7 +725,7 @@ public class ZoneView {
       if (token.hasLightSources() && token.isVisible()) {
         if (!token.isVisibleOnlyToOwner() || AppUtil.playerOwns(token)) {
           for (AttachedLightSource als : token.getLightSources()) {
-            LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+            LightSource lightSource = als.resolve(token, MapTool.getCampaign());
             if (lightSource == null) {
               continue;
             }
@@ -908,7 +915,7 @@ public class ZoneView {
     for (Token token : event.tokens()) {
       if (token.hasAnyTopology()) tokenChangedTopology = true;
       for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = MapTool.getCampaign().getLightSource(als.getLightSourceId());
+        LightSource lightSource = als.resolve(token, MapTool.getCampaign());
         if (lightSource == null) {
           continue;
         }
@@ -963,7 +970,7 @@ public class ZoneView {
           token.hasLightSources() && (token.isVisible() || MapTool.getPlayer().isEffectiveGM());
       if (token.hasAnyTopology()) hasTopology = true;
       for (AttachedLightSource als : token.getLightSources()) {
-        LightSource lightSource = c.getLightSource(als.getLightSourceId());
+        LightSource lightSource = als.resolve(token, c);
         if (lightSource != null) {
           Set<GUID> lightSet = lightSourceMap.get(lightSource.getType());
           if (hasLightSource) {

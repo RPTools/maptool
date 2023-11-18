@@ -78,7 +78,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 import net.rptools.maptool.model.Token.Type;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.sheet.stats.StatSheet;
@@ -412,6 +411,12 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
     getPitVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON));
 
+    getCoverVblToggle()
+        .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.COVER_VBL));
+    getCoverVblToggle()
+        .setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON));
+    getCoverVblToggle().setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON));
+
     getMblToggle()
         .setSelected(getTokenTopologyPanel().isTopologyTypeSelected(Zone.TopologyType.MBL));
     getMblToggle().setSelectedIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON));
@@ -656,7 +661,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
     DefaultComboBoxModel model = new DefaultComboBoxModel(grid.getFootprints().toArray());
     model.insertElementAt(
-        token.getLayer() == Layer.TOKEN
+        !token.getLayer().isStampLayer()
             ? I18N.getString("token.popup.menu.size.native")
             : I18N.getString("token.popup.menu.size.free"),
         0);
@@ -827,15 +832,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // If we are not a GM and the only non GM owner make sure we can't
       // take our selves off of the owners list
       if (!MapTool.getPlayer().isGM()) {
-        boolean hasPlayer = false;
-        Set<String> owners = token.getOwners();
-        if (owners != null) {
-          for (Player pl : MapTool.getPlayerList()) {
-            if (!pl.isGM() && owners.contains(pl.getName())) {
-              hasPlayer = true;
-            }
-          }
-        }
+        boolean hasPlayer = token.isOwnedByAny(MapTool.getNonGMs());
         if (!hasPlayer) {
           token.addOwner(MapTool.getPlayer().getName());
         }
@@ -1082,6 +1079,10 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JToggleButton) getComponent("pitVblToggle");
   }
 
+  public JToggleButton getCoverVblToggle() {
+    return (JToggleButton) getComponent("coverVblToggle");
+  }
+
   public JToggleButton getMblToggle() {
     return (JToggleButton) getComponent("mblToggle");
   }
@@ -1285,6 +1286,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 getTokenTopologyPanel()
                     .setTopologyTypeSelected(
                         Zone.TopologyType.PIT_VBL, ((AbstractButton) e.getSource()).isSelected()));
+    getCoverVblToggle()
+        .addActionListener(
+            e ->
+                getTokenTopologyPanel()
+                    .setTopologyTypeSelected(
+                        Zone.TopologyType.COVER_VBL,
+                        ((AbstractButton) e.getSource()).isSelected()));
     getMblToggle()
         .addActionListener(
             e ->

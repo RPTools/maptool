@@ -30,7 +30,7 @@ import javax.swing.KeyStroke;
 import javax.swing.text.Style;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.drawing.DrawnLabel;
 import net.rptools.maptool.model.drawing.Pen;
 
@@ -79,8 +79,7 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override

@@ -26,7 +26,7 @@ import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.ToolHelper;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
@@ -305,8 +305,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    *-------------------------------------------------------------------------------------------*/
 
   /**
-   * @see
-   *     net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(net.rptools.maptool.client.ui.zone.ZoneRenderer,
+   * @see net.rptools.maptool.client.ui.zone.ZoneOverlay#paintOverlay(ZoneRenderer,
    *     java.awt.Graphics2D)
    */
   @Override
@@ -353,7 +352,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
   }
 
   /**
-   * @see Tool#detachFrom(net.rptools.maptool.client.ui.zone.ZoneRenderer)
+   * @see Tool#detachFrom(ZoneRenderer)
    */
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
@@ -363,7 +362,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
   }
 
   /**
-   * @see Tool#attachTo(net.rptools.maptool.client.ui.zone.ZoneRenderer)
+   * @see Tool#attachTo(ZoneRenderer)
    */
   @Override
   protected void attachTo(ZoneRenderer renderer) {

@@ -131,7 +131,7 @@ public class InitiativeListModel extends AbstractListModel<TokenInitiative>
   public static boolean isTokenVisible(Token token, boolean hideNPC) {
     if (token == null) return false;
     if (MapTool.getFrame().getInitiativePanel().hasGMPermission()) return true;
-    if (!token.isVisible() || token.getLayer() == Zone.Layer.GM) return false;
+    if (!token.isVisible() || !token.getLayer().isVisibleToPlayers()) return false;
     if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) return false;
     if (hideNPC && token.getType() == Type.NPC) return false;
     return true;

@@ -25,7 +25,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 
@@ -67,6 +67,12 @@ public class TopologyModeSelectionPanel extends JToolBar {
         Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
         "tools.topology_mode_selection.pit_vbl.tooltip",
+        initiallySelectedTypes);
+    createAndAddModeButton(
+        Zone.TopologyType.COVER_VBL,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON,
+        Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF,
+        "tools.topology_mode_selection.cover_vbl.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.MBL,

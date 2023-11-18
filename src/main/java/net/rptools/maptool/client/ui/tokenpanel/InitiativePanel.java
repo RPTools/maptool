@@ -34,7 +34,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
@@ -792,7 +792,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.insertTokens(list.getZone().getTokens());
+          list.insertTokens(list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer));
         }
       };
 
@@ -802,7 +802,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
-          for (Token token : list.getZone().getTokens()) {
+          for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
@@ -895,7 +895,7 @@ public class InitiativePanel extends JPanel
                 ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                 if (renderer == null
                     || token == null
-                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || (!token.getLayer().isTokenLayer() && !MapTool.getPlayer().isGM())
                     || !AppUtil.playerOwns(token)) {
                   return;
                 }

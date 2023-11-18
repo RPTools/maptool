@@ -28,7 +28,7 @@ import net.rptools.maptool.client.ClientMessageHandler;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
 import net.rptools.maptool.client.ui.zone.FogUtil;
-import net.rptools.maptool.client.ui.zone.ZoneRenderer;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
@@ -45,7 +45,6 @@ import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetProducer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.tika.utils.ExceptionUtils;
 
 /**
  * This class is used by the server host to receive client commands sent through {@link
@@ -262,8 +261,7 @@ public class ServerMessageHandler implements MessageHandler {
       }
       log.debug("from " + id + " handled: " + msgType);
     } catch (Exception e) {
-      log.error(ExceptionUtils.getStackTrace(e));
-      MapTool.showError(ExceptionUtils.getStackTrace(e));
+      MapTool.showError("Unexpected error during message handling", e);
     }
   }
 
@@ -488,7 +486,9 @@ public class ServerMessageHandler implements MessageHandler {
           server.getCampaign().removeZone(zoneGUID);
 
           // Now we have fire off adding the tokens in the zone
-          new MapToolEventBus().getMainEventBus().post(new TokensRemoved(zone, zone.getTokens()));
+          new MapToolEventBus()
+              .getMainEventBus()
+              .post(new TokensRemoved(zone, zone.getAllTokens()));
           new MapToolEventBus().getMainEventBus().post(new ZoneRemoved(zone));
         });
   }
@@ -544,7 +544,7 @@ public class ServerMessageHandler implements MessageHandler {
 
           // Now we have fire off adding the tokens in the zone
           new MapToolEventBus().getMainEventBus().post(new ZoneAdded(zone));
-          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getTokens()));
+          new MapToolEventBus().getMainEventBus().post(new TokensAdded(zone, zone.getAllTokens()));
         });
   }
 
