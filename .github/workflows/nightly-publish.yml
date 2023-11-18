@@ -2,7 +2,7 @@ name: Nightly Release
 
 on:
   schedule:
-    - cron:  '10 * * * *'
+    - cron:  '25 * * * *'
 
 jobs:
   build:
@@ -22,4 +22,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }} # This token is provided by Actions, you do not need to create your own token
         run: |
-          gh release create  nightly-${NIGHTLY-DATE} -R ${{github.repository}}  --notes "MapTool Nightly Build for ${{NIGHTLY_DATE}}" --generate-notes -p -target develop
+          gh release create  nightly-${NIGHTLY-DATE} -R ${{github.repository}}  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p -target develop
