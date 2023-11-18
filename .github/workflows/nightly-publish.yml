@@ -2,7 +2,7 @@ name: Nightly Release
 
 on:
   schedule:
-    - cron:  '25 * * * *'
+    - cron:  '*/20 * * * *'
 
 jobs:
   build:
@@ -11,7 +11,7 @@ jobs:
       - name: Set Vars
         id: set-vars
         env:
-          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
           echo "LATEST_STABLE_TAG=$(gh release list -R ${{ github.repository}} | grep -v nightly | awk '{ print $1}' | head -1)"  >> $GITHUB_ENV
           echo "Latest Stable Tag: $LATEST_STABLE_TAG"
@@ -20,6 +20,6 @@ jobs:
       - name: Create Release
         id: create-release
         env:
-          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }} # This token is provided by Actions, you do not need to create your own token
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
-          gh release create  nightly-${NIGHTLY-DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop
+          gh release create  nightly-${NIGHTLY-DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}"  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop

@@ -345,7 +345,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.9.4'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
     // For Twelvemonkey SVG
