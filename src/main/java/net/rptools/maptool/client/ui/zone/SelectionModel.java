@@ -31,10 +31,13 @@ public class SelectionModel {
 
   /** The zone in which the selections are made. */
   private final Zone zone;
+
   /** The current selection. */
   private final Set<GUID> currentSelection = new HashSet<>();
+
   /** A stack of previous selections that can be restored. */
   private final List<Set<GUID>> selectionHistory = new ArrayList<>();
+
   /** How long {@link #selectionHistory} can get before old entries are forgotten. */
   private int maxHistoryLength = 20;
 

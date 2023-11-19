@@ -54,8 +54,10 @@ public class HTMLPane extends JEditorPane {
 
   /** The default rule for the body tag. */
   private static final String CSS_RULE_BODY = "body { font-family: sans-serif; font-size: %dpt; }";
+
   /** The default rule for the div tag. */
   private static final String CSS_RULE_DIV = "div {margin-bottom: 5px}";
+
   /** The default rule for the span tag. */
   private static final String CSS_RULE_SPAN = "span.roll {background:#efefef}";
 

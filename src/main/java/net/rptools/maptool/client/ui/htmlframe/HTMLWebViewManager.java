@@ -68,10 +68,13 @@ public class HTMLWebViewManager {
 
   /** Whether the scrolling to be reset. */
   private boolean scrollReset = true;
+
   /** The horizontal scrolling. */
   private int scrollX = 0;
+
   /** The vertical scrolling. */
   private int scrollY = 0;
+
   /** Whether the WebView has been flushed out. */
   private boolean isFlushed = true;
 
@@ -177,8 +180,10 @@ public class HTMLWebViewManager {
   /** The default rule for the body tag. */
   static final String CSS_BODY =
       "body { font-family: sans-serif; font-size: %dpt; background: #ECE9D8;}";
+
   /** The default rule for the div tag. */
   static final String CSS_DIV = "div {margin-bottom: 5px}";
+
   /** The default rule for the span tag. */
   static final String CSS_SPAN = "span.roll {background:#efefef}";
 

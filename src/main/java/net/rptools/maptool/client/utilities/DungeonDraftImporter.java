@@ -66,8 +66,10 @@ public class DungeonDraftImporter {
 
   /** The width to used for VBL for walls. */
   private static final int WALL_VBL_WIDTH = 3;
+
   /** The width to used for VBL for doors. */
   private static final int DOOR_VBL_WIDTH = 1;
+
   /** The width to used for VBL for objects. */
   private static final int OBJECT_VBL_WIDTH = 1;
 
@@ -85,6 +87,7 @@ public class DungeonDraftImporter {
 
   /** Width of the Light source icon. */
   private static final int LIGHT_WIDTH = 20;
+
   /** Height of the Light source icon. */
   private static final int LIGHT_HEIGHT = 20;
 

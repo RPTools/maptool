@@ -35,17 +35,22 @@ import net.rptools.parser.ParserException;
 public class SoundManager {
   /** Maps a registered system AudioClip to its name. */
   private static final Map<String, AudioClip> registeredSoundMap = new HashMap<>();
+
   /** Maps a registered system AudioClip to its event. */
   private static final Map<String, AudioClip> soundEventMap = new HashMap<>();
+
   /** Maps a SoundManager to the string of its URI. */
   private static final Map<String, SoundManager> userSounds = new ConcurrentHashMap<>();
 
   /** String of the URI of the sound. */
   private final String strUri;
+
   /** AudioClip that can play the sound. */
   private final AudioClip clip;
+
   /** Last cycleCount used. */
   private int cycleCount;
+
   /** Volume specific to the sound, independently of global sound. */
   private double volume;
 

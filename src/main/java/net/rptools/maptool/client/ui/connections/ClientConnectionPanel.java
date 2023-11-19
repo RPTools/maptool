@@ -59,8 +59,10 @@ public class ClientConnectionPanel extends JPanel {
   private final JList<Player> list = new JList<>();
 
   private final DefaultListModel<Player> listModel;
+
   /** List of players awaiting approval. */
   private final List<PlayerAwaitingApproval> awaitingApprovalList;
+
   /**
    * JTable for players awaiting approval, a table with a single column is used rather than a list
    * as a swing list doesn't allow interactive components.

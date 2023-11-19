@@ -54,6 +54,7 @@ public class MessagePanelImageView extends View {
 
   /** Property name for pending image icon */
   private static final String PENDING_IMAGE = "html.pendingImage";
+
   /** Property name for missing image icon */
   private static final String MISSING_IMAGE = "html.missingImage";
 
@@ -79,6 +80,7 @@ public class MessagePanelImageView extends View {
 
   private int width;
   private int height;
+
   /**
    * Bitmask containing some of the above bitmask values. Because the image loading notification can
    * happen on another thread access to this is synchronized (at least for modifying it).
@@ -96,15 +98,18 @@ public class MessagePanelImageView extends View {
   private short rightInset;
   private short topInset;
   private short bottomInset;
+
   /**
    * We don't directly implement ImageObserver, instead we use an instance that calls back to us.
    */
   private final ImageObserver imageObserver;
+
   /**
    * Used for alt text. Will be non-null if the image couldn't be found, and there is valid alt
    * text.
    */
   private View altView;
+
   /** Alignment along the vertical (Y) axis. */
   private float vAlign;
 

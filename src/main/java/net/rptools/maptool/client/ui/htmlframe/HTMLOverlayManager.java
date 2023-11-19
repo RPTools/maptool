@@ -257,6 +257,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
     jobj.addProperty("visible", isVisible() ? BigDecimal.ONE : BigDecimal.ZERO);
     return jobj;
   }
+
   /**
    * Act when an action is performed.
    *

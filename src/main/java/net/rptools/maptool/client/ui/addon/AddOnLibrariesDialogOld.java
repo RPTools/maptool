@@ -21,6 +21,7 @@ public class AddOnLibrariesDialogOld {
   /** The path of the FXML file for the dialog. */
   private static final String FXML_PATH =
       "/net/rptools/maptool/client/ui/fxml/AddOnLibrariesDialog.fxml";
+
   /** The {@link SwingJavaFXDialog} used to display the dialog. */
   private final SimpleSwingJavaFXDialog simpleSwingJavaFXDialog;
 
