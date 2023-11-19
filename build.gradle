@@ -36,6 +36,7 @@ java {
 def javaArgs = [
         "-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
         "-Dpolyglot.engine.WarnInterpreterOnly=false",
+        "-Djava.util.Arrays.useLegacyMergeSort=true",
         "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
         "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
         "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
@@ -137,7 +138,7 @@ spotless {
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '20'
+    version = '21'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
