@@ -394,8 +394,8 @@ public class GraphicsUtil {
       double topAngle = bottomAngle + 180;
       // System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
 
-      bottomList.add(getPoint(points[i], bottomAngle, width));
-      topList.add(getPoint(points[i], topAngle, width));
+      bottomList.add(getPointAtVector(points[i], bottomAngle, width));
+      topList.add(getPointAtVector(points[i], topAngle, width));
     }
     // System.out.println(bottomList);
     // System.out.println(topList);
@@ -415,7 +415,7 @@ public class GraphicsUtil {
     return new Area(path);
   }
 
-  private static Point2D getPoint(Point2D point, double angle, double length) {
+  private static Point2D getPointAtVector(Point2D point, double angle, double length) {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
 
