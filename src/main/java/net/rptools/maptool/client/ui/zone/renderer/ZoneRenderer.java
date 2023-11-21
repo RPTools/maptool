@@ -85,10 +85,10 @@ public class ZoneRenderer extends JComponent
 
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
-  private static final ZoneRendererConstants constants = new ZoneRendererConstants();
+  protected static final ZoneRendererConstants constants = new ZoneRendererConstants();
 
   /** DebounceExecutor for throttling repaint() requests. */
-  private final DebounceExecutor repaintDebouncer;
+  final DebounceExecutor repaintDebouncer;
 
   /** Noise for mask on repeating tiles. */
   private DrawableNoise noise = null;
@@ -156,6 +156,8 @@ public class ZoneRenderer extends JComponent
 
   private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
   private final ZoneCompositor compositor;
+  public GridRenderer gridRenderer;
+  private HaloRenderer haloRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -168,6 +170,8 @@ public class ZoneRenderer extends JComponent
     }
     this.zone = zone;
     this.compositor = new ZoneCompositor();
+    this.gridRenderer = new GridRenderer();
+    this.haloRenderer = new HaloRenderer();
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -1045,7 +1049,8 @@ public class ZoneRenderer extends JComponent
       // }
     }
     timer.start("grid");
-    renderGrid(g2d, view);
+    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    gridRenderer.renderGrid(g2d, view);
     timer.stop("grid");
 
     if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
@@ -1218,7 +1223,8 @@ public class ZoneRenderer extends JComponent
     timer.stop("overlays");
 
     timer.start("renderCoordinates");
-    renderCoordinates(g2d, view);
+    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    gridRenderer.renderCoordinates(g2d, view);
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
@@ -1905,20 +1911,6 @@ public class ZoneRenderer extends JComponent
     lastScale = scale.getScale();
 
     g.drawImage(backbuffer, 0, 0, this);
-  }
-
-  protected void renderGrid(Graphics2D g, PlayerView view) {
-    int gridSize = (int) (zone.getGrid().getSize() * getScale());
-    if (!AppState.isShowGrid() || gridSize < constants.MIN_GRID_SIZE) {
-      return;
-    }
-    zone.getGrid().draw(this, g, g.getClipBounds());
-  }
-
-  protected void renderCoordinates(Graphics2D g, PlayerView view) {
-    if (AppState.isShowCoordinates()) {
-      zone.getGrid().drawCoordinatesOverlay(g, this);
-    }
   }
 
   private Set<SelectionSet> getOwnedMovementSet(PlayerView view) {
@@ -3078,11 +3070,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("tokenlist-6");
 
       // Render Halo
-      if (token.hasHalo()) {
-        tokenG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-        tokenG.setColor(token.getHaloColor());
-        tokenG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
-      }
+      if (!haloRenderer.isInitialised()) haloRenderer.setRenderer(this);
+      haloRenderer.renderHalo(tokenG, token);
 
       // Calculate alpha Transparency from token and use opacity for indicating that token is moving
       float opacity = token.getTokenOpacity();
@@ -3794,28 +3783,6 @@ public class ZoneRenderer extends JComponent
     return zoneScale.getOffsetY();
   }
 
-  public void adjustGridSize(int delta) {
-    zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    repaintDebouncer.dispatch();
-  }
-
-  public void moveGridBy(int dx, int dy) {
-    int gridOffsetX = zone.getGrid().getOffsetX();
-    int gridOffsetY = zone.getGrid().getOffsetY();
-
-    gridOffsetX += dx;
-    gridOffsetY += dy;
-
-    if (gridOffsetY > 0) {
-      gridOffsetY = gridOffsetY - (int) zone.getGrid().getCellHeight();
-    }
-    if (gridOffsetX > 0) {
-      gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
-    }
-    zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    repaintDebouncer.dispatch();
-  }
-
   /**
    * Since the map can be scaled, this is a convenience method to find out what cell is at this
    * location.
@@ -4247,6 +4214,7 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  // Should this be moved to GridRenderer?
   @Subscribe
   private void onGridChanged(GridChanged event) {
     if (event.zone() != this.zone) {
