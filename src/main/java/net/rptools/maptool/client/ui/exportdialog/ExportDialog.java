@@ -842,9 +842,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     waitingForPostScreenshot = true;
     return view;
   }
+
   public Rectangle fogExtents() {
     return zone.getExposedArea().getBounds();
   }
+
   /**
    * Get a bounding box, in Zone coordinates, of all the elements in the zone. This method was
    * created by copying renderZone() and then replacing each bit of rendering with a routine to
@@ -867,11 +869,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // TODO: when the background image can be resized, fix this!
     if (zone.getMapAssetId() != null) {
       extents =
-              new Rectangle(
-                      zone.getBoardX(),
-                      zone.getBoardY(),
-                      ImageManager.getImage(zone.getMapAssetId(), this).getWidth(),
-                      ImageManager.getImage(zone.getMapAssetId(), this).getHeight());
+          new Rectangle(
+              zone.getBoardX(),
+              zone.getBoardY(),
+              ImageManager.getImage(zone.getMapAssetId(), this).getWidth(),
+              ImageManager.getImage(zone.getMapAssetId(), this).getHeight());
     }
     // next, extents of drawing objects
     List<DrawnElement> drawableList = zone.getAllDrawnElements();
@@ -880,19 +882,19 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
         continue;
       }
 
-      Drawable  drawable    = element.getDrawable();
+      Drawable drawable = element.getDrawable();
       Rectangle drawnBounds = new Rectangle(drawable.getBounds());
 
       // Handle pen size
       // This slightly over-estimates the size of the pen, but we want to
       // make sure to include the anti-aliased edges.
-      Pen pen     = element.getPen();
+      Pen pen = element.getPen();
       int penSize = (int) Math.ceil((pen.getThickness() / 2) + 1);
       drawnBounds.setBounds(
-              drawnBounds.x - penSize,
-              drawnBounds.y - penSize,
-              drawnBounds.width + (penSize * 2),
-              drawnBounds.height + (penSize * 2));
+          drawnBounds.x - penSize,
+          drawnBounds.y - penSize,
+          drawnBounds.width + (penSize * 2),
+          drawnBounds.height + (penSize * 2));
 
       if (extents == null) {
         extents = drawnBounds;
@@ -905,7 +907,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
     // Note: order doesn't matter, so don't need to go back-to-front.
     for (Token element :
-            zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
+        zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
       Rectangle drawnBounds = element.getBounds(zone);
       if (element.hasFacing()) {
         // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some

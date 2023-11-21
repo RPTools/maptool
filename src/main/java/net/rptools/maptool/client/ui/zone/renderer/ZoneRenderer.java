@@ -880,9 +880,6 @@ public class ZoneRenderer extends JComponent
     return new PlayerView(role, selectedTokens);
   }
 
-
-
-
   /**
    * This method clears {@link #visibleScreenArea} and {@link #lastView}. It also flushes the {@link
    * #zoneView}.

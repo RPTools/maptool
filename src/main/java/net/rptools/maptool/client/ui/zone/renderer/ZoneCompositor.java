@@ -48,6 +48,4 @@ public class ZoneCompositor {
     // Some logic goes here
     return objectCache;
   }
-
-
 }
