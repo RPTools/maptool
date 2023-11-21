@@ -373,6 +373,17 @@ public class CampaignPropertiesDialog extends JDialog {
                 // TODO: Make this a preference
                 shape = light.getShape().toString().toLowerCase();
                 break;
+              case LINE:
+                {
+                  lastArc = light.getArcAngle();
+                  shape = "line arc=" + StringUtil.formatDecimal(lastArc);
+                  if (light.getFacingOffset() != 0)
+                    builder
+                        .append(" offset=")
+                        .append(StringUtil.formatDecimal(light.getFacingOffset()))
+                        .append(' ');
+                }
+                break;
               case CONE:
                 // if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle()
                 // != lastArc)
@@ -748,7 +759,10 @@ public class CampaignPropertiesDialog extends JDialog {
             if ("arc".equalsIgnoreCase(key)) {
               try {
                 arc = StringUtil.parseDecimal(value);
-                shape = ShapeType.CONE; // If the user specifies an arc, force the shape to CONE
+                shape =
+                    (shape != ShapeType.CONE && shape != ShapeType.LINE)
+                        ? ShapeType.CONE
+                        : shape; // If the user specifies an arc, force the shape to CONE
               } catch (ParseException pe) {
                 errlog.add(
                     I18N.getText("msg.error.mtprops.light.arc", reader.getLineNumber(), value));

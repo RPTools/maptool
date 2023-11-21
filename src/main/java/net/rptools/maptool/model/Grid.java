@@ -14,17 +14,8 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.common.base.Stopwatch;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -32,7 +23,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
@@ -352,7 +342,7 @@ public abstract class Grid implements Cloneable {
   /**
    * Called by SightType and Light class to return a vision area based upon a specified distance
    *
-   * @param shape CIRCLE, GRID, SQUARE or CONE
+   * @param shape CIRCLE, GRID, SQUARE, CONE or LINE
    * @param token Used to position the shape and to provide footprint
    * @param range As specified in the vision or light definition
    * @param arcAngle Only used by cone
@@ -403,6 +393,24 @@ public abstract class Grid implements Cloneable {
             new Area(
                 new Rectangle2D.Double(
                     -visionRange, -visionRange, visionRange * 2, visionRange * 2));
+        break;
+      case LINE:
+        if (token.getFacing() == null) {
+          token.setFacing(0);
+        }
+        Shape lineShape =
+            new Rectangle2D.Double(
+                0,
+                getSize() / -2d * Math.sin(Math.toRadians(arcAngle / 2d)),
+                visionRange,
+                getSize() * Math.sin(Math.toRadians(arcAngle / 2d)));
+        Shape visibleShape = new GeneralPath(lineShape);
+
+        visibleArea =
+            new Area(
+                AffineTransform.getRotateInstance(
+                        Math.toRadians(offsetAngle) - Math.toRadians(token.getFacing()))
+                    .createTransformedShape(visibleShape));
         break;
       case CONE:
         if (token.getFacing() == null) {
@@ -749,7 +757,7 @@ public abstract class Grid implements Cloneable {
     final Area visibleArea;
 
     if (range > 0) {
-      final Stopwatch stopwatch = Stopwatch.createStarted();
+      //      final Stopwatch stopwatch = Stopwatch.createStarted();
       final int gridRadius = (int) (range / getZone().getUnitsPerCell());
 
       if (scaleWithToken) {
@@ -758,12 +766,12 @@ public abstract class Grid implements Cloneable {
         visibleArea = getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
       }
 
-      if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
-        log.debug(
-            "Excessive time to generate {}r grid light, took {}ms",
-            gridRadius,
-            stopwatch.elapsed(TimeUnit.MILLISECONDS));
-      }
+      //      if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
+      //        log.debug(
+      //            "Excessive time to generate {}r grid light, took {}ms",
+      //            gridRadius,
+      //            stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      //      }
     } else {
       // Fall back to regular circle in daylight, etc.
       visibleArea =
