@@ -349,19 +349,19 @@ public class GridTool extends DefaultTool {
 
     switch (direction) {
       case Increase:
-        renderer.adjustGridSize(1);
+        renderer.gridRenderer.adjustGridSize(1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
         if (renderer.getZone().getGrid().getSize() != oldGridSize) {
-          renderer.moveGridBy(-cell.x, -cell.y);
+          renderer.gridRenderer.moveGridBy(-cell.x, -cell.y);
         }
         break;
       case Decrease:
-        renderer.adjustGridSize(-1);
+        renderer.gridRenderer.adjustGridSize(-1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
         if (renderer.getZone().getGrid().getSize() != oldGridSize) {
-          renderer.moveGridBy(cell.x, cell.y);
+          renderer.gridRenderer.moveGridBy(cell.x, cell.y);
         }
         break;
     }
@@ -404,16 +404,16 @@ public class GridTool extends DefaultTool {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       switch (direction) {
         case Left:
-          renderer.moveGridBy(-1, 0);
+          renderer.gridRenderer.moveGridBy(-1, 0);
           break;
         case Right:
-          renderer.moveGridBy(1, 0);
+          renderer.gridRenderer.moveGridBy(1, 0);
           break;
         case Up:
-          renderer.moveGridBy(0, -1);
+          renderer.gridRenderer.moveGridBy(0, -1);
           break;
         case Down:
-          renderer.moveGridBy(0, 1);
+          renderer.gridRenderer.moveGridBy(0, 1);
           break;
       }
       copyGridToControlPanel();
