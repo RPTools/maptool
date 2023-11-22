@@ -52,6 +52,7 @@ public class FindTokenFunctions extends AbstractFunction {
     PROPERTYTYPE, // 1.5.5
     LAYER // FJE 1.3b77
   }
+
   // @formatter:on
 
   private enum Ownership {

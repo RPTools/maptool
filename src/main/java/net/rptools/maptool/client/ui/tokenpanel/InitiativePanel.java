@@ -233,6 +233,7 @@ public class InitiativePanel extends JPanel
       getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "none");
     }
   }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/

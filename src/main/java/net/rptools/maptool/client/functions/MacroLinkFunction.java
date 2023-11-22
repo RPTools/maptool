@@ -72,6 +72,7 @@ public class MacroLinkFunction extends AbstractFunction {
 
   static final Pattern TOOLTIP_PATTERN =
       Pattern.compile("([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
   /** Pattern to distinguish a link (group 1) from its data (group 2). */
   public static final Pattern LINK_DATA_PATTERN =
       Pattern.compile("((?s)[^:]*://.*/[^/]*/[^?]*\\?)(.*)?");

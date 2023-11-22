@@ -30,6 +30,7 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
 
   /** Color to use for rendering the default color foreground. */
   private final Color defaultForeground;
+
   /** Color to use for rendering the default color background. */
   private final Color defaultBackground;
 

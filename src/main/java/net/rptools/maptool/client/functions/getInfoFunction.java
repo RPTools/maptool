@@ -75,6 +75,7 @@ public class getInfoFunction extends AbstractFunction {
   protected void resetSysInfoProvider() {
     sysInfoProvider = new MapToolSysInfoProvider();
   }
+
   // endregion
 
   /**
@@ -475,6 +476,7 @@ public class getInfoFunction extends AbstractFunction {
     }
     return theme;
   }
+
   /**
    * Retrieves debug information
    *

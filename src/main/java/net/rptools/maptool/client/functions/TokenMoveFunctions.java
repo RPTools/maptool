@@ -61,10 +61,13 @@ public class TokenMoveFunctions extends AbstractFunction {
 
   /** macro name to call for the onTokenMove event */
   public static final String ON_TOKEN_MOVE_COMPLETE_CALLBACK = "onTokenMove";
+
   /** macro name to call for the onMultipleTokensMove event */
   public static final String ON_MULTIPLE_TOKENS_MOVED_COMPLETE_CALLBACK = "onMultipleTokensMove";
+
   /** variable to test for token move denial */
   public static final String ON_TOKEN_MOVE_DENY_VARIABLE = "tokens.denyMove";
+
   /** variable to contain number of tokens moved */
   public static final String ON_TOKEN_MOVE_COUNT_VARIABLE = "tokens.moveCount";
 

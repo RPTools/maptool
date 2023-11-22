@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '20' ]
+        java: [ '21' ]
         distribution: ['temurin']
       fail-fast: false
     steps:

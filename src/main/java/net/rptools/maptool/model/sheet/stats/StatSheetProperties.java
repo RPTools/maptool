@@ -25,6 +25,7 @@ public final class StatSheetProperties {
 
   /** The id of the stat sheet. */
   private final String id;
+
   /** The location of the stat sheet. */
   private final StatSheetLocation location;
 

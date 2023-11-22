@@ -65,15 +65,19 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   /** The index in the array for the GM handshake challenge, only used for role based auth */
   private static final int GM_CHALLENGE = 0;
+
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
 
   /** The connection for the handshake. */
   private final Connection connection;
+
   /** The player for the client. */
   private final LocalPlayer player;
+
   /** Observers that want to be notified when the status changes. */
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
+
   /** Message for any error that has occurred, {@code null} if no error has occurred. */
   private String errorMessage;
 

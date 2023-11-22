@@ -30,6 +30,7 @@ public class PasswordGenerator {
 
   /** The default minimum length to use for password when no length is specified. */
   public static final int DEFAULT_MIN_PASSWORD_LENGTH = 15;
+
   /** The default maximum length to use for password when no length is specified. */
   public static final int DEFAULT_MAX_PASSWORD_LENGTH = 30;
 
