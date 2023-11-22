@@ -348,7 +348,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
     // For Twelvemonkey SVG
     implementation 'org.apache.xmlgraphics:batik-all:1.16'
 
