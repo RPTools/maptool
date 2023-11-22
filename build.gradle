@@ -335,7 +335,7 @@ repositories {
 dependencies {
     forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '223.7571.182'
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
@@ -344,7 +344,7 @@ dependencies {
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
@@ -474,7 +474,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.4.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.7.0'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
@@ -487,13 +487,13 @@ dependencies {
 
     // webrtc
     implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.3'
-    implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0'
+    implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
     if (osdetector.os.is('windows'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:windows-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64'
     else if (osdetector.os.is('osx'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:macos-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64'
     else if (osdetector.os.is('linux'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:linux-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64'
 
     // protobuf
     implementation "io.grpc:grpc-protobuf:1.58.0"
@@ -513,9 +513,9 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.23.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-3'
     // intellij forms runtime
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:232.9921.53'
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.774'
     // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:11.1'
+    implementation 'com.miglayout:miglayout-swing:11.2'
 
     implementation 'com.github.jknack:handlebars:4.3.1'
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'
