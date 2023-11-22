@@ -513,7 +513,7 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.23.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-3'
     // intellij forms runtime
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:232.9921.53'
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.774'
     // layout for forms created in code
     implementation 'com.miglayout:miglayout-swing:11.1'
 
