@@ -1,0 +1,25 @@
+name: Nightly Release
+
+on:
+  schedule:
+    - cron:  '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set Vars
+        id: set-vars
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
+        run: |
+          echo "LATEST_STABLE_TAG=$(gh release list -R ${{ github.repository}} | grep -v nightly | awk '{ print $1}' | head -1)"  >> $GITHUB_ENV
+          echo "Latest Stable Tag: $LATEST_STABLE_TAG"
+          echo "NIGHTLY_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
+          echo "Creating for Nightly: $NIGHTLY_DATE"
+      - name: Create Release
+        id: create-release
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
+        run: |
+          gh release create  nightly-${NIGHTLY_DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}"  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop
