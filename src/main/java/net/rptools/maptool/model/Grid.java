@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.common.base.Stopwatch;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.TimeUnit;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
@@ -394,7 +396,7 @@ public abstract class Grid implements Cloneable {
                 new Rectangle2D.Double(
                     -visionRange, -visionRange, visionRange * 2, visionRange * 2));
         break;
-      case LINE:
+      case BEAM:
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
@@ -757,7 +759,7 @@ public abstract class Grid implements Cloneable {
     final Area visibleArea;
 
     if (range > 0) {
-      //      final Stopwatch stopwatch = Stopwatch.createStarted();
+      final Stopwatch stopwatch = Stopwatch.createStarted();
       final int gridRadius = (int) (range / getZone().getUnitsPerCell());
 
       if (scaleWithToken) {
@@ -766,12 +768,12 @@ public abstract class Grid implements Cloneable {
         visibleArea = getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
       }
 
-      //      if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
-      //        log.debug(
-      //            "Excessive time to generate {}r grid light, took {}ms",
-      //            gridRadius,
-      //            stopwatch.elapsed(TimeUnit.MILLISECONDS));
-      //      }
+      if (stopwatch.elapsed(TimeUnit.MILLISECONDS) > 50) {
+        log.debug(
+            "Excessive time to generate {}r grid light, took {}ms",
+            gridRadius,
+            stopwatch.elapsed(TimeUnit.MILLISECONDS));
+      }
     } else {
       // Fall back to regular circle in daylight, etc.
       visibleArea =

@@ -19,6 +19,6 @@ public enum ShapeType {
   CONE,
   GRID,
   HEX,
-  LINE,
+  BEAM,
   SQUARE
 }

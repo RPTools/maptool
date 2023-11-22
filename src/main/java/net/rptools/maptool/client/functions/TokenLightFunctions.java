@@ -400,7 +400,7 @@ public class TokenLightFunctions extends AbstractFunction {
             ? ShapeType.valueOf(lightDef.get("shape").getAsString())
             : ShapeType.CIRCLE;
     // Cones permit the fields arc and offset, but no other shape accepts them.
-    if (shape != ShapeType.CONE && shape != ShapeType.LINE) {
+    if (shape != ShapeType.CONE && shape != ShapeType.BEAM) {
       if (lightDef.has("offset")) {
         throw new ParserException(
             I18N.getText("Facing offset provided but the shape is not a cone"));
@@ -465,7 +465,7 @@ public class TokenLightFunctions extends AbstractFunction {
     final var lightDef = new JsonObject();
     lightDef.addProperty("shape", light.getShape().toString());
 
-    if (light.getShape() == ShapeType.LINE) {
+    if (light.getShape() == ShapeType.BEAM) {
       lightDef.addProperty("offset", light.getFacingOffset());
       lightDef.addProperty("arc", light.getArcAngle());
     }
