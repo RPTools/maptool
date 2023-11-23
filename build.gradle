@@ -21,7 +21,7 @@ plugins {
     id "com.diffplug.spotless" version "6.22.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
-    id "com.google.protobuf" version "0.9.3"
+    id "com.google.protobuf" version "0.9.4"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
