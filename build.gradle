@@ -144,7 +144,7 @@ javafx {
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:3.20.0" }
+    protoc { artifact = "com.google.protobuf:protoc:3.25.1" }
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
