@@ -192,10 +192,13 @@ public final class Asset {
   /** The MD5 Sum of this {@code Asset}. */
   @XStreamAlias("id") // Maintain comparability...
   private final MD5Key md5Key;
+
   /** The name of the {@code Asset}. */
   private final String name;
+
   /** The file extension for the {@code Asset}. */
   private final String extension;
+
   /** The type of the {@code Asset}. */
   private final Type type;
 
@@ -388,6 +391,7 @@ public final class Asset {
     var factory = Type.fromMediaType(mediaType).getFactory();
     return factory.apply(name, data);
   }
+
   /**
    * Creates an Asset detecting the type.
    *

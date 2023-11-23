@@ -18,10 +18,10 @@ plugins {
     id "base"
     id "java"
     id "org.ajoberstar.grgit" version "5.2.0"
-    id "com.diffplug.spotless" version "6.18.0"
+    id "com.diffplug.spotless" version "6.22.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
-    id "com.google.protobuf" version "0.9.3"
+    id "com.google.protobuf" version "0.9.4"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 }
 
@@ -29,13 +29,14 @@ plugins {
 defaultTasks 'clean', 'build'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_20
-    targetCompatibility = JavaVersion.VERSION_20
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
 }
 
 def javaArgs = [
         "-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
         "-Dpolyglot.engine.WarnInterpreterOnly=false",
+        "-Djava.util.Arrays.useLegacyMergeSort=true",
         "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
         "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
         "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
@@ -121,7 +122,7 @@ spotless {
         toggleOffOn()
 
         // Now using the Google Java style guide
-        googleJavaFormat("1.16.0")
+        googleJavaFormat("1.17.0")
     }
 
     format 'misc', {
@@ -137,13 +138,13 @@ spotless {
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '20'
+    version = '21'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:3.20.0" }
+    protoc { artifact = "com.google.protobuf:protoc:3.25.1" }
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
@@ -275,7 +276,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.1%2B9/OpenJDK20U-jdk_x64_windows_hotspot_20.0.1_9.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip');
             }
         }
 
@@ -286,7 +287,7 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.1%2B9/OpenJDK20U-jdk_x64_mac_hotspot_20.0.1_9.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz');
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
@@ -312,7 +313,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin20-binaries/releases/download/jdk-20.0.1%2B9/OpenJDK20U-jdk_x64_linux_hotspot_20.0.1_9.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz');
             }
         }
     }
@@ -334,20 +335,20 @@ repositories {
 dependencies {
     forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '223.7571.182'
 
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.20.0'
-    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.20.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
+    implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
     implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
     // Image processing lib
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.9.4'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.8.2'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.8.2'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
     // For Twelvemonkey SVG
     implementation 'org.apache.xmlgraphics:batik-all:1.16'
 
@@ -363,7 +364,7 @@ dependencies {
     // Various file utilities
     implementation 'commons-io:commons-io:2.15.0'
     // ftp client
-    implementation 'commons-net:commons-net:3.9.0'
+    implementation 'commons-net:commons-net:3.10.0'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.5.0'
 
@@ -392,7 +393,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.53.v20231009'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
 
@@ -441,7 +442,7 @@ dependencies {
     implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
 
     // For syntax highlighting in macro editor
-    implementation "com.fifesoft:rsyntaxtextarea:3.3.0"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+    implementation "com.fifesoft:rsyntaxtextarea:3.3.4"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation "com.fifesoft:rstaui:3.3.1"				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
     implementation "com.fifesoft:autocomplete:3.3.1"		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
     implementation "com.fifesoft:languagesupport:3.3.0"
@@ -473,10 +474,10 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.4.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.7.0'
 
     // flexmark markdown parsing / conversion
-    implementation 'com.vladsch.flexmark:flexmark-all:0.64.0'
+    implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
 
     // Apache Tika Parsers for determining file type
     implementation 'org.apache.tika:tika-core:2.9.1'
@@ -486,17 +487,17 @@ dependencies {
 
     // webrtc
     implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.3'
-    implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0'
+    implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
     if (osdetector.os.is('windows'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:windows-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64'
     else if (osdetector.os.is('osx'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:macos-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64'
     else if (osdetector.os.is('linux'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.7.0:linux-x86_64'
+        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64'
 
     // protobuf
-    implementation "io.grpc:grpc-protobuf:1.58.0"
-    implementation "com.google.protobuf:protobuf-java-util:3.20.0"
+    implementation "io.grpc:grpc-protobuf:1.59.0"
+    implementation "com.google.protobuf:protobuf-java-util:3.25.1"
 
     // Java Tuples
     implementation 'com.flipkart.utils:javatuples:3.0'
@@ -509,12 +510,12 @@ dependencies {
     // eventbus
     implementation 'com.google.guava:guava:32.1.3-jre'
     // compression of messages between client and server
-    implementation 'org.apache.commons:commons-compress:1.23.0'
+    implementation 'org.apache.commons:commons-compress:1.25.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-3'
     // intellij forms runtime
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:232.9921.53'
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.774'
     // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:11.1'
+    implementation 'com.miglayout:miglayout-swing:11.2'
 
     implementation 'com.github.jknack:handlebars:4.3.1'
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'

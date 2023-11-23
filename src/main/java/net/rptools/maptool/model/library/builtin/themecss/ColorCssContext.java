@@ -26,6 +26,7 @@ import javax.swing.UIDefaults;
 public class ColorCssContext {
   /** The "blue" action color from flat laf. */
   private final String actionsBlue;
+
   /** The "dark blue" action color from flat laf. */
   private final String actionsBlueDark;
 
@@ -34,40 +35,58 @@ public class ColorCssContext {
 
   /** The "dark green" action color from flat laf. */
   private final String actionsGreenDark;
+
   /** The "grey" action color from flat laf. */
   private final String actionsGrey;
+
   /** The "dark grey" action color from flat laf. */
   private final String actionsGreyDark;
+
   /** The "grey inline" action color from flat laf. */
   private final String actionsGreyInline;
+
   /** The "dark grey inline" action color from flat laf. */
   private final String actionsGreyInlineDark;
+
   /** The "red" action color from flat laf. */
   private final String actionsRed;
+
   /** The "dark red" action color from flat laf. */
   private final String actionsRedDark;
+
   /** The "yellow" action color from flat laf. */
   private final String actionsYellow;
+
   /** The "dark yellow" action color from flat laf. */
   private final String actionsYellowDark;
+
   /** The "black text" object color from flat laf. */
   private final String objectsBlackText;
+
   /** The "blue" object color from flat laf. */
   private final String objectsBlue;
+
   /** The "green" object color from flat laf. */
   private final String objectsGreen;
+
   /** The "green android" object color from flat laf. */
   private final String objectsGreenAndroid;
+
   /** The "grey" object color from flat laf. */
   private final String objectsGrey;
+
   /** The "pink" object color from flat laf. */
   private final String objectsPink;
+
   /** The "red" object color from flat laf. */
   private final String objectsRed;
+
   /** The "red status" object color from flat laf. */
   private final String objectsRedStatus;
+
   /** The "yellow" object color from flat laf. */
   private final String objectsYellow;
+
   /** The "dark yellow" object color from flat laf. */
   private final String objectsYellowDark;
 

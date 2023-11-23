@@ -81,6 +81,7 @@ public class TransferableHelper extends TransferHandler {
    */
   private static final DataFlavor URI_LIST_FLAVOR =
       new DataFlavor("text/uri-list; class=java.lang.String", "Image"); // $NON-NLS-1$
+
   /**
    * <b>application/x-java-url; class=java.net.URL</b>
    *
@@ -91,6 +92,7 @@ public class TransferableHelper extends TransferHandler {
       new DataFlavor(
           "application/x-java-url; class=java.net.URL", // $NON-NLS-1$
           "Image");
+
   /**
    * <b>image/x-java-image; class=java.awt.Image</b>
    *
@@ -99,6 +101,7 @@ public class TransferableHelper extends TransferHandler {
    */
   private static final DataFlavor X_JAVA_IMAGE =
       new DataFlavor("image/x-java-image; class=java.awt.Image", "Image"); // $NON-NLS-1$
+
   /**
    * <b>text/plain; class=java.lang.String</b>
    *
@@ -123,6 +126,7 @@ public class TransferableHelper extends TransferHandler {
     // never used herein...
     GroupTokenTransferData.GROUP_TOKEN_LIST_FLAVOR,
   };
+
   // @formatter:on
 
   /**

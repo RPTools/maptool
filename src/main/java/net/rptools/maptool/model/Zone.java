@@ -396,13 +396,16 @@ public class Zone {
 
   @Deprecated
   private @Nonnull LinkedList<DrawnElement> backgroundDrawables = new LinkedList<DrawnElement>();
+
   // endregion
   // Contains the above lists, but in an easily accessible map.
   private transient @Nonnull Map<Layer, LinkedList<DrawnElement>> drawablesByLayer;
 
   private final Map<GUID, Label> labels = new LinkedHashMap<GUID, Label>();
+
   /** Map each token GUID to the corresponding token. */
   private final Map<GUID, Token> tokenMap = new HashMap<GUID, Token>();
+
   /** Map each token GUID to its exposed area metadata */
   private Map<GUID, ExposedAreaMetaData> exposedAreaMeta = new HashMap<GUID, ExposedAreaMetaData>();
 
@@ -1569,6 +1572,7 @@ public class Zone {
     putToken(token);
     new MapToolEventBus().getMainEventBus().post(new TokenEdited(this, token));
   }
+
   /**
    * Same as {@link #putToken(Token)} but optimizes map updates by accepting a list of Tokens. Note
    * that this method fires a single <code>ModelChangeEvent</code> using <code> Event.TOKEN_ADDED

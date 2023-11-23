@@ -406,6 +406,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class VblAction extends AbstractAction {
     private final boolean isEraser;
     private final boolean pathOnly;
+
     /**
      * @param pathOnly - boolean, just path if true, otherwise fill shape.
      * @param isEraser - boolean, erase VBL if true.

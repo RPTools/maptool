@@ -34,6 +34,7 @@ public class ChatTypingNotification extends JPanel {
   private BufferedImage chatImage =
       ImageUtil.createCompatibleImage(
           RessourceManager.getSmallIcon(Icons.CHAT_NOTIFICATION).getImage());
+
   /**
    * This component is only made visible when there are notifications to be displayed. That means
    * the first couple of IF statements in this method are redundant since paintComponent() will not

@@ -339,6 +339,7 @@ public class Token implements Cloneable {
   private MD5Key portraitImage;
 
   private Map<GUID, LightSource> uniqueLightSources = new LinkedHashMap<>();
+
   /**
    * All light sources attached to the token.
    *
@@ -1681,6 +1682,7 @@ public class Token implements Cloneable {
       return new ZonePoint((int) newX, (int) newY);
     }
   }
+
   /**
    * Gets the point where the token should go, if it were to be unsnapped from the grid.
    *

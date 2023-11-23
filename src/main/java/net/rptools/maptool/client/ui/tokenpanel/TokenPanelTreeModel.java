@@ -60,6 +60,7 @@ public class TokenPanelTreeModel implements TreeModel {
   private static final String root = "Views";
   private Zone zone;
   private final JTree tree;
+
   /** Is an updateInternal pending? */
   private volatile boolean updatePending = false;
 

@@ -31,6 +31,7 @@ public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
    * The text field that is displayed so that the user can edit the contents without opening editor
    */
   private JTextField textField = new JTextField();
+
   /** The button that opens the editor dialog. */
   private JPanel panel = new JPanel(new GridBagLayout());
 

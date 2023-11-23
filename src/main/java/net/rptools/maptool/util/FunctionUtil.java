@@ -463,6 +463,7 @@ public class FunctionUtil {
       return json.getAsJsonArray();
     }
   }
+
   /**
    * Convert an object into a boolean value. Never returns an error.
    *

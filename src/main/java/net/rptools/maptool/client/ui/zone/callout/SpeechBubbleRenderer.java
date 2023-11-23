@@ -40,15 +40,19 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
   /** The default anchor point for the callout when none is specified. */
   private static final CalloutPopupLocation DEFAULT_POPUP_LOCATION =
       CalloutPopupLocation.BOTTOM_LEFT;
+
   /** The default color used for rendering text if none is specified. */
   private static final Color DEFAULT_TEXT_COLOR = Color.BLACK;
+
   /** The default color used to rendering the background if none is specified. */
   private static final Color DEFAULT_BACKGROUND_COLOR = Color.WHITE;
+
   /** The color used to render the shadows for the callout. */
   private static final Color SHADOW_COLOR = new Color(0.0f, 0.0f, 0.0f, 0.5f);
 
   /** The x offset for the shadow. */
   private static final int SHADOW_OFFSET_X = 1;
+
   /** The y offset for the shadow. */
   private static final int SHADOW_OFFSET_Y = 3;
 
@@ -57,8 +61,10 @@ public class SpeechBubbleRenderer extends AbstractCalloutRenderer {
    * oval.
    */
   private static final int MAX_OVAL_LINES = 5;
+
   /** The arc width to use for the rounded rectangle. */
   private static final int DEFAULT_ARC_WIDTH = 75;
+
   /** The arc height to use for the rounded rectangle. */
   private static final int DEFAULT_ARC_HEIGHT = 75;
 

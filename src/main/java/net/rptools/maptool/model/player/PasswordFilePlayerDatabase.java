@@ -816,6 +816,7 @@ public final class PasswordFilePlayerDatabase
     return putUncommittedPlayer(
         name, role, null, createPublicKeyDetails(publicKeyStrings, name), blockedReason, persisted);
   }
+
   /**
    * Adds a player to the database with the specified password or public keys. The {@link
    * #commitChanges} method * must be called to commit these * changes to persistent storage.

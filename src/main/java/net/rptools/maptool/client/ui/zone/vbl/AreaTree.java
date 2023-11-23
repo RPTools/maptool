@@ -26,8 +26,10 @@ import org.apache.logging.log4j.Logger;
 /** Class digesting a VBL area into an AreaOcean. */
 public class AreaTree {
   private static final Logger log = LogManager.getLogger(AreaTree.class);
+
   /** The original area digested. */
   private AreaOcean theOcean;
+
   /** The original area, in case we want to return the original area undigested */
   private Area theArea;
 

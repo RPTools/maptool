@@ -59,8 +59,10 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   private @Nonnull String group = "";
   private @Nonnull String sortby = "";
   private boolean autoExecute;
+
   /** If {@code true}, include the macro lable when printing output. */
   private boolean includeLabel;
+
   /**
    * If {@code true}, when the button is clicked it will impersonate every selected token when
    * executing the macro.

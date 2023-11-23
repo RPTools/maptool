@@ -123,6 +123,7 @@ public class ZoneView {
 
   /** Caches the lights to be drawn for a each view. */
   private final Map<PlayerView, List<DrawableLight>> drawableLights = new HashMap<>();
+
   /** Holds the auras from lightSourceMap after they have been combined. */
   private List<DrawableLight> drawableAuras = null;
 
