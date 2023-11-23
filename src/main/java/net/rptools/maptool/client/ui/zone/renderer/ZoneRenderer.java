@@ -85,10 +85,9 @@ public class ZoneRenderer extends JComponent
 
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
-  protected static final ZoneRendererConstants constants = new ZoneRendererConstants();
 
   /** DebounceExecutor for throttling repaint() requests. */
-  final DebounceExecutor repaintDebouncer;
+  private final DebounceExecutor repaintDebouncer;
 
   /** Noise for mask on repeating tiles. */
   private DrawableNoise noise = null;
@@ -924,6 +923,8 @@ public class ZoneRenderer extends JComponent
     itemRenderList.clear();
 
     if (!compositor.isInitialised()) compositor.setRenderer(this);
+    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    if (!haloRenderer.isInitialised()) haloRenderer.setRenderer(this);
 
     Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
 
@@ -1049,7 +1050,7 @@ public class ZoneRenderer extends JComponent
       // }
     }
     timer.start("grid");
-    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+
     gridRenderer.renderGrid(g2d, view);
     timer.stop("grid");
 
@@ -3070,7 +3071,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("tokenlist-6");
 
       // Render Halo
-      if (!haloRenderer.isInitialised()) haloRenderer.setRenderer(this);
       haloRenderer.renderHalo(tokenG, token);
 
       // Calculate alpha Transparency from token and use opacity for indicating that token is moving
@@ -3176,7 +3176,7 @@ public class ZoneRenderer extends JComponent
             if (token.getFacing() < 0) {
               tokenG.setColor(Color.yellow);
             } else {
-              tokenG.setColor(constants.TRANSLUCENT_YELLOW);
+              tokenG.setColor(ZoneRendererConstants.TRANSLUCENT_YELLOW);
             }
             tokenG.fill(arrow);
             tokenG.setColor(Color.darkGray);

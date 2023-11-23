@@ -39,7 +39,7 @@ public class GridRenderer {
 
   protected void renderGrid(Graphics2D g, PlayerView view) {
     int gridSize = (int) (zone.getGrid().getSize() * renderer.getScale());
-    if (!AppState.isShowGrid() || gridSize < renderer.constants.MIN_GRID_SIZE) {
+    if (!AppState.isShowGrid() || gridSize < ZoneRendererConstants.MIN_GRID_SIZE) {
       return;
     }
     zone.getGrid().draw(renderer, g, g.getClipBounds());
@@ -49,27 +49,5 @@ public class GridRenderer {
     if (AppState.isShowCoordinates()) {
       zone.getGrid().drawCoordinatesOverlay(g, renderer);
     }
-  }
-
-  public void adjustGridSize(int delta) {
-    zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    renderer.repaintDebouncer.dispatch();
-  }
-
-  public void moveGridBy(int dx, int dy) {
-    int gridOffsetX = zone.getGrid().getOffsetX();
-    int gridOffsetY = zone.getGrid().getOffsetY();
-
-    gridOffsetX += dx;
-    gridOffsetY += dy;
-
-    if (gridOffsetY > 0) {
-      gridOffsetY = gridOffsetY - (int) zone.getGrid().getCellHeight();
-    }
-    if (gridOffsetX > 0) {
-      gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
-    }
-    zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    renderer.repaintDebouncer.dispatch();
   }
 }
