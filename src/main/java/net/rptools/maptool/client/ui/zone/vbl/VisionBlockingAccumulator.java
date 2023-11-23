@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.zone.vbl;
 import java.awt.Point;
 import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nullable;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
@@ -56,16 +55,11 @@ public final class VisionBlockingAccumulator {
     visionBlockingSegments.addAll(segments);
   }
 
-  private void addIslandForHillBlocking(
-      AreaIsland blockingIsland, @Nullable AreaOcean excludeChildOcean) {
+  private void addIslandForHillBlocking(AreaIsland blockingIsland) {
     // The back side of the island blocks.
     addVisionBlockingSegments(blockingIsland, Facing.ISLAND_SIDE_FACES_ORIGIN);
     // The front side of each contained ocean also acts as a back side boundary of the island.
     for (var blockingOcean : blockingIsland.getOceans()) {
-      if (blockingOcean == excludeChildOcean) {
-        continue;
-      }
-
       addVisionBlockingSegments(blockingOcean, Facing.ISLAND_SIDE_FACES_ORIGIN);
     }
   }
@@ -132,14 +126,13 @@ public final class VisionBlockingAccumulator {
        * 1. The back side of the parent ocean's parent island.
        * 2. The back side of any sibling islands (other children of the parent ocean).
        * 3. The back side of any child ocean's islands.
-       * 4. For each island in the above, any child ocean provided it's not the parent of the
-       *    current island.
+       * 4. For each island in the above, the front side of any child ocean.
        */
       final var parentOcean = island.getParentOcean();
 
       final var grandparentIsland = parentOcean.getParentIsland();
       if (grandparentIsland != null) {
-        addIslandForHillBlocking(grandparentIsland, parentOcean);
+        addIslandForHillBlocking(grandparentIsland);
       }
 
       for (final var siblingIsland : parentOcean.getIslands()) {
@@ -150,12 +143,12 @@ public final class VisionBlockingAccumulator {
           continue;
         }
 
-        addIslandForHillBlocking(siblingIsland, null);
+        addIslandForHillBlocking(siblingIsland);
       }
 
       for (final var childOcean : island.getOceans()) {
         for (final var grandchildIsland : childOcean.getIslands()) {
-          addIslandForHillBlocking(grandchildIsland, null);
+          addIslandForHillBlocking(grandchildIsland);
         }
       }
     } else if (container instanceof final AreaOcean ocean) {
@@ -167,11 +160,11 @@ public final class VisionBlockingAccumulator {
        */
       final var parentIsland = ocean.getParentIsland();
       if (parentIsland != null) {
-        addIslandForHillBlocking(parentIsland, null);
+        addIslandForHillBlocking(parentIsland);
       }
       // Check each contained island.
       for (var containedIsland : ocean.getIslands()) {
-        addIslandForHillBlocking(containedIsland, null);
+        addIslandForHillBlocking(containedIsland);
       }
     }
 
