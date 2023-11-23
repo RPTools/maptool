@@ -388,7 +388,7 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     // webserver for old webapp that is scheduled for removal
-    implementation 'org.eclipse.jetty:jetty-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-server:9.4.51.v20230217'
     implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.44.v20210927'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
