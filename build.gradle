@@ -8,7 +8,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.3'
+        classpath 'com.google.protobuf:protobuf-gradle-plugin:0.9.4'
     }
 }
 
@@ -338,7 +338,7 @@ dependencies {
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
-    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.7'
+    implementation group: 'org.slf4j', name: 'slf4j-simple', version: '2.0.9'
     implementation group: 'commons-logging', name: 'commons-logging', version: '1.2'
 
     // Image processing lib
@@ -350,7 +350,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
     // For Twelvemonkey SVG
-    implementation 'org.apache.xmlgraphics:batik-all:1.16'
+    implementation 'org.apache.xmlgraphics:batik-all:1.17'
 
 
     // For Sentry bug reporting
@@ -392,7 +392,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.53.v20231009'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.53.v20231009'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
