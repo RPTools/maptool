@@ -250,6 +250,7 @@ public final class VisionBlockingAccumulator {
         addVisionBlockingSegments(childOcean, false);
       }
       addVisionBlockingSegments(parentOcean, false);
+      addVisionBlockingSegments(island, true);
 
     } else if (container instanceof AreaOcean ocean) {
       final var parentIsland = ocean.getParentIsland();
