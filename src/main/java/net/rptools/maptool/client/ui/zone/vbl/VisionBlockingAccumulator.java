@@ -49,24 +49,24 @@ public final class VisionBlockingAccumulator {
     return visionBlockingSegments;
   }
 
-  private void addVisionBlockingSegments(AreaContainer areaContainer, boolean frontSide) {
+  private void addVisionBlockingSegments(AreaContainer areaContainer, Facing facing) {
     var segments =
         areaContainer.getVisionBlockingBoundarySegments(
-            geometryFactory, originCoordinate, frontSide, vision);
+            geometryFactory, originCoordinate, facing, vision);
     visionBlockingSegments.addAll(segments);
   }
 
   private void addIslandForHillBlocking(
       AreaIsland blockingIsland, @Nullable AreaOcean excludeChildOcean) {
     // The back side of the island blocks.
-    addVisionBlockingSegments(blockingIsland, false);
+    addVisionBlockingSegments(blockingIsland, Facing.ISLAND_SIDE_FACES_ORIGIN);
     // The front side of each contained ocean also acts as a back side boundary of the island.
     for (var blockingOcean : blockingIsland.getOceans()) {
       if (blockingOcean == excludeChildOcean) {
         continue;
       }
 
-      addVisionBlockingSegments(blockingOcean, true);
+      addVisionBlockingSegments(blockingOcean, Facing.ISLAND_SIDE_FACES_ORIGIN);
     }
   }
 
@@ -91,15 +91,14 @@ public final class VisionBlockingAccumulator {
       final var parentIsland = ocean.getParentIsland();
       if (parentIsland != null) {
         // The near edge of the island blocks vision, which is the same as the boundary of this
-        // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
-        // back side.
-        addVisionBlockingSegments(ocean, false);
+        // ocean, which we're inside.
+        addVisionBlockingSegments(ocean, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
 
       // Check each contained island.
       for (var containedIsland : ocean.getIslands()) {
         // The front side of wall VBL blocks vision.
-        addVisionBlockingSegments(containedIsland, true);
+        addVisionBlockingSegments(containedIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
     }
 
@@ -201,13 +200,10 @@ public final class VisionBlockingAccumulator {
      */
 
     if (container instanceof final AreaIsland island) {
-      /*
-       * Since we're in an island, vision is blocked by:
-       * 1. The back side of the island.
-       * 2. The front side of any child ocean.
-       */
-      // These are actually the same rules as for the hill case, it's just the context that differs.
-      addIslandForHillBlocking(island, null);
+      addVisionBlockingSegments(island, Facing.ISLAND_SIDE_FACES_ORIGIN);
+      for (var childOcean : island.getOceans()) {
+        addVisionBlockingSegments(childOcean, Facing.ISLAND_SIDE_FACES_ORIGIN);
+      }
     }
 
     return true;
@@ -241,25 +237,24 @@ public final class VisionBlockingAccumulator {
         if (siblingIsland == island) {
           continue;
         }
-        addVisionBlockingSegments(siblingIsland, true);
+        addVisionBlockingSegments(siblingIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
       for (final var childOcean : island.getOceans()) {
         for (final var grandchildIsland : childOcean.getIslands()) {
-          addVisionBlockingSegments(grandchildIsland, true);
+          addVisionBlockingSegments(grandchildIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
         }
-        addVisionBlockingSegments(childOcean, false);
+        addVisionBlockingSegments(childOcean, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
-      addVisionBlockingSegments(parentOcean, false);
-      addVisionBlockingSegments(island, true);
-
+      addVisionBlockingSegments(parentOcean, Facing.OCEAN_SIDE_FACES_ORIGIN);
+      addVisionBlockingSegments(island, Facing.OCEAN_SIDE_FACES_ORIGIN);
     } else if (container instanceof AreaOcean ocean) {
       final var parentIsland = ocean.getParentIsland();
       if (parentIsland != null) {
-        addVisionBlockingSegments(ocean, true);
+        addVisionBlockingSegments(ocean, Facing.ISLAND_SIDE_FACES_ORIGIN);
       }
 
       for (var containedIsland : ocean.getIslands()) {
-        addVisionBlockingSegments(containedIsland, true);
+        addVisionBlockingSegments(containedIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
     }
 
