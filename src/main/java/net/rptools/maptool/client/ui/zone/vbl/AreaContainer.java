@@ -24,6 +24,7 @@ import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 public interface AreaContainer {
+
   public Area getBounds();
 
   /**
@@ -38,24 +39,20 @@ public interface AreaContainer {
   /**
    * Find sections of the container's boundary that block vision.
    *
-   * <p>Each returned segment is a sequence of connected faces which constitute an unbroken section
-   * of the container's boundary that would block vision. Each segment is aware of `origin` so that
-   * it can construct areas that cannot be seen from `origin`.
+   * <p>Each returned segment is a sequence of connected line segments which constitute an unbroken
+   * section of the container's boundary, where each segment faces the direction chosen by {@code
+   * facing}.
    *
    * <p>The segments that are returned depend on `origin`, and `frontSegments`.
    *
    * @param geometryFactory The strategy for creating geometries, which is used by the
    *     `VisibleAreaSegment` in creating areas of blocked vision.
    * @param origin The point from which visibility is calculated.
-   * @param frontSegments If `true`, only front-facing boundary segments are returned. Otherwise,
-   *     only back-facing boundary segments are returned. Due to winding order, back-facing and
-   *     front-facing are interpreted differently for oceans and islands.
+   * @param facing Whether the returned segments must have their island side or their ocean side
+   *     facing the origin.
    * @return A list of segments, which together represent the complete set of boundary faces that
    *     block vision.
    */
   public List<LineString> getVisionBlockingBoundarySegments(
-      GeometryFactory geometryFactory,
-      Coordinate origin,
-      boolean frontSegments,
-      PreparedGeometry vision);
+      GeometryFactory geometryFactory, Coordinate origin, Facing facing, PreparedGeometry vision);
 }
