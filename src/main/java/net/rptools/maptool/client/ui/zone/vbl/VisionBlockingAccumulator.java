@@ -234,9 +234,6 @@ public final class VisionBlockingAccumulator {
       final var parentOcean = island.getParentOcean();
 
       for (final var siblingIsland : parentOcean.getIslands()) {
-        if (siblingIsland == island) {
-          continue;
-        }
         addVisionBlockingSegments(siblingIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
       }
       for (final var childOcean : island.getOceans()) {
@@ -248,10 +245,7 @@ public final class VisionBlockingAccumulator {
       addVisionBlockingSegments(parentOcean, Facing.OCEAN_SIDE_FACES_ORIGIN);
       addVisionBlockingSegments(island, Facing.OCEAN_SIDE_FACES_ORIGIN);
     } else if (container instanceof AreaOcean ocean) {
-      final var parentIsland = ocean.getParentIsland();
-      if (parentIsland != null) {
-        addVisionBlockingSegments(ocean, Facing.ISLAND_SIDE_FACES_ORIGIN);
-      }
+      addVisionBlockingSegments(ocean, Facing.OCEAN_SIDE_FACES_ORIGIN);
 
       for (var containedIsland : ocean.getIslands()) {
         addVisionBlockingSegments(containedIsland, Facing.OCEAN_SIDE_FACES_ORIGIN);
