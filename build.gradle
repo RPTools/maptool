@@ -448,7 +448,7 @@ dependencies {
     implementation "com.fifesoft:languagesupport:3.3.0"
 
     // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.23.1'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.29.0'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
