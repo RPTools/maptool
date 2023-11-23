@@ -364,7 +364,7 @@ dependencies {
     // Various file utilities
     implementation 'commons-io:commons-io:2.15.0'
     // ftp client
-    implementation 'commons-net:commons-net:3.9.0'
+    implementation 'commons-net:commons-net:3.10.0'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.5.0'
 
