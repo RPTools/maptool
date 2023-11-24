@@ -17,7 +17,7 @@ plugins {
     id "application"
     id "base"
     id "java"
-    id "org.ajoberstar.grgit" version "5.2.0"
+    id "org.ajoberstar.grgit" version "5.2.1"
     id "com.diffplug.spotless" version "6.22.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
@@ -343,7 +343,7 @@ dependencies {
 
     // Image processing lib
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.8.2'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
@@ -366,7 +366,7 @@ dependencies {
     // ftp client
     implementation 'commons-net:commons-net:3.10.0'
     // commandline parsing
-    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation 'commons-cli:commons-cli:1.6.0'
 
     // needed for preference dialog at runtime
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
@@ -388,9 +388,9 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
 
     // webserver for old webapp that is scheduled for removal
-    implementation 'org.eclipse.jetty:jetty-server:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-server:9.4.51.v20230217'
     implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty:jetty-webapp:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty:jetty-webapp:9.4.44.v20210927'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.53.v20231009'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.53.v20231009'
@@ -433,13 +433,13 @@ dependencies {
     implementation 'com.jayway.jsonpath:json-path:2.8.0'
 
     // For PDF image extraction
-    implementation 'org.apache.pdfbox:pdfbox:2.0.28'
-    implementation 'org.apache.pdfbox:pdfbox-tools:2.0.28'
+    implementation 'org.apache.pdfbox:pdfbox:3.0.0'
+    implementation 'org.apache.pdfbox:pdfbox-tools:3.0.0'
     implementation 'org.bouncycastle:bcmail-jdk15on:1.70'								// To decrypt passworded/secured pdf's
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
-    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
+    implementation 'com.github.gotson:webp-imageio:0.2.2' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.2/jar
 
     // For syntax highlighting in macro editor
     implementation "com.fifesoft:rsyntaxtextarea:3.3.4"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
@@ -471,7 +471,7 @@ dependencies {
 
     testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.1'
     testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.1'
-    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
 
     // For mocking features during unit tests
     testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.7.0'
@@ -486,7 +486,7 @@ dependencies {
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
     // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.3'
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.4'
     implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
     if (osdetector.os.is('windows'))
         implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64'
