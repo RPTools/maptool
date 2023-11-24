@@ -38,19 +38,19 @@ public class HaloRenderer {
   }
 
   // Render Halos
-  public void renderHalo(Graphics2D g2d, Token token) {
+  public void renderHalo(Graphics2D g2d, Token token, TokenLocation location) {
     if (token.hasHalo()) {
-      Rectangle tokenBounds = token.getBounds(zone);
       g2d.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
       g2d.setColor(token.getHaloColor());
-      g2d.draw(zone.getGrid().getTokenCellArea(tokenBounds));
+      g2d.draw(location.bounds);
     }
   }
 
   // Render halo batch
-  public void renderHalos(Graphics2D g2d, ArrayList<Token> tokens) {
+  public void renderHalos(
+      Graphics2D g2d, ArrayList<Token> tokens, ArrayList<TokenLocation> locations) {
     for (Token token : tokens) {
-      renderHalo(g2d, token);
+      renderHalo(g2d, token, locations.get(tokens.indexOf(token)));
     }
   }
 }

@@ -3071,7 +3071,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("tokenlist-6");
 
       // Render Halo
-      haloRenderer.renderHalo(tokenG, token);
+      haloRenderer.renderHalo(tokenG, token, location);
 
       // Calculate alpha Transparency from token and use opacity for indicating that token is moving
       float opacity = token.getTokenOpacity();
