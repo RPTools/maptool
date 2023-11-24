@@ -486,7 +486,7 @@ dependencies {
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
     // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.3'
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.4'
     implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
     if (osdetector.os.is('windows'))
         implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64'
