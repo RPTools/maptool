@@ -439,7 +439,7 @@ dependencies {
     implementation 'com.github.jai-imageio:jai-imageio-core:1.4.0'						// For pdf image extraction, specifically for jpeg2000 (jpx) support.
     implementation 'com.github.jai-imageio:jai-imageio-jpeg2000:1.4.0'					// For pdf image extraction, specifically for jpeg2000 (jpx) support.
 
-    implementation 'com.github.gotson:webp-imageio:0.2.1' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.1/jar
+    implementation 'com.github.gotson:webp-imageio:0.2.2' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.2/jar
 
     // For syntax highlighting in macro editor
     implementation "com.fifesoft:rsyntaxtextarea:3.3.4"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
