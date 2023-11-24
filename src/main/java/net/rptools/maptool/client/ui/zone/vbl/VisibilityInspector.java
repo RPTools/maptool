@@ -51,6 +51,7 @@ public class VisibilityInspector extends JPanel {
     wallVblTree = new AreaTree(new Area());
     hillVblTree = new AreaTree(new Area());
     pitVblTree = new AreaTree(new Area());
+    coverVblTree = new AreaTree(new Area());
     affineTransform = new AffineTransform();
     point = new Point(0, 0);
     visionRange = 200;
@@ -199,6 +200,7 @@ public class VisibilityInspector extends JPanel {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
     for (int x = 1; x < 7; ++x) {
@@ -217,13 +219,14 @@ public class VisibilityInspector extends JPanel {
         }
       }
     }
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 
   private static void buildTripleIntersectionTopology(VisibilityInspector visibilityInspector) {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
 
@@ -231,19 +234,20 @@ public class VisibilityInspector extends JPanel {
     hillArea.add(new Area(new Polygon(new int[] {250, 450, 450}, new int[] {450, 450, 250}, 3)));
     pitArea.add(new Area(new Polygon(new int[] {275, 325, 325}, new int[] {350, 150, 550}, 3)));
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 
   private static void buildSinglePillarTopology(VisibilityInspector visibilityInspector) {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
 
     final var pillar = new Area(new Rectangle(300, 300, 50, 50));
     wallArea.add(pillar);
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 }
