@@ -366,7 +366,7 @@ dependencies {
     // ftp client
     implementation 'commons-net:commons-net:3.10.0'
     // commandline parsing
-    implementation 'commons-cli:commons-cli:1.5.0'
+    implementation 'commons-cli:commons-cli:1.6.0'
 
     // needed for preference dialog at runtime
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
