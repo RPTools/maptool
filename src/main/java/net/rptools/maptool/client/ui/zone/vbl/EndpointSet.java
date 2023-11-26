@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import javax.annotation.Nonnull;
@@ -73,7 +72,7 @@ public class EndpointSet {
     timer.stop("deduplicate");
   }
 
-  public @Nonnull Collection<VisibilitySweepEndpoint> getEndpoints() {
+  public @Nonnull Iterable<VisibilitySweepEndpoint> getEndpoints() {
     return endpoints;
   }
 

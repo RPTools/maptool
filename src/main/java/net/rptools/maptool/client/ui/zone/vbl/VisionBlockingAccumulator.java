@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.Point;
 import net.rptools.maptool.model.Zone;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -25,8 +24,8 @@ public final class VisionBlockingAccumulator {
   private final VisibilityProblem visibilityProblem;
 
   public VisionBlockingAccumulator(
-      Point origin, Envelope visionBounds, VisibilityProblem visibilityProblem) {
-    this.origin = new Coordinate(origin.getX(), origin.getY());
+      Coordinate origin, Envelope visionBounds, VisibilityProblem visibilityProblem) {
+    this.origin = origin;
     this.visionBounds = new Envelope(visionBounds);
     this.visibilityProblem = visibilityProblem;
   }

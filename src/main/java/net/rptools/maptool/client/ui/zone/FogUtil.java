@@ -72,6 +72,8 @@ public class FogUtil {
       AreaTree coverVbl) {
     var timer = CodeTimer.get();
     timer.start("FogUtil::calculateVisibility");
+    var originCoordinate = new Coordinate(origin.x, origin.y);
+
     try {
       timer.start("get vision bounds");
       Envelope visionBounds;
@@ -100,11 +102,15 @@ public class FogUtil {
       topologies.put(Zone.TopologyType.PIT_VBL, pitVbl);
       topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
       for (final var topology : topologies.entrySet()) {
-        final var solver =
-            new VisibilityProblem(new Coordinate(origin.getX(), origin.getY()), visionBounds);
+
+        timer.start("get pooled vision blocking set");
+        final var solver = new VisibilityProblem(originCoordinate, visionBounds);
+        timer.stop("get pooled vision blocking set");
 
         timer.start("accumulate blocking walls");
-        final var accumulator = new VisionBlockingAccumulator(origin, visionBounds, solver);
+        final var accumulator =
+            new VisionBlockingAccumulator(originCoordinate, visionBounds, solver);
+
         final var isVisionCompletelyBlocked =
             accumulator.add(topology.getKey(), topology.getValue());
         timer.stop("accumulate blocking walls");
