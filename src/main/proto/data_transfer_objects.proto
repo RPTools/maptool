@@ -83,6 +83,7 @@ enum ShapeTypeDto {
     CONE = 2;
     HEX = 3;
     GRID = 4;
+    BEAM = 5;
 }
 
 message LightDto {

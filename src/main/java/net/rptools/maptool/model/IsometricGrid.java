@@ -14,12 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
-import java.awt.Rectangle;
+import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
@@ -349,6 +344,33 @@ public class IsometricGrid extends Grid {
         int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
         int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
         visibleArea = new Area(new Polygon(x, y, 4));
+        break;
+      case BEAM:
+        if (token.getFacing() == null) {
+          token.setFacing(0);
+        }
+        Shape visibleShape =
+            new Rectangle2D.Double(
+                0,
+                getSize() / -2d * Math.sin(Math.toRadians(arcAngle / 2.0)),
+                visionRange,
+                getSize() * Math.sin(Math.toRadians(arcAngle / 2.0)));
+
+        // new angle, corrected for isometric view
+        double theta = Math.toRadians(offsetAngle) + Math.toRadians(token.getFacing());
+        Point2D angleVector = new Point2D.Double(Math.cos(theta), Math.sin(theta));
+        AffineTransform at = new AffineTransform();
+        at.rotate(Math.PI / 4);
+        at.scale(1.0, 0.5);
+        at.deltaTransform(angleVector, angleVector);
+
+        theta = -Math.atan2(angleVector.getY(), angleVector.getX());
+
+        visibleArea =
+            new Area(
+                AffineTransform.getRotateInstance(theta + Math.toRadians(45))
+                    .createTransformedShape(visibleShape));
+
         break;
       case CONE:
         if (token.getFacing() == null) {

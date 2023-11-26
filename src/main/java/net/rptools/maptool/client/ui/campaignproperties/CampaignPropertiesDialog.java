@@ -277,6 +277,24 @@ public class CampaignPropertiesDialog extends JDialog {
                 .append(StringUtil.formatDecimal(sight.getDistance()))
                 .append(' ');
           break;
+        case BEAM:
+          builder.append("beam ");
+          if (sight.getArc() != 0) {
+            builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
+          } else {
+            builder.append("arc=4").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
+          }
+          if (sight.getOffset() != 0)
+            builder
+                .append("offset=")
+                .append(StringUtil.formatDecimal(sight.getOffset()))
+                .append(' ');
+          if (sight.getDistance() != 0)
+            builder
+                .append("distance=")
+                .append(StringUtil.formatDecimal(sight.getDistance()))
+                .append(' ');
+          break;
         case CONE:
           builder.append("cone ");
           if (sight.getArc() != 0)
@@ -372,6 +390,17 @@ public class CampaignPropertiesDialog extends JDialog {
               case HEX:
                 // TODO: Make this a preference
                 shape = light.getShape().toString().toLowerCase();
+                break;
+              case BEAM:
+                {
+                  lastArc = light.getArcAngle();
+                  shape = "beam arc=" + StringUtil.formatDecimal(lastArc);
+                  if (light.getFacingOffset() != 0)
+                    builder
+                        .append(" offset=")
+                        .append(StringUtil.formatDecimal(light.getFacingOffset()))
+                        .append(' ');
+                }
                 break;
               case CONE:
                 // if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle()
@@ -504,6 +533,7 @@ public class CampaignPropertiesDialog extends JDialog {
           assert arg.length() > 0; // The split() uses "one or more spaces", removing empty strings
           try {
             shape = ShapeType.valueOf(arg.toUpperCase());
+            arc = shape == ShapeType.BEAM ? 4 : arc;
             continue;
           } catch (IllegalArgumentException iae) {
             // Expected when not defining a shape
@@ -714,6 +744,7 @@ public class CampaignPropertiesDialog extends JDialog {
           // Shape designation ?
           try {
             shape = ShapeType.valueOf(arg.toUpperCase());
+            arc = shape == ShapeType.BEAM ? 4 : arc;
             continue;
           } catch (IllegalArgumentException iae) {
             // Expected when not defining a shape
@@ -748,7 +779,10 @@ public class CampaignPropertiesDialog extends JDialog {
             if ("arc".equalsIgnoreCase(key)) {
               try {
                 arc = StringUtil.parseDecimal(value);
-                shape = ShapeType.CONE; // If the user specifies an arc, force the shape to CONE
+                shape =
+                    (shape != ShapeType.CONE && shape != ShapeType.BEAM)
+                        ? ShapeType.CONE
+                        : shape; // If the user specifies an arc, force the shape to CONE
               } catch (ParseException pe) {
                 errlog.add(
                     I18N.getText("msg.error.mtprops.light.arc", reader.getLineNumber(), value));
