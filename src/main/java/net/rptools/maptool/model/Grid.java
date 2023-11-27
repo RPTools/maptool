@@ -35,6 +35,7 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
+import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
@@ -51,17 +52,7 @@ import org.apache.logging.log4j.Logger;
  */
 public abstract class Grid implements Cloneable {
 
-  /**
-   * The minimum grid size (minimum on any dimension). The default value is 9 because the algorithm
-   * for determining whether a given square cell can be entered due to fog blocking the cell is
-   * based on the cell being split into 3x3, then the center further being split into 3x3; thus at
-   * least 9 pixels horizontally and vertically are required.
-   */
-  public static final int MIN_GRID_SIZE = 9;
-
-  public static final int MAX_GRID_SIZE = 350;
   protected static final Logger log = LogManager.getLogger();
-  protected static final int CIRCLE_SEGMENTS = 60;
 
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
@@ -88,7 +79,7 @@ public abstract class Grid implements Cloneable {
 
   protected synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
     final AffineTransform at = new AffineTransform();
-    final double gridScale = (double) MAX_GRID_SIZE / getSize();
+    final double gridScale = (double) MapToolConstants.MAX_GRID_SIZE / getSize();
     at.scale(gridScale, gridScale);
 
     getGridShapeCache().put(gridRadius, newGridArea.createTransformedArea(at));
@@ -310,10 +301,10 @@ public abstract class Grid implements Cloneable {
    * @return The size after it has been constrained.
    */
   protected final int constrainSize(int size) {
-    if (size < MIN_GRID_SIZE) {
-      size = MIN_GRID_SIZE;
-    } else if (size > MAX_GRID_SIZE) {
-      size = MAX_GRID_SIZE;
+    if (size < MapToolConstants.MIN_GRID_SIZE) {
+      size = MapToolConstants.MIN_GRID_SIZE;
+    } else if (size > MapToolConstants.MAX_GRID_SIZE) {
+      size = MapToolConstants.MAX_GRID_SIZE;
     }
     return size;
   }
@@ -385,7 +376,7 @@ public abstract class Grid implements Cloneable {
       case CIRCLE:
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+                -visionRange, -visionRange, visionRange, visionRange);
         break;
       case GRID:
         visibleArea = getGridArea(token, range, scaleWithToken, visionRange);
@@ -462,7 +453,11 @@ public abstract class Grid implements Cloneable {
       default:
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange * 2, visionRange * 2, CIRCLE_SEGMENTS);
+                -visionRange,
+                -visionRange,
+                visionRange * 2,
+                visionRange * 2,
+                MapToolConstants.CIRCLE_SEGMENTS);
         break;
     }
 
@@ -778,7 +773,7 @@ public abstract class Grid implements Cloneable {
       // Fall back to regular circle in daylight, etc.
       visibleArea =
           GraphicsUtil.createLineSegmentEllipse(
-              -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+              -visionRange, -visionRange, visionRange, visionRange);
     }
 
     return visibleArea;
@@ -925,7 +920,7 @@ public abstract class Grid implements Cloneable {
       createGridArea(gridRadius);
     }
 
-    double rescale = getSize() / (double) MAX_GRID_SIZE;
+    double rescale = getSize() / (double) MapToolConstants.MAX_GRID_SIZE;
     final AffineTransform at = new AffineTransform();
     at.scale(rescale, rescale);
 

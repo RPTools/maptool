@@ -136,10 +136,8 @@ public class VisibilityInspector extends JPanel {
     g2d.setColor(Color.red);
     g2d.draw(coverVblTree.getArea());
 
-    final var CIRCLE_SEGMENTS = 60;
     final var unobstructedVision =
-        GraphicsUtil.createLineSegmentEllipse(
-            -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+        GraphicsUtil.createLineSegmentEllipse(-visionRange, -visionRange, visionRange, visionRange);
     unobstructedVision.transform(AffineTransform.getTranslateInstance(point.getX(), point.getY()));
     final var visionBounds = new Area(unobstructedVision.getBounds());
 

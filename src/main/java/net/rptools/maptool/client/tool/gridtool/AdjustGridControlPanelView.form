@@ -3,7 +3,7 @@
   <grid id="241de" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="308" height="258"/>
+      <xy x="10" y="10" width="565" height="258"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -19,10 +19,11 @@
       </component>
       <component id="4491d" class="javax.swing.JSpinner">
         <constraints>
-          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="1" use-parent-layout="false"/>
         </constraints>
         <properties>
           <name value="gridSize"/>
+          <toolTipText value="[Preferences.label.maps.gridSize.tooltip / net.rptools.maptool.language.i18n]"/>
         </properties>
       </component>
       <component id="8631a" class="javax.swing.JLabel">

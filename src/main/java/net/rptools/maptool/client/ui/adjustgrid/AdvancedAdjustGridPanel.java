@@ -33,12 +33,10 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.ui.Scale;
+import net.rptools.maptool.common.MapToolConstants;
 
 public class AdvancedAdjustGridPanel extends JComponent
     implements MouseListener, MouseMotionListener, MouseWheelListener {
-
-  private static final int MINIMUM_GRID_SIZE = 5;
-
   private int gridCountX = 10;
   private int gridCountY = 10;
   private boolean showGrid = true;
@@ -293,8 +291,8 @@ public class AdvancedAdjustGridPanel extends JComponent
           if (location.y < 0) {
             location.y = 0;
           }
-          if (location.y > bottomGrid - MINIMUM_GRID_SIZE) {
-            location.y = bottomGrid - MINIMUM_GRID_SIZE;
+          if (location.y > bottomGrid - MapToolConstants.MIN_GRID_SIZE) {
+            location.y = bottomGrid - MapToolConstants.MIN_GRID_SIZE;
           }
 
           topGrid = location.y;
@@ -302,8 +300,8 @@ public class AdvancedAdjustGridPanel extends JComponent
         }
       case BOTTOM:
         {
-          if (location.y < topGrid + MINIMUM_GRID_SIZE) {
-            location.y = topGrid + MINIMUM_GRID_SIZE;
+          if (location.y < topGrid + MapToolConstants.MIN_GRID_SIZE) {
+            location.y = topGrid + MapToolConstants.MIN_GRID_SIZE;
           }
           if (location.y > image.getHeight()) {
             location.y = image.getHeight();
@@ -317,8 +315,8 @@ public class AdvancedAdjustGridPanel extends JComponent
           if (location.x < 0) {
             location.x = 0;
           }
-          if (location.x > rightGrid - MINIMUM_GRID_SIZE) {
-            location.x = rightGrid - MINIMUM_GRID_SIZE;
+          if (location.x > rightGrid - MapToolConstants.MIN_GRID_SIZE) {
+            location.x = rightGrid - MapToolConstants.MIN_GRID_SIZE;
           }
 
           leftGrid = location.x;
@@ -326,8 +324,8 @@ public class AdvancedAdjustGridPanel extends JComponent
         }
       case RIGHT:
         {
-          if (location.x < leftGrid + MINIMUM_GRID_SIZE) {
-            location.x = leftGrid + MINIMUM_GRID_SIZE;
+          if (location.x < leftGrid + MapToolConstants.MIN_GRID_SIZE) {
+            location.x = leftGrid + MapToolConstants.MIN_GRID_SIZE;
           }
           if (location.x > image.getWidth()) {
             location.x = image.getWidth();

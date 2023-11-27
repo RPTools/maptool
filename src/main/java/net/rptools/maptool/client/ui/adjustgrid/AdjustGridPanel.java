@@ -34,11 +34,10 @@ import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
+import net.rptools.maptool.common.MapToolConstants;
 
 public class AdjustGridPanel extends JComponent
     implements MouseListener, MouseMotionListener, MouseWheelListener {
-
-  private static final int MINIMUM_GRID_SIZE = 5;
 
   private enum Direction {
     Increase,
@@ -203,7 +202,8 @@ public class AdjustGridPanel extends JComponent
   }
 
   public void setGridSize(int size) {
-    gridSize = Math.max(MINIMUM_GRID_SIZE, size);
+    gridSize =
+        Math.min(MapToolConstants.MAX_GRID_SIZE, Math.max(MapToolConstants.MIN_GRID_SIZE, size));
     repaint();
   }
 
@@ -267,7 +267,10 @@ public class AdjustGridPanel extends JComponent
   public void adjustGridSize(int delta) {
 
     int oldSize = gridSize;
-    gridSize = Math.max(MINIMUM_GRID_SIZE, gridSize + delta);
+    gridSize =
+        Math.min(
+            MapToolConstants.MAX_GRID_SIZE,
+            Math.max(MapToolConstants.MIN_GRID_SIZE, gridSize + delta));
 
     repaint();
     propertyChangeSupport.firePropertyChange(PROPERTY_GRID_SIZE, oldSize, gridSize);

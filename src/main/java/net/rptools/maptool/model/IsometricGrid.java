@@ -338,7 +338,7 @@ public class IsometricGrid extends Grid {
         // 4, visionRange * 2));
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
+                -visionRange * 2, -visionRange, visionRange * 2, visionRange);
         break;
       case SQUARE:
         int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
@@ -417,7 +417,7 @@ public class IsometricGrid extends Grid {
         // visionRange * 2));
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+                -visionRange, -visionRange, visionRange, visionRange);
         break;
     }
     return visibleArea;
