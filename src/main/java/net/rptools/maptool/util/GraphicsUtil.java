@@ -43,6 +43,7 @@ import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.common.MapToolConstants;
 
 /** */
 public class GraphicsUtil {
@@ -298,6 +299,14 @@ public class GraphicsUtil {
     return newArea.isEmpty();
   }
 
+  public static Area createLineSegmentEllipse(double x1, double y1, double x2, double y2) {
+    return createLineSegmentEllipse(x1, y1, x2, y2, MapToolConstants.CIRCLE_SEGMENTS);
+  }
+
+  public static Area createLineSegmentEllipse(int x1, int y1, int x2, int y2) {
+    return createLineSegmentEllipse(x1, y1, x2, (double) y2, MapToolConstants.CIRCLE_SEGMENTS);
+  }
+
   public static Area createLineSegmentEllipse(int x1, int y1, int x2, int y2, int steps) {
     return createLineSegmentEllipse(x1, y1, x2, (double) y2, steps);
   }
@@ -323,7 +332,7 @@ public class GraphicsUtil {
     double b = h / 2;
 
     boolean firstMove = true;
-    for (double t = -Math.PI; t <= Math.PI; t += (2 * Math.PI / steps)) {
+    for (double t = -Math.PI; t <= Math.PI; t += (Math.TAU / steps)) {
       int px = (int) Math.round(x + a * Math.cos(t));
       int py = (int) Math.round(y + b * Math.sin(t));
 
