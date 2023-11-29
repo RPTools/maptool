@@ -49,6 +49,7 @@ import netscape.javascript.JSObject;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.w3c.dom.*;
+import org.w3c.dom.events.EventListener;
 import org.w3c.dom.events.EventTarget;
 import org.w3c.dom.html.*;
 
@@ -77,6 +78,10 @@ public class HTMLWebViewManager {
 
   /** The bridge from Javascript to Java. */
   private final JavaBridge bridge;
+
+  private EventListener listenerA = this::fixHref;
+
+  private EventListener listenerSubmit = this::getDataAndSubmit;
 
   /** Represents a bridge from Javascript to Java. */
   public class JavaBridge {
@@ -146,12 +151,49 @@ public class HTMLWebViewManager {
         if (addedNode instanceof EventTarget) {
           EventTarget target = (EventTarget) addedNode;
           if (addedNode instanceof HTMLAnchorElement || addedNode instanceof HTMLAreaElement) {
-            target.addEventListener("click", HTMLWebViewManager.this::fixHref, true);
+            target.addEventListener("click", listenerA, true);
           } else if (target instanceof HTMLFormElement) {
-            target.addEventListener("submit", HTMLWebViewManager.this::getDataAndSubmit, true);
+            target.addEventListener("submit", listenerSubmit, true);
           } else if (target instanceof HTMLInputElement || target instanceof HTMLButtonElement) {
-            target.addEventListener("click", HTMLWebViewManager.this::getDataAndSubmit, true);
+            target.addEventListener("click", listenerSubmit, true);
           }
+        }
+
+        // Add listeners to the node's descendant as they don't trigger mutation observer.
+        NodeList nodeList;
+
+        // Add event handlers for <a> hyperlinks.
+        nodeList = addedNode.getElementsByTagName("a");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget node = (EventTarget) nodeList.item(i);
+          node.addEventListener("click", listenerA, true);
+        }
+
+        // Add event handlers for hyperlinks for maps.
+        nodeList = addedNode.getElementsByTagName("area");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget node = (EventTarget) nodeList.item(i);
+          node.addEventListener("click", listenerA, true);
+        }
+
+        // Set the "submit" handler to get the data on submission not based on buttons
+        nodeList = addedNode.getElementsByTagName("form");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("submit", listenerSubmit, true);
+        }
+
+        // Set the "submit" handler to get the data on submission based on input
+        nodeList = addedNode.getElementsByTagName("input");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, true);
+        }
+        // Set the "submit" handler to get the data on submission based on button
+        nodeList = addedNode.getElementsByTagName("button");
+        for (int i = 0; i < nodeList.getLength(); i++) {
+          EventTarget target = (EventTarget) nodeList.item(i);
+          target.addEventListener("click", listenerSubmit, true);
         }
       }
     }
@@ -251,6 +293,10 @@ public class HTMLWebViewManager {
     webEngine.load("about:blank");
     // Delete cookies
     java.net.CookieHandler.setDefault(new java.net.CookieManager());
+
+    // This may look pointless, but we need new objects on JFX <22 to avoid peering issues.
+    listenerA = this::fixHref;
+    listenerSubmit = this::getDataAndSubmit;
 
     isFlushed = true;
   }
