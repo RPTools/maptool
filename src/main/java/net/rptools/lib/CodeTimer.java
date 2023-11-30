@@ -14,9 +14,7 @@
  */
 package net.rptools.lib;
 
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 public class CodeTimer {
@@ -42,17 +40,24 @@ public class CodeTimer {
     this.enabled = enabled;
   }
 
-  public void start(String id) {
+  public void start(String id, Object... parameters) {
     if (!enabled) {
       return;
     }
+    if (parameters.length > 0) {
+      id = String.format(id, parameters);
+    }
+
     Timer timer = timeMap.computeIfAbsent(id, key -> new Timer());
     timer.start();
   }
 
-  public void stop(String id) {
+  public void stop(String id, Object... parameters) {
     if (!enabled) {
       return;
+    }
+    if (parameters.length > 0) {
+      id = String.format(id, parameters);
     }
 
     Timer timer = timeMap.get(id);

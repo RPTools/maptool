@@ -1211,15 +1211,9 @@ public class ZoneRenderer extends JComponent
     }
     timer.start("overlays");
     for (ZoneOverlay overlay : overlayList) {
-      String msg = null;
-      if (timer.isEnabled()) {
-        msg = "overlays:" + overlay.getClass().getSimpleName();
-        timer.start(msg);
-      }
+      timer.start("overlays: %s", overlay.getClass().getSimpleName());
       overlay.paintOverlay(this, g2d);
-      if (timer.isEnabled()) {
-        timer.stop(msg);
-      }
+      timer.stop("overlays: %s", overlay.getClass().getSimpleName());
     }
     timer.stop("overlays");
 
@@ -1736,13 +1730,9 @@ public class ZoneRenderer extends JComponent
       Area visibleArea = zoneView.getVisibleArea(view);
       timer.stop("renderFog-visibleArea");
 
-      String msg = null;
-      if (timer.isEnabled()) {
-        msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
-      }
-      timer.start(msg);
+      timer.start("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
       Area combined = zoneView.getExposedArea(view);
-      timer.stop(msg);
+      timer.stop("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
 
       timer.start("renderFogArea");
       buffG.fill(combined);

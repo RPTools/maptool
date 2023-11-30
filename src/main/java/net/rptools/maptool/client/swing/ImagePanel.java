@@ -229,11 +229,7 @@ public class ImagePanel extends JComponent
     int itemHeight = getItemHeight();
 
     int numToProcess = model.getImageCount();
-    String timerField = null;
-    if (timer.isEnabled()) {
-      timerField = "time to process " + numToProcess + " images";
-      timer.start(timerField);
-    }
+    timer.start("time to process %d images", numToProcess);
     for (int i = 0; i < numToProcess; i++) {
       int row = i / itemsPerRow;
       int column = i % itemsPerRow;
@@ -328,8 +324,8 @@ public class ImagePanel extends JComponent
       }
     }
     g.setFont(savedFont);
+    timer.stop("time to process %d images", numToProcess);
     if (timer.isEnabled()) {
-      timer.stop(timerField);
       System.out.println(timer);
     }
   }
