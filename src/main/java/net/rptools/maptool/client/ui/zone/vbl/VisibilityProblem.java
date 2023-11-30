@@ -109,6 +109,29 @@ public class VisibilityProblem {
     }
   }
 
+  private List<Coordinate> sweep(Iterable<VisibilitySweepEndpoint> endpoints) {
+    List<Coordinate> visionPoints = new ArrayList<>();
+
+    var previousNearestWall = openWalls.getFirst();
+    for (final var endpoint : endpoints) {
+      if (endpoint == null) {
+        // This was a deduplicated endpoint.
+        continue;
+      }
+
+      final var currentNearestWall = updateOpenWalls(endpoint, previousNearestWall);
+      // If the current nearest wall hasn't changed, the endpoint is occluded and does not
+      // contribute to the result.
+      if (currentNearestWall != previousNearestWall) {
+        consumeEndpoint(endpoint, previousNearestWall, currentNearestWall, visionPoints);
+
+        previousNearestWall = currentNearestWall;
+      }
+    }
+
+    return visionPoints;
+  }
+
   /**
    * Solve the visibility polygon problem.
    *
@@ -150,18 +173,11 @@ public class VisibilityProblem {
     endpointSet.simplify();
     final var endpoints = endpointSet.getEndpoints();
     // verifyEndpoints(endpoints);
-    var previousNearestWall = openWalls.getFirst();
     timer.stop("initialize");
 
     // Now for the real sweep.
     timer.start("sweep");
-    List<Coordinate> visionPoints = new ArrayList<>();
-    for (final var endpoint : endpoints) {
-      if (endpoint == null) {
-        continue;
-      }
-      previousNearestWall = consumeEndpoint(endpoint, previousNearestWall, visionPoints);
-    }
+    final var visionPoints = sweep(endpoints);
     timer.stop("sweep");
 
     timer.start("sanity check");
@@ -187,28 +203,52 @@ public class VisibilityProblem {
     }
   }
 
-  private LineSegment consumeEndpoint(
-      VisibilitySweepEndpoint endpoint,
-      LineSegment previousNearestWall,
-      List<Coordinate> visionPoints) {
+  private LineSegment updateOpenWalls(
+      VisibilitySweepEndpoint endpoint, LineSegment previousNearestWall) {
     assert !openWalls.isEmpty();
 
-    // Note: removeAll can be slow, but not in our case with few removed elements. In fact it is
-    // almost always just removing one element.
     for (var otherEndpoint : endpoint.getEndsWalls()) {
-      openWalls.remove(new LineSegment(otherEndpoint.getPoint(), endpoint.getPoint()));
+      var removed =
+          openWalls.remove(new LineSegment(otherEndpoint.getPoint(), endpoint.getPoint()));
+      assert removed : "The endpoint's ended walls should be open just prior to this point";
     }
+
+    boolean maybeOccluded =
+        !endpoint.getPoint().equals(previousNearestWall.p1)
+            // The origin is always oriented counterclockwise to walls, so an occluded point would
+            // be oriented clockwise instead.
+            && previousNearestWall.orientationIndex(endpoint.getPoint()) == Orientation.CLOCKWISE;
+
+    // The endpoint is behind the wall, and the wall is still open. Only add segments for those
+    // ending points not also occluded by the same wall (otherwise the new wall would be
+    // completely occluded itself and contribute nothing).
     for (var otherEndpoint : endpoint.getStartsWalls()) {
-      openWalls.add(new LineSegment(endpoint.getPoint(), otherEndpoint.getPoint()));
+      // This check relies on the fact that walls cannot cross. So all we have to do is determine
+      // that the endpoint does not come after p1 to decide that it is also occluded.
+      var occluded =
+          maybeOccluded
+              && (Orientation.index(origin, previousNearestWall.p1, otherEndpoint.getPoint())
+                  == Orientation.CLOCKWISE);
+      if (occluded) {
+        // Occluded, we can remove the edge entirely. No need to remove it from this endpoint, but
+        // remove it from the upcoming one to avoid future work.
+        var removed = otherEndpoint.removeEndedWall(endpoint);
+        assert removed;
+      } else {
+        openWalls.add(new LineSegment(endpoint.getPoint(), otherEndpoint.getPoint()));
+      }
     }
 
     // Find a new nearest wall.
     assert !openWalls.isEmpty();
-    final var currentNearestWall = openWalls.getFirst();
-    if (currentNearestWall == previousNearestWall) {
-      return previousNearestWall;
-    }
+    return openWalls.getFirst();
+  }
 
+  private void consumeEndpoint(
+      VisibilitySweepEndpoint endpoint,
+      LineSegment previousNearestWall,
+      LineSegment currentNearestWall,
+      List<Coordinate> visionPoints) {
     // Implies we have changed which wall we are at. Need to figure out projections.
     final var ray = new LineSegment(origin, endpoint.getPoint());
     if (!ray.p1.equals(previousNearestWall.p1)) {
@@ -233,8 +273,6 @@ public class VisibilityProblem {
         visionPoints.add(projectOntoOpenWall(ray, currentNearestWall));
       }
     }
-
-    return currentNearestWall;
   }
 
   /**

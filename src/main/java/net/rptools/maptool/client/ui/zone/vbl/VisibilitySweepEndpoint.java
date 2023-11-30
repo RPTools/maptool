@@ -61,8 +61,16 @@ public final class VisibilitySweepEndpoint {
     startsWalls.add(end);
   }
 
+  public boolean removeStartedWall(VisibilitySweepEndpoint start) {
+    return startsWalls.remove(start);
+  }
+
   public void endsWall(VisibilitySweepEndpoint start) {
     endsWalls.add(start);
+  }
+
+  public boolean removeEndedWall(VisibilitySweepEndpoint start) {
+    return endsWalls.remove(start);
   }
 
   public double getPseudoangle() {
