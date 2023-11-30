@@ -205,129 +205,132 @@ public class ImagePanel extends JComponent
 
   @Override
   protected void paintComponent(Graphics gfx) {
-    var g = (Graphics2D) gfx;
-    CodeTimer timer = new CodeTimer("ImagePanel.paintComponent");
-    timer.setEnabled(false); // Change this to turn on perf data to System.out
+    CodeTimer.using(
+        "ImagePanel.paintComponent",
+        timer -> {
+          timer.setEnabled(false); // Change this to turn on perf data
 
-    Rectangle clipBounds = g.getClipBounds();
-    Dimension size = getSize();
-    var savedFont = g.getFont();
-    g.setFont(UIManager.getFont("Label.font"));
-    FontMetrics fm = g.getFontMetrics();
-    fontHeight = fm.getHeight();
+          var g = (Graphics2D) gfx;
 
-    g.setColor(getBackground());
-    g.fillRect(0, 0, size.width, size.height);
+          Rectangle clipBounds = g.getClipBounds();
+          Dimension size = getSize();
+          var savedFont = g.getFont();
+          g.setFont(UIManager.getFont("Label.font"));
+          FontMetrics fm = g.getFontMetrics();
+          fontHeight = fm.getHeight();
 
-    if (model == null) {
-      return;
-    }
-    imageBoundsMap.clear();
+          g.setColor(getBackground());
+          g.fillRect(0, 0, size.width, size.height);
 
-    int itemsPerRow = calculateItemsPerRow();
-    int itemWidth = getItemWidth();
-    int itemHeight = getItemHeight();
-
-    int numToProcess = model.getImageCount();
-    timer.start("time to process %d images", numToProcess);
-    for (int i = 0; i < numToProcess; i++) {
-      int row = i / itemsPerRow;
-      int column = i % itemsPerRow;
-
-      int x = gridPadding.width + column * itemWidth;
-      int y = gridPadding.height + row * itemHeight;
-
-      Image image;
-
-      Rectangle bounds = new Rectangle(x, y, gridSize, gridSize);
-      imageBoundsMap.put(
-          new Rectangle(x, y, itemWidth - gridPadding.width, itemHeight - gridPadding.height), i);
-
-      // Background
-      Paint paint = model.getBackground(i);
-      if (paint != null) {
-        g.setPaint(paint);
-        g.fillRect(x - 2, y - 2, gridSize + 4, gridSize + 4); // bleed out a little
-      }
-      if (bounds.intersects(clipBounds)) {
-        image = model.getImage(i);
-        if (image != null) {
-          Dimension dim = constrainSize(image, gridSize);
-          var savedRenderingHints = g.getRenderingHints();
-          if (dim.width < image.getWidth(null) || dim.height < image.getHeight(null)) {
-            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
-          } else if (dim.width > image.getWidth(null) || dim.height > image.getHeight(null)) {
-            AppPreferences.getRenderQuality().setRenderingHints(g);
+          if (model == null) {
+            return;
           }
-          g.drawImage(
-              image,
-              x + (gridSize - dim.width) / 2,
-              y + (gridSize - dim.height) / 2,
-              dim.width,
-              dim.height,
-              this);
+          imageBoundsMap.clear();
 
-          // Image border
-          g.setRenderingHints(savedRenderingHints);
-          if (showImageBorder) {
-            g.setColor(Color.black);
-            g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
-          }
-        }
-      }
-      // Selected
-      if (selectedIDList.contains(model.getID(i))) {
-        // TODO: Let the user pick the border
-        RessourceManager.getBorder(Borders.RED)
-            .paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
-      }
-      // Decorations
-      Image[] decorations = model.getDecorations(i);
-      if (decorations != null) {
-        int offx = x;
-        int offy = y + gridSize;
-        int rowHeight = 0;
-        for (Image decoration : decorations) {
-          g.drawImage(decoration, offx, offy - decoration.getHeight(null), this);
+          int itemsPerRow = calculateItemsPerRow();
+          int itemWidth = getItemWidth();
+          int itemHeight = getItemHeight();
 
-          rowHeight = Math.max(rowHeight, decoration.getHeight(null));
-          offx += decoration.getWidth(null);
-          if (offx > gridSize) {
-            offx = x;
-            offy -= rowHeight + 2;
-            rowHeight = 0;
-          }
-        }
-      }
-      // Caption
-      if (showCaptions) {
-        String caption = model.getCaption(i);
-        if (caption != null) {
-          boolean nameTooLong = false;
-          int strWidth = fm.stringWidth(caption);
-          if (strWidth > bounds.width) {
-            var avgCharWidth = (double) strWidth / caption.length();
-            var fittableChars = (int) (bounds.width / avgCharWidth);
-            caption = String.format("%s...", caption.substring(0, fittableChars - 2));
-            strWidth = fm.stringWidth(caption);
-          }
-          int cx = x + (gridSize - strWidth) / 2;
-          int cy = y + gridSize + fm.getHeight();
+          int numToProcess = model.getImageCount();
+          String timerField = null;
+          timer.start("time to process %d images", numToProcess);
+          for (int i = 0; i < numToProcess; i++) {
+            int row = i / itemsPerRow;
+            int column = i % itemsPerRow;
 
-          g.setColor(getForeground());
-          var savedRenderingHints = g.getRenderingHints();
-          g.setRenderingHint(
-              RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
-          g.drawString(caption, cx, cy);
-          g.setRenderingHints(savedRenderingHints);
-        }
-      }
-    }
-    g.setFont(savedFont);
-    timer.stop("time to process %d images", numToProcess);
-    if (timer.isEnabled()) {
-      System.out.println(timer);
-    }
+            int x = gridPadding.width + column * itemWidth;
+            int y = gridPadding.height + row * itemHeight;
+
+            Image image;
+
+            Rectangle bounds = new Rectangle(x, y, gridSize, gridSize);
+            imageBoundsMap.put(
+                new Rectangle(x, y, itemWidth - gridPadding.width, itemHeight - gridPadding.height),
+                i);
+
+            // Background
+            Paint paint = model.getBackground(i);
+            if (paint != null) {
+              g.setPaint(paint);
+              g.fillRect(x - 2, y - 2, gridSize + 4, gridSize + 4); // bleed out a little
+            }
+            if (bounds.intersects(clipBounds)) {
+              image = model.getImage(i);
+              if (image != null) {
+                Dimension dim = constrainSize(image, gridSize);
+                var savedRenderingHints = g.getRenderingHints();
+                if (dim.width < image.getWidth(null) || dim.height < image.getHeight(null)) {
+                  AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+                } else if (dim.width > image.getWidth(null) || dim.height > image.getHeight(null)) {
+                  AppPreferences.getRenderQuality().setRenderingHints(g);
+                }
+                g.drawImage(
+                    image,
+                    x + (gridSize - dim.width) / 2,
+                    y + (gridSize - dim.height) / 2,
+                    dim.width,
+                    dim.height,
+                    this);
+
+                // Image border
+                g.setRenderingHints(savedRenderingHints);
+                if (showImageBorder) {
+                  g.setColor(Color.black);
+                  g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+                }
+              }
+            }
+            // Selected
+            if (selectedIDList.contains(model.getID(i))) {
+              // TODO: Let the user pick the border
+              RessourceManager.getBorder(Borders.RED)
+                  .paintAround(g, bounds.x, bounds.y, bounds.width, bounds.height);
+            }
+            // Decorations
+            Image[] decorations = model.getDecorations(i);
+            if (decorations != null) {
+              int offx = x;
+              int offy = y + gridSize;
+              int rowHeight = 0;
+              for (Image decoration : decorations) {
+                g.drawImage(decoration, offx, offy - decoration.getHeight(null), this);
+
+                rowHeight = Math.max(rowHeight, decoration.getHeight(null));
+                offx += decoration.getWidth(null);
+                if (offx > gridSize) {
+                  offx = x;
+                  offy -= rowHeight + 2;
+                  rowHeight = 0;
+                }
+              }
+            }
+            // Caption
+            if (showCaptions) {
+              String caption = model.getCaption(i);
+              if (caption != null) {
+                boolean nameTooLong = false;
+                int strWidth = fm.stringWidth(caption);
+                if (strWidth > bounds.width) {
+                  var avgCharWidth = (double) strWidth / caption.length();
+                  var fittableChars = (int) (bounds.width / avgCharWidth);
+                  caption = String.format("%s...", caption.substring(0, fittableChars - 2));
+                  strWidth = fm.stringWidth(caption);
+                }
+                int cx = x + (gridSize - strWidth) / 2;
+                int cy = y + gridSize + fm.getHeight();
+
+                g.setColor(getForeground());
+                var savedRenderingHints = g.getRenderingHints();
+                g.setRenderingHint(
+                    RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+                g.drawString(caption, cx, cy);
+                g.setRenderingHints(savedRenderingHints);
+              }
+            }
+          }
+          g.setFont(savedFont);
+          timer.stop("time to process %d images", numToProcess);
+        });
   }
 
   /**

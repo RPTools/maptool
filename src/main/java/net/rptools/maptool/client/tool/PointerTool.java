@@ -1756,39 +1756,38 @@ public class PointerTool extends DefaultTool {
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
         if (AppPreferences.getShowStatSheet()
             && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())) {
-          CodeTimer timer = new CodeTimer("statSheet");
-          timer.setEnabled(AppState.isCollectProfilingData());
-          timer.setThreshold(5);
-          timer.start("allProps");
-          for (TokenProperty property :
-              MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
-            if (property.isShowOnStatSheet()) {
-              if (property.isGMOnly() && !MapTool.getPlayer().isGM()) {
-                continue;
-              }
-              if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
-                continue;
-              }
-              timer.start(property.getName());
-              MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
-              resolver.initialize();
-              resolver.setAutoPrompt(false);
-              Object propertyValue =
-                  tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
-              resolver.flush();
-              if (propertyValue != null && propertyValue.toString().length() > 0) {
-                String propName = property.getShortName();
-                if (StringUtils.isEmpty(propName)) propName = property.getName();
-                propertyMap.put(propName, propertyValue.toString());
-              }
-              timer.stop(property.getName());
-            }
-          }
-          timer.stop("allProps");
-          if (timer.isEnabled()) {
-            String results = timer.toString();
-            MapTool.getProfilingNoteFrame().addText(results);
-          }
+          CodeTimer.using(
+              "statSheet",
+              timer -> {
+                timer.setThreshold(5);
+
+                timer.start("allProps");
+                for (TokenProperty property :
+                    MapTool.getCampaign().getTokenPropertyList(tokenUnderMouse.getPropertyType())) {
+                  if (property.isShowOnStatSheet()) {
+                    if (property.isGMOnly() && !MapTool.getPlayer().isGM()) {
+                      continue;
+                    }
+                    if (property.isOwnerOnly() && !AppUtil.playerOwns(tokenUnderMouse)) {
+                      continue;
+                    }
+                    timer.start(property.getName());
+                    MapToolVariableResolver resolver = new MapToolVariableResolver(tokenUnderMouse);
+                    resolver.initialize();
+                    resolver.setAutoPrompt(false);
+                    Object propertyValue =
+                        tokenUnderMouse.getEvaluatedProperty(resolver, property.getName());
+                    resolver.flush();
+                    if (propertyValue != null && propertyValue.toString().length() > 0) {
+                      String propName = property.getShortName();
+                      if (StringUtils.isEmpty(propName)) propName = property.getName();
+                      propertyMap.put(propName, propertyValue.toString());
+                    }
+                    timer.stop(property.getName());
+                  }
+                }
+                timer.stop("allProps");
+              });
         }
         if (tokenUnderMouse.getPortraitImage() != null || !propertyMap.isEmpty()) {
           Font font = AppStyle.labelFont;
