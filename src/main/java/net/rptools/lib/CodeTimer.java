@@ -14,10 +14,51 @@
  */
 package net.rptools.lib;
 
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 
 public class CodeTimer {
+  private static final ThreadLocal<CodeTimer> ROOT_TIMER =
+      ThreadLocal.withInitial(() -> new CodeTimer(""));
+  private static final ThreadLocal<List<CodeTimer>> timerStack =
+      ThreadLocal.withInitial(ArrayList::new);
+
+  @FunctionalInterface
+  public interface TimedSection<Ex extends Throwable> {
+    void call(CodeTimer timer) throws Ex;
+  }
+
+  public static <Ex extends Exception> void using(String name, TimedSection<Ex> callback)
+      throws Ex {
+    var stack = timerStack.get();
+
+    var timer = new CodeTimer(name);
+    timer.setEnabled(AppState.isCollectProfilingData());
+
+    stack.addLast(timer);
+    try {
+      callback.call(timer);
+    } finally {
+      final var lastTimer = stack.removeLast();
+      assert lastTimer == timer : "Timer stack is corrupted";
+
+      if (timer.isEnabled()) {
+        String results = timer.toString();
+        MapTool.getProfilingNoteFrame().addText(results);
+      }
+      timer.clear();
+    }
+  }
+
+  public static CodeTimer get() {
+    final var stack = timerStack.get();
+    return stack.isEmpty() ? ROOT_TIMER.get() : stack.getLast();
+  }
+
   private final Map<String, Timer> timeMap = new LinkedHashMap<>();
   private final String name;
   private boolean enabled;
