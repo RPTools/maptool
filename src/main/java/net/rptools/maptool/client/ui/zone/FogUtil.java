@@ -20,6 +20,7 @@ import java.awt.geom.Area;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
@@ -27,7 +28,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
@@ -73,13 +73,13 @@ public class FogUtil {
    *
    * @param origin the vision origin.
    * @param vision the lightSourceArea.
-   * @param topology the VBL topology.
+   * @param wallVbl the VBL topology.
    * @return the visible area.
    */
   public static @Nonnull Area calculateVisibility(
       Point origin,
       Area vision,
-      AreaTree topology,
+      AreaTree wallVbl,
       AreaTree hillVbl,
       AreaTree pitVbl,
       AreaTree coverVbl) {
@@ -94,16 +94,18 @@ public class FogUtil {
      * cannot handle. These cases do not exist within a single type of topology, but can arise when
      * we combine them.
      */
+
+    var topologies = new EnumMap<Zone.TopologyType, AreaTree>(Zone.TopologyType.class);
+    topologies.put(Zone.TopologyType.WALL_VBL, wallVbl);
+    topologies.put(Zone.TopologyType.HILL_VBL, hillVbl);
+    topologies.put(Zone.TopologyType.PIT_VBL, pitVbl);
+    topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
+
     List<Geometry> visibleAreas = new ArrayList<>();
-    final List<Function<VisionBlockingAccumulator, Boolean>> topologyConsumers = new ArrayList<>();
-    topologyConsumers.add(acc -> acc.addWallBlocking(topology));
-    topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
-    topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
-    topologyConsumers.add(acc -> acc.addCoverBlocking(coverVbl));
-    for (final var consumer : topologyConsumers) {
+    for (final var topology : topologies.entrySet()) {
       final var accumulator =
           new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
-      final var isVisionCompletelyBlocked = consumer.apply(accumulator);
+      final var isVisionCompletelyBlocked = accumulator.add(topology.getKey(), topology.getValue());
       if (!isVisionCompletelyBlocked) {
         // Vision has been completely blocked by this topology. Short circuit.
         return new Area();
