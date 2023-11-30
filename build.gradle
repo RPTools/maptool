@@ -362,7 +362,7 @@ dependencies {
     // Specialized collections: ReferenceMap, LinkedMap.
     implementation 'org.apache.commons:commons-collections4:4.4'
     // Various file utilities
-    implementation 'commons-io:commons-io:2.15.0'
+    implementation 'commons-io:commons-io:2.15.1'
     // ftp client
     implementation 'commons-net:commons-net:3.10.0'
     // commandline parsing
