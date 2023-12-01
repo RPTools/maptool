@@ -171,9 +171,8 @@ public class SightSyntax {
                 ? null
                 : LightSource.createPersonal(scaleWithToken, personalLightLights);
         SightType sight =
-            new SightType(label, magnifier, personalLight, shape, width, arc, scaleWithToken);
-        sight.setDistance(range);
-        sight.setOffset(offset);
+            new SightType(
+                label, range, magnifier, shape, width, arc, offset, scaleWithToken, personalLight);
 
         // Store
         sightList.add(sight);
