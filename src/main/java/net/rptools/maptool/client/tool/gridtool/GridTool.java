@@ -340,6 +340,29 @@ public class GridTool extends DefaultTool {
         });
   }
 
+  public void moveGridBy(int dx, int dy) {
+    int gridOffsetX = renderer.getZone().getGrid().getOffsetX();
+    int gridOffsetY = renderer.getZone().getGrid().getOffsetY();
+
+    gridOffsetX += dx;
+    gridOffsetY += dy;
+
+    if (gridOffsetY > 0) {
+      gridOffsetY = gridOffsetY - (int) renderer.getZone().getGrid().getCellHeight();
+    }
+    if (gridOffsetX > 0) {
+      gridOffsetX = gridOffsetX - (int) renderer.getZone().getGrid().getCellWidth();
+    }
+    renderer.getZone().getGrid().setOffset(gridOffsetX, gridOffsetY);
+  }
+
+  public void adjustGridSize(int delta) {
+    renderer
+        .getZone()
+        .getGrid()
+        .setSize(Math.max(0, renderer.getZone().getGrid().getSize() + delta));
+  }
+
   private void adjustGridSize(ZoneRenderer renderer, Size direction) {
     CellPoint cell = renderer.getCellAt(new ScreenPoint(mouseX, mouseY));
     if (cell == null) {
@@ -349,19 +372,19 @@ public class GridTool extends DefaultTool {
 
     switch (direction) {
       case Increase:
-        renderer.adjustGridSize(1);
+        adjustGridSize(1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
         if (renderer.getZone().getGrid().getSize() != oldGridSize) {
-          renderer.moveGridBy(-cell.x, -cell.y);
+          moveGridBy(-cell.x, -cell.y);
         }
         break;
       case Decrease:
-        renderer.adjustGridSize(-1);
+        adjustGridSize(-1);
         updateSecondDimension(renderer.getZone().getGrid(), true);
 
         if (renderer.getZone().getGrid().getSize() != oldGridSize) {
-          renderer.moveGridBy(cell.x, cell.y);
+          moveGridBy(cell.x, cell.y);
         }
         break;
     }
@@ -404,16 +427,16 @@ public class GridTool extends DefaultTool {
       ZoneRenderer renderer = (ZoneRenderer) e.getSource();
       switch (direction) {
         case Left:
-          renderer.moveGridBy(-1, 0);
+          moveGridBy(-1, 0);
           break;
         case Right:
-          renderer.moveGridBy(1, 0);
+          moveGridBy(1, 0);
           break;
         case Up:
-          renderer.moveGridBy(0, -1);
+          moveGridBy(0, -1);
           break;
         case Down:
-          renderer.moveGridBy(0, 1);
+          moveGridBy(0, 1);
           break;
       }
       copyGridToControlPanel();

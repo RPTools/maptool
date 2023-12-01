@@ -86,9 +86,6 @@ public class ZoneRenderer extends JComponent
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
 
-  private static final Color TRANSLUCENT_YELLOW =
-      new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
-
   /** DebounceExecutor for throttling repaint() requests. */
   private final DebounceExecutor repaintDebouncer;
 
@@ -98,7 +95,6 @@ public class ZoneRenderer extends JComponent
   /** Is the noise filter on for disrupting pattens in background tiled textures. */
   private boolean bgTextureNoiseFilterOn = false;
 
-  public static final int MIN_GRID_SIZE = 10;
   private static LightSourceIconOverlay lightSourceIconOverlay = new LightSourceIconOverlay();
 
   /** The zone the ZoneRenderer was built from. */
@@ -158,6 +154,9 @@ public class ZoneRenderer extends JComponent
   private ZonePoint previousZonePoint;
 
   private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
+  private final ZoneCompositor compositor;
+  public GridRenderer gridRenderer;
+  private HaloRenderer haloRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -169,7 +168,9 @@ public class ZoneRenderer extends JComponent
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
-
+    this.compositor = new ZoneCompositor();
+    this.gridRenderer = new GridRenderer();
+    this.haloRenderer = new HaloRenderer();
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -882,127 +883,6 @@ public class ZoneRenderer extends JComponent
     return new PlayerView(role, selectedTokens);
   }
 
-  public Rectangle fogExtents() {
-    return zone.getExposedArea().getBounds();
-  }
-
-  /**
-   * Get a bounding box, in Zone coordinates, of all the elements in the zone. This method was
-   * created by copying renderZone() and then replacing each bit of rendering with a routine to
-   * simply aggregate the extents of the object that would have been rendered.
-   *
-   * @param view the player view
-   * @return a new Rectangle with the bounding box of all the elements in the Zone
-   */
-  public Rectangle zoneExtents(PlayerView view) {
-    // Can't initialize extents to any set x/y values, because
-    // we don't know if the actual map contains that x/y.
-    // So we need a flag to say extents is 'unset', and the best I
-    // could come up with is checking for 'null' on each loop iteration.
-    Rectangle extents = null;
-
-    // We don't iterate over the layers in the same order as rendering
-    // because its cleaner to group them by type and the order doesn't matter.
-
-    // First background image extents
-    // TODO: when the background image can be resized, fix this!
-    if (zone.getMapAssetId() != null) {
-      extents =
-          new Rectangle(
-              zone.getBoardX(),
-              zone.getBoardY(),
-              ImageManager.getImage(zone.getMapAssetId(), this).getWidth(),
-              ImageManager.getImage(zone.getMapAssetId(), this).getHeight());
-    }
-    // next, extents of drawing objects
-    List<DrawnElement> drawableList = zone.getAllDrawnElements();
-    for (DrawnElement element : drawableList) {
-      if (!view.isGMView() && !element.getDrawable().getLayer().isVisibleToPlayers()) {
-        continue;
-      }
-
-      Drawable drawable = element.getDrawable();
-      Rectangle drawnBounds = new Rectangle(drawable.getBounds());
-
-      // Handle pen size
-      // This slightly over-estimates the size of the pen, but we want to
-      // make sure to include the anti-aliased edges.
-      Pen pen = element.getPen();
-      int penSize = (int) Math.ceil((pen.getThickness() / 2) + 1);
-      drawnBounds.setBounds(
-          drawnBounds.x - penSize,
-          drawnBounds.y - penSize,
-          drawnBounds.width + (penSize * 2),
-          drawnBounds.height + (penSize * 2));
-
-      if (extents == null) {
-        extents = drawnBounds;
-      } else {
-        extents.add(drawnBounds);
-      }
-    }
-    // now, add the stamps/tokens
-    // tokens and stamps are the same thing, just treated differently
-
-    // Note: order doesn't matter, so don't need to go back-to-front.
-    for (Token element :
-        zone.getTokensForLayers(layer -> view.isGMView() || layer.isVisibleToPlayers())) {
-      Rectangle drawnBounds = element.getBounds(zone);
-      if (element.hasFacing()) {
-        // Get the facing and do a quick fix to make the math easier: -90 is 'unrotated' for some
-        // reason
-        int facing = element.getFacing() + 90;
-        if (facing > 180) {
-          facing -= 360;
-        }
-        // if 90 degrees, just swap w and h
-        // also swap them if rotated more than 90 (optimization for non-90deg rotations)
-        if (facing != 0 && facing != 180) {
-          if (Math.abs(facing) >= 90) {
-            drawnBounds.setSize(drawnBounds.height, drawnBounds.width); // swapping h and w
-          }
-          // if rotated to non-axis direction, assume the worst case 45 deg
-          // also assumes the rectangle rotates around its center
-          // This will usually makes the bounds bigger than necessary, but its quick.
-          // Also, for quickness, we assume its a square token using the larger dimension
-          // At 45 deg, the bounds of the square will be sqrt(2) bigger, and the UL corner will
-          // shift by 1/2 of the length.
-          // The size increase is: (sqrt*(2) - 1) * size ~= 0.42 * size.
-          if (facing != 0 && facing != 180 && facing != 90 && facing != -90) {
-            int size = Math.max(drawnBounds.width, drawnBounds.height);
-            int x = drawnBounds.x - (int) (0.21 * size);
-            int y = drawnBounds.y - (int) (0.21 * size);
-            int w = drawnBounds.width + (int) (0.42 * size);
-            int h = drawnBounds.height + (int) (0.42 * size);
-            drawnBounds.setBounds(x, y, w, h);
-          }
-        }
-      }
-      // TODO: Handle auras here?
-      if (extents == null) {
-        extents = drawnBounds;
-      } else {
-        extents.add(drawnBounds);
-      }
-    }
-    if (zone.hasFog()) {
-      if (extents == null) {
-        extents = fogExtents();
-      } else {
-        extents.add(fogExtents());
-      }
-    }
-    // TODO: What are token templates?
-    // renderTokenTemplates(g2d, view);
-
-    // TODO: Do lights make the area of interest larger?
-    // see: renderLights(g2d, view);
-
-    // TODO: Do auras make the area of interest larger?
-    // see: renderAuras(g2d, view);
-    return extents;
-  }
-
   /**
    * This method clears {@link #visibleScreenArea} and {@link #lastView}. It also flushes the {@link
    * #zoneView}.
@@ -1034,10 +914,23 @@ public class ZoneRenderer extends JComponent
    */
   public void renderZone(Graphics2D g2d, PlayerView view) {
     timer.start("setup");
+    // store previous rendering settings
+    RenderingHints oldRenderingHints = g2d.getRenderingHints();
+
+    // Clear internal state
+    tokenLocationMap.clear();
+    markerLocationList.clear();
+    itemRenderList.clear();
+
+    if (!compositor.isInitialised()) compositor.setRenderer(this);
+    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    if (!haloRenderer.isInitialised()) haloRenderer.setRenderer(this);
+
+    Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
+
     g2d.setFont(AppStyle.labelFont);
     Object oldAA = SwingUtil.useAntiAliasing(g2d);
 
-    Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
     Area viewArea = new Area(viewRect);
     // much of the raster code assumes the user clip is set
     boolean resetClip = false;
@@ -1067,19 +960,9 @@ public class ZoneRenderer extends JComponent
     }
     lastView = view;
 
-    // Clear internal state
-    tokenLocationMap.clear();
-    markerLocationList.clear();
-    itemRenderList.clear();
+    Map<Token, Set<Token>> drawThese = compositor.drawWhat(viewRect);
 
     timer.stop("setup");
-
-    // Calculations
-    timer.start("calcs-1");
-    AffineTransform af = new AffineTransform();
-    af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
-    af.scale(getScale(), getScale());
-
     // @formatter:off
     /*
      * This is the new code that doesn't work. See below for newer code that _might_ work. ;-) if (visibleScreenArea
@@ -1090,6 +973,12 @@ public class ZoneRenderer extends JComponent
      * Rectangle(0, 0, getSize().width, getSize().height)); }
      */
     // @formatter:on
+
+    // Calculations
+    timer.start("calcs-1");
+    AffineTransform af = new AffineTransform();
+    af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
+    af.scale(getScale(), getScale());
 
     if (visibleScreenArea == null) {
       timer.start("ZoneRenderer-getVisibleArea");
@@ -1161,7 +1050,8 @@ public class ZoneRenderer extends JComponent
       // }
     }
     timer.start("grid");
-    renderGrid(g2d, view);
+
+    gridRenderer.renderGrid(g2d, view);
     timer.stop("grid");
 
     if (shouldRenderLayer(Zone.Layer.OBJECT, view)) {
@@ -1334,7 +1224,8 @@ public class ZoneRenderer extends JComponent
     timer.stop("overlays");
 
     timer.start("renderCoordinates");
-    renderCoordinates(g2d, view);
+    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    gridRenderer.renderCoordinates(g2d, view);
     timer.stop("renderCoordinates");
 
     timer.start("lightSourceIconOverlay.paintOverlay");
@@ -1354,7 +1245,8 @@ public class ZoneRenderer extends JComponent
     // zoneScale.getOffsetY()));
     // g2d.draw(area);
     // }
-    SwingUtil.restoreAntiAliasing(g2d, oldAA);
+    g2d.setRenderingHints(oldRenderingHints);
+
     if (resetClip) {
       g2d.setClip(null);
     }
@@ -2020,20 +1912,6 @@ public class ZoneRenderer extends JComponent
     lastScale = scale.getScale();
 
     g.drawImage(backbuffer, 0, 0, this);
-  }
-
-  protected void renderGrid(Graphics2D g, PlayerView view) {
-    int gridSize = (int) (zone.getGrid().getSize() * getScale());
-    if (!AppState.isShowGrid() || gridSize < MIN_GRID_SIZE) {
-      return;
-    }
-    zone.getGrid().draw(this, g, g.getClipBounds());
-  }
-
-  protected void renderCoordinates(Graphics2D g, PlayerView view) {
-    if (AppState.isShowCoordinates()) {
-      zone.getGrid().drawCoordinatesOverlay(g, this);
-    }
   }
 
   private Set<SelectionSet> getOwnedMovementSet(PlayerView view) {
@@ -3193,11 +3071,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("tokenlist-6");
 
       // Render Halo
-      if (token.hasHalo()) {
-        tokenG.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
-        tokenG.setColor(token.getHaloColor());
-        tokenG.draw(zone.getGrid().getTokenCellArea(tokenBounds));
-      }
+      haloRenderer.renderHalo(tokenG, token, location);
 
       // Calculate alpha Transparency from token and use opacity for indicating that token is moving
       float opacity = token.getTokenOpacity();
@@ -3302,7 +3176,7 @@ public class ZoneRenderer extends JComponent
             if (token.getFacing() < 0) {
               tokenG.setColor(Color.yellow);
             } else {
-              tokenG.setColor(TRANSLUCENT_YELLOW);
+              tokenG.setColor(ZoneRendererConstants.TRANSLUCENT_YELLOW);
             }
             tokenG.fill(arrow);
             tokenG.setColor(Color.darkGray);
@@ -3909,28 +3783,6 @@ public class ZoneRenderer extends JComponent
     return zoneScale.getOffsetY();
   }
 
-  public void adjustGridSize(int delta) {
-    zone.getGrid().setSize(Math.max(0, zone.getGrid().getSize() + delta));
-    repaintDebouncer.dispatch();
-  }
-
-  public void moveGridBy(int dx, int dy) {
-    int gridOffsetX = zone.getGrid().getOffsetX();
-    int gridOffsetY = zone.getGrid().getOffsetY();
-
-    gridOffsetX += dx;
-    gridOffsetY += dy;
-
-    if (gridOffsetY > 0) {
-      gridOffsetY = gridOffsetY - (int) zone.getGrid().getCellHeight();
-    }
-    if (gridOffsetX > 0) {
-      gridOffsetX = gridOffsetX - (int) zone.getGrid().getCellWidth();
-    }
-    zone.getGrid().setOffset(gridOffsetX, gridOffsetY);
-    repaintDebouncer.dispatch();
-  }
-
   /**
    * Since the map can be scaled, this is a convenience method to find out what cell is at this
    * location.
@@ -4362,6 +4214,7 @@ public class ZoneRenderer extends JComponent
     repaintDebouncer.dispatch();
   }
 
+  // Should this be moved to GridRenderer?
   @Subscribe
   private void onGridChanged(GridChanged event) {
     if (event.zone() != this.zone) {
