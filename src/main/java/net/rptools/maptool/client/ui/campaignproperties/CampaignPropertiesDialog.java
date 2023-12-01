@@ -245,75 +245,43 @@ public class CampaignPropertiesDialog extends JDialog {
     for (SightType sight : sightTypeMap.values()) {
       builder.append(sight.getName()).append(": ");
 
+      builder.append(sight.getShape().name().toLowerCase()).append(" ");
+
       switch (sight.getShape()) {
-        case SQUARE:
-          builder.append("square ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CIRCLE:
-          builder.append("circle ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case GRID:
-          builder.append("grid ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case HEX:
-          builder.append("hex ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+        case SQUARE, CIRCLE, GRID, HEX:
           break;
         case BEAM:
-          builder.append("beam ");
           if (sight.getArc() != 0) {
             builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
           } else {
             builder.append("arc=4").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
           }
-          if (sight.getOffset() != 0)
+          if (sight.getOffset() != 0) {
             builder
                 .append("offset=")
                 .append(StringUtil.formatDecimal(sight.getOffset()))
                 .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+          }
           break;
         case CONE:
-          builder.append("cone ");
-          if (sight.getArc() != 0)
+          if (sight.getArc() != 0) {
             builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
-          if (sight.getOffset() != 0)
+          }
+          if (sight.getOffset() != 0) {
             builder
                 .append("offset=")
                 .append(StringUtil.formatDecimal(sight.getOffset()))
                 .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+          }
           break;
-        default:
-          throw new IllegalArgumentException("Invalid shape?!");
       }
+      if (sight.getDistance() != 0) {
+        builder
+            .append("distance=")
+            .append(StringUtil.formatDecimal(sight.getDistance()))
+            .append(' ');
+      }
+
       // Scale with Token
       if (sight.isScaleWithToken()) {
         builder.append("scale ");
