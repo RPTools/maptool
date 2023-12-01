@@ -399,16 +399,25 @@ public class TokenLightFunctions extends AbstractFunction {
         lightDef.has("shape")
             ? ShapeType.valueOf(lightDef.get("shape").getAsString())
             : ShapeType.CIRCLE;
-    // Cones permit the fields arc and offset, but no other shape accepts them.
+    // Beams permit the field "width", cones permit the field "arc", and both permit "offset".
+    // But no other shape permits these fields.
+    if (shape != ShapeType.BEAM) {
+      if (lightDef.has("width")) {
+        throw new ParserException(I18N.getText("Width provided but the shape is not a beam"));
+      }
+    }
+    if (shape != ShapeType.CONE) {
+      if (lightDef.has("arc")) {
+        throw new ParserException(I18N.getText("Arc provided but the shape is not a cone"));
+      }
+    }
     if (shape != ShapeType.CONE && shape != ShapeType.BEAM) {
       if (lightDef.has("offset")) {
         throw new ParserException(
             I18N.getText("Facing offset provided but the shape is not a cone"));
       }
-      if (lightDef.has("arc")) {
-        throw new ParserException(I18N.getText("Arc provided but the shape is not a cone"));
-      }
     }
+    final var width = lightDef.has("width") ? lightDef.get("width").getAsDouble() : 0;
     final var offset = lightDef.has("offset") ? lightDef.get("offset").getAsDouble() : 0;
     final var arc = lightDef.has("arc") ? lightDef.get("arc").getAsDouble() : 0;
 
@@ -444,7 +453,7 @@ public class TokenLightFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("Lumens must be non-zero."));
     }
 
-    return new Light(shape, offset, range, arc, colorPaint, lumens, gmOnly, ownerOnly);
+    return new Light(shape, offset, range, width, arc, colorPaint, lumens, gmOnly, ownerOnly);
   }
 
   private static JsonObject lightSourceToJson(LightSource source) {
@@ -467,7 +476,7 @@ public class TokenLightFunctions extends AbstractFunction {
 
     if (light.getShape() == ShapeType.BEAM) {
       lightDef.addProperty("offset", light.getFacingOffset());
-      lightDef.addProperty("arc", light.getArcAngle());
+      lightDef.addProperty("width", light.getWidth());
     }
 
     if (light.getShape() == ShapeType.CONE) {

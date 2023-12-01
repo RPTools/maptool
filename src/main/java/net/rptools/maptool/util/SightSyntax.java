@@ -66,6 +66,7 @@ public class SightSyntax {
         String[] args = value.split("\\s+");
         ShapeType shape = ShapeType.CIRCLE;
         boolean scaleWithToken = false;
+        double width = 0;
         int arc = 90;
         float range = 0;
         int offset = 0;
@@ -74,7 +75,6 @@ public class SightSyntax {
           assert !arg.isEmpty(); // The split() uses "one or more spaces", removing empty strings
           try {
             shape = ShapeType.valueOf(arg.toUpperCase());
-            arc = shape == ShapeType.BEAM ? 4 : arc;
             continue;
           } catch (IllegalArgumentException iae) {
             // Expected when not defining a shape
@@ -125,6 +125,7 @@ public class SightSyntax {
                         shape,
                         0,
                         pLightRange,
+                        width,
                         arc,
                         personalLightColor == null
                             ? null
@@ -136,6 +137,10 @@ public class SightSyntax {
                 throw new ParseException(
                     String.format("Unrecognized personal light syntax: %s", arg), 0);
               }
+            } else if (arg.startsWith("width=") && arg.length() > 6) {
+              toBeParsed = arg.substring(6);
+              errmsg = "msg.error.mtprops.sight.width";
+              width = StringUtil.parseInteger(toBeParsed);
             } else if (arg.startsWith("arc=") && arg.length() > 4) {
               toBeParsed = arg.substring(4);
               errmsg = "msg.error.mtprops.sight.arc";
@@ -166,7 +171,7 @@ public class SightSyntax {
                 ? null
                 : LightSource.createPersonal(scaleWithToken, personalLightLights);
         SightType sight =
-            new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
+            new SightType(label, magnifier, personalLight, shape, width, arc, scaleWithToken);
         sight.setDistance(range);
         sight.setOffset(offset);
 
@@ -198,10 +203,8 @@ public class SightSyntax {
         case SQUARE, CIRCLE, GRID, HEX:
           break;
         case BEAM:
-          if (sight.getArc() != 0) {
-            builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
-          } else {
-            builder.append("arc=4").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
+          if (sight.getWidth() != 0) {
+            builder.append("width=").append(StringUtil.formatDecimal(sight.getWidth())).append(' ');
           }
           if (sight.getOffset() != 0) {
             builder

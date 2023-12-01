@@ -321,6 +321,7 @@ public class CampaignProperties {
               (Double) row[2],
               (LightSource) row[4],
               (ShapeType) row[5],
+              0.,
               (Integer) row[3],
               (boolean) row[6]);
       st.setDistance(((Double) row[1]).floatValue());

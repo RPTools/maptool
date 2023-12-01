@@ -24,10 +24,19 @@ public class SightType {
   private double multiplier;
   private LightSource personalLightSource;
   private ShapeType shape;
+  private double width = 0;
   private int arc = 0;
   private float distance = 0;
   private int offset = 0;
   private boolean scaleWithToken = false;
+
+  public double getWidth() {
+    return this.width;
+  }
+
+  public void setWidth(double width) {
+    this.width = width;
+  }
 
   public int getOffset() {
     return this.offset;
@@ -82,12 +91,14 @@ public class SightType {
       double multiplier,
       LightSource personalLightSource,
       ShapeType shape,
+      double width,
       int arc,
       boolean scaleWithToken) {
     this.name = name;
     this.multiplier = multiplier;
     this.personalLightSource = personalLightSource;
     this.shape = shape;
+    this.width = width;
     this.arc = arc;
     this.scaleWithToken = scaleWithToken;
   }
@@ -137,7 +148,8 @@ public class SightType {
    */
   public Area getVisionShape(Token token, Zone zone) {
     return zone.getGrid()
-        .getShapedArea(getShape(), token, getDistance(), getArc(), getOffset(), scaleWithToken);
+        .getShapedArea(
+            getShape(), token, getDistance(), getWidth(), getArc(), getOffset(), scaleWithToken);
   }
 
   public static SightType fromDto(SightTypeDto dto) {
@@ -147,6 +159,7 @@ public class SightType {
     sightType.personalLightSource =
         dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null;
     sightType.shape = ShapeType.valueOf(dto.getShape().name());
+    sightType.width = dto.getWidth();
     sightType.arc = dto.getArc();
     sightType.distance = dto.getDistance();
     sightType.offset = dto.getOffset();
@@ -161,6 +174,7 @@ public class SightType {
     if (personalLightSource != null) dto.setPersonalLightSource(personalLightSource.toDto());
     if (shape == null) shape = ShapeType.CIRCLE;
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
+    dto.setWidth(width);
     dto.setArc(arc);
     dto.setDistance(distance);
     dto.setOffset(offset);

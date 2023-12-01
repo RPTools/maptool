@@ -311,6 +311,7 @@ public class IsometricGrid extends Grid {
       ShapeType shape,
       Token token,
       double range,
+      double width,
       double arcAngle,
       int offsetAngle,
       boolean scaleWithToken) {
@@ -349,12 +350,8 @@ public class IsometricGrid extends Grid {
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
-        Shape visibleShape =
-            new Rectangle2D.Double(
-                0,
-                getSize() / -2d * Math.sin(Math.toRadians(arcAngle / 2.0)),
-                visionRange,
-                getSize() * Math.sin(Math.toRadians(arcAngle / 2.0)));
+        var pixelWidth = width * getSize() / getZone().getUnitsPerCell();
+        Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         // new angle, corrected for isometric view
         double theta = Math.toRadians(offsetAngle) + Math.toRadians(token.getFacing());
