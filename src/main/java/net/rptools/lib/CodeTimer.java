@@ -15,13 +15,12 @@
 package net.rptools.lib;
 
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
 public class CodeTimer {
-  private final Map<String, Timer> timeMap = new HashMap<>();
-  private final Map<String, Integer> orderMap = new HashMap<>();
+  private final Map<String, Timer> timeMap = new LinkedHashMap<>();
   private final String name;
   private boolean enabled;
   private int threshold = 1;
@@ -47,13 +46,7 @@ public class CodeTimer {
     if (!enabled) {
       return;
     }
-    int count = orderMap.size();
-    orderMap.putIfAbsent(id, count);
-    Timer timer = timeMap.get(id);
-    if (timer == null) {
-      timer = new Timer();
-      timeMap.put(id, timer);
-    }
+    Timer timer = timeMap.computeIfAbsent(id, key -> new Timer());
     timer.start();
   }
 
@@ -61,17 +54,15 @@ public class CodeTimer {
     if (!enabled) {
       return;
     }
-    if (!orderMap.containsKey(id)) {
-      throw new IllegalArgumentException("Could not find orderMap id: " + id);
-    }
-    if (!timeMap.containsKey(id)) {
+
+    Timer timer = timeMap.get(id);
+    if (timer == null) {
       throw new IllegalArgumentException("Could not find timer id: " + id);
     }
-    timeMap.get(id).stop();
+    timer.stop();
   }
 
   public void clear() {
-    orderMap.clear();
     timeMap.clear();
   }
 
@@ -83,17 +74,19 @@ public class CodeTimer {
         .append("Timer ")
         .append(name)
         .append(" (")
-        .append(orderMap.size())
+        .append(timeMap.size())
         .append(" elements)\n");
 
-    List<String> idSet = new ArrayList<String>(timeMap.keySet());
-    idSet.sort((arg0, arg1) -> orderMap.get(arg0) - orderMap.get(arg1));
-    for (String id : idSet) {
-      long elapsed = timeMap.get(id).getElapsed();
+    var i = -1;
+    for (var entry : timeMap.entrySet()) {
+      ++i;
+
+      var id = entry.getKey();
+      long elapsed = entry.getValue().getElapsed();
       if (elapsed < threshold) {
         continue;
       }
-      builder.append(String.format("  %3d.  %6d ms  %s\n", orderMap.get(id), elapsed, id));
+      builder.append(String.format("  %3d.  %6d ms  %s\n", i, elapsed, id));
     }
     return builder.toString();
   }
