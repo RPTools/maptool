@@ -292,23 +292,21 @@ public class CampaignPropertiesDialog extends JDialog {
       if (sight.getPersonalLightSource() != null) {
         LightSource source = sight.getPersonalLightSource();
 
-        if (source.getLightList() != null) {
-          for (Light light : source.getLightList()) {
-            double range = light.getRadius();
+        for (Light light : source.getLightList()) {
+          double range = light.getRadius();
 
-            builder.append("r").append(StringUtil.formatDecimal(range));
+          builder.append("r").append(StringUtil.formatDecimal(range));
 
-            if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
-              Color color = (Color) light.getPaint().getPaint();
-              builder.append(toHex(color));
-            }
-            final var lumens = light.getLumens();
-            if (lumens >= 0) {
-              builder.append('+');
-            }
-            builder.append(Integer.toString(lumens, 10));
-            builder.append(' ');
+          if (light.getPaint() != null && light.getPaint() instanceof DrawableColorPaint) {
+            Color color = (Color) light.getPaint().getPaint();
+            builder.append(toHex(color));
           }
+          final var lumens = light.getLumens();
+          if (lumens >= 0) {
+            builder.append('+');
+          }
+          builder.append(Integer.toString(lumens, 10));
+          builder.append(' ');
         }
       }
       builder.append('\n');
@@ -604,9 +602,8 @@ public class CampaignPropertiesDialog extends JDialog {
                 ? null
                 : LightSource.createPersonal(scaleWithToken, personalLightLights);
         SightType sight =
-            new SightType(label, magnifier, personalLight, shape, width, arc, scaleWithToken);
-        sight.setDistance(range);
-        sight.setOffset(offset);
+            new SightType(
+                label, range, magnifier, shape, width, arc, offset, scaleWithToken, personalLight);
 
         // Store
         sightList.add(sight);
