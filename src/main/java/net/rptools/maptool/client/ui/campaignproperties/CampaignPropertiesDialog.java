@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
@@ -244,75 +245,43 @@ public class CampaignPropertiesDialog extends JDialog {
     for (SightType sight : sightTypeMap.values()) {
       builder.append(sight.getName()).append(": ");
 
+      builder.append(sight.getShape().name().toLowerCase()).append(" ");
+
       switch (sight.getShape()) {
-        case SQUARE:
-          builder.append("square ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case CIRCLE:
-          builder.append("circle ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case GRID:
-          builder.append("grid ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
-          break;
-        case HEX:
-          builder.append("hex ");
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+        case SQUARE, CIRCLE, GRID, HEX:
           break;
         case BEAM:
-          builder.append("beam ");
           if (sight.getArc() != 0) {
             builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
           } else {
             builder.append("arc=4").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
           }
-          if (sight.getOffset() != 0)
+          if (sight.getOffset() != 0) {
             builder
                 .append("offset=")
                 .append(StringUtil.formatDecimal(sight.getOffset()))
                 .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+          }
           break;
         case CONE:
-          builder.append("cone ");
-          if (sight.getArc() != 0)
+          if (sight.getArc() != 0) {
             builder.append("arc=").append(StringUtil.formatDecimal(sight.getArc())).append(' ');
-          if (sight.getOffset() != 0)
+          }
+          if (sight.getOffset() != 0) {
             builder
                 .append("offset=")
                 .append(StringUtil.formatDecimal(sight.getOffset()))
                 .append(' ');
-          if (sight.getDistance() != 0)
-            builder
-                .append("distance=")
-                .append(StringUtil.formatDecimal(sight.getDistance()))
-                .append(' ');
+          }
           break;
-        default:
-          throw new IllegalArgumentException("Invalid shape?!");
       }
+      if (sight.getDistance() != 0) {
+        builder
+            .append("distance=")
+            .append(StringUtil.formatDecimal(sight.getDistance()))
+            .append(' ');
+      }
+
       // Scale with Token
       if (sight.isScaleWithToken()) {
         builder.append("scale ");
@@ -365,60 +334,67 @@ public class CampaignPropertiesDialog extends JDialog {
           builder.append(" scale");
         }
 
-        String lastShape = ""; // this forces 'circle' to be printed
-        double lastArc = 90;
-        boolean lastGM = false;
-        boolean lastOwner = false;
+        final var lastParameters = new LinkedHashMap<String, Object>();
+        lastParameters.put("", null);
+        lastParameters.put("arc", 0.);
+        lastParameters.put("offset", 0.);
+        lastParameters.put("GM", false);
+        lastParameters.put("OWNER", false);
+
         for (Light light : lightSource.getLightList()) {
-          String shape;
+          final var parameters = new HashMap<>();
+
           // TODO: This HAS to change, the lights need to be auto describing, this hard wiring sucks
           if (lightSource.getType() == LightSource.Type.AURA) {
-            // Currently these are mutually exclusive but perhaps not in the future?
-            if (light.isGM() && light.isGM() != lastGM) builder.append(" GM");
-            if (light.isOwnerOnly() && light.isOwnerOnly() != lastOwner) builder.append(" OWNER");
-            lastGM = light.isGM();
-            lastOwner = light.isOwnerOnly();
+            parameters.put("GM", light.isGM());
+            parameters.put("OWNER", light.isOwnerOnly());
           }
-          if (light.getShape() != null) {
-            switch (light.getShape()) {
-              default:
-                throw new RuntimeException(
-                    "Unrecognized shape: " + light.getShape().toString().toLowerCase());
-              case SQUARE:
-              case GRID:
-              case CIRCLE:
-              case HEX:
-                // TODO: Make this a preference
-                shape = light.getShape().toString().toLowerCase();
-                break;
-              case BEAM:
-                {
-                  lastArc = light.getArcAngle();
-                  shape = "beam arc=" + StringUtil.formatDecimal(lastArc);
-                  if (light.getFacingOffset() != 0)
-                    builder
-                        .append(" offset=")
-                        .append(StringUtil.formatDecimal(light.getFacingOffset()))
-                        .append(' ');
+
+          parameters.put("", light.getShape().name().toLowerCase());
+          switch (light.getShape()) {
+            default:
+              throw new RuntimeException(
+                  "Unrecognized shape: " + light.getShape().toString().toLowerCase());
+            case SQUARE, GRID, CIRCLE, HEX:
+              break;
+            case BEAM:
+              parameters.put("arc", light.getArcAngle());
+              parameters.put("offset", light.getFacingOffset());
+              break;
+            case CONE:
+              parameters.put("arc", light.getArcAngle());
+              parameters.put("offset", light.getFacingOffset());
+              break;
+          }
+
+          for (final var parameterEntry : lastParameters.entrySet()) {
+            final var key = parameterEntry.getKey();
+            final var oldValue = parameterEntry.getValue();
+            final var newValue = parameters.get(key);
+
+            if (newValue != null && !newValue.equals(oldValue)) {
+              lastParameters.put(key, newValue);
+
+              // Special case: booleans are flags that are either present or not.
+              if (newValue instanceof Boolean b) {
+                if (b) {
+                  builder.append(" ").append(key);
                 }
-                break;
-              case CONE:
-                // if (light.getArcAngle() != 0 && light.getArcAngle() != 90 && light.getArcAngle()
-                // != lastArc)
-                {
-                  lastArc = light.getArcAngle();
-                  shape = "cone arc=" + StringUtil.formatDecimal(lastArc);
-                  if (light.getFacingOffset() != 0)
-                    builder
-                        .append(" offset=")
-                        .append(StringUtil.formatDecimal(light.getFacingOffset()))
-                        .append(' ');
+              } else {
+                builder.append(" ");
+                if (!"".equals(key)) {
+                  // Special case: don't include a key= for shapes.
+                  builder.append(key).append("=");
                 }
-                break;
+                builder.append(
+                    switch (newValue) {
+                      case Double d -> StringUtil.formatDecimal(d);
+                      default -> newValue.toString();
+                    });
+              }
             }
-            if (!lastShape.equals(shape)) builder.append(' ').append(shape);
-            lastShape = shape;
           }
+
           builder.append(' ').append(StringUtil.formatDecimal(light.getRadius()));
           if (light.getPaint() instanceof DrawableColorPaint) {
             Color color = (Color) light.getPaint().getPaint();
