@@ -159,6 +159,7 @@ public class ZoneRenderer extends JComponent
   private final DarknessRenderer darknessRenderer;
   private final LumensRenderer lumensRenderer;
   private final FogRenderer fogRenderer;
+  private final VisionOverlayRenderer visionOverlayRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -181,6 +182,7 @@ public class ZoneRenderer extends JComponent
     this.darknessRenderer = new DarknessRenderer(renderHelper, zoneView);
     this.lumensRenderer = new LumensRenderer(renderHelper, zone, zoneView);
     this.fogRenderer = new FogRenderer(renderHelper, zone, zoneView);
+    this.visionOverlayRenderer = new VisionOverlayRenderer(renderHelper, zone, zoneView);
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -1195,16 +1197,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("token name/labels");
     }
 
-    // if (zone.visionType ...)
-    if (view.isGMView()) {
-      timer.start("visionOverlayGM");
-      renderGMVisionOverlay(g2d, view);
-      timer.stop("visionOverlayGM");
-    } else {
-      timer.start("visionOverlayPlayer");
-      renderPlayerVisionOverlay(g2d, view);
-      timer.stop("visionOverlayPlayer");
-    }
+    this.visionOverlayRenderer.render(g2d, view, tokenUnderMouse);
+
     timer.start("overlays");
     for (ZoneOverlay overlay : overlayList) {
       timer.start("overlays: %s", overlay.getClass().getSimpleName());
@@ -1259,105 +1253,6 @@ public class ZoneRenderer extends JComponent
    * overlay in turn.
    */
   private final BufferedImagePool tempBufferPool = new BufferedImagePool(2);
-
-  /**
-   * This outlines the area visible to the token under the cursor, clipped to the current
-   * fog-of-war. This is appropriate for the player view, but the GM sees everything.
-   */
-  private void renderPlayerVisionOverlay(Graphics2D g, PlayerView view) {
-    Graphics2D g2 = (Graphics2D) g.create();
-    if (zone.hasFog()) {
-      Area clip = new Area(new Rectangle(getSize().width, getSize().height));
-
-      Area viewArea = new Area(exposedFogArea);
-      if (view.isUsingTokenView()) {
-        for (Token tok : view.getTokens()) {
-          ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          viewArea.add(exposedMeta.getExposedAreaHistory());
-        }
-      }
-      if (!viewArea.isEmpty()) {
-        clip.intersect(new Area(viewArea.getBounds2D()));
-      }
-      // Note: the viewArea doesn't need to be transform()'d because exposedFogArea has been
-      // already.
-      g2.setClip(clip);
-    }
-    renderVisionOverlay(g2, view);
-    g2.dispose();
-  }
-
-  /** Render the vision overlay as though the view were the GM. */
-  private void renderGMVisionOverlay(Graphics2D g, PlayerView view) {
-    renderVisionOverlay(g, view);
-  }
-
-  /**
-   * This outlines the area visible to the token under the cursor and shades it with the halo color,
-   * if there is one.
-   */
-  private void renderVisionOverlay(Graphics2D g, PlayerView view) {
-    Area currentTokenVisionArea = zoneView.getVisibleArea(tokenUnderMouse, view);
-    if (currentTokenVisionArea == null) {
-      return;
-    }
-    Area combined = new Area(currentTokenVisionArea);
-    ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tokenUnderMouse.getExposedAreaGUID());
-
-    Area tmpArea = new Area(meta.getExposedAreaHistory());
-    tmpArea.add(zone.getExposedArea());
-    if (zone.hasFog()) {
-      if (tmpArea.isEmpty()) {
-        return;
-      }
-      combined.intersect(tmpArea);
-    }
-    boolean isOwner = AppUtil.playerOwns(tokenUnderMouse);
-    boolean tokenIsPC = tokenUnderMouse.getType() == Token.Type.PC;
-    boolean strictOwnership =
-        MapTool.getServerPolicy() != null && MapTool.getServerPolicy().useStrictTokenManagement();
-    boolean showVisionAndHalo = isOwner || view.isGMView() || (tokenIsPC && !strictOwnership);
-    // String player = MapTool.getPlayer().getName();
-    // System.err.print("tokenUnderMouse.ownedBy(" + player + "): " + isOwner);
-    // System.err.print(", tokenIsPC: " + tokenIsPC);
-    // System.err.print(", isGMView(): " + view.isGMView());
-    // System.err.println(", strictOwnership: " + strictOwnership);
-
-    /*
-     * The vision arc and optional halo-filled visible area shouldn't be shown to everyone. If we are in GM view, or if we are the owner of the token in question, or if the token is a PC and
-     * strict token ownership is off... then the vision arc should be displayed.
-     */
-    if (showVisionAndHalo) {
-      AffineTransform af = new AffineTransform();
-      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
-      af.scale(getScale(), getScale());
-
-      Area area = combined.createTransformedArea(af);
-      g.setClip(this.getBounds());
-      Object oldAA = SwingUtil.useAntiAliasing(g);
-      // g.setStroke(new BasicStroke(2));
-      g.setColor(new Color(255, 255, 255)); // outline around visible area
-      g.draw(area);
-      renderHaloArea(g, area);
-      SwingUtil.restoreAntiAliasing(g, oldAA);
-    }
-  }
-
-  private void renderHaloArea(Graphics2D g, Area visible) {
-    boolean useHaloColor =
-        tokenUnderMouse.getHaloColor() != null && AppPreferences.getUseHaloColorOnVisionOverlay();
-    if (tokenUnderMouse.getVisionOverlayColor() != null || useHaloColor) {
-      Color visionColor =
-          useHaloColor ? tokenUnderMouse.getHaloColor() : tokenUnderMouse.getVisionOverlayColor();
-      g.setColor(
-          new Color(
-              visionColor.getRed(),
-              visionColor.getGreen(),
-              visionColor.getBlue(),
-              AppPreferences.getHaloOverlayOpacity()));
-      g.fill(visible);
-    }
-  }
 
   private void renderLabels(Graphics2D g, PlayerView view) {
     final var timer = CodeTimer.get();
