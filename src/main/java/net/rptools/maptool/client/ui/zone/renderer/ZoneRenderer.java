@@ -156,6 +156,7 @@ public class ZoneRenderer extends JComponent
   private final ZoneCompositor compositor;
   private final GridRenderer gridRenderer;
   private final HaloRenderer haloRenderer;
+  private final DarknessRenderer darknessRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -174,6 +175,7 @@ public class ZoneRenderer extends JComponent
     this.compositor = new ZoneCompositor();
     this.gridRenderer = new GridRenderer();
     this.haloRenderer = new HaloRenderer();
+    this.darknessRenderer = new DarknessRenderer(renderHelper, zoneView);
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -1069,7 +1071,7 @@ public class ZoneRenderer extends JComponent
       timer.stop("auras");
     }
 
-    renderPlayerDarkness(g2d, view);
+    darknessRenderer.render(g2d, view);
 
     /**
      * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by
@@ -1511,45 +1513,6 @@ public class ZoneRenderer extends JComponent
       g.setComposite(overlayBlending);
       g.drawImage(lightOverlay, null, 0, 0);
       timer.stop("renderLightOverlay:drawBuffer");
-    }
-  }
-
-  /**
-   * Draws a solid black overlay wherever a non-GM player should see darkness.
-   *
-   * <p>If {@code view} is a GM view, this renders nothing.
-   *
-   * @param g The graphics object used to render the zone.
-   * @param view The player view.
-   */
-  private void renderPlayerDarkness(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    if (view.isGMView()) {
-      // GMs see the darkness rendered as lights, not as blackness.
-      return;
-    }
-
-    final var darkness = zoneView.getIllumination(view).getDarkenedArea();
-    if (darkness.isEmpty()) {
-      // Skip the rendering work if it isn't necessary.
-      return;
-    }
-
-    g = (Graphics2D) g.create();
-    try {
-      timer.start("renderPlayerDarkness:setTransform");
-      AffineTransform af = new AffineTransform();
-      af.translate(getViewOffsetX(), getViewOffsetY());
-      af.scale(getScale(), getScale());
-      g.setTransform(af);
-      timer.stop("renderPlayerDarkness:setTransform");
-
-      g.setComposite(AlphaComposite.Src);
-      g.setPaint(Color.black);
-      g.fill(darkness);
-    } finally {
-      g.dispose();
     }
   }
 
