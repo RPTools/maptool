@@ -154,8 +154,8 @@ public class ZoneRenderer extends JComponent
 
   private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
   private final ZoneCompositor compositor;
-  public GridRenderer gridRenderer;
-  private HaloRenderer haloRenderer;
+  private final GridRenderer gridRenderer;
+  private final HaloRenderer haloRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
