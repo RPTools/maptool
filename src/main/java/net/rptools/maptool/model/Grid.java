@@ -401,7 +401,8 @@ public abstract class Grid implements Cloneable {
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
-        var pixelWidth = width * getSize() / zone.getUnitsPerCell();
+        // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
+        var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
         Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
         Shape visibleShape = new GeneralPath(lineShape);
 
