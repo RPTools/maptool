@@ -350,7 +350,7 @@ public class IsometricGrid extends Grid {
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
-        var pixelWidth = width * getSize() / getZone().getUnitsPerCell();
+        var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         // new angle, corrected for isometric view
