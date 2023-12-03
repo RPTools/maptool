@@ -158,6 +158,7 @@ public class ZoneRenderer extends JComponent
   private final LightsRenderer lightsRenderer;
   private final DarknessRenderer darknessRenderer;
   private final LumensRenderer lumensRenderer;
+  private final FogRenderer fogRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -179,6 +180,7 @@ public class ZoneRenderer extends JComponent
     this.lightsRenderer = new LightsRenderer(renderHelper, zone, zoneView);
     this.darknessRenderer = new DarknessRenderer(renderHelper, zoneView);
     this.lumensRenderer = new LumensRenderer(renderHelper, zone, zoneView);
+    this.fogRenderer = new FogRenderer(renderHelper, zone, zoneView);
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -1154,10 +1156,7 @@ public class ZoneRenderer extends JComponent
       renderLabels(g2d, view);
     }
 
-    // (This method has it's own 'timer' calls)
-    if (zone.hasFog()) {
-      renderFog(g2d, view);
-    }
+    this.fogRenderer.render(g2d, view);
 
     if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
@@ -1399,115 +1398,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("labels-1.1");
     }
     timer.stop("labels-1");
-  }
-
-  private void renderFog(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    Dimension size = getSize();
-    Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
-
-    timer.start("renderFog-allocateBufferedImage");
-    try (final var entry = tempBufferPool.acquire()) {
-      final var buffer = entry.get();
-      timer.stop("renderFog-allocateBufferedImage");
-
-      timer.start("renderFog");
-      final var fogX = getViewOffsetX();
-      final var fogY = getViewOffsetY();
-
-      Graphics2D buffG = buffer.createGraphics();
-      buffG.setClip(fogClip);
-      SwingUtil.useAntiAliasing(buffG);
-
-      timer.start("renderFog-fill");
-      // Fill
-      double scale = getScale();
-      buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
-      buffG.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this
-      // fixes the
-      // GM
-      // exposed
-      // area
-      // view.
-      buffG.fillRect(0, 0, size.width, size.height);
-      timer.stop("renderFog-fill");
-
-      // Cut out the exposed area
-      AffineTransform af = new AffineTransform();
-      af.translate(fogX, fogY);
-      af.scale(scale, scale);
-
-      buffG.setTransform(af);
-      // buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f :
-      // 1f));
-      buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-
-      timer.start("renderFog-visibleArea");
-      Area visibleArea = zoneView.getVisibleArea(view);
-      timer.stop("renderFog-visibleArea");
-
-      timer.start("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
-      Area combined = zoneView.getExposedArea(view);
-      timer.stop("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
-
-      timer.start("renderFogArea");
-      buffG.fill(combined);
-      renderFogArea(buffG, view, combined, visibleArea);
-      renderFogOutline(buffG, view, visibleArea);
-      timer.stop("renderFogArea");
-
-      buffG.dispose();
-      timer.stop("renderFog");
-
-      g.drawImage(buffer, 0, 0, this);
-    }
-  }
-
-  private void renderFogArea(
-      final Graphics2D buffG, final PlayerView view, Area softFog, @Nonnull Area visibleArea) {
-    if (zoneView.isUsingVision()) {
-      buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-      if (!visibleArea.isEmpty()) {
-        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
-
-        // Fill in the exposed area
-        buffG.fill(softFog);
-
-        buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-
-        Shape oldClip = buffG.getClip();
-        buffG.setClip(softFog);
-        buffG.fill(visibleArea);
-        buffG.setClip(oldClip);
-      } else {
-        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
-        buffG.fill(softFog);
-      }
-    } else {
-      buffG.fill(softFog);
-      buffG.setClip(softFog);
-    }
-  }
-
-  private void renderFogOutline(
-      final Graphics2D buffG, PlayerView view, @Nonnull Area visibleArea) {
-    // If there is no visible area, there is no outline that needs rendering.
-    if (zoneView.isUsingVision() && !visibleArea.isEmpty()) {
-      // Transform the area (not G2D) because we want the drawn line to remain thin.
-      AffineTransform af = new AffineTransform();
-      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
-      af.scale(getScale(), getScale());
-      visibleArea = visibleArea.createTransformedArea(af);
-
-      buffG.setTransform(new AffineTransform());
-      buffG.setComposite(AlphaComposite.Src);
-      buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      buffG.setStroke(new BasicStroke(1));
-      buffG.setColor(Color.BLACK);
-      buffG.draw(visibleArea);
-    }
   }
 
   public boolean isLoading() {
