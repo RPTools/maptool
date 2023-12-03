@@ -167,14 +167,16 @@ public class ZoneRenderer extends JComponent
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
+    zoneView = new ZoneView(zone);
+    setZoneScale(new Scale());
+
+    var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();
     this.gridRenderer = new GridRenderer();
     this.haloRenderer = new HaloRenderer();
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
-    setZoneScale(new Scale());
-    zoneView = new ZoneView(zone);
     selectionModel = new SelectionModel(zone);
 
     // add(MapTool.getFrame().getFxPanel(), PositionalLayout.Position.NW);
