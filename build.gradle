@@ -511,7 +511,7 @@ dependencies {
     implementation 'com.google.guava:guava:32.1.3-jre'
     // compression of messages between client and server
     implementation 'org.apache.commons:commons-compress:1.25.0'
-    implementation 'com.github.luben:zstd-jni:1.5.5-10'
+    implementation 'com.github.luben:zstd-jni:1.5.5-11'
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.774'
     // layout for forms created in code
