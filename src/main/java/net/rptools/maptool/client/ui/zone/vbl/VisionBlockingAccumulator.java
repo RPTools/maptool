@@ -15,32 +15,20 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
 import net.rptools.maptool.model.Zone;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.Envelope;
 
 public final class VisionBlockingAccumulator {
-  private final GeometryFactory geometryFactory;
   private final Coordinate origin;
-  private final PreparedGeometry vision;
-  private final List<LineString> visionBlockingSegments;
+  private final Envelope visionBounds;
+  private final VisibilityProblem visibilityProblem;
 
   public VisionBlockingAccumulator(
-      GeometryFactory geometryFactory, Point origin, PreparedGeometry vision) {
-    this.geometryFactory = geometryFactory;
+      Point origin, Envelope visionBounds, VisibilityProblem visibilityProblem) {
     this.origin = new Coordinate(origin.getX(), origin.getY());
-
-    this.vision = vision;
-
-    this.visionBlockingSegments = new ArrayList<>();
-  }
-
-  public List<LineString> getVisionBlockingSegments() {
-    return visionBlockingSegments;
+    this.visionBounds = new Envelope(visionBounds);
+    this.visibilityProblem = visibilityProblem;
   }
 
   private void blockVisionBeyondContainer(AreaTree.Node container) {
@@ -49,12 +37,9 @@ public final class VisionBlockingAccumulator {
             ? Facing.OCEAN_SIDE_FACES_ORIGIN
             : Facing.ISLAND_SIDE_FACES_ORIGIN;
 
-    visionBlockingSegments.addAll(
-        container.getMeta().getFacingSegments(geometryFactory, origin, facing, vision));
-
+    container.getMeta().getFacingSegments(origin, facing, visionBounds, visibilityProblem::add);
     for (var child : container.getChildren()) {
-      visionBlockingSegments.addAll(
-          child.getMeta().getFacingSegments(geometryFactory, origin, facing, vision));
+      child.getMeta().getFacingSegments(origin, facing, visionBounds, visibilityProblem::add);
     }
   }
 

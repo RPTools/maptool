@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -23,74 +25,90 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.rptools.lib.CodeTimer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineSegment;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.prep.PreparedGeometry;
-import org.locationtech.jts.geom.util.LineStringExtracter;
-import org.locationtech.jts.operation.union.UnaryUnionOp;
 
 record NearestWallResult(LineSegment wall, Coordinate point, double distance) {}
 
 public class VisibilityProblem {
   private static final Logger log = LogManager.getLogger(VisibilityProblem.class);
 
-  private final GeometryFactory geometryFactory;
   private final Coordinate origin;
-  private final PreparedGeometry visionGeometry;
-  private final List<LineString> visionBlockingSegments;
+  private final Envelope visionBounds;
+  private final List<LineSegment> segments;
+  private final Envelope envelope;
 
-  public VisibilityProblem(
-      GeometryFactory geometryFactory, Coordinate origin, PreparedGeometry visionGeometry) {
-    this.geometryFactory = geometryFactory;
+  /**
+   * Build a new problem set.
+   *
+   * @param origin The point at which all vision rays begin.
+   * @param visionBounds The bounds of the vision, in order to avoid the need for infinite polygonal
+   *     areas.
+   */
+  public VisibilityProblem(Coordinate origin, Envelope visionBounds) {
     this.origin = origin;
-    this.visionGeometry = visionGeometry;
-    this.visionBlockingSegments = new ArrayList<>();
+    this.visionBounds = visionBounds;
+    this.segments = new ArrayList<>();
+    this.envelope = new Envelope();
   }
 
-  public void add(LineString string) {
-    visionBlockingSegments.add(string);
+  public void add(Coordinate... string) {
+    add(Arrays.asList(string));
   }
 
-  public @Nullable Geometry solve() {
-    if (visionBlockingSegments.isEmpty()) {
+  public void add(List<Coordinate> string) {
+    if (string.isEmpty()) {
+      return;
+    }
+
+    // Always plainly add the first point.
+    var previous = string.get(0);
+    this.envelope.expandToInclude(previous);
+
+    for (int i = 1; i < string.size(); ++i) {
+      final var current = string.get(i);
+      this.envelope.expandToInclude(current);
+      segments.add(new LineSegment(previous, current));
+      previous = current;
+    }
+  }
+
+  public @Nullable Coordinate[] solve() {
+    final var timer = CodeTimer.get();
+
+    if (segments.isEmpty()) {
       // No topology, apparently.
       return null;
     }
 
-    /*
-     * Unioning all the line segments has the nice effect of noding any intersections between line
-     * segments. Without this, it may not be valid.
-     * Note: if the geometry were only composed of one topology, it would certainly be valid due to
-     * its "flat" nature. But even in that case, it is more robust to due the union in case this
-     * flatness assumption ever changes.
-     */
-    final var allWallGeometry = new UnaryUnionOp(visionBlockingSegments).union();
-    // Replace the original geometry with the well-defined geometry.
-    visionBlockingSegments.clear();
-    LineStringExtracter.getLines(allWallGeometry, visionBlockingSegments);
-
+    timer.start("add bounds");
     /*
      * The algorithm requires walls in every direction. The easiest way to accomplish this is to add
      * the boundary of the bounding box.
      */
-    final var envelope = allWallGeometry.getEnvelopeInternal();
-    envelope.expandToInclude(visionGeometry.getGeometry().getEnvelopeInternal());
+    envelope.expandToInclude(visionBounds);
     // Exact expansion distance doesn't matter, we just don't want the boundary walls to overlap
     // endpoints from real walls.
     envelope.expandBy(1.0);
-    // Because we definitely have geometry, the envelope will always be a non-trivial rectangle.
-    visionBlockingSegments.add(((Polygon) geometryFactory.toGeometry(envelope)).getExteriorRing());
+    // Because we definitely have geometry, the envelope will always be a non-trivial rectangle. Add
+    // the rectangle's sides as wall so the sweep is well-defined. Careful to create the segments
+    // counterclockwise!
+    add(
+        new Coordinate(envelope.getMinX(), envelope.getMinY()),
+        new Coordinate(envelope.getMaxX(), envelope.getMinY()),
+        new Coordinate(envelope.getMaxX(), envelope.getMaxY()),
+        new Coordinate(envelope.getMinX(), envelope.getMaxY()),
+        new Coordinate(envelope.getMinX(), envelope.getMinY()));
+    timer.stop("add bounds");
 
     // Now that we have valid geometry and a bounding box, we can continue with the sweep.
 
-    final var endpoints = getSweepEndpoints(origin, visionBlockingSegments);
+    final var endpoints = getSweepEndpoints(origin, segments);
     Set<LineSegment> openWalls = Collections.newSetFromMap(new IdentityHashMap<>());
 
     // This initial sweep just makes sure we have the correct open set to start.
@@ -144,7 +162,18 @@ public class VisibilityProblem {
     }
     visionPoints.add(visionPoints.get(0)); // Ensure a closed loop.
 
-    return geometryFactory.createPolygon(visionPoints.toArray(Coordinate[]::new));
+    timer.start("close polygon");
+    // Ensure a closed loop.
+    // TODO Are there not cases where this is already done?
+    visionPoints.add(visionPoints.get(0));
+    timer.stop("close polygon");
+
+    timer.start("build result");
+    try {
+      return visionPoints.toArray(Coordinate[]::new);
+    } finally {
+      timer.stop("build result");
+    }
   }
 
   private static NearestWallResult findNearestOpenWall(
@@ -186,36 +215,18 @@ public class VisibilityProblem {
    * @return A list of all endpoints in counterclockwise order.
    */
   private static List<VisibilitySweepEndpoint> getSweepEndpoints(
-      Coordinate origin, List<LineString> visionBlockingSegments) {
+      Coordinate origin, Collection<LineSegment> visionBlockingSegments) {
     final Map<Coordinate, VisibilitySweepEndpoint> endpointsByPosition = new HashMap<>();
-    for (final var segment : visionBlockingSegments) {
-      VisibilitySweepEndpoint current = null;
-      for (final var coordinate : segment.getCoordinates()) {
-        final var previous = current;
-        current =
-            endpointsByPosition.computeIfAbsent(
-                coordinate, c -> new VisibilitySweepEndpoint(c, origin));
-        if (previous == null) {
-          // We just started this segment; still need a second point.
-          continue;
-        }
+    for (final var wall : visionBlockingSegments) {
+      assert wall.orientationIndex(origin) == Orientation.COUNTERCLOCKWISE;
 
-        final var isForwards =
-            Orientation.COUNTERCLOCKWISE
-                == Orientation.index(origin, previous.getPoint(), current.getPoint());
-        // Make sure the wall always goes in the counterclockwise direction.
-        final LineSegment wall =
-            isForwards
-                ? new LineSegment(previous.getPoint(), coordinate)
-                : new LineSegment(coordinate, previous.getPoint());
-        if (isForwards) {
-          previous.startsWall(wall);
-          current.endsWall(wall);
-        } else {
-          previous.endsWall(wall);
-          current.startsWall(wall);
-        }
-      }
+      var start =
+          endpointsByPosition.computeIfAbsent(wall.p0, c -> new VisibilitySweepEndpoint(c, origin));
+      var end =
+          endpointsByPosition.computeIfAbsent(wall.p1, c -> new VisibilitySweepEndpoint(c, origin));
+
+      start.startsWall(wall);
+      end.endsWall(wall);
     }
     final List<VisibilitySweepEndpoint> endpoints = new ArrayList<>(endpointsByPosition.values());
 
