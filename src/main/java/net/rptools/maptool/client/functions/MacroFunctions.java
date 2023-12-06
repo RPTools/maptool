@@ -315,7 +315,7 @@ public class MacroFunctions extends AbstractFunction {
       json =
           JSONMacroFunctions.getInstance().getJsonObjectFunctions().fromStrProp(propString, delim);
     }
-    mbp = macroButtonPropertiesFromJSON(mbp, null, json);
+    macroButtonPropertiesFromJSON(mbp, null, json);
     JsonObject jobj = json.getAsJsonObject();
 
     if (jobj.has("command") && !MapTool.getParser().isMacroTrusted()) {
@@ -577,7 +577,7 @@ public class MacroFunctions extends AbstractFunction {
     } else {
       FunctionUtil.checkNumberParam("createMacro", param, 1, 3);
       prop = param.get(0).toString();
-      mbp = macroButtonPropertiesFromJSON(mbp, prop, null);
+      macroButtonPropertiesFromJSON(mbp, prop, null);
       mbp.setCommand(JSONMacroFunctions.getInstance().jsonToScriptString(jobj.get("command")));
     }
     mbp.setSaveLocation(gmPanel ? "GmPanel" : "CampaignPanel");
@@ -589,8 +589,8 @@ public class MacroFunctions extends AbstractFunction {
   }
 
   /**
-   * Creates a macro button on a token. If There is only one argument in param and it is a json
-   * string then the values in this are used to create the button on the token in context. If there
+   * Creates a macro button on a token. If There is only one argument in param, and it is a json
+   * string, then the values in this are used to create the button on the token in context. If there
    * are two arguments and the first is a json string the second argument is the token to create the
    * button on. If the first argument is not a json string then it is the label for the new button.
    * The second argument is the command, if the third argument is specified then it is the
@@ -675,7 +675,7 @@ public class MacroFunctions extends AbstractFunction {
               value.toString(),
               gmPanel ? "gm panel" : "campaign panel"));
     }
-    MacroButtonProperties mbp = null;
+    MacroButtonProperties mbp;
     List<MacroButtonProperties> list = getCampaignMbpList(gmPanel);
     ImmutablePair<Integer, MacroButtonProperties> pair;
     if ((value instanceof BigDecimal)) {
@@ -694,9 +694,8 @@ public class MacroFunctions extends AbstractFunction {
       }
       if (delim.equals("json")) {
         try {
-          mbp =
-              macroButtonPropertiesFromJSON(
-                  mbp, null, JSONMacroFunctions.getInstance().asJsonElement(props));
+          macroButtonPropertiesFromJSON(
+              mbp, null, JSONMacroFunctions.getInstance().asJsonElement(props));
         } catch (IllegalStateException e) {
           throw new ParserException(
               I18N.getText(
@@ -924,7 +923,7 @@ public class MacroFunctions extends AbstractFunction {
     List<String> strIndexes = new LinkedList<>();
     List<Integer> indexes = new LinkedList<>();
     List<MacroButtonProperties> mbpList = getCampaignMbpList(gmPanel);
-    delim = delim == "" ? "," : delim;
+    delim = delim.isEmpty() ? "," : delim;
     for (MacroButtonProperties props : mbpList) {
       if (props.getGroup().equals(group)) {
         strIndexes.add(String.valueOf(props.getIndex()));
@@ -1218,134 +1217,4 @@ public class MacroFunctions extends AbstractFunction {
       return true;
     }
   }
-
-  /**
-   * I don't know how to actually make tests, but these are the macros I used when developing the
-   * functions for dealing with macros on the campaign panels. These macros create test macro
-   * buttons containing applications of the various functions. This is mostly so I have them stored
-   * somewhere relevant.
-   */
-/*
-[h: broadcast("<b>Panel " + panel.campaign + "</b>")]
-[h: broadcast('getMacroName() + &quot; @ &quot; + getMacroLocation() - > ' + getMacroName() + ' @ 'getMacroLocation())]
-[h: broadcast('getMacroLocation() - > ' + getMacroLocation())]
-[h: broadcast('getMacroButtonIndex() -> ' + getMacroButtonIndex())]
-[h: broadcast('getMacros("json", panel.campaign) -> ' + getMacros("json", panel.campaign))]
-[h: broadcast('getMacros("", panel.campaign) -> ' + getMacros("", panel.campaign))]
-[h: broadcast('getMacroProps(getMacroButtonIndex(),";", getMacroLocation()) -> ' +
-              getMacroProps(getMacroButtonIndex(),";", getMacroLocation()))]
-[h: mbp = getMacroProps(getMacroButtonIndex(),"json", getMacroLocation())]
-[h: broadcast('getMacroProps(getMacroButtonIndex(),"json", getMacroLocation()) -> <pre>'
-                      + json.indent(mbp,3) + '</pre>')]
-[h: mbp = json.remove(mbp,"index")]
-[h: broadcast('createMacro(mbp, panel.campaign) -> ' + createMacro(mbp, panel.campaign))]
-[h: broadcast('getMacroIndices(getMacroName(), "json", panel.campaign) -> ' +
-              getMacroIndices(getMacroName(), "json", panel.campaign))]
-[h: broadcast('getMacroIndices(getMacroName(), "", panel.campaign) -> ' +
-              getMacroIndices(getMacroName(), "", panel.campaign))]
-[h: broadcast('getMacroIndexes(getMacroName(), "json", panel.campaign) -> ' +
-              getMacroIndexes(getMacroName(), "json", panel.campaign))]
-[h: broadcast('getMacroIndexes(getMacroName(), "", panel.campaign) -> ' +
-              getMacroIndexes(getMacroName(), "", panel.campaign))]
-[h: broadcast('getMacroCommand(getMacroButtonIndex(), panel.campaign) -> ' +
-              getMacroCommand(getMacroButtonIndex(), panel.campaign))]
-[h: props = json.set("",
-"applyToSelected"      , false                                     ,
-"autoExecute"          , true                                      ,
-"color"                , "red"                                     ,
-"command"              , "[h: this = getMacroName()]
-[h: here = getMacroLocation()]
-[h: broadcast(strformat('%{this}@%{here}'))]",
-"fontColor"            , "white"                                   ,
-"fontSize"             , "13pt"                                    ,
-"includeLabel"         , false                                     ,
-"group"                , "New Group"                               ,
-"sortBy"               , "a1"                                      ,
-"label"                , "New Macro"                               ,
-"maxWidth"             , "Sneaky hiding place"                     ,
-"minWidth"             , 90                                        ,
-"playerEditable"       , false                                     ,
-"tooltip"              , "Three cheers for the sun god. Ra! Ra! Ra!",
-"compare"              , json.append(""                            ,
-"applyToSelected"  ,
-"autoExecute"      ,
-"command"          ,
-"group"            ,
-"includeLabel"     ,
-"sortPrefix")
-)]
-[h: indices = getMacroIndices(getMacroName(), "json", panel.campaign)]
-[h: broadcast('setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.campaign) ->' +
-              setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.campaign))]
-[h: props = json.set(props, "fontColor", "black")]
-[h: broadcast('setMacroProps("New Macro", props,"json", panel.campaign) ->' +
-              setMacroProps("New Macro", props,"json", panel.campaign))]
-[h: broadcast('hasMacro("New Macro", panel.campaign) -> ' + hasMacro("New Macro", panel.campaign))]
-[h, macro("New Macro@campaign"):""]
-[h: setMacroCommand(
-json.get(getMacroIndexes("New Macro", "json", panel.campaign),0),	"[h: broadcast(strformat('%s@%s remastered... and deleted.', getMacroName(), getMacroLocation()))][r: removeMacro(listGet(getMacroIndexes('New Macro', '', panel.campaign), 0), panel.campaign)]", panel.campaign)]
-[h, macro("New Macro@campaign"):""]
-[h: broadcast('getMacroGroup("New Group","", panel.campaign) ->' + getMacroGroup("New Group","", panel.campaign)]
-
-[h: broadcast("<b>Panel " + panel.gm + "</b>")]
-[h: broadcast('getMacroName() + &quot; @ &quot; + getMacroLocation() - > ' + getMacroName() + ' @ 'getMacroLocation())]
-[h: broadcast('getMacroLocation() - > ' + getMacroLocation())]
-[h: broadcast('getMacroButtonIndex() -> ' + getMacroButtonIndex())]
-[h: broadcast('getMacros("json", panel.gm) -> ' + getMacros("json", panel.gm))]
-[h: broadcast('getMacros("", panel.gm) -> ' + getMacros("", panel.gm))]
-[h: broadcast('getMacroProps(getMacroButtonIndex(),";", getMacroLocation()) -> ' +
-	getMacroProps(getMacroButtonIndex(),";", getMacroLocation()))]
-[h: mbp = getMacroProps(getMacroButtonIndex(),"json", getMacroLocation())]
-[h: broadcast('getMacroProps(getMacroButtonIndex(),"json", getMacroLocation()) -> <pre>'
-	+ json.indent(mbp,3) + '</pre>')]
-[h: mbp = json.remove(mbp,"index")]
-[h: broadcast('createMacro(mbp, panel.gm) -> ' + createMacro(mbp, panel.gm))]
-[h: broadcast('getMacroIndices(getMacroName(), "json", panel.gm) -> ' +
-	getMacroIndices(getMacroName(), "json", panel.gm))]
-[h: broadcast('getMacroIndices(getMacroName(), "", panel.gm) -> ' +
-	getMacroIndices(getMacroName(), "", panel.gm))]
-[h: broadcast('getMacroIndexes(getMacroName(), "json", panel.gm) -> ' +
-	getMacroIndexes(getMacroName(), "json", panel.gm))]
-[h: broadcast('getMacroIndexes(getMacroName(), "", panel.gm) -> ' +
-	getMacroIndexes(getMacroName(), "", panel.gm))]
-[h: broadcast('getMacroCommand(getMacroButtonIndex(), panel.gm) -> ' +
-	getMacroCommand(getMacroButtonIndex(), panel.gm))]
-[h: props = json.set("",
-"applyToSelected"      , false                                     ,
-"autoExecute"          , true                                      ,
-"color"                , "red"                                     ,
-"command"              , "[h: this = getMacroName()]
-[h: here = getMacroLocation()]
-[h: broadcast(strformat('%{this}@%{here}'))]",
-"fontColor"            , "white"                                   ,
-"fontSize"             , "13pt"                                    ,
-"includeLabel"         , false                                     ,
-"group"                , "New Group"                               ,
-"sortBy"               , "a1"                                      ,
-"label"                , "New Macro"                               ,
-"maxWidth"             , "Sneaky hiding place"                     ,
-"minWidth"             , 90                                        ,
-"playerEditable"       , false                                     ,
-"tooltip"              , "Three cheers for the sun god. Ra! Ra! Ra!",
-"compare"              , json.append(""                            ,
-                            "applyToSelected"  ,
-                            "autoExecute"      ,
-                            "command"          ,
-                            "group"            ,
-                            "includeLabel"     ,
-                            "sortPrefix")
-)]
-[h: indices = getMacroIndices(getMacroName(), "json", panel.gm)]
-[h: broadcast('setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.gm) ->' +
-	setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.gm))]
-[h: props = json.set(props, "fontColor", "black")]
-[h: broadcast('setMacroProps("New Macro", props,"json", panel.gm) ->' +
-	setMacroProps("New Macro", props,"json", panel.gm))]
-[h: broadcast('hasMacro("New Macro", panel.gm) -> ' + hasMacro("New Macro", panel.gm))]
-[h, macro("New Macro@gm"):""]
-[h: setMacroCommand(
-		json.get(getMacroIndexes("New Macro", "json", panel.gm),0),	"[h: broadcast(strformat('%s@%s remastered.', getMacroName(), getMacroLocation()))][h: removeMacro(listGet(getMacroIndexes('New Macro', '', panel.gm), 0), panel.gm)]", panel.gm)]
-[h, macro("New Macro@gm"):""]
-[h: broadcast('getMacroGroup("New Group","", panel.gm) ->' + getMacroGroup("New Group","", panel.gm)]
-*/
 }
