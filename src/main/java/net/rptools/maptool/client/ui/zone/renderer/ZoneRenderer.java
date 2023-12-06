@@ -160,6 +160,7 @@ public class ZoneRenderer extends JComponent
   private final LumensRenderer lumensRenderer;
   private final FogRenderer fogRenderer;
   private final VisionOverlayRenderer visionOverlayRenderer;
+  private final DebugRenderer debugRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -183,6 +184,7 @@ public class ZoneRenderer extends JComponent
     this.lumensRenderer = new LumensRenderer(renderHelper, zone, zoneView);
     this.fogRenderer = new FogRenderer(renderHelper, zone, zoneView);
     this.visionOverlayRenderer = new VisionOverlayRenderer(renderHelper, zone, zoneView);
+    this.debugRenderer = new DebugRenderer(renderHelper);
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
@@ -1219,6 +1221,9 @@ public class ZoneRenderer extends JComponent
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
+
+    debugRenderer.renderShapes(g2d, Arrays.asList(shape, shape2));
+
     // g2d.setColor(Color.red);
     // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
     // Area area = new
@@ -1920,20 +1925,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderPath-3");
     }
 
-    // g.translate(getViewOffsetX(), getViewOffsetY());
-    // g.scale(getScale(), getScale());
-    // for debugging purposes...
-    if (shape != null) {
-      g.setColor(Color.red);
-      g.fill(shape);
-      g.draw(shape);
-    }
-    if (shape2 != null) {
-      g.setColor(Color.blue);
-      g.fill(shape2);
-      g.draw(shape2);
-    }
-
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldRendering);
   }
 
@@ -1983,11 +1974,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
 
-    AffineTransform at = new AffineTransform();
-    at.translate(getViewOffsetX(), getViewOffsetY());
-    at.scale(getScale(), getScale());
-
-    this.shape = at.createTransformedShape(shape);
+    this.shape = shape;
   }
 
   public void setShape2(Shape shape) {
@@ -1995,36 +1982,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
 
-    AffineTransform at = new AffineTransform();
-    at.translate(getViewOffsetX(), getViewOffsetY());
-    at.scale(getScale(), getScale());
-
-    this.shape2 = at.createTransformedShape(shape);
-  }
-
-  public Shape getShape() {
-    return shape;
-  }
-
-  public Shape getShape2() {
-    return shape2;
-  }
-
-  public void drawShape(Shape shape, int x, int y) {
-    Graphics2D g = (Graphics2D) this.getGraphics();
-
-    Grid grid = zone.getGrid();
-    double cwidth = grid.getCellWidth() * getScale();
-    double cheight = grid.getCellHeight() * getScale();
-
-    double iwidth = cwidth;
-    double iheight = cheight;
-
-    ScreenPoint sp = ScreenPoint.fromZonePoint(this, x, y);
-
-    AffineTransform at = new AffineTransform();
-    at.translate(sp.x, sp.y);
-    g.draw(at.createTransformedShape(shape));
+    this.shape2 = shape;
   }
 
   public void showBlockedMoves(
