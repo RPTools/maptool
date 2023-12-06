@@ -20,9 +20,11 @@ import java.util.List;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.macro.MacroManager;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -37,7 +39,7 @@ import net.rptools.parser.function.AbstractFunction;
 public class ChatFunction extends AbstractFunction {
   /** Ctor */
   public ChatFunction() {
-    super(1, 3, "broadcast");
+    super(1, 3, "broadcast", "slash");
   }
 
   /** The singleton instance. */
@@ -59,9 +61,28 @@ public class ChatFunction extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("broadcast")) {
       return broadcast(resolver, parameters);
+    } else if (functionName.equalsIgnoreCase("slash")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
+      return slash(parameters);
     } else {
       throw new ParserException("Unknown function: " + functionName);
     }
+  }
+
+  /**
+   * Function to expose "/" chat commands to use by macro.
+   *
+   * @param parameters command and arguments
+   * @return true on success
+   */
+  private Object slash(List<Object> parameters) {
+    String command = parameters.get(0).toString();
+    if (!command.startsWith("/")) command = "/" + command;
+    if (parameters.size() > 1) {
+      command += " " + parameters.get(1).toString();
+    }
+    MacroManager.executeMacro(command);
+    return "";
   }
 
   /**
