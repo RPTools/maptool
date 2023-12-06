@@ -1221,32 +1221,131 @@ public class MacroFunctions extends AbstractFunction {
 
   /**
    * I don't know how to actually make tests, but these are the macros I used when developing the
-   * functions for dealing with macros on the campaign panels.
-   * These macros create test macro buttons containing applications of the various functions.
-   * This is mostly so I have them stored somewhere relelvant.
+   * functions for dealing with macros on the campaign panels. These macros create test macro
+   * buttons containing applications of the various functions. This is mostly so I have them stored
+   * somewhere relevant.
    */
-  public void campaignMacroFunctionsTest() throws ParserException {
-    String macroTestCampaign = "[h: props = json.set(\\\"\\\",\n" +
-            "    \\\"autoExecute\\\", true,\n" +
-            "    \\\"label\\\", \\\"CampaignMacro\\\",\n" +
-            "    \\\"playerEditable\\\", false,\n" +
-            "    \\\"command\\\", decode(\\\"%5Bh%3A%20broadcast(%22%3Cb%3EPanel%20%22%20%2B%20panel.campaign%20%2B%20%22%3C%2Fb%3E%22)%5D%0D%0A%5Bh%3A%20broadcast('getMacroName()%20%2B%20%26quot%3B%20%40%20%26quot%3B%20%2B%20getMacroLocation()%20-%20%3E%20'%20%2B%20getMacroName()%20%2B%20'%20%40%20'getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroLocation()%20-%20%3E%20'%20%2B%20getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroButtonIndex()%20-%3E%20'%20%2B%20getMacroButtonIndex())%5D%0D%0A%5Bh%3A%20broadcast('getMacros(%22json%22%2C%20panel.campaign)%20-%3E%20'%20%2B%20getMacros(%22json%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacros(%22%22%2C%20panel.campaign)%20-%3E%20'%20%2B%20getMacros(%22%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroProps(getMacroButtonIndex()%2C%22%3B%22%2C%20getMacroLocation())%20-%3E%20'%20%2B%0D%0A%09getMacroProps(getMacroButtonIndex()%2C%22%3B%22%2C%20getMacroLocation()))%5D%0D%0A%5Bh%3A%20mbp%20%3D%20getMacroProps(getMacroButtonIndex()%2C%22json%22%2C%20getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroProps(getMacroButtonIndex()%2C%22json%22%2C%20getMacroLocation())%20-%3E%20%3Cpre%3E'%0D%0A%09%2B%20json.indent(mbp%2C3)%20%2B%20'%3C%2Fpre%3E')%5D%0D%0A%5Bh%3A%20mbp%20%3D%20json.remove(mbp%2C%22index%22)%5D%0D%0A%5Bh%3A%20broadcast('createMacro(mbp%2C%20panel.campaign)%20-%3E%20'%20%2B%20createMacro(mbp%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.campaign)%20-%3E%20'%20%2B%0D%0A%09getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndices(getMacroName()%2C%20%22%22%2C%20panel.campaign)%20-%3E%20'%20%2B%0D%0A%09getMacroIndices(getMacroName()%2C%20%22%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndexes(getMacroName()%2C%20%22json%22%2C%20panel.campaign)%20-%3E%20'%20%2B%0D%0A%09getMacroIndexes(getMacroName()%2C%20%22json%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndexes(getMacroName()%2C%20%22%22%2C%20panel.campaign)%20-%3E%20'%20%2B%0D%0A%09getMacroIndexes(getMacroName()%2C%20%22%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('getMacroCommand(getMacroButtonIndex()%2C%20panel.campaign)%20-%3E%20'%20%2B%0D%0A%09getMacroCommand(getMacroButtonIndex()%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20props%20%3D%20json.set(%22%22%2C%0D%0A%22applyToSelected%22%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22autoExecute%22%20%20%20%20%20%20%20%20%20%20%2C%20true%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22color%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22red%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22command%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22%5Bh%3A%20this%20%3D%20getMacroName()%5D%0D%0A%5Bh%3A%20here%20%3D%20getMacroLocation()%5D%0D%0A%5Bh%3A%20broadcast(strformat('%25%7Bthis%7D%40%25%7Bhere%7D'))%5D%22%2C%0D%0A%22fontColor%22%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22white%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22fontSize%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%2213pt%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22includeLabel%22%20%20%20%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22group%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22New%20Group%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22sortBy%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22a1%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22label%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22New%20Macro%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22maxWidth%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22Sneaky%20hiding%20place%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22minWidth%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%2090%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22playerEditable%22%20%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22tooltip%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22Three%20cheers%20for%20the%20sun%20god.%20Ra!%20Ra!%20Ra!%22%2C%0D%0A%22compare%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20json.append(%22%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22applyToSelected%22%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22autoExecute%22%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22command%22%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22group%22%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22includeLabel%22%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22sortPrefix%22)%0D%0A)%5D%0D%0A%0D%0A%5Bh%3A%20indices%20%3D%20getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.campaign)%5D%0D%0A%5Bh%3A%20broadcast('setMacroProps(json.get(indices%2C%20json.length(indices)%20-%201)%2C%20props%2C%22json%22%2C%20panel.campaign)%20-%3E'%20%2B%0D%0A%09setMacroProps(json.get(indices%2C%20json.length(indices)%20-%201)%2C%20props%2C%22json%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20props%20%3D%20json.set(props%2C%20%22fontColor%22%2C%20%22black%22)%5D%0D%0A%5Bh%3A%20broadcast('setMacroProps(%22New%20Macro%22%2C%20props%2C%22json%22%2C%20panel.campaign)%20-%3E'%20%2B%0D%0A%09setMacroProps(%22New%20Macro%22%2C%20props%2C%22json%22%2C%20panel.campaign))%5D%0D%0A%5Bh%3A%20broadcast('hasMacro(%22New%20Macro%22%2C%20panel.campaign)%20-%3E%20'%20%2B%20hasMacro(%22New%20Macro%22%2C%20panel.campaign))%5D%0D%0A%5Bh%2C%20macro(%22New%20Macro%40campaign%22)%3A%22%22%5D%0D%0A%5Bh%3A%20setMacroCommand(%0D%0A%09%09json.get(getMacroIndexes(%22New%20Macro%22%2C%20%22json%22%2C%20panel.campaign)%2C0)%2C%09%22%5Bh%3A%20broadcast(strformat('%25s%40%25s%20remastered.'%2C%20getMacroName()%2C%20getMacroLocation()))%5D%5Bh%3A%20removeMacro(listGet(getMacroIndexes('New%20Macro'%2C%20''%2C%20panel.campaign)%2C%200)%2C%20panel.campaign)%5D%22%2C%20panel.campaign)%5D%0D%0A%5Bh%2C%20macro(%22New%20Macro%40campaign%22)%3A%22%22%5D%0D%0A%5Bh%3A%20broadcast('getMacroGroup(%22New%20Group%22%2C%22%22%2C%20panel.campaign)%20-%3E'%20%2B%20getMacroGroup(%22New%20Group%22%2C%22%22%2C%20panel.campaign)%5D\\\"),\n" +
-            "    \\\"applyToSelected\\\", false,\n" +
-            "    \\\"compare\\\", json.append(\\\"\\\", \\\"group\\\", \\\"sortPrefix\\\", \\\"command\\\", \\\"includeLabel\\\", \\\"autoExecute\\\", \\\"applyToSelected\\\")\n" +
-            ")]\n" +
-            "[h: createMacro(props, panel.campaign)]\n" +
-            "[r, macro(\\\"CampaignMacro@campaign\\\"):\\\"\\\"]";
-    String macroTestGM = "[h: props = json.set(\\\"\\\",\n" +
-            "    \\\"autoExecute\\\", true,\n" +
-            "    \\\"label\\\", \\\"GMMacro\\\",\n" +
-            "    \\\"playerEditable\\\", false,\n" +
-            "    \\\"command\\\", decode(\\\"%5Bh%3A%20broadcast(%22%3Cb%3EPanel%20%22%20%2B%20panel.gm%20%2B%20%22%3C%2Fb%3E%22)%5D%0D%0A%5Bh%3A%20broadcast('getMacroName()%20%2B%20%26quot%3B%20%40%20%26quot%3B%20%2B%20getMacroLocation()%20-%20%3E%20'%20%2B%20getMacroName()%20%2B%20'%20%40%20'getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroLocation()%20-%20%3E%20'%20%2B%20getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroButtonIndex()%20-%3E%20'%20%2B%20getMacroButtonIndex())%5D%0D%0A%5Bh%3A%20broadcast('getMacros(%22json%22%2C%20panel.gm)%20-%3E%20'%20%2B%20getMacros(%22json%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacros(%22%22%2C%20panel.gm)%20-%3E%20'%20%2B%20getMacros(%22%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroProps(getMacroButtonIndex()%2C%22%3B%22%2C%20getMacroLocation())%20-%3E%20'%20%2B%0D%0A%09getMacroProps(getMacroButtonIndex()%2C%22%3B%22%2C%20getMacroLocation()))%5D%0D%0A%5Bh%3A%20mbp%20%3D%20getMacroProps(getMacroButtonIndex()%2C%22json%22%2C%20getMacroLocation())%5D%0D%0A%5Bh%3A%20broadcast('getMacroProps(getMacroButtonIndex()%2C%22json%22%2C%20getMacroLocation())%20-%3E%20%3Cpre%3E'%0D%0A%09%2B%20json.indent(mbp%2C3)%20%2B%20'%3C%2Fpre%3E')%5D%0D%0A%5Bh%3A%20mbp%20%3D%20json.remove(mbp%2C%22index%22)%5D%0D%0A%5Bh%3A%20broadcast('createMacro(mbp%2C%20panel.gm)%20-%3E%20'%20%2B%20createMacro(mbp%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.gm)%20-%3E%20'%20%2B%0D%0A%09getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndices(getMacroName()%2C%20%22%22%2C%20panel.gm)%20-%3E%20'%20%2B%0D%0A%09getMacroIndices(getMacroName()%2C%20%22%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndexes(getMacroName()%2C%20%22json%22%2C%20panel.gm)%20-%3E%20'%20%2B%0D%0A%09getMacroIndexes(getMacroName()%2C%20%22json%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroIndexes(getMacroName()%2C%20%22%22%2C%20panel.gm)%20-%3E%20'%20%2B%0D%0A%09getMacroIndexes(getMacroName()%2C%20%22%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('getMacroCommand(getMacroButtonIndex()%2C%20panel.gm)%20-%3E%20'%20%2B%0D%0A%09getMacroCommand(getMacroButtonIndex()%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20props%20%3D%20json.set(%22%22%2C%0D%0A%22applyToSelected%22%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22autoExecute%22%20%20%20%20%20%20%20%20%20%20%2C%20true%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22color%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22red%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22command%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22%5Bh%3A%20this%20%3D%20getMacroName()%5D%0D%0A%5Bh%3A%20here%20%3D%20getMacroLocation()%5D%0D%0A%5Bh%3A%20broadcast(strformat('%25%7Bthis%7D%40%25%7Bhere%7D'))%5D%22%2C%0D%0A%22fontColor%22%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22white%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22fontSize%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%2213pt%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22includeLabel%22%20%20%20%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22group%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22New%20Group%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22sortBy%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22a1%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22label%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22New%20Macro%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22maxWidth%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22Sneaky%20hiding%20place%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22minWidth%22%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%2090%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22playerEditable%22%20%20%20%20%20%20%20%2C%20false%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%22tooltip%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20%22Three%20cheers%20for%20the%20sun%20god.%20Ra!%20Ra!%20Ra!%22%2C%0D%0A%22compare%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%20json.append(%22%22%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22applyToSelected%22%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22autoExecute%22%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22command%22%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22group%22%20%20%20%20%20%20%20%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22includeLabel%22%20%20%20%20%20%2C%0D%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%22sortPrefix%22)%0D%0A)%5D%0D%0A%0D%0A%5Bh%3A%20indices%20%3D%20getMacroIndices(getMacroName()%2C%20%22json%22%2C%20panel.gm)%5D%0D%0A%5Bh%3A%20broadcast('setMacroProps(json.get(indices%2C%20json.length(indices)%20-%201)%2C%20props%2C%22json%22%2C%20panel.gm)%20-%3E'%20%2B%0D%0A%09setMacroProps(json.get(indices%2C%20json.length(indices)%20-%201)%2C%20props%2C%22json%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20props%20%3D%20json.set(props%2C%20%22fontColor%22%2C%20%22black%22)%5D%0D%0A%5Bh%3A%20broadcast('setMacroProps(%22New%20Macro%22%2C%20props%2C%22json%22%2C%20panel.gm)%20-%3E'%20%2B%0D%0A%09setMacroProps(%22New%20Macro%22%2C%20props%2C%22json%22%2C%20panel.gm))%5D%0D%0A%5Bh%3A%20broadcast('hasMacro(%22New%20Macro%22%2C%20panel.gm)%20-%3E%20'%20%2B%20hasMacro(%22New%20Macro%22%2C%20panel.gm))%5D%0D%0A%5Bh%2C%20macro(%22New%20Macro%40gm%22)%3A%22%22%5D%0D%0A%5Bh%3A%20setMacroCommand(%0D%0A%09%09json.get(getMacroIndexes(%22New%20Macro%22%2C%20%22json%22%2C%20panel.gm)%2C0)%2C%09%22%5Bh%3A%20broadcast(strformat('%25s%40%25s%20remastered.'%2C%20getMacroName()%2C%20getMacroLocation()))%5D%5Bh%3A%20removeMacro(listGet(getMacroIndexes('New%20Macro'%2C%20''%2C%20panel.gm)%2C%200)%2C%20panel.gm)%5D%22%2C%20panel.gm)%5D%0D%0A%5Bh%2C%20macro(%22New%20Macro%40gm%22)%3A%22%22%5D%0D%0A%5Bh%3A%20broadcast('getMacroGroup(%22New%20Group%22%2C%22%22%2C%20panel.gm)%20-%3E'%20%2B%20getMacroGroup(%22New%20Group%22%2C%22%22%2C%20panel.gm)%5D\\\"),\n" +
-            "    \\\"applyToSelected\\\", false,\n" +
-            "    \\\"compare\\\", json.append(\\\"\\\", \\\"group\\\", \\\"sortPrefix\\\", \\\"command\\\", \\\"includeLabel\\\", \\\"autoExecute\\\", \\\"applyToSelected\\\")\n" +
-            ")]\n" +
-            "[h: createMacro(props, panel.gm)]\n" +
-            "[r, macro(\\\"CampaignMacro@gm\\\"):\\\"\\\"]";
-    MapTool.getParser().parseExpression(macroTestGM,false);
-    MapTool.getParser().parseExpression(macroTestCampaign,false);
-  }
+/*
+[h: broadcast("<b>Panel " + panel.campaign + "</b>")]
+[h: broadcast('getMacroName() + &quot; @ &quot; + getMacroLocation() - > ' + getMacroName() + ' @ 'getMacroLocation())]
+[h: broadcast('getMacroLocation() - > ' + getMacroLocation())]
+[h: broadcast('getMacroButtonIndex() -> ' + getMacroButtonIndex())]
+[h: broadcast('getMacros("json", panel.campaign) -> ' + getMacros("json", panel.campaign))]
+[h: broadcast('getMacros("", panel.campaign) -> ' + getMacros("", panel.campaign))]
+[h: broadcast('getMacroProps(getMacroButtonIndex(),";", getMacroLocation()) -> ' +
+              getMacroProps(getMacroButtonIndex(),";", getMacroLocation()))]
+[h: mbp = getMacroProps(getMacroButtonIndex(),"json", getMacroLocation())]
+[h: broadcast('getMacroProps(getMacroButtonIndex(),"json", getMacroLocation()) -> <pre>'
+                      + json.indent(mbp,3) + '</pre>')]
+[h: mbp = json.remove(mbp,"index")]
+[h: broadcast('createMacro(mbp, panel.campaign) -> ' + createMacro(mbp, panel.campaign))]
+[h: broadcast('getMacroIndices(getMacroName(), "json", panel.campaign) -> ' +
+              getMacroIndices(getMacroName(), "json", panel.campaign))]
+[h: broadcast('getMacroIndices(getMacroName(), "", panel.campaign) -> ' +
+              getMacroIndices(getMacroName(), "", panel.campaign))]
+[h: broadcast('getMacroIndexes(getMacroName(), "json", panel.campaign) -> ' +
+              getMacroIndexes(getMacroName(), "json", panel.campaign))]
+[h: broadcast('getMacroIndexes(getMacroName(), "", panel.campaign) -> ' +
+              getMacroIndexes(getMacroName(), "", panel.campaign))]
+[h: broadcast('getMacroCommand(getMacroButtonIndex(), panel.campaign) -> ' +
+              getMacroCommand(getMacroButtonIndex(), panel.campaign))]
+[h: props = json.set("",
+"applyToSelected"      , false                                     ,
+"autoExecute"          , true                                      ,
+"color"                , "red"                                     ,
+"command"              , "[h: this = getMacroName()]
+[h: here = getMacroLocation()]
+[h: broadcast(strformat('%{this}@%{here}'))]",
+"fontColor"            , "white"                                   ,
+"fontSize"             , "13pt"                                    ,
+"includeLabel"         , false                                     ,
+"group"                , "New Group"                               ,
+"sortBy"               , "a1"                                      ,
+"label"                , "New Macro"                               ,
+"maxWidth"             , "Sneaky hiding place"                     ,
+"minWidth"             , 90                                        ,
+"playerEditable"       , false                                     ,
+"tooltip"              , "Three cheers for the sun god. Ra! Ra! Ra!",
+"compare"              , json.append(""                            ,
+"applyToSelected"  ,
+"autoExecute"      ,
+"command"          ,
+"group"            ,
+"includeLabel"     ,
+"sortPrefix")
+)]
+[h: indices = getMacroIndices(getMacroName(), "json", panel.campaign)]
+[h: broadcast('setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.campaign) ->' +
+              setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.campaign))]
+[h: props = json.set(props, "fontColor", "black")]
+[h: broadcast('setMacroProps("New Macro", props,"json", panel.campaign) ->' +
+              setMacroProps("New Macro", props,"json", panel.campaign))]
+[h: broadcast('hasMacro("New Macro", panel.campaign) -> ' + hasMacro("New Macro", panel.campaign))]
+[h, macro("New Macro@campaign"):""]
+[h: setMacroCommand(
+json.get(getMacroIndexes("New Macro", "json", panel.campaign),0),	"[h: broadcast(strformat('%s@%s remastered... and deleted.', getMacroName(), getMacroLocation()))][r: removeMacro(listGet(getMacroIndexes('New Macro', '', panel.campaign), 0), panel.campaign)]", panel.campaign)]
+[h, macro("New Macro@campaign"):""]
+[h: broadcast('getMacroGroup("New Group","", panel.campaign) ->' + getMacroGroup("New Group","", panel.campaign)]
+
+[h: broadcast("<b>Panel " + panel.gm + "</b>")]
+[h: broadcast('getMacroName() + &quot; @ &quot; + getMacroLocation() - > ' + getMacroName() + ' @ 'getMacroLocation())]
+[h: broadcast('getMacroLocation() - > ' + getMacroLocation())]
+[h: broadcast('getMacroButtonIndex() -> ' + getMacroButtonIndex())]
+[h: broadcast('getMacros("json", panel.gm) -> ' + getMacros("json", panel.gm))]
+[h: broadcast('getMacros("", panel.gm) -> ' + getMacros("", panel.gm))]
+[h: broadcast('getMacroProps(getMacroButtonIndex(),";", getMacroLocation()) -> ' +
+	getMacroProps(getMacroButtonIndex(),";", getMacroLocation()))]
+[h: mbp = getMacroProps(getMacroButtonIndex(),"json", getMacroLocation())]
+[h: broadcast('getMacroProps(getMacroButtonIndex(),"json", getMacroLocation()) -> <pre>'
+	+ json.indent(mbp,3) + '</pre>')]
+[h: mbp = json.remove(mbp,"index")]
+[h: broadcast('createMacro(mbp, panel.gm) -> ' + createMacro(mbp, panel.gm))]
+[h: broadcast('getMacroIndices(getMacroName(), "json", panel.gm) -> ' +
+	getMacroIndices(getMacroName(), "json", panel.gm))]
+[h: broadcast('getMacroIndices(getMacroName(), "", panel.gm) -> ' +
+	getMacroIndices(getMacroName(), "", panel.gm))]
+[h: broadcast('getMacroIndexes(getMacroName(), "json", panel.gm) -> ' +
+	getMacroIndexes(getMacroName(), "json", panel.gm))]
+[h: broadcast('getMacroIndexes(getMacroName(), "", panel.gm) -> ' +
+	getMacroIndexes(getMacroName(), "", panel.gm))]
+[h: broadcast('getMacroCommand(getMacroButtonIndex(), panel.gm) -> ' +
+	getMacroCommand(getMacroButtonIndex(), panel.gm))]
+[h: props = json.set("",
+"applyToSelected"      , false                                     ,
+"autoExecute"          , true                                      ,
+"color"                , "red"                                     ,
+"command"              , "[h: this = getMacroName()]
+[h: here = getMacroLocation()]
+[h: broadcast(strformat('%{this}@%{here}'))]",
+"fontColor"            , "white"                                   ,
+"fontSize"             , "13pt"                                    ,
+"includeLabel"         , false                                     ,
+"group"                , "New Group"                               ,
+"sortBy"               , "a1"                                      ,
+"label"                , "New Macro"                               ,
+"maxWidth"             , "Sneaky hiding place"                     ,
+"minWidth"             , 90                                        ,
+"playerEditable"       , false                                     ,
+"tooltip"              , "Three cheers for the sun god. Ra! Ra! Ra!",
+"compare"              , json.append(""                            ,
+                            "applyToSelected"  ,
+                            "autoExecute"      ,
+                            "command"          ,
+                            "group"            ,
+                            "includeLabel"     ,
+                            "sortPrefix")
+)]
+[h: indices = getMacroIndices(getMacroName(), "json", panel.gm)]
+[h: broadcast('setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.gm) ->' +
+	setMacroProps(json.get(indices, json.length(indices) - 1), props,"json", panel.gm))]
+[h: props = json.set(props, "fontColor", "black")]
+[h: broadcast('setMacroProps("New Macro", props,"json", panel.gm) ->' +
+	setMacroProps("New Macro", props,"json", panel.gm))]
+[h: broadcast('hasMacro("New Macro", panel.gm) -> ' + hasMacro("New Macro", panel.gm))]
+[h, macro("New Macro@gm"):""]
+[h: setMacroCommand(
+		json.get(getMacroIndexes("New Macro", "json", panel.gm),0),	"[h: broadcast(strformat('%s@%s remastered.', getMacroName(), getMacroLocation()))][h: removeMacro(listGet(getMacroIndexes('New Macro', '', panel.gm), 0), panel.gm)]", panel.gm)]
+[h, macro("New Macro@gm"):""]
+[h: broadcast('getMacroGroup("New Group","", panel.gm) ->' + getMacroGroup("New Group","", panel.gm)]
+*/
 }
