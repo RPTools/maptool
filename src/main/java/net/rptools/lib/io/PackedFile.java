@@ -52,8 +52,6 @@ import javax.xml.parsers.ParserConfigurationException;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.ModelVersionManager;
-import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
@@ -286,128 +284,118 @@ public class PackedFile implements AutoCloseable {
   }
 
   public void save() throws IOException {
-    CodeTimer saveTimer;
-
     if (!dirty) {
       return;
     }
-    saveTimer = new CodeTimer("PackedFile.save");
-    saveTimer.setEnabled(AppState.isCollectProfilingData());
 
-    // Create the new file
-    File newFile = new File(tmpDir, new GUID() + ".pak");
-    ZipOutputStream zout =
-        new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(newFile)));
-    zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
-    try {
-      saveTimer.start(CONTENT_FILE);
-      if (hasFile(CONTENT_FILE)) {
-        saveEntry(zout, CONTENT_FILE);
-      }
-      saveTimer.stop(CONTENT_FILE);
+    CodeTimer.using(
+        "PackedFile.save",
+        saveTimer -> {
+          // Create the new file
+          File newFile = new File(tmpDir, new GUID() + ".pak");
+          ZipOutputStream zout =
+              new ZipOutputStream(new BufferedOutputStream(new FileOutputStream(newFile)));
+          zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
 
-      saveTimer.start(PROPERTY_FILE);
-      if (getPropertyMap().isEmpty()) {
-        removeFile(PROPERTY_FILE);
-      } else {
-        zout.putNextEntry(new ZipEntry(PROPERTY_FILE));
-        xstream.toXML(getPropertyMap(), zout);
-        zout.closeEntry();
-      }
-      saveTimer.stop(PROPERTY_FILE);
-
-      // Now put each file
-      saveTimer.start("addFiles");
-      addedFileSet.remove(CONTENT_FILE);
-      for (String path : addedFileSet) {
-        saveEntry(zout, path);
-      }
-      saveTimer.stop("addFiles");
-
-      // Copy the rest of the zip entries over
-      saveTimer.start("copyFiles");
-      if (file.exists()) {
-        Enumeration<? extends ZipEntry> entries = zFile.entries();
-        while (entries.hasMoreElements()) {
-          ZipEntry entry = entries.nextElement();
-          if (!entry.isDirectory()
-              && !addedFileSet.contains(entry.getName())
-              && !removedFileSet.contains(entry.getName())
-              && !CONTENT_FILE.equals(entry.getName())
-              && !PROPERTY_FILE.equals(entry.getName())) {
-            // if (entry.getName().endsWith(".png") ||
-            // entry.getName().endsWith(".gif") ||
-            // entry.getName().endsWith(".jpeg"))
-            // zout.setLevel(Deflater.NO_COMPRESSION); // none needed for images as they are already
-            // compressed
-            // else
-            // zout.setLevel(Deflater.BEST_COMPRESSION); // fast compression
-            zout.putNextEntry(entry);
-            try (InputStream is = getFileAsInputStream(entry.getName())) {
-              // When copying, always use an InputStream
-              IOUtils.copy(is, zout);
+          try {
+            saveTimer.start(CONTENT_FILE);
+            if (hasFile(CONTENT_FILE)) {
+              saveEntry(zout, CONTENT_FILE);
             }
-            zout.closeEntry();
-          } else if (entry.isDirectory()) {
-            zout.putNextEntry(entry);
-            zout.closeEntry();
+            saveTimer.stop(CONTENT_FILE);
+
+            saveTimer.start(PROPERTY_FILE);
+            if (getPropertyMap().isEmpty()) {
+              removeFile(PROPERTY_FILE);
+            } else {
+              zout.putNextEntry(new ZipEntry(PROPERTY_FILE));
+              xstream.toXML(getPropertyMap(), zout);
+              zout.closeEntry();
+            }
+            saveTimer.stop(PROPERTY_FILE);
+
+            // Now put each file
+            saveTimer.start("addFiles");
+            addedFileSet.remove(CONTENT_FILE);
+            for (String path : addedFileSet) {
+              saveEntry(zout, path);
+            }
+            saveTimer.stop("addFiles");
+
+            // Copy the rest of the zip entries over
+            saveTimer.start("copyFiles");
+            if (file.exists()) {
+              Enumeration<? extends ZipEntry> entries = zFile.entries();
+              while (entries.hasMoreElements()) {
+                ZipEntry entry = entries.nextElement();
+                if (!entry.isDirectory()
+                    && !addedFileSet.contains(entry.getName())
+                    && !removedFileSet.contains(entry.getName())
+                    && !CONTENT_FILE.equals(entry.getName())
+                    && !PROPERTY_FILE.equals(entry.getName())) {
+                  zout.putNextEntry(entry);
+                  try (InputStream is = getFileAsInputStream(entry.getName())) {
+                    // When copying, always use an InputStream
+                    IOUtils.copy(is, zout);
+                  }
+                  zout.closeEntry();
+                } else if (entry.isDirectory()) {
+                  zout.putNextEntry(entry);
+                  zout.closeEntry();
+                }
+              }
+            }
+            try {
+              if (zFile != null) zFile.close();
+            } catch (IOException e) {
+              // ignore close exception
+            }
+            zFile = null;
+            saveTimer.stop("copyFiles");
+
+            saveTimer.start("close");
+            IOUtils.closeQuietly(zout);
+            zout = null;
+            saveTimer.stop("close");
+
+            // Backup the original
+            saveTimer.start("backup");
+            File backupFile = new File(tmpDir, new GUID() + ".mv");
+            if (file.exists()) {
+              backupFile.delete(); // Always delete the old backup file first; renameTo() is very
+              // platform-dependent
+              if (!file.renameTo(backupFile)) {
+                saveTimer.start("backup file");
+                FileUtil.copyFile(file, backupFile);
+                file.delete();
+                saveTimer.stop("backup file");
+              }
+            }
+            saveTimer.stop("backup");
+
+            saveTimer.start("finalize");
+            // Finalize
+            if (!newFile.renameTo(file)) {
+              saveTimer.start("backup newFile");
+              FileUtil.copyFile(newFile, file);
+              saveTimer.stop("backup newFile");
+            }
+            if (backupFile.exists()) backupFile.delete();
+            saveTimer.stop("finalize");
+
+            dirty = false;
+          } finally {
+            saveTimer.start("cleanup");
+            try {
+              if (zFile != null) zFile.close();
+            } catch (IOException e) {
+              // ignore close exception
+            }
+            if (newFile.exists()) newFile.delete();
+            IOUtils.closeQuietly(zout);
+            saveTimer.stop("cleanup");
           }
-        }
-      }
-      try {
-        if (zFile != null) zFile.close();
-      } catch (IOException e) {
-        // ignore close exception
-      }
-      zFile = null;
-      saveTimer.stop("copyFiles");
-
-      saveTimer.start("close");
-      IOUtils.closeQuietly(zout);
-      zout = null;
-      saveTimer.stop("close");
-
-      // Backup the original
-      saveTimer.start("backup");
-      File backupFile = new File(tmpDir, new GUID() + ".mv");
-      if (file.exists()) {
-        backupFile.delete(); // Always delete the old backup file first; renameTo() is very
-        // platform-dependent
-        if (!file.renameTo(backupFile)) {
-          saveTimer.start("backup file");
-          FileUtil.copyFile(file, backupFile);
-          file.delete();
-          saveTimer.stop("backup file");
-        }
-      }
-      saveTimer.stop("backup");
-
-      saveTimer.start("finalize");
-      // Finalize
-      if (!newFile.renameTo(file)) {
-        saveTimer.start("backup newFile");
-        FileUtil.copyFile(newFile, file);
-        saveTimer.stop("backup newFile");
-      }
-      if (backupFile.exists()) backupFile.delete();
-      saveTimer.stop("finalize");
-
-      dirty = false;
-    } finally {
-      saveTimer.start("cleanup");
-      try {
-        if (zFile != null) zFile.close();
-      } catch (IOException e) {
-        // ignore close exception
-      }
-      if (newFile.exists()) newFile.delete();
-      IOUtils.closeQuietly(zout);
-      saveTimer.stop("cleanup");
-
-      if (saveTimer.isEnabled()) {
-        MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
-      }
-    }
+        });
   }
 
   private void saveEntry(ZipOutputStream zout, String path) throws IOException {
