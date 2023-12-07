@@ -19,7 +19,6 @@ import com.jidesoft.docking.DockableFrame;
 import java.util.*;
 import javax.swing.SwingUtilities;
 import net.rptools.lib.CodeTimer;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.MapToolFrame;
@@ -43,7 +42,6 @@ public class SelectionPanel extends AbstractMacroPanel {
   private static final Logger log = LogManager.getLogger(SelectionPanel.class);
 
   private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
-  private CodeTimer timer;
 
   public SelectionPanel() {
     // TODO: refactoring reminder
@@ -68,49 +66,48 @@ public class SelectionPanel extends AbstractMacroPanel {
   }
 
   public void init(List<Token> selectedTokenList) {
-    boolean panelVisible = true;
-
-    if (MapTool.getFrame() != null) {
-      DockableFrame selectionPanel = MapTool.getFrame().getDockingManager().getFrame("SELECTION");
-      if (selectionPanel != null)
-        panelVisible =
-            (selectionPanel.isVisible() && !selectionPanel.isAutohide())
-                || selectionPanel.isAutohideShowing();
-    }
     // Set up a code timer to get some performance data
-    timer = new CodeTimer("selectionpanel");
-    timer.setEnabled(AppState.isCollectProfilingData());
-    timer.setThreshold(10);
+    CodeTimer.using(
+        "selectionpanel",
+        timer -> {
+          timer.setThreshold(10);
 
-    timer.start("painting");
+          boolean panelVisible = true;
+          if (MapTool.getFrame() != null) {
+            DockableFrame selectionPanel =
+                MapTool.getFrame().getDockingManager().getFrame("SELECTION");
+            if (selectionPanel != null)
+              panelVisible =
+                  (selectionPanel.isVisible() && !selectionPanel.isAutohide())
+                      || selectionPanel.isAutohideShowing();
+          }
 
-    // paint panel only when it's visible or active
-    if (panelVisible) {
+          timer.start("painting");
 
-      // draw common group only when there is more than one token selected
-      if (selectedTokenList.size() > 1) {
-        populateCommonButtons(selectedTokenList);
-        addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
-        // add(new ButtonGroup(selectedTokenList, commonMacros, this));
-      }
-      for (Token token : selectedTokenList) {
-        if (!AppUtil.playerOwns(token)) {
-          continue;
-        }
-        addArea(token.getId());
-      }
-      if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
-        // if only one token selected, show its image as tab icon
-        MapTool.getFrame()
-            .getFrame(MTFrame.SELECTION)
-            .setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
-      }
-    }
-    timer.stop("painting");
+          // paint panel only when it's visible or active
+          if (panelVisible) {
 
-    if (timer.isEnabled()) {
-      MapTool.getProfilingNoteFrame().addText(timer.toString());
-    }
+            // draw common group only when there is more than one token selected
+            if (selectedTokenList.size() > 1) {
+              populateCommonButtons(selectedTokenList);
+              addArea(commonMacros, I18N.getText("component.areaGroup.macro.commonMacros"));
+              // add(new ButtonGroup(selectedTokenList, commonMacros, this));
+            }
+            for (Token token : selectedTokenList) {
+              if (!AppUtil.playerOwns(token)) {
+                continue;
+              }
+              addArea(token.getId());
+            }
+            if (selectedTokenList.size() == 1 && AppUtil.playerOwns(selectedTokenList.get(0))) {
+              // if only one token selected, show its image as tab icon
+              MapTool.getFrame()
+                  .getFrame(MTFrame.SELECTION)
+                  .setFrameIcon(selectedTokenList.get(0).getIcon(16, 16));
+            }
+          }
+          timer.stop("painting");
+        });
   }
 
   @Subscribe

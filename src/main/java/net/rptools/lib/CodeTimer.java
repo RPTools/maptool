@@ -14,30 +14,59 @@
  */
 package net.rptools.lib;
 
-import java.text.DecimalFormat;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 
 public class CodeTimer {
-  private final Map<String, Timer> timeMap = new HashMap<String, Timer>();
-  private final Map<String, Integer> orderMap = new HashMap<String, Integer>();
+  private static final ThreadLocal<CodeTimer> ROOT_TIMER =
+      ThreadLocal.withInitial(() -> new CodeTimer(""));
+  private static final ThreadLocal<List<CodeTimer>> timerStack =
+      ThreadLocal.withInitial(ArrayList::new);
+
+  @FunctionalInterface
+  public interface TimedSection<Ex extends Throwable> {
+    void call(CodeTimer timer) throws Ex;
+  }
+
+  public static <Ex extends Exception> void using(String name, TimedSection<Ex> callback)
+      throws Ex {
+    var stack = timerStack.get();
+
+    var timer = new CodeTimer(name);
+    timer.setEnabled(AppState.isCollectProfilingData());
+
+    stack.addLast(timer);
+    try {
+      callback.call(timer);
+    } finally {
+      final var lastTimer = stack.removeLast();
+      assert lastTimer == timer : "Timer stack is corrupted";
+
+      if (timer.isEnabled()) {
+        String results = timer.toString();
+        MapTool.getProfilingNoteFrame().addText(results);
+      }
+      timer.clear();
+    }
+  }
+
+  public static CodeTimer get() {
+    final var stack = timerStack.get();
+    return stack.isEmpty() ? ROOT_TIMER.get() : stack.getLast();
+  }
+
+  private final Map<String, Timer> timeMap = new LinkedHashMap<>();
   private final String name;
-  private final long created = System.currentTimeMillis();
   private boolean enabled;
   private int threshold = 1;
-
-  private final DecimalFormat df = new DecimalFormat();
-
-  public CodeTimer() {
-    this("");
-  }
 
   public CodeTimer(String n) {
     name = n;
     enabled = true;
-    df.setMinimumIntegerDigits(5);
   }
 
   public boolean isEnabled() {
@@ -52,55 +81,34 @@ public class CodeTimer {
     this.enabled = enabled;
   }
 
-  public void start(String id) {
+  public void start(String id, Object... parameters) {
     if (!enabled) {
       return;
     }
-    int count = orderMap.size();
-    orderMap.putIfAbsent(id, count);
-    Timer timer = timeMap.get(id);
-    if (timer == null) {
-      timer = new Timer();
-      timeMap.put(id, timer);
+    if (parameters.length > 0) {
+      id = String.format(id, parameters);
     }
+
+    Timer timer = timeMap.computeIfAbsent(id, key -> new Timer());
     timer.start();
   }
 
-  public void stop(String id) {
+  public void stop(String id, Object... parameters) {
     if (!enabled) {
       return;
     }
-    if (!orderMap.containsKey(id)) {
-      throw new IllegalArgumentException("Could not find orderMap id: " + id);
+    if (parameters.length > 0) {
+      id = String.format(id, parameters);
     }
-    if (!timeMap.containsKey(id)) {
+
+    Timer timer = timeMap.get(id);
+    if (timer == null) {
       throw new IllegalArgumentException("Could not find timer id: " + id);
     }
-    timeMap.get(id).stop();
-  }
-
-  public long getElapsed(String id) {
-    if (!enabled) {
-      return 0;
-    }
-    if (!orderMap.containsKey(id)) {
-      throw new IllegalArgumentException("Could not find orderMap id: " + id);
-    }
-    if (!timeMap.containsKey(id)) {
-      throw new IllegalArgumentException("Could not find timer id: " + id);
-    }
-    return timeMap.get(id).getElapsed();
-  }
-
-  public void reset(String id) {
-    if (!orderMap.containsKey(id)) {
-      throw new IllegalArgumentException("Could not find orderMap id: " + id);
-    }
-    timeMap.remove(id);
+    timer.stop();
   }
 
   public void clear() {
-    orderMap.clear();
     timeMap.clear();
   }
 
@@ -112,19 +120,19 @@ public class CodeTimer {
         .append("Timer ")
         .append(name)
         .append(" (")
-        .append(orderMap.size())
+        .append(timeMap.size())
         .append(" elements)\n");
 
-    List<String> idSet = new ArrayList<String>(timeMap.keySet());
-    idSet.sort((arg0, arg1) -> orderMap.get(arg0) - orderMap.get(arg1));
-    for (String id : idSet) {
-      long elapsed = timeMap.get(id).getElapsed();
+    var i = -1;
+    for (var entry : timeMap.entrySet()) {
+      ++i;
+
+      var id = entry.getKey();
+      long elapsed = entry.getValue().getElapsed();
       if (elapsed < threshold) {
         continue;
       }
-      builder.append(String.format("  %3d.  %6d ms  %s\n", orderMap.get(id), elapsed, id));
-      // builder.append("\t").append(orderMap.get(id)).append(". ").append(id).append(":
-      // ").append(timer.getElapsed()).append(" ms\n");
+      builder.append(String.format("  %3d.  %6d ms  %s\n", i, elapsed, id));
     }
     return builder.toString();
   }

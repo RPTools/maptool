@@ -509,82 +509,82 @@ public class FogUtil {
   }
 
   public static void exposeLastPath(final ZoneRenderer renderer, final Set<GUID> tokenSet) {
-    CodeTimer timer = new CodeTimer("exposeLastPath");
+    CodeTimer.using(
+        "exposeLastPath",
+        timer -> {
+          final Zone zone = renderer.getZone();
+          final Grid grid = zone.getGrid();
+          GridCapabilities caps = grid.getCapabilities();
 
-    final Zone zone = renderer.getZone();
-    final Grid grid = zone.getGrid();
-    GridCapabilities caps = grid.getCapabilities();
+          if (!caps.isPathingSupported() || !caps.isSnapToGridSupported()) {
+            return;
+          }
 
-    if (!caps.isPathingSupported() || !caps.isSnapToGridSupported()) {
-      return;
-    }
+          final Set<GUID> filteredToks = new HashSet<GUID>(2);
 
-    final Set<GUID> filteredToks = new HashSet<GUID>(2);
+          for (final GUID tokenGUID : tokenSet) {
+            final Token token = zone.getToken(tokenGUID);
+            timer.start("exposeLastPath-" + token.getName());
 
-    for (final GUID tokenGUID : tokenSet) {
-      final Token token = zone.getToken(tokenGUID);
-      timer.start("exposeLastPath-" + token.getName());
+            Path<? extends AbstractPoint> lastPath = token.getLastPath();
 
-      Path<? extends AbstractPoint> lastPath = token.getLastPath();
+            if (lastPath == null) return;
 
-      if (lastPath == null) return;
+            Map<GUID, ExposedAreaMetaData> fullMeta = zone.getExposedAreaMetaData();
+            GUID exposedGUID = token.getExposedAreaGUID();
+            final ExposedAreaMetaData meta =
+                fullMeta.computeIfAbsent(exposedGUID, guid -> new ExposedAreaMetaData());
 
-      Map<GUID, ExposedAreaMetaData> fullMeta = zone.getExposedAreaMetaData();
-      GUID exposedGUID = token.getExposedAreaGUID();
-      final ExposedAreaMetaData meta =
-          fullMeta.computeIfAbsent(exposedGUID, guid -> new ExposedAreaMetaData());
+            final Token tokenClone = new Token(token);
+            final ZoneView zoneView = renderer.getZoneView();
+            Area visionArea = new Area();
 
-      final Token tokenClone = new Token(token);
-      final ZoneView zoneView = renderer.getZoneView();
-      Area visionArea = new Area();
+            // Lee: get path according to zone's way point exposure toggle...
+            List<? extends AbstractPoint> processPath =
+                zone.getWaypointExposureToggle()
+                    ? lastPath.getWayPointList()
+                    : lastPath.getCellPath();
 
-      // Lee: get path according to zone's way point exposure toggle...
-      List<? extends AbstractPoint> processPath =
-          zone.getWaypointExposureToggle() ? lastPath.getWayPointList() : lastPath.getCellPath();
+            int stepCount = processPath.size();
+            log.debug("Path size = " + stepCount);
 
-      int stepCount = processPath.size();
-      log.debug("Path size = " + stepCount);
+            Consumer<ZonePoint> revealAt =
+                zp -> {
+                  tokenClone.setX(zp.x);
+                  tokenClone.setY(zp.y);
 
-      Consumer<ZonePoint> revealAt =
-          zp -> {
-            tokenClone.setX(zp.x);
-            tokenClone.setY(zp.y);
+                  Area currVisionArea =
+                      zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
+                  if (currVisionArea != null) {
+                    visionArea.add(currVisionArea);
+                    meta.addToExposedAreaHistory(currVisionArea);
+                  }
 
-            Area currVisionArea = zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
-            if (currVisionArea != null) {
-              visionArea.add(currVisionArea);
-              meta.addToExposedAreaHistory(currVisionArea);
+                  zoneView.flush(tokenClone);
+                };
+            if (token.isSnapToGrid()) {
+              // For each cell point along the path, reveal FoW.
+              for (final AbstractPoint cell : processPath) {
+                assert cell instanceof CellPoint;
+                revealAt.accept(grid.convert((CellPoint) cell));
+              }
+            } else {
+              // Only reveal the final position.
+              final AbstractPoint finalCell = processPath.get(processPath.size() - 1);
+              assert finalCell instanceof ZonePoint;
+              revealAt.accept((ZonePoint) finalCell);
             }
 
-            zoneView.flush(tokenClone);
-          };
-      if (token.isSnapToGrid()) {
-        // For each cell point along the path, reveal FoW.
-        for (final AbstractPoint cell : processPath) {
-          assert cell instanceof CellPoint;
-          revealAt.accept(grid.convert((CellPoint) cell));
-        }
-      } else {
-        // Only reveal the final position.
-        final AbstractPoint finalCell = processPath.get(processPath.size() - 1);
-        assert finalCell instanceof ZonePoint;
-        revealAt.accept((ZonePoint) finalCell);
-      }
+            timer.stop("exposeLastPath-" + token.getName());
+            renderer.flush(tokenClone);
 
-      timer.stop("exposeLastPath-" + token.getName());
-      renderer.flush(tokenClone);
-
-      filteredToks.clear();
-      filteredToks.add(token.getId());
-      zone.putToken(token);
-      MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
-      MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
-    }
-
-    String results = timer.toString();
-    MapTool.getProfilingNoteFrame().addText(results);
-    // System.out.println(results);
-    timer.clear();
+            filteredToks.clear();
+            filteredToks.add(token.getId());
+            zone.putToken(token);
+            MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
+            MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
+          }
+        });
   }
 
   /**

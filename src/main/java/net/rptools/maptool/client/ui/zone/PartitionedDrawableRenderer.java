@@ -56,8 +56,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 
   private boolean dirty = false;
 
-  private CodeTimer timer;
-
   public void flush() {
     int unusedSize = unusedChunkList.size();
     for (Tuple tuple : chunkList) {
@@ -78,115 +76,113 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 
   public void renderDrawables(
       Graphics g, List<DrawnElement> drawableList, Rectangle viewport, double scale) {
-    timer = new CodeTimer("Renderer");
-    timer.setThreshold(10);
-    timer.setEnabled(false);
+    CodeTimer.using(
+        "Renderer",
+        timer -> {
+          timer.setThreshold(10);
+          timer.setEnabled(false);
 
-    // NOTHING TO DO
-    if (drawableList == null || drawableList.isEmpty()) {
-      if (dirty) flush();
-      return;
-    }
-    // View changed ?
-    if (dirty || lastScale != scale) {
-      flush();
-    }
-    if (lastViewport == null
-        || viewport.width != lastViewport.width
-        || viewport.height != lastViewport.height) {
-      horizontalChunkCount = (int) Math.ceil(viewport.width / (double) CHUNK_SIZE) + 1;
-      verticalChunkCount = (int) Math.ceil(viewport.height / (double) CHUNK_SIZE) + 1;
-
-      maxChunks = (horizontalChunkCount * verticalChunkCount * 2);
-    }
-    // Compute grid
-    int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
-    int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
-
-    // OK, weirdest hack ever. Basically, when the viewport.x is exactly divisible by the chunk
-    // size, the gridx decrements
-    // too early, creating a visual jump in the drawables. I don't know the exact cause, but this
-    // seems to account for it
-    // note that it only happens in the negative space. Weird.
-    gridx += (viewport.x > CHUNK_SIZE && (viewport.x % CHUNK_SIZE == 0) ? -1 : 0);
-    gridy += (viewport.y > CHUNK_SIZE && (viewport.y % CHUNK_SIZE == 0) ? -1 : 0);
-
-    for (int row = 0; row < verticalChunkCount; row++) {
-      for (int col = 0; col < horizontalChunkCount; col++) {
-        int cellX = gridx + col;
-        int cellY = gridy + row;
-
-        String key = getKey(cellX, cellY);
-        if (noImageSet.contains(key)) {
-          continue;
-        }
-        Tuple chunk = findChunk(chunkList, key);
-        if (chunk == null) {
-          chunk = new Tuple(key, createChunk(drawableList, cellX, cellY, scale));
-
-          if (chunk.image == null) {
-            noImageSet.add(key);
-            continue;
+          // NOTHING TO DO
+          if (drawableList == null || drawableList.isEmpty()) {
+            if (dirty) flush();
+            return;
           }
-        }
-        // Most recently used is at the front
-        chunkList.add(0, chunk);
-
-        // Trim to the right size
-        if (chunkList.size() > maxChunks) {
-          int chunkSize = chunkList.size();
-          // chunkList.subList(maxChunks, chunkSize).clear();
-          while (chunkSize > maxChunks) {
-            chunkList.remove(--chunkSize);
+          // View changed ?
+          if (dirty || lastScale != scale) {
+            flush();
           }
-        }
-        int x =
-            col * CHUNK_SIZE
-                - ((CHUNK_SIZE - viewport.x)) % CHUNK_SIZE
-                - (gridx < -1 ? CHUNK_SIZE : 0);
-        int y =
-            row * CHUNK_SIZE
-                - ((CHUNK_SIZE - viewport.y)) % CHUNK_SIZE
-                - (gridy < -1 ? CHUNK_SIZE : 0);
+          if (lastViewport == null
+              || viewport.width != lastViewport.width
+              || viewport.height != lastViewport.height) {
+            horizontalChunkCount = (int) Math.ceil(viewport.width / (double) CHUNK_SIZE) + 1;
+            verticalChunkCount = (int) Math.ceil(viewport.height / (double) CHUNK_SIZE) + 1;
 
-        timer.start("render:DrawImage");
-        g.drawImage(chunk.image, x, y, null);
-        timer.stop("render:DrawImage");
-
-        // DEBUG: Show partition boundaries
-        if (DeveloperOptions.Toggle.ShowPartitionDrawableBoundaries.isEnabled()) {
-          if (!messageLogged) {
-            messageLogged = true;
-            log.debug(
-                "DEBUG logging of "
-                    + this.getClass().getSimpleName()
-                    + " causes colored rectangles and message strings.");
+            maxChunks = (horizontalChunkCount * verticalChunkCount * 2);
           }
-          if (col % 2 == 0) {
-            if (row % 2 == 0) {
-              g.setColor(Color.white);
-            } else {
-              g.setColor(Color.green);
+          // Compute grid
+          int gridx = (int) Math.floor(-viewport.x / (double) CHUNK_SIZE);
+          int gridy = (int) Math.floor(-viewport.y / (double) CHUNK_SIZE);
+
+          // OK, weirdest hack ever. Basically, when the viewport.x is exactly divisible by the
+          // chunk size, the gridx decrements too early, creating a visual jump in the drawables. I
+          // don't know the exact cause, but this seems to account for it
+          // note that it only happens in the negative space. Weird.
+          gridx += (viewport.x > CHUNK_SIZE && (viewport.x % CHUNK_SIZE == 0) ? -1 : 0);
+          gridy += (viewport.y > CHUNK_SIZE && (viewport.y % CHUNK_SIZE == 0) ? -1 : 0);
+
+          for (int row = 0; row < verticalChunkCount; row++) {
+            for (int col = 0; col < horizontalChunkCount; col++) {
+              int cellX = gridx + col;
+              int cellY = gridy + row;
+
+              String key = getKey(cellX, cellY);
+              if (noImageSet.contains(key)) {
+                continue;
+              }
+              Tuple chunk = findChunk(chunkList, key);
+              if (chunk == null) {
+                chunk = new Tuple(key, createChunk(drawableList, cellX, cellY, scale));
+
+                if (chunk.image == null) {
+                  noImageSet.add(key);
+                  continue;
+                }
+              }
+              // Most recently used is at the front
+              chunkList.add(0, chunk);
+
+              // Trim to the right size
+              if (chunkList.size() > maxChunks) {
+                int chunkSize = chunkList.size();
+                // chunkList.subList(maxChunks, chunkSize).clear();
+                while (chunkSize > maxChunks) {
+                  chunkList.remove(--chunkSize);
+                }
+              }
+              int x =
+                  col * CHUNK_SIZE
+                      - ((CHUNK_SIZE - viewport.x)) % CHUNK_SIZE
+                      - (gridx < -1 ? CHUNK_SIZE : 0);
+              int y =
+                  row * CHUNK_SIZE
+                      - ((CHUNK_SIZE - viewport.y)) % CHUNK_SIZE
+                      - (gridy < -1 ? CHUNK_SIZE : 0);
+
+              timer.start("render:DrawImage");
+              g.drawImage(chunk.image, x, y, null);
+              timer.stop("render:DrawImage");
+
+              // DEBUG: Show partition boundaries
+              if (DeveloperOptions.Toggle.ShowPartitionDrawableBoundaries.isEnabled()) {
+                if (!messageLogged) {
+                  messageLogged = true;
+                  log.debug(
+                      "DEBUG logging of "
+                          + this.getClass().getSimpleName()
+                          + " causes colored rectangles and message strings.");
+                }
+                if (col % 2 == 0) {
+                  if (row % 2 == 0) {
+                    g.setColor(Color.white);
+                  } else {
+                    g.setColor(Color.green);
+                  }
+                } else {
+                  if (row % 2 == 0) {
+                    g.setColor(Color.green);
+                  } else {
+                    g.setColor(Color.white);
+                  }
+                }
+                g.drawRect(x, y, CHUNK_SIZE - 1, CHUNK_SIZE - 1);
+                g.drawString(key, x + CHUNK_SIZE / 2, y + CHUNK_SIZE / 2);
+              }
             }
-          } else {
-            if (row % 2 == 0) {
-              g.setColor(Color.green);
-            } else {
-              g.setColor(Color.white);
-            }
           }
-          g.drawRect(x, y, CHUNK_SIZE - 1, CHUNK_SIZE - 1);
-          g.drawString(key, x + CHUNK_SIZE / 2, y + CHUNK_SIZE / 2);
-        }
-      }
-    }
-    // REMEMBER
-    lastViewport = viewport;
-    lastScale = scale;
-
-    if (timer.isEnabled()) {
-      // System.out.println(timer);
-    }
+          // REMEMBER
+          lastViewport = viewport;
+          lastScale = scale;
+        });
   }
 
   /**
@@ -210,6 +206,8 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 
   private BufferedImage createChunk(
       List<DrawnElement> drawableList, int gridx, int gridy, double scale) {
+    final var timer = CodeTimer.get();
+
     int x = gridx * CHUNK_SIZE;
     int y = gridy * CHUNK_SIZE;
 
