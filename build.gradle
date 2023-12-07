@@ -474,7 +474,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.1'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.7.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.8.0'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
