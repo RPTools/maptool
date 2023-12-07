@@ -471,7 +471,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
 
     // Macro Editor setup
     macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
-
+    macroEditorRSyntaxTextArea.setInsertPairedCharacters(false);
     macroEditorRSyntaxTextArea.setEditable(true);
     macroEditorRSyntaxTextArea.setCodeFoldingEnabled(true);
     macroEditorRSyntaxTextArea.setLineWrap(true);
