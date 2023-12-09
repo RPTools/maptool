@@ -610,12 +610,7 @@ public class ZoneView {
    * @param token the token to get the visible area of.
    * @return the visible area of a token, including the effect of other lights.
    */
-  public Area getVisibleArea(Token token, PlayerView view) {
-    // Sanity
-    if (token == null) {
-      return null;
-    }
-
+  public Area getVisibleArea(@Nonnull Token token, PlayerView view) {
     // Cache ?
     Map<GUID, Area> tokenVisionCache =
         tokenVisionCachePerView.computeIfAbsent(view, v -> new HashMap<>());

@@ -33,7 +33,6 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
@@ -154,8 +153,14 @@ public class ZoneRenderer extends JComponent
 
   private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
   private final ZoneCompositor compositor;
-  public GridRenderer gridRenderer;
-  private HaloRenderer haloRenderer;
+  private final GridRenderer gridRenderer;
+  private final HaloRenderer haloRenderer;
+  private final LightsRenderer lightsRenderer;
+  private final DarknessRenderer darknessRenderer;
+  private final LumensRenderer lumensRenderer;
+  private final FogRenderer fogRenderer;
+  private final VisionOverlayRenderer visionOverlayRenderer;
+  private final DebugRenderer debugRenderer;
 
   /**
    * Constructor for the ZoneRenderer from a zone.
@@ -167,14 +172,22 @@ public class ZoneRenderer extends JComponent
       throw new IllegalArgumentException("Zone cannot be null");
     }
     this.zone = zone;
+    zoneView = new ZoneView(zone);
+    setZoneScale(new Scale());
+
+    var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();
     this.gridRenderer = new GridRenderer();
     this.haloRenderer = new HaloRenderer();
+    this.lightsRenderer = new LightsRenderer(renderHelper, zone, zoneView);
+    this.darknessRenderer = new DarknessRenderer(renderHelper, zoneView);
+    this.lumensRenderer = new LumensRenderer(renderHelper, zone, zoneView);
+    this.fogRenderer = new FogRenderer(renderHelper, zone, zoneView);
+    this.visionOverlayRenderer = new VisionOverlayRenderer(renderHelper, zone, zoneView);
+    this.debugRenderer = new DebugRenderer(renderHelper);
     repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
 
     setFocusable(true);
-    setZoneScale(new Scale());
-    zoneView = new ZoneView(zone);
     selectionModel = new SelectionModel(zone);
 
     // add(MapTool.getFrame().getFxPanel(), PositionalLayout.Position.NW);
@@ -1058,16 +1071,12 @@ public class ZoneRenderer extends JComponent
       }
     }
     if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
-      timer.start("lights");
-      renderLights(g2d, view);
-      timer.stop("lights");
-
-      timer.start("auras");
-      renderAuras(g2d, view);
-      timer.stop("auras");
+      this.lightsRenderer.renderLights(g2d, view);
+      this.lumensRenderer.render(g2d, view);
+      this.lightsRenderer.renderAuras(g2d, view);
     }
 
-    renderPlayerDarkness(g2d, view);
+    darknessRenderer.render(g2d, view);
 
     /**
      * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by
@@ -1151,10 +1160,7 @@ public class ZoneRenderer extends JComponent
       renderLabels(g2d, view);
     }
 
-    // (This method has it's own 'timer' calls)
-    if (zone.hasFog()) {
-      renderFog(g2d, view);
-    }
+    this.fogRenderer.render(g2d, view);
 
     if (shouldRenderLayer(Zone.Layer.TOKEN, view)) {
       // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
@@ -1193,16 +1199,8 @@ public class ZoneRenderer extends JComponent
       timer.stop("token name/labels");
     }
 
-    // if (zone.visionType ...)
-    if (view.isGMView()) {
-      timer.start("visionOverlayGM");
-      renderGMVisionOverlay(g2d, view);
-      timer.stop("visionOverlayGM");
-    } else {
-      timer.start("visionOverlayPlayer");
-      renderPlayerVisionOverlay(g2d, view);
-      timer.stop("visionOverlayPlayer");
-    }
+    this.visionOverlayRenderer.render(g2d, view, tokenUnderMouse);
+
     timer.start("overlays");
     for (ZoneOverlay overlay : overlayList) {
       timer.start("overlays: %s", overlay.getClass().getSimpleName());
@@ -1223,6 +1221,9 @@ public class ZoneRenderer extends JComponent
       lightSourceIconOverlay.paintOverlay(this, g2d);
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
+
+    debugRenderer.renderShapes(g2d, Arrays.asList(shape, shape2));
+
     // g2d.setColor(Color.red);
     // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
     // Area area = new
@@ -1257,398 +1258,6 @@ public class ZoneRenderer extends JComponent
    * overlay in turn.
    */
   private final BufferedImagePool tempBufferPool = new BufferedImagePool(2);
-
-  /**
-   * Render the lights.
-   *
-   * @param g the graphic 2D object
-   * @param view the player view
-   */
-  private void renderLights(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    // Collect and organize lights
-    timer.start("renderLights:getLights");
-    final var drawableLights = zoneView.getDrawableLights(view);
-    timer.stop("renderLights:getLights");
-
-    if (AppState.isShowLights()) {
-      // Lighting enabled.
-      timer.start("renderLights:renderLightOverlay");
-      final var overlayBlending =
-          switch (zone.getLightingStyle()) {
-            case OVERTOP -> AlphaComposite.SrcOver.derive(
-                AppPreferences.getLightOverlayOpacity() / 255.f);
-            case ENVIRONMENTAL -> LightingComposite.OverlaidLights;
-          };
-      final var overlayFillColor =
-          switch (zone.getLightingStyle()) {
-            case OVERTOP -> new Color(0, 0, 0, 0);
-            case ENVIRONMENTAL -> Color.black;
-          };
-
-      renderLightOverlay(
-          g,
-          LightingComposite.BlendedLights,
-          overlayBlending,
-          view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
-          drawableLights,
-          overlayFillColor);
-      timer.stop("renderLights:renderLightOverlay");
-    }
-
-    if (AppState.isShowLumensOverlay()) {
-      // Lumens overlay enabled.
-      timer.start("renderLights:renderLumensOverlay");
-      renderLumensOverlay(
-          g,
-          view,
-          view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
-          AppPreferences.getLumensOverlayOpacity() / 255.0f);
-      timer.stop("renderLights:renderLumensOverlay");
-    }
-  }
-
-  /**
-   * Render the auras.
-   *
-   * @param g the Graphics2D object.
-   * @param view the player view.
-   */
-  private void renderAuras(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    // Setup
-    timer.start("renderAuras:getAuras");
-    final var drawableAuras = zoneView.getDrawableAuras();
-    timer.stop("renderAuras:getAuras");
-
-    timer.start("renderAuras:renderAuraOverlay");
-    renderLightOverlay(
-        g,
-        AlphaComposite.SrcOver.derive(AppPreferences.getAuraOverlayOpacity() / 255.0f),
-        AlphaComposite.SrcOver,
-        view.isGMView() ? null : ZoneRendererConstants.LightOverlayClipStyle.CLIP_TO_VISIBLE_AREA,
-        drawableAuras,
-        new Color(0, 0, 0, 0));
-    timer.stop("renderAuras:renderAuraOverlay");
-  }
-
-  private void renderLumensOverlay(
-      Graphics2D g,
-      PlayerView view,
-      @Nullable ZoneRendererConstants.LightOverlayClipStyle clipStyle,
-      float overlayOpacity) {
-    final var timer = CodeTimer.get();
-
-    g = (Graphics2D) g.create();
-
-    final var disjointLumensLevels = zoneView.getDisjointObscuredLumensLevels(view);
-
-    timer.start("renderLumensOverlay:allocateBuffer");
-    try (final var bufferHandle = tempBufferPool.acquire()) {
-      BufferedImage lumensOverlay = bufferHandle.get();
-      timer.stop("renderLumensOverlay:allocateBuffer");
-
-      Graphics2D newG = lumensOverlay.createGraphics();
-      // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
-      newG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
-      newG.setPaint(
-          zone.getVisionType() == Zone.VisionType.NIGHT
-              ? new Color(0.f, 0.f, 0.f, 1.f)
-              : new Color(0.f, 0.f, 0.f, 0.f));
-      newG.fillRect(0, 0, lumensOverlay.getWidth(), lumensOverlay.getHeight());
-
-      newG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
-      SwingUtil.useAntiAliasing(newG);
-
-      if (clipStyle != null && visibleScreenArea != null) {
-        timer.start("renderLumensOverlay:setClip");
-        Area clip = new Area(g.getClip());
-        switch (clipStyle) {
-          case CLIP_TO_VISIBLE_AREA -> clip.intersect(visibleScreenArea);
-          case CLIP_TO_NOT_VISIBLE_AREA -> clip.subtract(visibleScreenArea);
-        }
-        newG.setClip(clip);
-        g.setClip(clip);
-        timer.stop("renderLumensOverlay:setClip");
-      }
-
-      timer.start("renderLumensOverlay:setTransform");
-      AffineTransform af = new AffineTransform();
-      af.translate(getViewOffsetX(), getViewOffsetY());
-      af.scale(getScale(), getScale());
-      newG.setTransform(af);
-      timer.stop("renderLumensOverlay:setTransform");
-
-      timer.start("renderLumensOverlay:drawLumens");
-      for (final var lumensLevel : disjointLumensLevels) {
-        final var lumensStrength = lumensLevel.lumensStrength();
-
-        // Light is weaker than darkness, so do it first.
-        float lightOpacity;
-        float lightShade;
-        if (lumensStrength == 0) {
-          // This area represents daylight, so draw it as clear despite the low value.
-          lightShade = 1.f;
-          lightOpacity = 0;
-        } else if (lumensStrength >= 100) {
-          // Bright light, render mostly clear.
-          lightShade = 1.f;
-          lightOpacity = 1.f / 10.f;
-        } else {
-          lightShade = Math.max(0.f, Math.min(lumensStrength / 100.f, 1.f));
-          lightShade *= lightShade;
-          lightOpacity = 1.f;
-        }
-
-        timer.start("renderLumensOverlay:drawLights:fillArea");
-        newG.setPaint(new Color(lightShade, lightShade, lightShade, lightOpacity));
-        newG.fill(lumensLevel.lightArea());
-
-        newG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
-        newG.fill(lumensLevel.darknessArea());
-        timer.stop("renderLumensOverlay:drawLights:fillArea");
-      }
-
-      // Now draw borders around each region if configured.
-      final var borderThickness = AppPreferences.getLumensOverlayBorderThickness();
-      if (borderThickness > 0) {
-        newG.setStroke(
-            new BasicStroke(
-                (float) borderThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        newG.setComposite(AlphaComposite.SrcOver);
-        newG.setPaint(new Color(0.f, 0.f, 0.f, 1.f));
-        for (final var lumensLevel : disjointLumensLevels) {
-          timer.start("renderLumensOverlay:drawLights:drawArea");
-          newG.draw(lumensLevel.lightArea());
-          newG.draw(lumensLevel.darknessArea());
-          timer.stop("renderLumensOverlay:drawLights:drawArea");
-        }
-      }
-
-      timer.stop("renderLumensOverlay:drawLumens");
-      newG.dispose();
-
-      timer.start("renderLumensOverlay:drawBuffer");
-      g.drawImage(lumensOverlay, null, 0, 0);
-      timer.stop("renderLumensOverlay:drawBuffer");
-    }
-  }
-
-  /**
-   * Combines a set of lights into an image that is then rendered into the zone.
-   *
-   * @param g The graphics object used to render the zone.
-   * @param lightBlending The composite used to blend lights together within the overlay
-   * @param overlayBlending The composite used when blending the overlay with the underlying image.
-   * @param clipStyle How to clip the overlay relative to the visible area. Set to null for no extra
-   *     clipping.
-   * @param lights The lights that will be rendered and blended.
-   */
-  private void renderLightOverlay(
-      Graphics2D g,
-      Composite lightBlending,
-      Composite overlayBlending,
-      @Nullable ZoneRendererConstants.LightOverlayClipStyle clipStyle,
-      Collection<DrawableLight> lights,
-      Paint backgroundFill) {
-    final var timer = CodeTimer.get();
-
-    if (lights.isEmpty()) {
-      // No point spending resources accomplishing nothing.
-      return;
-    }
-
-    g = (Graphics2D) g.create();
-
-    // Set up a buffer image for lights to be drawn onto before the map
-    timer.start("renderLightOverlay:allocateBuffer");
-    try (final var bufferHandle = tempBufferPool.acquire()) {
-      BufferedImage lightOverlay = bufferHandle.get();
-      timer.stop("renderLightOverlay:allocateBuffer");
-
-      Graphics2D newG = lightOverlay.createGraphics();
-      newG.setComposite(AlphaComposite.Src);
-      newG.setPaint(backgroundFill);
-      newG.fillRect(0, 0, lightOverlay.getWidth(), lightOverlay.getHeight());
-
-      if (clipStyle != null && visibleScreenArea != null) {
-        timer.start("renderLightOverlay:setClip");
-        Area clip = new Area(g.getClip());
-        switch (clipStyle) {
-          case CLIP_TO_VISIBLE_AREA -> clip.intersect(visibleScreenArea);
-          case CLIP_TO_NOT_VISIBLE_AREA -> clip.subtract(visibleScreenArea);
-        }
-        newG.setClip(clip);
-        timer.stop("renderLightOverlay:setClip");
-      }
-
-      timer.start("renderLightOverlay:setTransform");
-      AffineTransform af = new AffineTransform();
-      af.translate(getViewOffsetX(), getViewOffsetY());
-      af.scale(getScale(), getScale());
-      newG.setTransform(af);
-      timer.stop("renderLightOverlay:setTransform");
-
-      newG.setComposite(lightBlending);
-
-      // Draw lights onto the buffer image so the map doesn't affect how they blend
-      timer.start("renderLightOverlay:drawLights");
-      for (var light : lights) {
-        newG.setPaint(light.getPaint().getPaint());
-        timer.start("renderLightOverlay:fillLight");
-        newG.fill(light.getArea());
-        timer.stop("renderLightOverlay:fillLight");
-      }
-      timer.stop("renderLightOverlay:drawLights");
-      newG.dispose();
-
-      // Draw the buffer image with all the lights onto the map
-      timer.start("renderLightOverlay:drawBuffer");
-      g.setComposite(overlayBlending);
-      g.drawImage(lightOverlay, null, 0, 0);
-      timer.stop("renderLightOverlay:drawBuffer");
-    }
-  }
-
-  /**
-   * Draws a solid black overlay wherever a non-GM player should see darkness.
-   *
-   * <p>If {@code view} is a GM view, this renders nothing.
-   *
-   * @param g The graphics object used to render the zone.
-   * @param view The player view.
-   */
-  private void renderPlayerDarkness(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    if (view.isGMView()) {
-      // GMs see the darkness rendered as lights, not as blackness.
-      return;
-    }
-
-    final var darkness = zoneView.getIllumination(view).getDarkenedArea();
-    if (darkness.isEmpty()) {
-      // Skip the rendering work if it isn't necessary.
-      return;
-    }
-
-    g = (Graphics2D) g.create();
-    try {
-      timer.start("renderPlayerDarkness:setTransform");
-      AffineTransform af = new AffineTransform();
-      af.translate(getViewOffsetX(), getViewOffsetY());
-      af.scale(getScale(), getScale());
-      g.setTransform(af);
-      timer.stop("renderPlayerDarkness:setTransform");
-
-      g.setComposite(AlphaComposite.Src);
-      g.setPaint(Color.black);
-      g.fill(darkness);
-    } finally {
-      g.dispose();
-    }
-  }
-
-  /**
-   * This outlines the area visible to the token under the cursor, clipped to the current
-   * fog-of-war. This is appropriate for the player view, but the GM sees everything.
-   */
-  private void renderPlayerVisionOverlay(Graphics2D g, PlayerView view) {
-    Graphics2D g2 = (Graphics2D) g.create();
-    if (zone.hasFog()) {
-      Area clip = new Area(new Rectangle(getSize().width, getSize().height));
-
-      Area viewArea = new Area(exposedFogArea);
-      if (view.isUsingTokenView()) {
-        for (Token tok : view.getTokens()) {
-          ExposedAreaMetaData exposedMeta = zone.getExposedAreaMetaData(tok.getExposedAreaGUID());
-          viewArea.add(exposedMeta.getExposedAreaHistory());
-        }
-      }
-      if (!viewArea.isEmpty()) {
-        clip.intersect(new Area(viewArea.getBounds2D()));
-      }
-      // Note: the viewArea doesn't need to be transform()'d because exposedFogArea has been
-      // already.
-      g2.setClip(clip);
-    }
-    renderVisionOverlay(g2, view);
-    g2.dispose();
-  }
-
-  /** Render the vision overlay as though the view were the GM. */
-  private void renderGMVisionOverlay(Graphics2D g, PlayerView view) {
-    renderVisionOverlay(g, view);
-  }
-
-  /**
-   * This outlines the area visible to the token under the cursor and shades it with the halo color,
-   * if there is one.
-   */
-  private void renderVisionOverlay(Graphics2D g, PlayerView view) {
-    Area currentTokenVisionArea = zoneView.getVisibleArea(tokenUnderMouse, view);
-    if (currentTokenVisionArea == null) {
-      return;
-    }
-    Area combined = new Area(currentTokenVisionArea);
-    ExposedAreaMetaData meta = zone.getExposedAreaMetaData(tokenUnderMouse.getExposedAreaGUID());
-
-    Area tmpArea = new Area(meta.getExposedAreaHistory());
-    tmpArea.add(zone.getExposedArea());
-    if (zone.hasFog()) {
-      if (tmpArea.isEmpty()) {
-        return;
-      }
-      combined.intersect(tmpArea);
-    }
-    boolean isOwner = AppUtil.playerOwns(tokenUnderMouse);
-    boolean tokenIsPC = tokenUnderMouse.getType() == Token.Type.PC;
-    boolean strictOwnership =
-        MapTool.getServerPolicy() != null && MapTool.getServerPolicy().useStrictTokenManagement();
-    boolean showVisionAndHalo = isOwner || view.isGMView() || (tokenIsPC && !strictOwnership);
-    // String player = MapTool.getPlayer().getName();
-    // System.err.print("tokenUnderMouse.ownedBy(" + player + "): " + isOwner);
-    // System.err.print(", tokenIsPC: " + tokenIsPC);
-    // System.err.print(", isGMView(): " + view.isGMView());
-    // System.err.println(", strictOwnership: " + strictOwnership);
-
-    /*
-     * The vision arc and optional halo-filled visible area shouldn't be shown to everyone. If we are in GM view, or if we are the owner of the token in question, or if the token is a PC and
-     * strict token ownership is off... then the vision arc should be displayed.
-     */
-    if (showVisionAndHalo) {
-      AffineTransform af = new AffineTransform();
-      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
-      af.scale(getScale(), getScale());
-
-      Area area = combined.createTransformedArea(af);
-      g.setClip(this.getBounds());
-      Object oldAA = SwingUtil.useAntiAliasing(g);
-      // g.setStroke(new BasicStroke(2));
-      g.setColor(new Color(255, 255, 255)); // outline around visible area
-      g.draw(area);
-      renderHaloArea(g, area);
-      SwingUtil.restoreAntiAliasing(g, oldAA);
-    }
-  }
-
-  private void renderHaloArea(Graphics2D g, Area visible) {
-    boolean useHaloColor =
-        tokenUnderMouse.getHaloColor() != null && AppPreferences.getUseHaloColorOnVisionOverlay();
-    if (tokenUnderMouse.getVisionOverlayColor() != null || useHaloColor) {
-      Color visionColor =
-          useHaloColor ? tokenUnderMouse.getHaloColor() : tokenUnderMouse.getVisionOverlayColor();
-      g.setColor(
-          new Color(
-              visionColor.getRed(),
-              visionColor.getGreen(),
-              visionColor.getBlue(),
-              AppPreferences.getHaloOverlayOpacity()));
-      g.fill(visible);
-    }
-  }
 
   private void renderLabels(Graphics2D g, PlayerView view) {
     final var timer = CodeTimer.get();
@@ -1689,115 +1298,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("labels-1.1");
     }
     timer.stop("labels-1");
-  }
-
-  private void renderFog(Graphics2D g, PlayerView view) {
-    final var timer = CodeTimer.get();
-
-    Dimension size = getSize();
-    Area fogClip = new Area(new Rectangle(0, 0, size.width, size.height));
-
-    timer.start("renderFog-allocateBufferedImage");
-    try (final var entry = tempBufferPool.acquire()) {
-      final var buffer = entry.get();
-      timer.stop("renderFog-allocateBufferedImage");
-
-      timer.start("renderFog");
-      final var fogX = getViewOffsetX();
-      final var fogY = getViewOffsetY();
-
-      Graphics2D buffG = buffer.createGraphics();
-      buffG.setClip(fogClip);
-      SwingUtil.useAntiAliasing(buffG);
-
-      timer.start("renderFog-fill");
-      // Fill
-      double scale = getScale();
-      buffG.setPaint(zone.getFogPaint().getPaint(fogX, fogY, scale));
-      buffG.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f : 1f)); // JFJ this
-      // fixes the
-      // GM
-      // exposed
-      // area
-      // view.
-      buffG.fillRect(0, 0, size.width, size.height);
-      timer.stop("renderFog-fill");
-
-      // Cut out the exposed area
-      AffineTransform af = new AffineTransform();
-      af.translate(fogX, fogY);
-      af.scale(scale, scale);
-
-      buffG.setTransform(af);
-      // buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC, view.isGMView() ? .6f :
-      // 1f));
-      buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-
-      timer.start("renderFog-visibleArea");
-      Area visibleArea = zoneView.getVisibleArea(view);
-      timer.stop("renderFog-visibleArea");
-
-      timer.start("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
-      Area combined = zoneView.getExposedArea(view);
-      timer.stop("renderFog-combined(%d)", view.isUsingTokenView() ? view.getTokens().size() : 0);
-
-      timer.start("renderFogArea");
-      buffG.fill(combined);
-      renderFogArea(buffG, view, combined, visibleArea);
-      renderFogOutline(buffG, view, visibleArea);
-      timer.stop("renderFogArea");
-
-      buffG.dispose();
-      timer.stop("renderFog");
-
-      g.drawImage(buffer, 0, 0, this);
-    }
-  }
-
-  private void renderFogArea(
-      final Graphics2D buffG, final PlayerView view, Area softFog, @Nonnull Area visibleArea) {
-    if (zoneView.isUsingVision()) {
-      buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-      if (!visibleArea.isEmpty()) {
-        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
-
-        // Fill in the exposed area
-        buffG.fill(softFog);
-
-        buffG.setComposite(AlphaComposite.getInstance(AlphaComposite.CLEAR));
-
-        Shape oldClip = buffG.getClip();
-        buffG.setClip(softFog);
-        buffG.fill(visibleArea);
-        buffG.setClip(oldClip);
-      } else {
-        buffG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
-        buffG.fill(softFog);
-      }
-    } else {
-      buffG.fill(softFog);
-      buffG.setClip(softFog);
-    }
-  }
-
-  private void renderFogOutline(
-      final Graphics2D buffG, PlayerView view, @Nonnull Area visibleArea) {
-    // If there is no visible area, there is no outline that needs rendering.
-    if (zoneView.isUsingVision() && !visibleArea.isEmpty()) {
-      // Transform the area (not G2D) because we want the drawn line to remain thin.
-      AffineTransform af = new AffineTransform();
-      af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
-      af.scale(getScale(), getScale());
-      visibleArea = visibleArea.createTransformedArea(af);
-
-      buffG.setTransform(new AffineTransform());
-      buffG.setComposite(AlphaComposite.Src);
-      buffG.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-      buffG.setStroke(new BasicStroke(1));
-      buffG.setColor(Color.BLACK);
-      buffG.draw(visibleArea);
-    }
   }
 
   public boolean isLoading() {
@@ -2425,20 +1925,6 @@ public class ZoneRenderer extends JComponent
       timer.stop("renderPath-3");
     }
 
-    // g.translate(getViewOffsetX(), getViewOffsetY());
-    // g.scale(getScale(), getScale());
-    // for debugging purposes...
-    if (shape != null) {
-      g.setColor(Color.red);
-      g.fill(shape);
-      g.draw(shape);
-    }
-    if (shape2 != null) {
-      g.setColor(Color.blue);
-      g.fill(shape2);
-      g.draw(shape2);
-    }
-
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldRendering);
   }
 
@@ -2488,11 +1974,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
 
-    AffineTransform at = new AffineTransform();
-    at.translate(getViewOffsetX(), getViewOffsetY());
-    at.scale(getScale(), getScale());
-
-    this.shape = at.createTransformedShape(shape);
+    this.shape = shape;
   }
 
   public void setShape2(Shape shape) {
@@ -2500,36 +1982,7 @@ public class ZoneRenderer extends JComponent
       return;
     }
 
-    AffineTransform at = new AffineTransform();
-    at.translate(getViewOffsetX(), getViewOffsetY());
-    at.scale(getScale(), getScale());
-
-    this.shape2 = at.createTransformedShape(shape);
-  }
-
-  public Shape getShape() {
-    return shape;
-  }
-
-  public Shape getShape2() {
-    return shape2;
-  }
-
-  public void drawShape(Shape shape, int x, int y) {
-    Graphics2D g = (Graphics2D) this.getGraphics();
-
-    Grid grid = zone.getGrid();
-    double cwidth = grid.getCellWidth() * getScale();
-    double cheight = grid.getCellHeight() * getScale();
-
-    double iwidth = cwidth;
-    double iheight = cheight;
-
-    ScreenPoint sp = ScreenPoint.fromZonePoint(this, x, y);
-
-    AffineTransform at = new AffineTransform();
-    at.translate(sp.x, sp.y);
-    g.draw(at.createTransformedShape(shape));
+    this.shape2 = shape;
   }
 
   public void showBlockedMoves(
