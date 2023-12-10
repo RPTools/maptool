@@ -90,8 +90,8 @@ public class getInfoFunction extends AbstractFunction {
 
   @Override
   public Object childEvaluate(
-          Parser parser, VariableResolver resolver, String functionName, List<Object> param)
-          throws ParserException {
+      Parser parser, VariableResolver resolver, String functionName, List<Object> param)
+      throws ParserException {
     String infoType = param.get(0).toString();
 
     if (infoType.equalsIgnoreCase("map") || infoType.equalsIgnoreCase("zone")) {
@@ -110,7 +110,7 @@ public class getInfoFunction extends AbstractFunction {
       return getFunctionLists();
     } else {
       throw new ParserException(
-              I18N.getText("macro.function.getInfo.invalidArg", param.get(0).toString()));
+          I18N.getText("macro.function.getInfo.invalidArg", param.get(0).toString()));
     }
   }
 
@@ -122,7 +122,7 @@ public class getInfoFunction extends AbstractFunction {
     }
     JsonArray fList = new JsonArray();
     MapToolExpressionParser.getMacroFunctions()
-                           .forEach(function -> Arrays.stream(function.getAliases()).forEach(fList::add));
+        .forEach(function -> Arrays.stream(function.getAliases()).forEach(fList::add));
 
     JsonObject fInfo = new JsonObject();
     fInfo.add("functions", fList);
@@ -218,18 +218,18 @@ public class getInfoFunction extends AbstractFunction {
 
     cinfo.addProperty("face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceEdge()));
     cinfo.addProperty(
-            "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceVertex()));
+        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceVertex()));
     cinfo.addProperty("portrait size", AppPreferences.getPortraitSize());
     cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
     cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
     cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
     cinfo.addProperty("show avatar in chat", AppPreferences.getShowAvatarInChat());
     cinfo.addProperty(
-            "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
+        "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
     cinfo.addProperty("use tooltips for inline rolls", AppPreferences.getUseToolTipForInlineRoll());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
-            "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));
+        "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));
     cinfo.addProperty("timeInMs", System.currentTimeMillis());
     cinfo.addProperty("timeDate", getTimeDate());
     cinfo.addProperty("isoTimeDate", getIsoTimeDate());
@@ -255,7 +255,7 @@ public class getInfoFunction extends AbstractFunction {
 
     JsonObject overlays = new JsonObject();
     ConcurrentSkipListSet<HTMLOverlayManager> registeredOverlays =
-            MapTool.getFrame().getOverlayPanel().getOverlays();
+        MapTool.getFrame().getOverlayPanel().getOverlays();
     for (HTMLOverlayManager o : registeredOverlays) {
       overlays.add(o.getName(), o.getProperties());
     }
@@ -285,11 +285,11 @@ public class getInfoFunction extends AbstractFunction {
    * @param unknownVersionText text to show if version is unknown
    */
   private void getInfoOnTokensOfType(
-          JsonObject cinfo,
-          String token_type,
-          String prefix,
-          String versionProperty,
-          String unknownVersionText) {
+      JsonObject cinfo,
+      String token_type,
+      String prefix,
+      String versionProperty,
+      String unknownVersionText) {
     JsonObject libInfo = new JsonObject();
     for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
       Zone zone = zr.getZone();
@@ -341,7 +341,7 @@ public class getInfoFunction extends AbstractFunction {
 
     if (!MapTool.getParser().isMacroTrusted()) {
       throw new ParserException(
-              I18N.getText("macro.function.general.noPerm", "getInfo('campaign')"));
+          I18N.getText("macro.function.general.noPerm", "getInfo('campaign')"));
     }
     JsonObject cinfo = new JsonObject();
     Campaign c = MapTool.getCampaign();
@@ -349,11 +349,11 @@ public class getInfoFunction extends AbstractFunction {
 
     cinfo.addProperty("id", c.getId().toString());
     cinfo.addProperty(
-            "initiative movement locked",
-            FunctionUtil.getDecimalForBoolean(cp.isInitiativeMovementLock()));
+        "initiative movement locked",
+        FunctionUtil.getDecimalForBoolean(cp.isInitiativeMovementLock()));
     cinfo.addProperty(
-            "initiative owner permissions",
-            FunctionUtil.getDecimalForBoolean(cp.isInitiativeOwnerPermissions()));
+        "initiative owner permissions",
+        FunctionUtil.getDecimalForBoolean(cp.isInitiativeOwnerPermissions()));
 
     JsonArray zoneIds = new JsonArray();
     JsonObject zinfo = new JsonObject();
@@ -414,7 +414,7 @@ public class getInfoFunction extends AbstractFunction {
       state.addProperty("isShowOwner", bto.isShowOwner() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("isShowOthers", bto.isShowOthers() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty(
-              "isImageOverlay", (bto instanceof ImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
+          "isImageOverlay", (bto instanceof ImageTokenOverlay) ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("mouseOver", bto.isMouseover() ? BigDecimal.ONE : BigDecimal.ZERO);
       state.addProperty("opacity", bto.getOpacity());
       state.addProperty("order", bto.getOrder());
