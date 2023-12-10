@@ -496,7 +496,7 @@ dependencies {
         implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64'
 
     // protobuf
-    implementation "io.grpc:grpc-protobuf:1.59.1"
+    implementation "io.grpc:grpc-protobuf:1.60.0"
     implementation "com.google.protobuf:protobuf-java-util:3.25.1"
 
     // Java Tuples
@@ -513,7 +513,7 @@ dependencies {
     implementation 'org.apache.commons:commons-compress:1.25.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-11'
     // intellij forms runtime
-    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.774'
+    implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.5183'
     // layout for forms created in code
     implementation 'com.miglayout:miglayout-swing:11.2'
 
