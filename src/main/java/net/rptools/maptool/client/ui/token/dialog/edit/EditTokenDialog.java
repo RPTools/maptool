@@ -87,6 +87,7 @@ import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.LightSyntax;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
