@@ -39,6 +39,8 @@ import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 
 public class LightSyntax {
+  private static final int DEFAULT_LUMENS = 100;
+
   public Map<GUID, LightSource> parseLights(String text, Iterable<LightSource> original) {
     final var lightSourceMap = new HashMap<GUID, LightSource>();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
@@ -217,10 +219,12 @@ public class LightSyntax {
         }
         if (lightSource.getType() == LightSource.Type.NORMAL) {
           final var lumens = light.getLumens();
-          if (lumens >= 0) {
-            builder.append('+');
+          if (lumens != DEFAULT_LUMENS) {
+            if (lumens >= 0) {
+              builder.append('+');
+            }
+            builder.append(Integer.toString(lumens, 10));
           }
-          builder.append(Integer.toString(lumens, 10));
         }
       }
       builder.append('\n');
@@ -325,7 +329,7 @@ public class LightSyntax {
       }
 
       Color color = null;
-      int perRangeLumens = 100;
+      int perRangeLumens = DEFAULT_LUMENS;
       distance = arg;
 
       final var rangeRegex = Pattern.compile("([^#+-]*)(#[0-9a-fA-F]+)?([+-]\\d*)?");
@@ -343,7 +347,7 @@ public class LightSyntax {
           perRangeLumens = Integer.parseInt(lumensString, 10);
           if (perRangeLumens == 0) {
             errlog.add(I18N.getText("msg.error.mtprops.light.zerolumens", lineNumber));
-            perRangeLumens = 100;
+            perRangeLumens = DEFAULT_LUMENS;
           }
         }
       }

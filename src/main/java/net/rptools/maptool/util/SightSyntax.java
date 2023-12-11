@@ -34,6 +34,8 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 
 public class SightSyntax {
+  private static final int DEFAULT_LUMENS = 100;
+
   public List<SightType> parse(String text) {
     final var sightList = new LinkedList<SightType>();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
@@ -105,13 +107,13 @@ public class SightSyntax {
                 if (colorString != null) {
                   personalLightColor = Color.decode(colorString);
                 }
-                int perRangeLumens = 100;
+                int perRangeLumens = DEFAULT_LUMENS;
                 if (lumensString != null) {
                   perRangeLumens = Integer.parseInt(lumensString, 10);
                   if (perRangeLumens == 0) {
                     errlog.add(
                         I18N.getText("msg.error.mtprops.sight.zerolumens", reader.getLineNumber()));
-                    perRangeLumens = 100;
+                    perRangeLumens = DEFAULT_LUMENS;
                   }
                 }
 
@@ -249,10 +251,12 @@ public class SightSyntax {
             builder.append(toHex(color));
           }
           final var lumens = light.getLumens();
-          if (lumens >= 0) {
-            builder.append('+');
+          if (lumens != DEFAULT_LUMENS) {
+            if (lumens >= 0) {
+              builder.append('+');
+            }
+            builder.append(Integer.toString(lumens, 10));
           }
-          builder.append(Integer.toString(lumens, 10));
           builder.append(' ');
         }
       }
