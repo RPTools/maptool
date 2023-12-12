@@ -819,9 +819,12 @@ public class ZoneRenderer extends JComponent
             timer.stop("paintComponent:createView");
 
             renderZone(bufferG2d, pl);
-            int noteVPos = 20;
-            if (MapTool.getFrame().areFullScreenToolsShown()) noteVPos += 40;
 
+            int noteVPos = 20;
+            bufferG2d.setFont(AppStyle.labelFont);
+            if (MapTool.getFrame().areFullScreenToolsShown()) {
+              noteVPos += 40;
+            }
             if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
               GraphicsUtil.drawBoxedString(
                   bufferG2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
@@ -921,8 +924,7 @@ public class ZoneRenderer extends JComponent
     final var timer = CodeTimer.get();
 
     timer.start("setup");
-    // store previous rendering settings
-    RenderingHints oldRenderingHints = g2d.getRenderingHints();
+    g2d = (Graphics2D) g2d.create();
 
     // Clear internal state
     tokenLocationMap.clear();
@@ -936,14 +938,12 @@ public class ZoneRenderer extends JComponent
     Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
 
     g2d.setFont(AppStyle.labelFont);
-    Object oldAA = SwingUtil.useAntiAliasing(g2d);
+    SwingUtil.useAntiAliasing(g2d);
 
     Area viewArea = new Area(viewRect);
     // much of the raster code assumes the user clip is set
-    boolean resetClip = false;
     if (g2d.getClipBounds() == null) {
       g2d.setClip(0, 0, viewRect.width, viewRect.height);
-      resetClip = true;
     }
     // Are we still waiting to show the zone ?
     if (isLoading()) {
@@ -1223,22 +1223,6 @@ public class ZoneRenderer extends JComponent
     timer.stop("lightSourceIconOverlay.paintOverlay");
 
     debugRenderer.renderShapes(g2d, Arrays.asList(shape, shape2));
-
-    // g2d.setColor(Color.red);
-    // for (AreaMeta meta : getTopologyAreaData().getAreaList()) {
-    // Area area = new
-    // Area(meta.getArea().getBounds()).createTransformedArea(AffineTransform.getScaleInstance(getScale(),
-    // getScale()));
-    // area =
-    // area.createTransformedArea(AffineTransform.getTranslateInstance(zoneScale.getOffsetX(),
-    // zoneScale.getOffsetY()));
-    // g2d.draw(area);
-    // }
-    g2d.setRenderingHints(oldRenderingHints);
-
-    if (resetClip) {
-      g2d.setClip(null);
-    }
   }
 
   private void delayRendering(ItemRenderer renderer) {
