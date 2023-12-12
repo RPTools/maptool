@@ -28,6 +28,7 @@ import java.util.concurrent.ConcurrentSkipListSet;
 import javax.swing.*;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.ui.htmlframe.HTMLDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrame;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
@@ -105,10 +106,28 @@ public class getInfoFunction extends AbstractFunction {
       return getThemeInfo();
     } else if (infoType.equalsIgnoreCase("debug")) {
       return getDebugInfo();
+    } else if (infoType.equalsIgnoreCase("functions")) {
+      return getFunctionLists();
     } else {
       throw new ParserException(
           I18N.getText("macro.function.getInfo.invalidArg", param.get(0).toString()));
     }
+  }
+
+  private JsonObject getFunctionLists() {
+    UserDefinedMacroFunctions UDF = UserDefinedMacroFunctions.getInstance();
+    JsonObject udfList = new JsonObject();
+    for (String name : UDF.getAliases()) {
+      udfList.addProperty(name, UDF.getFunctionLocation(name));
+    }
+    JsonArray fList = new JsonArray();
+    MapToolExpressionParser.getMacroFunctions()
+        .forEach(function -> Arrays.stream(function.getAliases()).forEach(fList::add));
+
+    JsonObject fInfo = new JsonObject();
+    fInfo.add("functions", fList);
+    fInfo.add("user defined functions", udfList);
+    return fInfo;
   }
 
   /**
