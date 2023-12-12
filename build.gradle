@@ -515,7 +515,7 @@ dependencies {
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.5183'
     // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:11.2'
+    implementation 'com.miglayout:miglayout-swing:11.3'
 
     implementation 'com.github.jknack:handlebars:4.3.1'
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'
