@@ -44,7 +44,6 @@ import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -272,126 +271,119 @@ public class PersistenceUtil {
   }
 
   public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
-    CodeTimer saveTimer; // FJE Previously this was 'private static' -- why?
-    saveTimer = new CodeTimer("CampaignSave");
-    saveTimer.setThreshold(5);
-    // Don't bother keeping track if it won't be displayed...
-    saveTimer.setEnabled(AppState.isCollectProfilingData());
+    CodeTimer.using(
+        "CampaignSave",
+        saveTimer -> {
+          saveTimer.setThreshold(5);
 
-    // Strategy: save the file to a tmp location so that if there's a failure the original file
-    // won't be touched. Then once we're finished, replace the old with the new.
-    File tmpDir = AppUtil.getTmpDir();
-    File tmpFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName());
-    if (tmpFile.exists()) tmpFile.delete();
+          // Strategy: save the file to a tmp location so that if there's a failure the original
+          // file won't be touched. Then once we're finished, replace the old with the new.
+          File tmpDir = AppUtil.getTmpDir();
+          File tmpFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName());
+          if (tmpFile.exists()) tmpFile.delete();
 
-    PackedFile pakFile = null;
-    try {
-      pakFile = new PackedFile(tmpFile);
-      // Configure the meta file (this is for legacy support)
-      PersistedCampaign persistedCampaign = new PersistedCampaign();
+          PackedFile pakFile = null;
+          try {
+            pakFile = new PackedFile(tmpFile);
+            // Configure the meta file (this is for legacy support)
+            PersistedCampaign persistedCampaign = new PersistedCampaign();
 
-      persistedCampaign.campaign = campaign;
+            persistedCampaign.campaign = campaign;
 
-      // Keep track of the current view
-      ZoneRenderer currentZoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
-      if (currentZoneRenderer != null) {
-        persistedCampaign.currentZoneId = currentZoneRenderer.getZone().getId();
-        persistedCampaign.currentView = currentZoneRenderer.getZoneScale();
-      }
-      // Save all assets in active use (consolidate duplicates between maps)
-      saveTimer.start("Collect all assets");
-      Set<MD5Key> allAssetIds = campaign.getAllAssetIds();
-      for (MD5Key key : allAssetIds) {
-        // Put in a placeholder; all we really care about is the MD5Key for now...
-        persistedCampaign.assetMap.put(key, null);
-      }
-      saveTimer.stop("Collect all assets");
+            // Keep track of the current view
+            ZoneRenderer currentZoneRenderer = MapTool.getFrame().getCurrentZoneRenderer();
+            if (currentZoneRenderer != null) {
+              persistedCampaign.currentZoneId = currentZoneRenderer.getZone().getId();
+              persistedCampaign.currentView = currentZoneRenderer.getZoneScale();
+            }
+            // Save all assets in active use (consolidate duplicates between maps)
+            saveTimer.start("Collect all assets");
+            Set<MD5Key> allAssetIds = campaign.getAllAssetIds();
+            for (MD5Key key : allAssetIds) {
+              // Put in a placeholder; all we really care about is the MD5Key for now...
+              persistedCampaign.assetMap.put(key, null);
+            }
+            saveTimer.stop("Collect all assets");
 
-      // And store the asset elsewhere
-      saveTimer.start("Save assets");
-      saveAssets(allAssetIds, pakFile);
-      saveTimer.stop("Save assets");
+            // And store the asset elsewhere
+            saveTimer.start("Save assets");
+            saveAssets(allAssetIds, pakFile);
+            saveTimer.stop("Save assets");
 
-      // Store the Drop In Libraries.
-      saveTimer.start("Save Drop In Libraries");
-      saveAddOnLibraries(pakFile);
-      saveTimer.stop("Save Drop In Libraries");
+            // Store the Drop In Libraries.
+            saveTimer.start("Save Drop In Libraries");
+            saveAddOnLibraries(pakFile);
+            saveTimer.stop("Save Drop In Libraries");
 
-      // Store the Game Data
-      saveTimer.start("Save Game Data");
-      saveGameData(pakFile);
-      saveTimer.stop("Save Game Data");
+            // Store the Game Data
+            saveTimer.start("Save Game Data");
+            saveGameData(pakFile);
+            saveTimer.stop("Save Game Data");
 
-      try {
-        saveTimer.start("Set content");
+            try {
+              saveTimer.start("Set content");
 
-        pakFile.setContent(persistedCampaign);
-        pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
-        pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
+              pakFile.setContent(persistedCampaign);
+              pakFile.setProperty(PROP_CAMPAIGN_VERSION, CAMPAIGN_VERSION);
+              pakFile.setProperty(PROP_VERSION, MapTool.getVersion());
 
-        saveTimer.stop("Set content");
-        saveTimer.start("Save");
-        pakFile.save();
-        saveTimer.stop("Save");
-      } catch (OutOfMemoryError oom) {
-        /*
-         * This error is normally because the heap space has been exceeded while trying to save the campaign. Since MapTool caches the images used by the current Zone, and since the
-         * VersionManager must keep the XML for objects in memory in order to apply transforms to them, the memory usage can spike very high during the save() operation. A common solution is
-         * to switch to an empty map and perform the save from there; this causes MapTool to unload any images that it may have had cached and this can frequently free up enough memory for the
-         * save() to work. We'll tell the user all this right here and then fail the save and they can try again.
-         */
-        saveTimer.start("OOM Close");
-        pakFile.close(); // Have to close the tmpFile first on some OSes
-        pakFile = null;
-        tmpFile.delete(); // Delete the temporary file
-        saveTimer.stop("OOM Close");
-        if (saveTimer.isEnabled()) {
-          MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
-        }
-        MapTool.showError("msg.error.failedSaveCampaignOOM");
-        return;
-      }
-    } finally {
-      saveTimer.start("Close");
-      try {
-        if (pakFile != null) pakFile.close();
-      } catch (Exception e) {
-      }
-      saveTimer.stop("Close");
-      pakFile = null;
-    }
+              saveTimer.stop("Set content");
+              saveTimer.start("Save");
+              pakFile.save();
+              saveTimer.stop("Save");
+            } catch (OutOfMemoryError oom) {
+              /*
+               * This error is normally because the heap space has been exceeded while trying to save the campaign. Since MapTool caches the images used by the current Zone, and since the
+               * VersionManager must keep the XML for objects in memory in order to apply transforms to them, the memory usage can spike very high during the save() operation. A common solution is
+               * to switch to an empty map and perform the save from there; this causes MapTool to unload any images that it may have had cached and this can frequently free up enough memory for the
+               * save() to work. We'll tell the user all this right here and then fail the save and they can try again.
+               */
+              saveTimer.start("OOM Close");
+              pakFile.close(); // Have to close the tmpFile first on some OSes
+              pakFile = null;
+              tmpFile.delete(); // Delete the temporary file
+              saveTimer.stop("OOM Close");
+              MapTool.showError("msg.error.failedSaveCampaignOOM");
+              return;
+            }
+          } finally {
+            saveTimer.start("Close");
+            try {
+              if (pakFile != null) pakFile.close();
+            } catch (Exception e) {
+            }
+            saveTimer.stop("Close");
+            pakFile = null;
+          }
 
-    /*
-     * Copy to the new location. Not the fastest solution in the world if renameTo() fails, but worth the safety net it provides. Jamz: So, renameTo() is causing more issues than it is worth. It
-     * has a tendency to lock a file under Google Drive/Drop box causing the save to fail. Removed the for final save location...
-     */
-    saveTimer.start("Backup");
-    File bakFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName() + ".bak");
+          /*
+           * Copy to the new location. Not the fastest solution in the world if renameTo() fails, but worth the safety net it provides. Jamz: So, renameTo() is causing more issues than it is worth. It
+           * has a tendency to lock a file under Google Drive/Drop box causing the save to fail. Removed the for final save location...
+           */
+          saveTimer.start("Backup");
+          File bakFile = new File(tmpDir.getAbsolutePath(), campaignFile.getName() + ".bak");
 
-    bakFile.delete(); // Delete the last backup file...
+          bakFile.delete(); // Delete the last backup file...
 
-    if (campaignFile.exists()) {
-      saveTimer.start("Backup campaignFile");
-      FileUtil.copyFile(campaignFile, bakFile);
-      // campaignFile.delete();
-      saveTimer.stop("Backup campaignFile");
-    }
+          if (campaignFile.exists()) {
+            saveTimer.start("Backup campaignFile");
+            FileUtil.copyFile(campaignFile, bakFile);
+            // campaignFile.delete();
+            saveTimer.stop("Backup campaignFile");
+          }
 
-    saveTimer.start("Backup tmpFile");
-    FileUtil.copyFile(tmpFile, campaignFile);
-    tmpFile.delete();
-    saveTimer.stop("Backup tmpFile");
-    if (bakFile.exists()) bakFile.delete();
-    saveTimer.stop("Backup");
+          saveTimer.start("Backup tmpFile");
+          FileUtil.copyFile(tmpFile, campaignFile);
+          tmpFile.delete();
+          saveTimer.stop("Backup tmpFile");
+          if (bakFile.exists()) bakFile.delete();
+          saveTimer.stop("Backup");
 
-    // Save the campaign thumbnail
-    saveTimer.start("Thumbnail");
-    saveCampaignThumbnail(campaignFile.getName());
-    saveTimer.stop("Thumbnail");
-
-    if (saveTimer.isEnabled()) {
-      MapTool.getProfilingNoteFrame().addText(saveTimer.toString());
-    }
+          // Save the campaign thumbnail
+          saveTimer.start("Thumbnail");
+          saveCampaignThumbnail(campaignFile.getName());
+          saveTimer.stop("Thumbnail");
+        });
   }
 
   /*

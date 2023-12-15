@@ -14,15 +14,19 @@
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
+import java.awt.*;
+import net.rptools.maptool.model.Grid;
+
 public class ZoneRendererConstants {
+  public static final int MIN_GRID_SIZE = Grid.MIN_GRID_SIZE;
+  public static final int MAX_GRID_SIZE = Grid.MAX_GRID_SIZE;
+
+  public static final Color TRANSLUCENT_YELLOW =
+      new Color(Color.yellow.getRed(), Color.yellow.getGreen(), Color.yellow.getBlue(), 50);
+
   public enum TokenMoveCompletion {
     TRUE,
     FALSE,
     OTHER
-  }
-
-  enum LightOverlayClipStyle {
-    CLIP_TO_VISIBLE_AREA,
-    CLIP_TO_NOT_VISIBLE_AREA,
   }
 }
