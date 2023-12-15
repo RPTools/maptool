@@ -130,9 +130,6 @@ public class ZoneRenderer extends JComponent
   private String loadingProgress;
   private boolean isLoaded;
 
-  /** In screen space */
-  private Area exposedFogArea;
-
   private BufferedImage miniImage;
   private BufferedImage backbuffer;
   private boolean drawBackground = true;
@@ -970,16 +967,6 @@ public class ZoneRenderer extends JComponent
     Map<Token, Set<Token>> drawThese = compositor.drawWhat(viewRect);
 
     timer.stop("setup");
-    // @formatter:off
-    /*
-     * This is the new code that doesn't work. See below for newer code that _might_ work. ;-) if (visibleScreenArea
-     * == null && zoneView.isUsingVision()) { Area a = zoneView.getVisibleArea(view); if (a != null && !a.isEmpty())
-     * visibleScreenArea = a; } exposedFogArea = new Area(zone.getExposedArea()); if (visibleScreenArea != null) {
-     * if (exposedFogArea != null) exposedFogArea.transform(af); visibleScreenArea.transform(af); } if
-     * (exposedFogArea == null || !zone.hasFog()) { // fully exposed (screen area) exposedFogArea = new Area(new
-     * Rectangle(0, 0, getSize().width, getSize().height)); }
-     */
-    // @formatter:on
 
     // Calculations
     timer.start("calcs-1");
@@ -1000,32 +987,6 @@ public class ZoneRenderer extends JComponent
     }
 
     timer.stop("calcs-1");
-    timer.start("calcs-2");
-    {
-      // renderMoveSelectionSet() requires exposedFogArea to be properly set
-      exposedFogArea = new Area(zone.getExposedArea());
-      if (zone.hasFog()) {
-        if (visibleScreenArea != null && !visibleScreenArea.isEmpty()) {
-          exposedFogArea.intersect(visibleScreenArea);
-        } else {
-          try {
-            // Try to calculate the inverse transform and apply it.
-            viewArea.transform(af.createInverse());
-            // If it works, restrict the exposedFogArea to the resulting rectangle.
-            exposedFogArea.intersect(viewArea);
-          } catch (NoninvertibleTransformException nte) {
-            // If it doesn't work, ignore the intersection and produce an error (should never
-            // happen,
-            // right?)
-            nte.printStackTrace();
-          }
-        }
-        exposedFogArea.transform(af);
-      } else {
-        exposedFogArea = viewArea;
-      }
-    }
-    timer.stop("calcs-2");
 
     // Rendering pipeline
     if (zone.drawBoard()) {
@@ -1420,8 +1381,31 @@ public class ZoneRenderer extends JComponent
     if (selectionSetMap.isEmpty()) {
       return;
     }
+    g = (Graphics2D) g.create();
+
+    // Regardless of vision settings, no need to render beyond the fog.
+    Area clearArea = null;
+    if (!view.isGMView()) {
+      if (zone.hasFog() && zoneView.isUsingVision()) {
+        clearArea = new Area(zoneView.getExposedArea(view));
+        clearArea.intersect(zoneView.getVisibleArea(view));
+      } else if (zone.hasFog()) {
+        clearArea = zoneView.getExposedArea(view);
+      } else if (zoneView.isUsingVision()) {
+        clearArea = zoneView.getVisibleArea(view);
+      }
+
+      if (clearArea != null) {
+        AffineTransform af = new AffineTransform();
+        af.translate(zoneScale.getOffsetX(), zoneScale.getOffsetY());
+        af.scale(getScale(), getScale());
+        var clip = clearArea.createTransformedArea(af);
+
+        g.clip(clip);
+      }
+    }
+
     double scale = zoneScale.getScale();
-    boolean clipInstalled = false;
     for (SelectionSet set : movementSet) {
       Token keyToken = zone.getToken(set.getKeyToken());
       if (keyToken == null) {
@@ -1449,17 +1433,8 @@ public class ZoneRenderer extends JComponent
         }
 
         // ... or if it's visible only to the owner and that's not us!
-        if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
-          continue;
-        }
-
-        // ... or there are no lights/visibleScreen and you are not the owner or gm and there is fow
-        // or vision
-        if (!view.isGMView()
-            && !AppUtil.playerOwns(token)
-            && visibleScreenArea == null
-            && zone.hasFog()
-            && zoneView.isUsingVision()) {
+        final boolean isOwner = view.isGMView() || AppUtil.playerOwns(token);
+        if (token.isVisibleOnlyToOwner() && !isOwner) {
           continue;
         }
 
@@ -1485,23 +1460,6 @@ public class ZoneRenderer extends JComponent
         int x = (int) (newScreenPoint.x);
         int y = (int) (newScreenPoint.y);
 
-        // Vision visibility
-        boolean isOwner = view.isGMView() || AppUtil.playerOwns(token); // ||
-        // set.getPlayerId().equals(MapTool.getPlayer().getName());
-        if (!view.isGMView() && visibleScreenArea != null && !isOwner) {
-          // FJE Um, why not just assign the clipping area at the top of the routine?
-          if (!clipInstalled) {
-            // Only show the part of the path that is visible
-            Area visibleArea = new Area(g.getClipBounds());
-            visibleArea.intersect(visibleScreenArea);
-
-            g = (Graphics2D) g.create();
-            g.setClip(new GeneralPath(visibleArea));
-
-            clipInstalled = true;
-            // System.out.println("Adding Clip: " + MapTool.getPlayer().getName());
-          }
-        }
         // Show path only on the key token on token layer that are visible to the owner or gm while
         // fow and vision is on
         if (token == keyToken && token.getLayer().supportsWalker()) {
@@ -1616,100 +1574,77 @@ public class ZoneRenderer extends JComponent
 
         g.drawImage(workImage, at, this);
 
-        // Other details
-        if (token == keyToken) {
-          Rectangle bounds = new Rectangle(tx, ty, imgSize.width, imgSize.height);
-          bounds.width *= getScale();
-          bounds.height *= getScale();
+        // Other details.
+        // If the token is visible on the screen it will be in the location cache
+        if (token == keyToken
+            && (isOwner || shouldShowMovementLabels(token, set, clearArea))
+            && tokenLocationCache.containsKey(token)) {
+          var labelY = y + 10 + scaledHeight;
+          var labelX = x + scaledWidth / 2;
 
-          Grid grid = zone.getGrid();
-          boolean checkForFog =
-              MapTool.getServerPolicy().isUseIndividualFOW() && zoneView.isUsingVision();
-          boolean showLabels = isOwner;
-          if (checkForFog) {
-            Path<? extends AbstractPoint> path =
-                set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
-            List<? extends AbstractPoint> thePoints = path.getCellPath();
-            /*
-             * now that we have the last point, we can check to see if it's gridless or not. If not gridless, get the last point the token was at and see if the token's footprint is inside
-             * the visible area to show the label.
-             */
-            if (thePoints.isEmpty()) {
-              showLabels = false;
-            } else {
-              AbstractPoint lastPoint = thePoints.get(thePoints.size() - 1);
-
-              Rectangle tokenRectangle = null;
-              if (lastPoint instanceof CellPoint) {
-                tokenRectangle = token.getFootprint(grid).getBounds(grid, (CellPoint) lastPoint);
-              } else {
-                Rectangle tokBounds = token.getBounds(zone);
-                tokenRectangle = new Rectangle();
-                tokenRectangle.setBounds(
-                    lastPoint.x,
-                    lastPoint.y,
-                    (int) tokBounds.getWidth(),
-                    (int) tokBounds.getHeight());
-              }
-              showLabels = showLabels || zoneView.getVisibleArea(view).intersects(tokenRectangle);
+          if (token.getLayer().supportsWalker() && AppState.getShowMovementMeasurements()) {
+            double distanceTraveled = calculateTraveledDistance(set);
+            if (distanceTraveled >= 0) {
+              String distance = NumberFormat.getInstance().format(distanceTraveled);
+              delayRendering(new LabelRenderer(this, distance, labelX, labelY));
+              labelY += 20;
             }
-          } else {
-            boolean hasFog = zone.hasFog();
-            boolean fogIntersects = exposedFogArea.intersects(bounds);
-            showLabels = showLabels || (visibleScreenArea == null && !hasFog); // no vision - fog
-            showLabels =
-                showLabels
-                    || (visibleScreenArea == null && hasFog && fogIntersects); // no vision + fog
-            showLabels =
-                showLabels
-                    || (visibleScreenArea != null
-                        && visibleScreenArea.intersects(bounds)
-                        && fogIntersects); // vision
           }
-          if (showLabels) {
-            // if the token is visible on the screen it will be in the location cache
-            if (tokenLocationCache.containsKey(token)) {
-              y += 10 + scaledHeight;
-              x += scaledWidth / 2;
-
-              if (token.getLayer().supportsWalker() && AppState.getShowMovementMeasurements()) {
-                String distance = "";
-                if (walker != null) { // This wouldn't be true unless token.isSnapToGrid() &&
-                  // grid.isPathingSupported()
-                  double distanceTraveled = walker.getDistance();
-                  if (distanceTraveled >= 0) {
-                    distance = NumberFormat.getInstance().format(distanceTraveled);
-                  }
-                } else {
-                  double c = 0;
-                  ZonePoint lastPoint = null;
-                  for (ZonePoint zp : set.gridlessPath.getCellPath()) {
-                    if (lastPoint == null) {
-                      lastPoint = zp;
-                      continue;
-                    }
-                    int a = lastPoint.x - zp.x;
-                    int b = lastPoint.y - zp.y;
-                    c += Math.hypot(a, b);
-                    lastPoint = zp;
-                  }
-                  c /= zone.getGrid().getSize(); // Number of "cells"
-                  c *= zone.getUnitsPerCell(); // "actual" distance traveled
-                  distance = NumberFormat.getInstance().format(c);
-                }
-                if (!distance.isEmpty()) {
-                  delayRendering(new LabelRenderer(this, distance, x, y));
-                  y += 20;
-                }
-              }
-              if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
-                delayRendering(new LabelRenderer(this, set.getPlayerId(), x, y));
-              }
-            } // !token.isStamp()
-          } // showLabels
-        } // token == keyToken
+          if (set.getPlayerId() != null && set.getPlayerId().length() >= 1) {
+            delayRendering(new LabelRenderer(this, set.getPlayerId(), labelX, labelY));
+          }
+        }
       }
     }
+  }
+
+  private boolean shouldShowMovementLabels(Token token, SelectionSet set, Area clearArea) {
+    Rectangle tokenRectangle;
+    if (set.getWalker() != null) {
+      final var path = set.getWalker().getPath();
+      if (path.getCellPath().isEmpty()) {
+        return false;
+      }
+      final var lastPoint = path.getCellPath().getLast();
+      final var grid = zone.getGrid();
+      tokenRectangle = token.getFootprint(grid).getBounds(grid, lastPoint);
+    } else {
+      final var path = set.gridlessPath;
+      if (path.getCellPath().isEmpty()) {
+        return false;
+      }
+      final var lastPoint = path.getCellPath().getLast();
+      Rectangle tokBounds = token.getBounds(zone);
+      tokenRectangle = new Rectangle();
+      tokenRectangle.setBounds(
+          lastPoint.x, lastPoint.y, (int) tokBounds.getWidth(), (int) tokBounds.getHeight());
+    }
+
+    return clearArea == null || clearArea.intersects(tokenRectangle);
+  }
+
+  private double calculateTraveledDistance(SelectionSet set) {
+    ZoneWalker walker = set.getWalker();
+    if (walker != null) {
+      // This wouldn't be true unless token.isSnapToGrid() && grid.isPathingSupported()
+      return walker.getDistance();
+    }
+
+    double distanceTraveled = 0;
+    ZonePoint lastPoint = null;
+    for (ZonePoint zp : set.gridlessPath.getCellPath()) {
+      if (lastPoint == null) {
+        lastPoint = zp;
+        continue;
+      }
+      int a = lastPoint.x - zp.x;
+      int b = lastPoint.y - zp.y;
+      distanceTraveled += Math.hypot(a, b);
+      lastPoint = zp;
+    }
+    distanceTraveled /= zone.getGrid().getSize(); // Number of "cells"
+    distanceTraveled *= zone.getUnitsPerCell(); // "actual" distance traveled
+    return distanceTraveled;
   }
 
   /**
@@ -1728,13 +1663,13 @@ public class ZoneRenderer extends JComponent
     if (path == null) {
       return;
     }
+    if (path.getCellPath().isEmpty()) {
+      return;
+    }
 
     Object oldRendering = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-    if (path.getCellPath().isEmpty()) {
-      return;
-    }
     Grid grid = zone.getGrid();
     double scale = getScale();
 
