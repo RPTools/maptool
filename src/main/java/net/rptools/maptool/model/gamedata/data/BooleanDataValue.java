@@ -24,6 +24,7 @@ public final class BooleanDataValue implements DataValue {
 
   /** The name of the value. */
   private final String name;
+
   /** The value. */
   private final boolean value;
 

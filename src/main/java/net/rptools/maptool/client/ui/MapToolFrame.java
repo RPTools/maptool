@@ -100,7 +100,6 @@ import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
@@ -110,6 +109,7 @@ import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.collections4.map.LinkedMap;
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.xml.sax.SAXException;
@@ -137,8 +137,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   // Components
   private final AssetPanel assetPanel;
   private final ClientConnectionPanel connectionPanel;
+
   /** The panel showing the initiative order. */
   private final InitiativePanel initiativePanel;
+
   /** The HTML pane showing the map overlay. */
   private HTMLOverlayPanel overlayPanel;
 
@@ -149,8 +151,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final Toolbox toolbox;
   private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
+
   /** Contains the zoneRenderer, as well as all overlays. */
   private final JPanel zoneRendererPanel;
+
   /** Contains the overlays that should be displayed in front of everything else. */
   private final PointerToolOverlay pointerToolOverlay;
 
@@ -183,6 +187,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private GUID PreRemoveRenderGUID = null;
 
   private final GlassPane glassPane;
+
   /** Model for the token tree panel of the map explorer. */
   private TokenPanelTreeModel tokenPanelTreeModel;
 
@@ -199,9 +204,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private JFileChooser saveFileChooser;
   private JFileChooser saveMapFileChooser;
   private JFileChooser saveTokenFileChooser;
-
-  /** Remember the last layer selected */
-  private Layer lastSelectedLayer = Zone.Layer.TOKEN;
 
   private final FileFilter campaignFilter =
       new MTFileFilter(I18N.getText("file.ext.cmpgn"), "cmpgn");
@@ -1300,7 +1302,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                     }
                     if (!selectedTokenSet.isEmpty()) {
                       try {
-                        if (firstToken.isStamp()) {
+                        if (firstToken.getLayer().isStampLayer()) {
                           new StampPopupMenu(
                                   selectedTokenSet, x, y, getCurrentZoneRenderer(), firstToken)
                               .showPopup(tree);
@@ -1892,28 +1894,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
     initiativePanel.setZone(zone);
 
-    // AssetAvailableListener listener = new AssetAvailableListener() {
-    // public void assetAvailable(net.rptools.lib.MD5Key key) {
-    // ZoneRenderer renderer = getCurrentZoneRenderer();
-    // if (renderer.getZone() == zone) {
-    // ImageManager.getImage(key, renderer);
-    // }
-    // }
-    // };
-    // Let's add all the assets, starting with the backgrounds
-    for (Token token : zone.getBackgroundStamps()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
-    }
-    // Now the stamps
-    for (Token token : zone.getStampTokens()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
-    }
-    // Now add the rest
-    for (Token token : zone.getAllTokens()) {
-      MD5Key key = token.getImageAssetId();
-      ImageManager.getImage(key);
+    // Let's add all the assets, starting with the backgrounds and working up.
+    final var layers = Zone.Layer.values();
+    ArrayUtils.reverse(layers);
+    for (Zone.Layer layer : layers) {
+      for (Token token : zone.getTokensOnLayer(layer)) {
+        MD5Key key = token.getImageAssetId();
+        ImageManager.getImage(key);
+      }
     }
   }
 

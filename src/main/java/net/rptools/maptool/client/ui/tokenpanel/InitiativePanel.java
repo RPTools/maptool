@@ -233,6 +233,7 @@ public class InitiativePanel extends JPanel
       getInputMap().put(KeyStroke.getKeyStroke("ENTER"), "none");
     }
   }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
@@ -792,7 +793,7 @@ public class InitiativePanel extends JPanel
       new AbstractAction() {
         @Override
         public void actionPerformed(ActionEvent e) {
-          list.insertTokens(list.getZone().getTokens());
+          list.insertTokens(list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer));
         }
       };
 
@@ -802,7 +803,7 @@ public class InitiativePanel extends JPanel
         @Override
         public void actionPerformed(ActionEvent e) {
           List<Token> tokens = new ArrayList<Token>();
-          for (Token token : list.getZone().getTokens()) {
+          for (Token token : list.getZone().getTokensForLayers(Zone.Layer::isTokenLayer)) {
             if (token.getType() == Type.PC) tokens.add(token);
           } // endfor
           list.insertTokens(tokens);
@@ -895,7 +896,7 @@ public class InitiativePanel extends JPanel
                 ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
                 if (renderer == null
                     || token == null
-                    || (!token.isToken() && !MapTool.getPlayer().isGM())
+                    || (!token.getLayer().isTokenLayer() && !MapTool.getPlayer().isGM())
                     || !AppUtil.playerOwns(token)) {
                   return;
                 }

@@ -345,6 +345,7 @@ public class HTMLOverlayPanel extends JFXPanel {
     bimg.flush();
     return c.getAlpha() != 0;
   }
+
   /**
    * Add the mouse listeners to forward the mouse events to the current ZoneRenderer. Clicks and
    * mouse press get validated first to see if they need forwarding.

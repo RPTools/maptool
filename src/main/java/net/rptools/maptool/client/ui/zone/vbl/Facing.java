@@ -12,13 +12,9 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.functions.exceptions;
+package net.rptools.maptool.client.ui.zone.vbl;
 
-import net.rptools.parser.ParserException;
-
-/** Exception type thrown by assert() function, allowing a user-defined error message. */
-public class AssertFunctionException extends ParserException {
-  public AssertFunctionException(String msg) {
-    super(msg);
-  }
+public enum Facing {
+  OCEAN_SIDE_FACES_ORIGIN,
+  ISLAND_SIDE_FACES_ORIGIN
 }

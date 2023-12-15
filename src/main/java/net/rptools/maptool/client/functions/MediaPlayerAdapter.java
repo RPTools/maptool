@@ -145,6 +145,7 @@ public class MediaPlayerAdapter {
       this.player.stop();
     }
   }
+
   /**
    * Start a given stream from its url string. If already streaming the file, dispose of the
    * previous stream.
@@ -421,6 +422,7 @@ public class MediaPlayerAdapter {
   private void updateMute() {
     player.setMute(globalMute);
   }
+
   /**
    * Get the global mute status
    *

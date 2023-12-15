@@ -24,6 +24,7 @@ public final class StringDataValue implements DataValue {
 
   /** The name of the value. */
   private final String name;
+
   /** The value. */
   private final String value;
 

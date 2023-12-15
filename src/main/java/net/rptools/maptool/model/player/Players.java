@@ -68,6 +68,7 @@ public class Players {
   /** Property change event name for when a player is changed. */
   public static final String PROPERTY_CHANGE_PLAYER_CHANGED =
       PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED;
+
   /**
    * Property change event name for when the database is changed or there are mas updates. Some
    * databases may only support this event and not player added/removed/changed

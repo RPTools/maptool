@@ -21,7 +21,6 @@ import java.net.URL;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.security.CodeSource;
-import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -54,6 +53,7 @@ public class AppUtil {
   /** Returns true if currently running on a Windows based operating system. */
   public static boolean WINDOWS =
       (System.getProperty("os.name").toLowerCase().startsWith("windows"));
+
   /** Returns true if currently running on a Mac OS X based operating system. */
   public static boolean MAC_OS_X =
       (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
@@ -216,6 +216,11 @@ public class AppUtil {
       path = path.getParent().getParent().getParent();
     } else { // First try to find MapTool* directory in path
       while (path != null) {
+        if (path.getFileName() == null) {
+          // We have gone too far!
+          path = null;
+          break;
+        }
         if (path.getFileName().toString().matches("(?i).*maptool.*")) {
           break;
         }
@@ -256,6 +261,7 @@ public class AppUtil {
 
     return cfgFile;
   }
+
   /**
    * Returns a File path representing configuration file under the app home directory structure.
    *
@@ -322,16 +328,7 @@ public class AppUtil {
    * @return true if owned by all, or one of the owners is online and not a gm.
    */
   public static boolean ownedByOnePlayer(Token token) {
-    if (token.isOwnedByAll()) {
-      return true;
-    }
-    List<String> players = MapTool.getNonGMs();
-    for (String owner : token.getOwners()) {
-      if (players.contains(owner)) {
-        return true;
-      }
-    }
-    return false;
+    return token.isOwnedByAny(MapTool.getNonGMs());
   }
 
   /**

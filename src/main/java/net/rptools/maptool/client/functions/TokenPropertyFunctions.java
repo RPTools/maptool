@@ -43,9 +43,7 @@ import net.rptools.maptool.model.gamedata.MTScriptDataConversion;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.data.LibraryData;
 import net.rptools.maptool.util.FunctionUtil;
-import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -1118,52 +1116,16 @@ public class TokenPropertyFunctions extends AbstractFunction {
    */
   public static Zone.Layer getLayer(String layerName) throws ParserException {
     Zone.Layer layer;
-    if (layerName.equalsIgnoreCase(Zone.Layer.TOKEN.name())) {
-      layer = Zone.Layer.TOKEN;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.BACKGROUND.name())) {
-      layer = Zone.Layer.BACKGROUND;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.GM.name())
-        || layerName.equalsIgnoreCase("hidden")) {
-      layer = Zone.Layer.GM;
-    } else if (layerName.equalsIgnoreCase(Zone.Layer.OBJECT.name())) {
-      layer = Zone.Layer.OBJECT;
-    } else {
+    try {
+      layer = Zone.Layer.getByName(layerName.toUpperCase());
+    } catch (IllegalArgumentException e) {
       throw new ParserException(
           I18N.getText("macro.function.tokenProperty.unknownLayer", "setLayer", layerName));
     }
+
     return layer;
   }
 
-  /**
-   * Get the token shape corresponding to the token and layer. Returns null if can't find match, or
-   * if forceShape is set to false.
-   *
-   * @param token the token to get the new shape of.
-   * @param layer the layer of the token.
-   * @param forceShape should we even get a new shape?
-   * @return the new TokenShape of the token
-   */
-  public static Token.TokenShape getTokenShape(Token token, Zone.Layer layer, boolean forceShape) {
-    Token.TokenShape tokenShape = null;
-    if (forceShape) {
-      switch (layer) {
-        case BACKGROUND:
-        case OBJECT:
-          tokenShape = Token.TokenShape.TOP_DOWN;
-          break;
-        case GM:
-        case TOKEN:
-          Image image = ImageManager.getImage(token.getImageAssetId());
-          if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
-            tokenShape = Token.TokenShape.TOP_DOWN;
-          } else {
-            tokenShape = TokenUtil.guessTokenType(image);
-          }
-          break;
-      }
-    }
-    return tokenShape;
-  }
   /**
    * Sets the layer of the token.
    *
@@ -1177,14 +1139,16 @@ public class TokenPropertyFunctions extends AbstractFunction {
   private static String setLayer(Token token, String layerName, boolean forceShape)
       throws ParserException {
     Zone.Layer layer = getLayer(layerName);
-    Token.TokenShape tokenShape = getTokenShape(token, layer, forceShape);
+    token.setLayer(layer);
 
-    if (tokenShape != null) {
+    if (forceShape) {
+      final var shape = token.guessAndSetShape();
       MapTool.serverCommand()
-          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), tokenShape.name());
+          .updateTokenProperty(token, Token.Update.setLayerShape, layer.name(), shape.name());
     } else {
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setLayer, layer.name());
     }
+
     return layer.name();
   }
 
@@ -1337,11 +1301,10 @@ public class TokenPropertyFunctions extends AbstractFunction {
    * @return a string list of the token owners.
    */
   public String getOwners(Token token, String delim) {
-    String[] owners = new String[token.getOwners().size()];
-    token.getOwners().toArray(owners);
+    var owners = new ArrayList<>(token.getOwners());
     if ("json".endsWith(delim)) {
       JsonArray jarr = new JsonArray();
-      Arrays.stream(owners).forEach(o -> jarr.add(new JsonPrimitive(o)));
+      owners.forEach(o -> jarr.add(new JsonPrimitive(o)));
       return jarr.toString();
     } else {
       return StringFunctions.getInstance().join(owners, delim);

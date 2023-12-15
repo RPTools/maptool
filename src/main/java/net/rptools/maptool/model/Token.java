@@ -61,6 +61,7 @@ import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -285,7 +286,7 @@ public class Token implements Cloneable {
 
   private String tokenShape = TokenShape.SQUARE.toString();
   private String tokenType = Type.NPC.toString();
-  private String layer = Zone.Layer.TOKEN.toString();
+  private String layer = Zone.Layer.getDefaultPlayerLayer().toString();
   private transient Zone.Layer actualLayer;
 
   private String propertyType =
@@ -338,6 +339,7 @@ public class Token implements Cloneable {
   private MD5Key portraitImage;
 
   private Map<GUID, LightSource> uniqueLightSources = new LinkedHashMap<>();
+
   /**
    * All light sources attached to the token.
    *
@@ -624,7 +626,7 @@ public class Token implements Cloneable {
   }
 
   public boolean isMarker() {
-    return isStamp()
+    return getLayer().isMarkerLayer()
         && (!StringUtil.isEmpty(notes) || !StringUtil.isEmpty(gmNotes) || portraitImage != null);
   }
 
@@ -783,38 +785,6 @@ public class Token implements Cloneable {
     }
   }
 
-  public boolean isObjectStamp() {
-    return getLayer() == Zone.Layer.OBJECT;
-  }
-
-  public boolean isGMStamp() {
-    return getLayer() == Zone.Layer.GM;
-  }
-
-  public boolean isBackgroundStamp() {
-    return getLayer() == Zone.Layer.BACKGROUND;
-  }
-
-  public boolean isOnTokenLayer() {
-    return getLayer() == Zone.Layer.TOKEN;
-  }
-
-  public boolean isStamp() {
-    switch (getLayer()) {
-      case BACKGROUND:
-      case OBJECT:
-      case GM:
-        return true;
-      default:
-        break;
-    }
-    return false;
-  }
-
-  public boolean isToken() {
-    return getLayer() == Zone.Layer.TOKEN;
-  }
-
   public TokenShape getShape() {
     try {
       return TokenShape.valueOf(tokenShape);
@@ -826,6 +796,23 @@ public class Token implements Cloneable {
 
   public void setShape(TokenShape type) {
     this.tokenShape = type.name();
+  }
+
+  /**
+   * Sets the shape based on the token's layer and image.
+   *
+   * @return The shape that was decided, possibly the same shape as before.
+   */
+  public TokenShape guessAndSetShape() {
+    var shape = Token.TokenShape.TOP_DOWN;
+    if (getLayer().supportsGuessingTokenShape()) {
+      Image image = ImageManager.getImage(getImageAssetId());
+      if (image != null && image != ImageManager.TRANSFERING_IMAGE) {
+        shape = TokenUtil.guessTokenType(image);
+      }
+    }
+    setShape(shape);
+    return shape;
   }
 
   public Type getType() {
@@ -856,7 +843,7 @@ public class Token implements Cloneable {
       }
       return actualLayer;
     } catch (IllegalArgumentException iae) {
-      return Zone.Layer.TOKEN;
+      return Zone.Layer.getDefaultPlayerLayer();
     }
   }
 
@@ -1109,8 +1096,45 @@ public class Token implements Cloneable {
     ownerList.clear();
   }
 
+  /**
+   * Check if the token is owned by the provided player.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players.
+   *
+   * @param playerId The player name to check ownership against.
+   * @return {@code true} if {@code playerId} identifies an owner of the token.
+   */
   public synchronized boolean isOwner(String playerId) {
-    return (ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId));
+    return ownerType == OWNER_TYPE_ALL || ownerList.contains(playerId);
+  }
+
+  /**
+   * Checks if the token is owned by any of the provided players.
+   *
+   * <p>This method allows implicit ownership when the token is owned by all players. It is as if
+   * each player was checked individually via {@link #isOwner(String)}, but more convenient and
+   * efficient.
+   *
+   * @param playerIds The player names to check ownership against.
+   * @return {@code true} if there is a player in {@code playerIds} that is an owner of this token.
+   */
+  public synchronized boolean isOwnedByAny(Collection<String> playerIds) {
+    if (playerIds.isEmpty()) {
+      return false;
+    }
+
+    return ownerType == OWNER_TYPE_ALL || !Collections.disjoint(ownerList, playerIds);
+  }
+
+  /**
+   * Checks if the token is not owned by anyone.
+   *
+   * <p>If the token is owned by all players, this will return {@code false}
+   *
+   * @return {@code true} if the token has any owners.
+   */
+  public synchronized boolean isOwnedByNone() {
+    return ownerType != OWNER_TYPE_ALL && ownerList.isEmpty();
   }
 
   @Override
@@ -1593,7 +1617,7 @@ public class Token implements Cloneable {
       footprintBounds.x = getX();
       footprintBounds.y = getY();
     } else {
-      if (!isBackgroundStamp()) {
+      if (getLayer().anchorSnapToGridAtCenter()) {
         // Center it on the footprint
         footprintBounds.x -= (w - footprintBounds.width) / 2;
         footprintBounds.y -= (h - footprintBounds.height) / 2;
@@ -1621,7 +1645,7 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int offsetX, offsetY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (isBackgroundStamp() || isSnapToScale() || isOnTokenLayer()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale() || getLayer().isTokenLayer()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         offsetX = getX() + (int) centerOffset.x;
         offsetY = getY() + (int) centerOffset.y;
@@ -1651,13 +1675,14 @@ public class Token implements Cloneable {
     Point2D.Double offset = getSnapToUnsnapOffset(zone);
     double newX = getX() + offset.x;
     double newY = getY() + offset.y;
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
       return grid.convert(
           grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
       return new ZonePoint((int) newX, (int) newY);
     }
   }
+
   /**
    * Gets the point where the token should go, if it were to be unsnapped from the grid.
    *
@@ -1683,13 +1708,13 @@ public class Token implements Cloneable {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported() || isBackgroundStamp()) {
-      if (isBackgroundStamp() || isSnapToScale()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
+      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
         TokenFootprint footprint = getFootprint(grid);
         Rectangle footprintBounds = footprint.getBounds(grid);
         double footprintOffsetX = 0;
         double footprintOffsetY = 0;
-        if (!isBackgroundStamp()) {
+        if (getLayer().anchorSnapToGridAtCenter()) {
           // Non-background tokens can have an offset from top left corner
           footprintOffsetX = tokenBounds.width - footprintBounds.width;
           footprintOffsetY = tokenBounds.height - footprintBounds.height;

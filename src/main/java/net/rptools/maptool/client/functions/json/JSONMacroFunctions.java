@@ -633,6 +633,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     return arrays;
   }
+
   /**
    * Returns the parameter list as a list of {@link JsonArray}s. If the parameter is not a json
    * object/array and is an empty string it will result in a 0 sized JsonArray, otherwise the value
@@ -652,6 +653,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
     return arrays;
   }
+
   /**
    * Returns the parameter list as a list of {@link JsonObject}s.
    *
@@ -964,6 +966,7 @@ public class JSONMacroFunctions extends AbstractFunction {
   public JsonObjectFunctions getJsonObjectFunctions() {
     return jsonObjectFunctions;
   }
+
   /**
    * This method returns the object passed in as the appropriate json type.
    *

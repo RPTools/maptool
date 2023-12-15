@@ -78,9 +78,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     this.elementUnderMouse = elementUnderMouse;
     this.topLevelOnly = topLevelOnly;
 
-    addGMItem(
-        createChangeToMenu(
-            Zone.Layer.TOKEN, Zone.Layer.GM, Zone.Layer.OBJECT, Zone.Layer.BACKGROUND));
+    addGMItem(createChangeToMenu(Zone.Layer.values()));
     addGMItem(createArrangeMenu());
     if (isDrawnElementGroup(elementUnderMouse)) {
       add(new UngroupDrawingsAction());
@@ -408,6 +406,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
   private class VblAction extends AbstractAction {
     private final boolean isEraser;
     private final boolean pathOnly;
+
     /**
      * @param pathOnly - boolean, just path if true, otherwise fill shape.
      * @param isEraser - boolean, erase VBL if true.

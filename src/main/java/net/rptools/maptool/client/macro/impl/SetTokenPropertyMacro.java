@@ -117,10 +117,9 @@ public class SetTokenPropertyMacro implements Macro {
        * and trying to change properties figuring out that there is a token there because they are getting a different error message (benefit of the doubt only goes so far ;) )
        */
       if (!MapTool.getPlayer().isGM()) {
-        if ((!zone.isTokenVisible(token) || token.getLayer() == Zone.Layer.GM)) {
+        if (!zone.isTokenVisible(token) || !token.getLayer().isVisibleToPlayers()) {
           token = null;
-        }
-        if (!token.isOwner(MapTool.getPlayer().getName())) {
+        } else if (!token.isOwner(MapTool.getPlayer().getName())) {
           token = null;
         }
       }

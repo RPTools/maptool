@@ -48,6 +48,7 @@ public class ToolbarPanel extends JToolBar {
   private final JToggleButton templateButton;
   private final JToggleButton fogButton;
   private final JToggleButton topologyButton;
+
   /**
    * The last component prior to the option panel. This is used to find the index at which to
    * reinsert the option panel when the fullscreen tools are hidden.

@@ -29,7 +29,7 @@ jobs:
         uses: actions/setup-java@v3
         with:
           distribution: 'temurin'
-          java-version: "20"
+          java-version: "21"
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
   build:
@@ -38,7 +38,7 @@ jobs:
     strategy:
       matrix:
         os: [windows-latest, ubuntu-latest, macOS-latest]
-        java: [ '20' ]
+        java: [ '21' ]
         distribution: [ 'temurin']
       fail-fast: false
     steps:

@@ -12,13 +12,19 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.functions.exceptions;
+package net.rptools.maptool.util;
 
-import net.rptools.parser.ParserException;
+import java.util.EnumMap;
+import java.util.function.Function;
 
-/** Exception type thrown by assert() function, allowing a user-defined error message. */
-public class AssertFunctionException extends ParserException {
-  public AssertFunctionException(String msg) {
-    super(msg);
+public class CollectionUtil {
+  public static <K extends Enum<K>, V> EnumMap<K, V> newFilledEnumMap(
+      Class<K> keyType, Function<K, V> instantiator) {
+    final var map = new EnumMap<K, V>(keyType);
+    for (final var key : keyType.getEnumConstants()) {
+      final var value = instantiator.apply(key);
+      map.put(key, value);
+    }
+    return map;
   }
 }

@@ -26,6 +26,7 @@ public class TextInputCssContext {
 
   /** The foreground color of the text input. */
   private final String foregroundColor;
+
   /** The background color of the text input. */
   private final String backgroundColor;
 

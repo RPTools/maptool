@@ -199,6 +199,7 @@ public class TokenStatesController
     GridTriangle,
     GridSquare
   }
+
   // the order needs to match the OverlayType enum
   private static final List<String> types =
       List.of(

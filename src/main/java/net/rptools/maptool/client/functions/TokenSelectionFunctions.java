@@ -138,13 +138,7 @@ public class TokenSelectionFunctions extends AbstractFunction {
     if (parameters == null || parameters.isEmpty()) {
       replaceSelection = true;
       // Select all tokens
-      List<Token> allTokens =
-          switch (zr.getActiveLayer()) {
-            case TOKEN -> zone.getTokens();
-            case GM -> zone.getGMStamps();
-            case OBJECT -> zone.getStampTokens();
-            case BACKGROUND -> zone.getBackgroundStamps();
-          };
+      List<Token> allTokens = zone.getTokensOnLayer(zr.getActiveLayer());
       if (allTokens != null) {
         for (Token t : allTokens) {
           GUID tid = t.getId();

@@ -30,6 +30,7 @@ public class StatSheetManager {
 
   /** The name of the legacy stat sheet. This is the stat sheet. */
   private static final String LEGACY_STATSHEET_NAME = "legacy-sheet";
+
   /** The namespace of the legacy stat sheet. */
   private static final String LEGACY_STATSHEET_NAMESPACE = "net.rptools.maptool";
 

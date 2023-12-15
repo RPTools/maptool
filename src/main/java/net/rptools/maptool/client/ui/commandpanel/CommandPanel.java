@@ -72,6 +72,7 @@ public class CommandPanel extends JPanel {
 
   /** The impersonated identity as displayed in the Impersonate panel. */
   private TokenIdentity globalIdentity = new TokenIdentity();
+
   /** The stack of impersonated identities. The most current is at the top of the stack. */
   private final Stack<TokenIdentity> identityStack = new Stack<>();
 
@@ -317,8 +318,10 @@ public class CommandPanel extends JPanel {
   public static class TokenIdentity {
     /** The name of the identity. If null, nothing is impersonated. */
     private final String identityName;
+
     /** The GUID of the identity. */
     private final GUID identityGUID;
+
     /** Whether the player is allowed to set the token in the Impersonate panel. */
     private final boolean canImpersonate;
 

@@ -56,16 +56,29 @@ public class AreaMeta {
   }
 
   /**
-   * @param origin
-   * @param faceAway If `true`, only return segments facing away from origin.
-   * @return
+   * Returns all line segments in the boundary that face the requested direction.
+   *
+   * <p>For each line segment, the exterior region will be on one side of the segment while the
+   * interior region will be on the other side. One of these regions will be an island and one will
+   * be an ocean depending on {@link #isHole()}. The {@code facing} parameter uses this fact to
+   * control whether a segment should be included in the result, based on whether the origin is on
+   * the island-side of the line segment or on its ocean-side.
+   *
+   * <p>If {@code origin} is colinear with a line segment, that segment will never be returned.
+   *
+   * @param origin The vision origin, which is the point by which line segment orientation is
+   *     measured.
+   * @param facing Whether the island-side or the ocean-side of the returned segments must face
+   *     {@code origin}.
+   * @return All line segments with a facing that matches {@code facing} based on the position of
+   *     {@code origin}. The line segments are joined into continguous line strings where possible.
    */
   public List<LineString> getFacingSegments(
-      GeometryFactory geometryFactory,
-      Coordinate origin,
-      boolean faceAway,
-      PreparedGeometry vision) {
-    final var requiredOrientation = faceAway ? Orientation.CLOCKWISE : Orientation.COUNTERCLOCKWISE;
+      GeometryFactory geometryFactory, Coordinate origin, Facing facing, PreparedGeometry vision) {
+    final var requiredOrientation =
+        facing == Facing.ISLAND_SIDE_FACES_ORIGIN
+            ? Orientation.CLOCKWISE
+            : Orientation.COUNTERCLOCKWISE;
     List<LineString> segments = new ArrayList<>();
     List<Coordinate> currentSegmentPoints = new ArrayList<>();
 

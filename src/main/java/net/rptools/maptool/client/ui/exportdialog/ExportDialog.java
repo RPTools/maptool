@@ -25,8 +25,11 @@ import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.event.IIOWriteProgressListener;
@@ -94,11 +97,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   private static Zone.VisionType savedVision;
   private static boolean savedFog;
   private static boolean savedBoard;
-  // real layers
-  private static boolean savedToken;
-  private static boolean savedHidden;
-  private static boolean savedObject;
-  private static boolean savedBackground;
   // for ZoneRenderer preservation
   private static Rectangle origBounds;
   private static Scale origScale;
@@ -238,26 +236,49 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    *
    * <p>The names of the enums should be the same as the button names.
    */
-  private enum ExportLayers {
-    // enum_val (fieldName as per Abeille Forms Designer, playerCanModify)
-    LAYER_TOKEN(true),
-    LAYER_HIDDEN(false),
-    LAYER_OBJECT(false),
-    LAYER_BACKGROUND(false),
-    LAYER_BOARD(false),
-    LAYER_FOG(false),
-    LAYER_VISIBILITY(true);
-
+  private static final class ExportLayers {
     private static AbeillePanel form;
+    private static final List<ExportLayers> values;
 
+    private static final ExportLayers LAYER_BOARD;
+    private static final ExportLayers LAYER_FOG;
+    private static final ExportLayers LAYER_VISIBILITY;
+
+    static {
+      values = new ArrayList<>();
+
+      // Include options for all zone layers.
+      for (final var layer : Zone.Layer.values()) {
+        values.add(new ExportLayers("LAYER_" + layer.name(), layer.isPlayerLayer(), layer));
+      }
+
+      // Also control some "pseudo-layers".
+      values.add(LAYER_BOARD = new ExportLayers("LAYER_BOARD", false, null));
+      values.add(LAYER_FOG = new ExportLayers("LAYER_FOG", false, null));
+      values.add(LAYER_VISIBILITY = new ExportLayers("LAYER_VISIBILITY", true, null));
+    }
+
+    public static ExportLayers[] values() {
+      return values.toArray(ExportLayers[]::new);
+    }
+
+    private final String name;
     private final boolean playerCanModify;
+    private final @Nullable Zone.Layer associatedZoneLayer;
 
-    /**
-     * Constructor, sets rules for export of this layer. 'Player' is in reference to the Role type
-     * (Player vs. GM).
-     */
-    ExportLayers(boolean playerCanModify) {
+    private ExportLayers(
+        String name, boolean playerCanModify, @Nullable Zone.Layer associatedZoneLayer) {
+      this.name = name;
       this.playerCanModify = playerCanModify;
+      this.associatedZoneLayer = associatedZoneLayer;
+    }
+
+    public String name() {
+      return name;
+    }
+
+    public String toString() {
+      return name();
     }
 
     /**
@@ -360,13 +381,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
         // Regardless of whether it is a player or GM,
         // only enable fog and visibility check-boxes
         // when the map has those things turned on.
-        switch (layer) {
-          case LAYER_VISIBILITY:
-            enabled &= (zone.getVisionType() != Zone.VisionType.OFF);
-            break;
-          case LAYER_FOG:
-            enabled &= zone.hasFog();
-            break;
+        if (layer == ExportLayers.LAYER_VISIBILITY) {
+          enabled &= (zone.getVisionType() != Zone.VisionType.OFF);
+        }
+        if (layer == ExportLayers.LAYER_FOG) {
+          enabled &= zone.hasFog();
         }
         layer.setEnabled(enabled);
         if (!enabled) {
@@ -692,7 +711,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * restoreZone()
    */
   private static void setupZoneLayers() throws OutOfMemoryError {
-    final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    final Zone zone = renderer.getZone();
 
     //
     // Preserve settings
@@ -701,11 +720,6 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     savedVision = zone.getVisionType();
     savedFog = zone.hasFog();
     savedBoard = zone.drawBoard();
-    // real layers
-    savedToken = Zone.Layer.TOKEN.isEnabled();
-    savedHidden = Zone.Layer.GM.isEnabled();
-    savedObject = Zone.Layer.OBJECT.isEnabled();
-    savedBackground = Zone.Layer.BACKGROUND.isEnabled();
 
     //
     // set according to dialog options
@@ -713,10 +727,12 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     zone.setHasFog(ExportLayers.LAYER_FOG.isChecked());
     if (!ExportLayers.LAYER_VISIBILITY.isChecked()) zone.setVisionType(Zone.VisionType.OFF);
     zone.setDrawBoard(ExportLayers.LAYER_BOARD.isChecked());
-    Zone.Layer.TOKEN.setEnabled(ExportLayers.LAYER_TOKEN.isChecked());
-    Zone.Layer.GM.setEnabled(ExportLayers.LAYER_HIDDEN.isChecked());
-    Zone.Layer.OBJECT.setEnabled(ExportLayers.LAYER_OBJECT.isChecked());
-    Zone.Layer.BACKGROUND.setEnabled(ExportLayers.LAYER_BACKGROUND.isChecked());
+
+    for (ExportLayers exportLayer : ExportLayers.values()) {
+      if (exportLayer.associatedZoneLayer != null && !exportLayer.isChecked()) {
+        renderer.disableLayer(exportLayer.associatedZoneLayer);
+      }
+    }
   }
 
   /** This restores the layer settings on the Zone object. It should follow setupZoneLayers(). */
@@ -724,10 +740,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     zone.setHasFog(savedFog);
     zone.setVisionType(savedVision);
     zone.setDrawBoard(savedBoard);
-    Zone.Layer.TOKEN.setEnabled(savedToken);
-    Zone.Layer.GM.setEnabled(savedHidden);
-    Zone.Layer.OBJECT.setEnabled(savedObject);
-    Zone.Layer.BACKGROUND.setEnabled(savedBackground);
+    renderer.restoreLayers();
   }
 
   /**

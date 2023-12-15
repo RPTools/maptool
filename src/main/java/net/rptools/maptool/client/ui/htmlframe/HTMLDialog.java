@@ -182,6 +182,7 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     panel.addToContainer(this);
     panel.addActionListener(this);
   }
+
   /**
    * Shows the HTML Dialog. This will create a new dialog if the named dialog does not already
    * exist. The width and height fields are ignored if the dialog has already been opened so that it
