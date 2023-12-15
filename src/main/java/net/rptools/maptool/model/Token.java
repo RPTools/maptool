@@ -933,6 +933,10 @@ public class Token implements Cloneable {
     uniqueLightSources.remove(lightSourceId);
   }
 
+  public void removeAllUniqueLightsources() {
+    uniqueLightSources.clear();
+  }
+
   public void addLightSource(GUID lightSourceId) {
     if (lightSourceList.stream().anyMatch(source -> source.matches(lightSourceId))) {
       // Avoid duplicates.
