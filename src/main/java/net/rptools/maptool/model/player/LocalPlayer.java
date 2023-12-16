@@ -63,13 +63,6 @@ public class LocalPlayer extends Player {
     return plainTextPassword;
   }
 
-  /**
-   * @return whether the player is a GM using GM view.
-   */
-  public boolean isEffectiveGM() {
-    return isGM() && !AppState.isShowAsPlayer();
-  }
-
   @Override
   public Player getTransferablePlayer() {
     return new Player(getName(), getRole(), getPassword());

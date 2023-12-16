@@ -333,7 +333,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.11799.262'
+    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.11799.304'
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.0'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.0'
@@ -515,7 +515,7 @@ dependencies {
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.5183'
     // layout for forms created in code
-    implementation 'com.miglayout:miglayout-swing:11.2'
+    implementation 'com.miglayout:miglayout-swing:11.3'
 
     implementation 'com.github.jknack:handlebars:4.3.1'
     implementation 'com.github.jknack:handlebars-helpers:4.3.1'
