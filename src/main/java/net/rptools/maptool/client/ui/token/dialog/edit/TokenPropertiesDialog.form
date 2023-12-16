@@ -1070,7 +1070,7 @@
                         <properties>
                           <actionCommand value="Find"/>
                           <name value="xmlStatblockSearchButton"/>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.action.hero.statBlockRTextScroll"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.action.hero.statBlockSearch.label"/>
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.hero.statBlockSearch.tooltip"/>
                         </properties>
                       </component>
@@ -1122,7 +1122,7 @@
                         <properties>
                           <actionCommand value="Find"/>
                           <name value="textStatblockSearchButton"/>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.action.hero.statBlockRTextScroll.label"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.action.hero.statBlockSearch.label"/>
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.hero.statBlockSearch.tooltip"/>
                         </properties>
                       </component>
