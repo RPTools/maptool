@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import static org.apache.commons.text.WordUtils.capitalize;
+import static org.apache.commons.text.WordUtils.uncapitalize;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
@@ -46,10 +50,13 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.util.LightSyntax;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.SightSyntax;
-import org.apache.commons.text.StringSubstitutor;
-import org.bouncycastle.jcajce.provider.asymmetric.GM;
+import org.apache.commons.text.*;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class CampaignPropertiesDialog extends JDialog {
+  private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
+
   public enum Status {
     OK,
     CANCEL
@@ -535,442 +542,350 @@ public class CampaignPropertiesDialog extends JDialog {
     System.exit(1);
   }
 
-    /**
-     * Fetches all the translations necessary to construct the sight and light help text
-     * @return Map of keys to translations
-     */
-    private Map<String, String> createSightLightHelpTextMap() {
+  /**
+   * Fetches all the translations necessary to construct the sight and light help text
+   *
+   * @return Map of keys to translations
+   */
+  private Map<String, String> createSightLightHelpTextMap() {
     Map<String, String> parameters = new HashMap();
+    /* cell formatting string */
+    parameters.put("alignCellCenter", " align=center");
     /* Useful words and phrases */
-    parameters.put("wordSyntax", I18N.getText("word.syntax"));
-    parameters.put("wordOptional", I18N.getText("word.optional"));
-    parameters.put("wordUnused", I18N.getText("word.unused"));
-    parameters.put("wordExamples", I18N.getText("word.examples"));
-    parameters.put("multipleEntriesAllowed", I18N.getText("phrase.multipleEntriesAllowed"));
+    parameters.put("phraseMultipleEntriesAllowed", I18N.getText("phrase.multipleEntriesAllowed"));
+    parameters.put("mapVisionDistance", I18N.getText("sight.default.distance"));
 
-    parameters.put("optionTypeKeyword", I18N.getText("optionType.keyword"));
-    parameters.put("optionTypeKeyValue", I18N.getText("optionType.key.equals.value"));
-    parameters.put("optionTypePrefixedValue", I18N.getText("optionType.prefixed.value"));
-    parameters.put("optionTypeSpecial", I18N.getText("optionType.special"));
+    /* Build list of useful words and phrases */
+    List<String> helpKeys = I18N.getMatchingKeys(Pattern.compile("^word."));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^option.type.")));
     /* Shape names */
-    parameters.put("shapeTypeBeam", I18N.getText("shape.type.name.beam"));
-    parameters.put("shapeTypeCircle", I18N.getText("shape.type.name.circle"));
-    parameters.put("shapeTypeCone", I18N.getText("shape.type.name.cone"));
-    parameters.put("shapeTypeGrid", I18N.getText("shape.type.name.grid"));
-    parameters.put("shapeTypeHexagon", I18N.getText("shape.type.name.hexagon"));
-    parameters.put("shapeTypeSquare", I18N.getText("shape.type.name.square"));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^shape.type.name.")));
+    /* example text */
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^sight.example.")));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^light.example.")));
 
-    /* Structure and syntax fields */
+    /* Generate parameter map from list */
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(capitalize(key, '.').replace(".", "")), I18N.getText(key));
+    }
+
+    /* Parameterised strings - need to be done individually */
     parameters.put(
         "wikiLinkReferral",
         I18N.getText(
             "sightLight.wikiLinkReferral",
             "<i>wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</i>"));
-    parameters.put("subheadingStructure", I18N.getText("sightLight.subheading.structure"));
-    parameters.put("structureLines", I18N.getText("sightLight.structure.listItem.lines"));
-    parameters.put("structureMeasure", I18N.getText("sightLight.structure.listItem.measurement"));
-    parameters.put("structureDefaults", I18N.getText("sightLight.structure.listItem.defaults"));
-    parameters.put("structureComments", I18N.getText("sightLight.structure.listItem.comments"));
-    parameters.put("structureCase", I18N.getText("sightLight.structure.listItem.letterCase"));
-    parameters.put("structureMultiple", I18N.getText("sightLight.structure.listItem.multiple"));
-    parameters.put("structureLabel", I18N.getText("sightLight.structure.label"));
-    parameters.put(
-        "structureGroupName",
-        I18N.getText(
-                "sightLight.structure.listItem.groupName",
-            I18N.getText("panel.MapExplorer.View.LIGHT_SOURCES")));
-    parameters.put("structureGroupNameLabel", I18N.getText("sightLight.syntax.label.groupName"));
-    parameters.put("structureGroupedNames", I18N.getText("sightLight.structure.listItem.groupedNames"));
-    parameters.put("structureGroups", I18N.getText("sightLight.structure.listItem.groups"));
-    parameters.put("structureSorting", I18N.getText("sightLight.structure.listItem.sorting"));
-
-    parameters.put("subheadingSyntax", I18N.getText("sightLight.subheading.definitionSyntax"));
-    parameters.put("syntaxLabelName", I18N.getText("sightLight.syntax.label.name"));
-    parameters.put("syntaxLabelOptions", I18N.getText("sightLight.syntax.label.options"));
-
-    /* Option column headers */
-    parameters.put("columnHeadOption", I18N.getText("sightLight.columnHeading.option"));
-    parameters.put("columnHeadOptionType", I18N.getText("sightLight.columnHeading.optionType"));
-    parameters.put(
-        "columnHeadOptionDescription", I18N.getText("sightLight.columnHeading.optionDescription"));
-    parameters.put(
-        "columnHeadOptionDefaultValue",
-        I18N.getText("sightLight.columnHeading.optionDefaultValue"));
-    parameters.put("columnHeadOptionExample", I18N.getText("word.example"));
-    parameters.put("columnHeadComponent", I18N.getText("sightLight.columnHeading.optionComponent"));
-
-    /* Option names */
-    parameters.put("labelAura", I18N.getText("sightLight.optionLabel.aura"));
-    parameters.put("labelShape", I18N.getText("sightLight.optionLabel.shape"));
-    parameters.put("labelDistance", I18N.getText("sightLight.optionLabel.distance"));
-    parameters.put("labelScale", I18N.getText("sightLight.optionLabel.scale"));
-    parameters.put("labelArc", I18N.getText("sightLight.optionLabel.arc"));
-    parameters.put("labelWidth", I18N.getText("sightLight.optionLabel.width"));
-    parameters.put("labelOffset", I18N.getText("sightLight.optionLabel.offset"));
-    parameters.put("labelMagnifier", I18N.getText("sightLight.optionLabel.magnifier"));
-    parameters.put("labelPersonalSight", I18N.getText("sightLight.optionLabel.personalSight"));
-    parameters.put("labelComponent", I18N.getText("sightLight.optionLabel.component"));
-    parameters.put("labelRange", I18N.getText("sightLight.optionLabel.range"));
-    parameters.put("labelColor", I18N.getText("sightLight.optionLabel.color"));
-    parameters.put("labelLumens", I18N.getText("sightLight.optionLabel.lumens"));
-    parameters.put("labelRestriction", I18N.getText("sightLight.optionLabel.restriction"));
-
-    /* Option descriptions */
-    parameters.put("descriptionName", I18N.getText("sightLight.optionDescription.name"));
-    parameters.put("descriptionAura", I18N.getText("sightLight.optionDescription.aura"));
     if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
       /* remove translated version of words for English locales. */
       parameters.put(
-          "descriptionShape",
+          "optionDescriptionShape",
           I18N.getText("sightLight.optionDescription.shape", "", "", "", "", "", "")
               .replace("(", "")
               .replace(")", ""));
     } else {
       parameters.put(
-          "descriptionShape",
+          "optionDescriptionShape",
           I18N.getText(
               "sightLight.optionDescription.shape",
-              I18N.getText("shape.type.name.beam"),
-              I18N.getText("shape.type.name.circle"),
-              I18N.getText("shape.type.name.cone"),
-              I18N.getText("shape.type.name.grid"),
-              I18N.getText("shape.type.name.hexagon"),
-              I18N.getText("shape.type.name.square")));
+              parameters.get("shapeTypeNameBeam"),
+              parameters.get("shapeTypeNameCircle"),
+              parameters.get("shapeTypeNameCone"),
+              parameters.get("shapeTypeNameGrid"),
+              parameters.get("shapeTypeNameHexagon"),
+              parameters.get("shapeTypeNameSquare")));
     }
-    parameters.put("descriptionRange", I18N.getText("sightLight.optionDescription.range"));
-    parameters.put("descriptionDistance", I18N.getText("sightLight.optionDescription.distance"));
-    parameters.put("descriptionScale", I18N.getText("sightLight.optionDescription.scale"));
-    parameters.put("descriptionArc", I18N.getText("sightLight.optionDescription.arc"));
-    parameters.put("descriptionWidth", I18N.getText("sightLight.optionDescription.width"));
-    parameters.put("descriptionOffset1", I18N.getText("sightLight.optionDescription.offset1"));
-    parameters.put("descriptionOffset2", I18N.getText("sightLight.optionDescription.offset2"));
-    parameters.put("descriptionMagnifier", I18N.getText("sightLight.optionDescription.magnifier"));
     parameters.put(
-        "descriptionPersonalSight", I18N.getText("sightLight.optionDescription.personalSight"));
-    parameters.put(
-        "descriptionPersonalSightRange",
-        I18N.getText("sightLight.optionDescription.personalSight.component.range"));
-    parameters.put(
-        "descriptionLightComponents", I18N.getText("sightLight.optionDescription.lightComponents"));
-    parameters.put(
-        "descriptionColor",
+        "optionDescriptionPersonalSightComponentColor",
         I18N.getText("sightLight.optionDescription.personalSight.component.color", "#rrggbb"));
     parameters.put(
-        "descriptionLumens",
-        I18N.getText("sightLight.optionDescription.personalSight.component.lumens"));
-    parameters.put(
-        "descriptionRestriction",
+        "optionDescriptionRestriction",
         I18N.getText("sightLight.optionDescription.restriction", "gm", "owner"));
 
-    /* default values */
-    parameters.put("mapVisionDistance", I18N.getText("sight.default.distance"));
-
-    /* footnotes */
-    parameters.put("multipleLightsFootnote", I18N.getText("sightLight.footnote.multiple.lights"));
-    parameters.put(
-        "multipleShapesFootnote1", I18N.getText("sightLight.footnote.multiple.shapes.1"));
-    parameters.put(
-        "multipleShapesFootnote2", I18N.getText("sightLight.footnote.multiple.shapes.2"));
-    parameters.put(
-        "multipleRangeColorLumensFootnote",
-        I18N.getText("sightLight.footnote.multiple.rangeColourLumens"));
-    parameters.put("lumensFootnote1", I18N.getText("sightLight.footnote.lumens.line.1"));
-    parameters.put("lumensFootnote2", I18N.getText("sightLight.footnote.lumens.footnote.2"));
-
-    /* example names - light */
-    parameters.put("lightExampleNameLantern", I18N.getText("light.example.name.lantern"));
-    parameters.put("lightExampleNameForwardArc", I18N.getText("light.example.name.forwardArcAura"));
-    /* example names - sight */
-    parameters.put("sightExampleNameDarkVision", I18N.getText("sight.example.name.darkVision"));
-    parameters.put("sightExampleNameConeVision", I18N.getText("sight.example.name.coneVision"));
-    parameters.put("sightExampleNameElfVision", I18N.getText("sight.example.name.elfVision"));
-    parameters.put("sightExampleNameBlind", I18N.getText("sight.example.name.blind"));
-    /* example names - auras */
-    parameters.put("exampleAuraGroupName", I18N.getText("light.example.auras.groupName"));
-    parameters.put(
-        "exampleAuraNameAuraGMRedSquare", I18N.getText("light.example.name.aura.gmRedSquare"));
-    parameters.put("exampleAuraNameAuraGMRed", I18N.getText("light.example.name.aura.gmRed"));
-    parameters.put("exampleAuraNameAuraOwner", I18N.getText("light.example.name.aura.owner"));
-    parameters.put(
-        "exampleAuraNameAuraAllPlayers", I18N.getText("light.example.name.aura.allPlayers"));
-    parameters.put("exampleAuraNameSideFields", I18N.getText("light.example.name.aura.sideFields"));
-    parameters.put("exampleAuraNameDonutHole", I18N.getText("light.example.name.aura.donutHole"));
-    parameters.put("exampleAuraNameDonutCone", I18N.getText("light.example.name.aura.donutCone"));
-    parameters.put(
-        "exampleAuraNameRangeCircles", I18N.getText("light.example.name.aura.rangeCircles"));
-    parameters.put("exampleAuraNameRangeArcs", I18N.getText("light.example.name.aura.rangeArcs"));
-    parameters.put("exampleAuraNameLoS", I18N.getText("light.example.name.aura.lineOfSight"));
-
-    /* example descriptions - auras */
-    parameters.put(
-        "exampleAuraTextAuraGMRedSquare", I18N.getText("light.example.text.aura.gmRedSquare"));
-    parameters.put("exampleAuraTextAuraGMRed", I18N.getText("light.example.text.aura.gmRed"));
-    parameters.put("exampleAuraTextAuraOwner", I18N.getText("light.example.text.aura.owner"));
-    parameters.put(
-        "exampleAuraTextAuraAllPlayers", I18N.getText("light.example.text.aura.allPlayers"));
-    parameters.put("exampleAuraTextSideFields", I18N.getText("light.example.text.aura.sideFields"));
-    parameters.put("exampleAuraTextDonutHole", I18N.getText("light.example.text.aura.donutHole"));
-    parameters.put("exampleAuraTextDonutCone", I18N.getText("light.example.text.aura.donutCone"));
-    parameters.put(
-        "exampleAuraTextRangeCircles", I18N.getText("light.example.text.aura.rangeCircles"));
-    parameters.put("exampleAuraTextRangeArcs", I18N.getText("light.example.text.aura.rangeArcs"));
-    parameters.put("exampleAuraTextLoS", I18N.getText("light.example.text.aura.lineOfSight"));
-
-    /* cell formatting string */
-    parameters.put("alignCellCenter", " align=center");
+    /* everything else */
+    helpKeys = I18N.getMatchingKeys("sightLight");
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(
+              capitalize(key, new char[] {'.'}).replace("SightLight", "").replace(".", "")),
+          I18N.getText(key));
+    }
     return parameters;
   }
 
-    /**
-     * Creates HTML for both sight and light help
-     * @return String[]
-     */
+  /**
+   * Creates HTML for both sight and light help
+   *
+   * @return String[]
+   */
   private String[] generateHelpText() {
     Map<String, String> parameters = createSightLightHelpTextMap();
     String structureCommon =
         """
-        <html>
-        <body >
-        <font size=4>${wikiLinkReferral}</font><br>
-        <u><font size=5>${subheadingStructure}</font></u><br>
-        <ul compact>
-        <li>${structureLines}</li>
-        <li>${structureMeasure}</li>
-        <li>${structureDefaults}</li>
-        <li>${structureComments}</li>
-        <li>${structureCase}</li>
-        """;
+            <html>
+            <body >
+            <font size=4>${wikiLinkReferral}</font><br>
+            <u><font size=5>${subheadingStructure}</font></u><br><br>
+            <ul compact>
+            <li>${structureListItemLines}</li>
+            <li>${structureListItemMeasurement}</li>
+            <li>${structureListItemDefaults}</li>
+            <li>${structureListItemComments}</li>
+            <li>${structureListItemLetterCase}</li>
+            """;
     String structureLight =
         """
-        <li>${structureMultiple}<sup>1</sup></li>
-        <li>${structureGroupName}</li>
-        <li>${structureGroupedNames}</li>
-        <li>${structureGroups}</li>
-        <li>${structureSorting}</li>
-        """;
-      String syntaxHeading =
-          """
-          </ul>
-          <u><font size=5>${subheadingSyntax}</font></u><br><br>
-          <code>""";
-      String syntaxSight =
-          """
-          <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${labelShape} [ ${labelArc} ${labelWidth} ${labelOffset} ]] [ ${labelDistance} ] [ ${labelScale} ] [ ${labelMagnifier} ] [ ${labelPersonalSight} ]</font><br>
-          """;
-      String syntaxLight =
+            <li>${structureListItemMultiple}<sup>1</sup></li>
+            <li>${structureListItemGroupName}</li>
+            <li>${structureListItemGroupedNames}</li>
+            <li>${structureListItemGroups}</li>
+            <li>${structureListItemSorting}</li>
+            """;
+    String syntaxHeading =
         """
-        <font size=4>${structureGroupNameLabel}<br>
-        -------<br>
-        [ ${syntaxLabelName} ] : [ ${labelAura} [ ${labelRestriction} ]] [ ${labelShape} [ ${labelArc} ${labelWidth} ${labelOffset} ]] [ ${labelScale} ] [ ${labelRange}|${labelColor}|${labelLumens} ]...<sup>1</sup></font><br>
-        ${lightExampleNameLantern} :  circle 4#ffffaa cone arc=300 7.5#666600 circle 10#000000<sup>1</sup><br>
-        ${lightExampleNameForwardArc} : aura owner cone arc=90 25#00ff00<br></code>
-        """;
+              </ul>
+              <u><font size=5>${subheadingDefinitionSyntax}</font></u><br><br>
+              <code>""";
+    String syntaxSight =
+        """
+              <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset}]] [ ${optionLabelDistance} ] [ ${optionLabelScale} ] [ ${optionLabelMagnifier} ] [ ${optionLabelPersonalSight} ]</font><br>
+              """;
+    String syntaxLight =
+        """
+            <font size=4>${syntaxLabelGroupName}<br>
+            -------<br>
+            [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
+            """;
     /*
      * Tabular options presentation
      * Columns are; Option Name, Option Type, Description, Default Value, Example
      */
     String optionsCommon_1 =
         """
-        <br>
-        <hr>
-        <font size=5>${syntaxLabelOptions}</font><br>
-        <table border=1 cellpadding=3 cellspacing=0>
-        <tr>
-          <th>${columnHeadOption}</th>
-          <th>${columnHeadOptionType}</th>
-          <th>${columnHeadOptionDescription}</th>
-          <th>${columnHeadOptionDefaultValue}</th>
-          <th>${columnHeadOptionExample}</th>
-        </tr>
-        <tr>
-          <th>${labelShape}</th>
-          <td${alignCellCenter}>${optionTypeKeyword}</td>
-          <td>${descriptionShape} ${multipleEntriesAllowed}<sup>2</sup></td>
-          <td${alignCellCenter}>circle</td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>${labelArc}</th>
-          <td${alignCellCenter}>${optionTypeKeyValue}</td>
-          <td>${descriptionArc}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}>arc=120</td>
-        </tr>
-        <tr>
-          <th>${labelWidth}</th>
-          <td${alignCellCenter}>${optionTypeKeyValue}</td>
-          <td>${descriptionWidth}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}>width=0.4</td>
-        </tr>
-        <tr>
-          <th>${labelOffset}</th>
-          <td${alignCellCenter}>${optionTypeKeyValue}</td>
-          <td>${descriptionOffset1} ${descriptionOffset2}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}>offset=140</td>
-        </tr>
-        """;
+            <br>
+            <hr>
+            <font size=5>${syntaxLabelOptions}</font><br>
+            <table border=1 cellpadding=3 cellspacing=0>
+            <tr>
+              <th>${columnHeadingOption}</th>
+              <th>${columnHeadingOptionType}</th>
+              <th>${columnHeadingOptionDescription}</th>
+              <th>${columnHeadingOptionDefaultValue}</th>
+              <th>${wordExample}</th>
+            </tr>
+            <tr>
+              <th>${optionLabelShape}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionShape} ${phraseMultipleEntriesAllowed}<sup>2</sup></td>
+              <td${alignCellCenter}>circle</td>
+              <td>cone</td>
+            </tr>
+            <tr>
+              <th>${optionLabelArc}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionArc}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>arc=120</td>
+            </tr>
+            <tr>
+              <th>${optionLabelWidth}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionWidth}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>width=0.4</td>
+            </tr>
+            <tr>
+              <th>${optionLabelOffset}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionOffset1} ${optionDescriptionOffset2}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>offset=140</td>
+            </tr>
+            """;
     String optionsLight =
-       """
-        <tr>
-          <th>${labelAura}</th>
-          <td${alignCellCenter}>${optionTypeKeyword}</td>
-          <td>${descriptionAura}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>${labelRestriction}</th>
-          <td${alignCellCenter}>${optionTypeKeyword}</td>
-          <td>${descriptionRestriction}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}></td>
-        </tr>
-        <tr>
-          <th>${labelRange}</th>
-          <td${alignCellCenter}>${optionTypeSpecial}</td>
-          <td>${descriptionLightComponents} ${multipleEntriesAllowed}<sup>3</sup></td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}>30#afafaa+100</td>
-        </tr>
-        <tr>
-          <th></th>
-          <th>${columnHeadComponent}</th>
-          <th>${wordSyntax}&nbsp;&#10233;&nbsp; 00|#rrggbb|+y&nbsp;&nbsp;(${labelRange}|${labelColor}|${labelLumens})</th>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th></th>
-          <th>${labelRange}</th>
-          <td>${descriptionRange}</td>
-          <td></td>
-          <td${alignCellCenter}>30</td>
-        </tr>
-        """;
+        """
+            <tr>
+              <th>${optionLabelAura}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionAura}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td>aura</td>
+            </tr>
+            <tr>
+              <th>${optionLabelRestriction}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionRestriction}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>owner</td>
+            </tr>
+            <tr>
+              <th>${optionLabelRange}</th>
+              <td${alignCellCenter}>${optionTypeSpecial}</td>
+              <td>${optionDescriptionLightComponents} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>30#afafaa+100</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp; 00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td>${optionDescriptionRange}</td>
+              <td></td>
+              <td${alignCellCenter}>30</td>
+            </tr>
+            """;
     String optionsSight =
         """
-        <tr>
-          <th>${labelDistance}</th>
-          <td${alignCellCenter}>${optionTypeKeyValue}</td>
-          <td>${descriptionDistance}</td>
-          <td${alignCellCenter}>${mapVisionDistance}</td>
-          <td${alignCellCenter}>distance=120</td>
-        </tr>
-        <tr>
-          <th>${labelScale}</th>
-          <td${alignCellCenter}>${optionTypeKeyword}</td>
-          <td>${descriptionScale}</td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td></td>
-        </tr>
-        <tr>
-          <th>${labelMagnifier}</th>
-          <td${alignCellCenter}>${optionTypePrefixedValue}</td>
-          <td><i>[ x0.0 ]</i> ${descriptionMagnifier}</td>
-          <td${alignCellCenter}>x1</td>
-          <td${alignCellCenter}>x2.5</td>
-        </tr>
-        <tr>
-          <th>${labelPersonalSight}</th>
-          <td${alignCellCenter}>${optionTypeSpecial}</td>
-          <td>${descriptionPersonalSight} ${multipleEntriesAllowed}<sup>3</sup></td>
-          <td${alignCellCenter}>${wordUnused}</td>
-          <td${alignCellCenter}>r30#afafaa+100</td>
-        </tr>
-        <tr>
-          <th></th>
-          <th>${columnHeadComponent}</th>
-          <th>${wordSyntax}&nbsp;&#10233;&nbsp;r00|#rrggbb|+y&nbsp;&nbsp;(${labelRange}|${labelColor}|${labelLumens})</th>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-          <th></th>
-          <th>${labelRange}</th>
-          <td><i>[${optionTypePrefixedValue} "r"]</i> ${descriptionPersonalSightRange}</td>
-          <td></td>
-          <td${alignCellCenter}>r30</td>
-        </tr>
-        """;
+            <tr>
+              <th>${optionLabelDistance}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionDistance}</td>
+              <td${alignCellCenter}>${mapVisionDistance}</td>
+              <td${alignCellCenter}>distance=120</td>
+            </tr>
+            <tr>
+              <th>${optionLabelScale}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionScale}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td>scale</td>
+            </tr>
+            <tr>
+              <th>${optionLabelMagnifier}</th>
+              <td${alignCellCenter}>${optionTypePrefixedValue}</td>
+              <td><i>[ x0.0 ]</i> ${optionDescriptionMagnifier}</td>
+              <td${alignCellCenter}>x1</td>
+              <td${alignCellCenter}>x2.5</td>
+            </tr>
+            <tr>
+              <th>${optionLabelPersonalSight}</th>
+              <td${alignCellCenter}>${optionTypeSpecial}(${wordString})</td>
+              <td>${optionDescriptionPersonalSight} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>r30#afafaa+100</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp;r00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td><i>[${optionTypePrefixedValue} "r"]</i> ${optionDescriptionPersonalSightComponentRange}</td>
+              <td></td>
+              <td${alignCellCenter}>r30</td>
+            </tr>
+            """;
     String optionsCommon_2 =
         """
-        <tr>
-          <th></th>
-          <th>${labelColor}</th>
-          <td><i>[${wordOptional}]</i>&nbsp;${descriptionColor}</td>
-          <td></td>
-          <td${alignCellCenter}>#afafaa</td>
-        </tr>
-        <tr>
-          <th></th>
-          <th>${labelLumens}</th>
-          <td><i>[${wordOptional}]</i>&nbsp;${descriptionLumens}<sup>4</sup></td>
-          <td${alignCellCenter}>+100</td>
-          <td${alignCellCenter}>+100</td>
-        </tr>
-        </table>
-        """;
+            <tr>
+              <th></th>
+              <th>${optionLabelColor}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalSightComponentColor}</td>
+              <td></td>
+              <td${alignCellCenter}>#afafaa</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelLumens}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalSightComponentLumens}<sup>4</sup></td>
+              <td${alignCellCenter}>+100</td>
+              <td${alignCellCenter}>+100</td>
+            </tr>
+            </table>
+            """;
     String footnotesSight =
         """
-        <ol start=2>
-        <li>${multipleShapesFootnote1} ${multipleShapesFootnote2}</li>
-        <li>${multipleRangeColorLumensFootnote}</li>
-        <li>${lumensFootnote1}<br>${lumensFootnote2}</li>
-        </ol>
-        """;
+            <ol start=2>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
     String footnotesLight =
         """
-        <ol>
-        <li>${multipleLightsFootnote}</li>
-        <li>${multipleShapesFootnote1} ${multipleShapesFootnote2}</li>
-        <li>${multipleRangeColorLumensFootnote}</li>
-        <li>${lumensFootnote1}<br>${lumensFootnote2}</li>
-        </ol>
-        """;
+            <ol>
+            <li>${footnoteMultipleLights}</li>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
     String examplesHeading =
         """
-        <hr>
-        <u><font size=5>${wordExamples}</font></u><br><br>
-        """;
+            <hr>
+            <u><font size=5>${wordExamples}</font></u><br><br>
+            """;
     String examplesSight =
         """
-        <code><font size=5>${sightExampleNameDarkVision} : circle scale r60#000000+100<br>
-        ${sightExampleNameConeVision} : cone arc=60 distance=120<br>
-        ${sightExampleNameElfVision}  : circle scale x3<br>
-        ${sightExampleNameBlind}      : r10000-1000<br></font></code>
-        """;
+            <code><font size=5>${sightExampleNameDarkVision} : circle scale r60#000000+100<br>
+            ${sightExampleNameConeVision} : cone arc=60 distance=120<br>
+            ${sightExampleNameElfVision}  : circle scale x3<br>
+            - ${sightExampleComment}<br>
+            ${sightExampleNameBlind}      : r10000-1000<br></font></code>
+            """;
     String examplesLight =
         """
-        <font size=4>${exampleAuraGroupName}<br>
-        ----<br>
-        <code>&nbsp;1. ${exampleAuraNameAuraGMRedSquare} : aura square GM 2.5#ff0000</code><br>
-        <code>&nbsp;2. ${exampleAuraNameAuraGMRed} : aura GM 7.5#ff0000</code><br>
-        <code>&nbsp;3. ${exampleAuraNameAuraOwner}: aura owner 7.5#00ff00</code><br>
-        <code>&nbsp;4. ${exampleAuraNameAuraAllPlayers} : aura 7.5#0000ff</code><br>
-        <code>&nbsp;5. ${exampleAuraNameSideFields}: aura cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa</code><br>
-        <code>&nbsp;6. ${exampleAuraNameDonutHole}: aura circle 20 40#ffff00</code><br>
-        <code>&nbsp;7. ${exampleAuraNameDonutCone}: aura cone arc=30 10 20#ffff00</code><br>
-        <code>&nbsp;8. ${exampleAuraNameRangeCircles} 30/60/90: aura circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
-        <code>&nbsp;9. ${exampleAuraNameRangeArcs} 30/60/90: aura cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
-        <code>10. ${exampleAuraNameLoS}: aura beam width=0.4 150#ffff00</code><br>
-        <br>
-        <code>&nbsp;1. </code>${exampleAuraTextAuraGMRedSquare}<br>
-        <code>&nbsp;2. </code>${exampleAuraTextAuraGMRed}<br>
-        <code>&nbsp;3. </code>${exampleAuraTextAuraOwner}<br>
-        <code>&nbsp;4. </code>${exampleAuraTextAuraAllPlayers}<br>
-        <code>&nbsp;5. </code>${exampleAuraTextSideFields}<br>
-        <code>&nbsp;6. </code>${exampleAuraTextDonutHole}<br>
-        <code>&nbsp;7. </code>${exampleAuraTextDonutCone}<br>
-        <code>&nbsp;8. </code>${exampleAuraTextRangeCircles}<br>
-        <code>&nbsp;9. </code>${exampleAuraTextRangeArcs}<br>
-        <code>10. </code>${exampleAuraTextLoS}<br>
-        </font>
-        """;
+            <font size=4>${lightExampleGroupName}<br>
+            ${lightExampleNameLantern} :  circle 4#ffffaa cone arc=300 7.5#666600 circle 10#000000<sup>1</sup><br>
+            ${lightExampleNameForwardArcAura} : aura owner cone arc=90 25#00ff00<br></code><br>
+            <br>
+            <font size=4>${lightExampleAurasGroupName}<br>
+            ---- ${sightExampleComment}<br>
+            <code>&nbsp;1. ${lightExampleNameAuraGmRedSquare} : aura square GM 2.5#ff0000</code><br>
+            <code>&nbsp;2. ${lightExampleNameAuraGmRed} : aura GM 7.5#ff0000</code><br>
+            <code>&nbsp;3. ${lightExampleNameAuraOwner}: aura owner 7.5#00ff00</code><br>
+            <code>&nbsp;4. ${lightExampleNameAuraAllPlayers} : aura 7.5#0000ff</code><br>
+            <code>&nbsp;5. ${lightExampleNameAuraSideFields}: aura cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa</code><br>
+            <code>&nbsp;6. ${lightExampleNameAuraDonutHole}: aura circle 20 40#ffff00</code><br>
+            <code>&nbsp;7. ${lightExampleNameAuraDonutCone}: aura cone arc=30 10 20#ffff00</code><br>
+            <code>&nbsp;8. ${lightExampleNameAuraRangeCircles} 30/60/90: aura circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
+            <code>&nbsp;9. ${lightExampleNameAuraRangeArcs} 30/60/90: aura cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
+            <code>10. ${lightExampleNameAuraLineOfSight}: aura beam width=0.4 150#ffff00</code><br>
+            <br>
+            <code>&nbsp;1. </code>${lightExampleTextAuraGmRedSquare}<br>
+            <code>&nbsp;2. </code>${lightExampleTextAuraGmRed}<br>
+            <code>&nbsp;3. </code>${lightExampleTextAuraOwner}<br>
+            <code>&nbsp;4. </code>${lightExampleTextAuraAllPlayers}<br>
+            <code>&nbsp;5. </code>${lightExampleTextAuraSideFields}<br>
+            <code>&nbsp;6. </code>${lightExampleTextAuraDonutHole}<br>
+            <code>&nbsp;7. </code>${lightExampleTextAuraDonutCone}<br>
+            <code>&nbsp;8. </code>${lightExampleTextAuraRangeCircles}<br>
+            <code>&nbsp;9. </code>${lightExampleTextAuraRangeArcs}<br>
+            <code>10. </code>${lightExampleTextAuraLineOfSight}<br>
+            </font>
+            """;
 
-    String lightString = structureCommon + structureLight + syntaxHeading + syntaxLight + optionsCommon_1 + optionsLight + optionsCommon_2 +footnotesLight + examplesHeading + examplesLight;
-    String sightString = structureCommon + syntaxHeading + syntaxSight + optionsCommon_1 + optionsSight + optionsCommon_2 +footnotesSight + examplesHeading + examplesSight;
+    String lightString =
+        structureCommon
+            + structureLight
+            + syntaxHeading
+            + syntaxLight
+            + optionsCommon_1
+            + optionsLight
+            + optionsCommon_2
+            + footnotesLight
+            + examplesHeading
+            + examplesLight;
+    String sightString =
+        structureCommon
+            + syntaxHeading
+            + syntaxSight
+            + optionsCommon_1
+            + optionsSight
+            + optionsCommon_2
+            + footnotesSight
+            + examplesHeading
+            + examplesSight;
     StringSubstitutor substitutor = new StringSubstitutor(parameters);
     String sightResult = substitutor.replace(sightString);
     String lightResult = substitutor.replace(lightString);
