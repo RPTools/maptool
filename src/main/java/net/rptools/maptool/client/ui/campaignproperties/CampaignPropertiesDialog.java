@@ -55,7 +55,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class CampaignPropertiesDialog extends JDialog {
-  private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
+  //private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
 
   public enum Status {
     OK,
@@ -141,7 +141,21 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void initHelp() {
-    String[] helpText = generateHelpText();
+    /* simple check to see if one of the keys has been translated from English. */
+    // TODO: this should be a proper method instead of a dodgy workaround
+    boolean isTranslated =
+        MapTool.getLanguage().toLowerCase().startsWith("en")
+        || !I18N.getText("sightLight.optionDescription.shape")
+            .equalsIgnoreCase(
+            "Shape may be {0}(beam), {1}(circle), {2}(cone), {3}(grid), {4}(hexagon), or {5}(square).");
+    /* use old text if new text not available */
+    String[] helpText =
+        isTranslated
+            ? generateHelpText()
+            : new String[] {
+              I18N.getText("CampaignPropertiesDialog.label.sight"),
+              I18N.getText("CampaignPropertiesDialog.label.light")
+            };
     JEditorPane lightHelp = (JEditorPane) formPanel.getComponent("lightHelp");
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.setText(helpText[1]);
@@ -548,7 +562,7 @@ public class CampaignPropertiesDialog extends JDialog {
    * @return Map of keys to translations
    */
   private Map<String, String> createSightLightHelpTextMap() {
-    Map<String, String> parameters = new HashMap();
+    Map<String, String> parameters = new HashMap<>();
     /* cell formatting string */
     parameters.put("alignCellCenter", " align=center");
     /* Useful words and phrases */
