@@ -51,11 +51,9 @@ import net.rptools.maptool.util.LightSyntax;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.SightSyntax;
 import org.apache.commons.text.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 
 public class CampaignPropertiesDialog extends JDialog {
-  //private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
+  // private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
 
   public enum Status {
     OK,
@@ -145,9 +143,9 @@ public class CampaignPropertiesDialog extends JDialog {
     // TODO: this should be a proper method instead of a dodgy workaround
     boolean isTranslated =
         MapTool.getLanguage().toLowerCase().startsWith("en")
-        || !I18N.getText("sightLight.optionDescription.shape")
-            .equalsIgnoreCase(
-            "Shape may be {0}(beam), {1}(circle), {2}(cone), {3}(grid), {4}(hexagon), or {5}(square).");
+            || !I18N.getText("sightLight.optionDescription.shape")
+                .equalsIgnoreCase(
+                    "Shape may be {0}(beam), {1}(circle), {2}(cone), {3}(grid), {4}(hexagon), or {5}(square).");
     /* use old text if new text not available */
     String[] helpText =
         isTranslated
