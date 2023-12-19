@@ -632,11 +632,10 @@ public class CampaignPropertiesDialog extends JDialog {
    */
   private String[] generateHelpText() {
     Map<String, String> parameters = createSightLightHelpTextMap();
-    String structureCommon =
+    /* html building blocks */
+    String wikiLink = "<font size=4>${wikiLinkReferral}</font><br>";
+    String structureListStart =
         """
-            <html>
-            <body >
-            <font size=4>${wikiLinkReferral}</font><br>
             <u><font size=5>${subheadingStructure}</font></u><br><br>
             <ul compact>
             <li>${structureListItemLines}</li>
@@ -645,7 +644,7 @@ public class CampaignPropertiesDialog extends JDialog {
             <li>${structureListItemComments}</li>
             <li>${structureListItemLetterCase}</li>
             """;
-    String structureLight =
+    String structureListLight =
         """
             <li>${structureListItemMultiple}<sup>1</sup></li>
             <li>${structureListItemGroupName}</li>
@@ -653,26 +652,27 @@ public class CampaignPropertiesDialog extends JDialog {
             <li>${structureListItemGroups}</li>
             <li>${structureListItemSorting}</li>
             """;
-    String syntaxHeading =
-        """
-              </ul>
-              <u><font size=5>${subheadingDefinitionSyntax}</font></u><br><br>
-              <code>""";
+    String structureListClose = "</ul>";
+    String syntaxHeading = "<u><font size=5>${subheadingDefinitionSyntax}</font></u><br><br>";
     String syntaxSight =
         """
+              <code>
               <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset}]] [ ${optionLabelDistance} ] [ ${optionLabelScale} ] [ ${optionLabelMagnifier} ] [ ${optionLabelPersonalSight} ]</font><br>
+              </code>
               """;
     String syntaxLight =
         """
+            <code>
             <font size=4>${syntaxLabelGroupName}<br>
             -------<br>
             [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
+            </code>
             """;
     /*
      * Tabular options presentation
      * Columns are; Option Name, Option Type, Description, Default Value, Example
      */
-    String optionsCommon_1 =
+    String optionsTableStart =
         """
             <br>
             <hr>
@@ -690,7 +690,7 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionShape} ${phraseMultipleEntriesAllowed}<sup>2</sup></td>
               <td${alignCellCenter}>circle</td>
-              <td>cone</td>
+              <td${alignCellCenter}>cone</td>
             </tr>
             <tr>
               <th>${optionLabelArc}</th>
@@ -714,14 +714,14 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>offset=140</td>
             </tr>
             """;
-    String optionsLight =
+    String optionsTableLightRows =
         """
             <tr>
               <th>${optionLabelAura}</th>
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionAura}</td>
               <td${alignCellCenter}>${wordUnused}</td>
-              <td>aura</td>
+              <td${alignCellCenter}>aura</td>
             </tr>
             <tr>
               <th>${optionLabelRestriction}</th>
@@ -732,7 +732,7 @@ public class CampaignPropertiesDialog extends JDialog {
             </tr>
             <tr>
               <th>${optionLabelRange}</th>
-              <td${alignCellCenter}>${optionTypeSpecial}</td>
+              <td${alignCellCenter}>${optionTypeSpecial}(${wordString})</td>
               <td>${optionDescriptionLightComponents} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
               <td${alignCellCenter}>${wordUnused}</td>
               <td${alignCellCenter}>30#afafaa+100</td>
@@ -752,7 +752,7 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>30</td>
             </tr>
             """;
-    String optionsSight =
+    String optionsTableSightRows =
         """
             <tr>
               <th>${optionLabelDistance}</th>
@@ -766,7 +766,7 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionScale}</td>
               <td${alignCellCenter}>${wordUnused}</td>
-              <td>scale</td>
+              <td${alignCellCenter}>scale</td>
             </tr>
             <tr>
               <th>${optionLabelMagnifier}</th>
@@ -797,7 +797,7 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>r30</td>
             </tr>
             """;
-    String optionsCommon_2 =
+    String optionsTableEnd =
         """
             <tr>
               <th></th>
@@ -876,31 +876,39 @@ public class CampaignPropertiesDialog extends JDialog {
             <code>10. </code>${lightExampleTextAuraLineOfSight}<br>
             </font>
             """;
-
-    String lightString =
-        structureCommon
-            + structureLight
+    String htmlLight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListLight
+            + structureListClose
             + syntaxHeading
             + syntaxLight
-            + optionsCommon_1
-            + optionsLight
-            + optionsCommon_2
+            + optionsTableStart
+            + optionsTableLightRows
+            + optionsTableEnd
             + footnotesLight
             + examplesHeading
-            + examplesLight;
-    String sightString =
-        structureCommon
+            + examplesLight
+            + "</body></html>";
+    String htmlSight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListClose
             + syntaxHeading
             + syntaxSight
-            + optionsCommon_1
-            + optionsSight
-            + optionsCommon_2
+            + optionsTableStart
+            + optionsTableSightRows
+            + optionsTableEnd
             + footnotesSight
             + examplesHeading
-            + examplesSight;
-    StringSubstitutor substitutor = new StringSubstitutor(parameters);
-    String sightResult = substitutor.replace(sightString);
-    String lightResult = substitutor.replace(lightString);
+            + examplesSight
+            + "</body></html>";
+
+    StringSubstitutor substitute = new StringSubstitutor(parameters);
+    String sightResult = substitute.replace(htmlSight);
+    String lightResult = substitute.replace(htmlLight);
     return new String[] {sightResult, lightResult};
   }
 }
