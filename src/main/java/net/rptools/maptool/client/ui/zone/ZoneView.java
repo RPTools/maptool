@@ -347,14 +347,21 @@ public class ZoneView {
     }
     lightSourceArea.transform(translateTransform);
 
-    final var lightSourceVisibleArea =
-        FogUtil.calculateVisibility(
-            p,
-            lightSourceArea,
-            getTopologyTree(Zone.TopologyType.WALL_VBL),
-            getTopologyTree(Zone.TopologyType.HILL_VBL),
-            getTopologyTree(Zone.TopologyType.PIT_VBL),
-            getTopologyTree(Zone.TopologyType.COVER_VBL));
+    Area lightSourceVisibleArea = null;
+
+    if (lightSource.isPassThroughVBL()) {
+      lightSourceVisibleArea =
+          FogUtil.calculateVisibility(p, lightSourceArea, null, null, null, null);
+    } else {
+      lightSourceVisibleArea =
+          FogUtil.calculateVisibility(
+              p,
+              lightSourceArea,
+              getTopologyTree(Zone.TopologyType.WALL_VBL),
+              getTopologyTree(Zone.TopologyType.HILL_VBL),
+              getTopologyTree(Zone.TopologyType.PIT_VBL),
+              getTopologyTree(Zone.TopologyType.COVER_VBL));
+    }
     if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
@@ -700,14 +707,21 @@ public class ZoneView {
 
                   Area lightSourceArea = lightSource.getArea(token, zone);
                   lightSourceArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-                  Area visibleArea =
-                      FogUtil.calculateVisibility(
-                          p,
-                          lightSourceArea,
-                          getTopologyTree(Zone.TopologyType.WALL_VBL),
-                          getTopologyTree(Zone.TopologyType.HILL_VBL),
-                          getTopologyTree(Zone.TopologyType.PIT_VBL),
-                          getTopologyTree(Zone.TopologyType.COVER_VBL));
+                  Area visibleArea = null;
+
+                  if (lightSource.isPassThroughVBL()) {
+                    visibleArea =
+                        FogUtil.calculateVisibility(p, lightSourceArea, null, null, null, null);
+                  } else {
+                    visibleArea =
+                        FogUtil.calculateVisibility(
+                            p,
+                            lightSourceArea,
+                            getTopologyTree(Zone.TopologyType.WALL_VBL),
+                            getTopologyTree(Zone.TopologyType.HILL_VBL),
+                            getTopologyTree(Zone.TopologyType.PIT_VBL),
+                            getTopologyTree(Zone.TopologyType.COVER_VBL));
+                  }
 
                   // This needs to be cached somehow
                   for (Light light : lightSource.getLightList()) {

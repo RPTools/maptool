@@ -48,6 +48,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   private final @Nullable GUID id;
   private final @Nonnull Type type;
   private final boolean scaleWithToken;
+  private final boolean passThroughVBL;
 
   /**
    * This light segments that make up the light source.
@@ -77,8 +78,10 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
    * @param scaleWithToken if {@code true}, the size of the lights will scale with the token size.
    * @param lights The set of lights that constitute the personal light source.
    */
-  public static LightSource createPersonal(boolean scaleWithToken, Collection<Light> lights) {
-    return new LightSource(null, null, Type.NORMAL, scaleWithToken, ImmutableList.copyOf(lights));
+  public static LightSource createPersonal(
+      boolean scaleWithToken, boolean passThroughVBL, Collection<Light> lights) {
+    return new LightSource(
+        null, null, Type.NORMAL, scaleWithToken, passThroughVBL, ImmutableList.copyOf(lights));
   }
 
   /**
@@ -90,6 +93,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
    * @param id The unique ID of the light source.
    * @param type The type of light, whether a normal light or an aura.
    * @param scaleWithToken if {@code true}, the size of the lights will scale with the token size.
+   * @param passThroughVBL if {@code true}, the light will ignore vbl
    * @param lights The set of lights that constitute the personal light source.
    */
   public static LightSource createRegular(
@@ -97,8 +101,10 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       @Nonnull GUID id,
       @Nonnull Type type,
       boolean scaleWithToken,
+      boolean passThroughVBL,
       @Nonnull Collection<Light> lights) {
-    return new LightSource(name, id, type, scaleWithToken, ImmutableList.copyOf(lights));
+    return new LightSource(
+        name, id, type, scaleWithToken, passThroughVBL, ImmutableList.copyOf(lights));
   }
 
   private LightSource(
@@ -106,11 +112,13 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       @Nullable GUID id,
       @Nonnull Type type,
       boolean scaleWithToken,
+      boolean passThroughVBL,
       @Nonnull List<Light> lights) {
     this.name = name;
     this.id = id;
     this.type = type;
     this.scaleWithToken = scaleWithToken;
+    this.passThroughVBL = passThroughVBL;
     this.lightList = lights;
   }
 
@@ -118,7 +126,8 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   public Object writeReplace() {
     // Make sure XStream keeps the serialization nice. We don't need the XML to contain
     // implementation details of the ImmutableList in use.
-    return new LightSource(name, id, type, scaleWithToken, new ArrayList<>(lightList));
+    return new LightSource(
+        name, id, type, scaleWithToken, passThroughVBL, new ArrayList<>(lightList));
   }
 
   @SuppressWarnings("ConstantConditions")
@@ -155,6 +164,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
         this.id,
         Objects.requireNonNullElse(this.type, Type.NORMAL),
         this.scaleWithToken,
+        this.passThroughVBL,
         ImmutableList.copyOf(lights));
   }
 
@@ -200,6 +210,10 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
 
   public boolean isScaleWithToken() {
     return scaleWithToken;
+  }
+
+  public boolean isPassThroughVBL() {
+    return passThroughVBL;
   }
 
   /*
@@ -266,6 +280,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
         dto.hasId() ? GUID.valueOf(dto.getId().getValue()) : null,
         Type.valueOf(dto.getType().name()),
         dto.getScaleWithToken(),
+        dto.getPassThroughVBL(),
         dto.getLightsList().stream().map(Light::fromDto).collect(ImmutableList.toImmutableList()));
   }
 
@@ -280,6 +295,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
     }
     dto.setType(LightSourceDto.LightTypeDto.valueOf(type.name()));
     dto.setScaleWithToken(scaleWithToken);
+    dto.setPassThroughVBL(passThroughVBL);
     return dto.build();
   }
 }

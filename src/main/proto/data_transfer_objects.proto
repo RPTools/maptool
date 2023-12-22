@@ -75,6 +75,7 @@ message LightSourceDto {
   google.protobuf.StringValue id = 3;
   LightTypeDto type = 4;
   bool scale_with_token = 5;
+  bool pass_through_VBL = 6;
 }
 
 enum ShapeTypeDto {
