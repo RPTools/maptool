@@ -16,19 +16,13 @@ package net.rptools.maptool.client.ui.zone.vbl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.HashMap;
-import java.util.IdentityHashMap;
+import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import javax.annotation.Nullable;
 import net.rptools.lib.CodeTimer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineSegment;
@@ -39,9 +33,14 @@ public class VisibilityProblem {
   private static final Logger log = LogManager.getLogger(VisibilityProblem.class);
 
   private final Coordinate origin;
-  private final Envelope visionBounds;
-  private final List<LineSegment> segments;
-  private final Envelope envelope;
+
+  /**
+   * All endpoints to check during the sweep.
+   *
+   * <p>Endpoints reference other endpoints, forming a graph where each edge is a vision blocking
+   * line segment connecting two endpoints.
+   */
+  private final EndpointSet endpointSet;
 
   /**
    * Build a new problem set.
@@ -52,9 +51,7 @@ public class VisibilityProblem {
    */
   public VisibilityProblem(Coordinate origin, Envelope visionBounds) {
     this.origin = origin;
-    this.visionBounds = visionBounds;
-    this.segments = new ArrayList<>();
-    this.envelope = new Envelope();
+    this.endpointSet = new EndpointSet(origin, visionBounds);
   }
 
   public void add(Coordinate... string) {
@@ -62,36 +59,40 @@ public class VisibilityProblem {
   }
 
   public void add(List<Coordinate> string) {
-    if (string.isEmpty()) {
+    if (string.size() < 2) {
       return;
     }
 
     // Always plainly add the first point.
-    var previous = string.get(0);
-    this.envelope.expandToInclude(previous);
 
+    var previous = endpointSet.add(string.get(0));
     for (int i = 1; i < string.size(); ++i) {
-      final var current = string.get(i);
-      this.envelope.expandToInclude(current);
-      segments.add(new LineSegment(previous, current));
-      previous = current;
+      var endpoint = endpointSet.add(string.get(i));
+
+      previous.startsWall(endpoint);
+      endpoint.endsWall(previous);
+
+      previous = endpoint;
+    }
+  }
+
+  // Don't actually call this, it's for testing purposes.
+  private void verifyEndpoints(Iterable<VisibilitySweepEndpoint> endpoints) {
+    for (var endpoint : endpoints) {
+      endpoint.verify();
     }
   }
 
   public @Nullable Coordinate[] solve() {
     final var timer = CodeTimer.get();
 
-    if (segments.isEmpty()) {
+    if (endpointSet.size() == 0) {
       // No topology, apparently.
       return null;
     }
 
     timer.start("add bounds");
-    /*
-     * The algorithm requires walls in every direction. The easiest way to accomplish this is to add
-     * the boundary of the bounding box.
-     */
-    envelope.expandToInclude(visionBounds);
+    final var envelope = endpointSet.getBounds();
     // Exact expansion distance doesn't matter, we just don't want the boundary walls to overlap
     // endpoints from real walls.
     envelope.expandBy(1.0);
@@ -107,14 +108,25 @@ public class VisibilityProblem {
     timer.stop("add bounds");
 
     // Now that we have valid geometry and a bounding box, we can continue with the sweep.
+    timer.start("initialize");
+    endpointSet.simplify();
+    final var endpoints = new ArrayList<>(endpointSet.getEndpoints());
+    // verifyEndpoints(endpoints);
+    timer.stop("initialize");
 
-    final var endpoints = getSweepEndpoints(origin, segments);
-    Set<LineSegment> openWalls = Collections.newSetFromMap(new IdentityHashMap<>());
+    Set<LineSegment> openWalls = new HashSet<>();
 
     // This initial sweep just makes sure we have the correct open set to start.
     for (final var endpoint : endpoints) {
-      openWalls.addAll(endpoint.getStartsWalls());
-      openWalls.removeAll(endpoint.getEndsWalls());
+      if (endpoint == null) {
+        continue;
+      }
+      for (var otherEndpoint : endpoint.getStartsWalls()) {
+        openWalls.add(new LineSegment(endpoint.getPoint(), otherEndpoint.getPoint()));
+      }
+      for (var otherEndpoint : endpoint.getEndsWalls()) {
+        openWalls.remove(new LineSegment(otherEndpoint.getPoint(), endpoint.getPoint()));
+      }
     }
 
     // Now for the real sweep. Make sure to process the first point once more at the end to ensure
@@ -122,13 +134,21 @@ public class VisibilityProblem {
     endpoints.add(endpoints.get(0));
     List<Coordinate> visionPoints = new ArrayList<>();
     for (final var endpoint : endpoints) {
+      if (endpoint == null) {
+        continue;
+      }
+
       assert !openWalls.isEmpty();
 
       final var ray = new LineSegment(origin, endpoint.getPoint());
       final var nearestWallResult = findNearestOpenWall(openWalls, ray);
 
-      openWalls.addAll(endpoint.getStartsWalls());
-      openWalls.removeAll(endpoint.getEndsWalls());
+      for (var otherEndpoint : endpoint.getStartsWalls()) {
+        openWalls.add(new LineSegment(endpoint.getPoint(), otherEndpoint.getPoint()));
+      }
+      for (var otherEndpoint : endpoint.getEndsWalls()) {
+        openWalls.remove(new LineSegment(otherEndpoint.getPoint(), endpoint.getPoint()));
+      }
 
       // Find a new nearest wall.
       final var newNearestWallResult = findNearestOpenWall(openWalls, ray);
@@ -149,7 +169,7 @@ public class VisibilityProblem {
           visionPoints.add(endpoint.getPoint());
           // Special case: if the two walls are adjacent, they share the current point. We don't
           // need to add the point twice, so just skip in that case.
-          if (!endpoint.getStartsWalls().contains(newNearestWallResult.wall())) {
+          if (!endpoint.getPoint().equals(newNearestWallResult.wall().p0)) {
             visionPoints.add(newNearestWallResult.point());
           }
         }
@@ -199,41 +219,5 @@ public class VisibilityProblem {
 
     assert currentNearest != null;
     return new NearestWallResult(currentNearest, currentNearestPoint, nearestDistance);
-  }
-
-  /**
-   * Builds a list of endpoints for the sweep algorithm to consume.
-   *
-   * <p>The endpoints will be unique (i.e., no coordinate is represented more than once) and in a
-   * consistent orientation (i.e., counterclockwise around the origin). In addition, all endpoints
-   * will have their starting and ending walls filled according to which walls are incident to the
-   * corresponding point.
-   *
-   * @param origin The center of vision, by which orientation can be determined.
-   * @param visionBlockingSegments The "walls" that are able to block vision. All points in these
-   *     walls will be present in the returned list.
-   * @return A list of all endpoints in counterclockwise order.
-   */
-  private static List<VisibilitySweepEndpoint> getSweepEndpoints(
-      Coordinate origin, Collection<LineSegment> visionBlockingSegments) {
-    final Map<Coordinate, VisibilitySweepEndpoint> endpointsByPosition = new HashMap<>();
-    for (final var wall : visionBlockingSegments) {
-      assert wall.orientationIndex(origin) == Orientation.COUNTERCLOCKWISE;
-
-      var start =
-          endpointsByPosition.computeIfAbsent(wall.p0, c -> new VisibilitySweepEndpoint(c, origin));
-      var end =
-          endpointsByPosition.computeIfAbsent(wall.p1, c -> new VisibilitySweepEndpoint(c, origin));
-
-      start.startsWall(wall);
-      end.endsWall(wall);
-    }
-    final List<VisibilitySweepEndpoint> endpoints = new ArrayList<>(endpointsByPosition.values());
-
-    endpoints.sort(
-        Comparator.comparingDouble(VisibilitySweepEndpoint::getPseudoangle)
-            .thenComparing(VisibilitySweepEndpoint::getDistance));
-
-    return endpoints;
   }
 }
