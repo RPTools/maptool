@@ -42,6 +42,7 @@ import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.LookupTable;
+import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -377,7 +378,7 @@ public class getInfoFunction extends AbstractFunction {
         JsonObject linfo = new JsonObject();
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
-        linfo.addProperty("type", ls.getType().toString());
+        linfo.addProperty("type", ls.getType().name());
         linfo.addProperty("scale", ls.isScaleWithToken());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
@@ -439,11 +440,28 @@ public class getInfoFunction extends AbstractFunction {
     JsonObject sightInfo = new JsonObject();
     for (SightType sightType : c.getSightTypeMap().values()) {
       JsonObject si = new JsonObject();
-      si.addProperty("arc", sightType.getArc());
-      si.addProperty("distance", sightType.getArc());
+      if (sightType.getShape() == ShapeType.BEAM) {
+        si.addProperty("width", sightType.getWidth());
+        si.addProperty("offset", sightType.getOffset());
+      }
+      if (sightType.getShape() == ShapeType.CONE) {
+        si.addProperty("arc", sightType.getArc());
+        si.addProperty("offset", sightType.getOffset());
+      }
+      si.addProperty("distance", sightType.getDistance());
       si.addProperty("multiplier", sightType.getMultiplier());
-      si.addProperty("shape", sightType.getShape().toString());
-      si.addProperty("type", sightType.getOffset());
+      si.addProperty("shape", sightType.getShape().name());
+      si.addProperty("scale", sightType.isScaleWithToken());
+
+      JsonArray lightList = null;
+      if (sightType.getPersonalLightSource() != null) {
+        lightList = new JsonArray();
+        for (Light light : sightType.getPersonalLightSource().getLightList()) {
+          lightList.add(gson.toJsonTree(light));
+        }
+      }
+      si.add("personal lights", lightList);
+
       sightInfo.add(sightType.getName(), si);
     }
     cinfo.add("sight", sightInfo);
