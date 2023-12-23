@@ -6967,7 +6967,7 @@
                                                 <at name="actionCommand">Find</at>
                                                 <at name="name">xmlStatblockSearchButton</at>
                                                 <at name="width">334</at>
-                                                <at name="text">EditTokenDialog.action.hero.statBlockRTextScroll</at>
+                                                <at name="text">EditTokenDialog.action.hero.statBlockSearch.label</at>
                                                 <at name="toolTipText">EditTokenDialog.button.hero.statBlockSearch.tooltip</at>
                                                 <at name="height">25</at>
                                                </object>
@@ -7209,7 +7209,7 @@
                                                 <at name="actionCommand">Find</at>
                                                 <at name="name">textStatblockSearchButton</at>
                                                 <at name="width">334</at>
-                                                <at name="text">EditTokenDialog.action.hero.statBlockRTextScroll</at>
+                                                <at name="text">EditTokenDialog.action.hero.statBlockSearch.label</at>
                                                 <at name="toolTipText">EditTokenDialog.button.hero.statBlockSearch.tooltip</at>
                                                 <at name="height">25</at>
                                                </object>
