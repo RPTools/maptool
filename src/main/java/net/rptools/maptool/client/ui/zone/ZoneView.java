@@ -349,7 +349,7 @@ public class ZoneView {
 
     Area lightSourceVisibleArea = null;
 
-    if (lightSource.isPassThroughVBL()) {
+    if (lightSource.isIgnoreVBL()) {
       lightSourceVisibleArea =
           FogUtil.calculateVisibility(p, lightSourceArea, null, null, null, null);
     } else {
@@ -707,12 +707,9 @@ public class ZoneView {
 
                   Area lightSourceArea = lightSource.getArea(token, zone);
                   lightSourceArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-                  Area visibleArea = null;
+                  Area visibleArea = lightSourceArea;
 
-                  if (lightSource.isPassThroughVBL()) {
-                    visibleArea =
-                        FogUtil.calculateVisibility(p, lightSourceArea, null, null, null, null);
-                  } else {
+                  if (!lightSource.isIgnoreVBL()) {
                     visibleArea =
                         FogUtil.calculateVisibility(
                             p,

@@ -66,7 +66,7 @@ public class SightSyntax {
         String[] args = value.split("\\s+");
         ShapeType shape = ShapeType.CIRCLE;
         boolean scaleWithToken = false;
-        boolean passThroughVBL = false;
+        boolean ignoreVBL = false;
         int arc = 90;
         float range = 0;
         int offset = 0;
@@ -85,8 +85,8 @@ public class SightSyntax {
             scaleWithToken = true;
             continue;
           }
-          if (arg.equalsIgnoreCase("PASSTHRU")) {
-            passThroughVBL = true;
+          if (arg.equalsIgnoreCase("IGNORE-VBL")) {
+            ignoreVBL = true;
             continue;
           }
 
@@ -170,7 +170,7 @@ public class SightSyntax {
         LightSource personalLight =
             personalLightLights == null
                 ? null
-                : LightSource.createPersonal(scaleWithToken, passThroughVBL, personalLightLights);
+                : LightSource.createPersonal(scaleWithToken, ignoreVBL, personalLightLights);
         SightType sight =
             new SightType(label, magnifier, personalLight, shape, arc, scaleWithToken);
         sight.setDistance(range);

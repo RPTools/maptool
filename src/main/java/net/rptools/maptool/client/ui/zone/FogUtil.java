@@ -96,18 +96,10 @@ public class FogUtil {
      */
     List<Geometry> visibleAreas = new ArrayList<>();
     final List<Function<VisionBlockingAccumulator, Boolean>> topologyConsumers = new ArrayList<>();
-    if (topology != null) {
-      topologyConsumers.add(acc -> acc.addWallBlocking(topology));
-    }
-    if (hillVbl != null) {
-      topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
-    }
-    if (pitVbl != null) {
-      topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
-    }
-    if (coverVbl != null) {
-      topologyConsumers.add(acc -> acc.addCoverBlocking(coverVbl));
-    }
+    topologyConsumers.add(acc -> acc.addWallBlocking(topology));
+    topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
+    topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
+    topologyConsumers.add(acc -> acc.addCoverBlocking(coverVbl));
 
     for (final var consumer : topologyConsumers) {
       final var accumulator =

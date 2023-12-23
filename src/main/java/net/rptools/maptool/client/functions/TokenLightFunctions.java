@@ -322,8 +322,8 @@ public class TokenLightFunctions extends AbstractFunction {
             : LightSource.Type.NORMAL;
     final boolean scaleWithToken =
         lightSourceDef.has("scale") ? lightSourceDef.get("scale").getAsBoolean() : false;
-    final boolean passThroughVBL =
-        lightSourceDef.has("passThru") ? lightSourceDef.get("passThru").getAsBoolean() : false;
+    final boolean ignoreVBL =
+        lightSourceDef.has("ignores-vbl") ? lightSourceDef.get("ignores-vbl").getAsBoolean() : false;
     final JsonArray lightDefs =
         lightSourceDef.has("lights") ? lightSourceDef.getAsJsonArray("lights") : new JsonArray();
 
@@ -338,7 +338,7 @@ public class TokenLightFunctions extends AbstractFunction {
             existingSource.isPresent() ? existingSource.get().getId() : new GUID(),
             type,
             scaleWithToken,
-            passThroughVBL,
+                ignoreVBL,
             lights);
     token.addUniqueLightSource(lightSource);
     MapTool.serverCommand()

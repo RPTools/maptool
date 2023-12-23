@@ -157,7 +157,7 @@ public class LightSyntax {
       lastParameters.put("offset", 0.);
       lastParameters.put("GM", false);
       lastParameters.put("OWNER", false);
-      lastParameters.put("PASSTHRU", false);
+      lastParameters.put("IGNORE-VBL", false);
 
       for (Light light : lightSource.getLightList()) {
         final var parameters = new HashMap<>();
@@ -167,7 +167,7 @@ public class LightSyntax {
           parameters.put("GM", light.isGM());
           parameters.put("OWNER", light.isOwnerOnly());
         }
-        parameters.put("PASSTHRU", lightSource.isPassThroughVBL());
+        parameters.put("IGNORE-VBL", lightSource.isIgnoreVBL());
 
         parameters.put("", light.getShape().name().toLowerCase());
         switch (light.getShape()) {
@@ -251,7 +251,7 @@ public class LightSyntax {
     GUID id = new GUID();
     LightSource.Type type = LightSource.Type.NORMAL;
     boolean scaleWithToken = false;
-    boolean passThroughVBL = false;
+    boolean ignoreVBL = false;
     List<Light> lights = new ArrayList<>();
     // endregion
     // region Individual light properties
@@ -284,8 +284,8 @@ public class LightSyntax {
         continue;
       }
       // pass through vbl designation
-      if (arg.equalsIgnoreCase("PASSTHRU")) {
-        passThroughVBL = true;
+      if (arg.equalsIgnoreCase("IGNORE-VBL")) {
+        ignoreVBL = true;
         continue;
       }
 
@@ -395,7 +395,7 @@ public class LightSyntax {
       }
     }
 
-    return LightSource.createRegular(name, id, type, scaleWithToken, passThroughVBL, lights);
+    return LightSource.createRegular(name, id, type, scaleWithToken, ignoreVBL, lights);
   }
 
   private String toHex(Color color) {
