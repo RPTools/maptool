@@ -347,12 +347,9 @@ public class ZoneView {
     }
     lightSourceArea.transform(translateTransform);
 
-    Area lightSourceVisibleArea = null;
+    Area lightSourceVisibleArea = lightSourceArea;
 
-    if (lightSource.isIgnoreVBL()) {
-      lightSourceVisibleArea =
-          FogUtil.calculateVisibility(p, lightSourceArea, null, null, null, null);
-    } else {
+    if (!lightSource.isIgnoreVBL()) {
       lightSourceVisibleArea =
           FogUtil.calculateVisibility(
               p,
