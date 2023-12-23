@@ -103,8 +103,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       boolean scaleWithToken,
       boolean ignoreVBL,
       @Nonnull Collection<Light> lights) {
-    return new LightSource(
-        name, id, type, scaleWithToken, ignoreVBL, ImmutableList.copyOf(lights));
+    return new LightSource(name, id, type, scaleWithToken, ignoreVBL, ImmutableList.copyOf(lights));
   }
 
   private LightSource(
@@ -126,8 +125,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   public Object writeReplace() {
     // Make sure XStream keeps the serialization nice. We don't need the XML to contain
     // implementation details of the ImmutableList in use.
-    return new LightSource(
-        name, id, type, scaleWithToken, ignoreVBL, new ArrayList<>(lightList));
+    return new LightSource(name, id, type, scaleWithToken, ignoreVBL, new ArrayList<>(lightList));
   }
 
   @SuppressWarnings("ConstantConditions")
