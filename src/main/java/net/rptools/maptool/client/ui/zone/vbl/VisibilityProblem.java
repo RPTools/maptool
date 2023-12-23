@@ -31,6 +31,12 @@ import org.locationtech.jts.geom.LineSegment;
 public class VisibilityProblem {
   private static final Logger log = LogManager.getLogger(VisibilityProblem.class);
 
+  /**
+   * The center point of the vision.
+   *
+   * <p>This is the point around which the event line (vision ray) rotates during the sweep.
+   * Orientation is always measured relative to this point.
+   */
   private final Coordinate origin;
 
   /**
@@ -41,14 +47,14 @@ public class VisibilityProblem {
    */
   private final EndpointSet endpointSet;
 
-  // Note: we are essentially this collection as a priority queue, so we can always operate on the
-  // closest wall. However, TreeSet is faster than PriorityQueue in this case, likely since the
-  // size of the collection tends to remain quite small.
-  // Note: it's not possible to totally order all walls by distance to `origin`. But it is
-  // possible to do it for the set of open walls at any point in time, which is why we can use
-  // this structure. So it's important to remove ended walls before adding opened walls, otherwise
-  // we might momentarily violate that basic requirement of the comparison.
-  // Note: as a rule, the number of open walls is small, usually well under 50.
+  /**
+   * The set of walls that are intersected by the current event line.
+   *
+   * <p>This set is ordered by distance to {@link #origin}, where the distance is measured along the
+   * event line. This way, the closest open wall is always the first element in the set. This
+   * ordering is only possible for walls intersected by the same event line, so it is important that
+   * we remove the walls from a previous event line before adding the walls for the next event line.
+   */
   private final TreeSet<LineSegment> openWalls;
 
   /**
@@ -71,7 +77,8 @@ public class VisibilityProblem {
   /**
    * Adds a string of vision blocking line segments into the problem space.
    *
-   * <p>All line segments in the string must be oriented counterclockwise around the origin.
+   * <p>All line segments in the string should be oriented counterclockwise around the origin, but
+   * if not we will patch things up.
    *
    * <p>Internally, endpoints will be guaranteed to be unique and in a consistent orientation
    * (counterclockwise around the origin, starting with the negative x-axis). Each segment in the
@@ -87,49 +94,32 @@ public class VisibilityProblem {
     // Always plainly add the first point.
     var previous = endpointSet.add(string.get(0));
     for (int i = 1; i < string.size(); ++i) {
-      var endpoint = endpointSet.add(string.get(i));
+      var current = endpointSet.add(string.get(i));
 
-      previous.startsWall(endpoint);
-      endpoint.endsWall(previous);
+      final VisibilitySweepEndpoint start;
+      final VisibilitySweepEndpoint end;
+      if (Orientation.COUNTERCLOCKWISE
+          == Orientation.index(origin, previous.getPoint(), current.getPoint())) {
+        // Caller is well-behaved passing us correctly oriented segments.
+        start = previous;
+        end = current;
+      } else {
+        // Tsk tsk. Caller gave it to us the wrong-way round.
+        start = current;
+        end = previous;
+      }
+
+      start.startsWall(end);
+      end.endsWall(start);
 
       // This check is only valid because of the counter-clockwise orientation enforced above.
-      final var isOpen = endpoint.getPoint().y <= origin.y && previous.getPoint().y > origin.y;
+      final var isOpen = end.getPoint().y <= origin.y && start.getPoint().y > origin.y;
       if (isOpen) {
-        openWalls.add(new LineSegment(previous.getPoint(), endpoint.getPoint()));
+        openWalls.add(new LineSegment(start.getPoint(), end.getPoint()));
       }
 
-      previous = endpoint;
+      previous = current;
     }
-  }
-
-  // Don't actually call this, it's for testing purposes.
-  private void verifyEndpoints(Iterable<VisibilitySweepEndpoint> endpoints) {
-    for (var endpoint : endpoints) {
-      endpoint.verify();
-    }
-  }
-
-  private List<Coordinate> sweep(Iterable<VisibilitySweepEndpoint> endpoints) {
-    List<Coordinate> visionPoints = new ArrayList<>();
-
-    var previousNearestWall = openWalls.getFirst();
-    for (final var endpoint : endpoints) {
-      if (endpoint == null) {
-        // This was a deduplicated endpoint.
-        continue;
-      }
-
-      final var currentNearestWall = updateOpenWalls(endpoint, previousNearestWall);
-      // If the current nearest wall hasn't changed, the endpoint is occluded and does not
-      // contribute to the result.
-      if (currentNearestWall != previousNearestWall) {
-        consumeEndpoint(endpoint, previousNearestWall, currentNearestWall, visionPoints);
-
-        previousNearestWall = currentNearestWall;
-      }
-    }
-
-    return visionPoints;
   }
 
   /**
@@ -140,17 +130,18 @@ public class VisibilityProblem {
    * open walls. As the algorithm progresses, open walls are maintained as an ordered set to enable
    * efficient polling of the closest wall at any given point in time.
    *
-   * @return A visibility polygon, represented as a ring of coordinates.
+   * @return A visibility polygon, represented as a ring of coordinates. A {@code null} result
+   *     indicates that no vision blocking needed to be applied.
    * @see <a href="https://arxiv.org/abs/1403.3905">Efficient Computation of Visibility Polygons,
    *     arXiv:1403.3905</a>
    */
   public @Nullable Coordinate[] solve() {
-    final var timer = CodeTimer.get();
-
     if (endpointSet.size() == 0) {
       // No topology, apparently.
       return null;
     }
+
+    final var timer = CodeTimer.get();
 
     timer.start("add bounds");
     final var envelope = endpointSet.getBounds();
@@ -180,31 +171,64 @@ public class VisibilityProblem {
     final var visionPoints = sweep(endpoints);
     timer.stop("sweep");
 
-    timer.start("sanity check");
-    try {
-      if (visionPoints.size() < 3) {
-        // This shouldn't happen, but just in case.
-        log.warn("Sweep produced too few points: {}", visionPoints);
-        return null;
-      }
-    } finally {
-      timer.stop("sanity check");
-    }
-    timer.start("close polygon");
-    // TODO Are there not cases where this is already done?
-    visionPoints.add(visionPoints.get(0)); // Ensure a closed loop.
-    timer.stop("close polygon");
+    return visionPoints;
+  }
 
-    timer.start("build result");
-    try {
-      return visionPoints.toArray(Coordinate[]::new);
-    } finally {
-      timer.stop("build result");
+  // Don't actually call this, it's for testing purposes.
+  private void verifyEndpoints(Iterable<VisibilitySweepEndpoint> endpoints) {
+    for (var endpoint : endpoints) {
+      endpoint.verify();
     }
   }
 
-  private LineSegment updateOpenWalls(
-      VisibilitySweepEndpoint endpoint, LineSegment previousNearestWall) {
+  /**
+   * Performs the core visibility sweep.
+   *
+   * <p>{@code endpoints} must already be sorted and deduplicated.
+   *
+   * @return The ring forming the visibility polygon. Since the ring is closed, it will contain at
+   *     least three distinct points, and the first point will be duplicated as the last.
+   */
+  private Coordinate[] sweep(Iterable<VisibilitySweepEndpoint> endpoints) {
+    List<Coordinate> visionPoints = new ArrayList<>();
+
+    var previousNearestWall = openWalls.getFirst();
+    for (final var endpoint : endpoints) {
+      if (endpoint == null) {
+        // This was a deduplicated endpoint.
+        continue;
+      }
+
+      // Find a new nearest wall.
+      updateOpenWalls(endpoint, previousNearestWall);
+      assert !openWalls.isEmpty();
+      final var currentNearestWall = openWalls.getFirst();
+
+      if (!currentNearestWall.equals(previousNearestWall)) {
+        addVisionPoints(endpoint.getPoint(), previousNearestWall, currentNearestWall, visionPoints);
+        previousNearestWall = currentNearestWall;
+      }
+    }
+
+    if (visionPoints.size() < 3) {
+      // This shouldn't happen, but just in case.
+      throw new RuntimeException(
+          String.format("Visibility sweep produced too few points: %s", visionPoints));
+    }
+
+    // Ensure a closed loop.
+    visionPoints.add(visionPoints.getFirst());
+
+    return visionPoints.toArray(Coordinate[]::new);
+  }
+
+  /**
+   * Updates {@link #openWalls} by removing now-ended walls and adding newly-opened walls.
+   *
+   * @param endpoint The current endpoint that the event line is pointing at.
+   * @param previousNearestWall The nearest open wall for the previous event line.
+   */
+  private void updateOpenWalls(VisibilitySweepEndpoint endpoint, LineSegment previousNearestWall) {
     assert !openWalls.isEmpty();
 
     for (var otherEndpoint : endpoint.getEndsWalls()) {
@@ -238,60 +262,75 @@ public class VisibilityProblem {
         openWalls.add(new LineSegment(endpoint.getPoint(), otherEndpoint.getPoint()));
       }
     }
-
-    // Find a new nearest wall.
-    assert !openWalls.isEmpty();
-    return openWalls.getFirst();
   }
 
-  private void consumeEndpoint(
-      VisibilitySweepEndpoint endpoint,
+  /**
+   * Adds points to {@code visionPoints} given the walls we just transitioned between.
+   *
+   * @param point The current point in the sweep, that the event line is being pointed at. Used to
+   *     determine the various possible cases.
+   * @param previousNearestWall The nearest open wall for the previous event line.
+   * @param currentNearestWall The nearest open wall for the current event line.
+   * @param visionPoints The vision polygon ring that is being built and to which points will be
+   *     added.
+   */
+  private void addVisionPoints(
+      Coordinate point,
       LineSegment previousNearestWall,
       LineSegment currentNearestWall,
       List<Coordinate> visionPoints) {
-    // Implies we have changed which wall we are at. Need to figure out projections.
-    final var ray = new LineSegment(origin, endpoint.getPoint());
-    if (!ray.p1.equals(previousNearestWall.p1)) {
-      // The previous nearest wall is still open. I.e., we didn't fall of its end but
-      // encountered a new closer wall. So we project the current point to the previous
-      // nearest wall, then step to the current point.
-      assert ray.p1.equals(currentNearestWall.p0)
-          : "Uh-oh, this case should only happen if we encountered a newly opened closer wall";
-      visionPoints.add(projectOntoOpenWall(ray, previousNearestWall));
-      visionPoints.add(currentNearestWall.p0);
-    } else {
-      // The previous nearest wall is now closed. I.e., we "fell off" it and therefore have
-      // encountered a different wall. So we step from the current point (which is on the
-      // previous wall) to the projection on the new wall.
-      assert ray.p1.equals(previousNearestWall.p1)
-          : "Uh-oh, this case should only happen if we left a closed wall for something farther away";
+    /*
+     * Implies we have changed which wall we are at. Need to figure out projections.
+     *
+     * There are four cases:
+     * 1. The previous nearest open wall ended, meaning its ending point should be added to the
+     *    vision points along with the projection to the current nearest open wall.
+     * 2. The current nearest open wall started, meaning the projection to the previous nearest wall
+     *    and the starting point of the current wall should be added to the vision points.
+     * 3. (1) and (2) at the same time, i.e., the previous and current walls are connected. No
+     *    projections needed, and only one point (that common point) needs to be added.
+     * 4. Neither (1) nor (2), in which case previousNearestWall and currentNearestWall will be the
+     *    same wall.
+     */
 
-      visionPoints.add(previousNearestWall.p1);
-      // Special case: if the two walls are adjacent, they share the current point. We don't
-      // need to add the point twice, so just skip in that case.
-      if (!previousNearestWall.p1.equals(currentNearestWall.p0)) {
-        visionPoints.add(projectOntoOpenWall(ray, currentNearestWall));
-      }
+    final var startedCurrentWall = point.equals(currentNearestWall.p0);
+    final var endedPreviousWall = point.equals(previousNearestWall.p1);
+
+    final var ray = new LineSegment(origin, point);
+    if (startedCurrentWall && endedPreviousWall) {
+      // Transition between connected walls. No projections needed.
+      visionPoints.add(point);
+    } else if (startedCurrentWall) {
+      // The previous nearest wall is still open. I.e., we didn't fall of its end but encountered a
+      // new closer wall. So we project the current point to the previous nearest wall, then step to
+      // the current point.
+      visionPoints.add(projectOntoWall(ray, previousNearestWall));
+      visionPoints.add(point);
+    } else if (endedPreviousWall) {
+      // The previous nearest wall is now closed. I.e., we "fell off" it and therefore have
+      // encountered a different wall. So we step from the current point (which is on the previous
+      // wall) to the projection on the new wall.
+      visionPoints.add(point);
+      visionPoints.add(projectOntoWall(ray, currentNearestWall));
+    } else {
+      // No change in walls, so no points need to be added.
     }
   }
 
   /**
-   * Projects an event line ray onto an open wall.
-   *
-   * <p>Since the wall is open for the event line, the intersection will succeed.
+   * Projects an event line ray onto a wall.
    *
    * @param ray A ray representing the event line.
-   * @param wall A wall that is open according to {@code ray}.
-   * @return The point at which {@code ray} would intersect with {@code wall} if extended
+   * @param wall A wall to project {@code ray} onto.
+   * @return The point at which {@code ray} would intersect with {@code wall} if they were extended
    *     indefinitely.
    */
-  private static @Nonnull Coordinate projectOntoOpenWall(LineSegment ray, LineSegment wall) {
-    // TODO This assertion is not quite right: it's okay to project onto an about-to-be-closed wall.
-    //  assert isWallOpen(ray, wall) : String.format("Wall %s is not open for ray %s", wall, ray);
+  private static @Nonnull Coordinate projectOntoWall(LineSegment ray, LineSegment wall) {
     var intersection = ray.lineIntersection(wall);
     assert intersection != null
         : String.format(
-            "Unable to project ray %s onto wall %s despite the wall being open", ray, wall);
+            "Unable to project ray %s onto wall %s despite not permitting collinear walls",
+            ray, wall);
     return intersection;
   }
 
@@ -353,8 +392,9 @@ public class VisibilityProblem {
     // Indefinite result (one point looks closer, one look further). So test the other segment's
     // points. Actually only need to test one point to be sure.
     p0Orientation = Orientation.index(s1.p0, s0.p0, s0.p1);
-    // Colinearity of one point implies colinearity of the other, otherwise we would have a definite
-    // result above. And this case can't happen in the context of the sweep algorithm.
+    // Collinearity of one point implies collinearity of the other, otherwise we would have a
+    // definite result above. And this case can't happen for _open_ walls since the event line would
+    // only intersect one of them.
     assert p0Orientation != Orientation.COLLINEAR
         : String.format(
             "It should not be possible to get a collinear result in the fallback check for %s and %s",

@@ -120,7 +120,14 @@ public class FogUtil {
         }
 
         timer.start("calculate visible area");
-        final var visibleArea = solver.solve();
+        final Coordinate[] visibleArea;
+        try {
+          visibleArea = solver.solve();
+        } catch (Exception e) {
+          log.error("Unexpected error while calculating visible area.", e);
+          // Play it safe and dont consider anything to be visible.
+          return new Area();
+        }
         timer.stop("calculate visible area");
 
         timer.start("add visibility polygon");
