@@ -14,53 +14,98 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import net.rptools.lib.GeometryUtil;
+import org.locationtech.jts.algorithm.InteriorPointArea;
 import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.algorithm.PointLocation;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateArrays;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineSegment;
 import org.locationtech.jts.geom.LineString;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Location;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
-  private Area area;
-  private List<Coordinate> vertices = new ArrayList<>();
+  private final Coordinate[] vertices;
 
-  // Only used during construction
-  private boolean isHole;
-  private GeneralPath path;
+  // region These fields are built from `vertices` and exist only for performance reasons.
 
-  public AreaMeta() {}
+  private final Coordinate interiorPoint;
+  private final Envelope boundingBox;
+  private final boolean isOcean;
 
-  public boolean contains(Point2D point) {
-    return area.contains(point);
-  }
-
-  public Area getBounds() {
-    return new Area(area);
-  }
+  // endregion
 
   /**
-   * @return true if this object does not have any edges.
+   * Creates an AreaMeta that represents the entire plane.
+   *
+   * <p>Since this is a sea of nothing, it counts as an ocean despite having no endpoints.
    */
-  public boolean isEmpty() {
-    // Note: vertices is a closed loop, so we can only have edges if we have at least 3 points with
-    // which to form a line.
-    return vertices.size() < 3;
+  public AreaMeta() {
+    this.vertices = new Coordinate[0];
+    this.interiorPoint = new Coordinate(0, 0);
+    this.boundingBox = null;
+    this.isOcean = true;
+  }
+
+  public AreaMeta(LinearRing ring) {
+    vertices = ring.getCoordinates();
+    assert vertices.length >= 4; // Yes, 4, because a ring duplicates its first element as its last.
+
+    // Creating a Polygon here is a necessary evil since JTS does not seem to expose the interior
+    // point algorithm for a plain ring. But it doesn't cost very much thankfully.
+    this.interiorPoint =
+        InteriorPointArea.getInteriorPoint(GeometryUtil.getGeometryFactory().createPolygon(ring));
+    boundingBox = CoordinateArrays.envelope(vertices);
+    isOcean = Orientation.isCCW(vertices);
+  }
+
+  public double getBoundingBoxArea() {
+    if (vertices.length == 0) {
+      return Double.POSITIVE_INFINITY;
+    }
+
+    return boundingBox.getArea();
+  }
+
+  public Coordinate getInteriorPoint() {
+    return interiorPoint;
+  }
+
+  public boolean contains(Coordinate point) {
+    if (vertices.length == 0) {
+      return true;
+    }
+
+    if (!boundingBox.contains(point)) {
+      return false;
+    }
+
+    // Oceans (holes) are open (do not include their boundary). This makes masks like Wall VBL
+    // function correctly by ensuring any intersection with the mask counts as being inside.
+    // On the other hand it is not sufficient to make Pit VBL behave correctly on the boundary.
+    // though it doesn't break vision.
+    final var location = PointLocation.locateInRing(point, vertices);
+    if (isOcean) {
+      return location == Location.INTERIOR;
+    } else {
+      return location != Location.EXTERIOR;
+    }
   }
 
   /**
-   * Returns all line segments in the boundary that face the requested direction.
+   * Find all sections of the boundary that block vision.
    *
    * <p>For each line segment, the exterior region will be on one side of the segment while the
    * interior region will be on the other side. One of these regions will be an island and one will
-   * be an ocean depending on {@link #isHole()}. The {@code facing} parameter uses this fact to
+   * be an ocean depending on {@link #isOcean()}. The {@code facing} parameter uses this fact to
    * control whether a segment should be included in the result, based on whether the origin is on
    * the island-side of the line segment or on its ocean-side.
    *
@@ -75,6 +120,10 @@ public class AreaMeta {
    */
   public List<LineString> getFacingSegments(
       GeometryFactory geometryFactory, Coordinate origin, Facing facing, PreparedGeometry vision) {
+    if (vertices.length == 0) {
+      return Collections.emptyList();
+    }
+
     final var requiredOrientation =
         facing == Facing.ISLAND_SIDE_FACES_ORIGIN
             ? Orientation.CLOCKWISE
@@ -122,48 +171,7 @@ public class AreaMeta {
     return segments;
   }
 
-  public boolean isHole() {
-    return isHole;
-  }
-
-  public void addPoint(double x, double y) {
-    final var vertex = new Coordinate(x, y);
-    GeometryUtil.getPrecisionModel().makePrecise(vertex);
-
-    if (!vertices.isEmpty()) {
-      final var lastVertex = vertices.get(vertices.size() - 1);
-      // Don't add if we haven't moved
-      if (lastVertex.equals(vertex)) {
-        return;
-      }
-    }
-    vertices.add(vertex);
-
-    if (path == null) {
-      path = new GeneralPath();
-      path.moveTo(vertex.x, vertex.y);
-    } else {
-      path.lineTo(vertex.x, vertex.y);
-    }
-  }
-
-  public void close() {
-    area = new Area(path);
-
-    // Close the circle.
-    // For some odd reason, sometimes the first and last point are already the same, so don't add
-    // the point again in that case.
-    final var first = vertices.get(0);
-    final var last = vertices.get(vertices.size() - 1);
-    if (!first.equals(last)) {
-      vertices.add(first);
-    }
-
-    isHole = vertices.size() >= 4 && Orientation.isCCW(vertices.toArray(Coordinate[]::new));
-
-    // Don't need this anymore
-    path = null;
-    // System.out.println("AreaMeta.skippedPoints: " + skippedPoints + " h:" + isHole + " f:" +
-    // faceList.size());
+  public boolean isOcean() {
+    return isOcean;
   }
 }

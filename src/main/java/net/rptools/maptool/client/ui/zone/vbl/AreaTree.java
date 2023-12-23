@@ -14,143 +14,153 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import com.google.common.collect.Iterables;
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import net.rptools.maptool.util.GraphicsUtil;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
+import net.rptools.lib.GeometryUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.geom.Coordinate;
 
-/** Class digesting a VBL area into an AreaOcean. */
+/**
+ * Represents a topology area as a tree of nested polygons.
+ *
+ * <p>Solid areas of topology are called <emph>islands</emph>, while areas not covered by topology
+ * are called <emph>oceans</emph>. Islands and oceans can be arranged in a tree structure where each
+ * island is a parent to the oceans contained within it, and each ocean is a parent to the islands
+ * contained within it. At the root of the tree is an infinite ocean with no parent island.
+ */
 public class AreaTree {
   private static final Logger log = LogManager.getLogger(AreaTree.class);
 
   /** The original area digested. */
-  private AreaOcean theOcean;
+  private final @Nonnull Node theOcean;
 
-  /** The original area, in case we want to return the original area undigested */
-  private Area theArea;
-
-  /**
-   * Digest the area and store it in theOcean.
-   *
-   * @param area the area to digest.
-   */
-  public AreaTree(Area area) {
-    digest(area);
+  /** Create an empty tree. */
+  public AreaTree() {
+    theOcean = new Node(new AreaMeta());
   }
 
   /**
-   * Gets the most nested ocean or island that contains `point`.
+   * Digests a flat {@link java.awt.geom.Area} into a hierarchical {@code AreaTree}.
    *
-   * @param point
-   * @return
+   * <p>The new {@code AreaTree} will represent that same topology as {@code area}, but represented
+   * as polygonal regions. Holes in the topology will be represented by oceans contained in islands
+   *
+   * @param area The area to digest.
    */
-  public AreaContainer getContainerAt(Point2D point) {
-    return theOcean.getDeepestContainerAt(point);
-  }
+  public AreaTree(@Nonnull Area area) {
+    this();
 
-  public Area getArea() {
-    return theArea;
-  }
-
-  private void digest(Area area) {
-    if (area == null) {
-      return;
+    final var islands = new ArrayList<Node>();
+    // Each polygon is an association of a parent polygon with polygonal holes. So we can easily map
+    // each polygon to a parent island node with child ocean nodes for each hole.
+    for (final var polygon : GeometryUtil.toJtsPolygons(area)) {
+      final var island = new Node(new AreaMeta(polygon.getExteriorRing()));
+      for (int i = 0; i < polygon.getNumInteriorRing(); ++i) {
+        final var hole = polygon.getInteriorRingN(i);
+        island.children.add(new Node(new AreaMeta(hole)));
+      }
+      islands.add(island);
     }
 
-    theArea = area;
+    // Now we need to hook up islands to the hierarchy. By sorting them from large to small, then
+    // consuming front-to-back, we know that parents will have been added to the hierarchy.
+    islands.sort(Comparator.comparingDouble(l -> -l.getMeta().getBoundingBoxArea()));
+    for (var island : islands) {
+      // This interior point check is only valid because we sorted the islands, ensuring parents are
+      // added to the tree before any possible children.
+      final var location = this.locate(island.getMeta().getInteriorPoint());
+      if (location.island() != null) {
+        // This shouldn't happen unless we messed up somewhere. Can't add islands to other islands.
+        log.warn("Unable to find a parent container for an island. Returning an empty tree");
+        this.theOcean.children.clear();
+        return;
+      }
 
-    List<AreaOcean> oceanList = new ArrayList<AreaOcean>();
-    List<AreaIsland> islandList = new ArrayList<AreaIsland>();
+      location.nearestOcean().children.add(island);
+    }
+  }
 
-    // Break the big area into independent areas
-    double[] coords = new double[6];
-    AreaMeta areaMeta = new AreaMeta();
-    for (PathIterator iter = area.getPathIterator(null, 1e-2); !iter.isDone(); iter.next()) {
-      int type = iter.currentSegment(coords);
-      switch (type) {
-        case PathIterator.SEG_CLOSE:
-          areaMeta.close();
+  /**
+   * Find a point within the topology tree.
+   *
+   * <p>The result contains the nodes most directly associated with {@code point}, namely:
+   *
+   * <ul>
+   *   <li>The deepest ocean containing {@code point}. There will always such an ocean.
+   *   <li>The parent island of the deepest ocean. There will always be such an island unless the
+   *       deepest ocean is the root ocean.
+   *   <li>The child island of the deepest ocean that contains {@code point}. This only exists if
+   *       the point is located directly in an island.
+   * </ul>
+   *
+   * @param point The point to look up.
+   * @return The location of {@code point} within the tree.
+   */
+  public @Nonnull TreeLocation locate(Coordinate point) {
+    @Nullable Node parentIsland = null;
+    @Nonnull Node nearestOcean = theOcean;
+    @Nullable Node containingIsland = null;
 
-          // Holes are oceans, solids are islands
-          if (!areaMeta.isEmpty()) {
-            if (areaMeta.isHole()) {
-              oceanList.add(new AreaOcean(areaMeta));
-            } else {
-              islandList.add(new AreaIsland(areaMeta));
-            }
+    @Nullable Node nextNodeToCheck = theOcean;
+    while (nextNodeToCheck != null) {
+      final var nodeToCheck = nextNodeToCheck;
+      nextNodeToCheck = null;
+
+      for (final var child : nodeToCheck.getChildren()) {
+        if (child.getMeta().contains(point)) {
+          if (!child.getMeta().isOcean()) {
+            containingIsland = child;
+          } else {
+            parentIsland = containingIsland;
+            nearestOcean = child;
+            containingIsland = null;
           }
+          nextNodeToCheck = child;
           break;
-        case PathIterator.SEG_LINETO:
-          areaMeta.addPoint(coords[0], coords[1]);
-          break;
-        case PathIterator.SEG_MOVETO:
-          areaMeta = new AreaMeta();
-          areaMeta.addPoint(coords[0], coords[1]);
-          break;
+        }
       }
-    }
-    // Create the hierarchy
-    // Start by putting each ocean into the containing island
-    // Every ocean should have a containing island. There is only one ocean that doesn't
-    // have an explicit island and that's the global scope ocean container
-    for (AreaOcean ocean : oceanList) {
-      AreaIsland island = findSmallestContainer(ocean, islandList);
-      if (island == null) {
-        log.warn("Weird, I couldn't find an island for an ocean.  Bad/overlapping VBL?");
-        continue;
-      }
-      island.addOcean(ocean);
-      ocean.setParentIsland(island);
-    }
-    // Now put each island into the containing ocean
-    List<AreaIsland> globalIslandList = new ArrayList<AreaIsland>();
-    for (AreaIsland island : islandList) {
-      AreaOcean ocean = findSmallestContainer(island, oceanList);
-      if (ocean == null) {
-        globalIslandList.add(island);
-        continue;
-      }
-      ocean.addIsland(island);
-      island.setParentOcean(ocean);
     }
 
-    // Now we have our hierarchy, just hook up the global space
-    theOcean = new AreaOcean(null);
-    for (AreaIsland island : globalIslandList) {
-      theOcean.addIsland(island);
-      island.setParentOcean(theOcean);
-    }
+    // No containing child found.
+    return new TreeLocation(parentIsland, nearestOcean, containingIsland);
   }
 
-  private <T extends AreaContainer> T findSmallestContainer(AreaContainer item, List<T> list) {
-    T smallest = null;
-    for (T container : list) {
-      if (!GraphicsUtil.contains(container.getBounds(), item.getBounds())) {
-        continue;
-      }
-      smallest = getSmallest(smallest, container);
-    }
-    return smallest;
-  }
+  /**
+   * The results of locating a point in the {@code AreaTree}.
+   *
+   * @param parentIsland The parent of {@code nearestOcean} if one exists.
+   * @param nearestOcean The deepest ancestor ocean. If the point is in an ocean, {@code
+   *     nearestOcean} will be that ocean. Otherwise, it will be the parent of {@code island}.
+   * @param island If the point is in an island, this will be that island. Otherwise {@code null}.
+   */
+  public record TreeLocation(
+      @Nullable Node parentIsland, @Nonnull Node nearestOcean, @Nullable Node island) {}
 
-  private <T extends AreaContainer> T getSmallest(T left, T right) {
-    // Something is smaller than nothing, for our purposes
-    if (left == null) {
-      return right;
-    }
-    if (right == null) {
-      return left;
-    }
-    // Presumably the container with the smaller area will be the contained area
-    double leftSize =
-        left.getBounds().getBounds().getWidth() * left.getBounds().getBounds().getHeight();
-    double rightSize =
-        right.getBounds().getBounds().getWidth() * right.getBounds().getBounds().getHeight();
+  /**
+   * A node of an {@code AreaTree}.
+   *
+   * <p>A node in the tree references its children and has a boundary ({@code AreaMeta}) as a value.
+   */
+  public static final class Node {
+    private final @Nonnull AreaMeta meta;
+    private final List<Node> children = new ArrayList<>();
 
-    return leftSize < rightSize ? left : right;
+    private Node(@Nonnull AreaMeta meta) {
+      this.meta = meta;
+    }
+
+    public @Nonnull AreaMeta getMeta() {
+      return meta;
+    }
+
+    public Iterable<Node> getChildren() {
+      return Iterables.unmodifiableIterable(this.children);
+    }
   }
 }
