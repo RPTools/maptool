@@ -15,113 +15,90 @@
 package net.rptools.maptool.model;
 
 import java.awt.geom.Area;
+import java.io.Serial;
+import java.io.Serializable;
+import java.util.Objects;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.maptool.server.proto.ShapeTypeDto;
 import net.rptools.maptool.server.proto.SightTypeDto;
 
-public class SightType {
-  private String name;
-  private double multiplier;
-  private LightSource personalLightSource;
-  private ShapeType shape;
-  private int arc = 0;
-  private float distance = 0;
-  private int offset = 0;
-  private boolean scaleWithToken = false;
+public final class SightType implements Serializable {
+  private final @Nonnull String name;
+  private final double multiplier;
+  private final @Nullable LightSource personalLightSource;
+  private final @Nonnull ShapeType shape;
+  private final double width;
+  private final int arc;
+  private final float distance;
+  private final int offset;
+  private final boolean scaleWithToken;
+
+  public SightType(
+      @Nonnull String name,
+      float distance,
+      double multiplier,
+      @Nonnull ShapeType shape,
+      double width,
+      int arc,
+      int offset,
+      boolean scaleWithToken,
+      @Nullable LightSource personalLightSource) {
+    this.name = name;
+    this.distance = distance;
+    this.multiplier = multiplier;
+    this.personalLightSource = personalLightSource;
+    this.shape = shape;
+    this.width = width;
+    this.arc = arc;
+    this.offset = offset;
+    this.scaleWithToken = scaleWithToken;
+  }
+
+  @Serial
+  private Object readResolve() {
+    return new SightType(
+        name,
+        distance,
+        multiplier,
+        Objects.requireNonNullElse(shape, ShapeType.CIRCLE),
+        width,
+        arc,
+        offset,
+        scaleWithToken,
+        personalLightSource);
+  }
+
+  public double getWidth() {
+    return this.width;
+  }
 
   public int getOffset() {
     return this.offset;
-  }
-
-  public void setOffset(int offset2) {
-    this.offset = offset2;
   }
 
   public float getDistance() {
     return this.distance;
   }
 
-  public void setDistance(float range) {
-    this.distance = range;
-  }
-
-  public ShapeType getShape() {
-    return shape != null ? shape : ShapeType.CIRCLE;
-  }
-
-  public void setShape(ShapeType shape) {
-    this.shape = shape;
-  }
-
-  public void setScaleWithToken(boolean scaleWithToken) {
-    this.scaleWithToken = scaleWithToken;
+  public @Nonnull ShapeType getShape() {
+    return shape;
   }
 
   public boolean isScaleWithToken() {
     return scaleWithToken;
   }
 
-  public SightType() {
-    // For serialization
-  }
-
-  public SightType(String name, double multiplier, @Nullable LightSource personalLightSource) {
-    this(name, multiplier, personalLightSource, ShapeType.CIRCLE);
-  }
-
-  public SightType(
-      String name, double multiplier, @Nullable LightSource personalLightSource, ShapeType shape) {
-    this.name = name;
-    this.multiplier = multiplier;
-    this.personalLightSource = personalLightSource;
-    this.shape = shape;
-  }
-
-  public SightType(
-      String name,
-      double multiplier,
-      LightSource personalLightSource,
-      ShapeType shape,
-      int arc,
-      boolean scaleWithToken) {
-    this.name = name;
-    this.multiplier = multiplier;
-    this.personalLightSource = personalLightSource;
-    this.shape = shape;
-    this.arc = arc;
-    this.scaleWithToken = scaleWithToken;
-  }
-
-  public String getName() {
+  public @Nonnull String getName() {
     return name;
-  }
-
-  public void setName(String name) {
-    this.name = name;
   }
 
   public double getMultiplier() {
     return multiplier;
   }
 
-  public void setMultiplier(double multiplier) {
-    this.multiplier = multiplier;
-  }
-
-  public boolean hasPersonalLightSource() {
-    return personalLightSource != null;
-  }
-
-  public LightSource getPersonalLightSource() {
+  public @Nullable LightSource getPersonalLightSource() {
     return personalLightSource;
-  }
-
-  public void setPersonalLightSource(LightSource personalLightSource) {
-    this.personalLightSource = personalLightSource;
-  }
-
-  public void setArc(int arc) {
-    this.arc = arc;
   }
 
   public int getArc() {
@@ -137,30 +114,38 @@ public class SightType {
    */
   public Area getVisionShape(Token token, Zone zone) {
     return zone.getGrid()
-        .getShapedArea(getShape(), token, getDistance(), getArc(), getOffset(), scaleWithToken);
+        .getShapedArea(
+            getShape(),
+            token,
+            getDistance(),
+            getWidth(),
+            getArc(),
+            getOffset(),
+            isScaleWithToken());
   }
 
   public static SightType fromDto(SightTypeDto dto) {
-    var sightType = new SightType();
-    sightType.name = dto.getName();
-    sightType.multiplier = dto.getMultiplier();
-    sightType.personalLightSource =
-        dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null;
-    sightType.shape = ShapeType.valueOf(dto.getShape().name());
-    sightType.arc = dto.getArc();
-    sightType.distance = dto.getDistance();
-    sightType.offset = dto.getOffset();
-    sightType.scaleWithToken = dto.getScaleWithToken();
-    return sightType;
+    return new SightType(
+        dto.getName(),
+        dto.getDistance(),
+        dto.getMultiplier(),
+        ShapeType.valueOf(dto.getShape().name()),
+        dto.getWidth(),
+        dto.getArc(),
+        dto.getOffset(),
+        dto.getScaleWithToken(),
+        dto.hasPersonalLightSource() ? LightSource.fromDto(dto.getPersonalLightSource()) : null);
   }
 
   public SightTypeDto toDto() {
     var dto = SightTypeDto.newBuilder();
     dto.setName(name);
     dto.setMultiplier(multiplier);
-    if (personalLightSource != null) dto.setPersonalLightSource(personalLightSource.toDto());
-    if (shape == null) shape = ShapeType.CIRCLE;
+    if (personalLightSource != null) {
+      dto.setPersonalLightSource(personalLightSource.toDto());
+    }
     dto.setShape(ShapeTypeDto.valueOf(shape.name()));
+    dto.setWidth(width);
     dto.setArc(arc);
     dto.setDistance(distance);
     dto.setOffset(offset);

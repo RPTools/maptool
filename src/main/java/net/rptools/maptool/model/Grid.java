@@ -356,6 +356,7 @@ public abstract class Grid implements Cloneable {
       ShapeType shape,
       Token token,
       double range,
+      double width,
       double arcAngle,
       int offsetAngle,
       boolean scaleWithToken) {
@@ -400,12 +401,9 @@ public abstract class Grid implements Cloneable {
         if (token.getFacing() == null) {
           token.setFacing(0);
         }
-        Shape lineShape =
-            new Rectangle2D.Double(
-                0,
-                getSize() / -2d * Math.sin(Math.toRadians(arcAngle / 2d)),
-                visionRange,
-                getSize() * Math.sin(Math.toRadians(arcAngle / 2d)));
+        // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
+        var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
+        Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
         Shape visibleShape = new GeneralPath(lineShape);
 
         visibleArea =
