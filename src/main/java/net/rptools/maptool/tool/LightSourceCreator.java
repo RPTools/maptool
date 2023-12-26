@@ -63,6 +63,7 @@ public class LightSourceCreator {
         new GUID(),
         LightSource.Type.NORMAL,
         false,
+        false,
         List.of(new Light(ShapeType.CIRCLE, 0, radius, 0, arcAngle, null, 100, false, false)));
   }
 

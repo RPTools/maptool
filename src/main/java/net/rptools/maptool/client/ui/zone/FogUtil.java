@@ -90,11 +90,6 @@ public class FogUtil {
     topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
 
     List<Geometry> visibleAreas = new ArrayList<>();
-    final List<Function<VisionBlockingAccumulator, Boolean>> topologyConsumers = new ArrayList<>();
-    topologyConsumers.add(acc -> acc.addWallBlocking(topology));
-    topologyConsumers.add(acc -> acc.addHillBlocking(hillVbl));
-    topologyConsumers.add(acc -> acc.addPitBlocking(pitVbl));
-    topologyConsumers.add(acc -> acc.addCoverBlocking(coverVbl));
 
     for (final var topology : topologies.entrySet()) {
       final var solver =
