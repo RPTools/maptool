@@ -534,7 +534,7 @@ public class ZoneView {
         personalLights.addAll(calculateLitAreas(token, sight.getMultiplier()));
       }
 
-      if (sight.hasPersonalLightSource()) {
+      if (sight.getPersonalLightSource() != null) {
         // Calculate the personal light area here.
         // Note that a personal light is affected by its own sight's magnification, but that's it.
         // Since each token is only aware of its own personal light, of course we don't want a

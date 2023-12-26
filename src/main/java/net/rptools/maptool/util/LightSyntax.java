@@ -153,6 +153,7 @@ public class LightSyntax {
 
       final var lastParameters = new LinkedHashMap<String, Object>();
       lastParameters.put("", null);
+      lastParameters.put("width", 0.);
       lastParameters.put("arc", 0.);
       lastParameters.put("offset", 0.);
       lastParameters.put("GM", false);
@@ -177,7 +178,7 @@ public class LightSyntax {
           case SQUARE, GRID, CIRCLE, HEX:
             break;
           case BEAM:
-            parameters.put("arc", light.getArcAngle());
+            parameters.put("width", light.getWidth());
             parameters.put("offset", light.getFacingOffset());
             break;
           case CONE:
@@ -256,6 +257,7 @@ public class LightSyntax {
     // endregion
     // region Individual light properties
     ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
+    double width = 0;
     double arc = 0;
     double offset = 0;
     boolean gmOnly = false;
@@ -292,7 +294,6 @@ public class LightSyntax {
       // Shape designation ?
       try {
         shape = ShapeType.valueOf(arg.toUpperCase());
-        arc = shape == ShapeType.BEAM ? 4 : arc;
         continue;
       } catch (IllegalArgumentException iae) {
         // Expected when not defining a shape
@@ -326,14 +327,20 @@ public class LightSyntax {
         if ("arc".equalsIgnoreCase(key)) {
           try {
             arc = StringUtil.parseDecimal(value);
-            shape =
-                (shape != ShapeType.CONE && shape != ShapeType.BEAM)
-                    ? ShapeType.CONE
-                    : shape; // If the user specifies an arc, force the shape to CONE
+            shape = ShapeType.CONE; // If the user specifies an arc, force the shape to CONE
           } catch (ParseException pe) {
             errlog.add(I18N.getText("msg.error.mtprops.light.arc", lineNumber, value));
           }
         }
+        if ("width".equalsIgnoreCase(key)) {
+          try {
+            width = StringUtil.parseDecimal(value);
+            shape = ShapeType.BEAM; // If the user specifies a width, force the shape to BEAM
+          } catch (ParseException pe) {
+            errlog.add(I18N.getText("msg.error.mtprops.light.width", lineNumber, value));
+          }
+        }
+
         continue;
       }
 
@@ -374,6 +381,7 @@ public class LightSyntax {
                 shape,
                 offset,
                 StringUtil.parseDecimal(distance),
+                width,
                 arc,
                 color == null ? null : new DrawableColorPaint(color),
                 perRangeLumens,

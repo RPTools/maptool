@@ -147,6 +147,7 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
                 light.getShape(),
                 light.getFacingOffset(),
                 light.getRadius(),
+                light.getWidth(),
                 light.getArcAngle(),
                 light.getPaint(),
                 lumens == 0 ? 100 : lumens,

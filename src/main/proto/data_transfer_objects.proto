@@ -91,11 +91,12 @@ message LightDto {
   DrawablePaintDto paint = 1;
   double facing_offset = 2;
   double radius = 3;
-  double arc_angle = 4;
-  ShapeTypeDto shape = 5;
-  bool is_gm = 6;
-  bool owner_only = 7;
-  int32 lumens = 8;
+  double width = 4;
+  double arc_angle = 5;
+  ShapeTypeDto shape = 6;
+  bool is_gm = 7;
+  bool owner_only = 8;
+  int32 lumens = 9;
 }
 
 message LocationDto {
@@ -139,10 +140,11 @@ message SightTypeDto {
   double multiplier = 2;
   LightSourceDto personal_light_source = 3;
   ShapeTypeDto shape = 4;
-  int32 arc = 5;
-  float distance = 6;
-  int32 offset = 7;
-  bool scale_with_token = 8;
+  double width = 5;
+  int32 arc = 6;
+  float distance = 7;
+  int32 offset = 8;
+  bool scale_with_token = 9;
 }
 
 message TokenPropertyDto {
