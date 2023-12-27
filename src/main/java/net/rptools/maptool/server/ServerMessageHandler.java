@@ -650,8 +650,7 @@ public class ServerMessageHandler implements MessageHandler {
           var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
           var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
           Zone zone = server.getCampaign().getZone(zoneGUID);
-          List<DrawnElement> list = zone.getDrawnElements(layer);
-          zone.clearDrawables(list); // FJE Empties the DrawableUndoManager and empties the list
+          zone.clearDrawables(layer);
         });
   }
 
