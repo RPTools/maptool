@@ -161,29 +161,6 @@ public class Players {
   }
 
   /**
-   * Returns the information about the current player database capabilities.
-   *
-   * @return the information about the current player database capabilities.
-   */
-  public CompletableFuture<PlayerDatabaseInfo> getDatabaseCapabilities() {
-    return CompletableFuture.supplyAsync(this::getPlayerDatabaseInfo);
-  }
-
-  /**
-   * Returns the information about the current player databases capabilities.
-   *
-   * @return the information about the current player databases capabilities.
-   */
-  private PlayerDatabaseInfo getPlayerDatabaseInfo() {
-    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    return new PlayerDatabaseInfo(
-        playerDatabase.supportsDisabling(),
-        !playerDatabase.supportsRolePasswords(),
-        playerDatabase.supportsAsymmetricalKeys(),
-        playerDatabase.recordsOnlyConnectedPlayers());
-  }
-
-  /**
    * Returns information about the specified player.
    *
    * @param name the name of the player to return the information about.
@@ -258,15 +235,6 @@ public class Players {
     }
 
     return players.stream().filter(Objects::nonNull).collect(Collectors.toSet());
-  }
-
-  /**
-   * Returns if the current player database only records players that are connected.
-   *
-   * @return {@code true} if the player database only records players while they are connected.
-   */
-  public boolean recordsOnlyConnectedPlayers() {
-    return PlayerDatabaseFactory.getCurrentPlayerDatabase().recordsOnlyConnectedPlayers();
   }
 
   /**

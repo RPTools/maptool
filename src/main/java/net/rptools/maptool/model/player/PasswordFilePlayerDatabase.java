@@ -739,7 +739,7 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getAllPlayers() {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 
     players.addAll(
@@ -751,13 +751,8 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return new HashSet<>(loggedInPlayers.getPlayers());
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return false;
   }
 
   /**

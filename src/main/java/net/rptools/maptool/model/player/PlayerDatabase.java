@@ -135,7 +135,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are known to the database.
    */
-  default Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+  default Set<Player> getAllPlayers() {
     return getOnlinePlayers();
   }
 
@@ -144,14 +144,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are currently connected.
    */
-  Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException;
-
-  /**
-   * Returns if this player database records information about only currently connected players.
-   *
-   * @return if this player database records information about only currently connected players.
-   */
-  boolean recordsOnlyConnectedPlayers();
+  Set<Player> getOnlinePlayers();
 
   /**
    * Returns the authentication method for the player.

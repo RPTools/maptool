@@ -125,13 +125,8 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return new HashSet<>(loggedInPlayers.getPlayers());
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return true;
   }
 
   @Override

@@ -109,13 +109,8 @@ public class DefaultPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return loggedInPlayers.getPlayers();
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return true;
   }
 
   @Override
