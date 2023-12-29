@@ -41,11 +41,10 @@ public class MapToolConnection implements IMapToolConnection {
   private ClientHandshake handshake;
   private List<Runnable> onCompleted;
 
-  public MapToolConnection(ServerConfig config, LocalPlayer player) {
-
+  public MapToolConnection(MapToolClient client, ServerConfig config, LocalPlayer player) {
     this.connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new ClientHandshake(connection, player);
+    this.handshake = new ClientHandshake(client, connection);
     onCompleted = new ArrayList<>();
   }
 

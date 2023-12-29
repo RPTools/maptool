@@ -31,7 +31,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
@@ -48,7 +48,7 @@ public class MapToolServer implements IMapToolServer {
 
   private final MapToolServerConnection conn;
   private final ServerConfig config;
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
@@ -60,7 +60,8 @@ public class MapToolServer implements IMapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb) {
+  public MapToolServer(
+      ServerConfig config, ServerPolicy policy, ServerSidePlayerDatabase playerDb) {
     this.config = config;
     this.policy = policy;
     playerDatabase = playerDb;
@@ -96,6 +97,10 @@ public class MapToolServer implements IMapToolServer {
   @Override
   public int getPort() {
     return config.getPort();
+  }
+
+  public ServerSidePlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
   }
 
   public void configureClientConnection(Connection connection) {

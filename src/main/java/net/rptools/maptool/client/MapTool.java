@@ -90,9 +90,9 @@ import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
@@ -162,7 +162,7 @@ public class MapTool {
   private static NoteFrame profilingNoteFrame;
   private static LogConsoleFrame logConsoleFrame;
   private static IMapToolServer server;
-  private static MapToolClient client = new MapToolClient();
+  private static MapToolClient client;
 
   private static BackupManager backupManager;
   private static AssetTransferManager assetTransferManager;
@@ -183,6 +183,17 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
+
+  static {
+    try {
+      final var player = new LocalPlayer();
+      final var personalServer = new PersonalServer(player);
+      server = personalServer;
+      client = new MapToolClient(personalServer);
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
+      throw new RuntimeException("Unable to create default personal server", e);
+    }
+  }
 
   public static Dimension getThumbnailSize() {
     return THUMBNAIL_SIZE;
@@ -743,7 +754,7 @@ public class MapTool {
     if (!playerList.contains(player)) {
       playerList.add(player);
       new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
-      new Players().playerSignedIn(player);
+      new Players(client.getPlayerDatabase()).playerSignedIn(player);
 
       // LATER: Make this non-anonymous
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
@@ -763,7 +774,7 @@ public class MapTool {
     playerList.remove(player);
     new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
 
-    new Players().playerSignedOut(player);
+    new Players(client.getPlayerDatabase()).playerSignedOut(player);
 
     if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
       String msg =
@@ -971,7 +982,7 @@ public class MapTool {
       ServerConfig config,
       ServerPolicy policy,
       Campaign campaign,
-      PlayerDatabase playerDatabase,
+      ServerSidePlayerDatabase playerDatabase,
       boolean copyCampaign)
       throws IOException {
     if (server != null) {
@@ -1138,8 +1149,9 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-    server = new PersonalServer();
-    client = new MapToolClient();
+    final var player = new LocalPlayer();
+    server = new PersonalServer(player);
+    client = new MapToolClient((PersonalServer) server);
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
@@ -1150,6 +1162,30 @@ public class MapTool {
   public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
       throws IOException {
     client = new MapToolClient(player, config);
+
+    MapTool.getFrame().getCommandPanel().clearAllIdentities();
+
+    IMapToolConnection clientConn = client.getConnection();
+    clientConn.addActivityListener(clientFrame.getActivityMonitor());
+    clientConn.onCompleted(
+        () -> {
+          clientFrame.getLookupTablePanel().updateView();
+          clientFrame.getInitiativePanel().updateView();
+          onCompleted.run();
+        });
+
+    client.start();
+  }
+
+  public static void createLocalConnection(LocalPlayer player, Runnable onCompleted)
+      throws IOException {
+    if (!(server instanceof MapToolServer mapToolServer)) {
+      // TODO Exceptional case.
+      // TODO Should we call createLocalConnection automatically when starting a real serrver?
+      return;
+    }
+
+    client = new MapToolClient(player, mapToolServer);
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 

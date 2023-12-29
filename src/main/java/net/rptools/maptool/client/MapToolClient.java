@@ -14,9 +14,6 @@
  */
 package net.rptools.maptool.client;
 
-import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.LOCAL_PLAYER;
-import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
-
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -28,6 +25,8 @@ import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.server.MapToolServer;
+import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
@@ -50,15 +49,12 @@ public class MapToolClient {
   private boolean disconnectExpected = false;
 
   /** Creates a client for a personal server. */
-  public MapToolClient() {
+  public MapToolClient(PersonalServer server) {
     this.campaign = new Campaign();
 
     try {
-      PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
-      playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-
-      String username = AppPreferences.getDefaultUserName();
-      player = (LocalPlayer) playerDatabase.getPlayer(username);
+      player = server.getLocalPlayer();
+      playerDatabase = server.getPlayerDatabase();
 
       serverPolicy = new ServerPolicy();
 
@@ -80,12 +76,28 @@ public class MapToolClient {
     this.player = player;
     this.serverPolicy = new ServerPolicy();
 
-    PlayerDatabaseFactory.setCurrentPlayerDatabase(LOCAL_PLAYER);
-    playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+    playerDatabase = PlayerDatabaseFactory.getLocalPlayerDatabase(player);
 
-    conn = new MapToolConnection(config, player);
+    conn = new MapToolConnection(this, config, player);
     conn.addDisconnectHandler(conn -> onDisconnect(false, conn));
     serverCommand = new ServerCommandClientImpl(this);
+    conn.onCompleted(
+        () -> {
+          conn.addMessageHandler(new ClientMessageHandler(this));
+        });
+  }
+
+  public MapToolClient(LocalPlayer player, MapToolServer server) {
+    this.campaign = new Campaign();
+
+    this.player = player;
+    this.serverPolicy = server.getPolicy();
+
+    playerDatabase = server.getPlayerDatabase();
+
+    conn = new MapToolConnection(this, server.getConfig(), player);
+    conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
+    this.serverCommand = new ServerCommandClientImpl(this);
     conn.onCompleted(
         () -> {
           conn.addMessageHandler(new ClientMessageHandler(this));

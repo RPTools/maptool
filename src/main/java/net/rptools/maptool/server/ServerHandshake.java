@@ -43,8 +43,8 @@ import net.rptools.maptool.model.player.PersistedPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
-import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.AuthTypeEnum;
 import net.rptools.maptool.server.proto.ClientAuthMsg;
 import net.rptools.maptool.server.proto.ClientInitMsg;
@@ -70,7 +70,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private static final Logger log = LogManager.getLogger(ServerHandshake.class);
 
   /** The database used for retrieving players. */
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
 
   private final MapToolServer server;
 
@@ -124,7 +124,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
   public ServerHandshake(
       MapToolServer server,
       Connection connection,
-      PlayerDatabase playerDatabase,
+      ServerSidePlayerDatabase playerDatabase,
       boolean useEasyConnect) {
     this.server = server;
     this.connection = connection;

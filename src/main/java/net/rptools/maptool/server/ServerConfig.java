@@ -14,26 +14,8 @@
  */
 package net.rptools.maptool.server;
 
-import net.rptools.maptool.util.PasswordGenerator;
-
 public class ServerConfig {
   public static final int DEFAULT_PORT = 51234;
-
-  private static final String personalServerGMPassword;
-
-  private static final String personalServerPlayerPassword;
-
-  static {
-    PasswordGenerator passwordGenerator = new PasswordGenerator();
-    // Generate a random password for personal server
-    personalServerGMPassword = passwordGenerator.getPassword();
-    String playerPass = passwordGenerator.getPassword();
-    if (playerPass.equals(personalServerGMPassword)) { // super unlikely but just to play safe
-      personalServerPlayerPassword = playerPass + "!";
-    } else {
-      personalServerPlayerPassword = playerPass;
-    }
-  }
 
   private final int port;
   private final String hostPlayerId;
@@ -43,14 +25,6 @@ public class ServerConfig {
   private final String hostName;
   private final boolean useEasyConnect;
   private final boolean useWebRTC;
-
-  public static String getPersonalServerGMPassword() {
-    return personalServerGMPassword;
-  }
-
-  public static String getPersonalServerPlayerPassword() {
-    return personalServerPlayerPassword;
-  }
 
   public ServerConfig(
       String hostPlayerId,

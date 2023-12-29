@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.server;
 
+import net.rptools.maptool.model.player.PlayerDatabase;
+
 public interface IMapToolServer {
   boolean isPersonalServer();
 
@@ -22,6 +24,8 @@ public interface IMapToolServer {
   String getName();
 
   int getPort();
+
+  PlayerDatabase getPlayerDatabase();
 
   void stop();
 }

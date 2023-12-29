@@ -77,7 +77,6 @@ import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.player.*;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.util.*;
@@ -2237,13 +2236,10 @@ public class AppActions {
                   // campaign.setHasUsedFogToolbar(useIF || campaign.hasUsedFogToolbar());
                   campaign.setHasUsedFogToolbar(useIF);
 
-                  PlayerDatabaseFactory.setServerConfig(config);
+                  ServerSidePlayerDatabase playerDatabase;
                   if (serverProps.getUsePasswordFile()) {
-                    PlayerDatabaseFactory.setCurrentPlayerDatabase(
-                        PlayerDatabaseType.PASSWORD_FILE);
                     PasswordFilePlayerDatabase db =
-                        (PasswordFilePlayerDatabase)
-                            PlayerDatabaseFactory.getCurrentPlayerDatabase();
+                        PlayerDatabaseFactory.getPasswordFilePlayerDatabase();
                     db.initialize();
                     if (serverProps.getRole() == Role.GM) {
                       db.addTemporaryPlayer(
@@ -2252,10 +2248,12 @@ public class AppActions {
                       db.addTemporaryPlayer(
                           dialog.getUsernameTextField().getText(), Role.PLAYER, playerPassword);
                     }
+                    playerDatabase = db;
                   } else {
-                    PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.DEFAULT);
+                    playerDatabase =
+                        PlayerDatabaseFactory.getDefaultPlayerDatabase(
+                            config.getPlayerPassword(), config.getGmPassword());
                   }
-                  PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
                   // Make a copy of the campaign since we don't coordinate local changes well ...
                   // yet
 
@@ -2287,19 +2285,12 @@ public class AppActions {
                                 I18N.getText("msg.info.startServer")));
                       };
 
-                  if (playerType == Player.Role.GM) {
-                    MapTool.createConnection(
-                        config,
-                        new LocalPlayer(
-                            dialog.getUsernameTextField().getText(), playerType, gmPassword),
-                        onConnected);
-                  } else {
-                    MapTool.createConnection(
-                        config,
-                        new LocalPlayer(
-                            dialog.getUsernameTextField().getText(), playerType, playerPassword),
-                        onConnected);
-                  }
+                  MapTool.createLocalConnection(
+                      new LocalPlayer(
+                          dialog.getUsernameTextField().getText(),
+                          playerType,
+                          (playerType == Role.GM) ? gmPassword : playerPassword),
+                      onConnected);
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;
@@ -2472,8 +2463,7 @@ public class AppActions {
 
         @Override
         public boolean isAvailable() {
-          return PlayerDatabaseFactory.getCurrentPlayerDatabase()
-              instanceof PersistedPlayerDatabase;
+          return MapTool.getClient().getPlayerDatabase() instanceof PersistedPlayerDatabase;
         }
 
         @Override
