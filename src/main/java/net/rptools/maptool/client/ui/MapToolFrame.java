@@ -1951,7 +1951,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void close() {
-    ServerDisconnectHandler.disconnectExpected = true;
+    MapTool.getClient().expectDisconnection();
     MapTool.disconnect();
 
     getDockingManager()

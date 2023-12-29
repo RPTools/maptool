@@ -2226,7 +2226,7 @@ public class AppActions {
 
                 boolean failed = false;
                 try {
-                  ServerDisconnectHandler.disconnectExpected = true;
+                  MapTool.getClient().expectDisconnection();
                   MapTool.stopServer();
 
                   // Use UPnP to open port in router
@@ -2352,7 +2352,7 @@ public class AppActions {
             return;
           }
 
-          ServerDisconnectHandler.disconnectExpected = true;
+          MapTool.getClient().expectDisconnection();
           LOAD_MAP.setSeenWarning(false);
           MapTool.stopServer();
 
@@ -2451,7 +2451,7 @@ public class AppActions {
       campaign = CampaignFactory.createBasicCampaign();
       new CampaignManager().clearCampaignData();
     }
-    ServerDisconnectHandler.disconnectExpected = true;
+    MapTool.getClient().expectDisconnection();
     LOAD_MAP.setSeenWarning(false);
     MapTool.stopServer();
     MapTool.disconnect();

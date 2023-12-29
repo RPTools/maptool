@@ -85,7 +85,11 @@ import org.apache.logging.log4j.Logger;
 public class ClientMessageHandler implements MessageHandler {
   private static final Logger log = LogManager.getLogger(ClientMessageHandler.class);
 
-  public ClientMessageHandler() {}
+  private final MapToolClient client;
+
+  public ClientMessageHandler(MapToolClient client) {
+    this.client = client;
+  }
 
   @Override
   public void handleMessage(String id, byte[] message) {
@@ -1013,7 +1017,6 @@ public class ClientMessageHandler implements MessageHandler {
     if (MapTool.getPlayer().getName().equals(playerName))
       EventQueue.invokeLater(
           () -> {
-            ServerDisconnectHandler.disconnectExpected = true;
             AppActions.disconnectFromServer();
             MapTool.showInformation("You have been booted from the server.");
           });

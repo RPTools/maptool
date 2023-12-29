@@ -45,6 +45,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
+import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -153,15 +154,11 @@ public class MapTool {
   private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal
   // runtime
 
-  private static Campaign campaign;
-
   private static List<Player> playerList;
-  private static LocalPlayer player;
   private static PlayerZoneListener playerZoneListener;
   private static ZoneLoadedListener zoneLoadedListener;
 
-  private static MapToolConnection conn;
-  private static ClientMessageHandler handler;
+  private static MapToolClient client = new MapToolClient();
   private static JMenuBar menuBar;
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
@@ -541,11 +538,7 @@ public class MapTool {
 
   public static void updateServerPolicy(ServerPolicy policy) {
     setServerPolicy(policy);
-
-    // Give everyone the new policy
-    if (serverCommand != null) {
-      serverCommand.setServerPolicy(policy);
-    }
+    client.getServerCommand().setServerPolicy(policy);
   }
 
   public static boolean isInFocus() {
@@ -671,20 +664,12 @@ public class MapTool {
 
     playerList = new ArrayList<>();
 
-    handler = new ClientMessageHandler();
-
     setClientFrame(new MapToolFrame(menuBar));
 
-    serverCommand = new ServerCommandClientImpl();
-
     try {
-      player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
       playerZoneListener = new PlayerZoneListener();
       zoneLoadedListener = new ZoneLoadedListener();
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
-      // This was previously being done in the server thread and didn't always get done
-      // before the campaign was accessed by the postInitialize() method below.
-      setCampaign(cmpgn);
       startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
@@ -747,8 +732,8 @@ public class MapTool {
     return serverPolicy;
   }
 
-  public static ServerCommand serverCommand() {
-    return serverCommand;
+  public static @Nonnull ServerCommand serverCommand() {
+    return client.getServerCommand();
   }
 
   /**
@@ -915,10 +900,7 @@ public class MapTool {
   }
 
   public static Campaign getCampaign() {
-    if (campaign == null) {
-      campaign = CampaignFactory.createBasicCampaign();
-    }
-    return campaign;
+    return client.getCampaign();
   }
 
   public static MapToolLineParser getParser() {
@@ -931,7 +913,7 @@ public class MapTool {
 
   public static void setCampaign(Campaign campaign, GUID defaultRendererId) {
     // Load up the new
-    MapTool.campaign = campaign;
+    client.setCampaign(campaign);
     ZoneRenderer currRenderer = null;
 
     clientFrame.clearZoneRendererList();
@@ -1154,8 +1136,12 @@ public class MapTool {
     }
   }
 
+  public static MapToolClient getClient() {
+    return client;
+  }
+
   public static LocalPlayer getPlayer() {
-    return player;
+    return client.getPlayer();
   }
 
   public static void startPersonalServer(Campaign campaign)
@@ -1178,41 +1164,25 @@ public class MapTool {
               .getConnectionStatusPanel()
               .setStatus(ConnectionStatusPanel.Status.server);
         });
+    setCampaign(campaign);
   }
 
   public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
       throws IOException {
-    MapTool.player = player;
+    client = new MapToolClient(player, config);
+
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
-    MapToolConnection clientConn = new MapToolConnection(config, player);
-
+    MapToolConnection clientConn = client.getConnection();
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
-    clientConn.addDisconnectHandler(new ServerDisconnectHandler());
-
-    clientConn.setOnCompleted(
+    clientConn.onCompleted(
         () -> {
-          clientConn.addMessageHandler(handler);
-          // LATER: I really, really, really don't like this startup pattern
-          if (clientConn.isAlive()) {
-            conn = clientConn;
-          }
           clientFrame.getLookupTablePanel().updateView();
           clientFrame.getInitiativePanel().updateView();
           onCompleted.run();
         });
 
-    clientConn.start();
-  }
-
-  public static void closeConnection() throws IOException {
-    if (conn != null) {
-      conn.close();
-    }
-  }
-
-  public static MapToolConnection getConnection() {
-    return conn;
+    client.start();
   }
 
   /** returns the current locale code. */
@@ -1254,9 +1224,7 @@ public class MapTool {
     }
 
     try {
-      if (conn != null && conn.isAlive()) {
-        conn.close();
-      }
+      client.close();
     } catch (IOException ioe) {
       // This isn't critical, we're closing it anyway
       log.debug("While closing connection", ioe);
@@ -1478,10 +1446,8 @@ public class MapTool {
           e.printStackTrace();
         }
 
-        ServerCommand command = serverCommand;
-        if (command != null) {
-          command.heartbeat(getPlayer().getName());
-        }
+        ServerCommand command = client.getServerCommand();
+        command.heartbeat(getPlayer().getName());
       }
     }
   }
