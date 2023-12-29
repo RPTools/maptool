@@ -639,13 +639,11 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-
-          if (MapTool.getServer() == null) {
-            return;
+          final var server = MapTool.getServer();
+          if (server != null) {
+            ConnectionInfoDialog dialog = new ConnectionInfoDialog(server);
+            dialog.setVisible(true);
           }
-
-          ConnectionInfoDialog dialog = new ConnectionInfoDialog(MapTool.getServer());
-          dialog.setVisible(true);
         }
       };
 
@@ -2386,6 +2384,7 @@ public class AppActions {
                           dialog.getPort(),
                           prefs.getServerName(),
                           dialog.getServer(),
+                          false,
                           dialog.getUseWebRTC());
 
                   String password =

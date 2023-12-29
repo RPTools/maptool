@@ -62,7 +62,7 @@ public class MapToolServerConnection
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
   public Handshake getConnectionHandshake(Connection conn) {
-    var handshake = new ServerHandshake(conn, playerDatabase, useEasyConnect);
+    var handshake = new ServerHandshake(server, conn, playerDatabase, useEasyConnect);
     handshakeMap.put(conn, handshake);
     handshake.addObserver(this);
     conn.addMessageHandler(handshake);

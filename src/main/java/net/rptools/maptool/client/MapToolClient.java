@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.LOCAL_PLAYER;
+import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
+
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -23,8 +26,11 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
+import net.rptools.maptool.server.ServerPolicy;
 
 /**
  * The client side of a client-server channel.
@@ -34,36 +40,51 @@ import net.rptools.maptool.server.ServerConfig;
  * net.rptools.maptool.client.MapTool} and elsewhere.
  */
 public class MapToolClient {
-  private Campaign campaign;
   private final LocalPlayer player;
-  private MapToolConnection conn;
+  private final PlayerDatabase playerDatabase;
+  private final IMapToolConnection conn;
+  private Campaign campaign;
+  private ServerPolicy serverPolicy;
   private final ServerCommand serverCommand;
 
   private boolean disconnectExpected = false;
 
+  /** Creates a client for a personal server. */
   public MapToolClient() {
     this.campaign = new Campaign();
-    try {
-      this.player = new LocalPlayer();
-    } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      throw new RuntimeException("Unable to create default client", e);
-    }
 
-    conn = new MapToolConnection(ServerConfig.createPersonalServerConfig(), player);
-    conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
-    serverCommand = new ServerCommandClientImpl(this);
-    conn.onCompleted(
-        () -> {
-          conn.addMessageHandler(new ClientMessageHandler(this));
-        });
+    try {
+      PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
+      playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
+
+      String username = AppPreferences.getDefaultUserName();
+      player = (LocalPlayer) playerDatabase.getPlayer(username);
+
+      serverPolicy = new ServerPolicy();
+
+      conn = new NilMapToolConnection();
+      conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
+      serverCommand = new ServerCommandClientImpl(this);
+      conn.onCompleted(
+          () -> {
+            conn.addMessageHandler(new ClientMessageHandler(this));
+          });
+    } catch (Exception e) {
+      throw new RuntimeException("Unable to start personal server", e);
+    }
   }
 
   public MapToolClient(LocalPlayer player, ServerConfig config) {
     this.campaign = new Campaign();
+
     this.player = player;
+    this.serverPolicy = new ServerPolicy();
+
+    PlayerDatabaseFactory.setCurrentPlayerDatabase(LOCAL_PLAYER);
+    playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
 
     conn = new MapToolConnection(config, player);
-    conn.addDisconnectHandler(conn -> onDisconnect(config.isPersonalServer(), conn));
+    conn.addDisconnectHandler(conn -> onDisconnect(false, conn));
     serverCommand = new ServerCommandClientImpl(this);
     conn.onCompleted(
         () -> {
@@ -81,18 +102,6 @@ public class MapToolClient {
     }
   }
 
-  public void connect(MapToolConnection conn) {
-    this.conn = conn;
-  }
-
-  public Campaign getCampaign() {
-    return campaign;
-  }
-
-  public void setCampaign(Campaign campaign) {
-    this.campaign = campaign;
-  }
-
   public void expectDisconnection() {
     disconnectExpected = true;
   }
@@ -105,8 +114,31 @@ public class MapToolClient {
     return player;
   }
 
-  public MapToolConnection getConnection() {
+  public PlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
+  }
+
+  public IMapToolConnection getConnection() {
     return conn;
+  }
+
+  public ServerPolicy getServerPolicy() {
+    return serverPolicy;
+  }
+
+  public Campaign getCampaign() {
+    return this.campaign;
+  }
+
+  public void setCampaign(Campaign campaign) {
+    this.campaign = campaign;
+  }
+
+  public void setServerPolicy(ServerPolicy serverPolicy, boolean sendToServer) {
+    this.serverPolicy = serverPolicy;
+    if (sendToServer) {
+      this.serverCommand.setServerPolicy(serverPolicy);
+    }
   }
 
   private void onDisconnect(boolean isLocalServer, Connection connection) {

@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author trevor
  */
-public class MapToolConnection {
+public class MapToolConnection implements IMapToolConnection {
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolConnection.class);
@@ -49,10 +49,12 @@ public class MapToolConnection {
     onCompleted = new ArrayList<>();
   }
 
+  @Override
   public void onCompleted(Runnable onCompleted) {
     this.onCompleted.add(onCompleted);
   }
 
+  @Override
   public void start() throws IOException {
     connection.addMessageHandler(handshake);
     handshake.addObserver(
@@ -82,26 +84,32 @@ public class MapToolConnection {
     handshake.startHandshake();
   }
 
+  @Override
   public void addMessageHandler(ClientMessageHandler handler) {
     connection.addMessageHandler(handler);
   }
 
+  @Override
   public void addActivityListener(ActivityMonitorPanel activityMonitor) {
     connection.addActivityListener(activityMonitor);
   }
 
+  @Override
   public void addDisconnectHandler(DisconnectHandler serverDisconnectHandler) {
     connection.addDisconnectHandler(serverDisconnectHandler);
   }
 
+  @Override
   public boolean isAlive() {
     return connection.isAlive();
   }
 
+  @Override
   public void close() throws IOException {
     connection.close();
   }
 
+  @Override
   public void sendMessage(Message msg) {
     log.debug(player.getName() + " sent " + msg.getMessageTypeCase());
     connection.sendMessage(msg.toByteArray());

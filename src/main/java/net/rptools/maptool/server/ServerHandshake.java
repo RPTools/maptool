@@ -72,6 +72,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
   /** The database used for retrieving players. */
   private final PlayerDatabase playerDatabase;
 
+  private final MapToolServer server;
+
   /** The connection to the client. */
   private final Connection connection;
 
@@ -120,7 +122,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @param useEasyConnect If true, the client will use the easy connect method.
    */
   public ServerHandshake(
-      Connection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
+      MapToolServer server,
+      Connection connection,
+      PlayerDatabase playerDatabase,
+      boolean useEasyConnect) {
+    this.server = server;
     this.connection = connection;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = useEasyConnect;
@@ -361,7 +367,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private void sendConnectionSuccessful() throws ExecutionException, InterruptedException {
-    var server = MapTool.getServer();
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(getPlayer().isGM() ? RoleDto.GM : RoleDto.PLAYER)
@@ -396,7 +401,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
           BadPaddingException,
           InvalidKeyException,
           InvalidAlgorithmParameterException {
-    var server = MapTool.getServer();
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
       setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.PLAYER_ALREADY_CONNECTED);

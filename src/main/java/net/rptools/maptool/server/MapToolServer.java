@@ -42,7 +42,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author drice
  */
-public class MapToolServer {
+public class MapToolServer implements IMapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
@@ -76,6 +76,26 @@ public class MapToolServer {
       heartbeatThread = new HeartbeatThread();
       heartbeatThread.start();
     }
+  }
+
+  @Override
+  public boolean isPersonalServer() {
+    return false;
+  }
+
+  @Override
+  public boolean isServerRegistered() {
+    return config.isServerRegistered();
+  }
+
+  @Override
+  public String getName() {
+    return config.getServerName();
+  }
+
+  @Override
+  public int getPort() {
+    return config.getPort();
   }
 
   public void configureClientConnection(Connection connection) {
@@ -163,6 +183,7 @@ public class MapToolServer {
     return config;
   }
 
+  @Override
   public void stop() {
     conn.close();
     if (heartbeatThread != null) {
