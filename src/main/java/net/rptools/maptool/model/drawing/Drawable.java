@@ -165,10 +165,10 @@ public interface Drawable {
         drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
         return drawable;
       }
-      case RIGHT_ANGLE_CONE_TEMPLATE -> {
-        var dto = drawableDto.getRightAngleConeTemplate();
+      case TRIANGLE_TEMPLATE -> {
+        var dto = drawableDto.getTriangleTemplate();
         var id = GUID.valueOf(dto.getId());
-        var drawable = new RightAngleConeTemplate(id);
+        var drawable = new TriangleTemplate(id);
         drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
@@ -176,6 +176,7 @@ public interface Drawable {
         if (dto.hasName()) drawable.setName(dto.getName().getValue());
         drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
         drawable.setTheta(dto.getTheta());
+        drawable.setSensitivity(dto.getSensitivity());
         return drawable;
       }
       case BURST_TEMPLATE -> {

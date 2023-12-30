@@ -25,9 +25,9 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
-import net.rptools.maptool.server.proto.drawing.RightAngleConeTemplateDto;
+import net.rptools.maptool.server.proto.drawing.TriangleTemplateDto;
 
-public class RightAngleConeTemplate extends AbstractTemplate {
+public class TriangleTemplate extends AbstractTemplate {
   // The definition of the cone is it is as wide as it is
   // long, so the cone angle is tan inverse of 1/2, since
   // if the length of the cone is 1, there is half it's
@@ -40,11 +40,11 @@ public class RightAngleConeTemplate extends AbstractTemplate {
   // base of the cone...
   public static double CONE_SIDE_LENGTH_RATIO = 1 / Math.cos(CONE_ANGLE);
 
-  public RightAngleConeTemplate() {
+  public TriangleTemplate() {
     this.showAOEOverlay = true; // While "building" it should show the overlay.
   }
 
-  public RightAngleConeTemplate(GUID id) {
+  public TriangleTemplate(GUID id) {
     super(id);
     this.showAOEOverlay = false;
   }
@@ -59,6 +59,18 @@ public class RightAngleConeTemplate extends AbstractTemplate {
 
   public void setTheta(double v) {
     theta = v;
+  }
+
+  // How much of a grid cell must be covered by the "stencil"
+  // for the grid cell to be considered part of the AoE.
+  private double sensitivity = 0.0;
+
+  public double getSensitivity() {
+    return sensitivity;
+  }
+
+  public void setSensitivity(double sensitivity) {
+    this.sensitivity = sensitivity;
   }
 
   private boolean showAOEOverlay = false;
@@ -324,7 +336,7 @@ public class RightAngleConeTemplate extends AbstractTemplate {
           // in the aoe!
           int totalArea = gridSize * gridSize;
           // How much of the grid square needs to be covered to be part of aoe.
-          double requiredPercent = 0;
+          double requiredPercent = getSensitivity();
           double thresholdArea = totalArea * (100 - requiredPercent) / 100;
 
           // Application of the Shoelace formula, using a "flattened"
@@ -371,16 +383,17 @@ public class RightAngleConeTemplate extends AbstractTemplate {
 
   @Override
   public DrawableDto toDto() {
-    var dto = RightAngleConeTemplateDto.newBuilder();
+    var dto = TriangleTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
-        .setTheta(getTheta());
+        .setTheta(getTheta())
+        .setSensitivity(getSensitivity());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
-    return DrawableDto.newBuilder().setRightAngleConeTemplate(dto).build();
+    return DrawableDto.newBuilder().setTriangleTemplate(dto).build();
   }
 }

@@ -47,7 +47,7 @@ import net.rptools.maptool.model.drawing.*;
  * <p>ToolSelectedAndInactive PlacingInitialVertex MovingVertexUsingCtrl AdjustingRadiusUsingMouse
  * -> Might change this? SendingDrawableToServerForRender...
  */
-public class RightAngleConeTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
+public class TriangleTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
@@ -85,7 +85,7 @@ public class RightAngleConeTemplateTool extends AbstractDrawingTool implements M
    * Constructor
    *-------------------------------------------------------------------------------------------*/
 
-  public RightAngleConeTemplateTool() {}
+  public TriangleTemplateTool() {}
 
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
@@ -97,7 +97,7 @@ public class RightAngleConeTemplateTool extends AbstractDrawingTool implements M
    * @return The right angle cone template that is to be drawn.
    */
   protected AbstractTemplate createBaseTemplate() {
-    return new RightAngleConeTemplate();
+    return new TriangleTemplate();
   }
 
   /**
@@ -295,7 +295,7 @@ public class RightAngleConeTemplateTool extends AbstractDrawingTool implements M
     } else {
       setRadiusFromAnchor(e);
       ZonePoint ep = getCellAtMouse(e);
-      RightAngleConeTemplate t = (RightAngleConeTemplate) template;
+      TriangleTemplate t = (TriangleTemplate) template;
       t.calculateTheta(e, renderer);
       renderer.repaint();
       controlOffset = null;
@@ -421,7 +421,7 @@ public class RightAngleConeTemplateTool extends AbstractDrawingTool implements M
       } // endif
 
       if (template.getRadius() < AbstractTemplate.MIN_RADIUS) return;
-      RightAngleConeTemplate t = (RightAngleConeTemplate) template;
+      TriangleTemplate t = (TriangleTemplate) template;
 
       setIsEraser(isEraser(e));
       template.setRadius(getRadiusAtMouse(e));

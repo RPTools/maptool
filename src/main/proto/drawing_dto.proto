@@ -50,7 +50,7 @@ message DrawableDto {
     BlastTemplateDto blast_template = 13;
     LineTemplateDto line_template = 14;
     WallTemplateDto wall_template = 15;
-    RightAngleConeTemplateDto right_angle_cone_template = 16;
+    TriangleTemplateDto triangle_template = 16;
   }
 }
 
@@ -120,7 +120,7 @@ message RadiusTemplateDto {
   int32 radius = 6;
 }
 
-message RightAngleConeTemplateDto {
+message TriangleTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
@@ -128,6 +128,7 @@ message RightAngleConeTemplateDto {
   IntPointDto vertex = 5;
   int32 radius = 6;
   double theta = 7;
+  double sensitivity = 8;
 }
 
 message LineCellTemplateDto {
