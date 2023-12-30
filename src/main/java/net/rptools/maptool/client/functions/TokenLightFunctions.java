@@ -322,7 +322,7 @@ public class TokenLightFunctions extends AbstractFunction {
             : LightSource.Type.NORMAL;
     final boolean scaleWithToken =
         lightSourceDef.has("scale") ? lightSourceDef.get("scale").getAsBoolean() : false;
-    final boolean ignoreVBL =
+    final boolean ignoresVBL =
         lightSourceDef.has("ignores-vbl")
             ? lightSourceDef.get("ignores-vbl").getAsBoolean()
             : false;
@@ -340,7 +340,7 @@ public class TokenLightFunctions extends AbstractFunction {
             existingSource.isPresent() ? existingSource.get().getId() : new GUID(),
             type,
             scaleWithToken,
-            ignoreVBL,
+            ignoresVBL,
             lights);
     token.addUniqueLightSource(lightSource);
     MapTool.serverCommand()
@@ -466,6 +466,7 @@ public class TokenLightFunctions extends AbstractFunction {
     lightSourceDef.addProperty("name", source.getName());
     lightSourceDef.addProperty("type", source.getType().toString());
     lightSourceDef.addProperty("scale", source.isScaleWithToken());
+    lightSourceDef.addProperty("ignores-vbl", source.isIgnoresVBL());
 
     final var lightDefs = new JsonArray();
     for (final Light light : source.getLightList()) {
