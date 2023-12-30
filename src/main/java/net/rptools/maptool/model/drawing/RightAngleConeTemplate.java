@@ -146,8 +146,22 @@ public class RightAngleConeTemplate extends AbstractTemplate {
 
   @Override
   protected void paint(Graphics2D g, boolean border, boolean area) {
-    Area aoe = this.getArea();
+    boolean debug = true;
     Path2D.Double path = getConePath();
+    if (debug && border) {
+      Rectangle boundingBox = this.getBoundingBox(path);
+      Grid grid = MapTool.getCampaign().getZone(getZoneId()).getGrid();
+      int gridSize = grid.getSize();
+      Rectangle gridSnappedBoundingBox = this.getGridSnappedBoundingBox(boundingBox, gridSize);
+      Color normal = g.getColor();
+      g.setColor(new Color(0, 0, 255));
+      g.draw(boundingBox);
+      g.setColor(new Color(255, 0, 0));
+      g.draw(gridSnappedBoundingBox);
+      g.setColor(normal);
+    }
+
+    Area aoe = this.getArea();
 
     // Paint what is needed.
     if (area) {
@@ -157,8 +171,6 @@ public class RightAngleConeTemplate extends AbstractTemplate {
       if (this.showAOEOverlay) { // While drawing, it's helpful to see the cone overlay.
         g.draw(path);
       }
-      // g.draw(boundingBox);
-      // g.draw(gridSnappedBoundingBox);
       g.draw(aoe);
     }
     // endif
@@ -216,6 +228,47 @@ public class RightAngleConeTemplate extends AbstractTemplate {
     return path;
   }
 
+  private Rectangle getBoundingBox(Path2D.Double path) {
+    return path.getBounds();
+  }
+
+  private Rectangle getGridSnappedBoundingBox(Rectangle boundingBox, int gridSize) {
+    // bounding box is not scaled to the grid.
+    // We want to take the gridSize and snap the bounding box onto the grid.
+    // In the top left position, we want to snap to the top left corner,
+    // in the bottom right position we want to snap to the bottom right corner.
+    double xLeftUpperGridScale = (double) boundingBox.x / gridSize;
+    double xLeftUpperGridSnapped = Math.floor(xLeftUpperGridScale);
+    double xLeftUpperZoneScale = gridSize * xLeftUpperGridSnapped;
+    int xLeftUpper = (int) xLeftUpperZoneScale;
+
+    double yLeftUpperGridScale = (double) boundingBox.y / gridSize;
+    double yLeftUpperGridSnapped = Math.floor(yLeftUpperGridScale);
+    double yLeftUpperZoneScale = gridSize * yLeftUpperGridSnapped;
+    int yLeftUpper = (int) yLeftUpperZoneScale;
+
+    ZonePoint leftUpper = new ZonePoint(xLeftUpper, yLeftUpper);
+
+    float bottomRightX = boundingBox.x + boundingBox.width;
+    double xRightBottomGridScale = (double) bottomRightX / gridSize;
+    double xRightBottomGridSnapped = Math.ceil(xRightBottomGridScale);
+    double xRightBottomZoneScale = gridSize * xRightBottomGridSnapped;
+    int xRightBottom = (int) xRightBottomZoneScale;
+
+    float bottomRightY = boundingBox.y + boundingBox.height;
+    double yRightBottomGridScale = (double) bottomRightY / gridSize;
+    double yRightBottomGridSnapped = Math.ceil(yRightBottomGridScale);
+    double yRightBottomZoneScale = gridSize * yRightBottomGridSnapped;
+    int yRightBottom = (int) yRightBottomZoneScale;
+
+    ZonePoint bottomRight = new ZonePoint(xRightBottom, yRightBottom);
+    Rectangle gridSnappedBoundingBox =
+        new Rectangle(
+            leftUpper.x, leftUpper.y, bottomRight.x - leftUpper.x, bottomRight.y - leftUpper.y);
+
+    return gridSnappedBoundingBox;
+  }
+
   @Override
   public Area getArea() {
     if (MapTool.getCampaign().getZone(getZoneId()) == null) {
@@ -229,21 +282,8 @@ public class RightAngleConeTemplate extends AbstractTemplate {
     //  boundingBox is the minimal bounding box of the cone.
     //  griddedBoundingBox is the bounding box of all game squares
     // that the boundingBox intersects.
-    Rectangle boundingBox = path.getBounds();
-    ZonePoint leftUpper =
-        new ZonePoint(
-            gridSize * (int) Math.floor(boundingBox.x / gridSize),
-            gridSize * (int) Math.floor(boundingBox.y / gridSize));
-
-    float bottomRightX = boundingBox.x + boundingBox.width;
-    int bottomRightXSnapped = gridSize * (int) Math.ceil(bottomRightX / gridSize);
-    float bottomRightY = boundingBox.y + boundingBox.height;
-    int bottomRightYSnapped = gridSize * (int) Math.ceil(bottomRightY / gridSize);
-    ZonePoint bottomRight = new ZonePoint(bottomRightXSnapped, bottomRightYSnapped);
-    Rectangle gridSnappedBoundingBox =
-        new Rectangle(
-            leftUpper.x, leftUpper.y, bottomRight.x - leftUpper.x, bottomRight.y - leftUpper.y);
-
+    Rectangle boundingBox = getBoundingBox(path);
+    Rectangle gridSnappedBoundingBox = getGridSnappedBoundingBox(boundingBox, gridSize);
     Area cone = new Area(path);
     Area aoe = new Area(); // Empty rectangle that we will update.
     /** */
@@ -284,7 +324,7 @@ public class RightAngleConeTemplate extends AbstractTemplate {
           // in the aoe!
           int totalArea = gridSize * gridSize;
           // How much of the grid square needs to be covered to be part of aoe.
-          double requiredPercent = 50;
+          double requiredPercent = 0;
           double thresholdArea = totalArea * (100 - requiredPercent) / 100;
 
           // Application of the Shoelace formula, using a "flattened"
