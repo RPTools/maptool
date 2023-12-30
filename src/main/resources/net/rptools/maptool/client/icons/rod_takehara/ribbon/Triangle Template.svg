@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg width="100%" height="100%" viewBox="0 0 19 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
+<svg width="100%" height="100%" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" xml:space="preserve" xmlns:serif="http://www.serif.com/" style="fill-rule:evenodd;clip-rule:evenodd;stroke-miterlimit:3;">
     <g transform="matrix(1,0,0,1,-38,-95)">
         <g id="Cone-Template" serif:id="Cone Template" transform="matrix(1,0,0,1,-52,95)">
             <rect x="90" y="0" width="16" height="16" style="fill:none;"/>
@@ -12,7 +12,7 @@
                     <circle cx="44" cy="30.623" r="3" style="fill:rgb(56,159,214);"/>
                 </g>
                 <g transform="matrix(7.47692e-17,-1.22107,0.881887,5.4e-17,24.7519,19.2743)">
-                    <path d="M9.643,82.491L13.328,86.862C13.328,89.862,5.957,89.862,5.957,86.862L9.643,82.491Z" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.88px;"/>
+                    <path d="M9.643,82.491L13.328,89.862L5.957,89.862L9.643,82.491Z" style="fill:none;stroke:rgb(110,110,110);stroke-width:1.88px;"/>
                 </g>
             </g>
         </g>

@@ -368,13 +368,14 @@ public class RessourceManager {
           put(
               Icons.TOOLBAR_TEMPLATE_LINE_CELL,
               ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
-          put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Cone Template.svg");
-          put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_OFF, ROD_ICONS + "ribbon/Triangle Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_ON, ROD_ICONS + "ribbon/Triangle Template.svg");
           put(Icons.TOOLBAR_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
           put(
               Icons.TOOLBAR_TEMPLATE_RADIUS_CELL,
               ROD_ICONS + "ribbon/Radius Template Centered on Grid.svg");
           put(Icons.TOOLBAR_TEMPLATE_WALL, ROD_ICONS + "ribbon/Wall Line Template.svg");
+          put(Icons.TOOLBAR_TEMPLATE_TRIANGLE, ROD_ICONS + "ribbon/Triangle Template.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_ALL_OFF, ROD_ICONS + "ribbon/All.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_ALL_ON, ROD_ICONS + "ribbon/All.svg");
           put(Icons.TOOLBAR_TOKENSELECTION_ME_OFF, ROD_ICONS + "ribbon/Me.svg");

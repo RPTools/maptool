@@ -390,7 +390,7 @@ public class TriangleTemplateTool extends AbstractDrawingTool implements MouseMo
    */
   @Override
   public String getTooltip() {
-    return "tool.radiustemplate.tooltip";
+    return "tool.triangletemplate.tooltip";
   }
 
   /**
@@ -398,7 +398,7 @@ public class TriangleTemplateTool extends AbstractDrawingTool implements MouseMo
    */
   @Override
   public String getInstructions() {
-    return "tool.radiustemplate.instructions";
+    return "tool.triangletemplate.instructions";
   }
 
   /*---------------------------------------------------------------------------------------------

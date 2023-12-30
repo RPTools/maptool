@@ -299,7 +299,9 @@ public class ToolbarPanel extends JToolBar {
     panel
         .add(WallTemplateTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_WALL));
-    panel.add(TriangleTemplateTool.class).setIcon(RessourceManager.getBigIcon(Icons.CHAT_SMILEY));
+    panel
+        .add(TriangleTemplateTool.class)
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TEMPLATE_TRIANGLE));
     return panel;
   }
 
