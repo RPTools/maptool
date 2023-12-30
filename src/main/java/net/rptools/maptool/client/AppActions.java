@@ -2257,6 +2257,13 @@ public class AppActions {
                   // Make a copy of the campaign since we don't coordinate local changes well ...
                   // yet
 
+                  Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
+                  final var player =
+                      new LocalPlayer(
+                          dialog.getUsernameTextField().getText(),
+                          playerType,
+                          (playerType == Role.GM) ? gmPassword : playerPassword);
+
                   /*
                    * JFJ 2010-10-27 The below creates a NEW campaign with a copy of the existing campaign. However, this is NOT a full copy. In the constructor called below, each zone from the
                    * previous campaign(ie, the one passed in) is recreated. This means that only some items for that campaign, zone(s), and token's are copied over when you start a new server
@@ -2270,27 +2277,8 @@ public class AppActions {
                       policy,
                       campaign,
                       playerDatabase,
-                      true);
-
-                  // Connect to server
-                  Player.Role playerType = (Player.Role) dialog.getRoleCombo().getSelectedItem();
-                  Runnable onConnected =
-                      () -> {
-                        // connecting
-                        MapTool.getFrame()
-                            .getConnectionStatusPanel()
-                            .setStatus(ConnectionStatusPanel.Status.server);
-                        MapTool.addLocalMessage(
-                            MessageUtil.getFormattedSystemMsg(
-                                I18N.getText("msg.info.startServer")));
-                      };
-
-                  MapTool.createLocalConnection(
-                      new LocalPlayer(
-                          dialog.getUsernameTextField().getText(),
-                          playerType,
-                          (playerType == Role.GM) ? gmPassword : playerPassword),
-                      onConnected);
+                      true,
+                      player);
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
                   failed = true;

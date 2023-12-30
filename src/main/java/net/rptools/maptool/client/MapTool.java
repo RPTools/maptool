@@ -919,6 +919,8 @@ public class MapTool {
   }
 
   public static void setCampaign(Campaign campaign, GUID defaultRendererId) {
+    campaign = Objects.requireNonNullElseGet(campaign, Campaign::new);
+
     // Load up the new
     client.setCampaign(campaign);
     ZoneRenderer currRenderer = null;
@@ -926,10 +928,6 @@ public class MapTool {
     clientFrame.clearZoneRendererList();
     clientFrame.getInitiativePanel().setZone(null);
     clientFrame.clearTokenTree();
-    if (campaign == null) {
-      clientFrame.setCurrentZoneRenderer(null);
-      return;
-    }
 
     // Install new campaign
     for (Zone zone : campaign.getZones()) {
@@ -983,7 +981,8 @@ public class MapTool {
       ServerPolicy policy,
       Campaign campaign,
       ServerSidePlayerDatabase playerDatabase,
-      boolean copyCampaign)
+      boolean copyCampaign,
+      LocalPlayer player)
       throws IOException {
     if (server != null) {
       Thread.dumpStack();
@@ -1028,7 +1027,21 @@ public class MapTool {
     if (MapTool.isHostingServer()) {
       getFrame().getConnectionPanel().startHosting();
     }
+
+    // Create the local connection so we aren't left hanging.
+    installClient(
+        new MapToolClient(player, server),
+        () -> {
+          // connecting
+          MapTool.getFrame()
+              .getConnectionStatusPanel()
+              .setStatus(ConnectionStatusPanel.Status.server);
+          MapTool.addLocalMessage(
+              MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+        });
+
     server.start();
+    client.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1159,9 +1172,8 @@ public class MapTool {
     setCampaign(campaign);
   }
 
-  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
-      throws IOException {
-    client = new MapToolClient(player, config);
+  private static void installClient(MapToolClient client, Runnable onCompleted) {
+    MapTool.client = client;
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
@@ -1173,31 +1185,11 @@ public class MapTool {
           clientFrame.getInitiativePanel().updateView();
           onCompleted.run();
         });
-
-    client.start();
   }
 
-  public static void createLocalConnection(LocalPlayer player, Runnable onCompleted)
+  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
       throws IOException {
-    if (!(server instanceof MapToolServer mapToolServer)) {
-      // TODO Exceptional case.
-      // TODO Should we call createLocalConnection automatically when starting a real serrver?
-      return;
-    }
-
-    client = new MapToolClient(player, mapToolServer);
-
-    MapTool.getFrame().getCommandPanel().clearAllIdentities();
-
-    IMapToolConnection clientConn = client.getConnection();
-    clientConn.addActivityListener(clientFrame.getActivityMonitor());
-    clientConn.onCompleted(
-        () -> {
-          clientFrame.getLookupTablePanel().updateView();
-          clientFrame.getInitiativePanel().updateView();
-          onCompleted.run();
-        });
-
+    installClient(new MapToolClient(player, config), onCompleted);
     client.start();
   }
 
