@@ -966,9 +966,8 @@ public class ClientMessageHandler implements MessageHandler {
         () -> {
           var zoneGUID = GUID.valueOf(clearAllDrawingsMsg.getZoneGuid());
           var layer = Zone.Layer.valueOf(clearAllDrawingsMsg.getLayer());
-
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.clearDrawables(zone.getDrawnElements(layer));
+          zone.clearDrawables(layer);
           MapTool.getFrame().refresh();
         });
   }

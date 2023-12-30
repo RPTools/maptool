@@ -1492,12 +1492,15 @@ public class Zone {
     }
   }
 
-  public void clearDrawables(List<DrawnElement> drawableList) {
-    for (DrawnElement drawable : drawableList) {
+  public void clearDrawables(Layer layer) {
+    final var original = drawablesByLayer.get(layer);
+    final var copy = new ArrayList<>(original);
+    original.clear();
+    undo.clear(); // clears the *entire* undo queue, but finer grained control isn't available
+
+    for (final var drawable : copy) {
       new MapToolEventBus().getMainEventBus().post(new DrawableRemoved(this, drawable));
     }
-    drawableList.clear();
-    undo.clear(); // clears the *entire* undo queue, but finer grained control isn't available
   }
 
   public void addDrawable(Pen pen, Drawable drawable) {
