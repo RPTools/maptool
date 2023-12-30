@@ -17,6 +17,7 @@ package net.rptools.maptool.client;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -48,60 +49,63 @@ public class MapToolClient {
 
   private boolean disconnectExpected = false;
 
-  /** Creates a client for a personal server. */
-  public MapToolClient(PersonalServer server) {
+  private MapToolClient(
+      boolean isForLocalServer,
+      LocalPlayer player,
+      PlayerDatabase playerDatabase,
+      ServerPolicy serverPolicy,
+      @Nullable ServerConfig serverConfig) {
     this.campaign = new Campaign();
-
-    try {
-      player = server.getLocalPlayer();
-      playerDatabase = server.getPlayerDatabase();
-
-      serverPolicy = new ServerPolicy();
-
-      conn = new NilMapToolConnection();
-      conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
-      serverCommand = new ServerCommandClientImpl(this);
-      conn.onCompleted(
-          () -> {
-            conn.addMessageHandler(new ClientMessageHandler(this));
-          });
-    } catch (Exception e) {
-      throw new RuntimeException("Unable to start personal server", e);
-    }
-  }
-
-  public MapToolClient(LocalPlayer player, ServerConfig config) {
-    this.campaign = new Campaign();
-
     this.player = player;
-    this.serverPolicy = new ServerPolicy();
+    this.playerDatabase = playerDatabase;
+    this.serverPolicy = serverPolicy;
 
-    playerDatabase = PlayerDatabaseFactory.getLocalPlayerDatabase(player);
+    this.conn =
+        serverConfig == null
+            ? new NilMapToolConnection()
+            : new MapToolConnection(this, serverConfig, player);
 
-    conn = new MapToolConnection(this, config, player);
-    conn.addDisconnectHandler(conn -> onDisconnect(false, conn));
-    serverCommand = new ServerCommandClientImpl(this);
-    conn.onCompleted(
-        () -> {
-          conn.addMessageHandler(new ClientMessageHandler(this));
-        });
-  }
-
-  public MapToolClient(LocalPlayer player, MapToolServer server) {
-    this.campaign = new Campaign();
-
-    this.player = player;
-    this.serverPolicy = server.getPolicy();
-
-    playerDatabase = server.getPlayerDatabase();
-
-    conn = new MapToolConnection(this, server.getConfig(), player);
-    conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
     this.serverCommand = new ServerCommandClientImpl(this);
-    conn.onCompleted(
+
+    this.conn.addDisconnectHandler(conn -> onDisconnect(isForLocalServer, conn));
+    this.conn.onCompleted(
         () -> {
-          conn.addMessageHandler(new ClientMessageHandler(this));
+          this.conn.addMessageHandler(new ClientMessageHandler(this));
         });
+  }
+
+  /**
+   * Creates a client for use with a personal server.
+   *
+   * @param server The personal server that will run with this client.
+   */
+  public MapToolClient(PersonalServer server) {
+    this(true, server.getLocalPlayer(), server.getPlayerDatabase(), new ServerPolicy(), null);
+  }
+
+  /**
+   * Creates a client for use with a remote hosted server.
+   *
+   * @param player The player connecting to the server.
+   * @param config The configuration details needed to connect to the server.
+   */
+  public MapToolClient(LocalPlayer player, ServerConfig config) {
+    this(
+        false,
+        player,
+        PlayerDatabaseFactory.getLocalPlayerDatabase(player),
+        new ServerPolicy(),
+        config);
+  }
+
+  /**
+   * Creates a client for a server hosted in the same MapTool process.
+   *
+   * @param player The player who started the server.
+   * @param server The local server.
+   */
+  public MapToolClient(LocalPlayer player, MapToolServer server) {
+    this(true, player, server.getPlayerDatabase(), server.getPolicy(), server.getConfig());
   }
 
   public void start() throws IOException {
