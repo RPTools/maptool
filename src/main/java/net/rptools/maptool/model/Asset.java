@@ -494,7 +494,7 @@ public final class Asset {
             try {
               decoder = StandardCharsets.ISO_8859_1.newDecoder();
               decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
-            } catch (Exception eThree) {
+            } catch (Exception eFour) {
               decodedString = null;
             }
           }
