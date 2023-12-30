@@ -25,6 +25,7 @@ import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.noding.NodableSegmentString;
 import org.locationtech.jts.noding.NodedSegmentString;
@@ -68,7 +69,7 @@ public class GeometryUtil {
     return geometryFactory;
   }
 
-  public static Geometry toJts(Area area) {
+  private static Polygonizer toPolygonizer(Area area) {
     final var pathIterator = area.getPathIterator(null);
     final var polygonizer = new Polygonizer(true);
     final var coords = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
@@ -78,6 +79,7 @@ public class GeometryUtil {
     for (var string : coords) {
       strings.add(new NodedSegmentString(string, null));
     }
+
     final var noder = new SnapRoundingNoder(precisionModel);
     noder.computeNodes(strings);
     final Collection<? extends SegmentString> nodedStrings = noder.getNodedSubstrings();
@@ -99,6 +101,14 @@ public class GeometryUtil {
           invalidRings);
     }
 
-    return polygonizer.getGeometry();
+    return polygonizer;
+  }
+
+  public static Geometry toJts(Area area) {
+    return toPolygonizer(area).getGeometry();
+  }
+
+  public static Collection<Polygon> toJtsPolygons(Area area) {
+    return toPolygonizer(area).getPolygons();
   }
 }
