@@ -369,10 +369,6 @@ public class RightAngleConeTemplate extends AbstractTemplate {
     return aoe;
   }
 
-  public PathIterator getPathIterator() {
-    return getArea().getPathIterator(new AffineTransform());
-  }
-
   @Override
   public DrawableDto toDto() {
     var dto = RightAngleConeTemplateDto.newBuilder();
