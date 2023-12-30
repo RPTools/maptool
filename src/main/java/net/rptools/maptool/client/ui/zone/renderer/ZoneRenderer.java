@@ -2824,10 +2824,6 @@ public class ZoneRenderer extends JComponent
                 nameDimension.height + 4,
                 token.getLabel());
           }
-          /**
-           * TODO: CDW GraphicsUtil.drawBoxedString( gLabelRender, name, width / 2, labelHeight / 2,
-           * SwingUtilities.CENTER, background, foreground);
-           */
           flatImgLabel.render(gLabelRender, (width - nameDimension.width) / 2, 0, name);
 
           // Add image to cache
