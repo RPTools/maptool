@@ -103,7 +103,8 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
       boolean scaleWithToken,
       boolean ignoresVBL,
       @Nonnull Collection<Light> lights) {
-    return new LightSource(name, id, type, scaleWithToken, ignoresVBL, ImmutableList.copyOf(lights));
+    return new LightSource(
+        name, id, type, scaleWithToken, ignoresVBL, ImmutableList.copyOf(lights));
   }
 
   private LightSource(
