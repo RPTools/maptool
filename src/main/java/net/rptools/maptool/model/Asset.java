@@ -475,7 +475,7 @@ public final class Asset {
     }
 
     if (type.isStringType()) {
-      CharsetDecoder decoder = StandardCharsets.US_ASCII.newDecoder();
+      CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
       decoder
           .onMalformedInput(CodingErrorAction.REPORT)
           .onUnmappableCharacter(CodingErrorAction.REPORT);
@@ -484,22 +484,13 @@ public final class Asset {
         decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
       } catch (Exception eOne) {
         try {
-          decoder = StandardCharsets.UTF_8.newDecoder();
+          decoder = StandardCharsets.UTF_16.newDecoder();
           decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
         } catch (Exception eTwo) {
-          try {
-            decoder = StandardCharsets.UTF_16.newDecoder();
-            decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
-          } catch (Exception eThree) {
-            try {
-              decoder = StandardCharsets.ISO_8859_1.newDecoder();
-              decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
-            } catch (Exception eFour) {
-              decodedString = null;
-            }
-          }
+          decodedString = null;
         }
       }
+
       dataAsString = decodedString;
     } else {
       dataAsString = null;
