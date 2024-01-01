@@ -30,6 +30,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Chat related functions like broadcast()
@@ -37,22 +39,38 @@ import net.rptools.parser.function.AbstractFunction;
  * @author bdornauf
  */
 public class ChatFunction extends AbstractFunction {
+  private static final Logger log = LogManager.getLogger(ChatFunction.class);
+
   /** Ctor */
   public ChatFunction() {
-    super(1, 3, "broadcast", "slash");
+    super(1, 3, "broadcast", "chat");
   }
 
   /** The singleton instance. */
   private static final ChatFunction instance = new ChatFunction();
 
   /**
-   * Gets the Input instance.
+   * Gets the instance.
    *
    * @return the instance.
    */
   public static ChatFunction getInstance() {
     return instance;
   }
+
+  public static final List<String> chatBlackList =
+      List.of(
+          "alias",
+          "clearaliases",
+          "loadaliases",
+          "savealiases",
+          "exp",
+          "exper",
+          "experiments",
+          "loadtokenstates",
+          "tsl",
+          "savetokenstates",
+          "tss");
 
   @Override
   public Object childEvaluate(
@@ -61,11 +79,12 @@ public class ChatFunction extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("broadcast")) {
       return broadcast(resolver, parameters);
-    } else if (functionName.equalsIgnoreCase("slash")) {
+    } else if (functionName.equalsIgnoreCase("chat")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 2);
-      return slash(parameters);
+      return chat(parameters);
     } else {
-      throw new ParserException("Unknown function: " + functionName);
+      throw new ParserException(
+          I18N.getText("macro.function.general.unknownFunction", functionName));
     }
   }
 
@@ -75,14 +94,36 @@ public class ChatFunction extends AbstractFunction {
    * @param parameters command and arguments
    * @return true on success
    */
-  private Object slash(List<Object> parameters) {
-    String command = parameters.get(0).toString();
+  private Object chat(List<Object> parameters) throws ParserException {
+    String command = FunctionUtil.paramAsString("chat", parameters, 0, false).trim();
+    String content =
+        parameters.size() == 2
+            ? FunctionUtil.paramAsString("chat", parameters, 1, false).trim()
+            : "";
+    log.info("Received " + parameters.size() + " parameters.");
+    if (command.contains(" ")) {
+      int index = command.indexOf(" ");
+      log.info("Space found at index " + index);
+      if (parameters.size() == 1) {
+        content = command.substring(index);
+        command = command.substring(0, index);
+        log.info("command: " + command + "; content: " + content);
+      } else {
+        content = FunctionUtil.paramAsString("chat", parameters, 1, false);
+        content = command.substring(index) + " " + content;
+        command = command.substring(0, index);
+        log.info("command: " + command + "; content: " + content);
+      }
+    }
+    if (chatBlackList.contains(command))
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", command));
     if (!command.startsWith("/")) command = "/" + command;
-    if (parameters.size() > 1) {
-      command += " " + parameters.get(1).toString();
+    if (!content.isEmpty()) {
+      command += " " + content;
     }
     MacroManager.executeMacro(command);
     return "";
+    // [chat("me does something")]<br>[chat("me ","does something")]
   }
 
   /**
