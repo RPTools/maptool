@@ -61,6 +61,8 @@ public class ChatFunction extends AbstractFunction {
   public static final List<String> chatBlackList =
       List.of(
           "alias",
+          "cc",
+          "color",
           "clearaliases",
           "loadaliases",
           "savealiases",
@@ -115,7 +117,7 @@ public class ChatFunction extends AbstractFunction {
         log.info("command: " + command + "; content: " + content);
       }
     }
-    if (chatBlackList.contains(command))
+    if (chatBlackList.contains(command.startsWith("/") ? command.substring(1) : command))
       throw new ParserException(I18N.getText("macro.function.general.noPerm", command));
     if (!command.startsWith("/")) command = "/" + command;
     if (!content.isEmpty()) {
