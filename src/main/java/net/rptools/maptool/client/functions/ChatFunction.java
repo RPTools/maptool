@@ -117,7 +117,9 @@ public class ChatFunction extends AbstractFunction {
         log.info("command: " + command + "; content: " + content);
       }
     }
-    if (chatBlackList.contains(command.startsWith("/") ? command.substring(1) : command))
+    if (chatBlackList.contains(command.startsWith("/") ?
+                               command.substring(1) :
+                               command))
       throw new ParserException(I18N.getText("macro.function.general.noPerm", command));
     if (!command.startsWith("/")) command = "/" + command;
     if (!content.isEmpty()) {
