@@ -102,25 +102,24 @@ public class ChatFunction extends AbstractFunction {
         parameters.size() == 2
             ? FunctionUtil.paramAsString("chat", parameters, 1, false).trim()
             : "";
-    log.info("Received " + parameters.size() + " parameters.");
-    if (command.contains(" ")) {
+    if (command.contains(" ")) { // split command if it contains a space
       int index = command.indexOf(" ");
-      log.info("Space found at index " + index);
       if (parameters.size() == 1) {
         content = command.substring(index);
         command = command.substring(0, index);
-        log.info("command: " + command + "; content: " + content);
       } else {
         content = FunctionUtil.paramAsString("chat", parameters, 1, false);
-        content = command.substring(index) + " " + content;
+        content = command.substring(index) + " " + content; // concatenate with split command string
         command = command.substring(0, index);
-        log.info("command: " + command + "; content: " + content);
       }
     }
-    if (chatBlackList.contains(command.startsWith("/") ? command.substring(1) : command))
+    if (chatBlackList.contains(command.startsWith("/") ? command.substring(1) : command)) {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", command));
-    if (!command.startsWith("/")) command = "/" + command;
-    if (!content.isEmpty()) {
+    }
+    if (!command.startsWith("/")) { // prepend an oblique if not present
+      command = "/" + command;
+    }
+    if (!content.isEmpty()) { // concatenate with content
       command += " " + content;
     }
     MacroManager.executeMacro(command);
@@ -154,9 +153,9 @@ public class ChatFunction extends AbstractFunction {
         // FALLTHRU
       case 2:
         String temp = param.get(1).toString().trim();
-        if ("json".equals(delim) || temp.charAt(0) == '[')
+        if ("json".equals(delim) || temp.charAt(0) == '[') {
           jarray = JsonParser.parseString(temp).getAsJsonArray();
-        else {
+        } else {
           jarray = new JsonArray();
           for (String t : StringUtil.split(temp, delim)) {
             jarray.add(t.trim());
