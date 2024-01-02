@@ -84,6 +84,7 @@ public class SightSyntax {
             scaleWithToken = true;
             continue;
           }
+
           try {
 
             if (arg.startsWith("x")) {
@@ -169,7 +170,7 @@ public class SightSyntax {
         LightSource personalLight =
             personalLightLights == null
                 ? null
-                : LightSource.createPersonal(scaleWithToken, personalLightLights);
+                : LightSource.createPersonal(scaleWithToken, false, personalLightLights);
         SightType sight =
             new SightType(
                 label, range, magnifier, shape, width, arc, offset, scaleWithToken, personalLight);
