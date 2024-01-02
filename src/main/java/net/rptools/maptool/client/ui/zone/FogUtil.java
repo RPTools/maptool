@@ -90,6 +90,7 @@ public class FogUtil {
     topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
 
     List<Geometry> visibleAreas = new ArrayList<>();
+
     for (final var topology : topologies.entrySet()) {
       final var solver =
           new VisibilityProblem(
