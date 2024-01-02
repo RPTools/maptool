@@ -33,12 +33,32 @@ public class TriangleTemplate extends AbstractTemplate {
   // if the length of the cone is 1, there is half it's
   // length from the midpoint to the left and right edge
   // of the base of the cone respectively...
-  public static double CONE_ANGLE = Math.atan2(0.5, 1.0);
+  private static final double CONE_ANGLE = Math.atan2(0.5, 1.0);
 
   // This is the ratio of the cone's side length to the
   // length from the point of the cone to the midpoint of the
   // base of the cone...
-  public static double CONE_SIDE_LENGTH_RATIO = 1 / Math.cos(CONE_ANGLE);
+  private static final double CONE_SIDE_LENGTH_RATIO = 1 / Math.cos(CONE_ANGLE);
+
+  private static Path2D.Double stencilDefinitionBuilder() {
+    // Calculate the position of the vertices of the cone based on
+    // the angle of the cone.
+    double coneSideLength = CONE_SIDE_LENGTH_RATIO;
+    double vertex1X = coneSideLength * Math.cos(CONE_ANGLE);
+    double vertex1Y = coneSideLength * Math.sin(CONE_ANGLE);
+
+    double vertex2X = coneSideLength * Math.cos(-CONE_ANGLE);
+    double vertex2Y = coneSideLength * Math.sin(-CONE_ANGLE);
+
+    Path2D.Double path = new Path2D.Double();
+    path.moveTo(0, 0);
+    path.lineTo(vertex1X, vertex1Y);
+    path.lineTo(vertex2X, vertex2Y);
+    path.lineTo(0, 0);
+    return path;
+  }
+
+  private static final Path2D.Double STENCIL_DEFINITION = stencilDefinitionBuilder();
 
   public TriangleTemplate() {
     this.showAOEOverlay = true; // While "building" it should show the overlay.
@@ -211,21 +231,34 @@ public class TriangleTemplate extends AbstractTemplate {
         vertex.x - quadrantSize, vertex.y - quadrantSize, quadrantSize * 2, quadrantSize * 2);
   }
 
-  private Path2D.Double getConePath() {
-    ZonePoint sp = getVertex();
+    protected static Path2D.Double getConePath(ZonePoint sp, int radius, int gridSize, double theta) {
+    if (radius == 0) return new Path2D.Double();
+    double coneScale = gridSize * radius;
 
-    // Only paint if the start and endpoints are not equal and the
-    // radius is non-zero.
-    double radius = getRadius();
-    if (getRadius() == 0) return new Path2D.Double();
+    AffineTransform transform = new AffineTransform();
+    // Since translate calls AffineTransform.concatenate under the hood,
+    // we have to un-intuitively (for me at least) call the
+    // translation before we call the scaling and rotating.
+    // What this is actually doing to the path below, is
+    // applying a rotation, then a scaling, then a translation
+    // from the STENCIL_DEFINITION onto the ZonePoint space,
+    // using the parameters of the starting point, the angle of the
+    // triangle and the scale based on the grid size and radius.
+    transform.translate(sp.x, sp.y);
+    transform.scale(coneScale, coneScale);
+    transform.rotate(theta);
 
-    Grid grid = MapTool.getCampaign().getZone(getZoneId()).getGrid();
-    int gridSize = grid.getSize();
+    Path2D.Double path = new Path2D.Double(STENCIL_DEFINITION, transform);
+    return path;
+  }
+
+  protected static Path2D.Double getConePathInneficientMethod(ZonePoint sp, int radius, int gridSize, double theta) {
+    if (radius == 0) return new Path2D.Double();
 
     // Calculate the position of the vertices of the cone based on
     // the angle of the cone.
     double coneSideLength = CONE_SIDE_LENGTH_RATIO * gridSize * radius;
-    double coneAimAngle = getTheta();
+    double coneAimAngle = theta;
     double vertex1X = coneSideLength * Math.cos(coneAimAngle + CONE_ANGLE) + sp.x;
     double vertex1Y = coneSideLength * Math.sin(coneAimAngle + CONE_ANGLE) + sp.y;
 
@@ -238,6 +271,20 @@ public class TriangleTemplate extends AbstractTemplate {
     path.lineTo(vertex2X, vertex2Y);
     path.lineTo(sp.x, sp.y);
     return path;
+  }
+
+  private Path2D.Double getConePath() {
+    ZonePoint sp = getVertex();
+
+    // Only paint if the start and endpoints are not equal and the
+    // radius is non-zero.
+    int radius = getRadius();
+    Grid grid = MapTool.getCampaign().getZone(getZoneId()).getGrid();
+    int gridSize = grid.getSize();
+
+    double theta = getTheta();
+
+    return getConePath(sp, radius, gridSize, theta);
   }
 
   private Rectangle getBoundingBox(Path2D.Double path) {
