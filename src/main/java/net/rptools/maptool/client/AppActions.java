@@ -347,7 +347,7 @@ public class AppActions {
             return;
           }
 
-          MapTool.showInformation("msg.confirm.campaignExported");
+          MapTool.showInformation("msg.confirm.campaignRepoExported");
         }
       };
 
