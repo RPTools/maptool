@@ -1273,7 +1273,9 @@ public class InputFunction extends AbstractFunction {
   /** Gets icon from the asset manager. Code copied and modified from EditTokenDialog.java */
   private ImageIcon getIcon(String id, int size, ImageObserver io) {
     // Extract the MD5Key from the URL
-    if (id == null) return null;
+    if (id == null) {
+      return null;
+    }
     var assetKey = new AssetResolver().getAssetKey(id);
     String assetId = null;
     if (assetKey.isPresent()) {
