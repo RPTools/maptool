@@ -74,9 +74,9 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.AssetResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -129,7 +129,8 @@ import org.apache.commons.lang.StringUtils;
 // @formatter:on
 
 public class InputFunction extends AbstractFunction {
-  private static final Pattern ASSET_PATTERN = Pattern.compile("^(.*)((?:asset|lib)://[0-9a-z-A-Z ./]+)");
+  private static final Pattern ASSET_PATTERN =
+      Pattern.compile("^(.*)((?:asset|lib)://[0-9a-z-A-Z ./]+)");
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
@@ -1281,7 +1282,7 @@ public class InputFunction extends AbstractFunction {
     MD5Key assetMD5 = null;
     if (assetId != null) {
       assetMD5 = new MD5Key(assetId);
-    }else{
+    } else {
       assetMD5 = new MD5Key(id);
     }
 
