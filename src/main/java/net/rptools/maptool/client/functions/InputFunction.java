@@ -76,6 +76,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -128,7 +129,7 @@ import org.apache.commons.lang.StringUtils;
 // @formatter:on
 
 public class InputFunction extends AbstractFunction {
-  private static final Pattern ASSET_PATTERN = Pattern.compile("^(.*)asset://(\\w+)");
+  private static final Pattern ASSET_PATTERN = Pattern.compile("^(.*)((?:asset|lib)://[0-9a-z-A-Z ./]+)");
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
@@ -1272,10 +1273,20 @@ public class InputFunction extends AbstractFunction {
   private ImageIcon getIcon(String id, int size, ImageObserver io) {
     // Extract the MD5Key from the URL
     if (id == null) return null;
-    MD5Key assetID = new MD5Key(id);
+    var assetKey = new AssetResolver().getAssetKey(id);
+    String assetId = null;
+    if (assetKey.isPresent()) {
+      assetId = assetKey.get().toString();
+    }
+    MD5Key assetMD5 = null;
+    if (assetId != null) {
+      assetMD5 = new MD5Key(assetId);
+    }else{
+      assetMD5 = new MD5Key(id);
+    }
 
     // Get the base image && find the new size for the icon
-    BufferedImage assetImage = ImageManager.getImage(assetID, io);
+    BufferedImage assetImage = ImageManager.getImage(assetMD5, io);
 
     // Resize
     if (assetImage.getWidth() > size || assetImage.getHeight() > size) {
