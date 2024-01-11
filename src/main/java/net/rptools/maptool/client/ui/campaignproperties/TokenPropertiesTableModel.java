@@ -88,13 +88,13 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   @Override
   public String getColumnName(int column) {
     return switch (column) {
-      case 0 -> I18N.getText("campaignPropertiesTable.column.name");
-      case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
-      case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
-      case 3 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
-      case 4 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
-      case 5 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
-      case 6 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
+      case 0 -> I18N.getText("CampaignPropertiesTable.column.name");
+      case 1 -> I18N.getText("CampaignPropertiesTable.column.shortName");
+      case 2 -> I18N.getText("CampaignPropertiesTable.column.displayName");
+      case 3 -> I18N.getText("CampaignPropertiesTable.column.onStatSheet");
+      case 4 -> I18N.getText("CampaignPropertiesTable.column.gmStatSheet");
+      case 5 -> I18N.getText("CampaignPropertiesTable.column.ownerStatSheet");
+      case 6 -> I18N.getText("CampaignPropertiesTable.column.defaultValue");
       default -> null;
     };
   }
@@ -147,7 +147,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     int seq = 1;
     while (true) {
       boolean free = true;
-      String newName = I18N.getText("campaignPropertiesDialog.newTokenPropertyDefaultName", seq);
+      String newName = I18N.getText("CampaignPropertiesDialog.newTokenPropertyDefaultName", seq);
       for (var p : properties) {
         if (newName.equals(p.getName())) {
           free = false;

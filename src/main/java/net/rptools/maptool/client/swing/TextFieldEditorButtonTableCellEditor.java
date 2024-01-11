@@ -52,7 +52,7 @@ public class TextFieldEditorButtonTableCellEditor extends AbstractCellEditor
                       }
                     })
                 .show(
-                    I18N.getText("campaignProperties.macroEditDialog.default.title"),
+                    I18N.getText("CampaignProperties.macroEditDialog.default.title"),
                     textField.getText()));
     panel.add(button);
   }

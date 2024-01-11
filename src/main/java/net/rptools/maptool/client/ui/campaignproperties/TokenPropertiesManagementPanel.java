@@ -150,19 +150,19 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                       // about being fancy
                       int seq = 1;
                       String name =
-                          I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                          I18N.getText("CampaignPropertiesDialog.newTokenTypeDefaultName", seq);
                       while (tokenTypeMap.containsKey(name)) {
                         seq++;
                         name =
-                            I18N.getText("campaignPropertiesDialog.newTokenTypeDefaultName", seq);
+                            I18N.getText("CampaignPropertiesDialog.newTokenTypeDefaultName", seq);
                       }
 
                       var newName =
                           (String)
                               JOptionPane.showInputDialog(
                                   this,
-                                  I18N.getText("campaignPropertiesDialog.newTokenTypeName"),
-                                  I18N.getText("campaignPropertiesDialog.newTokenTypeTitle"),
+                                  I18N.getText("CampaignPropertiesDialog.newTokenTypeName"),
+                                  I18N.getText("CampaignPropertiesDialog.newTokenTypeTitle"),
                                   JOptionPane.PLAIN_MESSAGE,
                                   null,
                                   null,
@@ -189,13 +189,13 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                         .map(String::toString)
                         .toArray(String[]::new));
             renameToPanel.add(
-                new JLabel(I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteMessage")));
+                new JLabel(I18N.getText("CampaignPropertiesDialog.tokenTypeNameDeleteMessage")));
             renameToPanel.add(types);
             int option =
                 JOptionPane.showConfirmDialog(
                     this,
                     renameToPanel,
-                    I18N.getText("campaignPropertiesDialog.tokenTypeNameDeleteTitle", type),
+                    I18N.getText("CampaignPropertiesDialog.tokenTypeNameDeleteTitle", type),
                     JOptionPane.OK_CANCEL_OPTION);
             if (option == JOptionPane.OK_OPTION) {
               var newType = (String) types.getSelectedItem();
@@ -322,8 +322,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           int option =
               JOptionPane.showConfirmDialog(
                   this,
-                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeWarning"),
-                  I18N.getText("campaignPropertiesDialog.tokenTypeNameChangeTitle"),
+                  I18N.getText("CampaignPropertiesDialog.tokenTypeNameChangeWarning"),
+                  I18N.getText("CampaignPropertiesDialog.tokenTypeNameChangeTitle"),
                   JOptionPane.OK_CANCEL_OPTION,
                   JOptionPane.WARNING_MESSAGE);
           if (option == JOptionPane.OK_OPTION) {
@@ -570,7 +570,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           int indexClose = line.lastIndexOf(')');
           // Check for unenclosed parentheses. Fix #1575.
           if (indexClose < index) {
-            MapTool.showError(I18N.getText("CampaignPropertyDialog.error.parenthesis", line));
+            MapTool.showError(
+                I18N.getText("CampaignPropertiesDialog.error.property.parenthesis", line));
             throw new IllegalArgumentException("Missing parenthesis");
           }
           String shortName = line.substring(index + 1, indexClose).trim();

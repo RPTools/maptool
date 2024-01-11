@@ -3,7 +3,7 @@
   <grid id="6db9f" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="815" height="720"/>
+      <xy x="10" y="10" width="1444" height="720"/>
     </constraints>
     <properties>
       <name value="mainForm"/>
@@ -45,7 +45,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.repo"/>
             </constraints>
             <properties>
-              <visible value="false"/>
+              <visible value="true"/>
             </properties>
             <border type="none"/>
             <children>
@@ -619,7 +619,7 @@
               <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.bars"/>
             </constraints>
             <properties>
-              <visible value="true"/>
+              <visible value="false"/>
             </properties>
             <border type="none"/>
             <children>
@@ -1076,6 +1076,7 @@
               <actionCommand value="Import"/>
               <name value="importButton"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.import"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.tooltip.import"/>
             </properties>
           </component>
           <component id="952ab" class="javax.swing.JButton">
@@ -1086,16 +1087,18 @@
               <actionCommand value="Export"/>
               <name value="exportButton"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.export"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.button.tooltip.export"/>
             </properties>
           </component>
           <component id="a7c53" class="javax.swing.JButton">
             <constraints>
-              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="1" use-parent-layout="false"/>
             </constraints>
             <properties>
               <actionCommand value="Import predefined"/>
               <name value="importPredefinedButton"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.button.import"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesDialog.button.tooltip.importPredefined"/>
             </properties>
           </component>
           <component id="ce91c" class="javax.swing.JComboBox">
@@ -1105,6 +1108,7 @@
             <properties>
               <actionCommand value="comboBoxChanged"/>
               <name value="predefinedPropertiesComboBox"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.combo.tooltip.importPredefined"/>
             </properties>
           </component>
         </children>
