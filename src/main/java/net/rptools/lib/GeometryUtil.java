@@ -19,6 +19,7 @@ import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
@@ -59,6 +60,52 @@ public class GeometryUtil {
       targetAngle += 360;
     }
     return targetAngle;
+  }
+
+  /**
+   * Unions several areas into one.
+   *
+   * <p>The results are the same as progressively `.add()`ing all areas in the collection, but
+   * performs much better when the result is complicated.
+   *
+   * @param areas The areas to union.
+   * @return The union of {@code areas}
+   */
+  public static Area union(Collection<Area> areas) {
+    final var copy = new ArrayList<>(areas);
+    copy.replaceAll(Area::new);
+
+    return destructiveUnion(copy);
+  }
+
+  /**
+   * Like {@link #union(java.util.Collection)}, but will modify the areas and collection for
+   * performance gains.
+   *
+   * @param areas The areas to union.
+   * @return The union of {@code areas}
+   */
+  public static Area destructiveUnion(List<Area> areas) {
+    areas.removeIf(Area::isEmpty);
+
+    // Union two-by-two, on repeat until only one is left.
+    while (areas.size() >= 2) {
+      for (int i = 0; i + 1 < areas.size(); i += 2) {
+        final var a = areas.get(i);
+        final var b = areas.get(i + 1);
+
+        a.add(b);
+        areas.set(i + 1, null);
+      }
+      areas.removeIf(Objects::isNull);
+    }
+
+    if (areas.isEmpty()) {
+      // Just in case, maybe it's possible for Area() to have edge cases the produce empty unions?
+      return new Area();
+    }
+
+    return areas.getFirst();
   }
 
   public static PrecisionModel getPrecisionModel() {
