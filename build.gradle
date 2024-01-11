@@ -497,7 +497,7 @@ dependencies {
 
     // protobuf
     implementation "io.grpc:grpc-protobuf:1.60.1"
-    implementation "com.google.protobuf:protobuf-java-util:3.25.1"
+    implementation "com.google.protobuf:protobuf-java-util:3.25.2"
 
     // Java Tuples
     implementation 'com.flipkart.utils:javatuples:3.0'
