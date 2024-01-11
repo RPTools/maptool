@@ -588,13 +588,18 @@ public class CampaignPropertiesDialog extends JDialog {
         I18N.getText(
             "sightLight.wikiLinkReferral",
             "<i>wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</i>"));
-    if (MapTool.getLanguage().toLowerCase().startsWith("n")) {
-      /* remove translated version of words for English locales. Otherwise we end up with stuff like - arc (arc) cone (cone)*/
+    if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
+      /* For string literals the English is the same as the translated text.
+        i.e. arc (arc), cone (cone)
+        Here we set the translated text values to blank which leaves the parenthesis empty.
+        We can then replace the empty () with blanks so it looks right to English readers.
+      */
       parameters.put(
           "optionDescriptionShape",
           I18N.getText("sightLight.optionDescription.shape", "", "", "", "", "", "")
               .replace("(", "")
               .replace(")", ""));
+
       parameters.put("optionLabelArc", "");
       parameters.put("optionLabelWidth", "");
       parameters.put("optionLabelOffset", "");
@@ -602,6 +607,7 @@ public class CampaignPropertiesDialog extends JDialog {
       parameters.put("optionLabelAura", "");
       parameters.put("optionLabelDistance", "");
       parameters.put("optionLabelScale", "");
+
     } else {
       parameters.put(
           "optionDescriptionShape",
@@ -922,6 +928,7 @@ public class CampaignPropertiesDialog extends JDialog {
             + "</body></html>";
 
     StringSubstitutor substitute = new StringSubstitutor(parameters);
+    /* English has no translated value between parenthesis so they are removed after the substitution */
     String sightResult = substitute.replace(htmlSight).replace("()", "");
     String lightResult = substitute.replace(htmlLight).replace("()", "");
     ;
