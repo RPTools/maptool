@@ -20,6 +20,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
+import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -32,6 +33,7 @@ import net.rptools.maptool.model.InvalidGUIDException;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.drawing.DrawablePaint;
+import net.rptools.maptool.util.AssetResolver;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -280,13 +282,14 @@ public class MapFunctions extends AbstractFunction {
 
       if (config.has("map asset")) {
         final var mapAssetId = config.getAsJsonPrimitive("map asset").getAsString();
-        final var mapAssetKey = FunctionUtil.getAssetKeyFromString(mapAssetId);
-        if (mapAssetKey == null) {
-          throw new ParserException(
-              I18N.getText("macro.function.map.invalidAsset", functionName, mapAssetId));
+        final var mapAssetKey = new AssetResolver().getAssetKey(mapAssetId);
+        MD5Key assetMD5 = null;
+        if (mapAssetKey.isPresent()) {
+          assetMD5 = new MD5Key(mapAssetKey.get().toString());
+        } else {
+          assetMD5 = new MD5Key(mapAssetId);
         }
-
-        final var mapAsset = AssetManager.getAsset(mapAssetKey);
+        final var mapAsset = AssetManager.getAsset(assetMD5);
         if (mapAsset != null) {
           AssetManager.putAsset(mapAsset);
           if (!MapTool.isHostingServer()) {
@@ -294,7 +297,7 @@ public class MapFunctions extends AbstractFunction {
           }
         }
 
-        newMap.setMapAsset(mapAssetKey);
+        newMap.setMapAsset(assetMD5);
       }
 
       MapTool.addZone(newMap, false);
