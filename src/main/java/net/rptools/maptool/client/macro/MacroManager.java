@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
-import net.rptools.maptool.client.functions.AboutMacro;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.client.macro.impl.*;
 import net.rptools.maptool.client.ui.MapToolFrame;

@@ -66,7 +66,6 @@ import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
@@ -74,6 +73,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
@@ -128,7 +128,8 @@ import org.apache.commons.lang.StringUtils;
 // @formatter:on
 
 public class InputFunction extends AbstractFunction {
-  private static final Pattern ASSET_PATTERN = Pattern.compile("^(.*)asset://(\\w+)");
+  private static final Pattern ASSET_PATTERN =
+      Pattern.compile("^(.*)((?:asset|lib|Image):(//)?[0-9a-z-A-Z ./]+)");
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
@@ -1271,11 +1272,13 @@ public class InputFunction extends AbstractFunction {
   /** Gets icon from the asset manager. Code copied and modified from EditTokenDialog.java */
   private ImageIcon getIcon(String id, int size, ImageObserver io) {
     // Extract the MD5Key from the URL
-    if (id == null) return null;
-    MD5Key assetID = new MD5Key(id);
+    if (id == null) {
+      return null;
+    }
+    var assetMD5 = FunctionUtil.getAssetKeyFromString(id);
 
     // Get the base image && find the new size for the icon
-    BufferedImage assetImage = ImageManager.getImage(assetID, io);
+    BufferedImage assetImage = ImageManager.getImage(assetMD5, io);
 
     // Resize
     if (assetImage.getWidth() > size || assetImage.getHeight() > size) {
