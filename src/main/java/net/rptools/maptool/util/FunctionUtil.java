@@ -524,19 +524,26 @@ public class FunctionUtil {
    * @return The MD5 key present in {@code assetUrlOrId}, or null.
    */
   public static @Nullable MD5Key getAssetKeyFromString(String assetUrlOrId) {
-    final String id;
+    String id = null;
     if (assetUrlOrId.toLowerCase().startsWith("asset://")) {
       id = assetUrlOrId.substring("asset://".length());
     } else if (assetUrlOrId.toLowerCase().startsWith("lib://")) {
       var assetKey = new AssetResolver().getAssetKey(assetUrlOrId);
       if (assetKey.isPresent()) {
         id = assetKey.get().toString();
-      } else {
-        return null;
+      }
+    } else if (assetUrlOrId.toLowerCase().startsWith("image:")) {
+      for (ZoneRenderer z : MapTool.getFrame().getZoneRenderers()) {
+        Token t = z.getZone().getTokenByName(assetUrlOrId);
+        if (t != null) {
+          id = t.getImageAssetId().toString();
+        }
       }
     } else if (assetUrlOrId.length() == 32) {
       id = assetUrlOrId;
-    } else {
+    }
+
+    if (id == null) {
       return null;
     }
 
