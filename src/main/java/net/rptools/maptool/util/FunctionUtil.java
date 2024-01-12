@@ -519,13 +519,21 @@ public class FunctionUtil {
   /**
    * Parses a string as an asset URL.
    *
-   * @param assetUrlOrId String containing the asset ID or asset URL.
+   * @param assetUrlOrId String containing the asset ID (ID), asset URL (asset://ID), or addon
+   *     URL(lib://PATH).
    * @return The MD5 key present in {@code assetUrlOrId}, or null.
    */
   public static @Nullable MD5Key getAssetKeyFromString(String assetUrlOrId) {
     final String id;
     if (assetUrlOrId.toLowerCase().startsWith("asset://")) {
       id = assetUrlOrId.substring("asset://".length());
+    } else if (assetUrlOrId.toLowerCase().startsWith("lib://")) {
+      var assetKey = new AssetResolver().getAssetKey(assetUrlOrId);
+      if (assetKey.isPresent()) {
+        id = assetKey.get().toString();
+      } else {
+        return null;
+      }
     } else if (assetUrlOrId.length() == 32) {
       id = assetUrlOrId;
     } else {
