@@ -32,9 +32,7 @@ public class CampaignPropertiesDialogTest {
     SwingUtilities.invokeAndWait(
         () -> {
           CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(null);
-
           JButton button = cpd.getImportPredefinedButton();
-
           assertEquals(
               button.getText(),
               I18N.getText("CampaignPropertiesDialog.button.label.importPredefined"));
