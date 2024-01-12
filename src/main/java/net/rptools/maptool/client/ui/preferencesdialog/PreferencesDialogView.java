@@ -19,12 +19,6 @@ import javax.swing.*;
 public class PreferencesDialogView {
 
   private JPanel mainPanel;
-  private JSpinner spinner1;
-  private JCheckBox checkBox1;
-  private JCheckBox checkBox2;
-  private JPanel developerOptionToggles;
-  private JPanel developerTab;
-  private JLabel developerTabWarning;
 
   public JComponent getRootComponent() {
     return mainPanel;

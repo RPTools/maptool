@@ -449,22 +449,79 @@ public class AppPreferences {
   private static final String KEY_PLAY_STREAMS = "playStreams";
   private static final boolean DEFAULT_PLAY_STREAMS = true;
 
+  /**
+   * The key for retrieving the background color of NPC map labels.
+   * The value of this key is used to store and retrieve background color information for NPC map
+   * The background color is used to style the text of the map labels for Non-Player Characters
+   * (NPCs).
+   * labels. The value associated with this key should be a valid color value.
+   */
   private static final String KEY_NPC_MAP_LABEL_BG_COLOR = "npcMapLabelBG";
+  /**
+   * Constant variable for the foreground color of NPC map labels.
+   * The value represents the key used to retrieve the color from a map or configuration file.
+   * The foreground color is used to style the text of the map labels for Non-Player Characters (NPCs).
+   * This constant is intended to be used within the context of a software application or system.
+   */
   private static final String KEY_NPC_MAP_LABEL_FG_COLOR = "npcMapLabelFG";
 
+  /**
+   * The key for retrieving the background color of PC map labels.
+   * The value of this key is used to store and retrieve background color information for NPC map
+   * The background color is used to style the text of the map labels for Player Characters
+   * (PCs) labels. The value associated with this key should be a valid color value.
+   */
   private static final String KEY_PC_MAP_LABEL_BG_COLOR = "pcMapLabelBG";
+  /**
+   * Constant variable for the foreground color of PC map labels.
+   * The value represents the key used to retrieve the color from a map or configuration file.
+   * The foreground color is used to style the text of the map labels for Player Characters (PCs).
+   * This constant is intended to be used within the context of a software application or system.
+   */
   private static final String KEY_PC_MAP_LABEL_FG_COLOR = "pcMapLabelFG";
 
+  /**
+   * This variable represents the key used to store the background color of non-visible token map
+   * labels. The background color is used to style the text of the map labels for tokens that are
+   * not visible to the player. The value associated with this key should be a valid color value.
+   */
   private static final String KEY_NONVIS_MAP_LABEL_BG_COLOR = "nonVisMapLabelBG";
+  /**
+   * This variable represents the key used to store the foreground color of non-visible token map
+   * labels. The foreground color is used to style the text of the map labels for tokens that are
+   * not visible to the player. The value associated with this key should be a valid color value.
+   */
   private static final String KEY_NONVIS_MAP_LABEL_FG_COLOR = "nonVisMapLabelFG";
 
+  /**
+   * The KEY_MAP_LABEL_FONT_SIZE constant is used to define the name of the key
+   * that represents the font size of map labels.
+   */
   private static final String KEY_MAP_LABEL_FONT_SIZE = "mapLabelFontSize";
 
+  /**
+   * The default background color for the NPC map label.
+   */
   private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
+  /**
+   * The default foreground color for NPC map labels.
+   */
   private static final Color DEFAULT_NPC_MAP_LABEL_FG_COLOR = Color.BLACK;
+  /**
+   * The default background color for the PC map label.
+   */
   private static final Color DEFAULT_PC_MAP_LABEL_BG_COLOR = Color.WHITE;
+  /**
+   * The default foreground color for the map labels in the PC map.
+   */
   private static final Color DEFAULT_PC_MAP_LABEL_FG_COLOR = Color.BLUE;
+  /**
+   * The default background color for non-visible map labels.
+   */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_BG_COLOR = Color.BLACK;
+  /**
+   * The default foreground color for non-visible map labels.
+   */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_FG_COLOR = Color.WHITE;
 
   private static final int DEFAULT_MAP_LABEL_FONT_SIZE = AppStyle.labelFont.getSize();

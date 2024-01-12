@@ -22,12 +22,22 @@ import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 
+/**
+ * The FlatImageLabelFactory class is responsible for creating instances of FlatImageLabel
+ * objects. It provides methods to customize the labels based on different parameters.
+ */
 public class FlatImageLabelFactory {
 
+  /** The singleton instance of the FlatImageLabelFactory class for NPC labels */
   private final FlatImageLabel npcImageLabel;
+  /** The singleton instance of the FlatImageLabelFactory class for PC labels */
   private final FlatImageLabel pcImageLabel;
+  /** The singleton instance of the FlatImageLabelFactory class for non-visible token labels */
   private final FlatImageLabel nonVisibleImageLabel;
 
+  /**
+   * Creates a new instance of the FlatImageLabelFactory class.
+   */
   public FlatImageLabelFactory() {
     var npcBackground = AppPreferences.getNPCMapLabelBG();
     var npcForeground = AppPreferences.getNPCMapLabelFG();
@@ -45,6 +55,12 @@ public class FlatImageLabelFactory {
         new FlatImageLabel(4, 4, nonVisForeground, nonVisBackground, font, Justification.Center);
   }
 
+  /**
+   * Retrieves the appropriate map image label based on the provided token.
+   *
+   * @param token The token representing the entity on the map.
+   * @return The map image label corresponding to the token type, and/or visibility.
+   */
   public FlatImageLabel getMapImageLabel(Token token) {
     if (!token.isVisible()) {
       return nonVisibleImageLabel;
@@ -55,6 +71,12 @@ public class FlatImageLabelFactory {
     }
   }
 
+  /**
+   * Retrieves the map image label based on the provided label.
+   *
+   * @param label The label containing the properties for the map image label.
+   * @return The map image label with the specified properties.
+   */
   public FlatImageLabel getMapImageLabel(Label label) {
     if (label.isShowBackground()) {
       // TODO: CDW
