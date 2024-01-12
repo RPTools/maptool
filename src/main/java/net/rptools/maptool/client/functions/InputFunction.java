@@ -129,7 +129,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class InputFunction extends AbstractFunction {
   private static final Pattern ASSET_PATTERN =
-      Pattern.compile("^(.*)((?:asset|lib)://[0-9a-z-A-Z ./]+)");
+      Pattern.compile("^(.*)((?:asset|lib|Image):(//)?[0-9a-z-A-Z ./]+)");
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
