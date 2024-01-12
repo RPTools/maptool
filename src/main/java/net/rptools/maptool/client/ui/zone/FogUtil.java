@@ -360,7 +360,7 @@ public class FogUtil {
 
             final Token tokenClone = new Token(token);
             final ZoneView zoneView = renderer.getZoneView();
-            Area visionArea = new Area();
+            final var visibleAreas = new ArrayList<Area>();
 
             // Lee: get path according to zone's way point exposure toggle...
             List<? extends AbstractPoint> processPath =
@@ -371,6 +371,7 @@ public class FogUtil {
             int stepCount = processPath.size();
             log.debug("Path size = " + stepCount);
 
+            timer.start("Get visible areas");
             Consumer<ZonePoint> revealAt =
                 zp -> {
                   tokenClone.setX(zp.x);
@@ -379,8 +380,7 @@ public class FogUtil {
                   Area currVisionArea =
                       zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
                   if (currVisionArea != null) {
-                    visionArea.add(currVisionArea);
-                    meta.addToExposedAreaHistory(currVisionArea);
+                    visibleAreas.add(currVisionArea);
                   }
 
                   zoneView.flush(tokenClone);
@@ -397,15 +397,31 @@ public class FogUtil {
               assert finalCell instanceof ZonePoint;
               revealAt.accept((ZonePoint) finalCell);
             }
+            timer.stop("Get visible areas");
 
-            timer.stop("exposeLastPath-" + token.getName());
+            timer.start("Union visible areas");
+            Area visionArea = GeometryUtil.destructiveUnion(visibleAreas);
+            timer.stop("Union visible areas");
+
+            timer.start("Add to token exposed area");
+            meta.addToExposedAreaHistory(visionArea);
+            timer.stop("Add to token exposed area");
+
             renderer.flush(tokenClone);
 
             filteredToks.clear();
             filteredToks.add(token.getId());
+
+            timer.start("Update zone");
             zone.putToken(token);
+            timer.stop("Update zone");
+
+            timer.start("Send results");
             MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
             MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
+            timer.stop("Send results");
+
+            timer.stop("exposeLastPath-" + token.getName());
           }
         });
   }
