@@ -394,7 +394,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.53.v20231009'
     implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.53.v20231009'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
+    implementation 'org.eclipse.jetty.websocket:websocket-servlet:10.0.19'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
 
 
