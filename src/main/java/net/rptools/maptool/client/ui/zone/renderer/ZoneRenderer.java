@@ -1209,16 +1209,20 @@ public class ZoneRenderer extends JComponent
     final var timer = CodeTimer.get();
 
     timer.start("labels-1");
+    var labelRenderFactory = new FlatImageLabelFactory();
     labelLocationList.clear();
     for (Label label : zone.getLabels()) {
+      var flabel = labelRenderFactory.getMapImageLabel(label);
       ZonePoint zp = new ZonePoint(label.getX(), label.getY());
       if (!zone.isPointVisible(zp, view)) {
         continue;
       }
       timer.start("labels-1.1");
       ScreenPoint sp = ScreenPoint.fromZonePointRnd(this, zp.x, zp.y);
-      Rectangle bounds = null;
-      if (label.isShowBackground()) {
+      var dim = flabel.getDimensions(g, label.getLabel());
+      Rectangle bounds = flabel.render(g, (int) sp.x, (int) sp.y, label.getLabel());
+      /*if (label.isShowBackground()) {
+        bounds = new Rectangle((int)sp.x, (int)sp.y, dim.width, dim.height);
         bounds =
             GraphicsUtil.drawBoxedString(
                 g,
@@ -1239,7 +1243,7 @@ public class ZoneRenderer extends JComponent
         g.drawString(label.getLabel(), x, (int) sp.y);
 
         bounds = new Rectangle(x, y, strWidth, fm.getHeight());
-      }
+      }*/
       labelLocationList.add(new LabelLocation(bounds, label));
       timer.stop("labels-1.1");
     }

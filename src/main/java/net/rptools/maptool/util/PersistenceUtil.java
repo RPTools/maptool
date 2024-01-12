@@ -71,6 +71,7 @@ import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.transform.campaign.AssetNameTransform;
 import net.rptools.maptool.model.transform.campaign.ExportInfoTransform;
+import net.rptools.maptool.model.transform.campaign.LabelFontAndBGTransform;
 import net.rptools.maptool.model.transform.campaign.PCVisionTransform;
 import net.rptools.maptool.model.transform.campaign.TokenPropertyMapTransform;
 import org.apache.commons.io.FileUtils;
@@ -98,7 +99,7 @@ public class PersistenceUtil {
 
   private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
 
-  private static final String CAMPAIGN_VERSION = "1.11.0";
+  private static final String CAMPAIGN_VERSION = "1.15.0";
 
   // Please add a single note regarding why the campaign version number has been updated:
   // 1.3.70 ownerOnly added to model.Light (not backward compatible)
@@ -111,6 +112,7 @@ public class PersistenceUtil {
   // compatible
   // 1.11.0 Added add-on libraries, if loaded and saved with an older version then add-on
   //        libraries will be removed.
+  // 1.15.0 Labels now have background color and font
 
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
   private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
@@ -149,6 +151,8 @@ public class PersistenceUtil {
     campaignVersionManager.registerTransformation("1.3.75", new ExportInfoTransform());
     campaignVersionManager.registerTransformation(
         "1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
+    // Label background color and font
+    campaignVersionManager.registerTransformation("1.15.0", new LabelFontAndBGTransform());
 
     // For a short time, assets were stored separately in files ending with ".dat". As of 1.3.64,
     // they are

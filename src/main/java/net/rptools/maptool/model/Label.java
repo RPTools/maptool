@@ -312,6 +312,8 @@ public class Label {
         .setY(y)
         .setShowBackground(showBackground)
         .setForegroundColor(foregroundColor)
+        .setBackgroundColor(backgroundColor)
+        .setFontSize(fontSize)
         .build();
   }
 }

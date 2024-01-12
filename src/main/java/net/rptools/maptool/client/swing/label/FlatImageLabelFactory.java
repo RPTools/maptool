@@ -78,18 +78,9 @@ public class FlatImageLabelFactory {
    * @return The map image label with the specified properties.
    */
   public FlatImageLabel getMapImageLabel(Label label) {
-    if (label.isShowBackground()) {
-      // TODO: CDW
-      return new FlatImageLabel(
-          4, 4, label.getForegroundColor(), Color.GRAY, AppStyle.labelFont, Justification.Center);
-    } else {
-      return new FlatImageLabel(
-          4,
-          4,
-          label.getForegroundColor(),
-          new Color(0, 0, 0, 0),
-          AppStyle.labelFont,
-          Justification.Center);
-    }
+    var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), label.getFontSize());
+    var bg = label.isShowBackground() ? label.getBackgroundColor() : new Color(0, 0, 0, 0);
+    return new FlatImageLabel(
+          4, 4, label.getForegroundColor(), bg, font, Justification.Center);
   }
 }

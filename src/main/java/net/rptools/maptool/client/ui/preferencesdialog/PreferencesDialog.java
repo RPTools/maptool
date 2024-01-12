@@ -853,17 +853,17 @@ public class PreferencesDialog extends JDialog {
           MapTool.getFrame().setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
         });
 
-    trustedOuputForeground.addActionListener(
+    trustedOutputForeground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixFG(trustedOuputForeground.getColor());
+          AppPreferences.setTrustedPrefixFG(trustedOutputForeground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
                   AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
         });
-    trustedOuputBackground.addActionListener(
+    trustedOutputBackground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixBG(trustedOuputBackground.getColor());
+          AppPreferences.setTrustedPrefixBG(trustedOutputBackground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
