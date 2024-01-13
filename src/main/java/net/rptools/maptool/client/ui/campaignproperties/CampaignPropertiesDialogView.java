@@ -14,21 +14,20 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
-import java.awt.*;
 import javax.swing.*;
 import net.rptools.maptool.client.swing.ColorWell;
 
 public class CampaignPropertiesDialogView {
 
   private JPanel mainPanel;
-  private JTextField nameField;
+  private JTextField textName;
   private JComboBox comboType;
   private JComboBox comboSide;
   private JSpinner spinnerThickness;
   private JSpinner spinnerOpacity;
   private JSpinner spinnerIncrements;
   private JCheckBox checkMouseover;
-  private ColorWell colourBG;
+  private ColorWell colourBg;
   private ColorWell colourBar;
 
   public JComponent getRootComponent() {
