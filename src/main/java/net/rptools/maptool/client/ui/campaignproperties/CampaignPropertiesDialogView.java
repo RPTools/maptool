@@ -20,6 +20,7 @@ import javax.swing.*;
 public class CampaignPropertiesDialogView {
 
   private JPanel mainPanel;
+  private JTextField textName;
 
   public JComponent getRootComponent() {
     return mainPanel;
