@@ -36,6 +36,7 @@
           <component id="8860f" class="javax.swing.JList">
             <constraints/>
             <properties>
+              <model/>
               <name value="tokenTypeList"/>
               <selectionMode value="0"/>
             </properties>

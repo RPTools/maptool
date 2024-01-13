@@ -170,7 +170,7 @@ public class CampaignPropertiesDialog extends JDialog {
     button.addActionListener(
         e -> {
           String newRepo = getNewServerTextField().getText();
-          if (newRepo == null || newRepo.length() == 0) {
+          if (newRepo == null || newRepo.isEmpty()) {
             return;
           }
           // TODO: Check for uniqueness
@@ -211,7 +211,7 @@ public class CampaignPropertiesDialog extends JDialog {
     try {
       MapTool.getFrame()
           .showFilledGlassPane(
-              new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+              new StaticMessageDialog("CampaignPropertiesDialog.tokenTypeNameRename"));
       tokenPropertiesPanel
           .getRenameTypes()
           .forEach(
@@ -589,12 +589,25 @@ public class CampaignPropertiesDialog extends JDialog {
             "sightLight.wikiLinkReferral",
             "<i>wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</i>"));
     if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
-      /* remove translated version of words for English locales. */
+      /* For string literals the English is the same as the translated text.
+        i.e. arc (arc), cone (cone)
+        Here we set the translated text values to blank which leaves the parenthesis empty.
+        We can then replace the empty () with blanks so it looks right to English readers.
+      */
       parameters.put(
           "optionDescriptionShape",
           I18N.getText("sightLight.optionDescription.shape", "", "", "", "", "", "")
               .replace("(", "")
               .replace(")", ""));
+
+      parameters.put("optionLabelArc", "");
+      parameters.put("optionLabelWidth", "");
+      parameters.put("optionLabelOffset", "");
+      parameters.put("optionLabelIgnoresVBL", "");
+      parameters.put("optionLabelAura", "");
+      parameters.put("optionLabelDistance", "");
+      parameters.put("optionLabelScale", "");
+
     } else {
       parameters.put(
           "optionDescriptionShape",
@@ -657,7 +670,7 @@ public class CampaignPropertiesDialog extends JDialog {
     String syntaxSight =
         """
               <code>
-              <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset}]] [ ${optionLabelDistance} ] [ ${optionLabelScale} ] [ ${optionLabelMagnifier} ] [ ${optionLabelPersonalSight} ]</font><br>
+              <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ Arc(${optionLabelArc}) Width(${optionLabelWidth}) Offset(${optionLabelOffset})]] [ Distance(${optionLabelDistance}) ] [ Scale(${optionLabelScale}) ] [ ${optionLabelMagnifier} ] [ ${optionLabelPersonalSight} ]</font><br>
               </code>
               """;
     String syntaxLight =
@@ -665,7 +678,7 @@ public class CampaignPropertiesDialog extends JDialog {
             <code>
             <font size=4>${syntaxLabelGroupName}<br>
             -------<br>
-            [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelIgnoresVBL} ] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
+            [ ${syntaxLabelName} ] : [ Aura(${optionLabelAura}) [ ${optionLabelRestriction} ]] [ Ignores-VBL(${optionLabelIgnoresVBL}) ] [ ${optionLabelShape} [ Arc(${optionLabelArc}) Width(${optionLabelWidth}) Offset(${optionLabelOffset}) ]] [ Scale(${optionLabelScale}) ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
             </code>
             """;
     /*
@@ -693,21 +706,21 @@ public class CampaignPropertiesDialog extends JDialog {
               <td${alignCellCenter}>cone</td>
             </tr>
             <tr>
-              <th>${optionLabelArc}</th>
+              <th>Arc (${optionLabelArc})</th>
               <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
               <td>${optionDescriptionArc}</td>
               <td${alignCellCenter}>${wordUnused}</td>
               <td${alignCellCenter}>arc=120</td>
             </tr>
             <tr>
-              <th>${optionLabelWidth}</th>
+              <th>Width (${optionLabelWidth})</th>
               <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
               <td>${optionDescriptionWidth}</td>
               <td${alignCellCenter}>${wordUnused}</td>
               <td${alignCellCenter}>width=0.4</td>
             </tr>
             <tr>
-              <th>${optionLabelOffset}</th>
+              <th>Offset (${optionLabelOffset})</th>
               <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
               <td>${optionDescriptionOffset1} ${optionDescriptionOffset2}</td>
               <td${alignCellCenter}>${wordUnused}</td>
@@ -717,14 +730,14 @@ public class CampaignPropertiesDialog extends JDialog {
     String optionsTableLightRows =
         """
             <tr>
-              <th>${optionLabelAura}</th>
+              <th>Aura (${optionLabelAura})</th>
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionAura}</td>
               <td${alignCellCenter}>${wordUnused}</td>
               <td${alignCellCenter}>aura</td>
             </tr>
             <tr>
-              <th>${optionLabelIgnoresVBL}</th>
+              <th>Ignores-vbl (${optionLabelIgnoresVBL})</th>
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionIgnoresVBL}</td>
               <td${alignCellCenter}>${wordUnused}</td>
@@ -762,14 +775,14 @@ public class CampaignPropertiesDialog extends JDialog {
     String optionsTableSightRows =
         """
             <tr>
-              <th>${optionLabelDistance}</th>
+              <th>distance (${optionLabelDistance})</th>
               <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
               <td>${optionDescriptionDistance}</td>
               <td${alignCellCenter}>${mapVisionDistance}</td>
               <td${alignCellCenter}>distance=120</td>
             </tr>
             <tr>
-              <th>${optionLabelScale}</th>
+              <th>scale (${optionLabelScale})</th>
               <td${alignCellCenter}>${optionTypeKeyword}</td>
               <td>${optionDescriptionScale}</td>
               <td${alignCellCenter}>${wordUnused}</td>
@@ -915,8 +928,10 @@ public class CampaignPropertiesDialog extends JDialog {
             + "</body></html>";
 
     StringSubstitutor substitute = new StringSubstitutor(parameters);
-    String sightResult = substitute.replace(htmlSight);
-    String lightResult = substitute.replace(htmlLight);
+    /* English has no translated value between parenthesis so they are removed after the substitution */
+    String sightResult = substitute.replace(htmlSight).replace("()", "");
+    String lightResult = substitute.replace(htmlLight).replace("()", "");
+    ;
     return new String[] {sightResult, lightResult};
   }
 }
