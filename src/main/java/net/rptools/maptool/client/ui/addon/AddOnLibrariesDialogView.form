@@ -221,7 +221,7 @@
                             <properties>
                               <enabled value="true"/>
                               <font style="1"/>
-                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.giturl"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.gitURL"/>
                             </properties>
                           </component>
                           <component id="bce02" class="javax.swing.JLabel" binding="addOnGitUrlLabel">

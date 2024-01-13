@@ -577,7 +577,7 @@
                       <actionCommand value="GM"/>
                       <name value="tokenStatesOwner"/>
                       <selected value="true"/>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaginPropertiesDialog.label.owner"/>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.label.owner"/>
                     </properties>
                   </component>
                   <component id="18b3a" class="javax.swing.JCheckBox">
@@ -1039,7 +1039,7 @@
                       <actionCommand value="GM"/>
                       <name value="tokenBarOwner"/>
                       <selected value="true"/>
-                      <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaginPropertiesDialog.label.owner"/>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.label.owner"/>
                     </properties>
                   </component>
                   <component id="518d9" class="javax.swing.JCheckBox">

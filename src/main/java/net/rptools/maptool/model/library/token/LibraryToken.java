@@ -398,7 +398,7 @@ class LibraryToken implements Library {
     }
 
     throw new LibraryNotValidException(
-        Reason.MISSING_LIBRARY, I18N.getText("library.error.libtoken.missing"));
+        Reason.MISSING_LIBRARY, I18N.getText("library.error.libToken.missing"));
   }
 
   /**

@@ -96,7 +96,7 @@ public class ToolbarPanel extends JToolBar {
             Icons.TOOLBAR_TOPOLOGY_ON,
             Icons.TOOLBAR_TOPOLOGY_OFF,
             createTopologyPanel(),
-            I18N.getText("tools.topo.tooltip"));
+            I18N.getText("tools.topology.tooltip"));
     add(topologyButton);
 
     optionPanelSeparator = addSeparator(this, 21);
@@ -239,7 +239,7 @@ public class ToolbarPanel extends JToolBar {
   }
 
   public JButton createZoneSelectionButton() {
-    String title = I18N.getText("tools.zoneselector.tooltip");
+    String title = I18N.getText("tools.zoneSelector.tooltip");
 
     final JButton button = new JButton(title, RessourceManager.getBigIcon(Icons.TOOLBAR_ZONE));
     button.setToolTipText(title);

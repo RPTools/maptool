@@ -107,7 +107,7 @@
                            </font>
                         </Label>
                         <Hyperlink fx:id="linkWebsite" maxWidth="1.7976931348623157E308" HBox.hgrow="ALWAYS" />
-                        <Label text="%library.dialog.addon.giturl">
+                        <Label text="%library.dialog.addon.gitURL">
                            <padding>
                               <Insets bottom="5.0" left="5.0" right="5.0" top="5.0" />
                            </padding>

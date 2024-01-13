@@ -770,8 +770,8 @@
                           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macrolinks"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macrolinks.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macroLinks"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.chat.macroLinks.tooltip"/>
                         </properties>
                       </component>
                       <component id="7908e" class="javax.swing.JCheckBox">
@@ -782,7 +782,7 @@
                           <actionCommand value="Use tooltips for inline rolls"/>
                           <name value="suppressToolTipsMacroLinks"/>
                           <text value=""/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preference.checkbox.chat.macrolinks.tooltip"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preference.checkbox.chat.macroLinks.tooltip"/>
                         </properties>
                       </component>
                     </children>
@@ -1024,8 +1024,8 @@
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillselection"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillselection.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillSelection"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.performance.fillSelection.tooltip"/>
                         </properties>
                       </component>
                       <component id="c0c50" class="javax.swing.JTextField">
@@ -1083,8 +1083,8 @@
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hidenpc"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hidenpc.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hideNPC"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.initiative.hideNPC.tooltip"/>
                         </properties>
                       </component>
                       <component id="bd817" class="javax.swing.JCheckBox">
@@ -1193,8 +1193,8 @@
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitview"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitview.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitView"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.client.fitView.tooltip"/>
                         </properties>
                       </component>
                       <component id="1a746" class="javax.swing.JCheckBox">
@@ -1530,8 +1530,8 @@
                           <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoexpose"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoexpose.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoExpose"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.autoExpose.tooltip"/>
                         </properties>
                       </component>
                       <component id="895c1" class="javax.swing.JCheckBox">
@@ -1636,8 +1636,8 @@
                           <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapvisibilitywarning"/>
-                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapvisibilitywarning.tooltip"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapVisibilityWarning"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.fog.mapVisibilityWarning.tooltip"/>
                         </properties>
                       </component>
                       <component id="7196b" class="javax.swing.JCheckBox">
@@ -1912,8 +1912,8 @@
                   <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                 </constraints>
                 <properties>
-                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.icontheme"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.icontheme.tooltip"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.iconTheme"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.iconTheme.tooltip"/>
                 </properties>
               </component>
               <component id="74e7" class="javax.swing.JComboBox">

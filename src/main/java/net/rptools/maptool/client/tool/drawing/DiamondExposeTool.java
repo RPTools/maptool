@@ -36,7 +36,7 @@ public class DiamondExposeTool extends DiamondTool {
 
   @Override
   public String getInstructions() {
-    return "tool.rectexpose.instructions";
+    return "tool.rectExpose.instructions";
   }
 
   @Override

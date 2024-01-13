@@ -52,12 +52,12 @@ public class HollowRectangleTopologyTool extends AbstractDrawingTool
 
   @Override
   public String getInstructions() {
-    return "tool.recttopology.instructions";
+    return "tool.rectTopology.instructions";
   }
 
   @Override
   public String getTooltip() {
-    return "tool.recttopologyhollow.tooltip";
+    return "tool.rectTopologyHollow.tooltip";
   }
 
   @Override

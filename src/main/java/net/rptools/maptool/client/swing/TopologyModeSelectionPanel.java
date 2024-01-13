@@ -54,19 +54,19 @@ public class TopologyModeSelectionPanel extends JToolBar {
         Zone.TopologyType.WALL_VBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF,
-        "tools.topology_mode_selection.vbl.tooltip",
+            "tools.topology_mode_selection.vb.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.HILL_VBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_HILL_OFF,
-        "tools.topology_mode_selection.hill_vbl.tooltip",
+            "tools.topology_mode_selection.hill_vb.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.PIT_VBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_OFF,
-        "tools.topology_mode_selection.pit_vbl.tooltip",
+            "tools.topology_mode_selection.pit_vb.tooltip",
         initiallySelectedTypes);
     createAndAddModeButton(
         Zone.TopologyType.COVER_VBL,
@@ -78,7 +78,7 @@ public class TopologyModeSelectionPanel extends JToolBar {
         Zone.TopologyType.MBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_ON,
         Icons.TOOLBAR_TOPOLOGY_TYPE_MBL_OFF,
-        "tools.topology_mode_selection.mbl.tooltip",
+            "tools.topology_mode_selection.mb.tooltip",
         initiallySelectedTypes);
 
     this.add(Box.createHorizontalStrut(5));

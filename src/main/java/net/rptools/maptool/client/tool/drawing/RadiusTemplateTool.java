@@ -376,7 +376,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    */
   @Override
   public String getTooltip() {
-    return "tool.radiustemplate.tooltip";
+    return "tool.radiusTemplate.tooltip";
   }
 
   /**
@@ -384,7 +384,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    */
   @Override
   public String getInstructions() {
-    return "tool.radiustemplate.instructions";
+    return "tool.radiusTemplate.instructions";
   }
 
   /*---------------------------------------------------------------------------------------------

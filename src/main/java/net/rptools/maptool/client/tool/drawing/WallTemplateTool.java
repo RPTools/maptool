@@ -58,7 +58,7 @@ public class WallTemplateTool extends BurstTemplateTool {
    */
   @Override
   public String getTooltip() {
-    return "tool.walltemplate.tooltip";
+    return "tool.wallTemplate.tooltip";
   }
 
   /**
@@ -66,7 +66,7 @@ public class WallTemplateTool extends BurstTemplateTool {
    */
   @Override
   public String getInstructions() {
-    return "tool.walltemplate.instructions";
+    return "tool.wallTemplate.instructions";
   }
 
   /**

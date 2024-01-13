@@ -381,7 +381,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
    */
   @Override
   public String getInstructions() {
-    return "tool.radiustemplate.instructions";
+    return "tool.radiusTemplate.instructions";
   }
 
   /*---------------------------------------------------------------------------------------------

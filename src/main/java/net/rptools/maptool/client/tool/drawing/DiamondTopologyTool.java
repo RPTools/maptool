@@ -49,12 +49,12 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
 
   @Override
   public String getInstructions() {
-    return "tool.isorectangletopology.instructions";
+    return "tool.isoRectangleTopology.instructions";
   }
 
   @Override
   public String getTooltip() {
-    return "tool.isorectangletopology.tooltip";
+    return "tool.isoRectangleTopology.tooltip";
   }
 
   @Override

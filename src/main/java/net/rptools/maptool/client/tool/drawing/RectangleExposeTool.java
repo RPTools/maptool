@@ -37,7 +37,7 @@ public class RectangleExposeTool extends RectangleTool {
 
   @Override
   public String getInstructions() {
-    return "tool.rectexpose.instructions";
+    return "tool.rectExpose.instructions";
   }
 
   @Override
@@ -86,6 +86,6 @@ public class RectangleExposeTool extends RectangleTool {
 
   @Override
   public String getTooltip() {
-    return "tool.rectexpose.tooltip";
+    return "tool.rectExpose.tooltip";
   }
 }
