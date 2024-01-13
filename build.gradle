@@ -144,7 +144,7 @@ javafx {
 }
 
 protobuf {
-    protoc { artifact = "com.google.protobuf:protoc:3.25.1" }
+    protoc { artifact = "com.google.protobuf:protoc:3.25.2" }
 }
 
 // Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
@@ -497,7 +497,7 @@ dependencies {
 
     // protobuf
     implementation "io.grpc:grpc-protobuf:1.60.1"
-    implementation "com.google.protobuf:protobuf-java-util:3.25.1"
+    implementation "com.google.protobuf:protobuf-java-util:3.25.2"
 
     // Java Tuples
     implementation 'com.flipkart.utils:javatuples:3.0'
@@ -508,7 +508,7 @@ dependencies {
     // HTML Parsing
     implementation 'org.jsoup:jsoup:1.17.2'
     // eventbus
-    implementation 'com.google.guava:guava:32.1.3-jre'
+    implementation 'com.google.guava:guava:33.0.0-jre'
     // compression of messages between client and server
     implementation 'org.apache.commons:commons-compress:1.25.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-11'

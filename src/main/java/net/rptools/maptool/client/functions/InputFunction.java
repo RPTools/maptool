@@ -66,7 +66,6 @@ import javax.swing.Scrollable;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
-import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
@@ -74,7 +73,7 @@ import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.htmlframe.HTMLPane;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.AssetResolver;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
@@ -130,7 +129,7 @@ import org.apache.commons.lang.StringUtils;
 
 public class InputFunction extends AbstractFunction {
   private static final Pattern ASSET_PATTERN =
-      Pattern.compile("^(.*)((?:asset|lib)://[0-9a-z-A-Z ./]+)");
+      Pattern.compile("^(.*)((?:asset|lib|Image):(//)?[0-9a-z-A-Z ./]+)");
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
@@ -1276,17 +1275,7 @@ public class InputFunction extends AbstractFunction {
     if (id == null) {
       return null;
     }
-    var assetKey = new AssetResolver().getAssetKey(id);
-    String assetId = null;
-    if (assetKey.isPresent()) {
-      assetId = assetKey.get().toString();
-    }
-    MD5Key assetMD5 = null;
-    if (assetId != null) {
-      assetMD5 = new MD5Key(assetId);
-    } else {
-      assetMD5 = new MD5Key(id);
-    }
+    var assetMD5 = FunctionUtil.getAssetKeyFromString(id);
 
     // Get the base image && find the new size for the icon
     BufferedImage assetImage = ImageManager.getImage(assetMD5, io);

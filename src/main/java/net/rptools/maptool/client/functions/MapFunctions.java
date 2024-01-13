@@ -285,7 +285,6 @@ public class MapFunctions extends AbstractFunction {
           throw new ParserException(
               I18N.getText("macro.function.map.invalidAsset", functionName, mapAssetId));
         }
-
         final var mapAsset = AssetManager.getAsset(mapAssetKey);
         if (mapAsset != null) {
           AssetManager.putAsset(mapAsset);
