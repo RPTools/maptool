@@ -44,7 +44,7 @@ import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
 @MacroDefinition(
     name = "addtokenstate",
     aliases = {"tsa"},
-    description = "addtokenstate.description")
+    description = "addTokenState.description")
 public class AddTokenStateMacro implements Macro {
 
   /** The element that contains the token state name */
@@ -77,7 +77,7 @@ public class AddTokenStateMacro implements Macro {
     // Split the command line into an array and get the tokens
     String[] tokens = aMacro.split("\\s");
     if (tokens.length < 2) {
-      MapTool.addLocalMessage(I18N.getText("addtokenstate.param"));
+      MapTool.addLocalMessage(I18N.getText("addTokenState.param"));
       return;
     } // endif
     String name = tokens[NAME];
@@ -87,7 +87,7 @@ public class AddTokenStateMacro implements Macro {
 
     // Check for a duplicate name
     if (MapTool.getCampaign().getTokenStatesMap().get(name) != null) {
-      MapTool.addLocalMessage(I18N.getText("addtokenstate.exists"));
+      MapTool.addLocalMessage(I18N.getText("addTokenState.exists"));
       return;
     } // endif
 
@@ -111,7 +111,7 @@ public class AddTokenStateMacro implements Macro {
       } else if (overlay.equals("triangle")) {
         tokenOverlay = createTriangleOverlay(name, param1, param2);
       } else {
-        MapTool.addLocalMessage(I18N.getText("addtokenstate.noOverlyType", overlay));
+        MapTool.addLocalMessage(I18N.getText("addTokenState.noOverlayType", overlay));
         return;
       } // endif
     } catch (IllegalArgumentException e) {
@@ -119,7 +119,7 @@ public class AddTokenStateMacro implements Macro {
       return;
     }
     MapTool.getCampaign().getTokenStatesMap().put(tokenOverlay.getName(), tokenOverlay);
-    MapTool.addLocalMessage(I18N.getText("addtokenstate.added", tokenOverlay.getName()));
+    MapTool.addLocalMessage(I18N.getText("addTokenState.added", tokenOverlay.getName()));
   }
 
   /**
@@ -245,7 +245,7 @@ public class AddTokenStateMacro implements Macro {
       return Color.decode(name);
     } catch (NumberFormatException e) {
       if (!MapToolUtil.isValidColor(name.toLowerCase())) {
-        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidColor", name), e);
+        throw new IllegalArgumentException(I18N.getText("addTokenState.invalidColor", name), e);
       } // endif
       return MapToolUtil.getColor(name);
     } // endtry
@@ -264,7 +264,7 @@ public class AddTokenStateMacro implements Macro {
     try {
       return Integer.parseInt(name);
     } catch (NumberFormatException e) {
-      throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidNumber", name), e);
+      throw new IllegalArgumentException(I18N.getText("addTokenState.invalidNumber", name), e);
     } // endtry
   }
 
@@ -281,7 +281,7 @@ public class AddTokenStateMacro implements Macro {
       return Quadrant.valueOf(name.toUpperCase());
     } catch (IllegalArgumentException e) {
       if (!CORNER_MAP.containsKey(name.toLowerCase())) {
-        throw new IllegalArgumentException(I18N.getText("addtokenstate.invalidCorner", name), e);
+        throw new IllegalArgumentException(I18N.getText("addTokenState.invalidCorner", name), e);
       } // endif
       return CORNER_MAP.get(name);
     } // endtry

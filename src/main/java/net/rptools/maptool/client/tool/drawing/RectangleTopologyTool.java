@@ -50,12 +50,12 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
 
   @Override
   public String getInstructions() {
-    return "tool.recttopology.instructions";
+    return "tool.rectTopology.instructions";
   }
 
   @Override
   public String getTooltip() {
-    return "tool.recttopology.tooltip";
+    return "tool.rectTopology.tooltip";
   }
 
   @Override

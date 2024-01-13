@@ -141,7 +141,7 @@
                     <properties>
                       <name value="mblToggle"/>
                       <text value=""/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movembltoggle.tooltip"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveMBToggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="e2975" class="javax.swing.JToggleButton">
@@ -151,7 +151,7 @@
                     <properties>
                       <name value="wallVblToggle"/>
                       <text value=""/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movevbltoggle.tooltip"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveVBToggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="9e8c7" class="javax.swing.JToggleButton">
@@ -161,7 +161,7 @@
                     <properties>
                       <name value="hillVblToggle"/>
                       <text value=""/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movehbltoggle.tooltip"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveHBToggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="d415c" class="javax.swing.JToggleButton">
@@ -171,7 +171,7 @@
                     <properties>
                       <name value="pitVblToggle"/>
                       <text value=""/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movepbltoggle.tooltip"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movePBToggle.tooltip"/>
                     </properties>
                   </component>
                   <component id="2b7ed" class="javax.swing.JToggleButton">
@@ -181,7 +181,7 @@
                     <properties>
                       <name value="coverVblToggle"/>
                       <text value=""/>
-                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movecbltoggle.tooltip"/>
+                      <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveCBToggle.tooltip"/>
                     </properties>
                   </component>
                 </children>
@@ -420,7 +420,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblToMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.tomap"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movetomap.tooltip"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveToMap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>
@@ -432,7 +432,7 @@
                   <actionCommand value="Clear VBL"/>
                   <name value="transferVblFromMap"/>
                   <text resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.vbl.frommap"/>
-                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.movefrommap.tooltip"/>
+                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="EditTokenDialog.button.moveFromMap.tooltip"/>
                   <visible value="true"/>
                 </properties>
               </component>

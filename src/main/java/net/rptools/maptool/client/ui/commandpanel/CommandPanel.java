@@ -482,7 +482,7 @@ public class CommandPanel extends JPanel {
       chatNotifyButton.setIcon(RessourceManager.getSmallIcon(Icons.CHAT_SHOW_TYPING_NOTIFICATION));
       chatNotifyButton.setSelectedIcon(
           RessourceManager.getSmallIcon(Icons.CHAT_HIDE_TYPING_NOTIFICATION));
-      chatNotifyButton.setToolTipText(I18N.getText("action.chat.showhide.tooltip"));
+      chatNotifyButton.setToolTipText(I18N.getText("action.chat.showHide.tooltip"));
       chatNotifyButton.setUI(new BasicToggleButtonUI());
       chatNotifyButton.setBorderPainted(false);
       chatNotifyButton.setFocusPainted(false);

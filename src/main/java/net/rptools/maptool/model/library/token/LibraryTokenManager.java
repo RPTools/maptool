@@ -268,7 +268,7 @@ public class LibraryTokenManager {
         return new LibraryToken(token.get());
       } else { // There are some tokens but none with "Allow URI Access"
         throw new LibraryNotValidException(
-            Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libtoken.no.access", name));
+            Reason.MISSING_PERMISSIONS, I18N.getText("library.error.libToken.no.access", name));
       }
     }
     return null;
@@ -304,7 +304,7 @@ public class LibraryTokenManager {
     }
 
     throw new LibraryNotValidException(
-        Reason.MISSING_LIBRARY, I18N.getText("library.error.libtoken.missing"));
+        Reason.MISSING_LIBRARY, I18N.getText("library.error.libToken.missing"));
   }
 
   /**

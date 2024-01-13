@@ -25,14 +25,14 @@ import net.rptools.maptool.util.MessageUtil;
 @MacroDefinition(
     name = "reply",
     aliases = {"rep"},
-    description = "whisperreply.description")
+    description = "whisperReply.description")
 public class WhisperReplyMacro extends AbstractMacro {
   public void execute(MacroContext context, String message, MapToolMacroContext executionContext) {
     String playerName = MapTool.getLastWhisperer();
     if (playerName == null) {
       MapTool.addMessage(
           TextMessage.me(
-              context.getTransformationHistory(), I18N.getString("whisperreply.noTarget")));
+              context.getTransformationHistory(), I18N.getString("whisperReply.noTarget")));
       return;
     }
     // Validate

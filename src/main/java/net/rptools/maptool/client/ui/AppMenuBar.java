@@ -59,8 +59,8 @@ public class AppMenuBar extends JMenuBar {
         createMinimizeButton(
             Icons.TOOLBAR_HIDE_ON,
             Icons.TOOLBAR_HIDE_OFF,
-            I18N.getText("tools.hidetoolbar.tooltip"),
-            I18N.getText("tools.unhidetoolbar.tooltip")));
+            I18N.getText("tools.hideToolbar.tooltip"),
+            I18N.getText("tools.unhideToolbar.tooltip")));
   }
 
   // This is a hack to allow the menubar shortcut keys to still work even

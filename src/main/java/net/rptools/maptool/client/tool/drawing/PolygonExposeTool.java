@@ -40,12 +40,12 @@ public class PolygonExposeTool extends PolygonTool implements MouseMotionListene
 
   @Override
   public String getTooltip() {
-    return "tool.polyexpose.tooltip";
+    return "tool.polygonExpose.tooltip";
   }
 
   @Override
   public String getInstructions() {
-    return "tool.polyexpose.instructions";
+    return "tool.polylineExpose.instructions";
   }
 
   @Override

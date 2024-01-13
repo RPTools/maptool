@@ -32,7 +32,7 @@ public class PolyLineTopologyTool extends PolygonTopologyTool implements MouseMo
 
   @Override
   public String getTooltip() {
-    return "tool.polylinetopo.tooltip";
+    return "tool.polylineTopology.tooltip";
   }
 
   @Override

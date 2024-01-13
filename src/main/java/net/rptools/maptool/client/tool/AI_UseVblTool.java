@@ -43,7 +43,7 @@ public class AI_UseVblTool extends DefaultTool {
 
   @Override
   public String getTooltip() {
-    return "tools.ignore_vbl_on_move.tooltip";
+    return "tools.ignore_vb_on_move.tooltip";
   }
 
   @Override

@@ -1001,9 +1001,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     public JMenuItem asJMenuItem() {
       JMenuItem jMenuItem = new JMenuItem(this);
       if (selectedTokenSet.size() > 1) {
-        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.toomany.tooltip"));
+        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.tooMany.tooltip"));
       } else if (!MapTool.getPlayer().isGM() && MapTool.getServerPolicy().isTokenEditorLocked()) {
-        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.notallowed.tooltip"));
+        jMenuItem.setToolTipText(I18N.getText("token.popup.menu.edit.notAllowed.tooltip"));
       }
       return jMenuItem;
     }

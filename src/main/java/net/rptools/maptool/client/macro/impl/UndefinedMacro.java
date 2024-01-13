@@ -25,6 +25,6 @@ import net.rptools.maptool.language.I18N;
 public class UndefinedMacro implements Macro {
 
   public void execute(MacroContext context, String macro, MapToolMacroContext executionContext) {
-    MapTool.addLocalMessage(I18N.getText("undefinedmacro.unknownCommand", macro));
+    MapTool.addLocalMessage(I18N.getText("undefinedMacro.unknownCommand", macro));
   }
 }
