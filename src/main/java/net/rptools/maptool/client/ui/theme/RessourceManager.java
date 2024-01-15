@@ -20,14 +20,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
-import java.util.Set;
-import java.util.SortedSet;
 import java.util.TreeSet;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.ImageBorder;
-import org.bouncycastle.tsp.ers.SortedHashList;
 import org.javatuples.Triplet;
 
 public class RessourceManager {
@@ -325,7 +322,8 @@ public class RessourceManager {
           put(Icons.COLORPICKER_SNAP_ON, ROD_ICONS + "shape_handles.svg");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, ROD_ICONS + "misc/Colour Selection (eye dropper).svg");
           put(Icons.EDIT_TOKEN_HEROLAB, ROD_ICONS + "hero-lab-icon.svg");
-          //FIXME: both icons are the same. Maybe we could change the color of svgs according to the theme?
+          // FIXME: both icons are the same. Maybe we could change the color of svgs according to
+          // the theme?
           put(Icons.EDIT_TOKEN_REFRESH_OFF, ROD_ICONS + "refresh_arrows.svg");
           put(Icons.EDIT_TOKEN_REFRESH_ON, ROD_ICONS + "refresh_arrows.svg");
           put(Icons.GRID_HEX_HORIZONTAL, ROD_ICONS + "gridHorizontalHex.svg");
@@ -564,16 +562,16 @@ public class RessourceManager {
   }
 
   public static void main(String[] args) {
-    //checkMissingFiles();
+    // checkMissingFiles();
     checkMissingIcons(classicIcons, rodIcons);
-    //for (var img : Set.of(images.values())) System.out.println(img);
+    // for (var img : Set.of(images.values())) System.out.println(img);
   }
 
   private static void checkMissingIcons(
       HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
     var missing = new TreeSet<Icons>();
     for (var key : classicIcons.keySet()) {
-      if (rodIcons.containsKey(key))  {
+      if (rodIcons.containsKey(key)) {
         continue;
       }
       missing.add(key);
