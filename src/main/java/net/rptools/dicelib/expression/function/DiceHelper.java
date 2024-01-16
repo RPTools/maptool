@@ -45,6 +45,11 @@ public class DiceHelper {
     return rolls + "Successes: " + successes;
   }
 
+  public static String explodingSuccessDice(int times, int sides, int target)
+      throws EvaluationException {
+    return explodingSuccessDice(times, sides, target, -1);
+  }
+
   public static String openTestDice(int times, int sides, int limit) throws EvaluationException {
     String rolls = "Dice: ";
     int max = 0;
@@ -55,6 +60,10 @@ public class DiceHelper {
       if (currentRoll > max) max = currentRoll;
     }
     return rolls + "Maximum: " + max;
+  }
+
+  public static String openTestDice(int times, int sides) throws EvaluationException {
+    return openTestDice(times, sides, -1);
   }
 
   public static int fudgeDice(int times) {
@@ -208,6 +217,10 @@ public class DiceHelper {
     }
 
     return result;
+  }
+
+  public static int explodeDice(int times, int sides) throws EvaluationException {
+    return explodeDice(times, sides, -1);
   }
 
   public static int countSuccessDice(int times, int sides, int success) {
