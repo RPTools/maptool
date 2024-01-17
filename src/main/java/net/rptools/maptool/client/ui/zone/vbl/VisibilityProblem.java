@@ -48,6 +48,14 @@ public class VisibilityProblem {
   private final EndpointSet endpointSet;
 
   /**
+   * Bounds on the vision and origin.
+   *
+   * <p>This will be used to guarantee that we have endpoints in every direction around the origin,
+   * and that we avoid infinite results.
+   */
+  private final Envelope bounds;
+
+  /**
    * The set of walls that are intersected by the current event line.
    *
    * <p>This set is ordered by distance to {@link #origin}, where the distance is measured along the
@@ -66,7 +74,9 @@ public class VisibilityProblem {
    */
   public VisibilityProblem(Coordinate origin, Envelope visionBounds) {
     this.origin = origin;
-    this.endpointSet = new EndpointSet(origin, visionBounds);
+    this.endpointSet = new EndpointSet(origin);
+    this.bounds = new Envelope(visionBounds);
+    this.bounds.expandToInclude(origin);
     this.openWalls = new TreeSet<>(this::compareOpenWalls);
   }
 
@@ -145,6 +155,7 @@ public class VisibilityProblem {
 
     timer.start("add bounds");
     final var envelope = endpointSet.getBounds();
+    envelope.expandToInclude(this.bounds);
     // Exact expansion distance doesn't matter, we just don't want the boundary walls to overlap
     // endpoints from real walls.
     envelope.expandBy(1.0);
