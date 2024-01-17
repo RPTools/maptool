@@ -24,7 +24,7 @@ import net.rptools.parser.function.EvaluationException;
 public class ExplodingSuccessDice extends AbstractNumberFunction {
 
   public ExplodingSuccessDice() {
-    super(3, 3, true, "explodingSuccess");
+    super(3, 4, true, "explodingSuccess");
   }
 
   @Override
@@ -35,7 +35,11 @@ public class ExplodingSuccessDice extends AbstractNumberFunction {
     int times = ((BigDecimal) parameters.get(n++)).intValue();
     int sides = ((BigDecimal) parameters.get(n++)).intValue();
     int target = ((BigDecimal) parameters.get(n++)).intValue();
+    int limit = -1;
+    if (parameters.size() > 3) {
+      limit = ((BigDecimal) parameters.get(n++)).intValue();
+    }
 
-    return DiceHelper.explodingSuccessDice(times, sides, target);
+    return DiceHelper.explodingSuccessDice(times, sides, target, limit);
   }
 }

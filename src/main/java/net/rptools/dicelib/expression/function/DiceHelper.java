@@ -32,29 +32,38 @@ public class DiceHelper {
     return result;
   }
 
-  public static String explodingSuccessDice(int times, int sides, int target)
+  public static String explodingSuccessDice(int times, int sides, int target, int limit)
       throws EvaluationException {
     String rolls = "Dice: ";
     int successes = 0;
 
     for (int i = 0; i < times; i++) {
-      int currentRoll = explodeDice(1, sides);
+      int currentRoll = explodeDice(1, sides, limit);
       rolls += currentRoll + ", ";
       if (currentRoll >= target) successes++;
     }
     return rolls + "Successes: " + successes;
   }
 
-  public static String openTestDice(int times, int sides) throws EvaluationException {
+  public static String explodingSuccessDice(int times, int sides, int target)
+      throws EvaluationException {
+    return explodingSuccessDice(times, sides, target, -1);
+  }
+
+  public static String openTestDice(int times, int sides, int limit) throws EvaluationException {
     String rolls = "Dice: ";
     int max = 0;
 
     for (int i = 0; i < times; i++) {
-      int currentRoll = explodeDice(1, sides);
+      int currentRoll = explodeDice(1, sides, limit);
       rolls += currentRoll + ", ";
       if (currentRoll > max) max = currentRoll;
     }
     return rolls + "Maximum: " + max;
+  }
+
+  public static String openTestDice(int times, int sides) throws EvaluationException {
+    return openTestDice(times, sides, -1);
   }
 
   public static int fudgeDice(int times) {
@@ -186,20 +195,32 @@ public class DiceHelper {
     return result;
   }
 
-  public static int explodeDice(int times, int sides) throws EvaluationException {
+  public static int explodeDice(int times, int sides, int limit) throws EvaluationException {
     int result = 0;
+    boolean infiniteExplode = limit <= 0;
 
     if (sides == 0 || sides == 1) throw new EvaluationException("Number of sides must be > 1");
 
     RunData runData = RunData.getCurrent();
 
     for (int i = 0; i < times; i++) {
-      int roll = runData.randomInt(sides);
-      if (roll == sides) times++;
-      result += roll;
+      int thisDieRolls = 0;
+      boolean endRolling = false;
+      while (!endRolling && (thisDieRolls < limit || infiniteExplode)) {
+        int roll = runData.randomInt(sides);
+        thisDieRolls++;
+        if (roll != sides) {
+          endRolling = true;
+        }
+        result += roll;
+      }
     }
 
     return result;
+  }
+
+  public static int explodeDice(int times, int sides) throws EvaluationException {
+    return explodeDice(times, sides, -1);
   }
 
   public static int countSuccessDice(int times, int sides, int success) {
