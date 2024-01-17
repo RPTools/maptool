@@ -320,8 +320,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     propertyTable.setShowHorizontalLines(true);
     propertyTable.setIntercellSpacing(new Dimension(4, 3));
 
-    DefaultTableCellRenderer myCellRenderer = new DefaultTableCellRenderer();
-    myCellRenderer.setBackground(new Color(0f, 0f, 0f, 0.027f));
+    DefaultTableCellRenderer cellRenderer = new DefaultTableCellRenderer();
+    cellRenderer.setBackground(new Color(0f, 0f, 0f, 0.027f));
+    cellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.LEFT);
+    DefaultTableCellRenderer headerRenderer = new DefaultTableCellRenderer();
+    headerRenderer.setBackground(new Color(0f, 0f, 0f, 0.027f));
+    headerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
 
     propertyTable.setGridColor(ThemeSupport.getThemeColor(ThemeSupport.ThemeColor.YELLOW).darker());
 
@@ -329,37 +333,32 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
       propertyTable.getColumnModel().getColumn(i).sizeWidthToFit();
       switch (i) {
         case 0, 1, 2 -> {
-          myCellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(myCellRenderer);
+          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
           propertyTable.getColumnModel().getColumn(i).setMinWidth(65);
           propertyTable.getColumnModel().getColumn(i).setMaxWidth(80);
           propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
         }
         case 3 -> {
-          myCellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.LEFT);
-          propertyTable.getColumnModel().getColumn(i).setCellRenderer(myCellRenderer);
+          propertyTable.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
           propertyTable.getColumnModel().getColumn(i).setMaxWidth(160);
           propertyTable.getColumnModel().getColumn(i).setMinWidth(80);
           propertyTable.getColumnModel().getColumn(i).setPreferredWidth(120);
           propertyTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
         }
         case 4 -> {
-          myCellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(myCellRenderer);
+          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
           propertyTable.getColumnModel().getColumn(i).setMinWidth(50);
           propertyTable.getColumnModel().getColumn(i).setMaxWidth(100);
           propertyTable.getColumnModel().getColumn(i).setPreferredWidth(90);
         }
         case 5 -> {
-          myCellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.LEFT);
-          propertyTable.getColumnModel().getColumn(i).setCellRenderer(myCellRenderer);
+          propertyTable.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
           propertyTable.getColumnModel().getColumn(i).setMinWidth(80);
           propertyTable.getColumnModel().getColumn(i).setMaxWidth(220);
           propertyTable.getColumnModel().getColumn(i).setPreferredWidth(160);
         }
         case 6 -> {
-          myCellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(myCellRenderer);
+          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
           propertyTable.getColumnModel().getColumn(i).setMinWidth(180);
           propertyTable.getColumnModel().getColumn(i).setMaxWidth(320);
           propertyTable.getColumnModel().getColumn(i).setPreferredWidth(220);
