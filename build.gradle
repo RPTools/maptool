@@ -117,6 +117,8 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Flat*ContrastIJTheme.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Utils.java'
         }
         licenseHeaderFile 'spotless.license.java'
         toggleOffOn()
