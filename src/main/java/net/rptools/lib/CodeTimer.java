@@ -61,8 +61,8 @@ public class CodeTimer {
 
   private final Map<String, Timer> timeMap = new LinkedHashMap<>();
   private final String name;
+  private long threshold = 1;
   private boolean enabled;
-  private int threshold = 1;
 
   public CodeTimer(String n) {
     name = n;
@@ -73,7 +73,7 @@ public class CodeTimer {
     return enabled;
   }
 
-  public void setThreshold(int threshold) {
+  public void setThreshold(long threshold) {
     this.threshold = threshold;
   }
 
@@ -128,7 +128,7 @@ public class CodeTimer {
       ++i;
 
       var id = entry.getKey();
-      long elapsed = entry.getValue().getElapsed();
+      long elapsed = entry.getValue().getElapsed() / 1_000_000;
       if (elapsed < threshold) {
         continue;
       }
@@ -141,19 +141,23 @@ public class CodeTimer {
     long elapsed;
     long start = -1;
 
+    private long getTime() {
+      return System.nanoTime();
+    }
+
     public void start() {
-      start = System.currentTimeMillis();
+      start = getTime();
     }
 
     public void stop() {
-      elapsed += (System.currentTimeMillis() - start);
+      elapsed += (getTime() - start);
       start = -1;
     }
 
     public long getElapsed() {
       long time = elapsed;
       if (start > 0) {
-        time += (System.currentTimeMillis() - start);
+        time += (getTime() - start);
       }
       return time;
     }
