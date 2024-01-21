@@ -53,9 +53,9 @@ public class EndpointSet {
 
   private final int[] bucketSizes;
 
-  public EndpointSet(Coordinate origin, Envelope bounds) {
+  public EndpointSet(Coordinate origin) {
     this.origin = origin;
-    this.envelope = new Envelope(bounds);
+    this.envelope = new Envelope();
 
     this.buckets = new VisibilitySweepEndpoint[BUCKET_COUNT][];
     Arrays.setAll(this.buckets, i -> new VisibilitySweepEndpoint[32]);
