@@ -117,6 +117,8 @@ spotless {
         target project.fileTree(project.rootDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Flat*ContrastIJTheme.java'
+            exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Utils.java'
         }
         licenseHeaderFile 'spotless.license.java'
         toggleOffOn()
@@ -420,11 +422,11 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.20'
 
     // themes
-    implementation 'com.formdev:flatlaf:3.1.1'
-    implementation 'com.formdev:flatlaf-intellij-themes:3.1.1'
-    implementation 'com.formdev:flatlaf-extras:3.2.5'
-    implementation 'com.formdev:svgSalamander:1.1.4'
-    implementation 'com.formdev:flatlaf-jide-oss:3.2.5'
+    implementation 'com.formdev:flatlaf:3.3'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.3'
+    implementation 'com.formdev:flatlaf-extras:3.3'
+    implementation 'com.github.weisj:jsvg:1.2.0'
+    implementation 'com.formdev:flatlaf-jide-oss:3.3'
 
     // JS support for macros
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
