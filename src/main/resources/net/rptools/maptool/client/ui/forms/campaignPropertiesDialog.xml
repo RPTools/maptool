@@ -3711,7 +3711,7 @@
                                         <at name="actionCommand">GM</at>
                                         <at name="name">tokenStatesOwner</at>
                                         <at name="width">245</at>
-                                        <at name="text">CampaginPropertiesDialog.label.owner</at>
+                                        <at name="text">CampaignPropertiesDialog.label.owner</at>
                                         <at name="selected">true</at>
                                         <at name="height">17</at>
                                        </object>
@@ -6049,7 +6049,7 @@
                                              <at name="actionCommand">GM</at>
                                              <at name="name">tokenBarOwner</at>
                                              <at name="width">245</at>
-                                             <at name="text">CampaginPropertiesDialog.label.owner</at>
+                                             <at name="text">CampaignPropertiesDialog.label.owner</at>
                                              <at name="selected">true</at>
                                              <at name="height">17</at>
                                             </object>

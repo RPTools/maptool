@@ -95,15 +95,25 @@ public class ExpressionParser {
         new String[] {"\\b(\\d+)[dD](\\d+)[eE][sS](\\d+)\\b", "explodingSuccess($1, $2, $3)"},
         new String[] {"\\b[dD](\\d+)[eE][sS](\\d+)\\b", "explodingSuccess(1, $1, $2)"},
         new String[] {"\\b(\\d+)[eE][sS](\\d+)\\b", "explodingSuccess($1, 6, $2)"},
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[eE](\\d+)[sS](\\d+)\\b", "explodingSuccess($1, $2, $4, $3)"
+        },
+        new String[] {"\\b[dD](\\d+)[eE](\\d+)[sS](\\d+)\\b", "explodingSuccess(1, $1, $3, $2)"},
+        new String[] {"\\b(\\d+)[eE](\\d+)[sS](\\d+)\\b", "explodingSuccess($1, 6, $3, $2)"},
 
         // show max while exploding
         new String[] {"\\b(\\d+)[dD](\\d+)[oO]\\b", "openTest($1, $2)"},
         new String[] {"\\b[dD](\\d+)[oO]\\b", "openTest(1, $1)"},
         new String[] {"\\b(\\d+)[oO]\\b", "openTest($1, 6)"},
+        new String[] {"\\b(\\d+)[dD](\\d+)[oO](\\d+)\\b", "openTest($1, $2, $3)"},
+        new String[] {"\\b[dD](\\d+)[oO](\\d+)\\b", "openTest(1, $1, $2)"},
+        new String[] {"\\b(\\d+)[oO](\\d+)\\b", "openTest($1, 6, $2)"},
 
         // explode
         new String[] {"\\b(\\d+)[dD](\\d+)[eE]\\b", "explode($1, $2)"},
         new String[] {"\\b[dD](\\d+)[eE]\\b", "explode(1, $1)"},
+        new String[] {"\\b(\\d+)[dD](\\d+)[eE](\\d+)\\b", "explode($1, $2, $3)"},
+        new String[] {"\\b[dD](\\d+)[eE](\\d+)\\b", "explode(1, $1, $2)"},
 
         // hero
         new String[] {"\\b(\\d+[.]\\d+)[dD](\\d+)[hH]\\b", "hero($1, $2)"},
