@@ -1221,29 +1221,6 @@ public class ZoneRenderer extends JComponent
       ScreenPoint sp = ScreenPoint.fromZonePointRnd(this, zp.x, zp.y);
       var dim = flabel.getDimensions(g, label.getLabel());
       Rectangle bounds = flabel.render(g, (int) sp.x, (int) sp.y, label.getLabel());
-      /*if (label.isShowBackground()) {
-        bounds = new Rectangle((int)sp.x, (int)sp.y, dim.width, dim.height);
-        bounds =
-            GraphicsUtil.drawBoxedString(
-                g,
-                label.getLabel(),
-                (int) sp.x,
-                (int) sp.y,
-                SwingUtilities.CENTER,
-                GraphicsUtil.GREY_LABEL,
-                label.getForegroundColor());
-      } else {
-        FontMetrics fm = g.getFontMetrics();
-        int strWidth = SwingUtilities.computeStringWidth(fm, label.getLabel());
-
-        int x = (int) (sp.x - strWidth / 2);
-        int y = (int) (sp.y - fm.getAscent());
-
-        g.setColor(label.getForegroundColor());
-        g.drawString(label.getLabel(), x, (int) sp.y);
-
-        bounds = new Rectangle(x, y, strWidth, fm.getHeight());
-      }*/
       labelLocationList.add(new LabelLocation(bounds, label));
       timer.stop("labels-1.1");
     }
