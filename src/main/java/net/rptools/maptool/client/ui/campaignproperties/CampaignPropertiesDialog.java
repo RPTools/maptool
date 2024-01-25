@@ -132,6 +132,7 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initTokenPropertiesDialog(AbeillePanel panel) {
     tokenPropertiesPanel = new TokenPropertiesManagementPanel();
     panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    tokenPropertiesPanel.prettify();
   }
 
   public JTextField getNewServerTextField() {
