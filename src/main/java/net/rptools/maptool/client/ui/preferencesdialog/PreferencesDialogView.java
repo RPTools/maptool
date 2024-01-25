@@ -21,6 +21,12 @@ import javax.swing.*;
  * for accessing the root component of the dialog.
  */
 public class PreferencesDialogView {
+  private JSpinner spinner1;
+  private JCheckBox checkBox1;
+  private JCheckBox checkBox2;
+  private JPanel developerOptionToggles;
+  private JPanel developerTab;
+  private JLabel developerTabWarning;
 
   /**
    * The mainPanel variable represents the root component of the preferences dialog view. It is an
