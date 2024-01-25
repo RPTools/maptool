@@ -79,43 +79,91 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * @author trevor
- */
+/** This class provides utility methods for persistence operations in the application. */
 public class PersistenceUtil {
+  /**
+   * The log variable is an instance of the Logger class provided by the
+   * LogManager.getLogger(PersistenceUtil.class) method. The Logger class is used for logging
+   * purposes and can be used to log debug, info, warning, and error messages.
+   */
   private static final Logger log = LogManager.getLogger(PersistenceUtil.class);
 
+  /** The version property for a persistencd file. */
   public static final String PROP_VERSION = "version"; // $NON-NLS-1$
+
+  /** The campaign version property for a persisted campaign. */
   public static final String PROP_CAMPAIGN_VERSION = "campaignVersion"; // $NON-NLS-1$
+
+  /**
+   * The ASSET_DIR variable represents the directory path where assets are stored within a persisted
+   * file.
+   */
   private static final String ASSET_DIR = "assets/"; // $NON-NLS-1$;
+
+  /**
+   * The HERO_LAB variable represents the directory path where HeroLab assets are stored within a
+   * persisted file.
+   */
   public static final String HERO_LAB = "herolab"; // $NON-NLS-1$
+
+  /**
+   * This variable represents the directory where drop-in library files are stored within a
+   * persisted file.
+   */
   private static final String DROP_IN_LIBRARY_DIR = "libraries/";
 
+  /** The file path for the list of drop-in libraries stored within a persisted campaign file. */
   private static final String DROP_IN_LIBRARY_LIST_FILE = DROP_IN_LIBRARY_DIR + "libraries.json";
 
+  /** The directory path for the drop-in library assets stored within a persisted campaign file. */
   private static final String DROP_IN_LIBRARY_ASSET_DIR = DROP_IN_LIBRARY_DIR + ASSET_DIR;
 
+  /** The directory where game data is stored within a persisted campaign file. */
   private static final String GAME_DATA_DIR = "data/";
 
+  /** Represents the file path of the game data content file within a persisted campaign file. */
   private static final String GAME_DATA_FILE = GAME_DATA_DIR + "game-data.json";
 
+  /**
+   * The version number of the campaign.
+   *
+   * <p>The {@code CAMPAIGN_VERSION} variable represents the version number of the campaign. It is a
+   * string value that follows the standard format of major.minor.patch. Each part of the version
+   * number represents a different level of changes and updates in the campaign.
+   *
+   * @since 1.3.70 ownerOnly added to model.Light (not backward compatible)
+   * @since 1.3.75 model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it
+   *     before release)
+   * @since 1.3.83 ExposedAreaData added to tokens in b78 but again not caught until b82 :(
+   * @since 1.3.85 Added CampaignProperties.hasUsedFogToolbar
+   * @since 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89
+   *     compatible
+   * @since 1.11.0 Added add-on libraries, if loaded and saved with an older version then add-on
+   *     libraries will be removed.
+   * @since 1.15.0 Labels now have background color and font, will default old lables to a similar
+   *     background color to what they had before.
+   */
   private static final String CAMPAIGN_VERSION = "1.15.0";
 
-  // Please add a single note regarding why the campaign version number has been updated:
-  // 1.3.70 ownerOnly added to model.Light (not backward compatible)
-  // 1.3.75 model.Token.visibleOnlyToOwner (actually added to b74 but I didn't catch it before
-  // release)
-  // 1.3.83 ExposedAreaData added to tokens in b78 but again not caught until b82 :(
-  // 1.3.85 Added CampaignProperties.hasUsedFogToolbar (old versions could ignore this field, but
-  // how to implement?)
-  // 1.4.0 Added lumens to LightSource class, old versions will not load unless saved as b89
-  // compatible
-  // 1.11.0 Added add-on libraries, if loaded and saved with an older version then add-on
-  //        libraries will be removed.
-  // 1.15.0 Labels now have background color and font
-
+  /**
+   * Manager of the versioning of campaign models.
+   *
+   * @see ModelVersionManager
+   */
   private static final ModelVersionManager campaignVersionManager = new ModelVersionManager();
+
+  /**
+   * Manager of the versioning of assets within a campaign.
+   *
+   * @see ModelVersionManager
+   */
   private static final ModelVersionManager assetnameVersionManager = new ModelVersionManager();
+
+  /**
+   * Manages the versioning of the token in the system.
+   *
+   * @see ModelVersionManager
+   */
   private static final ModelVersionManager tokenVersionManager = new ModelVersionManager();
 
   static {
@@ -171,12 +219,33 @@ public class PersistenceUtil {
         "1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
   }
 
+  /**
+   * A class representing a game map that can be persisted.
+   *
+   * <p>The PersistedMap class contains information about a map, including the zone, asset map, and
+   * map tool version.
+   */
   public static class PersistedMap {
+    /**
+     * Represents a zone in a game map.
+     *
+     * @see Zone
+     */
     public Zone zone;
+
+    /**
+     * Represents a mapping of MD5Key objects to Asset objects.
+     *
+     * <p>The key of the map is an MD5Key object, which represents the MD5 key for a certain set of
+     * data. The value of the map is an Asset object, which represents an asset in a game map.
+     */
     public Map<MD5Key, Asset> assetMap = new HashMap<MD5Key, Asset>();
+
+    /** Represents the version of the Map Tool being used. */
     public String mapToolVersion;
   }
 
+  /** Class representing a persisted campaign. */
   public static class PersistedCampaign {
     public Campaign campaign;
     public Map<MD5Key, Asset> assetMap = new HashMap<MD5Key, Asset>();
@@ -185,6 +254,13 @@ public class PersistenceUtil {
     public String mapToolVersion;
   }
 
+  /**
+   * Saves the given Zone object in a file as a persisted map.
+   *
+   * @param z The Zone object to save.
+   * @param mapFile The file to save the map to.
+   * @throws IOException If an error occurs while saving the map.
+   */
   public static void saveMap(Zone z, File mapFile) throws IOException {
     PersistedMap pMap = new PersistedMap();
     pMap.zone = z;
@@ -205,6 +281,14 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Loads a persisted map from a file.
+   *
+   * @param mapFile The file to load the map from.
+   * @return The loaded PersistedMap object representing the map, or null if the map file is not
+   *     valid.
+   * @throws IOException If an error occurs while loading the map.
+   */
   public static PersistedMap loadMap(File mapFile) throws IOException {
     PersistedMap persistedMap = null;
 
@@ -274,6 +358,13 @@ public class PersistenceUtil {
     return n;
   }
 
+  /**
+   * Saves a Campaign to a specified File.
+   *
+   * @param campaign The Campaign to save.
+   * @param campaignFile The File to save the Campaign to.
+   * @throws IOException If an I/O error occurs during the save process.
+   */
   public static void saveCampaign(Campaign campaign, File campaignFile) throws IOException {
     CodeTimer.using(
         "CampaignSave",
@@ -390,10 +481,10 @@ public class PersistenceUtil {
         });
   }
 
-  /*
-   * A public function because I think it should be called when a campaign is opened as well so if it is opened then closed without saving, there is still a preview created; however, the rendering
-   * of the campaign appears to complete after AppActions.loadCampaign returns, causing the preview to always appear as black if this method is called from within loadCampaign. Either need to find
-   * another place to call saveCampaignThumbnail upon opening, or code to delay it's call until the render is complete. =P
+  /**
+   * Saves a thumbnail image for a campaign.
+   *
+   * @param fileName The file name of the campaign.
    */
   public static void saveCampaignThumbnail(String fileName) {
     BufferedImage screen = MapTool.takeMapScreenShot(new PlayerView(MapTool.getPlayer().getRole()));
@@ -427,6 +518,14 @@ public class PersistenceUtil {
     return new File(AppUtil.getAppHome("campaignthumbs"), fileName + ".jpg");
   }
 
+  /**
+   * Loads a campaign from the given campaign file.
+   *
+   * @param campaignFile The campaign file to load.
+   * @return The loaded PersistedCampaign object representing the campaign, or null if the campaign
+   *     file is not valid.
+   * @throws IOException If an I/O error occurs during the loading process.
+   */
   public static PersistedCampaign loadCampaign(File campaignFile) throws IOException {
     PersistedCampaign persistedCampaign = null;
 
@@ -497,6 +596,12 @@ public class PersistenceUtil {
     return persistedCampaign;
   }
 
+  /**
+   * Returns the filename of the thumbnail for the given PackedFile.
+   *
+   * @param pakFile The PackedFile for which to retrieve the thumbnail filename.
+   * @throws IOException If an error occurs while retrieving the thumbnail filename.
+   */
   private static String getThumbFilename(PackedFile pakFile) throws IOException {
     if ((MapTool.getThumbnailSize().width > 50 || MapTool.getThumbnailSize().height > 50)
         && pakFile.hasFile(Token.FILE_THUMBNAIL_LARGE)) return Token.FILE_THUMBNAIL_LARGE;
@@ -519,15 +624,33 @@ public class PersistenceUtil {
     return thumb;
   }
 
+  /**
+   * Saves the given Token object to a specified File.
+   *
+   * @param token The Token object to save.
+   * @param file The File to save the Token to.
+   * @throws IOException If an I/O error occurs during the save process.
+   */
   public static void saveToken(Token token, File file) throws IOException {
     saveToken(token, file, false);
   }
 
+  /**
+   * Saves the provided Token object to the specified file.
+   *
+   * @param token The Token object to save.
+   * @param file The destination file to save the Token to.
+   * @param doWait If true, wait for the image to load before saving.
+   * @throws IOException If an I/O error occurs during the save process.
+   */
   public static void saveToken(Token token, File file, boolean doWait) throws IOException {
-    // Jamz: Added a "Large Thumbnail" to support larger image grid previews
+    // Added a "Large Thumbnail" to support larger image grid previews
     BufferedImage image = null;
-    if (doWait) image = ImageManager.getImageAndWait(token.getImageAssetId());
-    else image = ImageManager.getImage(token.getImageAssetId());
+    if (doWait) {
+      image = ImageManager.getImageAndWait(token.getImageAssetId());
+    } else {
+      image = ImageManager.getImage(token.getImageAssetId());
+    }
 
     Dimension sz = new Dimension(image.getWidth(), image.getHeight());
     SwingUtil.constrainTo(sz, 50);
@@ -561,6 +684,14 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Loads a Token object from the specified File.
+   *
+   * @param file The File from which to load the Token.
+   * @return The loaded Token object, or null if the file is not valid.
+   * @note if there is an error loading the token, the token then a message is displayed to the user
+   *     and null is returned.
+   */
   public static Token loadToken(File file) {
     Token token = null;
     try (PackedFile pakFile = new PackedFile(file)) {
@@ -580,6 +711,13 @@ public class PersistenceUtil {
     return token;
   }
 
+  /**
+   * Loads a Token object from the specified URL.
+   *
+   * @param url The URL from which to load the Token.
+   * @return The loaded Token object, or null if the URL is not valid.
+   * @throws IOException If an I/O error occurs during the loading process.
+   */
   public static Token loadToken(URL url) throws IOException {
     // Create a temporary file from the downloaded URL
     File newFile = new File(PackedFile.getTmpDir(), new GUID() + ".url");
@@ -589,6 +727,13 @@ public class PersistenceUtil {
     return token;
   }
 
+  /**
+   * Loads assets from a packed file and adds them to the asset manager.
+   *
+   * @param assetIds The collection of MD5 keys representing the assets to be loaded
+   * @param pakFile The packed file containing the assets
+   * @throws IOException If an I/O error occurs while loading the assets
+   */
   private static void loadAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
@@ -708,6 +853,12 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Saves the add-on libraries to the provided packed file.
+   *
+   * @param packedFile The packed file to save the add-on libraries to.
+   * @throws IOException If an error occurs while saving the add-on libraries.
+   */
   private static void saveAddOnLibraries(PackedFile packedFile) throws IOException {
     // remove all drop-in libraries from the packed file first.
     for (String path : packedFile.getPaths()) {
@@ -732,6 +883,12 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Loads game data from a PackedFile.
+   *
+   * @param packedFile The PackedFile containing the game data to load.
+   * @throws IOException If an I/O error occurs during the loading process.
+   */
   private static void loadGameData(PackedFile packedFile) throws IOException {
 
     if (!packedFile.hasFile(GAME_DATA_FILE)) {
@@ -751,6 +908,12 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Saves the game data to the specified packed file.
+   *
+   * @param packedFile The packed file to save the game data to.
+   * @throws IOException If an I/O error occurs while saving the game data.
+   */
   private static void saveGameData(PackedFile packedFile) throws IOException {
     // Remove all the game data from the packed file first.
     for (String path : packedFile.getPaths()) {
@@ -772,6 +935,13 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Saves a collection of assets to a specified packed file.
+   *
+   * @param assetIds A collection of MD5Key objects representing the asset IDs to be saved.
+   * @param pakFile The PackedFile object representing the file to save the assets to.
+   * @throws IOException If there is an error writing the assets to the file.
+   */
   private static void saveAssets(Collection<MD5Key> assetIds, PackedFile pakFile)
       throws IOException {
     // Special handling of assets: XML file to describe the Asset, but binary file for the image
@@ -800,20 +970,45 @@ public class PersistenceUtil {
     }
   }
 
+  /**
+   * Clears all assets in the given packed file that are located in the asset directory.
+   *
+   * @param pakFile the packed file from which assets will be cleared
+   * @throws IOException if an I/O error occurs
+   */
   private static void clearAssets(PackedFile pakFile) throws IOException {
     for (String path : pakFile.getPaths()) {
-      if (path.startsWith(ASSET_DIR) && !path.equals(ASSET_DIR)) pakFile.removeFile(path);
+      if (path.startsWith(ASSET_DIR) && !path.equals(ASSET_DIR)) {
+        pakFile.removeFile(path);
+      }
     }
   }
 
+  /**
+   * Loads the legacy campaign properties from a file.
+   *
+   * @param file The file containing the legacy campaign properties.
+   * @return The loaded legacy campaign properties.
+   * @throws IOException If an I/O error occurs while reading the file.
+   * @throws FileNotFoundException If the specified file does not exist.
+   */
   public static CampaignProperties loadLegacyCampaignProperties(File file) throws IOException {
-    if (!file.exists()) throw new FileNotFoundException();
+    if (!file.exists()) {
+      throw new FileNotFoundException();
+    }
 
     try (FileInputStream in = new FileInputStream(file)) {
       return loadCampaignProperties(in);
     }
   }
 
+  /**
+   * Loads the CampaignProperties from the given InputStream.
+   *
+   * @param in the InputStream to load the CampaignProperties from
+   * @return the CampaignProperties instance loaded from the InputStream, or null if an error
+   *     occurred
+   */
   public static CampaignProperties loadCampaignProperties(InputStream in) {
     CampaignProperties props = null;
     try {

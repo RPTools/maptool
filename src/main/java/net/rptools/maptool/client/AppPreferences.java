@@ -34,33 +34,128 @@ import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * The AppPreferences class represents the preferences used by the application. It provides methods
+ * for setting and getting various preferences related to the application settings.
+ */
 public class AppPreferences {
 
+  /**
+   * The log variable represents a logger object used for logging messages in the AppPreferences
+   * class. It is a private static final variable of type Logger. The logger object is obtained
+   * using the getLogger method from the LogManager class, specifying the AppPreferences class as
+   * the logging context.
+   */
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
+
+  /**
+   * This private static variable represents the user preferences node for the application. It is an
+   * instance of the Preferences class, which provides a way to store and retrieve user preferences
+   * using a hierarchical tree of preference nodes, starting from the user root node.
+   *
+   * <p>The preferences are stored under a specific node path derived from the application name
+   * using the AppConstants.APP_NAME constant.
+   *
+   * <p>This variable is used to access and modify user preferences throughout the application.
+   */
   private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
+  /** Holds the render quality preference setting for the application. */
   private static RenderQuality renderQuality;
 
+  /**
+   * Defines the key constant for retrieving asset roots.
+   *
+   * <p>This constant is used to define the key for accessing asset roots in a configuration file or
+   * a data source. Asset roots represent the directories or paths where application assets are
+   * stored.
+   *
+   * <p>The asset roots can be used to locate and load files, images, or other resources required by
+   * the application at runtime. By convention, the asset root directories are organized in a
+   * structured manner to facilitate easy retrieval of assets.
+   */
   private static final String KEY_ASSET_ROOTS = "assetRoots";
+
+  /**
+   * The constant representing the key for the save directory.
+   *
+   * <p>This key is used to access and store the value of the save directory. The value associated
+   * with this key should be a string representing the directory path.
+   */
   private static final String KEY_SAVE_DIR = "saveDir";
+
+  /**
+   * The constant representing the key for saving token directory. This constant is used to retrieve
+   * the directory path where token information will be exported.
+   */
   private static final String KEY_SAVE_TOKEN_DIR = "saveTokenDir";
+
+  /**
+   * The variable to store the key for saving the map directory.
+   *
+   * <p>This variable is used to configure the directory where the map will be export.
+   */
   private static final String KEY_SAVE_MAP_DIR = "saveMapDir";
+
+  /**
+   * The key for the load directory.
+   *
+   * <p>This constant represents the key used to specify the last directory used for loading files
+   * so that subsequent dialogs will be opened with the same path.
+   *
+   * <p>The value should be a String representing the directory path.
+   */
   private static final String KEY_LOAD_DIR = "loadDir";
+
+  /**
+   * The configuration key for specifying the directory path where the last add-on was loaded from,
+   * so that subsequent dialogs will be opened with the same path.
+   *
+   * <p>The value should be a String representing the directory path.
+   */
   private static final String KEY_ADD_ON_LOAD_DIR = "addOnLoadDir";
+
+  /** Represents the key used to access the most recently used campaigns for the menu option. */
   private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
+
+  /** Represents the key used to save the paint textures to the preferences. */
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
 
+  /**
+   * Represents the key used to determine if the user should be prompted to save the campaign on
+   * quit.
+   */
   private static final String KEY_SAVE_REMINDER = "autoSaveReminder";
+
+  /**
+   * The default value for the {@code KEY_SAVE_REMINDER} key.
+   *
+   * @see #KEY_SAVE_REMINDER
+   */
   private static final boolean DEFAULT_SAVE_REMINDER = true;
 
+  /**
+   * Represents the key for the method used to determine which name of the token (Player/GM) the
+   * number is appended to.
+   */
   private static final String KEY_TOKEN_NUMBER_DISPLAY = "tokenNumberDisplayg";
+
+  /**
+   * The default value for the {@code KEY_TOKEN_NUMBER_DISPLAY} preference option,.
+   *
+   * @see #KEY_TOKEN_NUMBER_DISPLAY
+   */
   private static final String DEFAULT_TOKEN_NUMBER_DISPLAY = Token.NUM_ON_NAME;
 
+  /** Represents the key used to retrieve the number of minutes between auto saves. */
   private static final String KEY_AUTO_SAVE_INCREMENT = "autoSaveIncrement";
-  private static final int DEFAULT_AUTO_SAVE_INCREMENT = 5; // Minutes
 
-  // private static final String KEY_ENABLE_MAP_EXPORT_IMPORT = "enableMapExportImport";
-  // private static final boolean DEFAULT_ENABLE_MAP_EXPORT_IMPORT = false;
+  /**
+   * The default value for the {@code KEY_AUTO_SAVE_INCREMENT} preference option.
+   *
+   * @see #KEY_AUTO_SAVE_INCREMENT
+   */
+  private static final int DEFAULT_AUTO_SAVE_INCREMENT = 5; // Minutes
 
   private static final String KEY_CHAT_AUTOSAVE_TIME = "chatAutosaveTime";
   private static final int DEFAULT_CHAT_AUTOSAVE_TIME = 0; // Minutes; zero=disabled
@@ -450,33 +545,34 @@ public class AppPreferences {
   private static final boolean DEFAULT_PLAY_STREAMS = true;
 
   /**
-   * The key for retrieving the background color of NPC map labels.
-   * The value of this key is used to store and retrieve background color information for NPC map
-   * The background color is used to style the text of the map labels for Non-Player Characters
-   * (NPCs).
-   * labels. The value associated with this key should be a valid color value.
+   * The key for retrieving the background color of NPC map labels. The value of this key is used to
+   * store and retrieve background color information for NPC map The background color is used to
+   * style the text of the map labels for Non-Player Characters (NPCs). labels. The value associated
+   * with this key should be a valid color value.
    */
   private static final String KEY_NPC_MAP_LABEL_BG_COLOR = "npcMapLabelBG";
+
   /**
-   * Constant variable for the foreground color of NPC map labels.
-   * The value represents the key used to retrieve the color from a map or configuration file.
-   * The foreground color is used to style the text of the map labels for Non-Player Characters (NPCs).
-   * This constant is intended to be used within the context of a software application or system.
+   * Constant variable for the foreground color of NPC map labels. The value represents the key used
+   * to retrieve the color from a map or configuration file. The foreground color is used to style
+   * the text of the map labels for Non-Player Characters (NPCs). This constant is intended to be
+   * used within the context of a software application or system.
    */
   private static final String KEY_NPC_MAP_LABEL_FG_COLOR = "npcMapLabelFG";
 
   /**
-   * The key for retrieving the background color of PC map labels.
-   * The value of this key is used to store and retrieve background color information for NPC map
-   * The background color is used to style the text of the map labels for Player Characters
-   * (PCs) labels. The value associated with this key should be a valid color value.
+   * The key for retrieving the background color of PC map labels. The value of this key is used to
+   * store and retrieve background color information for NPC map The background color is used to
+   * style the text of the map labels for Player Characters (PCs) labels. The value associated with
+   * this key should be a valid color value.
    */
   private static final String KEY_PC_MAP_LABEL_BG_COLOR = "pcMapLabelBG";
+
   /**
-   * Constant variable for the foreground color of PC map labels.
-   * The value represents the key used to retrieve the color from a map or configuration file.
-   * The foreground color is used to style the text of the map labels for Player Characters (PCs).
-   * This constant is intended to be used within the context of a software application or system.
+   * Constant variable for the foreground color of PC map labels. The value represents the key used
+   * to retrieve the color from a map or configuration file. The foreground color is used to style
+   * the text of the map labels for Player Characters (PCs). This constant is intended to be used
+   * within the context of a software application or system.
    */
   private static final String KEY_PC_MAP_LABEL_FG_COLOR = "pcMapLabelFG";
 
@@ -486,6 +582,7 @@ public class AppPreferences {
    * not visible to the player. The value associated with this key should be a valid color value.
    */
   private static final String KEY_NONVIS_MAP_LABEL_BG_COLOR = "nonVisMapLabelBG";
+
   /**
    * This variable represents the key used to store the foreground color of non-visible token map
    * labels. The foreground color is used to style the text of the map labels for tokens that are
@@ -494,34 +591,27 @@ public class AppPreferences {
   private static final String KEY_NONVIS_MAP_LABEL_FG_COLOR = "nonVisMapLabelFG";
 
   /**
-   * The KEY_MAP_LABEL_FONT_SIZE constant is used to define the name of the key
-   * that represents the font size of map labels.
+   * The KEY_MAP_LABEL_FONT_SIZE constant is used to define the name of the key that represents the
+   * font size of map labels.
    */
   private static final String KEY_MAP_LABEL_FONT_SIZE = "mapLabelFontSize";
 
-  /**
-   * The default background color for the NPC map label.
-   */
+  /** The default background color for the NPC map label. */
   private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
-  /**
-   * The default foreground color for NPC map labels.
-   */
+
+  /** The default foreground color for NPC map labels. */
   private static final Color DEFAULT_NPC_MAP_LABEL_FG_COLOR = Color.BLACK;
-  /**
-   * The default background color for the PC map label.
-   */
+
+  /** The default background color for the PC map label. */
   private static final Color DEFAULT_PC_MAP_LABEL_BG_COLOR = Color.WHITE;
-  /**
-   * The default foreground color for the map labels in the PC map.
-   */
+
+  /** The default foreground color for the map labels in the PC map. */
   private static final Color DEFAULT_PC_MAP_LABEL_FG_COLOR = Color.BLUE;
-  /**
-   * The default background color for non-visible map labels.
-   */
+
+  /** The default background color for non-visible map labels. */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_BG_COLOR = Color.BLACK;
-  /**
-   * The default foreground color for non-visible map labels.
-   */
+
+  /** The default foreground color for non-visible map labels. */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_FG_COLOR = Color.WHITE;
 
   private static final int DEFAULT_MAP_LABEL_FONT_SIZE = AppStyle.labelFont.getSize();

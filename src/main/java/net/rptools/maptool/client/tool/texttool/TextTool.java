@@ -40,10 +40,9 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.ZonePoint;
 
-
 /**
- * The TextTool class represents a tool that allows users to add and edit labels in a graphical editor.
- * It extends the DefaultTool class and implements the ZoneOverlay interface.
+ * The TextTool class represents a tool that allows users to add and edit labels in a graphical
+ * editor. It extends the DefaultTool class and implements the ZoneOverlay interface.
  */
 public class TextTool extends DefaultTool implements ZoneOverlay {
   /** The serial version UID. */
@@ -58,13 +57,14 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
   /** The horizontal offset for dragging the element. */
   private int dragOffsetX;
+
   /** The vertical offset of the drag operation. */
   private int dragOffsetY;
+
   /** Is the Label being dragged. */
   private boolean isDragging;
-  private boolean selectedNewLabel;
 
-  public TextTool() {}
+  private boolean selectedNewLabel;
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
@@ -202,17 +202,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   }
 
   /**
-   * The EditLabelDialog class is a dialog box that allows the user to edit a label.
-   * It extends the JDialog class and provides functionality for displaying and interacting
-   * with the label editing panel.
+   * The EditLabelDialog class is a dialog box that allows the user to edit a label. It extends the
+   * JDialog class and provides functionality for displaying and interacting with the label editing
+   * panel.
    */
   public class EditLabelDialog extends JDialog {
     /** The serial version UID. */
     private static final long serialVersionUID = 7621373725343873527L;
 
-    /**
-     * Indicates whether the changes have been accepted.
-     */
+    /** Indicates whether the changes have been accepted. */
     private boolean accepted;
 
     /**
@@ -252,9 +250,9 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   }
 
   /**
-   * EditLabelPanel is a GUI panel used for editing label properties.
-   * It extends the AbeillePanel class and provides functionality for binding a Label
-   * model, committing changes to the model, and initializing the user interface components.
+   * EditLabelPanel is a GUI panel used for editing label properties. It extends the AbeillePanel
+   * class and provides functionality for binding a Label model, committing changes to the model,
+   * and initializing the user interface components.
    */
   public class EditLabelPanel extends AbeillePanel<Label> {
     private static final long serialVersionUID = 3307411310513003924L;
@@ -324,8 +322,8 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
     /**
      * Initializes the OK button by adding an ActionListener that handles the button click event.
-     * Upon clicking the OK button, the dialog's 'accepted' flag is set to true, the commit() method is called,
-     * and the dialog is closed.
+     * Upon clicking the OK button, the dialog's 'accepted' flag is set to true, the commit() method
+     * is called, and the dialog is closed.
      */
     public void initOKButton() {
       getOKButton()
@@ -338,16 +336,14 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     }
 
     /**
-     * Initializes the cancel button by adding an ActionListener that handles the button click event.
-     * Upon clicking the cancel button, the dialog is closed.
+     * Initializes the cancel button by adding an ActionListener that handles the button click
+     * event. Upon clicking the cancel button, the dialog is closed.
      */
     public void initCancelButton() {
       ((JButton) getComponent("cancelButton")).addActionListener(e -> close());
     }
 
-    /**
-     * Closes the dialog.
-     */
+    /** Closes the dialog. */
     private void close() {
       dialog.setVisible(false);
     }

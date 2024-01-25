@@ -23,21 +23,21 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 
 /**
- * The FlatImageLabelFactory class is responsible for creating instances of FlatImageLabel
- * objects. It provides methods to customize the labels based on different parameters.
+ * The FlatImageLabelFactory class is responsible for creating instances of FlatImageLabel objects.
+ * It provides methods to customize the labels based on different parameters.
  */
 public class FlatImageLabelFactory {
 
   /** The singleton instance of the FlatImageLabelFactory class for NPC labels */
   private final FlatImageLabel npcImageLabel;
+
   /** The singleton instance of the FlatImageLabelFactory class for PC labels */
   private final FlatImageLabel pcImageLabel;
+
   /** The singleton instance of the FlatImageLabelFactory class for non-visible token labels */
   private final FlatImageLabel nonVisibleImageLabel;
 
-  /**
-   * Creates a new instance of the FlatImageLabelFactory class.
-   */
+  /** Creates a new instance of the FlatImageLabelFactory class. */
   public FlatImageLabelFactory() {
     var npcBackground = AppPreferences.getNPCMapLabelBG();
     var npcForeground = AppPreferences.getNPCMapLabelFG();
@@ -80,7 +80,6 @@ public class FlatImageLabelFactory {
   public FlatImageLabel getMapImageLabel(Label label) {
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), label.getFontSize());
     var bg = label.isShowBackground() ? label.getBackgroundColor() : new Color(0, 0, 0, 0);
-    return new FlatImageLabel(
-          4, 4, label.getForegroundColor(), bg, font, Justification.Center);
+    return new FlatImageLabel(4, 4, label.getForegroundColor(), bg, font, Justification.Center);
   }
 }

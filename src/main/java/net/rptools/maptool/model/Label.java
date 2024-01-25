@@ -29,7 +29,6 @@ public class Label {
    *
    * <p>The ID is used to uniquely identify each Label object.
    *
-   * @see Label
    * @see GUID
    */
   private final GUID id;
