@@ -20,6 +20,15 @@ import net.rptools.maptool.server.proto.LabelDto;
 /** A label is a piece of text that can be placed on a map. */
 public class Label {
 
+  /** The default font size for labels. */
+  public static final int DEFAULT_LABEL_FONT_SIZE = 12;
+
+  /** The default background color for labels. */
+  public static final Color DEFAULT_LABEL_BACKGROUND_COLOR = new Color(0.82f, 0.82f, 0.82f, 1.0f);
+
+  /** The default foreground color for labels. */
+  public static final Color DEFAULT_LABEL_FOREGROUND_COLOR = Color.BLACK;
+
   /**
    * The unique identifier for a Label object.
    *
@@ -42,19 +51,17 @@ public class Label {
   /** The y coordinate of the label is the y coordinate of the location of the label on the map. */
   private int y;
 
-  /** Whether or not the background of the label is shown. */
+  /** Whether the background of the label is shown. */
   private boolean showBackground;
 
   /** The foreground color of the label. */
-  private int foregroundColor;
+  private int foregroundColor = DEFAULT_LABEL_FOREGROUND_COLOR.getRGB();
 
   /** The background color of the label. */
-  private int backgroundColor;
+  private int backgroundColor = DEFAULT_LABEL_BACKGROUND_COLOR.getRGB();
 
   /** The font size of the label. */
-  private int fontSize;
-
-  // for serialisation
+  private int fontSize = DEFAULT_LABEL_FONT_SIZE;
 
   /**
    * Creates a new instance of the {@link Label} class.

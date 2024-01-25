@@ -17,6 +17,7 @@ package net.rptools.maptool.model.transform.campaign;
 import java.awt.Color;
 import java.util.regex.Pattern;
 import net.rptools.lib.ModelVersionTransformation;
+import net.rptools.maptool.model.Label;
 
 /**
  * A class that implements the ModelVersionTransformation interface to transform XML strings by
@@ -35,7 +36,9 @@ public class LabelFontAndBGTransform implements ModelVersionTransformation {
       "<backgroundColor>"
           + legacyBackgroundColor.getRGB()
           + "</backgroundColor>\n"
-          + "<fontSize>12</fontSize>\n"
+          + "<fontSize>"
+          + Label.DEFAULT_LABEL_FONT_SIZE
+          + "</fontSize>\n"
           + endLabelTag;
 
   /** The pattern that we want to use to match the end label tag. */

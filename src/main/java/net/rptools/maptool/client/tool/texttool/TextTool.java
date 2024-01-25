@@ -24,6 +24,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -274,6 +275,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     public void bind(Label model) {
       getForegroundColorWell().setColor(model.getForegroundColor());
       getBackgroundColorWell().setColor(model.getBackgroundColor());
+      getFontSizeSpinner().setValue(model.getFontSize());
       super.bind(model);
     }
 
@@ -281,6 +283,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     public boolean commit() {
       getModel().setForegroundColor(getForegroundColorWell().getColor());
       getModel().setBackgroundColor(getBackgroundColorWell().getColor());
+      getModel().setFontSize((Integer) getFontSizeSpinner().getValue());
       return super.commit();
     }
 
@@ -300,6 +303,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
      */
     public ColorWell getBackgroundColorWell() {
       return (ColorWell) getComponent("backgroundColor");
+    }
+
+    /**
+     * Retrieves the font size spinner component from EditLabelPanel.
+     *
+     * @return The font size spinner component.
+     */
+    public JSpinner getFontSizeSpinner() {
+      return (JSpinner) getComponent("fontSize");
     }
 
     /**
