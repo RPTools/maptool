@@ -425,7 +425,7 @@ dependencies {
     implementation 'com.formdev:flatlaf:3.3'
     implementation 'com.formdev:flatlaf-intellij-themes:3.3'
     implementation 'com.formdev:flatlaf-extras:3.3'
-    implementation 'com.github.weisj:jsvg:1.2.0'
+    implementation 'com.github.weisj:jsvg:1.3.0-jb.3'
     implementation 'com.formdev:flatlaf-jide-oss:3.3'
 
     // JS support for macros
