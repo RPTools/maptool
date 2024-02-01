@@ -18,14 +18,15 @@ import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
 import org.locationtech.jts.noding.NodableSegmentString;
@@ -33,10 +34,13 @@ import org.locationtech.jts.noding.NodedSegmentString;
 import org.locationtech.jts.noding.SegmentString;
 import org.locationtech.jts.noding.snapround.SnapRoundingNoder;
 import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.operation.valid.IsValidOp;
 
 public class GeometryUtil {
   private static final Logger log = LogManager.getLogger(GeometryUtil.class);
-  private static final PrecisionModel precisionModel = new PrecisionModel(1_000_000.0);
+
+  private static final PrecisionModel precisionModel = new PrecisionModel(100_000.0);
+
   private static final GeometryFactory geometryFactory = new GeometryFactory(precisionModel);
 
   public static double getAngle(Point2D origin, Point2D target) {
@@ -117,11 +121,10 @@ public class GeometryUtil {
   }
 
   private static Polygonizer toPolygonizer(Area area) {
-    final var pathIterator = area.getPathIterator(null);
-    final var polygonizer = new Polygonizer(true);
-    final var coords = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
+    final var pathIterator = area.getPathIterator(null, 1. / precisionModel.getScale());
 
     // Make sure the geometry is noded and precise before polygonizing.
+    final var coords = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
     final var strings = new ArrayList<NodableSegmentString>(coords.size());
     for (var string : coords) {
       strings.add(new NodedSegmentString(string, null));
@@ -132,6 +135,7 @@ public class GeometryUtil {
     final Collection<? extends SegmentString> nodedStrings = noder.getNodedSubstrings();
 
     // Now build the polygons from our corrected geometry.
+    final var polygonizer = new Polygonizer(true);
     for (var string : nodedStrings) {
       final var lineString = geometryFactory.createLineString(string.getCoordinates());
       polygonizer.add(lineString);
@@ -151,11 +155,20 @@ public class GeometryUtil {
     return polygonizer;
   }
 
-  public static Geometry toJts(Area area) {
-    return toPolygonizer(area).getGeometry();
+  public static MultiPolygon toJts(Area area) {
+    final var polygons = toJtsPolygons(area);
+    final var geometry = geometryFactory.createMultiPolygon(polygons.toArray(Polygon[]::new));
+    assert geometry.isValid()
+        : "Returned geometry must be valid, but found this error: "
+            + new IsValidOp(geometry).getValidationError();
+    return geometry;
   }
 
   public static Collection<Polygon> toJtsPolygons(Area area) {
+    if (area.isEmpty()) {
+      return Collections.emptyList();
+    }
+
     return toPolygonizer(area).getPolygons();
   }
 }
