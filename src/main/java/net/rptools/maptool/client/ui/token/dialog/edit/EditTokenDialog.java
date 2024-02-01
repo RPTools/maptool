@@ -87,7 +87,6 @@ import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.util.ExtractHeroLab;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.LightSyntax;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fife.ui.rsyntaxtextarea.RSyntaxTextArea;
@@ -173,10 +172,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     EnumSet.allOf(TerrainModifierOperation.class).forEach(operationModel::addElement);
   }
 
-  public void initUniqueLightSourcesTextPane() {
-    setUniqueLightSourcesEnabled(MapTool.getPlayer().isGM());
-  }
-
   public void initJtsMethodComboBox() {
     getJtsMethodComboBox().setModel(new DefaultComboBoxModel<>(JTS_SimplifyMethodType.values()));
   }
@@ -205,8 +200,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     getRootPane().setDefaultButton(getOKButton());
     setGmNotesEnabled(MapTool.getPlayer().isGM());
     getComponent("@GMName").setEnabled(MapTool.getPlayer().isGM());
-
-    setUniqueLightSourcesEnabled(MapTool.getPlayer().isGM());
 
     dialog.setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -377,9 +370,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 .stream()
                 .mapToInt(Integer::valueOf)
                 .toArray());
-
-    getUniqueLightSourcesTextPane()
-        .setText(new LightSyntax().stringifyLights(token.getUniqueLightSources()));
 
     // Jamz: Init the Topology tab...
     JTabbedPane tabbedPane = getTabbedPane();
@@ -719,15 +709,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     return (JList<TerrainModifierOperation>) getComponent("terrainModifiersIgnored");
   }
 
-  public void setUniqueLightSourcesEnabled(boolean enabled) {
-    getUniqueLightSourcesTextPane().setEnabled(enabled);
-    getLabel("uniqueLightSourcesLabel").setEnabled(enabled);
-  }
-
-  public JTextPane getUniqueLightSourcesTextPane() {
-    return (JTextPane) getComponent("uniqueLightSources");
-  }
-
   public JLabel getLibTokenURIErrorLabel() {
     return (JLabel) getComponent("Label.LibURIError");
   }
@@ -801,14 +782,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     token.setTerrainModifiersIgnored(
         new HashSet<>(getTerrainModifiersIgnoredList().getSelectedValuesList()));
-
-    var uniqueLightSources =
-        new LightSyntax()
-            .parseLights(getUniqueLightSourcesTextPane().getText(), token.getUniqueLightSources());
-    token.removeAllUniqueLightsources();
-    for (var lightSource : uniqueLightSources.values()) {
-      token.addUniqueLightSource(lightSource);
-    }
 
     // Get the states
     Component[] stateComponents = getStatesPanel().getComponents();
