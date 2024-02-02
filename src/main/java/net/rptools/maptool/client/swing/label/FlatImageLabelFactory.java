@@ -41,18 +41,51 @@ public class FlatImageLabelFactory {
   public FlatImageLabelFactory() {
     var npcBackground = AppPreferences.getNPCMapLabelBG();
     var npcForeground = AppPreferences.getNPCMapLabelFG();
+    var npcBorder = AppPreferences.getNPCMapLabelBorder();
     var pcBackground = AppPreferences.getPCMapLabelBG();
     var pcForeground = AppPreferences.getPCMapLabelFG();
+    var pcBorder = AppPreferences.getPCMapLabelBorder();
     var nonVisBackground = AppPreferences.getNonVisMapLabelBG();
     var nonVisForeground = AppPreferences.getNonVisMapLabelFG();
+    var nonVisBorder = AppPreferences.getNonVisMapLabelBorder();
     int fontSize = AppPreferences.getMapLabelFontSize();
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), fontSize);
+    int borderWidth = AppPreferences.getMapLabelBorderWidth();
+    int borderArc = AppPreferences.getMapLabelBorderArc();
 
     npcImageLabel =
-        new FlatImageLabel(4, 4, npcForeground, npcBackground, font, Justification.Center);
-    pcImageLabel = new FlatImageLabel(4, 4, pcForeground, pcBackground, font, Justification.Center);
+        new FlatImageLabel(
+            4,
+            4,
+            npcForeground,
+            npcBackground,
+            npcBorder,
+            font,
+            Justification.Center,
+            borderWidth,
+            borderArc);
+    pcImageLabel =
+        new FlatImageLabel(
+            4,
+            4,
+            pcForeground,
+            pcBackground,
+            pcBorder,
+            font,
+            Justification.Center,
+            borderWidth,
+            borderArc);
     nonVisibleImageLabel =
-        new FlatImageLabel(4, 4, nonVisForeground, nonVisBackground, font, Justification.Center);
+        new FlatImageLabel(
+            4,
+            4,
+            nonVisForeground,
+            nonVisBackground,
+            nonVisBorder,
+            font,
+            Justification.Center,
+            borderWidth,
+            borderArc);
   }
 
   /**
@@ -80,6 +113,16 @@ public class FlatImageLabelFactory {
   public FlatImageLabel getMapImageLabel(Label label) {
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), label.getFontSize());
     var bg = label.isShowBackground() ? label.getBackgroundColor() : new Color(0, 0, 0, 0);
-    return new FlatImageLabel(4, 4, label.getForegroundColor(), bg, font, Justification.Center);
+    int borderSize = label.isShowBorder() ? label.getBorderWidth() : 0;
+    return new FlatImageLabel(
+        4,
+        4,
+        label.getForegroundColor(),
+        bg,
+        label.getBorderColor(),
+        font,
+        Justification.Center,
+        borderSize,
+        label.getBorderArc());
   }
 }

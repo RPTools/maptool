@@ -17,7 +17,16 @@ package net.rptools.maptool.model;
 import java.awt.Color;
 import net.rptools.maptool.server.proto.LabelDto;
 
-/** A label is a piece of text that can be placed on a map. */
+/**
+ * The Label class represents a label in a graphical user interface. Labels are used to display text
+ * on the screen.
+ *
+ * <p>A label can have various properties such as the text content, position, visibility of the
+ * background and border, and the colors and font size.
+ *
+ * <p>This class provides methods to set and retrieve these properties of a label object.
+ * Additionally, it provides constructors to create label objects with different properties.
+ */
 public class Label {
 
   /** The default font size for labels. */
@@ -30,7 +39,13 @@ public class Label {
   public static final Color DEFAULT_LABEL_FOREGROUND_COLOR = Color.BLACK;
 
   /** The default border color for labels. */
-  public static final int DEFAULT_LABEL_BORDER_WIDTH = 1;
+  public static final Color DEFAULT_LABEL_BORDER_COLOR = DEFAULT_LABEL_FOREGROUND_COLOR;
+
+  /** The default border width for labels. */
+  public static final int DEFAULT_LABEL_BORDER_WIDTH = 2;
+
+  /** The default border arc for labels. */
+  public static final int DEFAULT_LABEL_BORDER_ARC = 10;
 
   /**
    * The unique identifier for a Label object.
@@ -60,8 +75,11 @@ public class Label {
   /** Whether the border of the label is shown. */
   private boolean showBorder;
 
+  /** The border arc of the label. */
+  private int borderArc = DEFAULT_LABEL_BORDER_ARC;
+
   /** The border color of the label. */
-  private int borderColor = DEFAULT_LABEL_FOREGROUND_COLOR.getRGB();
+  private int borderColor = DEFAULT_LABEL_BORDER_COLOR.getRGB();
 
   /** The border width of the label. */
   private int borderWidth = DEFAULT_LABEL_BORDER_WIDTH;
@@ -86,6 +104,7 @@ public class Label {
    * @param foregroundColor the color of the label's foreground
    * @param backgroundColor the color of the label's background
    * @param showBorder indicates whether the label should show the border
+   * @param borderArc the arc of the label's border
    * @param fontSize the font size of the label
    */
   private Label(
@@ -99,6 +118,7 @@ public class Label {
       int borderColor,
       boolean showBorder,
       int borderWidth,
+      int borderArc,
       int fontSize) {
     this.id = id;
     this.label = label;
@@ -110,6 +130,7 @@ public class Label {
     this.borderColor = borderColor;
     this.showBorder = showBorder;
     this.borderWidth = borderWidth;
+    this.borderArc = borderArc;
     this.fontSize = fontSize;
   }
 
@@ -161,6 +182,7 @@ public class Label {
         label.borderColor,
         label.showBorder,
         label.borderWidth,
+        label.borderArc,
         label.fontSize);
   }
 
@@ -318,6 +340,78 @@ public class Label {
   }
 
   /**
+   * Retrieves the border color of the Label object.
+   *
+   * @return the border color
+   */
+  public boolean isShowBorder() {
+    return showBorder;
+  }
+
+  /**
+   * Sets whether the border of the Label object should be shown.
+   *
+   * @param showBorder indicates whether the border should be shown
+   */
+  public void setShowBorder(boolean showBorder) {
+    this.showBorder = showBorder;
+  }
+
+  /**
+   * Retrieves the border color of the Label object.
+   *
+   * @return the border color
+   */
+  public Color getBorderColor() {
+    return new Color(borderColor, true);
+  }
+
+  /**
+   * Sets the border color of the Label object.
+   *
+   * @param borderColor the color to set as the border color
+   */
+  public void setBorderColor(Color borderColor) {
+    this.borderColor = borderColor.getRGB();
+  }
+
+  /**
+   * Retrieves the width of the border of the Label object.
+   *
+   * @return the width of the border
+   */
+  public int getBorderWidth() {
+    return borderWidth;
+  }
+
+  /**
+   * Sets the width of the border for the Label object.
+   *
+   * @param borderWidth the width of the border to set
+   */
+  public void setBorderWidth(int borderWidth) {
+    this.borderWidth = borderWidth;
+  }
+
+  /**
+   * Retrieves the arc of the border of the Label object.
+   *
+   * @return the arc of the border
+   */
+  public int getBorderArc() {
+    return borderArc;
+  }
+
+  /**
+   * Sets the arc of the border for the Label object.
+   *
+   * @param borderArc the arc of the border to set
+   */
+  public void setBorderArc(int borderArc) {
+    this.borderArc = borderArc;
+  }
+
+  /**
    * Creates a new instance of the {@link Label} class based on the provided LabelDto object.
    *
    * @param dto the LabelDto object used to create the Label
@@ -335,6 +429,7 @@ public class Label {
         dto.getBorderColor(),
         dto.getShowBorder(),
         dto.getBorderWidth(),
+        dto.getBorderArc(),
         dto.getFontSize());
   }
 
@@ -357,6 +452,7 @@ public class Label {
         .setBorderColor(borderColor)
         .setShowBorder(showBorder)
         .setBorderWidth(borderWidth)
+        .setBorderArc(borderArc)
         .build();
   }
 }

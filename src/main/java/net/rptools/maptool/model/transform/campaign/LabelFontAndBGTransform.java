@@ -39,6 +39,16 @@ public class LabelFontAndBGTransform implements ModelVersionTransformation {
           + "<fontSize>"
           + Label.DEFAULT_LABEL_FONT_SIZE
           + "</fontSize>\n"
+          + "<borderColor>"
+          + Label.DEFAULT_LABEL_BORDER_COLOR.getRGB()
+          + "</borderColor>\n"
+          + "<borderWidth>"
+          + Label.DEFAULT_LABEL_BORDER_WIDTH
+          + "</borderWidth>\n"
+          + "<borderArc>"
+          + Label.DEFAULT_LABEL_BORDER_ARC
+          + "</borderArc>\n"
+          + "<showBorder>true</showBorder>\n"
           + endLabelTag;
 
   /** The pattern that we want to use to match the end label tag. */

@@ -29,15 +29,13 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
+import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * The AppPreferences class represents the preferences used by the application. It provides methods
- * for setting and getting various preferences related to the application settings.
- */
+/** The AppPreferences class is used for managing the preferences of the application. */
 public class AppPreferences {
 
   /**
@@ -561,6 +559,14 @@ public class AppPreferences {
   private static final String KEY_NPC_MAP_LABEL_FG_COLOR = "npcMapLabelFG";
 
   /**
+   * Constant variable for the border color of NPC map labels. The value represents the key used to
+   * retrieve the color from a map or configuration file. The foreground color is used to style the
+   * text of the map labels for Non-Player Characters (NPCs). This constant is intended to be used
+   * within the context of a software application or system.
+   */
+  private static final String KEY_NPC_MAP_LABEL_BORDER_COLOR = "mapLabelBorderColor";
+
+  /**
    * The key for retrieving the background color of PC map labels. The value of this key is used to
    * store and retrieve background color information for NPC map The background color is used to
    * style the text of the map labels for Player Characters (PCs) labels. The value associated with
@@ -569,12 +575,18 @@ public class AppPreferences {
   private static final String KEY_PC_MAP_LABEL_BG_COLOR = "pcMapLabelBG";
 
   /**
-   * Constant variable for the foreground color of PC map labels. The value represents the key used
-   * to retrieve the color from a map or configuration file. The foreground color is used to style
-   * the text of the map labels for Player Characters (PCs). This constant is intended to be used
-   * within the context of a software application or system.
+   * Constant variable for the foreground color of NPC map labels. The value represents the key used
+   * to retrieve the color from a map or configuration file. The border color is used to style the
+   * text of the map labels for Non Player Characters (NPCs).
    */
   private static final String KEY_PC_MAP_LABEL_FG_COLOR = "pcMapLabelFG";
+
+  /**
+   * Constant variable for the foreground color of PC map labels. The value represents the key used
+   * to retrieve the color from a map or configuration file. The border color is used to style the
+   * text of the map labels for Player Characters (PCs).
+   */
+  private static final String KEY_PC_MAP_LABEL_BORDER_COLOR = "pcMapLabelBorderColor";
 
   /**
    * This variable represents the key used to store the background color of non-visible token map
@@ -591,10 +603,23 @@ public class AppPreferences {
   private static final String KEY_NONVIS_MAP_LABEL_FG_COLOR = "nonVisMapLabelFG";
 
   /**
+   * This variable represents the key used to store the border color of non-visible token map
+   * labels. The foreground color is used to style the text of the map labels for tokens that are
+   * not visible to the player. The value associated with this key should be a valid color value.
+   */
+  private static final String KEY_NONVIS_MAP_LABEL_BORDER_COLOR = "nonVisMapLabelBorderColor";
+
+  /**
    * The KEY_MAP_LABEL_FONT_SIZE constant is used to define the name of the key that represents the
    * font size of map labels.
    */
   private static final String KEY_MAP_LABEL_FONT_SIZE = "mapLabelFontSize";
+
+  /** The configuration key for specifying the width of the border around map labels for tokens. */
+  private static final String KEY_MAP_LABEL_BORDER_WIDTH = "mapLabelBorderWidth";
+
+  /** The configuration key for specifying the arc of the border around map labels for tokens. */
+  private static final String KEY_MAP_LABEL_BORDER_ARC = "mapLabelBorderArc";
 
   /** The default background color for the NPC map label. */
   private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
@@ -602,11 +627,17 @@ public class AppPreferences {
   /** The default foreground color for NPC map labels. */
   private static final Color DEFAULT_NPC_MAP_LABEL_FG_COLOR = Color.BLACK;
 
+  /** The default border color for NPC map labels. */
+  private static final Color DEFAULT_NPC_MAP_LABEL_BORDER_COLOR = DEFAULT_NPC_MAP_LABEL_FG_COLOR;
+
   /** The default background color for the PC map label. */
   private static final Color DEFAULT_PC_MAP_LABEL_BG_COLOR = Color.WHITE;
 
   /** The default foreground color for the map labels in the PC map. */
   private static final Color DEFAULT_PC_MAP_LABEL_FG_COLOR = Color.BLUE;
+
+  /** The default border color for the PC map labels. */
+  private static final Color DEFAULT_PC_MAP_LABEL_BORDER_COLOR = DEFAULT_PC_MAP_LABEL_FG_COLOR;
 
   /** The default background color for non-visible map labels. */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_BG_COLOR = Color.BLACK;
@@ -614,7 +645,18 @@ public class AppPreferences {
   /** The default foreground color for non-visible map labels. */
   private static final Color DEFAULT_NONVIS_MAP_LABEL_FG_COLOR = Color.WHITE;
 
+  /** The default border color for non-visible map labels. */
+  private static final Color DEFAULT_NONVIS_MAP_LABEL_BORDER_COLOR =
+      DEFAULT_NONVIS_MAP_LABEL_FG_COLOR;
+
+  /** The default font size for map labels. */
   private static final int DEFAULT_MAP_LABEL_FONT_SIZE = AppStyle.labelFont.getSize();
+
+  /** The default border width for token map labels. */
+  private static final int DEFAULT_MAP_LABEL_BORDER_WIDTH = Label.DEFAULT_LABEL_BORDER_WIDTH;
+
+  /** The default border arc for token map labels. */
+  private static final int DEFAULT_MAP_LABEL_BORDER_ARC = Label.DEFAULT_LABEL_BORDER_ARC;
 
   public static void setHaloLineWidth(int size) {
     prefs.putInt(KEY_HALO_LINE_WIDTH, size);
@@ -1664,6 +1706,26 @@ public class AppPreferences {
   }
 
   /**
+   * Returns the border color to use for PC Map Labels.
+   *
+   * @return the border color to use for PC Map Labels.
+   */
+  public static Color getPCMapLabelBorder() {
+    return new Color(
+        prefs.getInt(KEY_PC_MAP_LABEL_BORDER_COLOR, DEFAULT_PC_MAP_LABEL_BORDER_COLOR.getRGB()),
+        true);
+  }
+
+  /**
+   * Sets the border color to use for PC Map Labels.
+   *
+   * @param color the border color to use for PC Map Labels.
+   */
+  public static void setPCMapLabelBorder(Color color) {
+    prefs.putInt(KEY_PC_MAP_LABEL_BORDER_COLOR, color.getRGB());
+  }
+
+  /**
    * Returns the foreground color to use for NPC Map Labels.
    *
    * @return the foreground color to use for NPC Map Labels.
@@ -1680,6 +1742,26 @@ public class AppPreferences {
    */
   public static void setNPCMapLabelFG(Color color) {
     prefs.putInt(KEY_NPC_MAP_LABEL_FG_COLOR, color.getRGB());
+  }
+
+  /**
+   * Returns the border color to use for NPC Map Labels.
+   *
+   * @return the border color to use for NPC Map Labels.
+   */
+  public static Color getNPCMapLabelBorder() {
+    return new Color(
+        prefs.getInt(KEY_NPC_MAP_LABEL_BORDER_COLOR, DEFAULT_NPC_MAP_LABEL_BORDER_COLOR.getRGB()),
+        true);
+  }
+
+  /**
+   * Sets the border color to use for NPC Map Labels.
+   *
+   * @param color the border color to use for NPC Map Labels.
+   */
+  public static void setNPCMapLabelBorder(Color color) {
+    prefs.putInt(KEY_NPC_MAP_LABEL_BORDER_COLOR, color.getRGB());
   }
 
   /**
@@ -1761,6 +1843,27 @@ public class AppPreferences {
   }
 
   /**
+   * Returns the border color to use for Non-Visible Token Map Labels.
+   *
+   * @return the border color to use for Non-Visible Token Map Labels.
+   */
+  public static Color getNonVisMapLabelBorder() {
+    return new Color(
+        prefs.getInt(
+            KEY_NONVIS_MAP_LABEL_BORDER_COLOR, DEFAULT_NONVIS_MAP_LABEL_BORDER_COLOR.getRGB()),
+        true);
+  }
+
+  /**
+   * Sets the border color to use for Non-Visible Token Map Labels.
+   *
+   * @param color the border color to use for Non-Visible Token Map Labels.
+   */
+  public static void setNonVisMapLabelBorder(Color color) {
+    prefs.putInt(KEY_NONVIS_MAP_LABEL_BORDER_COLOR, color.getRGB());
+  }
+
+  /**
    * Returns the font size to use for Map Token Labels.
    *
    * @return the font size to use for Map Token Labels.
@@ -1776,5 +1879,41 @@ public class AppPreferences {
    */
   public static void setMapLabelFontSize(int size) {
     prefs.putInt(KEY_MAP_LABEL_FONT_SIZE, size);
+  }
+
+  /**
+   * Gets the width of the border for token map labels.
+   *
+   * @return The width of the border for map labels.
+   */
+  public static int getMapLabelBorderWidth() {
+    return prefs.getInt(KEY_MAP_LABEL_BORDER_WIDTH, DEFAULT_MAP_LABEL_BORDER_WIDTH);
+  }
+
+  /**
+   * Sets the width of the border for token map labels.
+   *
+   * @param width the width of the border in pixels
+   */
+  public static void setMapLabelBorderWidth(int width) {
+    prefs.putInt(KEY_MAP_LABEL_BORDER_WIDTH, width);
+  }
+
+  /**
+   * Returns the value of the preference for the map label border arc.
+   *
+   * @return the value of the preference for the map label border arc
+   */
+  public static int getMapLabelBorderArc() {
+    return prefs.getInt(KEY_MAP_LABEL_BORDER_ARC, DEFAULT_MAP_LABEL_BORDER_ARC);
+  }
+
+  /**
+   * Sets the value of the preference for the map label border arc.
+   *
+   * @param arc the value of the preference for the map label border arc
+   */
+  public static void setMapLabelBorderArc(int arc) {
+    prefs.putInt(KEY_MAP_LABEL_BORDER_ARC, arc);
   }
 }

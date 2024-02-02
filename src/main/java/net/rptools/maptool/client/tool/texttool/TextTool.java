@@ -276,6 +276,9 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getForegroundColorWell().setColor(model.getForegroundColor());
       getBackgroundColorWell().setColor(model.getBackgroundColor());
       getFontSizeSpinner().setValue(model.getFontSize());
+      getBorderColorWell().setColor(model.getBorderColor());
+      getBorderWidthSpinner().setValue(model.getBorderWidth());
+      getBorderArcSpinner().setValue(model.getBorderArc());
       super.bind(model);
     }
 
@@ -283,7 +286,10 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     public boolean commit() {
       getModel().setForegroundColor(getForegroundColorWell().getColor());
       getModel().setBackgroundColor(getBackgroundColorWell().getColor());
-      getModel().setFontSize((Integer) getFontSizeSpinner().getValue());
+      getModel().setFontSize(Math.max((Integer) getFontSizeSpinner().getValue(), 6));
+      getModel().setBorderColor(getBorderColorWell().getColor());
+      getModel().setBorderWidth(Math.max((Integer) getBorderWidthSpinner().getValue(),0));
+      getModel().setBorderArc(Math.max((Integer) getBorderArcSpinner().getValue(), 0));
       return super.commit();
     }
 
@@ -303,6 +309,33 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
      */
     public ColorWell getBackgroundColorWell() {
       return (ColorWell) getComponent("backgroundColor");
+    }
+
+    /**
+     * Retrieves the border color well component.
+     *
+     * @return The border color well component.
+     */
+    public ColorWell getBorderColorWell() {
+      return (ColorWell) getComponent("borderColor");
+    }
+
+    /**
+     * Retrieves the border width spinner component from EditLabelPanel.
+     *
+     * @return The border width spinner component.
+     */
+    public JSpinner getBorderWidthSpinner() {
+      return (JSpinner) getComponent("borderWidth");
+    }
+
+    /**
+     * Retrieves the border arc spinner component from EditLabelPanel.
+     *
+     * @return The border arc spinner component.
+     */
+    public JSpinner getBorderArcSpinner() {
+      return (JSpinner) getComponent("borderArc");
     }
 
     /**

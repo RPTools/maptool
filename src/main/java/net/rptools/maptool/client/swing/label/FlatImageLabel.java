@@ -14,16 +14,19 @@
  */
 package net.rptools.maptool.client.swing.label;
 
+import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.geom.RoundRectangle2D;
 import javax.swing.SwingUtilities;
 
 /**
- * The FlatImageLabel class represents a label that can be rendered as an image. It provides methods
- * to get the dimensions of the label and render it on a graphics context.
+ * The FlatImageLabel class represents an image label with customizable properties such as padding,
+ * colors, font, and justification. It can be used to create labels for images in various
+ * containers.
  */
 public class FlatImageLabel {
 
@@ -97,24 +100,48 @@ public class FlatImageLabel {
    */
   private final Justification justification;
 
+  /** The borderColor variable represents the color used as the border of a FlatImageLabel. */
+  private final Color borderColor;
+
+  /** The borderSize variable represents the size of the border for a FlatImageLabel. */
+  private final int borderWidth;
+
+  /** The borderArc variable represents the size of the border arc for a FlatImageLabel. */
+  private final int borderArc;
+
   /**
    * The FlatImageLabel class represents an image label with customizable properties such as
    * padding, colors, font, and justification. It can be used to create labels for images in various
    * containers.
+   *
+   * @param padX the horizontal padding value for the label.
+   * @param padY the vertical padding value for the label.
+   * @param foreground the color value for the foreground of the label.
+   * @param background the color value for the background of the label.
+   * @param borderColor the color value for the border of the label.
+   * @param font the font used for rendering text in the label.
+   * @param justification the type of text justification used for the label.
+   * @param borderWidth the size of the border for the label.
    */
   public FlatImageLabel(
       int padX,
       int padY,
       Color foreground,
       Color background,
+      Color borderColor,
       Font font,
-      Justification justification) {
+      Justification justification,
+      int borderWidth,
+      int borderArc) {
     this.padX = padX;
     this.padY = padY;
     this.foreground = foreground;
     this.background = background;
     this.font = font;
     this.justification = justification;
+    this.borderColor = borderColor;
+    this.borderWidth = borderWidth;
+    this.borderArc = borderArc;
   }
 
   /**
@@ -131,7 +158,8 @@ public class FlatImageLabel {
     var fm = g2d.getFontMetrics();
     int strWidth = SwingUtilities.computeStringWidth(fm, string);
     int strHeight = fm.getHeight();
-    return new Dimension(strWidth + padX * 2, strHeight + padY * 2);
+    return new Dimension(
+        strWidth + padX * 2 + borderWidth * 2, strHeight + padY * 2 + borderWidth * 2);
   }
 
   /**
@@ -150,26 +178,33 @@ public class FlatImageLabel {
     g2d.setFont(font);
     var fm = g2d.getFontMetrics();
     int strWidth = SwingUtilities.computeStringWidth(fm, string);
-    int strHeight = fm.getHeight();
+    int strHeight = fm.getAscent() - fm.getDescent() - fm.getLeading();
 
-    int width = strWidth + padX * 2;
-    int height = strHeight + padY * 2;
+    var dim = getDimensions(g2d, string);
+    int width = (int) dim.getWidth();
+    int height = (int) dim.getHeight();
 
     var bounds = new Rectangle(x, y, width, height);
 
-    y = y + strHeight;
-    x =
+    int stringY = y + height / 2 + strHeight / 2;
+    int stringX =
         switch (justification) {
           case Left -> x + padY;
           case Right -> width - strWidth - padX;
           case Center -> x + padX + (width - strWidth) / 2 - padX;
         };
 
+    var labelRect = new RoundRectangle2D.Float(x, y, width - 1, height, borderArc, borderArc);
     g2d.setBackground(background);
     g2d.setColor(background);
-    g2d.fill(bounds);
+    g2d.fill(labelRect);
     g2d.setColor(foreground);
-    g2d.drawString(string, x, y);
+    g2d.drawString(string, stringX, stringY);
+    if (borderWidth > 0) {
+      g2d.setStroke(new BasicStroke(borderWidth, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+      g2d.setColor(borderColor);
+      g2d.draw(labelRect);
+    }
 
     return bounds;
   }
