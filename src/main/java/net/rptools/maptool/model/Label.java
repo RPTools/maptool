@@ -29,6 +29,9 @@ public class Label {
   /** The default foreground color for labels. */
   public static final Color DEFAULT_LABEL_FOREGROUND_COLOR = Color.BLACK;
 
+  /** The default border color for labels. */
+  public static final int DEFAULT_LABEL_BORDER_WIDTH = 1;
+
   /**
    * The unique identifier for a Label object.
    *
@@ -54,6 +57,15 @@ public class Label {
   /** Whether the background of the label is shown. */
   private boolean showBackground;
 
+  /** Whether the border of the label is shown. */
+  private boolean showBorder;
+
+  /** The border color of the label. */
+  private int borderColor = DEFAULT_LABEL_FOREGROUND_COLOR.getRGB();
+
+  /** The border width of the label. */
+  private int borderWidth = DEFAULT_LABEL_BORDER_WIDTH;
+
   /** The foreground color of the label. */
   private int foregroundColor = DEFAULT_LABEL_FOREGROUND_COLOR.getRGB();
 
@@ -73,6 +85,7 @@ public class Label {
    * @param showBackground indicates whether the label should show the background
    * @param foregroundColor the color of the label's foreground
    * @param backgroundColor the color of the label's background
+   * @param showBorder indicates whether the label should show the border
    * @param fontSize the font size of the label
    */
   private Label(
@@ -83,6 +96,9 @@ public class Label {
       boolean showBackground,
       int foregroundColor,
       int backgroundColor,
+      int borderColor,
+      boolean showBorder,
+      int borderWidth,
       int fontSize) {
     this.id = id;
     this.label = label;
@@ -91,6 +107,9 @@ public class Label {
     this.showBackground = showBackground;
     this.foregroundColor = foregroundColor;
     this.backgroundColor = backgroundColor;
+    this.borderColor = borderColor;
+    this.showBorder = showBorder;
+    this.borderWidth = borderWidth;
     this.fontSize = fontSize;
   }
 
@@ -122,6 +141,7 @@ public class Label {
     this.x = x;
     this.y = y;
     showBackground = true;
+    showBorder = true;
   }
 
   /**
@@ -130,7 +150,18 @@ public class Label {
    * @param label The Label object to copy from.
    */
   public Label(Label label) {
-    this(label.label, label.x, label.y);
+    this(
+        label.id,
+        label.label,
+        label.x,
+        label.y,
+        label.showBackground,
+        label.foregroundColor,
+        label.backgroundColor,
+        label.borderColor,
+        label.showBorder,
+        label.borderWidth,
+        label.fontSize);
   }
 
   /**
@@ -301,6 +332,9 @@ public class Label {
         dto.getShowBackground(),
         dto.getForegroundColor(),
         dto.getBackgroundColor(),
+        dto.getBorderColor(),
+        dto.getShowBorder(),
+        dto.getBorderWidth(),
         dto.getFontSize());
   }
 
@@ -320,6 +354,9 @@ public class Label {
         .setForegroundColor(foregroundColor)
         .setBackgroundColor(backgroundColor)
         .setFontSize(fontSize)
+        .setBorderColor(borderColor)
+        .setShowBorder(showBorder)
+        .setBorderWidth(borderWidth)
         .build();
   }
 }
