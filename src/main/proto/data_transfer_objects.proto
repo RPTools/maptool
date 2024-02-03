@@ -494,6 +494,12 @@ message LabelDto {
   int32 y = 4;
   bool show_background = 5;
   int32 foreground_color = 6;
+  int32 background_color = 7;
+  int32 font_size = 8;
+  int32 border_width = 9;
+  int32 border_color = 10;
+  bool show_border = 11;
+  int32 border_arc = 12;
 }
 
 message DrawnElementListDto {
