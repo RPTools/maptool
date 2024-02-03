@@ -158,6 +158,7 @@ public class LightSyntax {
       lastParameters.put("offset", 0.);
       lastParameters.put("GM", false);
       lastParameters.put("OWNER", false);
+      lastParameters.put("IGNORES-VBL", false);
 
       for (Light light : lightSource.getLightList()) {
         final var parameters = new HashMap<>();
@@ -167,6 +168,7 @@ public class LightSyntax {
           parameters.put("GM", light.isGM());
           parameters.put("OWNER", light.isOwnerOnly());
         }
+        parameters.put("IGNORES-VBL", lightSource.isIgnoresVBL());
 
         parameters.put("", light.getShape().name().toLowerCase());
         switch (light.getShape()) {
@@ -250,6 +252,7 @@ public class LightSyntax {
     GUID id = new GUID();
     LightSource.Type type = LightSource.Type.NORMAL;
     boolean scaleWithToken = false;
+    boolean ignoresVBL = false;
     List<Light> lights = new ArrayList<>();
     // endregion
     // region Individual light properties
@@ -282,6 +285,12 @@ public class LightSyntax {
         scaleWithToken = true;
         continue;
       }
+      // pass through vbl designation
+      if (arg.equalsIgnoreCase("IGNORES-VBL")) {
+        ignoresVBL = true;
+        continue;
+      }
+
       // Shape designation ?
       try {
         shape = ShapeType.valueOf(arg.toUpperCase());
@@ -394,7 +403,7 @@ public class LightSyntax {
       }
     }
 
-    return LightSource.createRegular(name, id, type, scaleWithToken, lights);
+    return LightSource.createRegular(name, id, type, scaleWithToken, ignoresVBL, lights);
   }
 
   private String toHex(Color color) {

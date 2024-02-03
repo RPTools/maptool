@@ -31,8 +31,8 @@ public final class AttachedLightSource {
    * Get the ID of the attached light source.
    *
    * <p>If you're trying to use this to look up a {@link net.rptools.maptool.model.LightSource},
-   * consider using {@link #resolve(Token, Campaign)} instead. If you're trying to compare to
-   * another {@code GUID}, consider using {@link #matches(GUID)}.
+   * consider using {@link #resolve(Campaign)} instead. If you're trying to compare to another
+   * {@code GUID}, consider using {@link #matches(GUID)}.
    *
    * @return The ID of the attached light source.
    */
@@ -41,19 +41,13 @@ public final class AttachedLightSource {
   }
 
   /**
-   * Obtain the attached {@code LightSource} from the token or campaign.
+   * Obtain the attached {@code LightSource} from the campaign.
    *
-   * @param token The token in which to look up light source IDs.
    * @param campaign The campaign in which to look up light source IDs.
    * @return The {@code LightSource} referenced by this {@code AttachedLightSource}, or {@code null}
    *     if no such light source exists.
    */
-  public @Nullable LightSource resolve(Token token, Campaign campaign) {
-    final var uniqueLightSource = token.getUniqueLightSource(lightSourceId);
-    if (uniqueLightSource != null) {
-      return uniqueLightSource;
-    }
-
+  public @Nullable LightSource resolve(Campaign campaign) {
     for (Map<GUID, LightSource> map : campaign.getLightSourcesMap().values()) {
       if (map.containsKey(lightSourceId)) {
         return map.get(lightSourceId);

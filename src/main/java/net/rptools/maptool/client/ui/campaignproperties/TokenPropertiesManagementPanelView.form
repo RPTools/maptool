@@ -1,32 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesManagementPanelView">
-  <grid id="26b35" binding="mainPanel" layout-manager="GridLayoutManager" row-count="6" column-count="8" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="26b35" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
-      <xy x="10" y="10" width="1023" height="474"/>
+      <xy x="10" y="10" width="1503" height="474"/>
     </constraints>
-    <properties/>
+    <properties>
+      <minimumSize width="-1" height="-1"/>
+      <preferredSize width="-1" height="-1"/>
+    </properties>
     <border type="none"/>
     <children>
-      <scrollpane id="814eb">
-        <constraints>
-          <grid row="3" column="3" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="25e4a" class="javax.swing.JTable">
-            <constraints/>
-            <properties>
-              <name value="propertiesTable"/>
-              <preferredScrollableViewportSize width="550" height="400"/>
-            </properties>
-          </component>
-        </children>
-      </scrollpane>
+
       <scrollpane id="d849c">
         <constraints>
-          <grid row="2" column="0" row-span="2" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <horizontalScrollBarPolicy value="31"/>
@@ -42,48 +31,324 @@
           </component>
         </children>
       </scrollpane>
-      <component id="31030" class="javax.swing.JLabel">
+      <grid id="faebc" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+            <maximum-size width="1000" height="-1"/>
+          </grid>
         </constraints>
         <properties>
+          <enabled value="false"/>
+          <name value="descriptionContainer"/>
+          <visible value="true"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <grid id="15866" layout-manager="GridLayoutManager" row-count="4" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="Label.preferences"/>
+            <children>
+              <component id="b2fab" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.name.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="17c3b" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.name"/>
+                </properties>
+              </component>
+              <component id="5b057" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.shortName.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="7c8d" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.shortName"/>
+                </properties>
+              </component>
+              <component id="3893a" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.displayName"/>
+                </properties>
+              </component>
+              <component id="86fa8" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.defaultValue"/>
+                </properties>
+              </component>
+              <component id="a602b" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.displayName.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="d59a2" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.default.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+          <grid id="5ecae" layout-manager="GridLayoutManager" row-count="3" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="0" left="0" bottom="0" right="0"/>
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties/>
+            <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="campaignPropertiesTable.column.onStatSheet"/>
+            <children>
+              <component id="de662" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.onStatSheet"/>
+                </properties>
+              </component>
+              <component id="3813a" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.gmStatSheet"/>
+                </properties>
+              </component>
+              <component id="14a87" class="javax.swing.JLabel">
+                <constraints>
+                  <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <font style="1"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="CampaignPropertiesDialog.label.owner"/>
+                </properties>
+              </component>
+              <component id="df35b" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.gm.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="cc2fc" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.statSheet.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+              <component id="ae211" class="javax.swing.JTextArea" default-binding="true">
+                <constraints>
+                  <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="7" anchor="1" fill="1" indent="0" use-parent-layout="false"/>
+                </constraints>
+                <properties>
+                  <background color="-1"/>
+                  <editable value="false"/>
+                  <enabled value="true"/>
+                  <font swing-font="Label.font"/>
+                  <lineWrap value="true"/>
+                  <text resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.owner.description"/>
+                  <wrapStyleWord value="true"/>
+                </properties>
+              </component>
+            </children>
+          </grid>
+        </children>
+      </grid>
+      <component id="31030" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font/>
           <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.type"/>
         </properties>
       </component>
-      <vspacer id="efbc9">
-        <constraints>
-          <grid row="3" column="7" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </vspacer>
-      <hspacer id="1548">
-        <constraints>
-          <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </hspacer>
-      <component id="74fd" class="javax.swing.JComboBox">
-        <constraints>
-          <grid row="5" column="4" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <name value="statSheetComboBox"/>
-        </properties>
-      </component>
-      <grid id="b11e" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+      <grid id="57025" layout-manager="GridLayoutManager" row-count="2" column-count="5" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-          <grid row="4" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="3" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+
+        </constraints>
+        <properties/>
+        <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="TokenPropertiesPanel.label.type"/>
+        <children>
+          <component id="65829" class="javax.swing.JTextField">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                <minimum-size width="180" height="-1"/>
+              </grid>
+            </constraints>
+            <properties>
+              <name value="tokenTypeName"/>
+              <text value=""/>
+            </properties>
+          </component>
+          <component id="78855" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
+            </properties>
+          </component>
+          <component id="9772" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="1" column="1" row-span="1" col-span="2" vsize-policy="0" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="dialog.NewToken.statSheetLocation"/>
+            </properties>
+          </component>
+          <component id="e685d" class="javax.swing.JComboBox" default-binding="true">
+            <constraints>
+              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model/>
+              <name value="statSheetLocationComboBox"/>
+            </properties>
+          </component>
+          <component id="c35ca" class="javax.swing.JLabel">
+            <constraints>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="1" anchor="4" fill="0" indent="1" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.statSheet"/>
+            </properties>
+          </component>
+          <component id="74fd" class="javax.swing.JComboBox">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="2" vsize-policy="0" hsize-policy="2" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <model/>
+              <name value="statSheetComboBox"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <scrollpane id="814eb">
+        <constraints>
+          <grid row="4" column="3" row-span="3" col-span="1" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <horizontalScrollBarPolicy value="30"/>
+          <name value="tokenPropertiesTableScrollPane"/>
+          <verticalScrollBarPolicy value="20"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <component id="25e4a" class="javax.swing.JTable">
+            <constraints/>
+            <properties>
+              <name value="propertiesTable"/>
+              <preferredScrollableViewportSize width="-1" height="-1"/>
+            </properties>
+          </component>
+        </children>
+      </scrollpane>
+      <grid id="8e1f5" layout-manager="GridLayoutManager" row-count="1" column-count="6" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+
         </constraints>
         <properties/>
         <border type="none"/>
         <children>
-          <component id="b9603" class="javax.swing.JButton">
+          <component id="b0c00" class="javax.swing.JButton">
             <constraints>
-              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <actionCommand value="AddProperty"/>
-              <name value="propertyAddButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
+              <actionCommand value="MovePropertyUp"/>
+              <name value="propertyMoveUpButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.up"/>
+            </properties>
+          </component>
+          <component id="f04b7" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="MovePropertyDown"/>
+              <name value="propertyMoveDownButton"/>
+              <selected value="false"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.down"/>
             </properties>
           </component>
           <component id="7a102" class="javax.swing.JButton">
@@ -94,105 +359,119 @@
               <actionCommand value="DeleteProperty"/>
               <name value="propertyDeleteButton"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.delete"/>
+              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.button.deleteProperty.tooltip"/>
             </properties>
           </component>
-        </children>
-      </grid>
-      <component id="e685d" class="javax.swing.JComboBox" default-binding="true">
-        <constraints>
-          <grid row="5" column="6" row-span="1" col-span="1" vsize-policy="0" hsize-policy="2" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <model/>
-          <name value="statSheetLocationComboBox"/>
-        </properties>
-      </component>
-      <component id="1be4b" class="javax.swing.JButton">
-        <constraints>
-          <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <actionCommand value="New"/>
-          <name value="typeAddButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
-        </properties>
-      </component>
-      <component id="3287b" class="javax.swing.JButton">
-        <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <actionCommand value="New"/>
-          <name value="typeDeleteButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.delete"/>
-        </properties>
-      </component>
-      <component id="c8d97" class="javax.swing.JButton">
-        <constraints>
-          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <actionCommand value="New"/>
-          <name value="typeDefaultButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.button.setAsDefault"/>
-        </properties>
-      </component>
-      <component id="78855" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
-        </properties>
-      </component>
-      <component id="65829" class="javax.swing.JTextField">
-        <constraints>
-          <grid row="2" column="4" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <name value="tokenTypeName"/>
-          <text value=""/>
-        </properties>
-      </component>
-      <component id="c35ca" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.statSheet"/>
-        </properties>
-      </component>
-      <grid id="8e1f5" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-        <margin top="0" left="0" bottom="0" right="0"/>
-        <constraints>
-          <grid row="2" column="6" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="5" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties/>
-        <border type="none"/>
-        <children>
-          <component id="b0c00" class="javax.swing.JButton">
+          <component id="b9603" class="javax.swing.JButton">
             <constraints>
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <actionCommand value="MovePropertyUp"/>
-              <name value="propertyMoveUpButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.up"/>
+              <actionCommand value="AddProperty"/>
+              <name value="propertyAddButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
             </properties>
           </component>
-          <component id="f04b7" class="javax.swing.JButton">
+          <component id="33c3c" class="javax.swing.JButton" default-binding="true">
             <constraints>
-              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+              <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-              <actionCommand value="MovePropertyDown"/>
-              <name value="propertyMoveDownButton"/>
-              <selected value="false"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.down"/>
+              <name value="helpButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="menu.help"/>
+            </properties>
+          </component>
+          <hspacer id="26cb2">
+            <constraints>
+              <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+          </hspacer>
+        </children>
+      </grid>
+      <vspacer id="11f2e">
+        <constraints>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <hspacer id="168d3">
+        <constraints>
+          <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+
+        </constraints>
+      </hspacer>
+      <grid id="1fc7e" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+         <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="3287b" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="New"/>
+              <name value="typeDeleteButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.delete"/>
+            </properties>
+          </component>
+          <component id="1be4b" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="New"/>
+              <name value="typeAddButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
             </properties>
           </component>
         </children>
       </grid>
+      <vspacer id="2ded9">
+        <constraints>
+          <grid row="2" column="1" row-span="3" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+      </vspacer>
+      <grid id="d3071" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+        <margin top="0" left="0" bottom="0" right="0"/>
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties/>
+        <border type="none"/>
+        <children>
+          <component id="71fa5" class="javax.swing.JButton" default-binding="true">
+            <constraints>
+              <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+
+              <name value="typeDuplicateButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="action.copyTokens"/>
+            </properties>
+          </component>
+          <component id="c8d97" class="javax.swing.JButton">
+            <constraints>
+              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="1" fill="0" indent="0" use-parent-layout="false"/>
+            </constraints>
+            <properties>
+              <actionCommand value="New"/>
+              <name value="typeDefaultButton"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.button.setAsDefault"/>
+            </properties>
+          </component>
+        </children>
+      </grid>
+      <component id="31030" class="javax.swing.JLabel">
+        <constraints>
+          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.type"/>
+        </properties>
+      </component>
     </children>
   </grid>
 </form>

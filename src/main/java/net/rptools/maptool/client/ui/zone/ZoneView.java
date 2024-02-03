@@ -77,7 +77,7 @@ public class ZoneView {
 
   private void addLightSourceToken(Token token, Set<Player.Role> roles) {
     for (AttachedLightSource als : token.getLightSources()) {
-      LightSource lightSource = als.resolve(token, MapTool.getCampaign());
+      LightSource lightSource = als.resolve(MapTool.getCampaign());
       if (lightSource == null) {
         continue;
       }
@@ -315,8 +315,7 @@ public class ZoneView {
     final var result = new ArrayList<ContributedLight>();
 
     for (final var attachedLightSource : lightSourceToken.getLightSources()) {
-      LightSource lightSource =
-          attachedLightSource.resolve(lightSourceToken, MapTool.getCampaign());
+      LightSource lightSource = attachedLightSource.resolve(MapTool.getCampaign());
       if (lightSource == null) {
         continue;
       }
@@ -347,14 +346,18 @@ public class ZoneView {
     }
     lightSourceArea.transform(translateTransform);
 
-    final var lightSourceVisibleArea =
-        FogUtil.calculateVisibility(
-            p,
-            lightSourceArea,
-            getTopologyTree(Zone.TopologyType.WALL_VBL),
-            getTopologyTree(Zone.TopologyType.HILL_VBL),
-            getTopologyTree(Zone.TopologyType.PIT_VBL),
-            getTopologyTree(Zone.TopologyType.COVER_VBL));
+    Area lightSourceVisibleArea = lightSourceArea;
+
+    if (!lightSource.isIgnoresVBL()) {
+      lightSourceVisibleArea =
+          FogUtil.calculateVisibility(
+              p,
+              lightSourceArea,
+              getTopologyTree(Zone.TopologyType.WALL_VBL),
+              getTopologyTree(Zone.TopologyType.HILL_VBL),
+              getTopologyTree(Zone.TopologyType.PIT_VBL),
+              getTopologyTree(Zone.TopologyType.COVER_VBL));
+    }
     if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
       return Collections.emptyList();
@@ -689,7 +692,7 @@ public class ZoneView {
                 Point p = FogUtil.calculateVisionCenter(token, zone);
 
                 for (AttachedLightSource als : token.getLightSources()) {
-                  LightSource lightSource = als.resolve(token, MapTool.getCampaign());
+                  LightSource lightSource = als.resolve(MapTool.getCampaign());
                   if (lightSource == null) {
                     continue;
                   }
@@ -700,14 +703,18 @@ public class ZoneView {
 
                   Area lightSourceArea = lightSource.getArea(token, zone);
                   lightSourceArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-                  Area visibleArea =
-                      FogUtil.calculateVisibility(
-                          p,
-                          lightSourceArea,
-                          getTopologyTree(Zone.TopologyType.WALL_VBL),
-                          getTopologyTree(Zone.TopologyType.HILL_VBL),
-                          getTopologyTree(Zone.TopologyType.PIT_VBL),
-                          getTopologyTree(Zone.TopologyType.COVER_VBL));
+                  Area visibleArea = lightSourceArea;
+
+                  if (!lightSource.isIgnoresVBL()) {
+                    visibleArea =
+                        FogUtil.calculateVisibility(
+                            p,
+                            lightSourceArea,
+                            getTopologyTree(Zone.TopologyType.WALL_VBL),
+                            getTopologyTree(Zone.TopologyType.HILL_VBL),
+                            getTopologyTree(Zone.TopologyType.PIT_VBL),
+                            getTopologyTree(Zone.TopologyType.COVER_VBL));
+                  }
 
                   // This needs to be cached somehow
                   for (Light light : lightSource.getLightList()) {

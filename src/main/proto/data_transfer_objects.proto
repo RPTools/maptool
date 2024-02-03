@@ -75,6 +75,7 @@ message LightSourceDto {
   google.protobuf.StringValue id = 3;
   LightTypeDto type = 4;
   bool scale_with_token = 5;
+  bool ignores_VBL = 6;
 }
 
 enum ShapeTypeDto {
@@ -345,7 +346,6 @@ message TokenDto {
   bool is_flipped_iso = 47;
   google.protobuf.StringValue charsheet_image = 48;
   google.protobuf.StringValue portrait_image = 49;
-  repeated LightSourceDto unique_light_sources = 72;
   repeated AttachedLightSourceDto light_sources = 50;
   google.protobuf.StringValue sight_type = 51;
   bool has_sight = 52;
@@ -649,8 +649,6 @@ enum TokenUpdateDto {
     setPortraitImage = 43;
     setCharsheetImage = 44;
     setLayout = 45;
-    createUniqueLightSource = 46;
-    deleteUniqueLightSource = 47;
     clearLightSources = 48;
     removeLightSource = 49;
     addLightSource = 50;

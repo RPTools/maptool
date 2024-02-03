@@ -380,6 +380,7 @@ public class getInfoFunction extends AbstractFunction {
         linfo.addProperty("max range", ls.getMaxRange());
         linfo.addProperty("type", ls.getType().name());
         linfo.addProperty("scale", ls.isScaleWithToken());
+        linfo.addProperty("ignores-vbl", ls.isIgnoresVBL());
         // List<Light> lights = new ArrayList<Light>();
         // for (Light light : ls.getLightList()) {
         // lights.add(light);

@@ -664,7 +664,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
 
   public Map<String, Boolean> getExportSettings() {
     Map<String, Boolean> settings = new HashMap<>(16);
-    for (var component : interactPanel.getAllCompoments()) {
+    for (var component : interactPanel.getAllComponents()) {
       if (component instanceof JToggleButton jtb) {
         settings.put(jtb.getName(), jtb.isSelected());
       }
@@ -677,7 +677,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
    * turned on, since {@link #enforceButtonRules()} will turn them back on as appropriate.
    */
   private void resetExportSettings() {
-    for (var component : interactPanel.getAllCompoments()) {
+    for (var component : interactPanel.getAllComponents()) {
       if (component instanceof JToggleButton jtb) {
         jtb.setSelected(false);
       }

@@ -142,15 +142,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       menu.addSeparator();
     }
 
-    // Add unique light sources for the token.
-    {
-      JMenu subMenu = createLightCategoryMenu("Unique", tokenUnderMouse.getUniqueLightSources());
-      if (subMenu.getItemCount() != 0) {
-        menu.add(subMenu);
-        menu.addSeparator();
-      }
-    }
-
     for (Entry<String, Map<GUID, LightSource>> entry :
         MapTool.getCampaign().getLightSourcesMap().entrySet()) {
       JMenu subMenu = createLightCategoryMenu(entry.getKey(), entry.getValue().values());

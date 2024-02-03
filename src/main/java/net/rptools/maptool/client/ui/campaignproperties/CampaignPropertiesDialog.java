@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import static org.apache.commons.text.WordUtils.capitalize;
+import static org.apache.commons.text.WordUtils.uncapitalize;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +28,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Pattern;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
@@ -46,8 +50,11 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.util.LightSyntax;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.SightSyntax;
+import org.apache.commons.text.*;
 
 public class CampaignPropertiesDialog extends JDialog {
+  // private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
+
   public enum Status {
     OK,
     CANCEL
@@ -125,6 +132,7 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initTokenPropertiesDialog(AbeillePanel panel) {
     tokenPropertiesPanel = new TokenPropertiesManagementPanel();
     panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    tokenPropertiesPanel.prettify();
   }
 
   public JTextField getNewServerTextField() {
@@ -132,14 +140,29 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void initHelp() {
+    /* simple check to see if one of the keys has been translated from English. */
+    // TODO: this should be a proper method instead of a dodgy workaround
+    boolean isTranslated =
+        MapTool.getLanguage().toLowerCase().startsWith("en")
+            || !I18N.getText("sightLight.optionDescription.shape")
+                .equalsIgnoreCase(
+                    "Shape may be {0}(beam), {1}(circle), {2}(cone), {3}(grid), {4}(hexagon), or {5}(square).");
+    /* use old text if new text not available */
+    String[] helpText =
+        isTranslated
+            ? generateHelpText()
+            : new String[] {
+              I18N.getText("CampaignPropertiesDialog.label.sight"),
+              I18N.getText("CampaignPropertiesDialog.label.light")
+            };
     JEditorPane lightHelp = (JEditorPane) formPanel.getComponent("lightHelp");
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    lightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.light"));
+    lightHelp.setText(helpText[1]);
     lightHelp.setCaretPosition(0);
 
     JEditorPane sightHelp = (JEditorPane) formPanel.getComponent("sightHelp");
     sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
-    sightHelp.setText(I18N.getString("CampaignPropertiesDialog.label.sight"));
+    sightHelp.setText(helpText[0]);
     sightHelp.setCaretPosition(0);
   }
 
@@ -478,21 +501,23 @@ public class CampaignPropertiesDialog extends JDialog {
     CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(frame);
     // @formatter:off
     String lights =
-        "D20\n"
-            + "----\n"
-            + "Lantern, Bullseye - 60 : cone arc=60 60#f0f0f0 120#330000\n"
-            + "Lantern, Hooded - 30 : circle 30 60#330000 arc=60 120#f0f0f0\n"
-            + "Torch - 20 : circle 20 40#330000\n"
-            + "\n"
-            + "Aura\n"
-            + "----\n"
-            + "Arc 120deg OWNERonly - 20 : owner aura arc=120 22.5#115511\n"
-            + "Arc 60deg - 60 : aura cone arc=60 facing=15 62.5#77ffaa\n"
-            + "Circle - 20 : aura circle 22.5#220000\n"
-            + "Circle GM+Owner : aura circle GM Owner 62.5#ff8080\n"
-            + "Circle GMonly : aura circle GM 62.5#ff8080\n"
-            + "Fancy - 30/60/120 : aura GM circle 30 60#330000 owner arc=60 120#f0f0f0\n"
-            + "\n";
+        """
+            D20
+            ----
+            Lantern, Bullseye - 60 : cone arc=60 60#f0f0f0 120#330000
+            Lantern, Hooded - 30 : circle 30 60#330000 arc=60 120#f0f0f0
+            Torch - 20 : circle 20 40#330000
+
+            Aura
+            ----
+            Arc 120deg OwnerOnly - 20 : owner aura arc=120 22.5#115511
+            Arc 60deg - 60 : aura cone arc=60 facing=15 62.5#77ffaa
+            Circle - 20 : aura circle 22.5#220000
+            Circle GM+Owner : aura circle GM Owner 62.5#ff8080
+            Circle GM Only : aura circle GM 62.5#ff8080
+            Fancy - 30/60/120 : aura GM circle 30 60#330000 owner arc=60 120#f0f0f0
+            Ranges 30/60/90: aura circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
+            """;
     // @formatter:on
     System.out.print(lights);
 
@@ -528,5 +553,371 @@ public class CampaignPropertiesDialog extends JDialog {
       }
     }
     System.exit(1);
+  }
+
+  /**
+   * Fetches all the translations necessary to construct the sight and light help text
+   *
+   * @return Map of keys to translations
+   */
+  private Map<String, String> createSightLightHelpTextMap() {
+    Map<String, String> parameters = new HashMap<>();
+    /* cell formatting string */
+    parameters.put("alignCellCenter", " align=center");
+    /* Useful words and phrases */
+    parameters.put("phraseMultipleEntriesAllowed", I18N.getText("phrase.multipleEntriesAllowed"));
+    parameters.put("mapVisionDistance", I18N.getText("sight.default.distance"));
+
+    /* Build list of useful words and phrases */
+    List<String> helpKeys = I18N.getMatchingKeys(Pattern.compile("^word."));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^option.type.")));
+    /* Shape names */
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^shape.type.name.")));
+    /* example text */
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^sight.example.")));
+    helpKeys.addAll(I18N.getMatchingKeys(Pattern.compile("^light.example.")));
+
+    /* Generate parameter map from list */
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(capitalize(key, '.').replace(".", "")), I18N.getText(key));
+    }
+
+    /* Parameterised strings - need to be done individually */
+    parameters.put(
+        "wikiLinkReferral",
+        I18N.getText(
+            "sightLight.wikiLinkReferral",
+            "<i>wiki.rptools.info/index.php/Introduction_to_Lights_and_Sights</i>"));
+    if (MapTool.getLanguage().toLowerCase().startsWith("en")) {
+      /* remove translated version of words for English locales. */
+      parameters.put(
+          "optionDescriptionShape",
+          I18N.getText("sightLight.optionDescription.shape", "", "", "", "", "", "")
+              .replace("(", "")
+              .replace(")", ""));
+    } else {
+      parameters.put(
+          "optionDescriptionShape",
+          I18N.getText(
+              "sightLight.optionDescription.shape",
+              parameters.get("shapeTypeNameBeam"),
+              parameters.get("shapeTypeNameCircle"),
+              parameters.get("shapeTypeNameCone"),
+              parameters.get("shapeTypeNameGrid"),
+              parameters.get("shapeTypeNameHexagon"),
+              parameters.get("shapeTypeNameSquare")));
+    }
+    parameters.put(
+        "optionDescriptionPersonalSightComponentColor",
+        I18N.getText("sightLight.optionDescription.personalSight.component.color", "#rrggbb"));
+    parameters.put(
+        "optionDescriptionRestriction",
+        I18N.getText("sightLight.optionDescription.restriction", "gm", "owner"));
+
+    /* everything else */
+    helpKeys = I18N.getMatchingKeys("sightLight");
+    for (String key : helpKeys) {
+      parameters.putIfAbsent(
+          uncapitalize(
+              capitalize(key, new char[] {'.'}).replace("SightLight", "").replace(".", "")),
+          I18N.getText(key));
+    }
+    return parameters;
+  }
+
+  /**
+   * Creates HTML for both sight and light help
+   *
+   * @return String[]
+   */
+  private String[] generateHelpText() {
+    Map<String, String> parameters = createSightLightHelpTextMap();
+    /* html building blocks */
+    String wikiLink = "<font size=4>${wikiLinkReferral}</font><br>";
+    String structureListStart =
+        """
+            <u><font size=5>${subheadingStructure}</font></u><br><br>
+            <ul compact>
+            <li>${structureListItemLines}</li>
+            <li>${structureListItemMeasurement}</li>
+            <li>${structureListItemDefaults}</li>
+            <li>${structureListItemComments}</li>
+            <li>${structureListItemLetterCase}</li>
+            """;
+    String structureListLight =
+        """
+            <li>${structureListItemMultiple}<sup>1</sup></li>
+            <li>${structureListItemGroupName}</li>
+            <li>${structureListItemGroupedNames}</li>
+            <li>${structureListItemGroups}</li>
+            <li>${structureListItemSorting}</li>
+            """;
+    String structureListClose = "</ul>";
+    String syntaxHeading = "<u><font size=5>${subheadingDefinitionSyntax}</font></u><br><br>";
+    String syntaxSight =
+        """
+              <code>
+              <font size=4>[ ${syntaxLabelName} ] <b>:</b> [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset}]] [ ${optionLabelDistance} ] [ ${optionLabelScale} ] [ ${optionLabelMagnifier} ] [ ${optionLabelPersonalSight} ]</font><br>
+              </code>
+              """;
+    String syntaxLight =
+        """
+            <code>
+            <font size=4>${syntaxLabelGroupName}<br>
+            -------<br>
+            [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelIgnoresVBL} ] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
+            </code>
+            """;
+    /*
+     * Tabular options presentation
+     * Columns are; Option Name, Option Type, Description, Default Value, Example
+     */
+    String optionsTableStart =
+        """
+            <br>
+            <hr>
+            <font size=5>${syntaxLabelOptions}</font><br>
+            <table border=1 cellpadding=3 cellspacing=0>
+            <tr>
+              <th>${columnHeadingOption}</th>
+              <th>${columnHeadingOptionType}</th>
+              <th>${columnHeadingOptionDescription}</th>
+              <th>${columnHeadingOptionDefaultValue}</th>
+              <th>${wordExample}</th>
+            </tr>
+            <tr>
+              <th>${optionLabelShape}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionShape} ${phraseMultipleEntriesAllowed}<sup>2</sup></td>
+              <td${alignCellCenter}>circle</td>
+              <td${alignCellCenter}>cone</td>
+            </tr>
+            <tr>
+              <th>${optionLabelArc}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionArc}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>arc=120</td>
+            </tr>
+            <tr>
+              <th>${optionLabelWidth}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionWidth}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>width=0.4</td>
+            </tr>
+            <tr>
+              <th>${optionLabelOffset}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue} (${wordInteger})</td>
+              <td>${optionDescriptionOffset1} ${optionDescriptionOffset2}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>offset=140</td>
+            </tr>
+            """;
+    String optionsTableLightRows =
+        """
+            <tr>
+              <th>${optionLabelAura}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionAura}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>aura</td>
+            </tr>
+            <tr>
+              <th>${optionLabelIgnoresVBL}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionIgnoresVBL}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>ignores-vbl</td>
+            </tr>
+            <tr>
+              <th>${optionLabelRestriction}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionRestriction}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>owner</td>
+            </tr>
+            <tr>
+              <th>${optionLabelRange}</th>
+              <td${alignCellCenter}>${optionTypeSpecial}(${wordString})</td>
+              <td>${optionDescriptionLightComponents} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>30#afafaa+100</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp; 00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td>${optionDescriptionRange}</td>
+              <td></td>
+              <td${alignCellCenter}>30</td>
+            </tr>
+            """;
+    String optionsTableSightRows =
+        """
+            <tr>
+              <th>${optionLabelDistance}</th>
+              <td${alignCellCenter}>${optionTypeKeyEqualsValue}</td>
+              <td>${optionDescriptionDistance}</td>
+              <td${alignCellCenter}>${mapVisionDistance}</td>
+              <td${alignCellCenter}>distance=120</td>
+            </tr>
+            <tr>
+              <th>${optionLabelScale}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionScale}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>scale</td>
+            </tr>
+            <tr>
+              <th>${optionLabelMagnifier}</th>
+              <td${alignCellCenter}>${optionTypePrefixedValue}</td>
+              <td><i>[ x0.0 ]</i> ${optionDescriptionMagnifier}</td>
+              <td${alignCellCenter}>x1</td>
+              <td${alignCellCenter}>x2.5</td>
+            </tr>
+            <tr>
+              <th>${optionLabelPersonalSight}</th>
+              <td${alignCellCenter}>${optionTypeSpecial}(${wordString})</td>
+              <td>${optionDescriptionPersonalSight} ${phraseMultipleEntriesAllowed}<sup>3</sup></td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>r30#afafaa+100</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${columnHeadingOptionComponent}</th>
+              <th>${wordSyntax}&nbsp;&#10233;&nbsp;r00|#rrggbb|+y&nbsp;&nbsp;(${optionLabelRange}|${optionLabelColor}|${optionLabelLumens})</th>
+              <td></td>
+              <td></td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelRange}</th>
+              <td><i>[${optionTypePrefixedValue} "r"]</i> ${optionDescriptionPersonalSightComponentRange}</td>
+              <td></td>
+              <td${alignCellCenter}>r30</td>
+            </tr>
+            """;
+    String optionsTableEnd =
+        """
+            <tr>
+              <th></th>
+              <th>${optionLabelColor}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalSightComponentColor}</td>
+              <td></td>
+              <td${alignCellCenter}>#afafaa</td>
+            </tr>
+            <tr>
+              <th></th>
+              <th>${optionLabelLumens}</th>
+              <td><i>[${wordOptional}]</i>&nbsp;${optionDescriptionPersonalSightComponentLumens}<sup>4</sup></td>
+              <td${alignCellCenter}>+100</td>
+              <td${alignCellCenter}>+100</td>
+            </tr>
+            </table>
+            """;
+    String footnotesSight =
+        """
+            <ol start=2>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
+    String footnotesLight =
+        """
+            <ol>
+            <li>${footnoteMultipleLights}</li>
+            <li>${footnoteMultipleShapes1} ${footnoteMultipleShapes2}</li>
+            <li>${footnoteMultipleRangeColourLumens}</li>
+            <li>${footnoteLumensLine1}<br>${footnoteLumensLine2}</li>
+            </ol>
+            """;
+    String examplesHeading =
+        """
+            <hr>
+            <u><font size=5>${wordExamples}</font></u><br><br>
+            """;
+    String examplesSight =
+        """
+            <code><font size=5>${sightExampleNameDarkVision} : circle scale r60#000000+100<br>
+            ${sightExampleNameConeVision} : cone arc=60 distance=120<br>
+            ${sightExampleNameElfVision}  : circle scale x3<br>
+            - ${sightExampleComment}<br>
+            ${sightExampleNameBlind}      : r10000-1000<br></font></code>
+            """;
+    String examplesLight =
+        """
+            <font size=4>${lightExampleGroupName}<br>
+            ${lightExampleNameLantern} :  circle 4#ffffaa cone arc=300 7.5#666600 circle 10#000000<sup>1</sup><br>
+            ${lightExampleNameStreetLight} :  cone arc=350 1 10.05#aaaaaa arc=230 10 22.05#444444 arc=220 22 30#000000<br>
+            ${lightExampleNameForwardArcAura} : aura owner cone arc=90 25#00ff00<br></code><br>
+            <br>
+            <font size=4>${lightExampleAurasGroupName}<br>
+            ---- ${sightExampleComment}<br>
+            <code>&nbsp;1. ${lightExampleNameAuraGmRedSquare} : aura square GM 2.5#ff0000</code><br>
+            <code>&nbsp;2. ${lightExampleNameAuraGmRed} : aura GM 7.5#ff0000</code><br>
+            <code>&nbsp;3. ${lightExampleNameAuraOwner}: aura owner 7.5#00ff00</code><br>
+            <code>&nbsp;4. ${lightExampleNameAuraAllPlayers} : aura 7.5#0000ff</code><br>
+            <code>&nbsp;5. ${lightExampleNameAuraSideFields}: aura cone arc=90 12.5#6666ff offset=90  12.5#aadd00 offset=-90  12.5#aadd00 offset=180  12.5#bb00aa</code><br>
+            <code>&nbsp;6. ${lightExampleNameAuraDonutHole}: aura circle 20 40#ffff00</code><br>
+            <code>&nbsp;7. ${lightExampleNameAuraDonutCone}: aura cone arc=30 10 20#ffff00</code><br>
+            <code>&nbsp;8. ${lightExampleNameAuraRangeCircles} 30/60/90: aura circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
+            <code>&nbsp;9. ${lightExampleNameAuraRangeArcs} 30/60/90: aura cone arc=135 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000</code><br>
+            <code>10. ${lightExampleNameAuraLineOfSight}: aura beam width=0.4 150#ffff00</code><br>
+            <br>
+            <code>&nbsp;1. </code>${lightExampleTextAuraGmRedSquare}<br>
+            <code>&nbsp;2. </code>${lightExampleTextAuraGmRed}<br>
+            <code>&nbsp;3. </code>${lightExampleTextAuraOwner}<br>
+            <code>&nbsp;4. </code>${lightExampleTextAuraAllPlayers}<br>
+            <code>&nbsp;5. </code>${lightExampleTextAuraSideFields}<br>
+            <code>&nbsp;6. </code>${lightExampleTextAuraDonutHole}<br>
+            <code>&nbsp;7. </code>${lightExampleTextAuraDonutCone}<br>
+            <code>&nbsp;8. </code>${lightExampleTextAuraRangeCircles}<br>
+            <code>&nbsp;9. </code>${lightExampleTextAuraRangeArcs}<br>
+            <code>10. </code>${lightExampleTextAuraLineOfSight}<br>
+            </font>
+            """;
+    String htmlLight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListLight
+            + structureListClose
+            + syntaxHeading
+            + syntaxLight
+            + optionsTableStart
+            + optionsTableLightRows
+            + optionsTableEnd
+            + footnotesLight
+            + examplesHeading
+            + examplesLight
+            + "</body></html>";
+    String htmlSight =
+        "<html><body>"
+            + wikiLink
+            + structureListStart
+            + structureListClose
+            + syntaxHeading
+            + syntaxSight
+            + optionsTableStart
+            + optionsTableSightRows
+            + optionsTableEnd
+            + footnotesSight
+            + examplesHeading
+            + examplesSight
+            + "</body></html>";
+
+    StringSubstitutor substitute = new StringSubstitutor(parameters);
+    String sightResult = substitute.replace(htmlSight);
+    String lightResult = substitute.replace(htmlLight);
+    return new String[] {sightResult, lightResult};
   }
 }

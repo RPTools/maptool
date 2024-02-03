@@ -83,17 +83,22 @@ public class MacroFunctions extends AbstractFunction {
 
     if (functionName.equalsIgnoreCase("createMacro")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 6);
-      if (parameters.size() > 4) {
-        if (parameters.get(4).toString().equalsIgnoreCase("campaign")) {
-          return createMacro(parameters, false);
-        } else if (parameters.get(4).toString().equalsIgnoreCase("gm")) {
-          return createMacro(parameters, true);
+      switch (parameters.size()) {
+        case 2, 3 -> {
+          String id = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+          if (id.equalsIgnoreCase("campaign")) {
+            return createMacro(parameters, false);
+          } else if (id.equalsIgnoreCase("gm")) {
+            return createMacro(parameters, true);
+          }
         }
-      } else {
-        if (parameters.get(1).toString().equalsIgnoreCase("campaign")) {
-          return createMacro(parameters, false);
-        } else if (parameters.get(1).toString().equalsIgnoreCase("gm")) {
-          return createMacro(parameters, true);
+        case 5, 6 -> {
+          String id = FunctionUtil.paramAsString(functionName, parameters, 4, true);
+          if (id.equalsIgnoreCase("campaign")) {
+            return createMacro(parameters, false);
+          } else if (id.equalsIgnoreCase("gm")) {
+            return createMacro(parameters, true);
+          }
         }
       }
       return createMacro((MapToolVariableResolver) resolver, parameters);
@@ -102,44 +107,44 @@ public class MacroFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       String label = parameters.get(0).toString();
       if (parameters.size() > 1) {
-        if (parameters.get(1).toString().equalsIgnoreCase("campaign")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+        if (id.equalsIgnoreCase("campaign")) {
           return hasMacro(label, false) ? BigDecimal.ONE : BigDecimal.ZERO;
-        } else if (parameters.get(1).toString().equalsIgnoreCase("gm")) {
+        } else if (id.equalsIgnoreCase("gm")) {
           return hasMacro(label, true) ? BigDecimal.ONE : BigDecimal.ZERO;
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-        return token.getMacroNames(false).contains(label) ? BigDecimal.ONE : BigDecimal.ZERO;
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return token.getMacroNames(false).contains(label) ? BigDecimal.ONE : BigDecimal.ZERO;
 
     } else if (functionName.equalsIgnoreCase("getMacros")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 3);
       String delim = parameters.size() > 0 ? parameters.get(0).toString() : ",";
       if (parameters.size() > 1) {
-        if (parameters.get(1).toString().equalsIgnoreCase("campaign")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+        if (id.equalsIgnoreCase("campaign")) {
           return getMacros(delim, MapTool.getCampaign().getMacroButtonPropertiesArray());
-        } else if (parameters.get(1).toString().equalsIgnoreCase("gm")) {
+        } else if (id.equalsIgnoreCase("gm")) {
           return getMacros(delim, MapTool.getCampaign().getGmMacroButtonPropertiesArray());
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-        return getMacros(delim, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return getMacros(delim, token);
 
     } else if (functionName.equalsIgnoreCase("getMacroProps")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ";";
       if (parameters.size() > 2) {
-        if (parameters.get(2).toString().equalsIgnoreCase("campaign")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 2, true);
+        if (id.equalsIgnoreCase("campaign")) {
           return getMacroButtonProps(index, delim, false);
-        } else if (parameters.get(2).toString().equalsIgnoreCase("gm")) {
+        } else if (id.equalsIgnoreCase("gm")) {
           return getMacroButtonProps(index, delim, true);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
-        return getMacroButtonProps(token, index, delim);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
+      return getMacroButtonProps(token, index, delim);
 
     } else if (functionName.equalsIgnoreCase("setMacroProps")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 5);
@@ -147,15 +152,15 @@ public class MacroFunctions extends AbstractFunction {
       String props = parameters.get(1).toString();
       String delim = parameters.size() > 2 ? parameters.get(2).toString() : ";";
       if (parameters.size() > 3) {
-        if (parameters.get(3).toString().equalsIgnoreCase("campaign")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 3, true);
+        if (id.equalsIgnoreCase("campaign")) {
           return setMacroProps(value, props, delim, false);
-        } else if (parameters.get(3).toString().equalsIgnoreCase("gm")) {
+        } else if (id.equalsIgnoreCase("gm")) {
           return setMacroProps(value, props, delim, true);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 3, 4);
-        return setMacroProps(value, props, delim, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 3, 4);
+      return setMacroProps(value, props, delim, token);
 
     } else if (functionName.equalsIgnoreCase("getMacroIndexes")
         || functionName.equalsIgnoreCase("getMacroIndices")) {
@@ -163,17 +168,17 @@ public class MacroFunctions extends AbstractFunction {
       String label = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       if (parameters.size() > 2) {
-        if (parameters.get(2).toString().equalsIgnoreCase("campaign")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 2, true);
+        if (id.equalsIgnoreCase("campaign")) {
           return getMacroIndexes(
               label, delim, MapTool.getCampaign().getMacroButtonPropertiesArray());
-        } else if (parameters.get(2).toString().equalsIgnoreCase("gm")) {
+        } else if (id.equalsIgnoreCase("gm")) {
           return getMacroIndexes(
               label, delim, MapTool.getCampaign().getGmMacroButtonPropertiesArray());
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
-        return getMacroIndexes(label, delim, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
+      return getMacroIndexes(label, delim, token);
 
     } else if (functionName.equalsIgnoreCase("getMacroName")) {
       return MapTool.getParser().getMacroName();
@@ -187,29 +192,29 @@ public class MacroFunctions extends AbstractFunction {
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       String command = FunctionUtil.paramAsString(functionName, parameters, 1, true);
       if (parameters.size() > 2) {
-        if (parameters.get(2).toString().equalsIgnoreCase("gm")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 2, true);
+        if (id.equalsIgnoreCase("gm")) {
           return setMacroCommand(index, command, true);
-        } else if (parameters.get(2).toString().equalsIgnoreCase("campaign")) {
+        } else if (id.equalsIgnoreCase("campaign")) {
           return setMacroCommand(index, command, false);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
-        return setMacroCommand(index, command, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
+      return setMacroCommand(index, command, token);
 
     } else if (functionName.equalsIgnoreCase("getMacroCommand")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
-      if (parameters.size() > 1) {
-        if (parameters.get(1).toString().equalsIgnoreCase("gm")) {
+      if (parameters.size() > 1) { // check for panel parameter
+        String id = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+        if (id.equalsIgnoreCase("gm")) {
           return getMacroCommand(index, true);
-        } else if (parameters.get(1).toString().equalsIgnoreCase("campaign")) {
+        } else if (id.equalsIgnoreCase("campaign")) {
           return getMacroCommand(index, false);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-        return getMacroCommand(index, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return getMacroCommand(index, token);
 
     } else if (functionName.equalsIgnoreCase("getMacroButtonIndex")) {
       return BigDecimal.valueOf(MapTool.getParser().getMacroButtonIndex());
@@ -219,29 +224,29 @@ public class MacroFunctions extends AbstractFunction {
       String group = parameters.get(0).toString();
       String delim = parameters.size() > 1 ? parameters.get(1).toString() : ",";
       if (parameters.size() > 2) {
-        if (parameters.get(2).toString().equalsIgnoreCase("gm")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 2, true);
+        if (id.equalsIgnoreCase("gm")) {
           return getMacroGroup(group, delim, true);
-        } else if (parameters.get(2).toString().equalsIgnoreCase("campaign")) {
+        } else if (id.equalsIgnoreCase("campaign")) {
           return getMacroGroup(group, delim, false);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
-        return getMacroGroup(group, delim, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 2, 3);
+      return getMacroGroup(group, delim, token);
 
     } else if (functionName.equalsIgnoreCase("removeMacro")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 3);
       int index = FunctionUtil.paramAsInteger(functionName, parameters, 0, false);
       if (parameters.size() > 1) {
-        if (parameters.get(1).toString().equalsIgnoreCase("gm")) {
+        String id = FunctionUtil.paramAsString(functionName, parameters, 1, true);
+        if (id.equalsIgnoreCase("gm")) {
           return removeMacro(index, true);
-        } else if (parameters.get(1).toString().equalsIgnoreCase("campaign")) {
+        } else if (id.equalsIgnoreCase("campaign")) {
           return removeMacro(index, false);
         }
-      } else {
-        Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
-        return removeMacro(index, token);
       }
+      Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 1, 2);
+      return removeMacro(index, token);
     }
     /* code should never happen, hopefully ;) */
     throw new ParserException(I18N.getText(KEY_UNKNOWN_MACRO, functionName));

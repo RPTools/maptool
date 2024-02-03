@@ -320,6 +320,7 @@ public class CampaignProperties {
               true,
               LightSource.createPersonal(
                   true,
+                  false,
                   List.of(new Light(ShapeType.CIRCLE, 0, 60, 0, 0, null, 100, false, false)))),
         };
 
