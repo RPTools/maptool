@@ -14,14 +14,13 @@
  */
 package net.rptools.maptool.model.drawing;
 
-import net.rptools.maptool.model.*;
+import net.rptools.maptool.model.ZonePoint;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+
 import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
 
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class TriangleTemplatePerformanceTest {
   @Test
@@ -65,21 +64,5 @@ public class TriangleTemplatePerformanceTest {
     System.out.print(trianglesCalculated);
     System.out.print(" Triangles Calculated in Duration Using Transformed Stencil: ");
     System.out.println(endTime - startTime);
-
-    long trianglesCalculatedInneficient = 0;
-    long startTimeInefficient = System.currentTimeMillis();
-    for (ZonePoint startPoint : startPoints) {
-      for (double theta : testThetas) {
-        for (int radius : testRadiuses) {
-          Path2D.Double conePath = TriangleTemplate.getConePathInneficientMethod(startPoint, radius, 100, theta);
-          trianglesCalculatedInneficient++;
-          assertNotNull(conePath);
-        }
-      }
-    }
-    long endTimeInefficient = System.currentTimeMillis();
-    System.out.print(trianglesCalculatedInneficient);
-    System.out.print(" Triangles Calculated in Duration Using Re-Render from Scratch: ");
-    System.out.println(endTimeInefficient - startTimeInefficient);
   }
 }

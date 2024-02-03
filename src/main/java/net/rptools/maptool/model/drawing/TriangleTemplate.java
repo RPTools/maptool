@@ -231,28 +231,7 @@ public class TriangleTemplate extends AbstractTemplate {
         vertex.x - quadrantSize, vertex.y - quadrantSize, quadrantSize * 2, quadrantSize * 2);
   }
 
-    protected static Path2D.Double getConePath(ZonePoint sp, int radius, int gridSize, double theta) {
-    if (radius == 0) return new Path2D.Double();
-    double coneScale = gridSize * radius;
-
-    AffineTransform transform = new AffineTransform();
-    // Since translate calls AffineTransform.concatenate under the hood,
-    // we have to un-intuitively (for me at least) call the
-    // translation before we call the scaling and rotating.
-    // What this is actually doing to the path below, is
-    // applying a rotation, then a scaling, then a translation
-    // from the STENCIL_DEFINITION onto the ZonePoint space,
-    // using the parameters of the starting point, the angle of the
-    // triangle and the scale based on the grid size and radius.
-    transform.translate(sp.x, sp.y);
-    transform.scale(coneScale, coneScale);
-    transform.rotate(theta);
-
-    Path2D.Double path = new Path2D.Double(STENCIL_DEFINITION, transform);
-    return path;
-  }
-
-  protected static Path2D.Double getConePathInneficientMethod(ZonePoint sp, int radius, int gridSize, double theta) {
+  protected static Path2D.Double getConePath(ZonePoint sp, int radius, int gridSize, double theta) {
     if (radius == 0) return new Path2D.Double();
 
     // Calculate the position of the vertices of the cone based on
