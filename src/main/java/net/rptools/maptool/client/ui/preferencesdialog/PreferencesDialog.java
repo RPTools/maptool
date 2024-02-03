@@ -424,6 +424,24 @@ public class PreferencesDialog extends JDialog {
   /** Spinner for setting the token label font size. */
   private final JSpinner labelFontSizeSpinner;
 
+  /** ColorWell for displaying the token label border color for PCs. */
+  private final ColorWell pcTokenLabelBorderColor;
+
+  /** ColorWell for displaying the token label border color for NPCs. */
+  private final ColorWell npcTokenLabelBorderColor;
+
+  /** ColorWell for displaying the token label border color for non-visible tokens. */
+  private final ColorWell nonVisTokenLabelBorderColor;
+
+  /** Spinner for setting the token label border width. */
+  private final JSpinner labelBorderWidthSpinner;
+
+  /** Spinner for setting the token label border arc. */
+  private final JSpinner labelBorderArcSpinner;
+
+  /** Checkbox for showing the token label border. */
+  private final JCheckBox showLabelBorderCheckBox;
+
   /**
    * Array of LocalizedComboItems representing the default grid types for the preferences dialog.
    * Each item in the array consists of a grid type and its corresponding localized display name.
@@ -687,17 +705,62 @@ public class PreferencesDialog extends JDialog {
     pcTokenLabelFG.setColor(AppPreferences.getPCMapLabelFG());
     pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
     pcTokenLabelBG.setColor(AppPreferences.getPCMapLabelBG());
+    pcTokenLabelBorderColor = (ColorWell) panel.getComponent("pcTokenLabelBorder");
+    pcTokenLabelBorderColor.setColor(AppPreferences.getPCMapLabelBorder());
     npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
     npcTokenLabelFG.setColor(AppPreferences.getNPCMapLabelFG());
     npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
     npcTokenLabelBG.setColor(AppPreferences.getNPCMapLabelBG());
+    npcTokenLabelBorderColor = (ColorWell) panel.getComponent("npcTokenLabelBorder");
+    npcTokenLabelBorderColor.setColor(AppPreferences.getNPCMapLabelBorder());
     nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
     nonVisTokenLabelFG.setColor(AppPreferences.getNonVisMapLabelFG());
     nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
     nonVisTokenLabelBG.setColor(AppPreferences.getNonVisMapLabelBG());
+    nonVisTokenLabelBorderColor = (ColorWell) panel.getComponent("nonVisTokenLabelBorder");
+    nonVisTokenLabelBorderColor.setColor(AppPreferences.getNonVisMapLabelBorder());
 
     labelFontSizeSpinner = (JSpinner) panel.getComponent("labelFontSizeSpinner");
     labelFontSizeSpinner.setValue(AppPreferences.getMapLabelFontSize());
+    labelBorderWidthSpinner = (JSpinner) panel.getComponent("labelBorderWidthSpinner");
+    labelBorderWidthSpinner.setValue(AppPreferences.getMapLabelBorderWidth());
+    labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
+    labelBorderArcSpinner.setValue(AppPreferences.getMapLabelBorderArc());
+    showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
+    showLabelBorderCheckBox.addActionListener(
+        e -> {
+          if (showLabelBorderCheckBox.isSelected()) {
+            pcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            npcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            nonVisTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            labelBorderWidthSpinner.setEnabled(true);
+            labelBorderArcSpinner.setEnabled(true);
+            AppPreferences.setShowMapLabelBorder(true);
+          } else {
+            pcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
+            npcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
+            nonVisTokenLabelBorderColor.setVisible(false); // Disabling a color well does not  work
+            labelBorderWidthSpinner.setEnabled(false);
+            labelBorderArcSpinner.setEnabled(false);
+            AppPreferences.setShowMapLabelBorder(false);
+          }
+        });
+
+    boolean showBorder = AppPreferences.getShowMapLabelBorder();
+    showLabelBorderCheckBox.setSelected(showBorder);
+    if (showBorder) {
+      pcTokenLabelBorderColor.setVisible(true);
+      npcTokenLabelBorderColor.setVisible(true);
+      nonVisTokenLabelBorderColor.setVisible(true);
+      labelBorderWidthSpinner.setEnabled(true);
+      labelBorderArcSpinner.setEnabled(true);
+    } else {
+      pcTokenLabelBorderColor.setVisible(false);
+      npcTokenLabelBorderColor.setVisible(false);
+      nonVisTokenLabelBorderColor.setVisible(false);
+      labelBorderWidthSpinner.setEnabled(false);
+      labelBorderArcSpinner.setEnabled(false);
+    }
 
     {
       final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");
@@ -1161,7 +1224,38 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setMapLabelFontSize(value);
+            AppPreferences.setMapLabelFontSize(Math.max(value, 0));
+          }
+        });
+
+    pcTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelBorder(pcTokenLabelBorderColor.getColor());
+        });
+
+    npcTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelBorder(npcTokenLabelBorderColor.getColor());
+        });
+
+    nonVisTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelBorder(nonVisTokenLabelBorderColor.getColor());
+        });
+
+    labelBorderWidthSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelBorderWidth(Math.max(value, 0));
+          }
+        });
+
+    labelBorderArcSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelBorderArc(Math.max(value, 0));
           }
         });
 

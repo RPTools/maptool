@@ -50,7 +50,8 @@ public class FlatImageLabelFactory {
     var nonVisBorder = AppPreferences.getNonVisMapLabelBorder();
     int fontSize = AppPreferences.getMapLabelFontSize();
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), fontSize);
-    int borderWidth = AppPreferences.getMapLabelBorderWidth();
+    boolean showBorder = AppPreferences.getShowMapLabelBorder();
+    int borderWidth = showBorder ? AppPreferences.getMapLabelBorderWidth() : 0;
     int borderArc = AppPreferences.getMapLabelBorderArc();
 
     npcImageLabel =

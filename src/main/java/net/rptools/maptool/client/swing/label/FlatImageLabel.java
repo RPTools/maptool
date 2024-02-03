@@ -194,7 +194,7 @@ public class FlatImageLabel {
           case Center -> x + padX + (width - strWidth) / 2 - padX;
         };
 
-    var labelRect = new RoundRectangle2D.Float(x, y, width - 1, height, borderArc, borderArc);
+    var labelRect = new RoundRectangle2D.Float(x, y, width - 1, height - 1, borderArc, borderArc);
     g2d.setBackground(background);
     g2d.setColor(background);
     g2d.fill(labelRect);

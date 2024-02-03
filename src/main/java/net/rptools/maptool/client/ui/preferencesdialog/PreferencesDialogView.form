@@ -977,7 +977,7 @@
                   <text value=""/>
                 </properties>
               </component>
-              <grid id="85d76" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+              <grid id="85d76" layout-manager="GridLayoutManager" row-count="13" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                 <margin top="0" left="0" bottom="0" right="0"/>
                 <constraints>
                   <grid row="3" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -1007,7 +1007,7 @@
                   </component>
                   <component id="4fce9" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.pcBackground"/>
@@ -1015,7 +1015,7 @@
                   </component>
                   <component id="f4912" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.pcForeground"/>
@@ -1023,7 +1023,7 @@
                   </component>
                   <component id="1c56f" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.npcBackground"/>
@@ -1031,7 +1031,7 @@
                   </component>
                   <component id="bf81b" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.npcForeground"/>
@@ -1039,7 +1039,7 @@
                   </component>
                   <component id="e7462" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="8" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.nonVisBackground"/>
@@ -1047,7 +1047,7 @@
                   </component>
                   <component id="f8c81" class="javax.swing.JLabel">
                     <constraints>
-                      <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="9" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.nonVisForeground"/>
@@ -1055,7 +1055,7 @@
                   </component>
                   <component id="64fca" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1064,7 +1064,7 @@
                   </component>
                   <component id="93ef0" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1073,7 +1073,7 @@
                   </component>
                   <component id="bdd65" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1082,7 +1082,7 @@
                   </component>
                   <component id="6899a" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1091,7 +1091,7 @@
                   </component>
                   <component id="9edc6" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="8" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
@@ -1100,11 +1100,114 @@
                   </component>
                   <component id="a4ba2" class="net.rptools.maptool.client.swing.ColorWell">
                     <constraints>
-                      <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                      <grid row="9" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
                     </constraints>
                     <properties>
                       <font swing-font="Panel.font"/>
                       <name value="nonVisTokenLabelFG"/>
+                    </properties>
+                  </component>
+                  <component id="63dcd" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.pcBorderColor"/>
+                    </properties>
+                  </component>
+                  <component id="92609" class="net.rptools.maptool.client.swing.ColorWell">
+                    <constraints>
+                      <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font swing-font="Panel.font"/>
+                      <name value="pcTokenLabelBorder"/>
+                    </properties>
+                  </component>
+                  <component id="8623a" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="7" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.npcBorderColor"/>
+                    </properties>
+                  </component>
+                  <component id="afcc8" class="net.rptools.maptool.client.swing.ColorWell">
+                    <constraints>
+                      <grid row="7" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font swing-font="Panel.font"/>
+                      <name value="npcTokenLabelBorder"/>
+                    </properties>
+                  </component>
+                  <component id="b5320" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="10" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.nonVisBorderColor"/>
+                    </properties>
+                  </component>
+                  <component id="2d517" class="net.rptools.maptool.client.swing.ColorWell">
+                    <constraints>
+                      <grid row="10" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <font swing-font="Panel.font"/>
+                      <name value="nonVisTokenLabelBorder"/>
+                    </properties>
+                  </component>
+                  <component id="2dbf5" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="11" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.borderWidth"/>
+                    </properties>
+                  </component>
+                  <component id="e2578" class="javax.swing.JSpinner" default-binding="true">
+                    <constraints>
+                      <grid row="11" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="labelBorderWidthSpinner"/>
+                      <opaque value="false"/>
+                    </properties>
+                  </component>
+                  <component id="29fc9" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="12" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.label.access.tokenLabel.borderArc"/>
+                    </properties>
+                  </component>
+                  <component id="24685" class="javax.swing.JSpinner" default-binding="true">
+                    <constraints>
+                      <grid row="12" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value="labelBorderArcSpinner"/>
+                      <opaque value="false"/>
+                    </properties>
+                  </component>
+                  <component id="6e64c" class="javax.swing.JLabel">
+                    <constraints>
+                      <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.showBorder"/>
+                    </properties>
+                  </component>
+                  <component id="9b575" class="javax.swing.JCheckBox">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <actionCommand value="New maps have fog of war"/>
+                      <name value="showLabelBorder"/>
+                      <text value=""/>
                     </properties>
                   </component>
                 </children>

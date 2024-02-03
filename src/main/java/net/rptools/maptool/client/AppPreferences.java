@@ -621,6 +621,9 @@ public class AppPreferences {
   /** The configuration key for specifying the arc of the border around map labels for tokens. */
   private static final String KEY_MAP_LABEL_BORDER_ARC = "mapLabelBorderArc";
 
+  /** The configuration key for specifying the width of the border around map labels for tokens. */
+  private static final String KEY_MAP_LABEL_SHOW_BORDER = "mapLabelShowBorder";
+
   /** The default background color for the NPC map label. */
   private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
 
@@ -657,6 +660,9 @@ public class AppPreferences {
 
   /** The default border arc for token map labels. */
   private static final int DEFAULT_MAP_LABEL_BORDER_ARC = Label.DEFAULT_LABEL_BORDER_ARC;
+
+  /** The default border arc for token map labels. */
+  private static final boolean DEFAULT_MAP_LABEL_SHOW_BORDER = true;
 
   public static void setHaloLineWidth(int size) {
     prefs.putInt(KEY_HALO_LINE_WIDTH, size);
@@ -1915,5 +1921,24 @@ public class AppPreferences {
    */
   public static void setMapLabelBorderArc(int arc) {
     prefs.putInt(KEY_MAP_LABEL_BORDER_ARC, arc);
+  }
+
+  /**
+   * Returns the value of the preference "show map label border". The preference determines whether
+   * the border should be shown around the map label or not.
+   *
+   * @return {@code true} if the map label border should be shown, {@code false} otherwise.
+   */
+  public static boolean getShowMapLabelBorder() {
+    return prefs.getBoolean(KEY_MAP_LABEL_SHOW_BORDER, DEFAULT_MAP_LABEL_SHOW_BORDER);
+  }
+
+  /**
+   * Sets the preference for showing or hiding the border of map labels.
+   *
+   * @param show {@code true} to show the border, {@code false} to hide the border
+   */
+  public static void setShowMapLabelBorder(boolean show) {
+    prefs.putBoolean(KEY_MAP_LABEL_SHOW_BORDER, show);
   }
 }

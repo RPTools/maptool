@@ -288,7 +288,7 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       getModel().setBackgroundColor(getBackgroundColorWell().getColor());
       getModel().setFontSize(Math.max((Integer) getFontSizeSpinner().getValue(), 6));
       getModel().setBorderColor(getBorderColorWell().getColor());
-      getModel().setBorderWidth(Math.max((Integer) getBorderWidthSpinner().getValue(),0));
+      getModel().setBorderWidth(Math.max((Integer) getBorderWidthSpinner().getValue(), 0));
       getModel().setBorderArc(Math.max((Integer) getBorderArcSpinner().getValue(), 0));
       return super.commit();
     }
