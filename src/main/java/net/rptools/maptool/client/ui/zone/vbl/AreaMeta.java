@@ -14,143 +14,162 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Consumer;
 import net.rptools.lib.GeometryUtil;
+import org.locationtech.jts.algorithm.InteriorPointArea;
 import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.algorithm.PointLocation;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineSegment;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.CoordinateArrays;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Location;
 
 /** Represents the boundary of a piece of topology. */
 public class AreaMeta {
-  private Area area;
-  private List<Coordinate> vertices = new ArrayList<>();
+  private final Coordinate[] vertices;
 
-  // Only used during construction
-  private boolean isHole;
-  private GeneralPath path;
+  // region These fields are built from `vertices` and exist only for performance reasons.
 
-  public AreaMeta() {}
+  private final Coordinate interiorPoint;
+  private final Envelope boundingBox;
+  private final boolean isOcean;
 
-  public boolean contains(Point2D point) {
-    return area.contains(point);
+  // endregion
+
+  /**
+   * Creates an AreaMeta that represents the entire plane.
+   *
+   * <p>Since this is a sea of nothing, it counts as an ocean despite having no endpoints.
+   */
+  public AreaMeta() {
+    this.vertices = new Coordinate[0];
+    this.interiorPoint = new Coordinate(0, 0);
+    this.boundingBox = null;
+    this.isOcean = true;
   }
 
-  public Area getBounds() {
-    return new Area(area);
+  public AreaMeta(LinearRing ring) {
+    vertices = ring.getCoordinates();
+    assert vertices.length >= 4; // Yes, 4, because a ring duplicates its first element as its last.
+
+    // Creating a Polygon here is a necessary evil since JTS does not seem to expose the interior
+    // point algorithm for a plain ring. But it doesn't cost very much thankfully.
+    this.interiorPoint =
+        InteriorPointArea.getInteriorPoint(GeometryUtil.getGeometryFactory().createPolygon(ring));
+    boundingBox = CoordinateArrays.envelope(vertices);
+    isOcean = Orientation.isCCW(vertices);
+  }
+
+  public double getBoundingBoxArea() {
+    if (vertices.length == 0) {
+      return Double.POSITIVE_INFINITY;
+    }
+
+    return boundingBox.getArea();
+  }
+
+  public Coordinate getInteriorPoint() {
+    return interiorPoint;
+  }
+
+  public boolean contains(Coordinate point) {
+    if (vertices.length == 0) {
+      return true;
+    }
+
+    if (!boundingBox.contains(point)) {
+      return false;
+    }
+
+    // Oceans (holes) are open (do not include their boundary). This makes masks like Wall VBL
+    // function correctly by ensuring any intersection with the mask counts as being inside.
+    // On the other hand it is not sufficient to make Pit VBL behave correctly on the boundary.
+    // though it doesn't break vision.
+    final var location = PointLocation.locateInRing(point, vertices);
+    if (isOcean) {
+      return location == Location.INTERIOR;
+    } else {
+      return location != Location.EXTERIOR;
+    }
   }
 
   /**
-   * @return true if this object does not have any edges.
+   * Find all sections of the boundary that block vision.
+   *
+   * <p>For each line segment, the exterior region will be on one side of the segment while the
+   * interior region will be on the other side. One of these regions will be an island and one will
+   * be an ocean depending on {@link #isOcean()}. The {@code facing} parameter uses this fact to
+   * control whether a segment should be included in the result, based on whether the origin is on
+   * the island-side of the line segment or on its ocean-side.
+   *
+   * <p>If {@code origin} is colinear with a line segment, that segment will never be returned.
+   *
+   * @param origin The vision origin, which is the point by which line segment orientation is
+   *     measured.
+   * @param facing Whether the island-side or the ocean-side of the returned segments must face
+   *     {@code origin}.
+   * @param visionBounds The bounding box for vision, used to avoid adding unnecessary far away
+   *     segments.
+   * @param resultConsumer Each produced segment string will be sent to this consumer.
    */
-  public boolean isEmpty() {
-    // Note: vertices is a closed loop, so we can only have edges if we have at least 3 points with
-    // which to form a line.
-    return vertices.size() < 3;
-  }
-
-  /**
-   * @param origin
-   * @param faceAway If `true`, only return segments facing away from origin.
-   * @return
-   */
-  public List<LineString> getFacingSegments(
-      GeometryFactory geometryFactory,
+  public void getFacingSegments(
       Coordinate origin,
-      boolean faceAway,
-      PreparedGeometry vision) {
-    final var requiredOrientation = faceAway ? Orientation.CLOCKWISE : Orientation.COUNTERCLOCKWISE;
-    List<LineString> segments = new ArrayList<>();
-    List<Coordinate> currentSegmentPoints = new ArrayList<>();
+      Facing facing,
+      Envelope visionBounds,
+      Consumer<List<Coordinate>> resultConsumer) {
+    if (vertices.length == 0) {
+      return;
+    }
 
-    Coordinate current = null;
-    for (Coordinate coordinate : vertices) {
+    final var requiredOrientation =
+        facing == Facing.ISLAND_SIDE_FACES_ORIGIN
+            ? Orientation.CLOCKWISE
+            : Orientation.COUNTERCLOCKWISE;
+
+    List<Coordinate> currentSegmentPoints = new ArrayList<>();
+    for (int i = 1; i < vertices.length; ++i) {
       assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
 
-      final var previous = current;
-      current = coordinate;
-      if (previous == null) {
-        continue;
-      }
+      final var previous = vertices[i - 1];
+      final var current = vertices[i];
 
-      final var faceLineSegment = new LineSegment(previous, coordinate);
-      final var orientation = faceLineSegment.orientationIndex(origin);
       final var shouldIncludeFace =
-          (orientation == requiredOrientation)
-              && vision.intersects(faceLineSegment.toGeometry(geometryFactory));
+          // Don't need to be especially precise with the vision check.
+          visionBounds.intersects(previous, current)
+              && requiredOrientation == Orientation.index(origin, previous, current);
 
       if (shouldIncludeFace) {
         // Since we're including this face, the existing segment can be extended.
         if (currentSegmentPoints.isEmpty()) {
           // Also need the first point.
-          currentSegmentPoints.add(faceLineSegment.p0);
+          currentSegmentPoints.add(previous);
         }
-        currentSegmentPoints.add(faceLineSegment.p1);
+        currentSegmentPoints.add(current);
       } else if (!currentSegmentPoints.isEmpty()) {
         // Since we're skipping this face, the segment is broken and we must start a new one.
-        segments.add(
-            geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
+        var string = currentSegmentPoints;
+        if (requiredOrientation != Orientation.COUNTERCLOCKWISE) {
+          string = string.reversed();
+        }
+        resultConsumer.accept(string);
         currentSegmentPoints.clear();
       }
     }
+
     assert currentSegmentPoints.size() == 0 || currentSegmentPoints.size() >= 2;
-    // In case there is still current segment, we add it.
     if (!currentSegmentPoints.isEmpty()) {
-      segments.add(
-          geometryFactory.createLineString(currentSegmentPoints.toArray(Coordinate[]::new)));
-    }
-
-    return segments;
-  }
-
-  public boolean isHole() {
-    return isHole;
-  }
-
-  public void addPoint(double x, double y) {
-    final var vertex = new Coordinate(x, y);
-    GeometryUtil.getPrecisionModel().makePrecise(vertex);
-
-    if (!vertices.isEmpty()) {
-      final var lastVertex = vertices.get(vertices.size() - 1);
-      // Don't add if we haven't moved
-      if (lastVertex.equals(vertex)) {
-        return;
+      var string = currentSegmentPoints;
+      if (requiredOrientation != Orientation.COUNTERCLOCKWISE) {
+        string = string.reversed();
       }
-    }
-    vertices.add(vertex);
-
-    if (path == null) {
-      path = new GeneralPath();
-      path.moveTo(vertex.x, vertex.y);
-    } else {
-      path.lineTo(vertex.x, vertex.y);
+      resultConsumer.accept(string);
     }
   }
 
-  public void close() {
-    area = new Area(path);
-
-    // Close the circle.
-    // For some odd reason, sometimes the first and last point are already the same, so don't add
-    // the point again in that case.
-    final var first = vertices.get(0);
-    final var last = vertices.get(vertices.size() - 1);
-    if (!first.equals(last)) {
-      vertices.add(first);
-    }
-
-    isHole = vertices.size() >= 4 && Orientation.isCCW(vertices.toArray(Coordinate[]::new));
-
-    // Don't need this anymore
-    path = null;
-    // System.out.println("AreaMeta.skippedPoints: " + skippedPoints + " h:" + isHole + " f:" +
-    // faceList.size());
+  public boolean isOcean() {
+    return isOcean;
   }
 }

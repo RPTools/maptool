@@ -27,6 +27,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.charset.CharsetDecoder;
+import java.nio.charset.CodingErrorAction;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.Objects;
@@ -471,7 +475,23 @@ public final class Asset {
     }
 
     if (type.isStringType()) {
-      dataAsString = new String(data);
+      CharsetDecoder decoder = StandardCharsets.UTF_8.newDecoder();
+      decoder
+          .onMalformedInput(CodingErrorAction.REPORT)
+          .onUnmappableCharacter(CodingErrorAction.REPORT);
+      String decodedString;
+      try {
+        decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
+      } catch (Exception eOne) {
+        try {
+          decoder = StandardCharsets.UTF_16.newDecoder();
+          decodedString = decoder.decode(ByteBuffer.wrap(data)).toString();
+        } catch (Exception eTwo) {
+          decodedString = null;
+        }
+      }
+
+      dataAsString = decodedString;
     } else {
       dataAsString = null;
     }

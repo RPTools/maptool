@@ -24,6 +24,7 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.JButton;
 import javax.swing.JDialog;
+import javax.swing.JSpinner;
 import javax.swing.JTextField;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
@@ -40,18 +41,31 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.ZonePoint;
 
-/** */
+/**
+ * The TextTool class represents a tool that allows users to add and edit labels in a graphical
+ * editor. It extends the DefaultTool class and implements the ZoneOverlay interface.
+ */
 public class TextTool extends DefaultTool implements ZoneOverlay {
+  /** The serial version UID. */
   private static final long serialVersionUID = -8944323545051996907L;
 
+  /**
+   * Represents the currently selected Label object.
+   *
+   * @see Label
+   */
   private Label selectedLabel;
 
+  /** The horizontal offset for dragging the element. */
   private int dragOffsetX;
-  private int dragOffsetY;
-  private boolean isDragging;
-  private boolean selectedNewLabel;
 
-  public TextTool() {}
+  /** The vertical offset of the drag operation. */
+  private int dragOffsetY;
+
+  /** Is the Label being dragged. */
+  private boolean isDragging;
+
+  private boolean selectedNewLabel;
 
   @Override
   protected void attachTo(ZoneRenderer renderer) {
@@ -76,6 +90,12 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     return "tool.label.instructions";
   }
 
+  /**
+   * Paints the overlay for the given ZoneRenderer using the provided Graphics2D object.
+   *
+   * @param renderer the ZoneRenderer object used to render the zone
+   * @param g the Graphics2D object used for rendering
+   */
   public void paintOverlay(ZoneRenderer renderer, Graphics2D g) {
     if (selectedLabel != null && renderer.getLabelBounds(selectedLabel) != null) {
       AppStyle.selectedBorder.paintWithin(g, renderer.getLabelBounds(selectedLabel));
@@ -182,11 +202,24 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     renderer.repaint();
   }
 
+  /**
+   * The EditLabelDialog class is a dialog box that allows the user to edit a label. It extends the
+   * JDialog class and provides functionality for displaying and interacting with the label editing
+   * panel.
+   */
   public class EditLabelDialog extends JDialog {
+    /** The serial version UID. */
     private static final long serialVersionUID = 7621373725343873527L;
 
+    /** Indicates whether the changes have been accepted. */
     private boolean accepted;
 
+    /**
+     * Constructs a new EditLabelDialog.
+     *
+     * @param label the label to be edited
+     * @since [version number or first version]
+     */
     public EditLabelDialog(Label label) {
       super(MapTool.getFrame(), I18N.getText("tool.label.dialogtitle"), true);
       setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -199,6 +232,11 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       pack();
     }
 
+    /**
+     * Checks if the changes made in the dialog have been accepted.
+     *
+     * @return true if the changes have been accepted, false otherwise
+     */
     public boolean isAccepted() {
       return accepted;
     }
@@ -212,6 +250,11 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
     }
   }
 
+  /**
+   * EditLabelPanel is a GUI panel used for editing label properties. It extends the AbeillePanel
+   * class and provides functionality for binding a Label model, committing changes to the model,
+   * and initializing the user interface components.
+   */
   public class EditLabelPanel extends AbeillePanel<Label> {
     private static final long serialVersionUID = 3307411310513003924L;
 
@@ -230,28 +273,103 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public void bind(Label model) {
-      getColorWell().setColor(model.getForegroundColor());
+      getForegroundColorWell().setColor(model.getForegroundColor());
+      getBackgroundColorWell().setColor(model.getBackgroundColor());
+      getFontSizeSpinner().setValue(model.getFontSize());
+      getBorderColorWell().setColor(model.getBorderColor());
+      getBorderWidthSpinner().setValue(model.getBorderWidth());
+      getBorderArcSpinner().setValue(model.getBorderArc());
       super.bind(model);
     }
 
     @Override
     public boolean commit() {
-      getModel().setForegroundColor(getColorWell().getColor());
+      getModel().setForegroundColor(getForegroundColorWell().getColor());
+      getModel().setBackgroundColor(getBackgroundColorWell().getColor());
+      getModel().setFontSize(Math.max((Integer) getFontSizeSpinner().getValue(), 6));
+      getModel().setBorderColor(getBorderColorWell().getColor());
+      getModel().setBorderWidth(Math.max((Integer) getBorderWidthSpinner().getValue(), 0));
+      getModel().setBorderArc(Math.max((Integer) getBorderArcSpinner().getValue(), 0));
       return super.commit();
     }
 
-    public ColorWell getColorWell() {
+    /**
+     * Retrieves the foreground color well component.
+     *
+     * @return The foreground color well component.
+     */
+    public ColorWell getForegroundColorWell() {
       return (ColorWell) getComponent("foregroundColor");
     }
 
+    /**
+     * Retrieves the background color well component.
+     *
+     * @return The background color well component.
+     */
+    public ColorWell getBackgroundColorWell() {
+      return (ColorWell) getComponent("backgroundColor");
+    }
+
+    /**
+     * Retrieves the border color well component.
+     *
+     * @return The border color well component.
+     */
+    public ColorWell getBorderColorWell() {
+      return (ColorWell) getComponent("borderColor");
+    }
+
+    /**
+     * Retrieves the border width spinner component from EditLabelPanel.
+     *
+     * @return The border width spinner component.
+     */
+    public JSpinner getBorderWidthSpinner() {
+      return (JSpinner) getComponent("borderWidth");
+    }
+
+    /**
+     * Retrieves the border arc spinner component from EditLabelPanel.
+     *
+     * @return The border arc spinner component.
+     */
+    public JSpinner getBorderArcSpinner() {
+      return (JSpinner) getComponent("borderArc");
+    }
+
+    /**
+     * Retrieves the font size spinner component from EditLabelPanel.
+     *
+     * @return The font size spinner component.
+     */
+    public JSpinner getFontSizeSpinner() {
+      return (JSpinner) getComponent("fontSize");
+    }
+
+    /**
+     * Retrieves the label text field component from EditLabelPanel.
+     *
+     * @return The label text field component.
+     */
     public JTextField getLabelTextField() {
       return (JTextField) getComponent("@label");
     }
 
+    /**
+     * Retrieves the OK button component from EditLabelPanel.
+     *
+     * @return The OK button component.
+     */
     public JButton getOKButton() {
       return (JButton) getComponent("okButton");
     }
 
+    /**
+     * Initializes the OK button by adding an ActionListener that handles the button click event.
+     * Upon clicking the OK button, the dialog's 'accepted' flag is set to true, the commit() method
+     * is called, and the dialog is closed.
+     */
     public void initOKButton() {
       getOKButton()
           .addActionListener(
@@ -262,10 +380,15 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
               });
     }
 
+    /**
+     * Initializes the cancel button by adding an ActionListener that handles the button click
+     * event. Upon clicking the cancel button, the dialog is closed.
+     */
     public void initCancelButton() {
       ((JButton) getComponent("cancelButton")).addActionListener(e -> close());
     }
 
+    /** Closes the dialog. */
     private void close() {
       dialog.setVisible(false);
     }

@@ -59,7 +59,7 @@ public class DiceHelperTest {
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
 
-    assertEquals(23, DiceHelper.explodeDice(4, 6));
+    assertEquals(23, DiceHelper.explodeDice(4, 6, -1));
   }
 
   @Test
@@ -68,7 +68,7 @@ public class DiceHelperTest {
       RunData.setCurrent(new RunData(null));
       RunData.setSeed(102312L);
 
-      assertEquals(23, DiceHelper.explodeDice(4, 1));
+      assertEquals(23, DiceHelper.explodeDice(4, 1, -1));
       fail("Expected EvaluationException");
     } catch (EvaluationException e) {
     }

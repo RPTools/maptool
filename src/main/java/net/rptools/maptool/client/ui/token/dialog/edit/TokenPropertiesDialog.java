@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token.dialog.edit;
 
-import java.awt.*;
 import javax.swing.*;
 import net.rptools.maptool.client.swing.htmleditorsplit.HtmlEditorSplit;
 

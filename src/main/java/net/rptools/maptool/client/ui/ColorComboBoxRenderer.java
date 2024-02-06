@@ -40,7 +40,7 @@ public class ColorComboBoxRenderer extends JLabel implements ListCellRenderer {
   /**
    * Selects a black or white text color for the given background color. The function tries to
    * optimize readability by computing the gray value of the background color. Black is used only if
-   * the color becomes lighter than 70% gray because white it is significantly more difficult to
+   * the color becomes lighten than 70% gray because white it is significantly more difficult to
    * read. The luma of the background color is calculated using the standard PAL/NTSC luma
    * algorithm.
    *

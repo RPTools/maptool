@@ -52,7 +52,6 @@ import org.locationtech.jts.geom.GeometryFactory;
 import org.locationtech.jts.geom.LineString;
 import org.locationtech.jts.geom.prep.PreparedGeometry;
 import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
-import org.locationtech.jts.operation.valid.IsValidOp;
 
 public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   private record TerrainModifier(Token.TerrainModifierOperation operation, double value) {}
@@ -244,17 +243,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.vblGeometry = null;
       } else {
         try {
-          var vblGeometry = GeometryUtil.toJts(vbl);
-
-          // polygons
-          if (!vblGeometry.isValid()) {
-            log.info(
-                "vblGeometry is invalid! May cause issues. Check for self-intersecting polygons.");
-            log.debug("Invalid vblGeometry: " + new IsValidOp(vblGeometry).getValidationError());
-          }
-
-          vblGeometry = vblGeometry.buffer(1); // .buffer always creates valid geometry.
-          this.vblGeometry = PreparedGeometryFactory.prepare(vblGeometry);
+          this.vblGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vbl));
         } catch (Exception e) {
           log.info("vblGeometry oh oh: ", e);
         }
@@ -272,20 +261,8 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
         this.fowExposedAreaGeometry = null;
       } else {
         try {
-          var fowExposedAreaGeometry = GeometryUtil.toJts(fowExposedArea);
-
-          // polygons
-          if (!fowExposedAreaGeometry.isValid()) {
-            log.info(
-                "FoW Geometry is invalid! May cause issues. Check for self-intersecting polygons.");
-            log.debug(
-                "Invalid FoW Geometry: "
-                    + new IsValidOp(fowExposedAreaGeometry).getValidationError());
-          }
-
-          fowExposedAreaGeometry =
-              fowExposedAreaGeometry.buffer(1); // .buffer always creates valid geometry.
-          this.fowExposedAreaGeometry = PreparedGeometryFactory.prepare(fowExposedAreaGeometry);
+          this.fowExposedAreaGeometry =
+              PreparedGeometryFactory.prepare(GeometryUtil.toJts(fowExposedArea));
         } catch (Exception e) {
           log.info("FoW Geometry oh oh: ", e);
         }

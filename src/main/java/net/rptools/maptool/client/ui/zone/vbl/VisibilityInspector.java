@@ -30,10 +30,13 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.NoninvertibleTransformException;
 import java.awt.geom.Point2D;
+import java.util.EnumMap;
+import java.util.Map;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.ui.zone.FogUtil;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -42,15 +45,21 @@ public class VisibilityInspector extends JPanel {
   private static final Logger log = LogManager.getLogger(VisibilityInspector.class);
   private static final double VISION_RANGE_CHANGE_RATE = 15.;
 
-  private AreaTree wallVblTree, hillVblTree, pitVblTree, coverVblTree;
+  private Map<Zone.TopologyType, Color> palette = new EnumMap<>(Zone.TopologyType.class);
+  private Map<Zone.TopologyType, Area> toplogyAreas = new EnumMap<>(Zone.TopologyType.class);
+  private Map<Zone.TopologyType, AreaTree> toplogyTrees = new EnumMap<>(Zone.TopologyType.class);
   private AffineTransform affineTransform;
   private Point2D point;
   private double visionRange;
 
+  {
+    palette.put(Zone.TopologyType.WALL_VBL, Color.blue);
+    palette.put(Zone.TopologyType.HILL_VBL, Color.cyan);
+    palette.put(Zone.TopologyType.PIT_VBL, Color.green);
+    palette.put(Zone.TopologyType.COVER_VBL, Color.red);
+  }
+
   public VisibilityInspector() {
-    wallVblTree = new AreaTree(new Area());
-    hillVblTree = new AreaTree(new Area());
-    pitVblTree = new AreaTree(new Area());
     affineTransform = new AffineTransform();
     point = new Point(0, 0);
     visionRange = 200;
@@ -83,29 +92,32 @@ public class VisibilityInspector extends JPanel {
   }
 
   public void setTopology(Area wallVbl, Area hillVbl, Area pitVbl, Area coverVbl) {
-    wallVbl = new Area(wallVbl);
-    hillVbl = new Area(hillVbl);
-    pitVbl = new Area(pitVbl);
-    coverVbl = new Area(coverVbl);
+    this.toplogyAreas.clear();
+    this.toplogyAreas.put(Zone.TopologyType.WALL_VBL, wallVbl);
+    this.toplogyAreas.put(Zone.TopologyType.HILL_VBL, hillVbl);
+    this.toplogyAreas.put(Zone.TopologyType.PIT_VBL, pitVbl);
+    this.toplogyAreas.put(Zone.TopologyType.COVER_VBL, coverVbl);
+
+    this.toplogyTrees.clear();
+    var bounds = new Rectangle();
+    for (final var entry : this.toplogyAreas.entrySet()) {
+      var type = entry.getKey();
+      var area = entry.getValue();
+
+      var tree = new AreaTree(area);
+      this.toplogyTrees.put(type, tree);
+      bounds.add(area.getBounds());
+    }
 
     final var dimensions = getSize();
-    final var bounds = wallVbl.getBounds();
-    bounds.add(hillVbl.getBounds());
-    bounds.add(pitVbl.getBounds());
-    bounds.add(coverVbl.getBounds());
-    affineTransform = AffineTransform.getTranslateInstance(-bounds.getX(), -bounds.getY());
     final var scaleX = dimensions.getWidth() / bounds.getWidth();
     final var scaleY = dimensions.getHeight() / bounds.getHeight();
     var scale = Math.min(scaleX, scaleY);
     if (scale <= 0) {
       scale = 1.;
     }
+    affineTransform = AffineTransform.getTranslateInstance(-bounds.getX(), -bounds.getY());
     affineTransform.scale(scale, scale);
-
-    wallVblTree = new AreaTree(wallVbl);
-    hillVblTree = new AreaTree(hillVbl);
-    pitVblTree = new AreaTree(pitVbl);
-    coverVblTree = new AreaTree(coverVbl);
   }
 
   @Override
@@ -117,23 +129,19 @@ public class VisibilityInspector extends JPanel {
     g2d.fillRect(0, 0, size.width, size.height);
 
     g2d.transform(affineTransform);
-    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
     g2d.setStroke(new BasicStroke(1));
-    g2d.setColor(Color.blue.brighter());
-    g2d.fill(wallVblTree.getArea());
-    g2d.setColor(Color.cyan.brighter());
-    g2d.fill(hillVblTree.getArea());
-    g2d.setColor(Color.green.brighter());
-    g2d.fill(pitVblTree.getArea());
+
+    g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.4f));
+    for (final var entry : this.toplogyAreas.entrySet()) {
+      g2d.setColor(palette.get(entry.getKey()).brighter());
+      g2d.fill(entry.getValue());
+    }
+
     g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1.f));
-    g2d.setColor(Color.blue);
-    g2d.draw(wallVblTree.getArea());
-    g2d.setColor(Color.cyan);
-    g2d.draw(hillVblTree.getArea());
-    g2d.setColor(Color.green);
-    g2d.draw(pitVblTree.getArea());
-    g2d.setColor(Color.red);
-    g2d.draw(coverVblTree.getArea());
+    for (final var entry : this.toplogyAreas.entrySet()) {
+      g2d.setColor(palette.get(entry.getKey()));
+      g2d.draw(entry.getValue());
+    }
 
     final var CIRCLE_SEGMENTS = 60;
     final var unobstructedVision =
@@ -147,10 +155,10 @@ public class VisibilityInspector extends JPanel {
         FogUtil.calculateVisibility(
             new Point((int) point.getX(), (int) point.getY()),
             unobstructedVision,
-            wallVblTree,
-            hillVblTree,
-            pitVblTree,
-            coverVblTree);
+            toplogyTrees.get(Zone.TopologyType.WALL_VBL),
+            toplogyTrees.get(Zone.TopologyType.HILL_VBL),
+            toplogyTrees.get(Zone.TopologyType.PIT_VBL),
+            toplogyTrees.get(Zone.TopologyType.COVER_VBL));
 
     final var obstructedVision = new Area(unobstructedVision);
 
@@ -199,6 +207,7 @@ public class VisibilityInspector extends JPanel {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
     for (int x = 1; x < 7; ++x) {
@@ -217,13 +226,14 @@ public class VisibilityInspector extends JPanel {
         }
       }
     }
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 
   private static void buildTripleIntersectionTopology(VisibilityInspector visibilityInspector) {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
 
@@ -231,19 +241,20 @@ public class VisibilityInspector extends JPanel {
     hillArea.add(new Area(new Polygon(new int[] {250, 450, 450}, new int[] {450, 450, 250}, 3)));
     pitArea.add(new Area(new Polygon(new int[] {275, 325, 325}, new int[] {350, 150, 550}, 3)));
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 
   private static void buildSinglePillarTopology(VisibilityInspector visibilityInspector) {
     Area wallArea = new Area();
     Area hillArea = new Area();
     Area pitArea = new Area();
+    Area coverArea = new Area();
     wallArea.add(new Area(new Rectangle(0, 0, 750, 750)));
     wallArea.subtract(new Area(new Rectangle(50, 50, 650, 650)));
 
     final var pillar = new Area(new Rectangle(300, 300, 50, 50));
     wallArea.add(pillar);
 
-    visibilityInspector.setTopology(wallArea, hillArea, pitArea, null);
+    visibilityInspector.setTopology(wallArea, hillArea, pitArea, coverArea);
   }
 }

@@ -1210,6 +1210,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public void initTokenLayoutPanel() {
     TokenLayoutPanel layoutPanel = new TokenLayoutPanel();
+    layoutPanel.setMinimumSize(new Dimension(150, 125));
     layoutPanel.setPreferredSize(new Dimension(150, 125));
     layoutPanel.setName("tokenLayout");
 
@@ -1218,6 +1219,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public void initCharsheetPanel() {
     ImageAssetPanel panel = new ImageAssetPanel();
+    panel.setMinimumSize(new Dimension(150, 125));
     panel.setPreferredSize(new Dimension(150, 125));
     panel.setName("charsheet");
     panel.setLayout(new GridLayout());
@@ -1227,6 +1229,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public void initPortraitPanel() {
     ImageAssetPanel panel = new ImageAssetPanel();
+    panel.setMinimumSize(new Dimension(150, 125));
     panel.setPreferredSize(new Dimension(150, 125));
     panel.setName("portrait");
     panel.setLayout(new GridLayout());

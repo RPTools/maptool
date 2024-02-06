@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.zone.renderer;
 import java.awt.*;
 import java.awt.geom.Area;
 import java.awt.geom.Rectangle2D;
+import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.model.Token;
 
 class TokenLocation {
@@ -81,12 +82,12 @@ class TokenLocation {
     offsetX = renderer.getViewOffsetX();
     offsetY = renderer.getViewOffsetY();
 
-    renderer.timer.start("maybeOnsceen");
-    if (!boundsCache.intersects(viewport)) {
-      renderer.timer.stop("maybeOnsceen");
-      return false;
+    final var timer = CodeTimer.get();
+    timer.start("maybeOnsceen");
+    try {
+      return boundsCache.intersects(viewport);
+    } finally {
+      timer.stop("maybeOnsceen");
     }
-    renderer.timer.stop("maybeOnsceen");
-    return true;
   }
 }

@@ -15,16 +15,8 @@
 package net.rptools.maptool.model;
 
 import com.google.common.base.Stopwatch;
-import java.awt.Dimension;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
-import java.awt.geom.Arc2D;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Point2D;
-import java.awt.geom.Rectangle2D;
+import java.awt.*;
+import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.HashSet;
@@ -352,7 +344,7 @@ public abstract class Grid implements Cloneable {
   /**
    * Called by SightType and Light class to return a vision area based upon a specified distance
    *
-   * @param shape CIRCLE, GRID, SQUARE or CONE
+   * @param shape CIRCLE, GRID, SQUARE, CONE or LINE
    * @param token Used to position the shape and to provide footprint
    * @param range As specified in the vision or light definition
    * @param arcAngle Only used by cone
@@ -364,6 +356,7 @@ public abstract class Grid implements Cloneable {
       ShapeType shape,
       Token token,
       double range,
+      double width,
       double arcAngle,
       int offsetAngle,
       boolean scaleWithToken) {
@@ -403,6 +396,21 @@ public abstract class Grid implements Cloneable {
             new Area(
                 new Rectangle2D.Double(
                     -visionRange, -visionRange, visionRange * 2, visionRange * 2));
+        break;
+      case BEAM:
+        if (token.getFacing() == null) {
+          token.setFacing(0);
+        }
+        // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
+        var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
+        Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
+        Shape visibleShape = new GeneralPath(lineShape);
+
+        visibleArea =
+            new Area(
+                AffineTransform.getRotateInstance(
+                        Math.toRadians(offsetAngle) - Math.toRadians(token.getFacing()))
+                    .createTransformedShape(visibleShape));
         break;
       case CONE:
         if (token.getFacing() == null) {

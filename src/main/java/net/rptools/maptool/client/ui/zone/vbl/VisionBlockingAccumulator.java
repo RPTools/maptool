@@ -14,60 +14,52 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
-import java.awt.Point;
-import java.util.ArrayList;
-import java.util.List;
-import javax.annotation.Nullable;
+import net.rptools.maptool.model.Zone;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LineString;
-import org.locationtech.jts.geom.prep.PreparedGeometry;
+import org.locationtech.jts.geom.Envelope;
 
 public final class VisionBlockingAccumulator {
-  private final GeometryFactory geometryFactory;
-  private final Point origin;
-  private final Coordinate originCoordinate;
-  private final PreparedGeometry vision;
-  private final List<LineString> visionBlockingSegments;
+  private final Coordinate origin;
+  private final Envelope visionBounds;
+  private final VisibilityProblem visibilityProblem;
 
   public VisionBlockingAccumulator(
-      GeometryFactory geometryFactory, Point origin, PreparedGeometry vision) {
-    this.geometryFactory = geometryFactory;
+      Coordinate origin, Envelope visionBounds, VisibilityProblem visibilityProblem) {
     this.origin = origin;
-    this.originCoordinate = new Coordinate(origin.getX(), origin.getY());
-
-    this.vision = vision;
-
-    this.visionBlockingSegments = new ArrayList<>();
+    this.visionBounds = new Envelope(visionBounds);
+    this.visibilityProblem = visibilityProblem;
   }
 
-  public Point getOrigin() {
-    return origin;
-  }
+  private void blockVisionBeyondContainer(AreaTree.Node container) {
+    final var facing =
+        container.getMeta().isOcean()
+            ? Facing.OCEAN_SIDE_FACES_ORIGIN
+            : Facing.ISLAND_SIDE_FACES_ORIGIN;
 
-  public List<LineString> getVisionBlockingSegments() {
-    return visionBlockingSegments;
-  }
-
-  private void addVisionBlockingSegments(AreaContainer areaContainer, boolean frontSide) {
-    var segments =
-        areaContainer.getVisionBlockingBoundarySegments(
-            geometryFactory, originCoordinate, frontSide, vision);
-    visionBlockingSegments.addAll(segments);
-  }
-
-  private void addIslandForHillBlocking(
-      AreaIsland blockingIsland, @Nullable AreaOcean excludeChildOcean) {
-    // The back side of the island blocks.
-    addVisionBlockingSegments(blockingIsland, false);
-    // The front side of each contained ocean also acts as a back side boundary of the island.
-    for (var blockingOcean : blockingIsland.getOceans()) {
-      if (blockingOcean == excludeChildOcean) {
-        continue;
-      }
-
-      addVisionBlockingSegments(blockingOcean, true);
+    container.getMeta().getFacingSegments(origin, facing, visionBounds, visibilityProblem::add);
+    for (var child : container.getChildren()) {
+      child.getMeta().getFacingSegments(origin, facing, visionBounds, visibilityProblem::add);
     }
+  }
+
+  /**
+   * Finds all topology segments that can take part in blocking vision.
+   *
+   * <p>The exact selection of segments will different depending on the type of the topology. Some
+   * topology (Wall VBL) is a mask and can completely block vision simply by the origin point being
+   * located within it. The return value indicates whether this is the case.
+   *
+   * @param topology The VBL to apply.
+   * @return {@code true} if vision is possible, i.e., is not completely blocked by the topology.
+   */
+  public boolean add(Zone.TopologyType type, AreaTree topology) {
+    return switch (type) {
+      case WALL_VBL -> addWallBlocking(topology);
+      case HILL_VBL -> addHillBlocking(topology);
+      case PIT_VBL -> addPitBlocking(topology);
+      case COVER_VBL -> addCoverBlocking(topology);
+      case MBL -> true;
+    };
   }
 
   /**
@@ -77,32 +69,15 @@ public final class VisionBlockingAccumulator {
    * @return false if the vision has been completely blocked by topology, or true if vision may be
    *     blocked by particular segments.
    */
-  public boolean addWallBlocking(AreaTree topology) {
-    final AreaContainer container = topology.getContainerAt(origin);
-    if (container == null) {
-      // Should never happen since the global ocean should catch everything.
-      return false;
-    }
+  private boolean addWallBlocking(AreaTree topology) {
+    final var location = topology.locate(origin);
 
-    if (container instanceof AreaIsland) {
+    if (location.island() != null) {
       // Since we're contained in a wall island, there can be no vision through it.
       return false;
-    } else if (container instanceof AreaOcean ocean) {
-      final var parentIsland = ocean.getParentIsland();
-      if (parentIsland != null) {
-        // The near edge of the island blocks vision, which is the same as the boundary of this
-        // ocean. Since we're inside the ocean, the facing edges of the parent island are like the
-        // back side.
-        addVisionBlockingSegments(ocean, false);
-      }
-
-      // Check each contained island.
-      for (var containedIsland : ocean.getIslands()) {
-        // The front side of wall VBL blocks vision.
-        addVisionBlockingSegments(containedIsland, true);
-      }
     }
 
+    blockVisionBeyondContainer(location.nearestOcean());
     return true;
   }
 
@@ -113,12 +88,8 @@ public final class VisionBlockingAccumulator {
    * @return false if the vision has been completely blocked by topology, or true if vision can be
    *     blocked by particular segments.
    */
-  public boolean addHillBlocking(AreaTree topology) {
-    final AreaContainer container = topology.getContainerAt(origin);
-    if (container == null) {
-      // Should never happen since the global ocean should catch everything.
-      return false;
-    }
+  private boolean addHillBlocking(AreaTree topology) {
+    final var location = topology.locate(origin);
 
     /*
      * There are two cases for Hill VBL:
@@ -127,52 +98,29 @@ public final class VisionBlockingAccumulator {
      * 2. A token outside hill VBL can see into hill VBL, but not into any oceans adjacent to it.
      */
 
-    if (container instanceof final AreaIsland island) {
-      /*
-       * Since we're in an island, vision is blocked by:
-       * 1. The back side of the parent ocean's parent island.
-       * 2. The back side of any sibling islands (other children of the parent ocean).
-       * 3. The back side of any child ocean's islands.
-       * 4. For each island in the above, any child ocean provided it's not the parent of the
-       *    current island.
-       */
-      final var parentOcean = island.getParentOcean();
+    if (location.parentIsland() != null) {
+      blockVisionBeyondContainer(location.parentIsland());
+    }
 
-      final var grandparentIsland = parentOcean.getParentIsland();
-      if (grandparentIsland != null) {
-        addIslandForHillBlocking(grandparentIsland, parentOcean);
+    // Check each contained island.
+    for (var containedIsland : location.nearestOcean().getChildren()) {
+      if (containedIsland == location.island()) {
+        // We don't want to block vision for the hill we're currently in.
+        // TODO Ideally we could block the second occurence of the current island, but we need
+        //  a way to do that reliably.
+        continue;
       }
 
-      for (final var siblingIsland : parentOcean.getIslands()) {
-        if (siblingIsland == island) {
-          // We don't want to block vision for the hill we're currently in.
-          // TODO Ideally we could block the second occurence of the current island, but we need
-          //  a way to do that reliably.
-          continue;
+      blockVisionBeyondContainer(containedIsland);
+    }
+
+    if (location.island() != null) {
+      // Same basics as the nearestOcean logic above, but applied to children of this island
+      // (grandchildren of nearestOcean).
+      for (final var childOcean : location.island().getChildren()) {
+        for (final var containedIsland : childOcean.getChildren()) {
+          blockVisionBeyondContainer(containedIsland);
         }
-
-        addIslandForHillBlocking(siblingIsland, null);
-      }
-
-      for (final var childOcean : island.getOceans()) {
-        for (final var grandchildIsland : childOcean.getIslands()) {
-          addIslandForHillBlocking(grandchildIsland, null);
-        }
-      }
-    } else if (container instanceof final AreaOcean ocean) {
-      /*
-       * Since we're in an ocean, vision is blocked by:
-       * 1. The back side of the parent island.
-       * 2. The back side of any child island
-       * 3. For each island in the above, any child ocean provided it's not the current ocean.
-       */
-      final var parentIsland = ocean.getParentIsland();
-      if (parentIsland != null) {
-        addIslandForHillBlocking(parentIsland, null);
-      }
-      // Check each contained island.
-      for (var containedIsland : ocean.getIslands()) {
-        addIslandForHillBlocking(containedIsland, null);
       }
     }
 
@@ -186,12 +134,8 @@ public final class VisionBlockingAccumulator {
    * @return false if the vision has been completely blocked by topology, or true if vision can be
    *     blocked by particular segments.
    */
-  public boolean addPitBlocking(AreaTree topology) {
-    final AreaContainer container = topology.getContainerAt(origin);
-    if (container == null) {
-      // Should never happen since the global ocean should catch everything.
-      return false;
-    }
+  private boolean addPitBlocking(AreaTree topology) {
+    final var location = topology.locate(origin);
 
     /*
      * There are two cases for Pit VBL:
@@ -199,15 +143,8 @@ public final class VisionBlockingAccumulator {
      *    oceans.
      * 2. A token outside Pit VBL is unobstructed by the Pit VBL (nothing special to do).
      */
-
-    if (container instanceof final AreaIsland island) {
-      /*
-       * Since we're in an island, vision is blocked by:
-       * 1. The back side of the island.
-       * 2. The front side of any child ocean.
-       */
-      // These are actually the same rules as for the hill case, it's just the context that differs.
-      addIslandForHillBlocking(island, null);
+    if (location.island() != null) {
+      blockVisionBeyondContainer(location.island());
     }
 
     return true;
@@ -220,12 +157,8 @@ public final class VisionBlockingAccumulator {
    * @return false if the vision has been completely blocked by topology, or true if vision can be
    *     blocked by particular segments.
    */
-  public boolean addCoverBlocking(AreaTree topology) {
-    final AreaContainer container = topology.getContainerAt(origin);
-    if (container == null) {
-      // Should never happen since the global ocean should catch everything.
-      return false;
-    }
+  private boolean addCoverBlocking(AreaTree topology) {
+    final var location = topology.locate(origin);
 
     /*
      * There are two cases for Cover VBL:
@@ -233,33 +166,11 @@ public final class VisionBlockingAccumulator {
      * 2. A token outside Cover VBL can see nothing, as if it were wall.
      */
 
-    if (container instanceof final AreaIsland island) {
+    blockVisionBeyondContainer(location.nearestOcean());
 
-      final var parentOcean = island.getParentOcean();
-
-      for (final var siblingIsland : parentOcean.getIslands()) {
-        if (siblingIsland == island) {
-          continue;
-        }
-        addVisionBlockingSegments(siblingIsland, true);
-      }
-      for (final var childOcean : island.getOceans()) {
-        for (final var grandchildIsland : childOcean.getIslands()) {
-          addVisionBlockingSegments(grandchildIsland, true);
-        }
-        addVisionBlockingSegments(childOcean, false);
-      }
-      addVisionBlockingSegments(parentOcean, false);
-      addVisionBlockingSegments(island, true);
-
-    } else if (container instanceof AreaOcean ocean) {
-      final var parentIsland = ocean.getParentIsland();
-      if (parentIsland != null) {
-        addVisionBlockingSegments(ocean, true);
-      }
-
-      for (var containedIsland : ocean.getIslands()) {
-        addVisionBlockingSegments(containedIsland, true);
+    if (location.island() != null) {
+      for (var ocean : location.island().getChildren()) {
+        blockVisionBeyondContainer(ocean);
       }
     }
 

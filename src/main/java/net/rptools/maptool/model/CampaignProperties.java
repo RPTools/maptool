@@ -297,44 +297,37 @@ public class CampaignProperties {
     return defaultSightType;
   }
 
-  // @formatter:off
-  private static final Object[][] starter =
-      new Object[][] {
-        // Sight Type Name					Dist		Mult		Arc		LtSrc		Shape				Scale
-        {"Normal", 0.0, 1.0, 0, null, null, false},
-        {"Lowlight", 0.0, 2.0, 0, null, null, false},
-        {"Grid Vision", 0.0, 1.0, 0, null, ShapeType.GRID, true},
-        {"Square Vision", 0.0, 1.0, 0, null, ShapeType.SQUARE, false},
-        {"Normal Vision - Short Range", 10.0, 1.0, 0, null, ShapeType.CIRCLE, true},
-        {"Conic Vision", 0.0, 1.0, 120, null, ShapeType.CONE, false},
-        {"Darkvision", 0.0, 1.0, 0, null, null, true},
-      };
-
-  // @formatter:on
-
   private void initSightTypeMap() {
     sightTypeMap.clear();
-    for (Object[] row : starter) {
-      SightType st =
+
+    final var types =
+        new SightType[] {
+          new SightType("Normal", 0, 1.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
+          new SightType("Lowlight", 0, 2.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
+          new SightType("Grid Vision", 0, 1, ShapeType.GRID, 0, 0, 0, true, null),
+          new SightType("Square Vision", 0, 1, ShapeType.SQUARE, 0, 0, 0, false, null),
           new SightType(
-              (String) row[0],
-              (Double) row[2],
-              (LightSource) row[4],
-              (ShapeType) row[5],
-              (Integer) row[3],
-              (boolean) row[6]);
-      st.setDistance(((Double) row[1]).floatValue());
-      sightTypeMap.put((String) row[0], st);
+              "Normal Vision - Short Range", 10, 1.0, ShapeType.CIRCLE, 0, 0, 0, true, null),
+          new SightType("Conic Vision", 0, 1.0, ShapeType.CONE, 0, 120, 0, false, null),
+          new SightType(
+              "Darkvision",
+              0,
+              1.0,
+              ShapeType.CIRCLE,
+              0,
+              0,
+              0,
+              true,
+              LightSource.createPersonal(
+                  true,
+                  false,
+                  List.of(new Light(ShapeType.CIRCLE, 0, 60, 0, 0, null, 100, false, false)))),
+        };
+
+    for (SightType st : types) {
+      sightTypeMap.put(st.getName(), st);
     }
-    SightType dv = sightTypeMap.get("Darkvision");
-    try {
-      dv.setPersonalLightSource(LightSource.getDefaultLightSources().get("Generic").get(5));
-      // sightTypeMap.put("Darkvision & Lowlight", new SightType("Darkvision", 2,
-      // LightSource.getDefaultLightSources().get("Generic").get(4)));
-    } catch (IOException e) {
-      MapTool.showError("CampaignProperties.error.noGenericLight", e);
-    }
-    defaultSightType = (String) starter[0][0];
+    defaultSightType = types[0].getName();
   }
 
   private void initTokenTypeMap() {

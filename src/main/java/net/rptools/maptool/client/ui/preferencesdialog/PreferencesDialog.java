@@ -68,131 +68,384 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * Class: PreferencesDialog
+ *
+ * <p>A dialog box to manage user preferences.
+ */
 public class PreferencesDialog extends JDialog {
 
+  /** Logger instance used for logging messages in the PreferencesDialog class. */
   private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
+
+  /**
+   * Represents a tabbed panel in the PreferencesDialog class. This panel is used for displaying and
+   * managing multiple tabs.
+   */
   // Tabbed Panel
   private final JTabbedPane tabbedPane;
+
+  /**
+   * Represents a check box for the preference setting to have fog of war (FOW) enabled on new maps.
+   */
   // Interactions
   private final JCheckBox newMapsHaveFOWCheckBox;
+
+  /** Represents a check box for enabling a warning popup when a token is deleted. */
   private final JCheckBox tokensPopupWarningWhenDeletedCheckBox;
+
+  /** The checkbox used to indicate whether tokens should start snapping to the grid. */
   private final JCheckBox tokensStartSnapToGridCheckBox;
+
+  /**
+   * Represents a checkbox for the preference setting to have tokens snap to the grid while being
+   * dragged.
+   */
   private final JCheckBox tokensSnapWhileDraggingCheckBox;
+
+  /** Represents a checkbox that allows the user to hide the mouse pointer while dragging. */
   private final JCheckBox hideMousePointerWhileDraggingCheckBox;
+
+  /** Represents a checkbox indicating whether to hide the token stack indicator. */
   private final JCheckBox hideTokenStackIndicatorCheckBox;
+
+  /** Represents a checkbox for controlling the visibility of new maps. */
   private final JCheckBox newMapsVisibleCheckBox;
+
+  /** Represents the checkbox for controlling the visibility of new tokens. */
   private final JCheckBox newTokensVisibleCheckBox;
+
+  /** Represents the checkbox for starting tokens with free size. */
   private final JCheckBox tokensStartFreeSizeCheckBox;
+
+  /** The checkbox for new stamps with snap-to-grid enabled. */
   private final JCheckBox stampsStartSnapToGridCheckBox;
+
+  /** The checkbox for new stamps with free size enabled. */
   private final JCheckBox stampsStartFreeSizeCheckBox;
+
+  /** Provides a checkbox for new backgrounds snap-to-grid enabled. */
   private final JCheckBox backgroundsStartSnapToGridCheckBox;
+
+  /** The checkbox for new backgrounds free size enabled. */
   private final JCheckBox backgroundsStartFreeSizeCheckBox;
+
+  /** JComboBox variable used to display duplicate token naming options. */
   private final JComboBox<LocalizedComboItem> duplicateTokenCombo;
+
+  /** JComboBox variable used to display token naming options for imported tokens. */
   private final JComboBox<LocalizedComboItem> tokenNamingCombo;
+
+  /** JComboBox variable used to display token numbering options. */
   private final JComboBox<LocalizedComboItem> showNumberingCombo;
+
+  /** JComboBox variable used to display movement metric options. */
   private final JComboBox<WalkerMetric> movementMetricCombo;
+
+  /** JComboBox variable used to display vision type options. */
   private final JComboBox<Zone.VisionType> visionTypeCombo;
+
+  /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType;
+
+  /** Checkbox for displaying or hiding * the statistics sheet on token mouseover. */
   private final JCheckBox showStatSheetCheckBox;
+
+  /** Checkbox for displaying or hiding the token portrait on token mouseover. */
   private final JCheckBox showPortraitCheckBox;
+
+  /** Checkbox for if the modifier key needs to be held down to show the stat sheet. */
   private final JCheckBox showStatSheetModifierCheckBox;
+
+  /** Checkbox for if the facing arrow should be forced to be shown. */
   private final JCheckBox forceFacingArrowCheckBox;
+
+  /** Checkbox for if the map visibility warning should be shown. */
   private final JCheckBox mapVisibilityWarning;
+
+  /** Spinner for the halo line width. */
   private final JSpinner haloLineWidthSpinner;
+
+  /** Spinner for the halo overlay opacity. */
   private final JSpinner haloOverlayOpacitySpinner;
+
+  /** Spinner for the aura overlay opacity. */
   private final JSpinner auraOverlayOpacitySpinner;
+
+  /** Spinner for the light overlay opacity. */
   private final JSpinner lightOverlayOpacitySpinner;
+
+  /** Spinner for the luminosity overlay opacity. */
   private final JSpinner lumensOverlayOpacitySpinner;
+
+  /** Spinner for the luminosity overlay border thickness. */
   private final JSpinner lumensOverlayBorderThicknessSpinner;
+
+  /** Checkbox for if the luminosity overlay should be shown by default. */
   private final JCheckBox lumensOverlayShowByDefaultCheckBox;
+
+  /** Checkbox for if the environmental lights should be shown by default. */
   private final JCheckBox lightsShowByDefaultCheckBox;
+
+  /** Spinner for the fog opacity. */
   private final JSpinner fogOverlayOpacitySpinner;
+
+  /** Checkbox for if the halo color should be used as the vision overlay. */
   private final JCheckBox useHaloColorAsVisionOverlayCheckBox;
+
+  /** Checkbox for if the vision should be auto-revealed on GM move. */
   private final JCheckBox autoRevealVisionOnGMMoveCheckBox;
+
+  /** Checkbox for if smilies should be converted to images in chat. */
   private final JCheckBox showSmiliesCheckBox;
+
+  /** Checkbox for if system sounds should be played. */
   private final JCheckBox playSystemSoundCheckBox;
+
+  /** Checkbox for if audio streams should be played. */
   private final JCheckBox playStreamsCheckBox;
+
+  /** Checkbox for if system sounds should be played only when not focused. */
   private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox;
+
+  /** Checkbox for if Syrinscape integration should be enabled. */
   private final JCheckBox syrinscapeActiveCheckBox;
+
+  /** Checkbox for if token facing is allowed to point to edges of the grid cells. */
   private final JCheckBox facingFaceEdges;
+
+  /** Checkbox for if token facing is allowed to point to vertices of the grid cells. */
   private final JCheckBox facingFaceVertices;
+
+  /** Checkbox for if the avatar should be shown in chat. */
   private final JCheckBox showAvatarInChat;
+
+  /** Checkbox for if new macros should be editable by players by default. */
   private final JCheckBox allowPlayerMacroEditsDefault;
+
+  /** Checkbox for if the details of inline rolls should be shown in tooltips. */
   private final JCheckBox toolTipInlineRolls;
+
+  /** Checkbox for if macro link details should be suppressed in tooltips. */
   private final JCheckBox suppressToolTipsMacroLinks;
-  private final ColorWell trustedOuputForeground;
-  private final ColorWell trustedOuputBackground;
+
+  /** ColorWell for the completed trusted path output foreground color. */
+  private final ColorWell trustedOutputForeground;
+
+  /** ColorWell for the completed trusted path output background color. */
+  private final ColorWell trustedOutputBackground;
+
+  /** Spinner for the chat autosave time. */
   private final JSpinner chatAutosaveTime;
+
+  /** Text field for the chat autosave filename format. */
   private final JTextField chatFilenameFormat;
+
+  /** Spinner for the typing notification duration. */
   private final JSpinner typingNotificationDuration;
+
+  /** ComboBox for the macro editor theme. */
   private final JComboBox<String> macroEditorThemeCombo;
+
+  /** ComboBox for the icon theme. */
   private final JComboBox<String> iconThemeCombo;
+
   // Chat Notification
+  /** ColorWell for the chat notification color. */
   private final ColorWell chatNotificationColor;
+
+  /** Checkbox for if the chat notification background should be shown. */
   private final JCheckBox chatNotificationShowBackground;
+
   // Defaults
+  /** ComboBox for the default grid type to use for new maps. */
   private final JComboBox<LocalizedComboItem> defaultGridTypeCombo;
+
+  /** Text field for the default grid size to use for new maps. */
   private final JTextField defaultGridSizeTextField;
+
+  /** Text field for the default units per cell to use for new maps. */
   private final JTextField defaultUnitsPerCellTextField;
+
+  /** Text field for the default vision distance to use for new maps. */
   private final JTextField defaultVisionDistanceTextField;
+
+  /** Spinner for the stat sheet portrait size. */
   private final JTextField statsheetPortraitSize;
+
+  /** Spinner for the auto-save interval for campaign data. */
   private final JSpinner autoSaveSpinner;
+
+  /** Checkbox for if the save reminder should be shown on exit, new campaign etc. */
   private final JCheckBox saveReminderCheckBox;
+
+  /** Checkbox for if the dialog should be shown on new token creation. */
   private final JCheckBox showDialogOnNewToken;
+
   // Accessibility
+  /** Text field for the chat font size. */
   private final JTextField fontSizeTextField;
+
+  /** Spinner for the initial delay for tooltips. */
   private final JTextField toolTipInitialDelay;
+
+  /** Spinner for the dismiss delay for tooltips. */
   private final JTextField toolTipDismissDelay;
+
   // Application
+  /** Checkbox for if the client should fit the GM view automatically. */
   private final JCheckBox fitGMView;
+
+  /** Checkbox for if the selection should be filled when selecting objects. */
   private final JCheckBox fillSelectionCheckBox;
+
+  /** Text field for the frame rate cap for rendering. */
   private final JTextField frameRateCapTextField;
 
+  /** ComboBox for the render performance optimization level. */
   private final JComboBox<LocalizedComboItem> renderPerformanceComboBox;
+
+  /** Text field for the default username when not logged into a server. */
   private final JTextField defaultUsername;
 
   // private final JCheckBox initEnableServerSyncCheckBox;
+  /** Checkbox for if non-player characters should be hidden when creating a new map. */
   private final JCheckBox hideNPCs;
+
+  /** Checkbox for if owner permissions should be granted when creating a new campaign. */
   private final JCheckBox ownerPermissions;
+
+  /** Checkbox for if movement should be locked in new campaigns. */
   private final JCheckBox lockMovement;
+
+  /** Checkbox for if initiative gain messages should be shown. */
   private final JCheckBox showInitGainMessage;
+
+  /** Text field for the UPnP discovery timeout. */
   private final JTextField upnpDiscoveryTimeoutTextField;
+
+  /** Text field for the file synchronization path. */
   private final JTextField fileSyncPath;
+
+  /** Button for opening the file synchronization path selection dialog. */
   private final JButton fileSyncPathButton;
+
+  /** Checkbox for if macros should be allowed to access external resources. */
   private final JCheckBox allowExternalMacroAccessCheckBox;
 
   // Authentication
+  /** Text area for displaying the public key for authentication. */
   private final JTextArea publicKeyTextArea;
+
+  /** Button for regenerating the public key. */
   private final JButton regeneratePublicKey;
+
+  /** Button for copying the public key to the clipboard. */
   private final JButton copyPublicKey;
 
   // Themes
+  /** List for displaying available themes. */
   private final JList<String> themeList;
+
+  /** Label for displaying the theme image. */
   private final JLabel themeImageLabel;
+
+  /** Label for displaying the theme name. */
   private final JLabel themeNameLabel;
 
+  /** List model for all available themes. */
   private final ListModel<String> allThemesListModel;
 
+  /** List model for light themes. */
   private final ListModel<String> lightThemesListModel;
 
+  /** List model for dark themes. */
   private final ListModel<String> darkThemesListModel;
+
+  /** Combo box for selecting the theme filter. */
   private final JComboBox<LocalizedComboItem> themeFilterCombo;
 
+  /** Checkbox for if the theme should be applied to the chat window. */
   private final JCheckBox useThemeForChat;
 
   // Startup
+  /** Text field for the JVM maximum memory allocation. */
   private final JTextField jvmXmxTextField;
+
+  /** Text field for the JVM initial memory allocation. */
   private final JTextField jvmXmsTextField;
+
+  /** Text field for the JVM thread stack size. */
   private final JTextField jvmXssTextField;
+
+  /** Text field for the data directory. */
   private final JTextField dataDirTextField;
+
+  /** Checkbox for if the JVM should use Direct3D. */
   private final JCheckBox jvmDirect3dCheckbox;
+
+  /** Checkbox for if the JVM should use OpenGL. */
   private final JCheckBox jvmOpenGLCheckbox;
+
+  /** Checkbox for if the JVM should initialize AWT. */
   private final JCheckBox jvmInitAwtCheckbox;
+
+  /** Combo box for selecting the language override for JAM messages. */
   private final JComboBox<String> jamLanguageOverrideComboBox;
+
+  /** Label for displaying startup information. */
   private final JLabel startupInfoLabel;
+
+  /** Flag indicating if JVM values have been changed. */
   private boolean jvmValuesChanged = false;
 
+  /** Flag indicating if theme has been changed. */
   private boolean themeChanged = false;
+
+  // Map Token Labels
+  /** ColorWell for displaying the PC token label foreground color. */
+  private final ColorWell pcTokenLabelFG;
+
+  /** ColorWell for displaying the PC token label background color. */
+  private final ColorWell pcTokenLabelBG;
+
+  /** ColorWell for displaying the NPC token label foreground color. */
+  private final ColorWell npcTokenLabelFG;
+
+  /** ColorWell for displaying the NPC token label background color. */
+  private final ColorWell npcTokenLabelBG;
+
+  /** ColorWell for displaying the non-visibility token label foreground color. */
+  private final ColorWell nonVisTokenLabelFG;
+
+  /** ColorWell for displaying the non-visibility token label background color. */
+  private final ColorWell nonVisTokenLabelBG;
+
+  /** Spinner for setting the token label font size. */
+  private final JSpinner labelFontSizeSpinner;
+
+  /** ColorWell for displaying the token label border color for PCs. */
+  private final ColorWell pcTokenLabelBorderColor;
+
+  /** ColorWell for displaying the token label border color for NPCs. */
+  private final ColorWell npcTokenLabelBorderColor;
+
+  /** ColorWell for displaying the token label border color for non-visible tokens. */
+  private final ColorWell nonVisTokenLabelBorderColor;
+
+  /** Spinner for setting the token label border width. */
+  private final JSpinner labelBorderWidthSpinner;
+
+  /** Spinner for setting the token label border arc. */
+  private final JSpinner labelBorderArcSpinner;
+
+  /** Checkbox for showing the token label border. */
+  private final JCheckBox showLabelBorderCheckBox;
+
+  /**
+   * Array of LocalizedComboItems representing the default grid types for the preferences dialog.
+   * Each item in the array consists of a grid type and its corresponding localized display name.
+   */
   private static final LocalizedComboItem[] defaultGridTypeComboItems = {
     new LocalizedComboItem(GridFactory.SQUARE, "Preferences.combo.maps.grid.square"),
     new LocalizedComboItem(GridFactory.HEX_HORI, "Preferences.combo.maps.grid.hexHori"),
@@ -200,15 +453,33 @@ public class PreferencesDialog extends JDialog {
     new LocalizedComboItem(GridFactory.ISOMETRIC, "Preferences.combo.maps.grid.isometric"),
     new LocalizedComboItem(GridFactory.NONE, "MapPropertiesDialog.image.nogrid")
   };
+
+  /**
+   * Stores the localized combo items for duplicate token preferences.
+   *
+   * @see LocalizedComboItem
+   */
   private static final LocalizedComboItem[] duplicateTokenComboItems = {
     new LocalizedComboItem(Token.NUM_INCREMENT, "Preferences.combo.tokens.duplicate.increment"),
     new LocalizedComboItem(Token.NUM_RANDOM, "Preferences.combo.tokens.duplicate.random"),
   };
+
+  /**
+   * Array of LocalizedComboItem objects for showing numbering options in a combo box.
+   *
+   * @see LocalizedComboItem
+   */
   private static final LocalizedComboItem[] showNumberingComboItems = {
     new LocalizedComboItem(Token.NUM_ON_NAME, "Preferences.combo.tokens.numbering.name"),
     new LocalizedComboItem(Token.NUM_ON_GM, "Preferences.combo.tokens.numbering.gm"),
     new LocalizedComboItem(Token.NUM_ON_BOTH, "Preferences.combo.tokens.numbering.both")
   };
+
+  /**
+   * Array of LocalizedComboItem objects for showing vision type options in a combo box.
+   *
+   * @see LocalizedComboItem
+   */
   private static final LocalizedComboItem[] tokenNamingComboItems = {
     new LocalizedComboItem(Token.NAME_USE_FILENAME, "Preferences.combo.tokens.naming.filename"),
     new LocalizedComboItem(
@@ -216,6 +487,12 @@ public class PreferencesDialog extends JDialog {
         "Preferences.combo.tokens.naming.creature",
         I18N.getString("Token.name.creature"))
   };
+
+  /**
+   * An array of WalkerMetric objects that represent different movement metrics.
+   *
+   * @see WalkerMetric
+   */
   private static final WalkerMetric[] movementMetricComboItems = {
     WalkerMetric.ONE_TWO_ONE,
     WalkerMetric.ONE_ONE_ONE,
@@ -223,6 +500,11 @@ public class PreferencesDialog extends JDialog {
     WalkerMetric.NO_DIAGONALS
   };
 
+  /**
+   * Array of LocalizedComboItem objects for showing render performance options in a combo box.
+   *
+   * @see LocalizedComboItem
+   */
   private static final LocalizedComboItem[] renderPerformanceComboItems = {
     new LocalizedComboItem(RenderQuality.LOW_SCALING.name(), "Preferences.combo.render.low"),
     new LocalizedComboItem(
@@ -230,12 +512,24 @@ public class PreferencesDialog extends JDialog {
     new LocalizedComboItem(RenderQuality.MEDIUM_SCALING.name(), "Preferences.combo.render.medium"),
     new LocalizedComboItem(RenderQuality.HIGH_SCALING.name(), "Preferences.combo.render.high")
   };
+
+  /**
+   * Array of LocalizedComboItem objects for showing theme filter options in a combo box.
+   *
+   * @see LocalizedComboItem
+   */
   private static final LocalizedComboItem[] themeFilterComboItems = {
     new LocalizedComboItem("All", "Preferences.combo.themes.filter.all"),
     new LocalizedComboItem("Dark", "Preferences.combo.themes.filter.dark"),
     new LocalizedComboItem("Light", "Preferences.combo.themes.filter.light")
   };
 
+  /**
+   * The PreferencesDialog class represents a dialog window that allows users to customize their
+   * preferences.
+   *
+   * <p>This dialog window is modal.
+   */
   public PreferencesDialog() {
     super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
@@ -267,26 +561,7 @@ public class PreferencesDialog extends JDialog {
     getRootPane().setDefaultButton(okButton);
     okButton.addActionListener(
         e -> {
-          // Warn the user that they changed JVM options and need to restart MapTool for
-          // them to take affect.
-          // Also warn user to double check settings...
-          /* This cant happen until jpackager allows startup parameters outside of app
-             see https://github.com/RPTools/maptool/issues/2174
-          if (jvmValuesChanged) {
-            if (!MapTool.confirm("msg.confirm.jvm.options")) {
-              return;
-            }
-          }
-           */
-
           boolean close = true;
-          /* This cant happen until jpackager allows startup parameters outside of app
-             see https://github.com/RPTools/maptool/issues/2174
-          if (jvmValuesChanged) {
-            close = UserJvmOptions.saveAppCfg();
-          }
-           */
-
           if (close) {
             setVisible(false);
             dispose();
@@ -313,14 +588,12 @@ public class PreferencesDialog extends JDialog {
     renderPerformanceComboBox = panel.getComboBox("renderPerformanceComboBox");
 
     defaultUsername = panel.getTextField("defaultUsername");
-    // initEnableServerSyncCheckBox = panel.getCheckBox("initEnableServerSyncCheckBox");
     autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
     duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
     tokenNamingCombo = panel.getComboBox("tokenNamingCombo");
     newMapsHaveFOWCheckBox = panel.getCheckBox("newMapsHaveFOWCheckBox");
     tokensPopupWarningWhenDeletedCheckBox =
         panel.getCheckBox("tokensPopupWarningWhenDeletedCheckBox"); // new
-    // JCheckBox();//panel.getCheckBox("testCheckBox");
     tokensStartSnapToGridCheckBox = panel.getCheckBox("tokensStartSnapToGridCheckBox");
     tokensSnapWhileDraggingCheckBox = panel.getCheckBox("tokensSnapWhileDragging");
     hideMousePointerWhileDraggingCheckBox = panel.getCheckBox("hideMousePointerWhileDragging");
@@ -365,8 +638,8 @@ public class PreferencesDialog extends JDialog {
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
     suppressToolTipsMacroLinks = panel.getCheckBox("suppressToolTipsMacroLinks");
-    trustedOuputForeground = (ColorWell) panel.getComponent("trustedOuputForeground");
-    trustedOuputBackground = (ColorWell) panel.getComponent("trustedOuputBackground");
+    trustedOutputForeground = (ColorWell) panel.getComponent("trustedOuputForeground");
+    trustedOutputBackground = (ColorWell) panel.getComponent("trustedOuputBackground");
     toolTipInitialDelay = panel.getTextField("toolTipInitialDelay");
     toolTipDismissDelay = panel.getTextField("toolTipDismissDelay");
     facingFaceEdges = panel.getCheckBox("facingFaceEdges");
@@ -427,6 +700,67 @@ public class PreferencesDialog extends JDialog {
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
 
     startupInfoLabel = panel.getLabel("startupInfoLabel");
+
+    pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
+    pcTokenLabelFG.setColor(AppPreferences.getPCMapLabelFG());
+    pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
+    pcTokenLabelBG.setColor(AppPreferences.getPCMapLabelBG());
+    pcTokenLabelBorderColor = (ColorWell) panel.getComponent("pcTokenLabelBorder");
+    pcTokenLabelBorderColor.setColor(AppPreferences.getPCMapLabelBorder());
+    npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
+    npcTokenLabelFG.setColor(AppPreferences.getNPCMapLabelFG());
+    npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
+    npcTokenLabelBG.setColor(AppPreferences.getNPCMapLabelBG());
+    npcTokenLabelBorderColor = (ColorWell) panel.getComponent("npcTokenLabelBorder");
+    npcTokenLabelBorderColor.setColor(AppPreferences.getNPCMapLabelBorder());
+    nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
+    nonVisTokenLabelFG.setColor(AppPreferences.getNonVisMapLabelFG());
+    nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
+    nonVisTokenLabelBG.setColor(AppPreferences.getNonVisMapLabelBG());
+    nonVisTokenLabelBorderColor = (ColorWell) panel.getComponent("nonVisTokenLabelBorder");
+    nonVisTokenLabelBorderColor.setColor(AppPreferences.getNonVisMapLabelBorder());
+
+    labelFontSizeSpinner = (JSpinner) panel.getComponent("labelFontSizeSpinner");
+    labelFontSizeSpinner.setValue(AppPreferences.getMapLabelFontSize());
+    labelBorderWidthSpinner = (JSpinner) panel.getComponent("labelBorderWidthSpinner");
+    labelBorderWidthSpinner.setValue(AppPreferences.getMapLabelBorderWidth());
+    labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
+    labelBorderArcSpinner.setValue(AppPreferences.getMapLabelBorderArc());
+    showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
+    showLabelBorderCheckBox.addActionListener(
+        e -> {
+          if (showLabelBorderCheckBox.isSelected()) {
+            pcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            npcTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            nonVisTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
+            labelBorderWidthSpinner.setEnabled(true);
+            labelBorderArcSpinner.setEnabled(true);
+            AppPreferences.setShowMapLabelBorder(true);
+          } else {
+            pcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
+            npcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
+            nonVisTokenLabelBorderColor.setVisible(false); // Disabling a color well does not  work
+            labelBorderWidthSpinner.setEnabled(false);
+            labelBorderArcSpinner.setEnabled(false);
+            AppPreferences.setShowMapLabelBorder(false);
+          }
+        });
+
+    boolean showBorder = AppPreferences.getShowMapLabelBorder();
+    showLabelBorderCheckBox.setSelected(showBorder);
+    if (showBorder) {
+      pcTokenLabelBorderColor.setVisible(true);
+      npcTokenLabelBorderColor.setVisible(true);
+      nonVisTokenLabelBorderColor.setVisible(true);
+      labelBorderWidthSpinner.setEnabled(true);
+      labelBorderArcSpinner.setEnabled(true);
+    } else {
+      pcTokenLabelBorderColor.setVisible(false);
+      npcTokenLabelBorderColor.setVisible(false);
+      nonVisTokenLabelBorderColor.setVisible(false);
+      labelBorderWidthSpinner.setEnabled(false);
+      labelBorderArcSpinner.setEnabled(false);
+    }
 
     {
       final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");
@@ -540,17 +874,17 @@ public class PreferencesDialog extends JDialog {
           MapTool.getFrame().setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
         });
 
-    trustedOuputForeground.addActionListener(
+    trustedOutputForeground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixFG(trustedOuputForeground.getColor());
+          AppPreferences.setTrustedPrefixFG(trustedOutputForeground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
                   AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
         });
-    trustedOuputBackground.addActionListener(
+    trustedOutputBackground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixBG(trustedOuputBackground.getColor());
+          AppPreferences.setTrustedPrefixBG(trustedOutputBackground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
@@ -856,6 +1190,75 @@ public class PreferencesDialog extends JDialog {
               }
             });
 
+    npcTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelBG(npcTokenLabelBG.getColor());
+        });
+
+    npcTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelFG(npcTokenLabelFG.getColor());
+        });
+
+    pcTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelBG(pcTokenLabelBG.getColor());
+        });
+
+    pcTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelFG(pcTokenLabelFG.getColor());
+        });
+
+    nonVisTokenLabelBG.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelBG(nonVisTokenLabelBG.getColor());
+        });
+
+    nonVisTokenLabelFG.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelFG(nonVisTokenLabelFG.getColor());
+        });
+
+    labelFontSizeSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelFontSize(Math.max(value, 0));
+          }
+        });
+
+    pcTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setPCMapLabelBorder(pcTokenLabelBorderColor.getColor());
+        });
+
+    npcTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setNPCMapLabelBorder(npcTokenLabelBorderColor.getColor());
+        });
+
+    nonVisTokenLabelBorderColor.addActionListener(
+        e -> {
+          AppPreferences.setNonVisMapLabelBorder(nonVisTokenLabelBorderColor.getColor());
+        });
+
+    labelBorderWidthSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelBorderWidth(Math.max(value, 0));
+          }
+        });
+
+    labelBorderArcSpinner.addChangeListener(
+        new ChangeListenerProxy() {
+          @Override
+          protected void storeSpinnerValue(int value) {
+            AppPreferences.setMapLabelBorderArc(Math.max(value, 0));
+          }
+        });
+
     fitGMView.addActionListener(e -> AppPreferences.setFitGMView(fitGMView.isSelected()));
     hideNPCs.addActionListener(e -> AppPreferences.setInitHideNpcs(hideNPCs.isSelected()));
     ownerPermissions.addActionListener(
@@ -1130,6 +1533,10 @@ public class PreferencesDialog extends JDialog {
     }
   }
 
+  /**
+   * Initializes and sets the initial state of various user preferences in the application. This
+   * method is called during the initialization process.
+   */
   private void setInitialState() {
     showDialogOnNewToken.setSelected(AppPreferences.getShowDialogOnNewToken());
     saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
@@ -1196,8 +1603,8 @@ public class PreferencesDialog extends JDialog {
     allowPlayerMacroEditsDefault.setSelected(AppPreferences.getAllowPlayerMacroEditsDefault());
     toolTipInlineRolls.setSelected(AppPreferences.getUseToolTipForInlineRoll());
     suppressToolTipsMacroLinks.setSelected(AppPreferences.getSuppressToolTipsForMacroLinks());
-    trustedOuputForeground.setColor(AppPreferences.getTrustedPrefixFG());
-    trustedOuputBackground.setColor(AppPreferences.getTrustedPrefixBG());
+    trustedOutputForeground.setColor(AppPreferences.getTrustedPrefixFG());
+    trustedOutputBackground.setColor(AppPreferences.getTrustedPrefixBG());
     toolTipInitialDelay.setText(Integer.toString(AppPreferences.getToolTipInitialDelay()));
     toolTipDismissDelay.setText(Integer.toString(AppPreferences.getToolTipDismissDelay()));
     facingFaceEdges.setSelected(AppPreferences.getFaceEdge());
@@ -1326,12 +1733,25 @@ public class PreferencesDialog extends JDialog {
   }
 
   /**
-   * @author frank
+   * Private abstract static class representing a proxy implementation of the DocumentListener
+   * interface. This class is used to handle document changes in a JTextField and update a numeric
+   * value based on the entered text.
+   *
+   * @param <T> The type of numeric value to handle.
    */
   private abstract static class DocumentListenerProxy<T> implements DocumentListener {
 
+    /**
+     * This variable represents a JTextField component to listen for chqnges on.
+     *
+     * @see JTextField
+     */
     JTextField comp;
 
+    /**
+     * A proxy implementation of the DocumentListener interface. This class is used to handle
+     * document changes in a JTextField and update a numeric value based on the entered text.
+     */
     public DocumentListenerProxy(JTextField tf) {
       comp = tf;
     }
@@ -1351,6 +1771,13 @@ public class PreferencesDialog extends JDialog {
       updateValue();
     }
 
+    /**
+     * This method is used to update a numeric value based on the text entered in a JTextField
+     * component. It calls the convertString() method to parse the text and convert it into the
+     * appropriate numeric value. The parsed value is then passed to the storeNumericValue() method
+     * to update the numeric value. If the text cannot be parsed, a ParseException is caught and
+     * ignored.
+     */
     protected void updateValue() {
       try {
         storeNumericValue(convertString(comp.getText())); // Localized
@@ -1359,8 +1786,20 @@ public class PreferencesDialog extends JDialog {
       }
     }
 
+    /**
+     * Converts a string value to a specific type.
+     *
+     * @param value the string value to convert
+     * @return the converted value
+     * @throws ParseException if the string value cannot be converted
+     */
     protected abstract T convertString(String value) throws ParseException;
 
+    /**
+     * This method is used to store a numeric value.
+     *
+     * @param value the numeric value to store
+     */
     protected abstract void storeNumericValue(T value);
   }
 
@@ -1376,6 +1815,12 @@ public class PreferencesDialog extends JDialog {
       storeSpinnerValue(value);
     }
 
+    /**
+     * This method is used to store the value of a spinner. It is called when the state of the
+     * spinner changes.
+     *
+     * @param value the new value of the spinner
+     */
     protected abstract void storeSpinnerValue(int value);
   }
 
@@ -1384,23 +1829,52 @@ public class PreferencesDialog extends JDialog {
    * corresponding enum.
    */
   private static class LocalizedComboItem {
+    /** Represents the localized display name of a menu item or combo box option. */
     private final String displayName;
+
+    /**
+     * This variable represents a preference value. It stores a string that is used as a preference
+     * value for menu items or combo box options.
+     */
     private final String prefValue;
 
+    /**
+     * Creates a localized combo box item.
+     *
+     * @param prefValue the preference key to store.
+     * @param i18nKey the i18n key to use for the display name.
+     */
     LocalizedComboItem(String prefValue, String i18nKey) {
       this.prefValue = prefValue;
       displayName = I18N.getText(i18nKey);
     }
 
+    /**
+     * Creates a localized combo box item.
+     *
+     * @param prefValue the preference key to store.
+     * @param i18nKey the i18n key to use for the display name.
+     * @param args the arguments to use for the i18n key.
+     */
     LocalizedComboItem(String prefValue, String i18nKey, Object... args) {
       this.prefValue = prefValue;
       displayName = I18N.getText(i18nKey, args);
     }
 
+    /**
+     * Returns the preference key value for this item.
+     *
+     * @return the preference key value for this item.
+     */
     public String getValue() {
       return prefValue;
     }
 
+    /**
+     * Returns the localized display name of the menu item or combo box option.
+     *
+     * @return the localized display name
+     */
     public String toString() {
       return displayName;
     }
