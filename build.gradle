@@ -180,6 +180,11 @@ def instrumentForms = tasks.register('instrumentForms', Sync) {
     from compileJava.destinationDirectory
     into sourceSets.main.java.destinationDirectory
 
+    def formsSet = objects.sourceDirectorySet('forms', 'IntelliJ form files')
+    formsSet.srcDirs sourceSets.main.java.sourceDirectories
+    formsSet.include '**/*.form'
+    inputs.files(formsSet.files)
+
     doLast {
         ant.echo "Instrumenting IntelliJ GUI forms"
         ant.taskdef(
