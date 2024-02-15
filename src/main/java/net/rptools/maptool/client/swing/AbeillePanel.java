@@ -229,7 +229,7 @@ public class AbeillePanel<T> extends JPanel {
     return (JTextField) getComponent(name);
   }
 
-  public Collection<Component> getAllCompoments() {
+  public Collection<Component> getAllComponents() {
     if (componentMap == null) {
       createComponentMap();
     }

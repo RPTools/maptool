@@ -77,34 +77,37 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
         var displayName = property.getDisplayName();
         yield displayName == null || displayName.isBlank() ? null : displayName;
       }
-      case 3 -> property.isShowOnStatSheet();
-      case 4 -> property.isGMOnly() & property.isShowOnStatSheet();
-      case 5 -> property.isOwnerOnly() & property.isShowOnStatSheet();
-      case 6 -> property.getDefaultValue();
+      case 3 -> property.getDefaultValue();
+      case 4 -> property.isShowOnStatSheet();
+      case 5 -> property.isGMOnly() & property.isShowOnStatSheet();
+      case 6 -> property.isOwnerOnly() & property.isShowOnStatSheet();
       default -> null;
     };
   }
 
   @Override
   public String getColumnName(int column) {
-    return switch (column) {
-      case 0 -> I18N.getText("campaignPropertiesTable.column.name");
-      case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
-      case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
-      case 3 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
-      case 4 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
-      case 5 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
-      case 6 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
-      default -> null;
-    };
+    String cName = "";
+    String htmlWrap = "<html><table><th style=\"font-weight:normal;\">###</th></table></html>";
+    switch (column) {
+      case 0 -> cName = I18N.getText("campaignPropertiesTable.column.name");
+      case 1 -> cName = I18N.getText("campaignPropertiesTable.column.shortName");
+      case 2 -> cName = I18N.getText("campaignPropertiesTable.column.displayName");
+      case 3 -> cName = I18N.getText("campaignPropertiesTable.column.defaultValue");
+      case 4 -> cName = I18N.getText("campaignPropertiesTable.column.onStatSheet");
+      case 5 -> cName = I18N.getText("campaignPropertiesTable.column.gmStatSheet");
+      case 6 -> cName = I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+    }
+    ;
+    return htmlWrap.replace("###", cName);
   }
 
   @Override
   public Class<?> getColumnClass(int columnIndex) {
     return switch (columnIndex) {
       case 0, 1, 2 -> String.class;
-      case 3, 4, 5 -> Boolean.class;
-      case 6 -> LargeEditableText.class;
+      case 3 -> LargeEditableText.class;
+      case 4, 5, 6 -> Boolean.class;
       default -> null;
     };
   }
@@ -114,7 +117,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     var properties = tokenTypeMap.get(tokenType);
     var tokenProperty = properties.get(rowIndex);
     return switch (columnIndex) {
-      case 4, 5 -> tokenProperty
+      case 5, 6 -> tokenProperty
           .isShowOnStatSheet(); // GM, Owner only editable if show on stat sheet is set
       default -> true;
     };
@@ -128,13 +131,13 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
       case 0 -> tokenProperty.setName((String) aValue);
       case 1 -> tokenProperty.setShortName((String) aValue);
       case 2 -> tokenProperty.setDisplayName((String) aValue);
-      case 3 -> {
+      case 3 -> tokenProperty.setDefaultValue((String) aValue);
+      case 4 -> {
         tokenProperty.setShowOnStatSheet((Boolean) aValue);
         fireTableRowsUpdated(rowIndex, rowIndex);
       }
-      case 4 -> tokenProperty.setGMOnly((Boolean) aValue);
-      case 5 -> tokenProperty.setOwnerOnly((Boolean) aValue);
-      case 6 -> tokenProperty.setDefaultValue((String) aValue);
+      case 5 -> tokenProperty.setGMOnly((Boolean) aValue);
+      case 6 -> tokenProperty.setOwnerOnly((Boolean) aValue);
     }
   }
 
