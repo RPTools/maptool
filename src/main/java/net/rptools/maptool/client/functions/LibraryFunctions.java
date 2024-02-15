@@ -101,7 +101,8 @@ public class LibraryFunctions extends AbstractFunction {
         .thenAccept(
             l -> {
               l.forEach(json::add);
-            });
+            })
+        .get();
 
     return json;
   }
