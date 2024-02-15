@@ -340,7 +340,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.14015.113'
+    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.14475.28'
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.1'
@@ -400,7 +400,7 @@ dependencies {
     implementation 'org.eclipse.jetty:jetty-webapp:9.4.44.v20210927'
     implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.53.v20231009'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.53.v20231009'
+    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.54.v20240208'
     implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
     implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
 
