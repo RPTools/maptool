@@ -340,7 +340,7 @@ repositories {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
-    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.14475.28'
+    forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.14475.38'
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.1'
