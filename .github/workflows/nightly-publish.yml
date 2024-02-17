@@ -1,7 +1,7 @@
-name: Nightly Release
+name: Nightly Release (disabled)
 
 on:
-  schedule:
+  watch: # Change to 'schedule' to re-enable this build
     - cron:  '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
 
 jobs:
