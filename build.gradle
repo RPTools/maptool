@@ -517,7 +517,7 @@ dependencies {
     // eventbus
     implementation 'com.google.guava:guava:33.0.0-jre'
     // compression of messages between client and server
-    implementation 'org.apache.commons:commons-compress:1.25.0'
+    implementation 'org.apache.commons:commons-compress:1.26.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-11'
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.12019'
