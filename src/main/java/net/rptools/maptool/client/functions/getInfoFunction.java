@@ -371,6 +371,10 @@ public class getInfoFunction extends AbstractFunction {
     }
     cinfo.add("tables", tinfo);
 
+    JsonArray ttinfo = new JsonArray();
+    c.getTokenTypes().forEach(ttinfo::add);
+    cinfo.add("token types", ttinfo);
+
     JsonObject llinfo = new JsonObject();
     for (String ltype : c.getLightSourcesMap().keySet()) {
       JsonArray ltinfo = new JsonArray();
