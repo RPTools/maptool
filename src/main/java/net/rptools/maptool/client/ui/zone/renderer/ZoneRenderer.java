@@ -1220,7 +1220,9 @@ public class ZoneRenderer extends JComponent
       timer.start("labels-1.1");
       ScreenPoint sp = ScreenPoint.fromZonePointRnd(this, zp.x, zp.y);
       var dim = flabel.getDimensions(g, label.getLabel());
-      Rectangle bounds = flabel.render(g, (int) sp.x, (int) sp.y, label.getLabel());
+      Rectangle bounds =
+          flabel.render(
+              g, (int) (sp.x - dim.width / 2), (int) (sp.y - dim.height / 2), label.getLabel());
       labelLocationList.add(new LabelLocation(bounds, label));
       timer.stop("labels-1.1");
     }
