@@ -43,6 +43,7 @@ import net.rptools.maptool.client.functions.TokenMoveFunctions;
 import net.rptools.maptool.client.swing.ImageBorder;
 import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.Tool;
@@ -1208,37 +1209,20 @@ public class ZoneRenderer extends JComponent
     final var timer = CodeTimer.get();
 
     timer.start("labels-1");
+    var labelRenderFactory = new FlatImageLabelFactory();
     labelLocationList.clear();
     for (Label label : zone.getLabels()) {
+      var flabel = labelRenderFactory.getMapImageLabel(label);
       ZonePoint zp = new ZonePoint(label.getX(), label.getY());
       if (!zone.isPointVisible(zp, view)) {
         continue;
       }
       timer.start("labels-1.1");
       ScreenPoint sp = ScreenPoint.fromZonePointRnd(this, zp.x, zp.y);
-      Rectangle bounds = null;
-      if (label.isShowBackground()) {
-        bounds =
-            GraphicsUtil.drawBoxedString(
-                g,
-                label.getLabel(),
-                (int) sp.x,
-                (int) sp.y,
-                SwingUtilities.CENTER,
-                GraphicsUtil.GREY_LABEL,
-                label.getForegroundColor());
-      } else {
-        FontMetrics fm = g.getFontMetrics();
-        int strWidth = SwingUtilities.computeStringWidth(fm, label.getLabel());
-
-        int x = (int) (sp.x - strWidth / 2);
-        int y = (int) (sp.y - fm.getAscent());
-
-        g.setColor(label.getForegroundColor());
-        g.drawString(label.getLabel(), x, (int) sp.y);
-
-        bounds = new Rectangle(x, y, strWidth, fm.getHeight());
-      }
+      var dim = flabel.getDimensions(g, label.getLabel());
+      Rectangle bounds =
+          flabel.render(
+              g, (int) (sp.x - dim.width / 2), (int) (sp.y - dim.height / 2), label.getLabel());
       labelLocationList.add(new LabelLocation(bounds, label));
       timer.stop("labels-1.1");
     }
@@ -2113,6 +2097,7 @@ public class ZoneRenderer extends JComponent
     final var timer = CodeTimer.get();
 
     Graphics2D clippedG = g;
+    var imageLabelFactory = new FlatImageLabelFactory();
 
     boolean isGMView = view.isGMView(); // speed things up
 
@@ -2797,54 +2782,32 @@ public class ZoneRenderer extends JComponent
           name += " (" + token.getGMName() + ")";
         }
         if (!view.equals(lastView) || !labelRenderingCache.containsKey(tokId)) {
-          // if ((lastView != null && !lastView.equals(view)) ||
-          // !labelRenderingCache.containsKey(tokId)) {
           boolean hasLabel = false;
 
-          // Calculate image dimensions
-          FontMetrics fm = g.getFontMetrics();
-          Font f = g.getFont();
-          int strWidth = SwingUtilities.computeStringWidth(fm, name);
+          var flatImgLabel = imageLabelFactory.getMapImageLabel(token);
 
-          int width = strWidth + GraphicsUtil.BOX_PADDINGX * 2;
-          int height = fm.getHeight() + GraphicsUtil.BOX_PADDINGY * 2;
-          int labelHeight = height;
-
+          var nameDimension = flatImgLabel.getDimensions(g, name);
+          var labelDimension = new Dimension(0, 0);
           // If token has a label (in addition to name).
-          if (token.getLabel() != null && token.getLabel().trim().length() > 0) {
+          if (token.getLabel() != null && !token.getLabel().trim().isEmpty()) {
             hasLabel = true;
-            height = height * 2; // Double the image height for two boxed strings.
-            int labelWidth =
-                SwingUtilities.computeStringWidth(fm, token.getLabel())
-                    + GraphicsUtil.BOX_PADDINGX * 2;
-            width = Math.max(width, labelWidth);
+            labelDimension = flatImgLabel.getDimensions(g, token.getLabel());
           }
-
-          // Set up the image
-          BufferedImage labelRender = new BufferedImage(width, height, Transparency.TRANSLUCENT);
+          int width = (int) Math.max(nameDimension.getWidth(), labelDimension.getWidth());
+          int height = (int) (nameDimension.getHeight() + labelDimension.getHeight()) + 4;
+          var labelRender = new BufferedImage(width, height, Transparency.TRANSLUCENT);
           Graphics2D gLabelRender = labelRender.createGraphics();
-          gLabelRender.setFont(f); // Match font used in the main graphics context.
-          gLabelRender.setRenderingHints(g.getRenderingHints()); // Match rendering style.
+          gLabelRender.setRenderingHints(g.getRenderingHints());
 
           // Draw name and label to image
           if (hasLabel) {
-            GraphicsUtil.drawBoxedString(
+            flatImgLabel.render(
                 gLabelRender,
-                token.getLabel(),
-                width / 2,
-                height - (labelHeight / 2),
-                SwingUtilities.CENTER,
-                background,
-                foreground);
+                (width - labelDimension.width) / 2,
+                nameDimension.height + 4,
+                token.getLabel());
           }
-          GraphicsUtil.drawBoxedString(
-              gLabelRender,
-              name,
-              width / 2,
-              labelHeight / 2,
-              SwingUtilities.CENTER,
-              background,
-              foreground);
+          flatImgLabel.render(gLabelRender, (width - nameDimension.width) / 2, 0, name);
 
           // Add image to cache
           labelRenderingCache.put(tokId, labelRender);

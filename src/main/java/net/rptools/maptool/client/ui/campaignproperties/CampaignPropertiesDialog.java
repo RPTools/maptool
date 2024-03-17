@@ -132,6 +132,7 @@ public class CampaignPropertiesDialog extends JDialog {
   private void initTokenPropertiesDialog(AbeillePanel panel) {
     tokenPropertiesPanel = new TokenPropertiesManagementPanel();
     panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    tokenPropertiesPanel.prettify();
   }
 
   public JTextField getNewServerTextField() {
@@ -665,7 +666,7 @@ public class CampaignPropertiesDialog extends JDialog {
             <code>
             <font size=4>${syntaxLabelGroupName}<br>
             -------<br>
-            [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
+            [ ${syntaxLabelName} ] : [ ${optionLabelAura} [ ${optionLabelRestriction} ]] [ ${optionLabelIgnoresVBL} ] [ ${optionLabelShape} [ ${optionLabelArc} ${optionLabelWidth} ${optionLabelOffset} ]] [ ${optionLabelScale} ] [ ${optionLabelRange}|${optionLabelColor}|${optionLabelLumens} ]...<sup>1</sup></font><br>
             </code>
             """;
     /*
@@ -722,6 +723,13 @@ public class CampaignPropertiesDialog extends JDialog {
               <td>${optionDescriptionAura}</td>
               <td${alignCellCenter}>${wordUnused}</td>
               <td${alignCellCenter}>aura</td>
+            </tr>
+            <tr>
+              <th>${optionLabelIgnoresVBL}</th>
+              <td${alignCellCenter}>${optionTypeKeyword}</td>
+              <td>${optionDescriptionIgnoresVBL}</td>
+              <td${alignCellCenter}>${wordUnused}</td>
+              <td${alignCellCenter}>ignores-vbl</td>
             </tr>
             <tr>
               <th>${optionLabelRestriction}</th>
@@ -849,6 +857,7 @@ public class CampaignPropertiesDialog extends JDialog {
         """
             <font size=4>${lightExampleGroupName}<br>
             ${lightExampleNameLantern} :  circle 4#ffffaa cone arc=300 7.5#666600 circle 10#000000<sup>1</sup><br>
+            ${lightExampleNameStreetLight} :  cone arc=350 1 10.05#aaaaaa arc=230 10 22.05#444444 arc=220 22 30#000000<br>
             ${lightExampleNameForwardArcAura} : aura owner cone arc=90 25#00ff00<br></code><br>
             <br>
             <font size=4>${lightExampleAurasGroupName}<br>

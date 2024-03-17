@@ -48,9 +48,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeWriter;
 import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.Geometry;
+import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.prep.PreparedGeometryFactory;
 
 public class FogUtil {
   private static final Logger log = LogManager.getLogger(FogUtil.class);
@@ -71,61 +70,98 @@ public class FogUtil {
       AreaTree hillVbl,
       AreaTree pitVbl,
       AreaTree coverVbl) {
-    // We could use the vision envelope instead, but vision geometry tends to be pretty simple.
-    final var visionGeometry = PreparedGeometryFactory.prepare(GeometryUtil.toJts(vision));
+    var timer = CodeTimer.get();
+    timer.start("FogUtil::calculateVisibility");
+    var originCoordinate = new Coordinate(origin.x, origin.y);
 
-    /*
-     * Find the visible area for each topology type independently.
-     *
-     * In principle, we could also combine all the vision blocking segments for all topology types
-     * and run the sweep algorithm once. But this is subject to some pathological cases that JTS
-     * cannot handle. These cases do not exist within a single type of topology, but can arise when
-     * we combine them.
-     */
+    try {
+      timer.start("get vision bounds");
+      Envelope visionBounds;
+      {
+        var awtBounds = vision.getBounds2D();
+        visionBounds =
+            new Envelope(
+                new Coordinate(awtBounds.getMinX(), awtBounds.getMinY()),
+                new Coordinate(awtBounds.getMaxX(), awtBounds.getMaxY()));
+      }
+      timer.stop("get vision bounds");
 
-    var topologies = new EnumMap<Zone.TopologyType, AreaTree>(Zone.TopologyType.class);
-    topologies.put(Zone.TopologyType.WALL_VBL, wallVbl);
-    topologies.put(Zone.TopologyType.HILL_VBL, hillVbl);
-    topologies.put(Zone.TopologyType.PIT_VBL, pitVbl);
-    topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
+      /*
+       * Find the visible area for each topology type independently.
+       *
+       * In principle, we could also combine all the vision blocking segments for all topology types
+       * and run the sweep algorithm once. But this is subject to some pathological cases that JTS
+       * cannot handle. These cases do not exist within a single type of topology, but can arise when
+       * we combine them.
+       */
 
-    List<Geometry> visibleAreas = new ArrayList<>();
+      List<Coordinate[]> visibilityPolygons = new ArrayList<>();
+      var topologies = new EnumMap<Zone.TopologyType, AreaTree>(Zone.TopologyType.class);
+      topologies.put(Zone.TopologyType.WALL_VBL, wallVbl);
+      topologies.put(Zone.TopologyType.HILL_VBL, hillVbl);
+      topologies.put(Zone.TopologyType.PIT_VBL, pitVbl);
+      topologies.put(Zone.TopologyType.COVER_VBL, coverVbl);
+      for (final var topology : topologies.entrySet()) {
 
-    for (final var topology : topologies.entrySet()) {
-      final var solver =
-          new VisibilityProblem(
-              geometryFactory, new Coordinate(origin.getX(), origin.getY()), visionGeometry);
-      final var accumulator =
-          new VisionBlockingAccumulator(geometryFactory, origin, visionGeometry);
-      final var isVisionCompletelyBlocked = accumulator.add(topology.getKey(), topology.getValue());
-      if (!isVisionCompletelyBlocked) {
-        // Vision has been completely blocked by this topology. Short circuit.
-        return new Area();
+        timer.start("get pooled vision blocking set");
+        final var solver = new VisibilityProblem(originCoordinate, visionBounds);
+        timer.stop("get pooled vision blocking set");
+
+        timer.start("accumulate blocking walls");
+        final var accumulator =
+            new VisionBlockingAccumulator(originCoordinate, visionBounds, solver);
+
+        final var isVisionCompletelyBlocked =
+            accumulator.add(topology.getKey(), topology.getValue());
+        timer.stop("accumulate blocking walls");
+        if (!isVisionCompletelyBlocked) {
+          // Vision has been completely blocked by this topology. Short circuit.
+          return new Area();
+        }
+
+        timer.start("calculate visible area");
+        final Coordinate[] visibleArea;
+        try {
+          visibleArea = solver.solve();
+        } catch (Exception e) {
+          log.error("Unexpected error while calculating visible area.", e);
+          // Play it safe and dont consider anything to be visible.
+          return new Area();
+        }
+        timer.stop("calculate visible area");
+
+        timer.start("add visibility polygon");
+        if (visibleArea != null) {
+          visibilityPolygons.add(visibleArea);
+        }
+        timer.stop("add visibility polygon");
       }
 
-      for (var string : accumulator.getVisionBlockingSegments()) {
-        solver.add(string);
+      if (visibilityPolygons.isEmpty()) {
+        return vision;
       }
 
-      final var visibleArea = solver.solve();
-      if (visibleArea != null) {
-        visibleAreas.add(visibleArea);
-      }
-    }
-
-    // We have to intersect all the results in order to find the true remaining visible area.
-    vision = new Area(vision);
-    if (!visibleAreas.isEmpty()) {
+      // We have to intersect all the results in order to find the true remaining visible area.
+      timer.start("clone existing vision");
+      vision = new Area(vision);
+      timer.stop("clone existing vision");
+      timer.start("combine visibility polygons with vision");
       // We intersect in AWT space because JTS can be really finicky about intersection precision.
       var shapeWriter = new ShapeWriter();
-      for (final var visibleArea : visibleAreas) {
-        var area = new Area(shapeWriter.toShape(visibleArea));
+      for (var visibilityPolygon : visibilityPolygons) {
+        // Even though linear ring is just the boundary, the Area constructor uses the entire
+        // enclosed region.
+        var area =
+            new Area(shapeWriter.toShape(geometryFactory.createLinearRing(visibilityPolygon)));
         vision.intersect(area);
       }
-    }
+      timer.stop("combine visibility polygons with vision");
 
-    // For simplicity, this catches some of the edge cases
-    return vision;
+      // For simplicity, this catches some of the edge cases
+      return vision;
+    } finally {
+      timer.stop("FogUtil::calculateVisibility");
+    }
   }
 
   /**
@@ -360,7 +396,7 @@ public class FogUtil {
 
             final Token tokenClone = new Token(token);
             final ZoneView zoneView = renderer.getZoneView();
-            Area visionArea = new Area();
+            final var visibleAreas = new ArrayList<Area>();
 
             // Lee: get path according to zone's way point exposure toggle...
             List<? extends AbstractPoint> processPath =
@@ -371,6 +407,7 @@ public class FogUtil {
             int stepCount = processPath.size();
             log.debug("Path size = " + stepCount);
 
+            timer.start("Get visible areas");
             Consumer<ZonePoint> revealAt =
                 zp -> {
                   tokenClone.setX(zp.x);
@@ -379,8 +416,7 @@ public class FogUtil {
                   Area currVisionArea =
                       zoneView.getVisibleArea(tokenClone, renderer.getPlayerView());
                   if (currVisionArea != null) {
-                    visionArea.add(currVisionArea);
-                    meta.addToExposedAreaHistory(currVisionArea);
+                    visibleAreas.add(currVisionArea);
                   }
 
                   zoneView.flush(tokenClone);
@@ -397,15 +433,31 @@ public class FogUtil {
               assert finalCell instanceof ZonePoint;
               revealAt.accept((ZonePoint) finalCell);
             }
+            timer.stop("Get visible areas");
 
-            timer.stop("exposeLastPath-" + token.getName());
+            timer.start("Union visible areas");
+            Area visionArea = GeometryUtil.destructiveUnion(visibleAreas);
+            timer.stop("Union visible areas");
+
+            timer.start("Add to token exposed area");
+            meta.addToExposedAreaHistory(visionArea);
+            timer.stop("Add to token exposed area");
+
             renderer.flush(tokenClone);
 
             filteredToks.clear();
             filteredToks.add(token.getId());
+
+            timer.start("Update zone");
             zone.putToken(token);
+            timer.stop("Update zone");
+
+            timer.start("Send results");
             MapTool.serverCommand().exposeFoW(zone.getId(), visionArea, filteredToks);
             MapTool.serverCommand().updateExposedAreaMeta(zone.getId(), exposedGUID, meta);
+            timer.stop("Send results");
+
+            timer.stop("exposeLastPath-" + token.getName());
           }
         });
   }
