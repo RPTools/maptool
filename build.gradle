@@ -429,7 +429,7 @@ dependencies {
     // themes
     implementation 'com.formdev:flatlaf:3.3'
     implementation 'com.formdev:flatlaf-intellij-themes:3.3'
-    implementation 'com.formdev:flatlaf-extras:3.3'
+    implementation 'com.formdev:flatlaf-extras:3.4'
     implementation 'com.github.weisj:jsvg:1.4.0'
     implementation 'com.formdev:flatlaf-jide-oss:3.3'
 
