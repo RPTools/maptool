@@ -17,55 +17,6 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Graphics2D;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.awt.Image;
-import java.awt.Insets;
-import java.awt.Rectangle;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
-import java.awt.event.FocusEvent;
-import java.awt.event.FocusListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import javax.swing.Box;
-import javax.swing.ButtonGroup;
-import javax.swing.Icon;
-import javax.swing.ImageIcon;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JRadioButton;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.ListCellRenderer;
-import javax.swing.Scrollable;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
@@ -82,6 +33,20 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
+
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.math.BigDecimal;
+import java.util.List;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 // @formatter:off
 // Jamz: Had to remove <pre> tags and add formatter:off due to Spotless 3.x error, still not fixed
@@ -173,10 +138,10 @@ public class InputFunction extends AbstractFunction {
 
       defaultOptions = new OptionMap();
       Pattern pattern =
-          Pattern.compile("(\\w+)=([\\w-,]+)\\;"); // no spaces allowed, semicolon required
+          Pattern.compile("(\\w+)=([\\w-,]+);"); // no spaces allowed, semicolon required
       Matcher matcher = pattern.matcher(nameval);
       while (matcher.find()) {
-        defaultOptions.put(matcher.group(1).toUpperCase(), matcher.group(2).toUpperCase());
+        defaultOptions.put(matcher.group(1).toUpperCase(Locale.ROOT), matcher.group(2).toUpperCase(Locale.ROOT));
       }
     }
 
@@ -201,7 +166,7 @@ public class InputFunction extends AbstractFunction {
      * @return the default value for the passed in option.
      */
     public String getDefault(String option) {
-      return defaultOptions.get(option.toUpperCase());
+      return defaultOptions.get(option.toUpperCase(Locale.ROOT));
     }
 
     /**
