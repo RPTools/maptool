@@ -17,6 +17,19 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import de.muntjak.tinylookandfeel.TinyComboBoxButton;
+import java.awt.*;
+import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.awt.image.ImageObserver;
+import java.math.BigDecimal;
+import java.util.*;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.InputFunction.InputType.OptionException;
@@ -33,20 +46,6 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
 import org.apache.commons.lang.StringUtils;
-
-import javax.swing.*;
-import javax.swing.border.EmptyBorder;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.BufferedImage;
-import java.awt.image.ImageObserver;
-import java.math.BigDecimal;
-import java.util.List;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 // @formatter:off
 // Jamz: Had to remove <pre> tags and add formatter:off due to Spotless 3.x error, still not fixed
@@ -141,7 +140,8 @@ public class InputFunction extends AbstractFunction {
           Pattern.compile("(\\w+)=([\\w-,]+);"); // no spaces allowed, semicolon required
       Matcher matcher = pattern.matcher(nameval);
       while (matcher.find()) {
-        defaultOptions.put(matcher.group(1).toUpperCase(Locale.ROOT), matcher.group(2).toUpperCase(Locale.ROOT));
+        defaultOptions.put(
+            matcher.group(1).toUpperCase(Locale.ROOT), matcher.group(2).toUpperCase(Locale.ROOT));
       }
     }
 
