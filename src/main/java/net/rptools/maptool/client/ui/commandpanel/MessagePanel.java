@@ -71,6 +71,9 @@ public class MessagePanel extends JPanel {
     textPane.setEditorKit(new MessagePanelEditorKit());
     if (ThemeSupport.shouldUseThemeColorsForChat()) {
       textPane.setUI(new javax.swing.plaf.basic.BasicEditorPaneUI());
+    } else {
+      textPane.setBackground(new Color(253, 253, 254));
+      textPane.setForeground(Color.BLACK);
     }
     textPane.addComponentListener(
         new ComponentListener() {
@@ -149,13 +152,19 @@ public class MessagePanel extends JPanel {
     new MapToolEventBus().getMainEventBus().register(this);
     // Create the style
     StyleSheet style = document.getStyleSheet();
-    var defColor =
+    var fgColour =
         ThemeSupport.shouldUseThemeColorsForChat()
             ? MessageUtil.getDefaultForegroundHex()
             : "black";
+    var bgColour =
+        ThemeSupport.shouldUseThemeColorsForChat()
+            ? MessageUtil.getDefaultBackgroundHex()
+            : "#fdfdfe";
     var mainCss =
-        "body {color: "
-            + defColor
+        "body {background-color: "
+            + bgColour
+            + "; color: "
+            + fgColour
             + " ; font-family: sans-serif; font-size: "
             + AppPreferences.getFontSize()
             + "pt}";
