@@ -432,6 +432,8 @@ public class RessourceManager {
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_PIT_ON, ROD_ICONS + "ribbon/Draw Pit VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_OFF, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
           put(Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON, ROD_ICONS + "ribbon/Draw Wall VBL.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_OFF, ROD_ICONS + "ribbon/Draw Cover VBL.svg");
+          put(Icons.TOOLBAR_TOPOLOGY_TYPE_COVER_ON, ROD_ICONS + "ribbon/Draw Cover VBL.svg");
           put(Icons.TOOLBAR_VOLUME_OFF, ROD_ICONS + "ribbon/Mute - OFF.svg");
           put(Icons.TOOLBAR_VOLUME_ON, ROD_ICONS + "ribbon/Mute - ON.svg");
           put(Icons.TOOLBAR_ZONE, ROD_ICONS + "ribbon/Select Map.svg");
