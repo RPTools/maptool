@@ -1286,11 +1286,21 @@ public class AppPreferences {
   }
 
   public static void setFrameRateCap(int cap) {
+    if (cap <= 0) {
+      // The provided value is invalid. Change to default instead.
+      cap = DEFAULT_FRAME_RATE_CAP;
+    }
     prefs.putInt(KEY_FRAME_RATE_CAP, cap);
   }
 
   public static int getFrameRateCap() {
-    return prefs.getInt(KEY_FRAME_RATE_CAP, DEFAULT_FRAME_RATE_CAP);
+    int result = prefs.getInt(KEY_FRAME_RATE_CAP, DEFAULT_FRAME_RATE_CAP);
+    if (result <= 0) {
+      // An invalid value is stored. Fix that.
+      result = DEFAULT_FRAME_RATE_CAP;
+      setFrameRateCap(result);
+    }
+    return result;
   }
 
   public static void setUpnpDiscoveryTimeout(int timeout) {

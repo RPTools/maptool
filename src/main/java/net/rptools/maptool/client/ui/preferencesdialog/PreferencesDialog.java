@@ -939,14 +939,20 @@ public class PreferencesDialog extends JDialog {
               protected void storeNumericValue(Integer value) {
                 AppPreferences.setFrameRateCap(value);
 
+                // AppPreferences may have rejected the value, so read it back.
+                final var cap = AppPreferences.getFrameRateCap();
                 for (final var renderer : MapTool.getFrame().getZoneRenderers()) {
-                  renderer.setFrameRateCap(value);
+                  renderer.setFrameRateCap(cap);
                 }
               }
 
               @Override
               protected Integer convertString(String value) throws ParseException {
-                return StringUtil.parseInteger(value);
+                final var result = StringUtil.parseInteger(value);
+                if (result <= 0) {
+                  throw new ParseException("Frame rate cap must be positive", 0);
+                }
+                return result;
               }
             });
 
