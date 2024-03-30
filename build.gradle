@@ -365,7 +365,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.9.0'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.10.1'
     // Specialized collections: ReferenceMap, LinkedMap.
     implementation 'org.apache.commons:commons-collections4:4.4'
     // Various file utilities
