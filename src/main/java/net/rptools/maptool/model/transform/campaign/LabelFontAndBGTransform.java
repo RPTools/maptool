@@ -28,10 +28,22 @@ public class LabelFontAndBGTransform implements ModelVersionTransformation {
   /** The end label tag that we want to replace. */
   private static final String endLabelTag = "</net.rptools.maptool.model.Label>";
 
+  /** The pattern that we want o match for 0 foreground color. */
+  private static final String replace0ForegroundTags =
+      "<foregroundColor>0</foregroundColor>[^<]*" + endLabelTag;
+
+  /**
+   * The foreground color that we want to use for the label where the legacy foreground color is 0.
+   */
+  private static final Color legacyForegroundColor = new Color(0.0f, 0.0f, 0.0f, 1.0f);
+
+  private static final String foreground0Replacement =
+      "<foregroundColor>" + legacyForegroundColor.getRGB() + "</foregroundColor>\n" + endLabelTag;
+
   /** The background color that we want to use for the new label tag. */
   private static final Color legacyBackgroundColor = new Color(0.82f, 0.82f, 0.82f, 1.0f);
 
-  /** The replacement string that we want to use for the end label tag. */
+  /** The replacement string that we want to use for the new label tag. */
   private static final String replacement =
       "<backgroundColor>"
           + legacyBackgroundColor.getRGB()
@@ -54,8 +66,13 @@ public class LabelFontAndBGTransform implements ModelVersionTransformation {
   /** The pattern that we want to use to match the end label tag. */
   private static final Pattern pattern = Pattern.compile(endLabelTag, Pattern.DOTALL);
 
+  /** The pattern that we want to use to match the legacy foreground color of 0. */
+  private static final Pattern replace0Foreground =
+      Pattern.compile(replace0ForegroundTags, Pattern.DOTALL);
+
   @Override
   public String transform(String xml) {
-    return pattern.matcher(xml).replaceAll(replacement);
+    String replace0 = replace0Foreground.matcher(xml).replaceAll(foreground0Replacement);
+    return pattern.matcher(replace0).replaceAll(replacement);
   }
 }
