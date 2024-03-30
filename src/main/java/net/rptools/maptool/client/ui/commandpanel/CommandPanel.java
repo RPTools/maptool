@@ -36,6 +36,7 @@ import net.rptools.maptool.client.ui.chat.SmileyChatTranslationRuleGroup;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.theme.ThemeSupport;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -82,7 +83,6 @@ public class CommandPanel extends JPanel {
   public CommandPanel() {
     setLayout(new BorderLayout());
     setBorder(BorderFactory.createLineBorder(Color.gray));
-
     add(BorderLayout.SOUTH, createSouthPanel());
     add(BorderLayout.CENTER, getMessagePanel());
     initializeSmilies();
@@ -607,6 +607,10 @@ public class CommandPanel extends JPanel {
       commandTextArea.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
       commandTextArea.setPreferredSize(new Dimension(50, 40)); // XXX should be resizable
       commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.getFontSize()));
+      if (!ThemeSupport.shouldUseThemeColorsForChat()) {
+        commandTextArea.setBackground(Color.WHITE);
+        commandTextArea.setForeground(Color.BLACK);
+      }
       commandTextArea.addKeyListener(new ChatTypingListener());
       SwingUtil.useAntiAliasing(commandTextArea);
 
