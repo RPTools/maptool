@@ -2,13 +2,13 @@ name: Copy Labels to PR
 on:
   pull_request:
     types: [opened]
-  permissions:
-    contents: read
-    issues: read
-    pull-requests: write
 
 jobs:
   copy-labels:
+    permissions:
+      contents: read
+      issues: read
+      pull-requests: write
     runs-on: ubuntu-latest
     name: Copy labels from linked issues
     steps:
