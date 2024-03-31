@@ -29,8 +29,8 @@ plugins {
 defaultTasks 'clean', 'build'
 
 java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
+    sourceCompatibility = JavaVersion.VERSION_22
+    targetCompatibility = JavaVersion.VERSION_22
 }
 
 def javaArgs = [
@@ -283,7 +283,7 @@ runtime {
                     '--win-upgrade-uuid', winUpgradeUUID
             ]
             targetPlatform('win') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_windows_hotspot_21.0.1_12.zip');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin22-binaries/releases/download/jdk-22%2B36/OpenJDK22U-jdk_x64_windows_hotspot_22_36.zip');
             }
         }
 
@@ -294,7 +294,7 @@ runtime {
                     '--mac-package-name', project.name + developerRelease
             ]
             targetPlatform('mac') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_mac_hotspot_21.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin22-binaries/releases/download/jdk-22%2B36/OpenJDK22U-jdk_x64_mac_hotspot_22_36.tar.gz');
                 jvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
             }
         }
@@ -320,7 +320,7 @@ runtime {
                 ]
             }
             targetPlatform('linux') {
-                jdkHome = jdkDownload('https://github.com/adoptium/temurin21-binaries/releases/download/jdk-21.0.1%2B12/OpenJDK21U-jdk_x64_linux_hotspot_21.0.1_12.tar.gz');
+                jdkHome = jdkDownload('https://github.com/adoptium/temurin22-binaries/releases/download/jdk-22%2B36/OpenJDK22U-jdk_x64_linux_hotspot_22_36.tar.gz');
             }
         }
     }
