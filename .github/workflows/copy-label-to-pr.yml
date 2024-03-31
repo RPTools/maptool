@@ -1,6 +1,11 @@
+name: Copy Labels to PR
 on:
   pull_request:
     types: [opened]
+  permissions:
+    contents: read
+    issues: read
+    pull-requests: write
 
 jobs:
   copy-labels:
