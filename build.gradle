@@ -431,7 +431,7 @@ dependencies {
     implementation 'com.formdev:flatlaf-intellij-themes:3.3'
     implementation 'com.formdev:flatlaf-extras:3.4.1'
     implementation 'com.github.weisj:jsvg:1.4.0'
-    implementation 'com.formdev:flatlaf-jide-oss:3.3'
+    implementation 'com.formdev:flatlaf-jide-oss:3.4.1'
 
     // JS support for macros
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'
