@@ -17,10 +17,10 @@ package net.rptools.clientserver.simple.server;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
-import net.rptools.maptool.server.Handshake;
-import net.rptools.maptool.server.HandshakeObserver;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

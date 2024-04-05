@@ -12,9 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.server;
+package net.rptools.clientserver.simple.server;
 
-public interface HandshakeObserver {
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.connection.Connection;
 
-  void onCompleted(Handshake handshake);
+public interface HandshakeProvider {
+  Handshake getConnectionHandshake(Connection conn);
+
+  void releaseHandshake(Connection conn);
 }

@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.server;
+package net.rptools.clientserver.simple;
 
 import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.connection.Connection;

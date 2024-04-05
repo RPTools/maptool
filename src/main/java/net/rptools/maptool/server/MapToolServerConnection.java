@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.Server;
