@@ -22,8 +22,6 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.server.ServerConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
@@ -31,12 +29,17 @@ import org.java_websocket.handshake.ServerHandshake;
 
 public class WebRTCConnection extends AbstractConnection
     implements Connection, PeerConnectionObserver, RTCDataChannelObserver {
+  public interface Listener {
+    void onLoginError();
+  }
+
   private static final Logger log = LogManager.getLogger(WebRTCConnection.class);
 
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
-  private final ServerConfig config;
+  private final String serverName;
   private final String id;
   private final Gson gson = new Gson();
+  private final Listener listener;
   private WebSocketClient signalingClient;
   // only set on server side
   private WebRTCServer server;
@@ -49,9 +52,10 @@ public class WebRTCConnection extends AbstractConnection
   private Thread handleDisconnect;
 
   // used from client side
-  public WebRTCConnection(String id, ServerConfig config) {
+  public WebRTCConnection(String id, String serverName, Listener listener) {
     this.id = id;
-    this.config = config;
+    this.serverName = serverName;
+    this.listener = listener;
     init();
   }
 
@@ -59,7 +63,8 @@ public class WebRTCConnection extends AbstractConnection
   public WebRTCConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
     this.id = message.source;
     this.server = webRTCServer;
-    this.config = server.getConfig();
+    this.serverName = server.getName();
+    this.listener = () -> {};
     this.signalingClient = server.getSignalingClient();
     init();
 
@@ -90,7 +95,7 @@ public class WebRTCConnection extends AbstractConnection
                   @Override
                   public void onSuccess() {
                     var msg = new AnswerMessageDto();
-                    msg.source = server.getConfig().getServerName();
+                    msg.source = serverName;
                     msg.destination = getId();
                     msg.answer = description;
                     sendSignalingMessage(gson.toJson(msg));
@@ -116,9 +121,11 @@ public class WebRTCConnection extends AbstractConnection
 
   private String getSource() {
     // on server side the id is already user@server
-    if (isServerSide()) return getId();
+    if (isServerSide()) {
+      return getId();
+    }
 
-    return getId() + "@" + config.getServerName();
+    return getId() + "@" + serverName;
   }
 
   private void startSignaling() {
@@ -147,7 +154,9 @@ public class WebRTCConnection extends AbstractConnection
           public void onClose(int code, String reason, boolean remote) {
             lastError = "WebSocket closed: (" + code + ") " + reason;
             log.info(prefix() + lastError);
-            if (!isAlive()) fireDisconnectAsync();
+            if (!isAlive()) {
+              fireDisconnectAsync();
+            }
           }
 
           @Override
@@ -208,7 +217,9 @@ public class WebRTCConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    if (peerConnection == null) return false;
+    if (peerConnection == null) {
+      return false;
+    }
 
     return switch (peerConnection.getConnectionState()) {
       case CONNECTED, DISCONNECTED -> true;
@@ -269,7 +280,7 @@ public class WebRTCConnection extends AbstractConnection
 
   private void onLogin(LoginMessageDto message) {
     if (!message.success) {
-      MapTool.showError("Handshake.msg.playerAlreadyConnected");
+      listener.onLoginError();
       return;
     }
 
@@ -293,7 +304,7 @@ public class WebRTCConnection extends AbstractConnection
                     var msg = new OfferMessageDto();
                     msg.offer = description;
                     msg.source = getSource();
-                    msg.destination = config.getServerName();
+                    msg.destination = serverName;
                     sendSignalingMessage(gson.toJson(msg));
                   }
 
@@ -366,10 +377,10 @@ public class WebRTCConnection extends AbstractConnection
     var msg = new CandidateMessageDto();
 
     if (isServerSide()) {
-      msg.source = config.getServerName();
+      msg.source = serverName;
       msg.destination = getSource();
     } else {
-      msg.destination = config.getServerName();
+      msg.destination = serverName;
       msg.source = getSource();
     }
     msg.candidate = candidate;
@@ -460,7 +471,9 @@ public class WebRTCConnection extends AbstractConnection
       case OPEN -> {
         // connection established we don't need the signaling server anymore
         // for now disabled. We may get additional ice candidates.
-        if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
+        if (!isServerSide() && signalingClient.isOpen()) {
+          signalingClient.close();
+        }
 
         sendThread.start();
       }
@@ -483,7 +496,9 @@ public class WebRTCConnection extends AbstractConnection
     }
 
     var message = readMessage(channelBuffer.data);
-    if (message != null) dispatchCompressedMessage(id, message);
+    if (message != null) {
+      dispatchCompressedMessage(id, message);
+    }
   }
 
   private void fireDisconnectAsync() {
@@ -491,7 +506,9 @@ public class WebRTCConnection extends AbstractConnection
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) server.clearClients();
+              if (isServerSide()) {
+                server.clearClients();
+              }
             },
             "WebRTCConnection.handleDisconnect");
     handleDisconnect.start();
@@ -500,9 +517,13 @@ public class WebRTCConnection extends AbstractConnection
   @Override
   public void close() {
     // signalingClient should be closed if connection was established
-    if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
+    if (!isServerSide() && signalingClient.isOpen()) {
+      signalingClient.close();
+    }
 
-    if (sendThread.stopRequested) return;
+    if (sendThread.stopRequested) {
+      return;
+    }
 
     sendThread.requestStop();
     if (peerConnection != null) {
