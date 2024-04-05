@@ -15,11 +15,9 @@
 package net.rptools.maptool.server;
 
 import java.util.concurrent.ExecutionException;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
-import net.rptools.maptool.model.player.Player;
 
-public interface Handshake extends MessageHandler {
+public interface Handshake {
 
   /**
    * Returns if the handshake has been successful or not.
@@ -49,13 +47,6 @@ public interface Handshake extends MessageHandler {
    * @return the exception that occurred during the processing of the handshake.
    */
   Exception getException();
-
-  /**
-   * Returns the player associated with the handshake.
-   *
-   * @return the player associated with the handshake.
-   */
-  Player getPlayer();
 
   /**
    * Adds an observer to the handshake process.

@@ -144,7 +144,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
     return exception;
   }
 
-  @Override
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
   public synchronized Player getPlayer() {
     return player;
   }

@@ -45,7 +45,6 @@ import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
@@ -402,11 +401,6 @@ public class ClientHandshake implements Handshake, MessageHandler {
   @Override
   public Exception getException() {
     return exception;
-  }
-
-  @Override
-  public Player getPlayer() {
-    return player;
   }
 
   private void closeEasyConnectDialog() {

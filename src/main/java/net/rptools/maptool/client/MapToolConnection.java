@@ -21,7 +21,6 @@ import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.ClientHandshake;
-import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.proto.Message;
 import org.apache.logging.log4j.LogManager;
@@ -37,7 +36,7 @@ public class MapToolConnection {
 
   private final LocalPlayer player;
   private Connection connection;
-  private Handshake handshake;
+  private ClientHandshake handshake;
   private Runnable onCompleted;
 
   public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
