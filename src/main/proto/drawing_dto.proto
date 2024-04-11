@@ -126,8 +126,7 @@ message LineCellTemplateDto {
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
-  string quadrant = 7;
-  IntPointDto path_vertex = 8;
+  IntPointDto path_vertex = 7;
 }
 
 message RadiusCellTemplateDto {

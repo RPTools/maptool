@@ -141,9 +141,6 @@ public interface Drawable {
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
-        if (!dto.getQuadrant().isEmpty()) {
-          drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
-        }
         var pathVertex = dto.getPathVertex();
         drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
         if (dto.hasName()) {

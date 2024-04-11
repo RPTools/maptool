@@ -19,13 +19,11 @@ import java.awt.Paint;
 import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import javax.swing.SwingUtilities;
-import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
 import net.rptools.maptool.model.drawing.LineCellTemplate;
 import net.rptools.maptool.model.drawing.Pen;
 
@@ -173,7 +171,6 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
   protected void handleMouseMovement(MouseEvent e) {
     // Setting anchor point?
     LineCellTemplate lt = (LineCellTemplate) template;
-    ZonePoint pathVertex = lt.getPathVertex();
     ZonePoint vertex = lt.getVertex();
 
     if (!anchorSet) {
@@ -189,38 +186,21 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
       template.setRadius(getRadiusAtMouse(e));
       controlOffset = null;
 
-      // The path vertex remains null until it is set the first time.
-      if (pathVertex == null) {
-        pathVertex = new ZonePoint(vertex.x, vertex.y);
-        lt.setPathVertex(pathVertex);
-      } // endif
-      if (setCellAtMouse(e, pathVertex)) lt.clearPath();
+      ZonePoint pathVertex = getCellAtMouse(e);
+      lt.setPathVertex(pathVertex);
+      renderer.repaint();
 
       // Let control move the path anchor
     } else if (SwingUtil.isControlDown(e)) {
+      ZonePoint pathVertex = lt.getPathVertex();
       handleControlOffset(e, pathVertex);
+      lt.setPathVertex(pathVertex);
 
       // Set the final radius
     } else {
       template.setRadius(getRadiusAtMouse(e));
       renderer.repaint();
       controlOffset = null;
-      return;
-    } // endif
-
-    // Quadrant change?
-    if (pathVertex != null) {
-      ZonePoint mouse = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-      int dx = mouse.x - vertex.x;
-      int dy = mouse.y - vertex.y;
-      AbstractTemplate.Quadrant quadrant =
-          (dx < 0)
-              ? (dy < 0 ? Quadrant.NORTH_WEST : Quadrant.SOUTH_WEST)
-              : (dy < 0 ? Quadrant.NORTH_EAST : Quadrant.SOUTH_EAST);
-      if (quadrant != lt.getQuadrant()) {
-        lt.setQuadrant(quadrant);
-        renderer.repaint();
-      } // endif
     } // endif
   }
 }
