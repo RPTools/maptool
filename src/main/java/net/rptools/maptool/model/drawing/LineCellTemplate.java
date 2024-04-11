@@ -57,9 +57,6 @@ public class LineCellTemplate extends AbstractTemplate {
    */
   private String quadrant = null;
 
-  /** Flag used to determine mouse position relative to vertex position */
-  private boolean mouseSlopeGreater;
-
   public LineCellTemplate() {}
 
   public LineCellTemplate(GUID id) {
@@ -357,24 +354,6 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   /**
-   * Get the mouseSlopeGreater for this LineTemplate.
-   *
-   * @return Returns the current value of mouseSlopeGreater.
-   */
-  public boolean isMouseSlopeGreater() {
-    return mouseSlopeGreater;
-  }
-
-  /**
-   * Set the value of mouseSlopeGreater for this LineTemplate.
-   *
-   * @param aMouseSlopeGreater The mouseSlopeGreater to set.
-   */
-  public void setMouseSlopeGreater(boolean aMouseSlopeGreater) {
-    mouseSlopeGreater = aMouseSlopeGreater;
-  }
-
-  /**
    * @return Getter for path
    */
   public List<CellPoint> getPath() {
@@ -504,8 +483,7 @@ public class LineCellTemplate extends AbstractTemplate {
         .setLayer(getLayer().name())
         .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(getVertex().toDto())
-        .setMouseSlopeGreater(isMouseSlopeGreater());
+        .setVertex(getVertex().toDto());
 
     if (getQuadrant() != null) {
       dto.setQuadrant(getQuadrant().name());

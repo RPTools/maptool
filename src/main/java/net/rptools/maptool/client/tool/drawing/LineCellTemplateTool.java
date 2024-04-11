@@ -196,26 +196,6 @@ public class LineCellTemplateTool extends RadiusCellTemplateTool {
       } // endif
       if (setCellAtMouse(e, pathVertex)) lt.clearPath();
 
-      // Determine which of the extra squares are used on diagonals
-      double dx = pathVertex.x - vertex.x;
-      double dy = pathVertex.y - vertex.y;
-      if (dx != 0 && dy != 0) { // Ignore straight lines
-        boolean mouseSlopeGreater = false;
-        double m = Math.abs(dy / dx);
-        double edx = e.getX() - vertex.x;
-        double edy = e.getY() - vertex.y;
-        if (edx != 0 && edy != 0) { // Handle straight lines differently
-          double em = Math.abs(edy / edx);
-          mouseSlopeGreater = em > m;
-        } else if (edx == 0) {
-          mouseSlopeGreater = true;
-        } // endif
-        if (mouseSlopeGreater != lt.isMouseSlopeGreater()) {
-          lt.setMouseSlopeGreater(mouseSlopeGreater);
-          renderer.repaint();
-        } // endif
-      } // endif
-
       // Let control move the path anchor
     } else if (SwingUtil.isControlDown(e)) {
       handleControlOffset(e, pathVertex);
