@@ -112,20 +112,9 @@ public class LineCellTemplate extends AbstractTemplate {
     if (!noPaint[3]) paintCloseHorizontalBorder(g, xOff, yOff, gridSize, getQuadrant());
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D, boolean,
-   *     boolean)
-   */
   @Override
-  protected void paint(Graphics2D g, boolean border, boolean area) {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-      return;
-    }
-    // Need to paint? We need a line and to translate the painting
-    if (pathVertex == null) {
-      return;
-    }
-    if (getRadius() == 0) {
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    if (zone == null) {
       return;
     }
     final var path = getPath();
@@ -134,7 +123,7 @@ public class LineCellTemplate extends AbstractTemplate {
     }
 
     // Paint each element in the path
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ListIterator<CellPoint> i = path.listIterator();
     while (i.hasNext()) {
       CellPoint p = i.next();

@@ -47,12 +47,8 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
     this.id = id;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see maptool.model.drawing.Drawable#draw(java.awt.Graphics2D, maptool.model.drawing.Pen)
-   */
-  public void draw(Graphics2D g, Pen pen) {
+  @Override
+  public void draw(Zone zone, Graphics2D g, Pen pen) {
     if (pen == null) {
       pen = Pen.DEFAULT;
     }
@@ -72,7 +68,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
         // **** Legacy support for 1.1
         g.setColor(new Color(pen.getBackgroundColor()));
       }
-      drawBackground(g);
+      drawBackground(zone, g);
     }
     if (pen.getForegroundMode() == Pen.MODE_SOLID) {
       if (pen.getPaint() != null) {
@@ -81,15 +77,15 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
         // **** Legacy support for 1.1
         g.setColor(new Color(pen.getColor()));
       }
-      draw(g);
+      draw(zone, g);
     }
     g.setComposite(oldComposite);
     g.setStroke(oldStroke);
   }
 
-  protected abstract void draw(Graphics2D g);
+  protected abstract void draw(Zone zone, Graphics2D g);
 
-  protected abstract void drawBackground(Graphics2D g);
+  protected abstract void drawBackground(Zone zone, Graphics2D g);
 
   @VisibleForTesting
   protected Campaign getCampaign() {

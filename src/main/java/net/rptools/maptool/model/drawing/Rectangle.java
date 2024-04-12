@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.RectangleDrawableDto;
@@ -85,7 +86,7 @@ public class Rectangle extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 
@@ -99,7 +100,7 @@ public class Rectangle extends AbstractDrawing {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 

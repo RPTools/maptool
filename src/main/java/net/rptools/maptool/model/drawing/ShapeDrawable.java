@@ -20,6 +20,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.ShapeDrawableDto;
@@ -77,14 +78,14 @@ public class ShapeDrawable extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     Object oldAA = applyAA(g);
     g.draw(shape);
     restoreAA(g, oldAA);
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     Object oldAA = applyAA(g);
     g.fill(shape);
     restoreAA(g, oldAA);

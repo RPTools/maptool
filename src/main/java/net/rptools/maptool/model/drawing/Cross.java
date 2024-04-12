@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.CrossDrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
@@ -86,7 +87,8 @@ public class Cross extends AbstractDrawing {
     return endPoint;
   }
 
-  protected void draw(Graphics2D g) {
+  @Override
+  protected void draw(Zone zone, Graphics2D g) {
 
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
@@ -104,7 +106,8 @@ public class Cross extends AbstractDrawing {
     g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
   }
 
-  protected void drawBackground(Graphics2D g) {
+  @Override
+  protected void drawBackground(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 

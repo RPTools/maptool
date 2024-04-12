@@ -25,6 +25,7 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
@@ -110,7 +111,7 @@ public class LineSegment extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     width = ((BasicStroke) g.getStroke()).getLineWidth();
     squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
     Area area = getArea();
@@ -118,7 +119,7 @@ public class LineSegment extends AbstractDrawing {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     // do nothing
   }
 

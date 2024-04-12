@@ -30,7 +30,7 @@ import org.apache.logging.log4j.LogManager;
  */
 public interface Drawable {
 
-  void draw(Graphics2D g, Pen pen);
+  void draw(Zone zone, Graphics2D g, Pen pen);
 
   java.awt.Rectangle getBounds();
 

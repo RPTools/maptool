@@ -126,24 +126,18 @@ public class BurstTemplate extends RadiusTemplate {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
-   */
   @Override
-  protected void draw(Graphics2D g) {
-    renderer.draw(g);
-    vertexRenderer.draw(g);
+  protected void draw(Zone zone, Graphics2D g) {
+    renderer.draw(zone, g);
+    vertexRenderer.draw(zone, g);
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
-   */
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     Composite old = g.getComposite();
     if (old != AlphaComposite.Clear)
       g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-    renderer.drawBackground(g);
+    renderer.drawBackground(zone, g);
     g.setComposite(old);
   }
 

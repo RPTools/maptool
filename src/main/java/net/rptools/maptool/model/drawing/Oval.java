@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.OvalDrawableDto;
@@ -40,7 +41,7 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 
@@ -51,7 +52,7 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 

@@ -23,6 +23,7 @@ import javax.swing.CellRendererPane;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
@@ -78,11 +79,7 @@ public class DrawnLabel extends AbstractDrawing {
     return font;
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.drawing.Pen)
-   */
-  public void draw(Graphics2D aG) {
+  public void draw(Zone zone, Graphics2D aG) {
     if (renderer == null) {
       renderer = new CellRendererPane();
       textPane = DrawnTextTool.createTextPane(bounds, null, font);
@@ -92,7 +89,7 @@ public class DrawnLabel extends AbstractDrawing {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {}
+  protected void drawBackground(Zone zone, Graphics2D g) {}
 
   /**
    * @see net.rptools.maptool.model.drawing.Drawable#getBounds()

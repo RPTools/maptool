@@ -117,7 +117,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     AffineTransform transform = getPaintTransform(renderer);
     AffineTransform oldTransform = g.getTransform();
     g.transform(transform);
-    drawing.draw(g, pen);
+    drawing.draw(renderer.getZone(), g, pen);
     g.setTransform(oldTransform);
   }
 

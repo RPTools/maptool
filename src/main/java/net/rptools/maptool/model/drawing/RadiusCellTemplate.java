@@ -150,20 +150,13 @@ public class RadiusCellTemplate extends AbstractTemplate {
     }
   }
 
-  /**
-   * Paint the border or area of the template
-   *
-   * @param g Where to paint
-   * @param border Paint the border?
-   * @param area Paint the area?
-   */
-  protected void paint(Graphics2D g, boolean border, boolean area) {
+  @Override
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
     int radius = getRadius();
-    GUID zoneId = getZoneId();
 
-    if (radius == 0) return;
-    Zone zone = MapTool.getCampaign().getZone(zoneId);
-    if (zone == null) return;
+    if (zone == null || radius == 0) {
+      return;
+    }
 
     // Find the proper distance
     int gridSize = zone.getGrid().getSize();
@@ -175,8 +168,12 @@ public class RadiusCellTemplate extends AbstractTemplate {
         int yOff = y * gridSize;
 
         // Template specific painting
-        if (border) paintBorder(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
-        if (area) paintArea(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
+        if (border) {
+          paintBorder(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
+        }
+        if (area) {
+          paintArea(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
+        }
       } // endfor
     } // endfor
   }
