@@ -220,7 +220,6 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     } // endif
     template = createBaseTemplate();
     template.setVertex(vertex);
-    template.setZoneId(renderer.getZone().getId());
     controlOffset = null;
     renderer.repaint();
   }
@@ -357,7 +356,6 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
-    template.setZoneId(null);
     renderer.repaint();
   }
 
@@ -366,7 +364,6 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    */
   @Override
   protected void attachTo(ZoneRenderer renderer) {
-    template.setZoneId(renderer.getZone().getId());
     renderer.repaint();
     super.attachTo(renderer);
   }

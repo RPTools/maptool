@@ -116,7 +116,6 @@ public class BurstTemplate extends RadiusTemplate {
     var dto = BurstTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 

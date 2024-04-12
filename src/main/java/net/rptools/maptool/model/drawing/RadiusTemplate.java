@@ -159,7 +159,6 @@ public class RadiusTemplate extends AbstractTemplate {
     var dto = RadiusTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 

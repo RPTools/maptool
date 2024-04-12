@@ -37,7 +37,6 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
-import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -665,7 +664,6 @@ public class Zone {
     for (final var entry : drawablesByLayer.entrySet()) {
       entry.getValue().addAll(zone.drawablesByLayer.get(entry.getKey()));
     }
-    validateTemplateZoneIds();
 
     if (!zone.labels.isEmpty()) {
       for (GUID guid : zone.labels.keySet()) {
@@ -1507,17 +1505,6 @@ public class Zone {
     undo.addDrawable(pen, drawable);
   }
 
-  private void validateTemplateZoneIds() {
-    // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (var list : drawablesByLayer.values()) {
-      for (var de : list) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
-    }
-  }
-
   public boolean canUndo() {
     return undo.canUndo();
   }
@@ -2220,7 +2207,6 @@ public class Zone {
     drawablesByLayer.put(Layer.GM, gmDrawables);
     drawablesByLayer.put(Layer.OBJECT, objectDrawables);
     drawablesByLayer.put(Layer.BACKGROUND, backgroundDrawables);
-    validateTemplateZoneIds();
 
     return this;
   }
@@ -2347,8 +2333,6 @@ public class Zone {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
-
-    zone.validateTemplateZoneIds();
 
     return zone;
   }

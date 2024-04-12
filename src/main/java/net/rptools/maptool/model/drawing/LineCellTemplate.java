@@ -447,7 +447,6 @@ public class LineCellTemplate extends AbstractTemplate {
     var dto = LineCellTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 

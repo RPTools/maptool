@@ -127,7 +127,6 @@ public interface Drawable {
         var dto = drawableDto.getRadiusCellTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new RadiusCellTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -139,7 +138,6 @@ public interface Drawable {
         var dto = drawableDto.getLineCellTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new LineCellTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -155,7 +153,6 @@ public interface Drawable {
         var dto = drawableDto.getRadiusTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new RadiusTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -167,7 +164,6 @@ public interface Drawable {
         var dto = drawableDto.getBurstTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new BurstTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -179,7 +175,6 @@ public interface Drawable {
         var dto = drawableDto.getConeTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new ConeTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -192,7 +187,6 @@ public interface Drawable {
         var dto = drawableDto.getBlastTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new BlastTemplate(id, dto.getOffsetX(), dto.getOffsetY());
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -205,7 +199,6 @@ public interface Drawable {
         var dto = drawableDto.getLineTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new LineTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
@@ -224,7 +217,6 @@ public interface Drawable {
         var dto = drawableDto.getWallTemplate();
         var id = GUID.valueOf(dto.getId());
         var drawable = new WallTemplate(id);
-        drawable.setZoneId(GUID.valueOf(dto.getZoneId()));
         drawable.setRadius(dto.getRadius());
         var vertex = dto.getVertex();
         drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));

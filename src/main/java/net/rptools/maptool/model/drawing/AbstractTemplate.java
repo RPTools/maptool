@@ -41,9 +41,6 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   /** The location of the vertex where painting starts. */
   private ZonePoint vertex = new ZonePoint(0, 0);
 
-  /** The id of the zone where this drawable is painted. */
-  private GUID zoneId;
-
   protected AbstractTemplate() {}
 
   protected AbstractTemplate(GUID id) {
@@ -159,24 +156,6 @@ public abstract class AbstractTemplate extends AbstractDrawing {
    */
   public void setVertex(ZonePoint vertex) {
     this.vertex = vertex;
-  }
-
-  /**
-   * Get the zoneId for this RadiusTemplate.
-   *
-   * @return Returns the current value of zoneId.
-   */
-  public GUID getZoneId() {
-    return zoneId;
-  }
-
-  /**
-   * Set the value of zoneId for this RadiusTemplate.
-   *
-   * @param zoneId The zoneId to set.
-   */
-  public void setZoneId(GUID zoneId) {
-    this.zoneId = zoneId;
   }
 
   /**

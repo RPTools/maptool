@@ -37,7 +37,6 @@ public class ConeTemplateAreaTest {
     coneTemplate.setVertex(vertex);
     coneTemplate.setRadius(radius);
     coneTemplate.setDirection(direction);
-    coneTemplate.setZoneId(testZone.getId());
 
     coneTemplate = Mockito.spy(coneTemplate);
     Mockito.when(coneTemplate.getCampaign()).thenReturn(testCampaign);

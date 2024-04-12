@@ -476,7 +476,6 @@ public class LineTemplate extends AbstractTemplate {
     var dto = LineTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setMouseSlopeGreater(isMouseSlopeGreater())

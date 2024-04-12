@@ -37,7 +37,6 @@ public class RadiusTemplateAreaTest {
     radiusTemplate.setName("test");
     radiusTemplate.setVertex(vertex);
     radiusTemplate.setRadius(radius);
-    radiusTemplate.setZoneId(testZone.getId());
 
     radiusTemplate = Mockito.spy(radiusTemplate);
     Mockito.when(radiusTemplate.getCampaign()).thenReturn(testCampaign);

@@ -217,7 +217,6 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
     } // endif
     template = createBaseTemplate();
     template.setVertex(vertex);
-    template.setZoneId(renderer.getZone().getId());
     controlOffset = null;
     renderer.repaint();
   }
@@ -354,7 +353,6 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
-    template.setZoneId(null);
     renderer.repaint();
   }
 
@@ -363,7 +361,6 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
    */
   @Override
   protected void attachTo(ZoneRenderer renderer) {
-    template.setZoneId(renderer.getZone().getId());
     renderer.repaint();
     super.attachTo(renderer);
   }

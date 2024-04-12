@@ -80,7 +80,6 @@ public class WallTemplate extends LineTemplate {
     var dto = WallTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setMouseSlopeGreater(isMouseSlopeGreater())

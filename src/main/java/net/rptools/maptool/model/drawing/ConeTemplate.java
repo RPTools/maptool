@@ -336,7 +336,6 @@ public class ConeTemplate extends RadiusTemplate {
     var dto = ConeTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setDirection(getDirection().name());

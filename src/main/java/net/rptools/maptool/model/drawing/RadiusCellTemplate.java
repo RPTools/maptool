@@ -278,7 +278,6 @@ public class RadiusCellTemplate extends AbstractTemplate {
     var dto = RadiusCellTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 
