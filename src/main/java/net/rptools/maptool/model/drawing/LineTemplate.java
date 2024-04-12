@@ -24,6 +24,7 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
@@ -448,7 +449,7 @@ public class LineTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     if (path == null) {
       calcPath();
     }

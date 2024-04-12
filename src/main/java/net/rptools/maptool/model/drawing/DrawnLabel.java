@@ -19,6 +19,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import javax.swing.CellRendererPane;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
@@ -99,8 +100,8 @@ public class DrawnLabel extends AbstractDrawing {
   }
 
   @Override
-  public Area getArea(Zone zone) {
-    return null;
+  public @Nonnull Area getArea(Zone zone) {
+    return new Area();
   }
 
   @Override

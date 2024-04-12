@@ -18,6 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -136,7 +137,7 @@ public class RadiusTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }

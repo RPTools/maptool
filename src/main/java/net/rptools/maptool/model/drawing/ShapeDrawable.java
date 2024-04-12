@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
@@ -59,7 +60,7 @@ public class ShapeDrawable extends AbstractDrawing {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     return new Area(shape);
   }
 

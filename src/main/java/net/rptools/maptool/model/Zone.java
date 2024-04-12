@@ -2088,7 +2088,7 @@ public class Zone {
       DrawnElement drawn = drawnIter.next();
       // Are we covered ourselves ?
       Area drawnArea = drawn.getDrawable().getArea(this);
-      if (drawnArea == null) {
+      if (drawnArea.isEmpty()) {
         continue;
       }
       // The following is over-zealous optimization. Lines (1-dimensional) should be kept.

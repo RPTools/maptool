@@ -401,7 +401,7 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }

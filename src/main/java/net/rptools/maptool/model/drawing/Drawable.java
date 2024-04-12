@@ -17,6 +17,7 @@ package net.rptools.maptool.model.drawing;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.util.ArrayList;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -34,6 +35,7 @@ public interface Drawable {
 
   java.awt.Rectangle getBounds();
 
+  @Nonnull
   Area getArea(Zone zone);
 
   GUID getId();

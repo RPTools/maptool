@@ -18,6 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
@@ -63,7 +64,7 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     java.awt.Rectangle r = getBounds();
     return new Area(new Ellipse2D.Double(r.x, r.y, r.width, r.height));
   }

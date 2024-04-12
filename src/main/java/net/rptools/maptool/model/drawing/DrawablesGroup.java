@@ -19,6 +19,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
@@ -65,18 +66,18 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  public Area getArea(Zone zone) {
-    Area area = null;
+  public @Nonnull Area getArea(Zone zone) {
+    Area area = new Area();
     for (DrawnElement element : drawableList) {
       boolean isEraser = element.getPen().isEraser();
-      if (area == null) {
-        if (!isEraser) area = new Area(element.getDrawable().getArea(zone));
-      } else {
-        if (isEraser) {
+
+      if (isEraser) {
+        // Optimization: erasing from nothing is a no-op.
+        if (!area.isEmpty()) {
           area.subtract(element.getDrawable().getArea(zone));
-        } else {
-          area.add(element.getDrawable().getArea(zone));
         }
+      } else {
+        area.add(element.getDrawable().getArea(zone));
       }
     }
     return area;

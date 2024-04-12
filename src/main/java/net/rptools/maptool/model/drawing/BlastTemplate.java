@@ -21,6 +21,7 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -175,7 +176,7 @@ public class BlastTemplate extends ConeTemplate {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     return renderer.getArea(zone);
   }
 

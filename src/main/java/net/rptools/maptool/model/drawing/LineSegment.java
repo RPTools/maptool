@@ -23,6 +23,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -75,11 +76,11 @@ public class LineSegment extends AbstractDrawing {
   }
 
   @Override
-  public Area getArea(Zone zone) {
+  public @Nonnull Area getArea(Zone zone) {
     if (area == null) {
       area = createLineArea();
     }
-    return area;
+    return Objects.requireNonNullElseGet(area, Area::new);
   }
 
   @Override
@@ -97,7 +98,9 @@ public class LineSegment extends AbstractDrawing {
   }
 
   private Area createLineArea() {
-    if (points.size() < 1) return null;
+    if (points.size() < 1) {
+      return null;
+    }
     GeneralPath gp = null;
     for (Point point : points) {
       if (gp == null) {
@@ -116,7 +119,7 @@ public class LineSegment extends AbstractDrawing {
     width = ((BasicStroke) g.getStroke()).getLineWidth();
     squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
     Area area = getArea(zone);
-    if (area != null) g.fill(area);
+    g.fill(area);
   }
 
   @Override
