@@ -37,7 +37,7 @@ import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
 public class DrawnLabel extends AbstractDrawing {
 
   /** The bounds of the display rectangle */
-  private Rectangle bounds = new Rectangle();
+  private Rectangle bounds;
 
   /** Text being painted. */
   private String text;
@@ -92,10 +92,8 @@ public class DrawnLabel extends AbstractDrawing {
   @Override
   protected void drawBackground(Zone zone, Graphics2D g) {}
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     return bounds;
   }
 
@@ -109,7 +107,7 @@ public class DrawnLabel extends AbstractDrawing {
     var dto = DrawnLabelDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setBounds(Mapper.map(getBounds()))
+        .setBounds(Mapper.map(bounds))
         .setText(getText())
         .setFont(getFont());
 

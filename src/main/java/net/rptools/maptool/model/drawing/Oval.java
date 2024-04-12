@@ -65,7 +65,7 @@ public class Oval extends Rectangle {
 
   @Override
   public @Nonnull Area getArea(Zone zone) {
-    java.awt.Rectangle r = getBounds();
+    java.awt.Rectangle r = getBounds(zone);
     return new Area(new Ellipse2D.Double(r.x, r.y, r.width, r.height));
   }
 

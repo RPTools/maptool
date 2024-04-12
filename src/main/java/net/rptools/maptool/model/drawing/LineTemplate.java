@@ -26,7 +26,6 @@ import java.util.List;
 import java.util.ListIterator;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -381,15 +380,13 @@ public class LineTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
+    if (zone == null) {
       return new Rectangle();
     }
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ZonePoint vertex = getVertex();
 
     // Find the point that is farthest away in the path, then adjust
@@ -403,7 +400,7 @@ public class LineTemplate extends AbstractTemplate {
       }
     }
     for (CellPoint pt : path) {
-      ZonePoint p = MapTool.getCampaign().getZone(getZoneId()).getGrid().convert(pt);
+      ZonePoint p = zone.getGrid().convert(pt);
       p = new ZonePoint(vertex.x + p.x, vertex.y + p.y);
 
       if (minp == null) {

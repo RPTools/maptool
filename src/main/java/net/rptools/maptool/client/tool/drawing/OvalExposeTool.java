@@ -78,7 +78,7 @@ public class OvalExposeTool extends OvalTool {
     }
     Zone zone = getZone();
 
-    Rectangle bounds = drawable.getBounds();
+    Rectangle bounds = drawable.getBounds(zone);
     Area area = new Area(new Ellipse2D.Double(bounds.x, bounds.y, bounds.width, bounds.height));
     Set<GUID> selectedToks = renderer.getSelectedTokenSet();
     if (pen.isEraser()) {

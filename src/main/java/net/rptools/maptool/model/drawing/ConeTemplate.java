@@ -19,7 +19,6 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import javax.annotation.Nonnull;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -258,21 +257,9 @@ public class ConeTemplate extends RadiusTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-      // How does this happen ?! Anyway, try to use the current zone (since that's what we're
-      // drawing anyway, seems reasonable
-      if (MapTool.getFrame().getCurrentZoneRenderer() == null) {
-        // Wha?!
-        return new Rectangle();
-      }
-      setZoneId(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
-    }
-
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+  @Override
+  public Rectangle getBounds(Zone zone) {
+    int gridSize = zone.getGrid().getSize();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
 
     // Find the x,y loc

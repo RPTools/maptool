@@ -224,12 +224,13 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     for (DrawnElement element : drawableList) {
       timer.start("createChunk:calculate");
       Drawable drawable = element.getDrawable();
-      if (drawable.getBounds() == null) {
+      Rectangle drawableBounds = drawable.getBounds(zone);
+      if (drawableBounds == null) {
         timer.stop("createChunk:calculate");
         continue;
       }
 
-      Rectangle2D drawnBounds = new Rectangle(drawable.getBounds());
+      Rectangle2D drawnBounds = new Rectangle(drawableBounds);
       Rectangle2D chunkBounds =
           new Rectangle(
               (int) (gridx * (CHUNK_SIZE / scale)),

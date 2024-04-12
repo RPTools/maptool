@@ -33,7 +33,7 @@ public interface Drawable {
 
   void draw(Zone zone, Graphics2D g, Pen pen);
 
-  java.awt.Rectangle getBounds();
+  java.awt.Rectangle getBounds(Zone zone);
 
   @Nonnull
   Area getArea(Zone zone);

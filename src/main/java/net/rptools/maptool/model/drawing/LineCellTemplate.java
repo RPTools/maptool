@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.ListIterator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -343,12 +342,9 @@ public class LineCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
-    final var zone = MapTool.getCampaign().getZone(getZoneId());
     if (zone == null) {
       return new Rectangle();
     }

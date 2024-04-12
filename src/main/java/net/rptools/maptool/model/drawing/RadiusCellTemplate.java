@@ -219,15 +219,8 @@ public class RadiusCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (getZoneId() == null) {
-      // This avoids a NPE when loading up a campaign
-      return new Rectangle();
-    }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
+  @Override
+  public Rectangle getBounds(Zone zone) {
     if (zone == null) {
       return new Rectangle();
     }

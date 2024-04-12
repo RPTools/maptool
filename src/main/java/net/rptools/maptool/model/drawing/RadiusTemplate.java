@@ -19,7 +19,6 @@ import java.awt.*;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import javax.annotation.Nonnull;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -117,15 +116,8 @@ public class RadiusTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (getZoneId() == null) {
-      // This avoids a NPE when loading up a campaign
-      return new Rectangle();
-    }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
+  @Override
+  public Rectangle getBounds(Zone zone) {
     if (zone == null) {
       return new Rectangle();
     }

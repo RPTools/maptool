@@ -72,7 +72,7 @@ public class RectangleExposeTool extends RectangleTool {
     }
     Zone zone = getZone();
 
-    Rectangle bounds = drawable.getBounds();
+    Rectangle bounds = drawable.getBounds(zone);
     Area area = new Area(bounds);
     Set<GUID> selectedToks = renderer.getSelectedTokenSet();
     if (pen.isEraser()) {

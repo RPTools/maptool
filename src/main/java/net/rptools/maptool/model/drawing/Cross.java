@@ -45,7 +45,7 @@ public class Cross extends AbstractDrawing {
 
   @Override
   public @Nonnull Area getArea(Zone zone) {
-    return new Area(getBounds());
+    return new Area(getBounds(zone));
   }
 
   @Override
@@ -62,13 +62,8 @@ public class Cross extends AbstractDrawing {
     return DrawableDto.newBuilder().setCrossDrawable(dto).build();
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public java.awt.Rectangle getBounds() {
-
+  @Override
+  public java.awt.Rectangle getBounds(Zone zone) {
     if (bounds == null) {
       int x = Math.min(startPoint.x, endPoint.x);
       int y = Math.min(startPoint.y, endPoint.y);

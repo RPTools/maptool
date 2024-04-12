@@ -333,7 +333,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     if (!hasPaint(pen)) {
       return;
     }
-    if (drawable.getBounds() == null) {
+    if (drawable.getBounds(zone) == null) {
       return;
     }
     if (MapTool.getPlayer().isGM()) {

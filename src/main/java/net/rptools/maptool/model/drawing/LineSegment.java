@@ -127,12 +127,8 @@ public class LineSegment extends AbstractDrawing {
     // do nothing
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     if (lastPointCount == points.size()) {
       return cachedBounds;
     }

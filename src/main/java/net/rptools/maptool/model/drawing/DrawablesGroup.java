@@ -46,10 +46,10 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  public Rectangle getBounds() {
+  public Rectangle getBounds(Zone zone) {
     Rectangle bounds = null;
     for (DrawnElement element : drawableList) {
-      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
+      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds(zone));
       // Handle pen size
       Pen pen = element.getPen();
       int penSize = (int) (pen.getThickness() / 2 + 1);

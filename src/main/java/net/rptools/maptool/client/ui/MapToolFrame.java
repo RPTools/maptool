@@ -1181,11 +1181,13 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
               tree.addSelectionInterval(rowIndex, rowIndex);
               if (row instanceof DrawnElement && e.getClickCount() == 2) {
                 DrawnElement de = (DrawnElement) row;
+                var renderer = getCurrentZoneRenderer();
+                var zone = renderer.getZone();
                 getCurrentZoneRenderer()
                     .centerOn(
                         new ZonePoint(
-                            (int) de.getDrawable().getBounds().getCenterX(),
-                            (int) de.getDrawable().getBounds().getCenterY()));
+                            (int) de.getDrawable().getBounds(zone).getCenterX(),
+                            (int) de.getDrawable().getBounds(zone).getCenterY()));
               }
               /*
                * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =

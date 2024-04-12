@@ -196,7 +196,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     for (DrawnElement element : drawableList) {
       Drawable drawable = element.getDrawable();
 
-      Rectangle2D drawnBounds = drawable.getBounds();
+      Rectangle2D drawnBounds = drawable.getBounds(zone);
       Rectangle2D chunkBounds =
           new Rectangle(
               (int) (gridx * (CHUNK_SIZE / scale)),

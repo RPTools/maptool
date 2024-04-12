@@ -50,13 +50,13 @@ public class ShapeDrawable extends AbstractDrawing {
     return useAntiAliasing;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
   public java.awt.Rectangle getBounds() {
     return shape.getBounds();
+  }
+
+  @Override
+  public java.awt.Rectangle getBounds(Zone zone) {
+    return getBounds();
   }
 
   @Override

@@ -88,7 +88,7 @@ public class BlastTemplate extends ConeTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   @Override
-  public Rectangle getBounds() {
+  public Rectangle getBounds(Zone zone) {
     Rectangle r = new Rectangle(renderer.getShape().getBounds());
     // We don't know pen width, so add some padding to account for it
     r.x -= 5;
