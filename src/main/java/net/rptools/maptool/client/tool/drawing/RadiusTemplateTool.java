@@ -415,7 +415,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       template.setRadius(getRadiusAtMouse(e));
       ZonePoint vertex = template.getVertex();
       ZonePoint newPoint = new ZonePoint(vertex.x, vertex.y);
-      completeDrawable(renderer.getZone().getId(), getPen(), template);
+      completeDrawable(getPen(), template);
       setIsEraser(false);
       resetTool(newPoint);
     }
