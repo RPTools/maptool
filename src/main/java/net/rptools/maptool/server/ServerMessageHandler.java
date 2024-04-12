@@ -416,10 +416,12 @@ public class ServerMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-          Grid grid = zone.getGrid();
-          grid.setSize(msg.getSize());
-          grid.setOffset(msg.getXOffset(), msg.getYOffset());
-          zone.setGridColor(msg.getColor());
+          if (zone != null) {
+            Grid grid = zone.getGrid();
+            grid.setSize(msg.getSize());
+            grid.setOffset(msg.getXOffset(), msg.getYOffset());
+            zone.setGridColor(msg.getColor());
+          }
         });
   }
 
