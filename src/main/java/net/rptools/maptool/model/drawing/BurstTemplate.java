@@ -15,17 +15,13 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.RenderingHints;
 import java.awt.geom.Area;
 import javax.annotation.Nonnull;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
@@ -39,12 +35,6 @@ public class BurstTemplate extends RadiusTemplate {
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
 
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
-
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
-
   public BurstTemplate() {}
 
   public BurstTemplate(GUID id) {
@@ -55,53 +45,23 @@ public class BurstTemplate extends RadiusTemplate {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or
-   * direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when
-   * the radius is an even number and still stay in the squares, that case isn't allowed.
-   */
-  private void adjustShape() {
-    if (getZoneId() == null) return;
-    Zone zone;
-    if (MapTool.isHostingServer()) {
-      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
-    } else {
-      zone = MapTool.getCampaign().getZone(getZoneId());
-    }
-    if (zone == null) return;
-
+  private Rectangle makeVertexShape(Zone zone) {
     int gridSize = zone.getGrid().getSize();
-    Rectangle r = (Rectangle) vertexRenderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r = (Rectangle) renderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r.x -= getRadius() * gridSize;
-    r.y -= getRadius() * gridSize;
-    r.width = r.height = (getRadius() * 2 + 1) * gridSize;
+    return new Rectangle(getVertex().x, getVertex().y, gridSize, gridSize);
+  }
+
+  private Rectangle makeShape(Zone zone) {
+    int gridSize = zone.getGrid().getSize();
+    return new Rectangle(
+        getVertex().x - getRadius() * gridSize,
+        getVertex().y - getRadius() * gridSize,
+        (getRadius() * 2 + 1) * gridSize,
+        (getRadius() * 2 + 1) * gridSize);
   }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden *Template Methods
    *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
-   */
-  @Override
-  public void setRadius(int squares) {
-    super.setRadius(squares);
-    adjustShape();
-  }
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
-   */
-  @Override
-  public void setVertex(ZonePoint vertex) {
-    super.setVertex(vertex);
-    adjustShape();
-  }
 
   /**
    * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
@@ -113,7 +73,7 @@ public class BurstTemplate extends RadiusTemplate {
 
   @Override
   public Rectangle getBounds(Zone zone) {
-    Rectangle r = new Rectangle(renderer.getShape().getBounds());
+    Rectangle r = makeShape(zone);
     // We don't know pen width, so add some padding to account for it
     r.x -= 5;
     r.y -= 5;
@@ -128,23 +88,27 @@ public class BurstTemplate extends RadiusTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   @Override
-  protected void draw(Zone zone, Graphics2D g) {
-    renderer.draw(zone, g);
-    vertexRenderer.draw(zone, g);
-  }
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    try {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-  @Override
-  protected void drawBackground(Zone zone, Graphics2D g) {
-    Composite old = g.getComposite();
-    if (old != AlphaComposite.Clear)
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-    renderer.drawBackground(zone, g);
-    g.setComposite(old);
+      var shape = makeShape(zone);
+      if (border) {
+        g.draw(shape);
+        g.draw(makeVertexShape(zone));
+      }
+      if (area) {
+        g.fill(shape);
+      }
+    } finally {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
   }
 
   @Override
   public @Nonnull Area getArea(Zone zone) {
-    return renderer.getArea(zone);
+    return new Area(makeShape(zone));
   }
 
   @Override
