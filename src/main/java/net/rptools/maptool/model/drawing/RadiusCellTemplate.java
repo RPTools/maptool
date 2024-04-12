@@ -17,10 +17,8 @@ package net.rptools.maptool.model.drawing;
 import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
 import java.awt.geom.Area;
 import javax.annotation.Nonnull;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -34,13 +32,6 @@ import net.rptools.maptool.server.proto.drawing.RadiusCellTemplateDto;
  * @author naciron
  */
 public class RadiusCellTemplate extends AbstractTemplate {
-
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
-
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
-
   public RadiusCellTemplate() {}
 
   public RadiusCellTemplate(GUID id) {
@@ -237,40 +228,6 @@ public class RadiusCellTemplate extends AbstractTemplate {
   }
 
   /**
-   * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or
-   * direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when
-   * the radius is an even number and still stay in the squares, that case isn't allowed.
-   */
-  private void adjustShape() {
-    if (getZoneId() == null) return;
-    Zone zone;
-    if (MapTool.isHostingServer()) {
-      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
-    } else {
-      zone = MapTool.getCampaign().getZone(getZoneId());
-    }
-    if (zone == null) return;
-
-    int gridSize = zone.getGrid().getSize();
-    Rectangle r = (Rectangle) vertexRenderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r = (Rectangle) renderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r.x -= getRadius() * gridSize;
-    r.y -= getRadius() * gridSize;
-    r.width = r.height = (getRadius() * 2 + 1) * gridSize;
-  }
-
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
-   */
-  @Override
-  public void setRadius(int squares) {
-    super.setRadius(squares);
-    adjustShape();
-  }
-
-  /**
    * Get the distance to a specific coordinate.
    *
    * @param x delta-X of the coordinate.
@@ -283,16 +240,6 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (x > y) distance = x + (y / 2) + 1 + (y & 1);
     else distance = y + (x / 2) + 1 + (x & 1);
     return distance;
-  }
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
-   */
-  @Override
-  public void setVertex(ZonePoint vertex) {
-    super.setVertex(vertex);
-    adjustShape();
   }
 
   @Override
