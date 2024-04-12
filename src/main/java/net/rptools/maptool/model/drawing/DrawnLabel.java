@@ -98,8 +98,8 @@ public class DrawnLabel extends AbstractDrawing {
     return bounds;
   }
 
-  public Area getArea() {
-    // TODO Auto-generated method stub
+  @Override
+  public Area getArea(Zone zone) {
     return null;
   }
 

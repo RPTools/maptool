@@ -34,7 +34,7 @@ public interface Drawable {
 
   java.awt.Rectangle getBounds();
 
-  Area getArea();
+  Area getArea(Zone zone);
 
   GUID getId();
 

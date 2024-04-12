@@ -2087,7 +2087,7 @@ public class Zone {
     for (ListIterator<DrawnElement> drawnIter = list.listIterator(); drawnIter.hasNext(); ) {
       DrawnElement drawn = drawnIter.next();
       // Are we covered ourselves ?
-      Area drawnArea = drawn.getDrawable().getArea();
+      Area drawnArea = drawn.getDrawable().getArea(this);
       if (drawnArea == null) {
         continue;
       }

@@ -448,11 +448,10 @@ public class LineTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea() {
+  public Area getArea(Zone zone) {
     if (path == null) {
       calcPath();
     }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
     if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
       return new Area();
     }

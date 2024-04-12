@@ -47,9 +47,16 @@ public class ConeTemplateAreaTest {
   @Test
   @DisplayName("Test getArea function on cone drawing template")
   void testRDrawingArea() throws Exception {
+    Campaign testCampaign = new Campaign();
+    Zone testZone = new Zone();
+    Grid testGrid = new SquareGrid();
+    testGrid.setSize(50);
+    testZone.setGrid(testGrid);
+    testCampaign.putZone(testZone);
+
     ConeTemplate coneTemplate =
         testConeTemplate(new ZonePoint(50, 50), 3, AbstractTemplate.Direction.EAST);
-    Area area = coneTemplate.getArea();
+    Area area = coneTemplate.getArea(testZone);
     // This should look like the following:
     //
     // □■□

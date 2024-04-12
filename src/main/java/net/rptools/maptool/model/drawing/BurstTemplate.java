@@ -142,8 +142,8 @@ public class BurstTemplate extends RadiusTemplate {
   }
 
   @Override
-  public Area getArea() {
-    return renderer.getArea();
+  public Area getArea(Zone zone) {
+    return renderer.getArea(zone);
   }
 
   @Override

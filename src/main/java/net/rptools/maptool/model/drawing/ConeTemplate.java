@@ -307,11 +307,7 @@ public class ConeTemplate extends RadiusTemplate {
   }
 
   @Override
-  public Area getArea() {
-    if (getZoneId() == null) {
-      return new Area();
-    }
-    Zone zone = getCampaign().getZone(getZoneId());
+  public Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }

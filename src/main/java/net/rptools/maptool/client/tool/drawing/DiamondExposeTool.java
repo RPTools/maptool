@@ -70,7 +70,7 @@ public class DiamondExposeTool extends DiamondTool {
       return;
     }
     Zone zone = MapTool.getCampaign().getZone(zoneId);
-    Area area = new Area(drawable.getArea());
+    Area area = new Area(drawable.getArea(zone));
     Set<GUID> selectedToks = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (pen.isEraser()) {
       zone.hideArea(area, selectedToks);

@@ -175,8 +175,8 @@ public class BlastTemplate extends ConeTemplate {
   }
 
   @Override
-  public Area getArea() {
-    return renderer.getArea();
+  public Area getArea(Zone zone) {
+    return renderer.getArea(zone);
   }
 
   public int getOffsetX() {

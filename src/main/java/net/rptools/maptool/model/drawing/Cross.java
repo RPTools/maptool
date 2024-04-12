@@ -42,7 +42,8 @@ public class Cross extends AbstractDrawing {
     endPoint = new Point(endX, endY);
   }
 
-  public Area getArea() {
+  @Override
+  public Area getArea(Zone zone) {
     return new Area(getBounds());
   }
 

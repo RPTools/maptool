@@ -401,13 +401,16 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea() {
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
-
-    final var path = getPath();
-    if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
+  public Area getArea(Zone zone) {
+    if (zone == null) {
       return new Area();
     }
+
+    final var path = getPath();
+    if (path == null) {
+      return new Area();
+    }
+
     // Create an area by merging all the squares along the path
     Area result = new Area();
     int gridSize = zone.getGrid().getSize();

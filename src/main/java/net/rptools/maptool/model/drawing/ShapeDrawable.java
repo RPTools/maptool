@@ -58,7 +58,8 @@ public class ShapeDrawable extends AbstractDrawing {
     return shape.getBounds();
   }
 
-  public Area getArea() {
+  @Override
+  public Area getArea(Zone zone) {
     return new Area(shape);
   }
 

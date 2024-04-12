@@ -74,7 +74,8 @@ public class LineSegment extends AbstractDrawing {
     return points;
   }
 
-  public Area getArea() {
+  @Override
+  public Area getArea(Zone zone) {
     if (area == null) {
       area = createLineArea();
     }
@@ -114,7 +115,7 @@ public class LineSegment extends AbstractDrawing {
   protected void draw(Zone zone, Graphics2D g) {
     width = ((BasicStroke) g.getStroke()).getLineWidth();
     squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
-    Area area = getArea();
+    Area area = getArea(zone);
     if (area != null) g.fill(area);
   }
 
