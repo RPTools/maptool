@@ -140,7 +140,7 @@ spotless {
 
 // org.openjfx.javafxplugin
 javafx {
-    version = '21'
+    version = '22'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
 }
@@ -365,7 +365,7 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.9.0'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.10.1'
     // Specialized collections: ReferenceMap, LinkedMap.
     implementation 'org.apache.commons:commons-collections4:4.4'
     // Various file utilities
@@ -429,7 +429,7 @@ dependencies {
     // themes
     implementation 'com.formdev:flatlaf:3.3'
     implementation 'com.formdev:flatlaf-intellij-themes:3.3'
-    implementation 'com.formdev:flatlaf-extras:3.3'
+    implementation 'com.formdev:flatlaf-extras:3.4.1'
     implementation 'com.github.weisj:jsvg:1.4.0'
     implementation 'com.formdev:flatlaf-jide-oss:3.3'
 
@@ -449,7 +449,7 @@ dependencies {
     implementation 'com.github.gotson:webp-imageio:0.2.2' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.2/jar
 
     // For syntax highlighting in macro editor
-    implementation "com.fifesoft:rsyntaxtextarea:3.3.4"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+    implementation "com.fifesoft:rsyntaxtextarea:3.4.0"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation "com.fifesoft:rstaui:3.3.1"				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
     implementation "com.fifesoft:autocomplete:3.3.1"		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
     implementation "com.fifesoft:languagesupport:3.3.0"
@@ -517,7 +517,7 @@ dependencies {
     // eventbus
     implementation 'com.google.guava:guava:33.0.0-jre'
     // compression of messages between client and server
-    implementation 'org.apache.commons:commons-compress:1.25.0'
+    implementation 'org.apache.commons:commons-compress:1.26.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-11'
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.12019'
