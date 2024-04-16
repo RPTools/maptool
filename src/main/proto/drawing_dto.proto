@@ -126,9 +126,7 @@ message LineCellTemplateDto {
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
-  bool mouse_slope_greater = 7;
-  string quadrant = 8;
-  IntPointDto path_vertex = 9;
+  IntPointDto path_vertex = 7;
 }
 
 message RadiusCellTemplateDto {
