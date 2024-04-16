@@ -536,9 +536,13 @@ public class ClientMessageHandler implements MessageHandler {
           int color = msg.getColor();
 
           var zone = MapTool.getCampaign().getZone(zoneGUID);
-          zone.getGrid().setSize(size);
-          zone.getGrid().setOffset(xOffset, yOffset);
-          zone.setGridColor(color);
+          // Sometimes these messages can come in as a zone is being removed, so we can't rely on
+          // its existence
+          if (zone != null) {
+            zone.getGrid().setSize(size);
+            zone.getGrid().setOffset(xOffset, yOffset);
+            zone.setGridColor(color);
+          }
 
           MapTool.getFrame().refresh();
         });
