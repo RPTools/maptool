@@ -3557,6 +3557,9 @@ public class ZoneRenderer extends JComponent
     if (event.zone() != this.zone) {
       return;
     }
+
+    // A change in grid can change the size of templates.
+    flushDrawableRenderer();
     repaintDebouncer.dispatch();
   }
 
