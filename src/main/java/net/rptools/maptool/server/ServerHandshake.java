@@ -29,6 +29,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
@@ -144,7 +146,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
     return exception;
   }
 
-  @Override
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
   public synchronized Player getPlayer() {
     return player;
   }

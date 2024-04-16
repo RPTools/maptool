@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.Server;
@@ -187,16 +189,23 @@ public class MapToolServerConnection
 
   @Override
   public void onCompleted(Handshake handshake) {
+    if (!(handshake instanceof ServerHandshake serverHandshake)) {
+      log.error("Got the wrong handshake type: {}", handshake.getClass());
+      return;
+    }
+
     handshake.removeObserver(this);
     if (handshake.isSuccessful()) {
-      Player player = handshake.getPlayer();
+      Player player = serverHandshake.getPlayer();
 
       if (player != null) {
         playerMap.put(handshake.getConnection().getId().toUpperCase(), player);
       }
     } else {
       var exception = handshake.getException();
-      if (exception != null) log.error("Handshake failure: " + exception, exception);
+      if (exception != null) {
+        log.error("Handshake failure: " + exception, exception);
+      }
     }
   }
 }
