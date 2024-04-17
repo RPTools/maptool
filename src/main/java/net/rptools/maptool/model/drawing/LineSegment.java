@@ -53,6 +53,21 @@ public class LineSegment extends AbstractDrawing {
     this.squareCap = squareCap;
   }
 
+  public LineSegment(LineSegment other) {
+    super(other);
+    this.width = other.width;
+    this.squareCap = other.squareCap;
+
+    for (final var point : other.points) {
+      this.points.add(new Point(point));
+    }
+  }
+
+  @Override
+  public Drawable copy() {
+    return new LineSegment(this);
+  }
+
   @SuppressWarnings("ConstantValue")
   private Object readResolve() {
     if (width == null) {

@@ -30,6 +30,7 @@ import org.apache.logging.log4j.LogManager;
  * @author drice
  */
 public interface Drawable {
+  Drawable copy();
 
   void draw(Zone zone, Graphics2D g, Pen pen);
 
@@ -39,6 +40,8 @@ public interface Drawable {
   Area getArea(Zone zone);
 
   GUID getId();
+
+  void setId(GUID guid);
 
   Zone.Layer getLayer();
 

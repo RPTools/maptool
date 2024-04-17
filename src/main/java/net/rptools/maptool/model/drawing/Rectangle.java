@@ -43,6 +43,17 @@ public class Rectangle extends AbstractDrawing {
     endPoint = new Point(endX, endY);
   }
 
+  public Rectangle(Rectangle other) {
+    super(other);
+    this.startPoint = new Point(other.startPoint);
+    this.endPoint = new Point(other.endPoint);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new Rectangle(this);
+  }
+
   @Override
   public @Nonnull Area getArea(Zone zone) {
     return new Area(getBounds(zone));

@@ -41,6 +41,15 @@ public class Oval extends Rectangle {
     super(id, x, y, width, height);
   }
 
+  public Oval(Oval other) {
+    super(other);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new Oval(this);
+  }
+
   @Override
   protected void draw(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);

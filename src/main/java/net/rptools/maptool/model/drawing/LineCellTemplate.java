@@ -58,6 +58,11 @@ public class LineCellTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public LineCellTemplate(LineCellTemplate other) {
+    super(other);
+    this.pathVertex = new ZonePoint(other.pathVertex);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
    *-------------------------------------------------------------------------------------------*/
@@ -341,6 +346,11 @@ public class LineCellTemplate extends AbstractTemplate {
   /*---------------------------------------------------------------------------------------------
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new LineCellTemplate(this);
+  }
 
   @Override
   public Rectangle getBounds(Zone zone) {

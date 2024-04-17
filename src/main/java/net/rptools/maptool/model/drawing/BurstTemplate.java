@@ -41,9 +41,18 @@ public class BurstTemplate extends RadiusTemplate {
     super(id);
   }
 
+  public BurstTemplate(BurstTemplate other) {
+    super(other);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new BurstTemplate(this);
+  }
 
   private Rectangle makeVertexShape(Zone zone) {
     int gridSize = zone.getGrid().getSize();

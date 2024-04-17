@@ -72,6 +72,18 @@ public class DrawnLabel extends AbstractDrawing {
     font = aFont;
   }
 
+  public DrawnLabel(DrawnLabel other) {
+    super(other);
+    this.bounds = new Rectangle(other.bounds);
+    this.text = other.text;
+    this.font = other.font;
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawnLabel(this);
+  }
+
   public String getText() {
     return text;
   }

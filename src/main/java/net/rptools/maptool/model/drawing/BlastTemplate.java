@@ -48,9 +48,20 @@ public class BlastTemplate extends ConeTemplate {
     this.offsetY = offsetY;
   }
 
+  public BlastTemplate(BlastTemplate other) {
+    super(other);
+    this.offsetX = other.offsetX;
+    this.offsetY = other.offsetY;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new BlastTemplate(this);
+  }
 
   private Rectangle makeShape(Zone zone) {
     if (zone == null) {

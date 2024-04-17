@@ -33,8 +33,12 @@ import net.rptools.maptool.model.Zone;
  * implementing classes.
  */
 public abstract class AbstractDrawing implements Drawable, ImageObserver {
-  /** The unique identifier for this drawable. It is immutable. */
-  private final GUID id;
+  /**
+   * The unique identifier for this drawable.
+   *
+   * <p>It should not typically be changed except to give copies a new ID.
+   */
+  private GUID id;
 
   private String layer;
   private String name;
@@ -45,6 +49,13 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
 
   protected AbstractDrawing(GUID id) {
     this.id = id;
+  }
+
+  protected AbstractDrawing(AbstractDrawing other) {
+    // The only thing we don't preserve is the ID.
+    this.id = other.id;
+    this.layer = other.layer;
+    this.name = other.name;
   }
 
   @Override
@@ -99,6 +110,11 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
    */
   public GUID getId() {
     return id;
+  }
+
+  @Override
+  public void setId(GUID guid) {
+    this.id = guid;
   }
 
   public void setLayer(Zone.Layer layer) {

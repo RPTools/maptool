@@ -18,6 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
@@ -39,6 +40,20 @@ public class DrawablesGroup extends AbstractDrawing {
   public DrawablesGroup(GUID id, List<DrawnElement> drawableList) {
     super(id);
     this.drawableList = drawableList;
+  }
+
+  public DrawablesGroup(DrawablesGroup other) {
+    super(other);
+
+    this.drawableList = new ArrayList<>(other.drawableList.size());
+    for (final var element : other.drawableList) {
+      this.drawableList.add(new DrawnElement(element));
+    }
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawablesGroup(this);
   }
 
   public List<DrawnElement> getDrawableList() {

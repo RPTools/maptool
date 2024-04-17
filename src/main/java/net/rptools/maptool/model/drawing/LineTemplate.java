@@ -72,6 +72,30 @@ public class LineTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public LineTemplate(LineTemplate other) {
+    super(other);
+
+    this.doubleWide = other.doubleWide;
+    this.pathVertex = new ZonePoint(other.pathVertex);
+
+    if (other.path != null) {
+      this.path = new ArrayList<>(other.path.size());
+      for (final var cellPoint : other.path) {
+        this.path.add(new CellPoint(cellPoint));
+      }
+    }
+
+    if (other.pool != null) {
+      this.pool = new ArrayList<>(other.pool.size());
+      for (final var cellPoint : other.pool) {
+        this.pool.add(new CellPoint(cellPoint));
+      }
+    }
+
+    this.quadrant = other.quadrant;
+    this.mouseSlopeGreater = other.mouseSlopeGreater;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
    *-------------------------------------------------------------------------------------------*/
@@ -379,6 +403,11 @@ public class LineTemplate extends AbstractTemplate {
   /*---------------------------------------------------------------------------------------------
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new LineTemplate(this);
+  }
 
   @Override
   public Rectangle getBounds(Zone zone) {

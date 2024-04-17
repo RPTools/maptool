@@ -38,6 +38,15 @@ public class RadiusCellTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public RadiusCellTemplate(RadiusCellTemplate other) {
+    super(other);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new RadiusCellTemplate(this);
+  }
+
   /**
    * Paint the border at a specific radius.
    *

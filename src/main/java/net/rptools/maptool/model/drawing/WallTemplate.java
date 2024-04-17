@@ -40,6 +40,15 @@ public class WallTemplate extends LineTemplate {
     setPathVertex(new ZonePoint(0, 0));
   }
 
+  public WallTemplate(WallTemplate other) {
+    super(other);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new WallTemplate(this);
+  }
+
   /**
    * @see net.rptools.maptool.model.drawing.AbstractTemplate#getRadius()
    */

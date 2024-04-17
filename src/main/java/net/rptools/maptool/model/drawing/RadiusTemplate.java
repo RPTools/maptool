@@ -40,6 +40,15 @@ public class RadiusTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public RadiusTemplate(RadiusTemplate other) {
+    super(other);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new RadiusTemplate(this);
+  }
+
   /**
    * Paint the border at a specific radius.
    *

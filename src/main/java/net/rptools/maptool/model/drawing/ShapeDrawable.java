@@ -16,9 +16,11 @@ package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
+import java.awt.Polygon;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.RectangularShape;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -44,6 +46,24 @@ public class ShapeDrawable extends AbstractDrawing {
 
   public ShapeDrawable(Shape shape) {
     this(shape, true);
+  }
+
+  public ShapeDrawable(ShapeDrawable other) {
+    super(other);
+    this.useAntiAliasing = other.useAntiAliasing;
+    this.shape =
+        switch (other.shape) {
+            // Covers Rectangle, Ellipse2D, etc.
+          case RectangularShape r -> (Shape) r.clone();
+          case Polygon p -> new Polygon(p.xpoints, p.ypoints, p.npoints);
+          case Area a -> new Area(a);
+          default -> other.shape; // Assume anything else cannot be copied but is also okay.
+        };
+  }
+
+  @Override
+  public Drawable copy() {
+    return new ShapeDrawable(this);
   }
 
   public boolean getUseAntiAliasing() {
