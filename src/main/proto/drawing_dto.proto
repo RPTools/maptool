@@ -50,6 +50,7 @@ message DrawableDto {
     BlastTemplateDto blast_template = 13;
     LineTemplateDto line_template = 14;
     WallTemplateDto wall_template = 15;
+    TriangleTemplateDto triangle_template = 16;
   }
 }
 
@@ -111,6 +112,17 @@ message RadiusTemplateDto {
   google.protobuf.StringValue name = 3;
   IntPointDto vertex = 4;
   int32 radius = 5;
+}
+
+message TriangleTemplateDto {
+  string id = 1;
+  string layer = 2;
+  google.protobuf.StringValue name = 3;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  double theta = 7;
+  double sensitivity = 8;
 }
 
 message LineCellTemplateDto {
