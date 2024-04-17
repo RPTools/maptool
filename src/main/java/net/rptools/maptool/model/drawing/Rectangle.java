@@ -73,6 +73,19 @@ public class Rectangle extends AbstractDrawing {
     return DrawableDto.newBuilder().setRectangleDrawable(dto).build();
   }
 
+  public static Rectangle fromDto(RectangleDrawableDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var startPoint = dto.getStartPoint();
+    var endPoint = dto.getEndPoint();
+    var drawable =
+        new Rectangle(id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
+
   @Override
   public java.awt.Rectangle getBounds(Zone zone) {
     if (bounds == null) {

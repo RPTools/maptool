@@ -89,4 +89,17 @@ public class Oval extends Rectangle {
 
     return DrawableDto.newBuilder().setOvalDrawable(dto).build();
   }
+
+  public static Oval fromDto(OvalDrawableDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var startPoint = dto.getStartPoint();
+    var endPoint = dto.getEndPoint();
+    var drawable =
+        new Oval(id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
 }

@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
@@ -187,5 +188,19 @@ public class BlastTemplate extends ConeTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setBlastTemplate(dto).build();
+  }
+
+  public static BlastTemplate fromDto(BlastTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new BlastTemplate(id, dto.getOffsetX(), dto.getOffsetY());
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

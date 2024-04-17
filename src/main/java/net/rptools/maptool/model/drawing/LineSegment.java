@@ -112,6 +112,19 @@ public class LineSegment extends AbstractDrawing {
     return DrawableDto.newBuilder().setLineSegment(dto).build();
   }
 
+  public static LineSegment fromDto(LineSegmentDrawableDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new LineSegment(id, dto.getWidth(), dto.getSquareCap());
+    var points = drawable.getPoints();
+    var pointDtos = dto.getPointsList();
+    pointDtos.forEach(p -> points.add(Mapper.map(p)));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
+
   private Area createLineArea() {
     if (points.size() < 1) {
       return null;

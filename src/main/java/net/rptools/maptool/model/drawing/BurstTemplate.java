@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
+import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.proto.drawing.BurstTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
@@ -131,5 +132,18 @@ public class BurstTemplate extends RadiusTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setBurstTemplate(dto).build();
+  }
+
+  public static BurstTemplate fromDto(BurstTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new BurstTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

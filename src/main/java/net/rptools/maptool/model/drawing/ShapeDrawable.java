@@ -99,6 +99,17 @@ public class ShapeDrawable extends AbstractDrawing {
     return DrawableDto.newBuilder().setShapeDrawable(dto).build();
   }
 
+  public static ShapeDrawable fromDto(ShapeDrawableDto dto) {
+    var shape = Mapper.map(dto.getShape());
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new ShapeDrawable(id, shape, dto.getUseAntiAliasing());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
+
   @Override
   protected void draw(Zone zone, Graphics2D g) {
     Object oldAA = applyAA(g);

@@ -350,4 +350,18 @@ public class ConeTemplate extends RadiusTemplate {
 
     return DrawableDto.newBuilder().setConeTemplate(dto).build();
   }
+
+  public static ConeTemplate fromDto(ConeTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new ConeTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
 }

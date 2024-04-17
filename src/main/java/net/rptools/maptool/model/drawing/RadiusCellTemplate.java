@@ -294,4 +294,17 @@ public class RadiusCellTemplate extends AbstractTemplate {
 
     return DrawableDto.newBuilder().setRadiusCellTemplate(dto).build();
   }
+
+  public static RadiusCellTemplate fromDto(RadiusCellTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new RadiusCellTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
 }

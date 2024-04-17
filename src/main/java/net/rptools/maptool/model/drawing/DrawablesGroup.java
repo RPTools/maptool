@@ -109,6 +109,19 @@ public class DrawablesGroup extends AbstractDrawing {
     return DrawableDto.newBuilder().setDrawablesGroup(dto).build();
   }
 
+  public static DrawablesGroup fromDto(DrawablesGroupDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var elements = new ArrayList<DrawnElement>();
+    var elementDtos = dto.getDrawnElementsList();
+    elementDtos.forEach(e -> elements.add(DrawnElement.fromDto(e)));
+    var drawable = new DrawablesGroup(id, elements);
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
+
   @Override
   protected void draw(Zone zone, Graphics2D g) {
     // This should never be called

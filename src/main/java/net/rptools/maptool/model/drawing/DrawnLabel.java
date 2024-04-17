@@ -127,4 +127,15 @@ public class DrawnLabel extends AbstractDrawing {
 
     return DrawableDto.newBuilder().setDrawnLabel(dto).build();
   }
+
+  public static DrawnLabel fromDto(DrawnLabelDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var bounds = dto.getBounds();
+    var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
 }
