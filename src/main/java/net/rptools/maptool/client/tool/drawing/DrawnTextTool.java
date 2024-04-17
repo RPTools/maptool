@@ -239,7 +239,7 @@ public class DrawnTextTool extends AbstractDrawingTool implements MouseMotionLis
     textPane = null;
 
     // Tell everybody else
-    completeDrawable(renderer.getZone().getId(), getPen(), label);
+    completeDrawable(getPen(), label);
     resetTool();
   }
 

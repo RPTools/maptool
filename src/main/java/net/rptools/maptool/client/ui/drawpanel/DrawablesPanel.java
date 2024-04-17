@@ -80,12 +80,12 @@ public class DrawablesPanel extends JComponent {
           }
           if (drawableList.size() > 0) {
             Collections.reverse(drawableList);
-            Rectangle bounds = getBounds(drawableList);
+            Rectangle bounds = getBounds(zone, drawableList);
             double scale =
                 (double) Math.min(MAX_PANEL_SIZE, getSize().width) / (double) bounds.width;
             if ((bounds.height * scale) > MAX_PANEL_SIZE)
               scale = (double) Math.min(MAX_PANEL_SIZE, getSize().height) / (double) bounds.height;
-            g.drawImage(drawDrawables(drawableList, bounds, scale, onlyCuts), 0, 0, null);
+            g.drawImage(drawDrawables(zone, drawableList, bounds, scale, onlyCuts), 0, 0, null);
           }
         }
       }
@@ -93,7 +93,11 @@ public class DrawablesPanel extends JComponent {
   }
 
   private BufferedImage drawDrawables(
-      List<DrawnElement> drawableList, Rectangle viewport, double scale, boolean showEraser) {
+      Zone zone,
+      List<DrawnElement> drawableList,
+      Rectangle viewport,
+      double scale,
+      boolean showEraser) {
     BufferedImage backBuffer =
         new BufferedImage(
             (int) (viewport.width * scale),
@@ -126,24 +130,33 @@ public class DrawablesPanel extends JComponent {
       if (drawable instanceof DrawablesGroup) {
         g.drawImage(
             drawDrawables(
-                ((DrawablesGroup) drawable).getDrawableList(), new Rectangle(viewport), 1, false),
+                zone,
+                ((DrawablesGroup) drawable).getDrawableList(),
+                new Rectangle(viewport),
+                1,
+                false),
             viewport.x,
             viewport.y,
             null);
-      } else drawable.draw(g, pen);
+      } else {
+        drawable.draw(zone, g, pen);
+      }
       g.setComposite(oldComposite);
     }
     g.dispose();
     return backBuffer;
   }
 
-  private Rectangle getBounds(List<DrawnElement> drawableList) {
+  private Rectangle getBounds(Zone zone, List<DrawnElement> drawableList) {
     Rectangle bounds = null;
     for (DrawnElement element : drawableList) {
       // Empty drawables are created by right clicking during the draw process
       // and need to be skipped.
-      if (element.getDrawable().getBounds() == null) continue;
-      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
+      Rectangle drawnBounds = element.getDrawable().getBounds(zone);
+      if (drawnBounds == null) {
+        continue;
+      }
+      drawnBounds = new Rectangle(drawnBounds);
       // Handle pen size
       Pen pen = element.getPen();
       int penSize = pen.getForegroundMode() == Pen.MODE_TRANSPARENT ? 0 : (int) pen.getThickness();

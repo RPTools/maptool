@@ -18,7 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -257,21 +257,9 @@ public class ConeTemplate extends RadiusTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-      // How does this happen ?! Anyway, try to use the current zone (since that's what we're
-      // drawing anyway, seems reasonable
-      if (MapTool.getFrame().getCurrentZoneRenderer() == null) {
-        // Wha?!
-        return new Rectangle();
-      }
-      setZoneId(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
-    }
-
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+  @Override
+  public Rectangle getBounds(Zone zone) {
+    int gridSize = zone.getGrid().getSize();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
 
     // Find the x,y loc
@@ -307,11 +295,7 @@ public class ConeTemplate extends RadiusTemplate {
   }
 
   @Override
-  public Area getArea() {
-    if (getZoneId() == null) {
-      return new Area();
-    }
-    Zone zone = getCampaign().getZone(getZoneId());
+  public @Nonnull Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }
@@ -352,7 +336,6 @@ public class ConeTemplate extends RadiusTemplate {
     var dto = ConeTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setDirection(getDirection().name());

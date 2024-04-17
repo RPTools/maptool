@@ -78,7 +78,7 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
           renderer.repaint();
           return;
         }
-        Area area = new ShapeDrawable(diamond, false).getArea();
+        Area area = new ShapeDrawable(diamond, false).getArea(getZone());
         if (isEraser(e)) {
           getZone().removeTopology(area);
           MapTool.serverCommand()

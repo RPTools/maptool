@@ -23,8 +23,10 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.LineSegmentDrawableDto;
@@ -73,11 +75,12 @@ public class LineSegment extends AbstractDrawing {
     return points;
   }
 
-  public Area getArea() {
+  @Override
+  public @Nonnull Area getArea(Zone zone) {
     if (area == null) {
       area = createLineArea();
     }
-    return area;
+    return Objects.requireNonNullElseGet(area, Area::new);
   }
 
   @Override
@@ -95,7 +98,9 @@ public class LineSegment extends AbstractDrawing {
   }
 
   private Area createLineArea() {
-    if (points.size() < 1) return null;
+    if (points.size() < 1) {
+      return null;
+    }
     GeneralPath gp = null;
     for (Point point : points) {
       if (gp == null) {
@@ -110,24 +115,20 @@ public class LineSegment extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     width = ((BasicStroke) g.getStroke()).getLineWidth();
     squareCap = ((BasicStroke) g.getStroke()).getEndCap() == BasicStroke.CAP_SQUARE;
-    Area area = getArea();
-    if (area != null) g.fill(area);
+    Area area = getArea(zone);
+    g.fill(area);
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     // do nothing
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     if (lastPointCount == points.size()) {
       return cachedBounds;
     }

@@ -18,7 +18,9 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.OvalDrawableDto;
@@ -40,7 +42,7 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 
@@ -51,7 +53,7 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     int minX = Math.min(startPoint.x, endPoint.x);
     int minY = Math.min(startPoint.y, endPoint.y);
 
@@ -62,8 +64,8 @@ public class Oval extends Rectangle {
   }
 
   @Override
-  public Area getArea() {
-    java.awt.Rectangle r = getBounds();
+  public @Nonnull Area getArea(Zone zone) {
+    java.awt.Rectangle r = getBounds(zone);
     return new Area(new Ellipse2D.Double(r.x, r.y, r.width, r.height));
   }
 

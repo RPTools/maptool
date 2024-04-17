@@ -17,10 +17,8 @@ package net.rptools.maptool.model.drawing;
 import com.google.protobuf.StringValue;
 import java.awt.*;
 import java.awt.Rectangle;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
-import java.awt.geom.PathIterator;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -118,15 +116,8 @@ public class RadiusTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (getZoneId() == null) {
-      // This avoids a NPE when loading up a campaign
-      return new Rectangle();
-    }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
+  @Override
+  public Rectangle getBounds(Zone zone) {
     if (zone == null) {
       return new Rectangle();
     }
@@ -137,15 +128,8 @@ public class RadiusTemplate extends AbstractTemplate {
         vertex.x - quadrantSize, vertex.y - quadrantSize, quadrantSize * 2, quadrantSize * 2);
   }
 
-  public PathIterator getPathIterator() {
-    return getArea().getPathIterator(new AffineTransform());
-  }
-
-  public Area getArea() {
-    if (getZoneId() == null) {
-      return new Area();
-    }
-    Zone zone = getCampaign().getZone(getZoneId());
+  @Override
+  public @Nonnull Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }
@@ -175,7 +159,6 @@ public class RadiusTemplate extends AbstractTemplate {
     var dto = RadiusTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 

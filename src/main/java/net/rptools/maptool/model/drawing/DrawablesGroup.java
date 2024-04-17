@@ -19,7 +19,9 @@ import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.util.List;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawablesGroupDto;
 
@@ -44,10 +46,10 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  public Rectangle getBounds() {
+  public Rectangle getBounds(Zone zone) {
     Rectangle bounds = null;
     for (DrawnElement element : drawableList) {
-      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
+      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds(zone));
       // Handle pen size
       Pen pen = element.getPen();
       int penSize = (int) (pen.getThickness() / 2 + 1);
@@ -64,18 +66,18 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  public Area getArea() {
-    Area area = null;
+  public @Nonnull Area getArea(Zone zone) {
+    Area area = new Area();
     for (DrawnElement element : drawableList) {
       boolean isEraser = element.getPen().isEraser();
-      if (area == null) {
-        if (!isEraser) area = new Area(element.getDrawable().getArea());
-      } else {
-        if (isEraser) {
-          area.subtract(element.getDrawable().getArea());
-        } else {
-          area.add(element.getDrawable().getArea());
+
+      if (isEraser) {
+        // Optimization: erasing from nothing is a no-op.
+        if (!area.isEmpty()) {
+          area.subtract(element.getDrawable().getArea(zone));
         }
+      } else {
+        area.add(element.getDrawable().getArea(zone));
       }
     }
     return area;
@@ -93,15 +95,15 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     // This should never be called
     for (DrawnElement element : drawableList) {
-      element.getDrawable().draw(g, element.getPen());
+      element.getDrawable().draw(zone, g, element.getPen());
     }
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     // This should never be called
   }
 }

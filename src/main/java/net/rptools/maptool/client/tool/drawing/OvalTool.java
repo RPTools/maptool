@@ -100,7 +100,6 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
         }
 
         completeDrawable(
-            renderer.getZone().getId(),
             getPen(),
             new ShapeDrawable(new Ellipse2D.Float(oval.x, oval.y, oval.width, oval.height), true));
         oval = null;

@@ -15,16 +15,13 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.RenderingHints;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.server.proto.drawing.BlastTemplateDto;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 
@@ -39,9 +36,6 @@ public class BlastTemplate extends ConeTemplate {
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
-
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
 
   private int offsetX;
   private int offsetY;
@@ -58,28 +52,16 @@ public class BlastTemplate extends ConeTemplate {
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or
-   * location.
-   */
-  private void adjustRectangle() {
-    if (getZoneId() == null) return;
-    Zone zone;
-    if (MapTool.isHostingServer()) {
-      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
-    } else {
-      zone = MapTool.getCampaign().getZone(getZoneId());
+  private Rectangle makeShape(Zone zone) {
+    if (zone == null) {
+      return new Rectangle();
     }
-    if (zone == null) return;
 
     int gridSize = zone.getGrid().getSize();
     int size = getRadius() * gridSize;
 
-    Rectangle r = (Rectangle) renderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, size, size);
-
-    r.x += offsetX * gridSize;
-    r.y += offsetY * gridSize;
+    return new Rectangle(
+        getVertex().x + offsetX * gridSize, getVertex().y + offsetY * gridSize, size, size);
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -87,8 +69,8 @@ public class BlastTemplate extends ConeTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   @Override
-  public Rectangle getBounds() {
-    Rectangle r = new Rectangle(renderer.getShape().getBounds());
+  public Rectangle getBounds(Zone zone) {
+    Rectangle r = makeShape(zone);
     // We don't know pen width, so add some padding to account for it
     r.x -= 5;
     r.y -= 5;
@@ -135,17 +117,6 @@ public class BlastTemplate extends ConeTemplate {
       }
       offsetX = centerOffset + Math.min(Math.max(lowerBound, relX), upperBound);
     }
-    adjustRectangle();
-  }
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
-   */
-  @Override
-  public void setVertex(ZonePoint vertex) {
-    super.setVertex(vertex);
-    adjustRectangle();
   }
 
   /**
@@ -160,29 +131,27 @@ public class BlastTemplate extends ConeTemplate {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
-   */
   @Override
-  protected void draw(Graphics2D g) {
-    renderer.draw(g);
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    try {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+      var shape = makeShape(zone);
+      if (area) {
+        g.fill(shape);
+      }
+      if (border) {
+        g.draw(shape);
+      }
+    } finally {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
-   */
   @Override
-  protected void drawBackground(Graphics2D g) {
-    Composite old = g.getComposite();
-    if (old != AlphaComposite.Clear)
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-    renderer.drawBackground(g);
-    g.setComposite(old);
-  }
-
-  @Override
-  public Area getArea() {
-    return renderer.getArea();
+  public @Nonnull Area getArea(Zone zone) {
+    return new Area(makeShape(zone));
   }
 
   public int getOffsetX() {
@@ -198,7 +167,6 @@ public class BlastTemplate extends ConeTemplate {
     var dto = BlastTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setDirection(getDirection().name())

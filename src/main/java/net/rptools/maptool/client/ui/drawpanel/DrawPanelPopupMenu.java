@@ -279,14 +279,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         // only bother doing stuff if more than one selected
         List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
         Iterator<DrawnElement> iter = drawableList.iterator();
-        Area a = elementUnderMouse.getDrawable().getArea();
+        Area a = elementUnderMouse.getDrawable().getArea(renderer.getZone());
         while (iter.hasNext()) {
           DrawnElement de = iter.next();
           if (selectedDrawSet.contains(de.getDrawable().getId())) {
             renderer.getZone().removeDrawable(de.getDrawable().getId());
             MapTool.serverCommand().undoDraw(renderer.getZone().getId(), de.getDrawable().getId());
             de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
-            if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea());
+            if (!de.equals(elementUnderMouse)) a.add(de.getDrawable().getArea(renderer.getZone()));
           }
         }
         Shape s = a;

@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.ListIterator;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -112,20 +111,9 @@ public class LineCellTemplate extends AbstractTemplate {
     if (!noPaint[3]) paintCloseHorizontalBorder(g, xOff, yOff, gridSize, getQuadrant());
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D, boolean,
-   *     boolean)
-   */
   @Override
-  protected void paint(Graphics2D g, boolean border, boolean area) {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-      return;
-    }
-    // Need to paint? We need a line and to translate the painting
-    if (pathVertex == null) {
-      return;
-    }
-    if (getRadius() == 0) {
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    if (zone == null) {
       return;
     }
     final var path = getPath();
@@ -134,7 +122,7 @@ public class LineCellTemplate extends AbstractTemplate {
     }
 
     // Paint each element in the path
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ListIterator<CellPoint> i = path.listIterator();
     while (i.hasNext()) {
       CellPoint p = i.next();
@@ -354,12 +342,9 @@ public class LineCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
-    final var zone = MapTool.getCampaign().getZone(getZoneId());
     if (zone == null) {
       return new Rectangle();
     }
@@ -412,13 +397,16 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea() {
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
-
-    final var path = getPath();
-    if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
+  public @Nonnull Area getArea(Zone zone) {
+    if (zone == null) {
       return new Area();
     }
+
+    final var path = getPath();
+    if (path == null) {
+      return new Area();
+    }
+
     // Create an area by merging all the squares along the path
     Area result = new Area();
     int gridSize = zone.getGrid().getSize();
@@ -459,7 +447,6 @@ public class LineCellTemplate extends AbstractTemplate {
     var dto = LineCellTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 

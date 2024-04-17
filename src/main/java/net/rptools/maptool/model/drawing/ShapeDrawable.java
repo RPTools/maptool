@@ -19,7 +19,9 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.ShapeDrawableDto;
@@ -48,16 +50,17 @@ public class ShapeDrawable extends AbstractDrawing {
     return useAntiAliasing;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
   public java.awt.Rectangle getBounds() {
     return shape.getBounds();
   }
 
-  public Area getArea() {
+  @Override
+  public java.awt.Rectangle getBounds(Zone zone) {
+    return getBounds();
+  }
+
+  @Override
+  public @Nonnull Area getArea(Zone zone) {
     return new Area(shape);
   }
 
@@ -77,14 +80,14 @@ public class ShapeDrawable extends AbstractDrawing {
   }
 
   @Override
-  protected void draw(Graphics2D g) {
+  protected void draw(Zone zone, Graphics2D g) {
     Object oldAA = applyAA(g);
     g.draw(shape);
     restoreAA(g, oldAA);
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {
+  protected void drawBackground(Zone zone, Graphics2D g) {
     Object oldAA = applyAA(g);
     g.fill(shape);
     restoreAA(g, oldAA);

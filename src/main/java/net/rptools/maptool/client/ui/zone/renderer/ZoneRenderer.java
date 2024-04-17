@@ -107,8 +107,7 @@ public class ZoneRenderer extends JComponent
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
-      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers;
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -172,6 +171,10 @@ public class ZoneRenderer extends JComponent
     this.zone = zone;
     zoneView = new ZoneView(zone);
     setZoneScale(new Scale());
+
+    drawableRenderers =
+        CollectionUtil.newFilledEnumMap(
+            Zone.Layer.class, layer -> new PartitionedDrawableRenderer(zone));
 
     var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();

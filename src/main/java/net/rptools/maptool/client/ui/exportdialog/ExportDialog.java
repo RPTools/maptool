@@ -883,7 +883,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
 
       Drawable drawable = element.getDrawable();
-      Rectangle drawnBounds = new Rectangle(drawable.getBounds());
+      Rectangle drawnBounds = new Rectangle(drawable.getBounds(zone));
 
       // Handle pen size
       // This slightly over-estimates the size of the pen, but we want to

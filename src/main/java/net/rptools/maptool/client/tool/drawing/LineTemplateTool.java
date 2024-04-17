@@ -116,7 +116,7 @@ public class LineTemplateTool extends RadiusTemplateTool implements PropertyChan
       g.setTransform(newTransform);
       ZonePoint vertex = template.getVertex();
       ZonePoint pathVertex = ((LineTemplate) template).getPathVertex();
-      template.draw(g, pen);
+      template.draw(renderer.getZone(), g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), vertex);
       if (pathVertex != null) {
