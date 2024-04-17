@@ -662,7 +662,16 @@ public class Zone {
     playerAlias = zone.playerAlias;
 
     for (final var entry : drawablesByLayer.entrySet()) {
-      entry.getValue().addAll(zone.drawablesByLayer.get(entry.getKey()));
+      final var otherDrawables = zone.drawablesByLayer.get(entry.getKey());
+      final var thisDrawables = entry.getValue();
+
+      for (final var element : otherDrawables) {
+        final var copy = new DrawnElement(element);
+        if (!keepIds) {
+          copy.getDrawable().setId(new GUID());
+        }
+        thisDrawables.add(copy);
+      }
     }
 
     if (!zone.labels.isEmpty()) {
