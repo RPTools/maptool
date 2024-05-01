@@ -35,7 +35,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
   private String hostName;
   private int port;
 
-  public SocketConnection(String id, String hostName, int port) throws IOException {
+  public SocketConnection(String id, String hostName, int port) {
     this.id = id;
     this.hostName = hostName;
     this.port = port;

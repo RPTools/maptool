@@ -60,8 +60,7 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
-      throws IOException {
+  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb) {
     this.config = config;
     this.policy = policy;
     playerDatabase = playerDb;

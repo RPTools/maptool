@@ -39,7 +39,7 @@ public class MapToolConnection {
   private ClientHandshake handshake;
   private Runnable onCompleted;
 
-  public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
+  public MapToolConnection(ServerConfig config, LocalPlayer player) {
 
     this.connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
     this.player = player;

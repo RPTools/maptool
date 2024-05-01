@@ -47,8 +47,7 @@ public class MapToolServerConnection
   private final boolean useEasyConnect;
 
   public MapToolServerConnection(
-      MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler)
-      throws IOException {
+      MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler) {
     this.connection =
         ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
     this.server = server;
