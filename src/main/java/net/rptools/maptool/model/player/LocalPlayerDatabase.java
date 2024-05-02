@@ -35,7 +35,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
   LocalPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    localPlayer = new LocalPlayer("None", Role.GM, ServerConfig.getPersonalServerGMPassword());
+    localPlayer = new LocalPlayer();
   }
 
   public synchronized void setLocalPlayer(LocalPlayer player) {

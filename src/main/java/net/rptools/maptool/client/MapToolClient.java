@@ -23,7 +23,6 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 
@@ -45,7 +44,7 @@ public class MapToolClient {
   public MapToolClient() {
     this.campaign = new Campaign();
     try {
-      this.player = new LocalPlayer("", Player.Role.GM, ServerConfig.getPersonalServerGMPassword());
+      this.player = new LocalPlayer();
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default client", e);
     }

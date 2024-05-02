@@ -17,7 +17,9 @@ package net.rptools.maptool.model.player;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** Represents the local player. Its methods can depend on AppState and other local properties. */
@@ -25,6 +27,10 @@ public class LocalPlayer extends Player {
 
   private final String plainTextPassword;
   private CipherUtil.Key password;
+
+  public LocalPlayer() throws NoSuchAlgorithmException, InvalidKeySpecException {
+    this(AppPreferences.getDefaultUserName(), Role.GM, ServerConfig.getPersonalServerGMPassword());
+  }
 
   public LocalPlayer(String name, Role role, String plainTextPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
