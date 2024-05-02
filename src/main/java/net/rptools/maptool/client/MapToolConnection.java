@@ -15,7 +15,6 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
@@ -52,7 +51,7 @@ public class MapToolConnection {
     else this.onCompleted = onCompleted;
   }
 
-  public void start() throws IOException, ExecutionException, InterruptedException {
+  public void start() throws IOException {
     connection.addMessageHandler(handshake);
     handshake.addObserver(
         (ignore) -> {

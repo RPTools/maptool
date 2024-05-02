@@ -120,8 +120,19 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public void startHandshake() throws ExecutionException, InterruptedException {
-    var md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+  public void startHandshake() {
+    MD5Key md5key;
+    try {
+      md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+    } catch (ExecutionException | InterruptedException e) {
+      // Report the error the same way as any other handshake error.
+      errorMessage = I18N.getText("Handshake.msg.failedToGetPublicKey");
+      exception = e;
+      currentState = State.Error;
+      notifyObservers();
+      return;
+    }
+
     var clientInitMsg =
         ClientInitMsg.newBuilder()
             .setPlayerName(player.getName())
@@ -212,8 +223,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
     }
   }
 
-  private void handle(PublicKeyAddedMsg publicKeyAddedMsg)
-      throws ExecutionException, InterruptedException {
+  private void handle(PublicKeyAddedMsg publicKeyAddedMsg) {
     SwingUtilities.invokeLater(this::closeEasyConnectDialog);
     startHandshake();
   }

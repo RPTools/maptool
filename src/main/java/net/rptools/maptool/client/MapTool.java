@@ -45,7 +45,6 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.text.MessageFormat;
 import java.util.*;
-import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -1160,11 +1159,7 @@ public class MapTool {
   }
 
   public static void startPersonalServer(Campaign campaign)
-      throws IOException,
-          NoSuchAlgorithmException,
-          InvalidKeySpecException,
-          ExecutionException,
-          InterruptedException {
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     ServerConfig config = ServerConfig.createPersonalServerConfig();
 
     PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
@@ -1186,7 +1181,7 @@ public class MapTool {
   }
 
   public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
-      throws IOException, ExecutionException, InterruptedException {
+      throws IOException {
     MapTool.player = player;
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
