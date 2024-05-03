@@ -57,7 +57,7 @@ import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;
-import net.rptools.maptool.client.events.ServerStopped;
+import net.rptools.maptool.client.events.ServerDisconnected;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.NoteFrame;
@@ -978,6 +978,7 @@ public class MapTool {
   public static void startServer(
       String id,
       ServerConfig config,
+      boolean useUPnP,
       ServerPolicy policy,
       Campaign campaign,
       ServerSidePlayerDatabase playerDatabase,
@@ -991,6 +992,11 @@ public class MapTool {
     }
 
     assetTransferManager.flush();
+
+    // Use UPnP to open port in router
+    if (useUPnP) {
+      UPnPUtil.openPort(config.getPort());
+    }
 
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
@@ -1052,15 +1058,41 @@ public class MapTool {
     return thumbnailManager;
   }
 
+  /**
+   * Shutdown the current server.
+   *
+   * <p>The client must have already been disconnected if necessary.
+   */
   public static void stopServer() {
     if (server == null) {
       return;
     }
 
-    disconnect();
     server.stop();
-    server = null;
     getFrame().getConnectionPanel().stopHosting();
+
+    // Unregister ourselves
+    if (server.isServerRegistered()) {
+      try {
+        MapToolRegistry.getInstance().unregisterInstance();
+      } catch (Throwable t) {
+        MapTool.showError("While unregistering server instance", t);
+      }
+    }
+
+    if (announcer != null) {
+      announcer.stop();
+      announcer = null;
+    }
+
+    server = null;
+
+    // Close UPnP port mapping if used
+    StartServerDialogPreferences serverProps = new StartServerDialogPreferences();
+    if (serverProps.getUseUPnP()) {
+      int port = serverProps.getPort();
+      UPnPUtil.closePort(port);
+    }
   }
 
   public static List<Player> getPlayerList() {
@@ -1209,28 +1241,6 @@ public class MapTool {
   }
 
   public static void disconnect() {
-    // Close UPnP port mapping if used
-    StartServerDialogPreferences serverProps = new StartServerDialogPreferences();
-    if (serverProps.getUseUPnP()) {
-      int port = serverProps.getPort();
-      UPnPUtil.closePort(port);
-    }
-    boolean isPersonalServer = isPersonalServer();
-
-    if (announcer != null) {
-      announcer.stop();
-      announcer = null;
-    }
-
-    // Unregister ourselves
-    if (server != null && server.isServerRegistered() && !isPersonalServer) {
-      try {
-        MapToolRegistry.getInstance().unregisterInstance();
-      } catch (Throwable t) {
-        MapTool.showError("While unregistering server instance", t);
-      }
-    }
-
     try {
       client.close();
     } catch (IOException ioe) {
@@ -1238,14 +1248,14 @@ public class MapTool {
       log.debug("While closing connection", ioe);
     }
 
-    new MapToolEventBus().getMainEventBus().post(new ServerStopped());
+    new MapToolEventBus().getMainEventBus().post(new ServerDisconnected());
     playerList.clear();
 
     MapTool.getFrame()
         .getConnectionStatusPanel()
         .setStatus(ConnectionStatusPanel.Status.disconnected);
 
-    if (!isPersonalServer) {
+    if (!isPersonalServer()) {
       addLocalMessage(MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.disconnected")));
     }
   }

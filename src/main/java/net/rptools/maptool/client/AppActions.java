@@ -2224,12 +2224,9 @@ public class AppActions {
                 boolean failed = false;
                 try {
                   MapTool.getClient().expectDisconnection();
+                  MapTool.disconnect();
                   MapTool.stopServer();
 
-                  // Use UPnP to open port in router
-                  if (serverProps.getUseUPnP()) {
-                    UPnPUtil.openPort(serverProps.getPort());
-                  }
                   // Right now set this is set to whatever the last server settings were. If we
                   // wanted to turn it on and
                   // leave it turned on, the line would change to:
@@ -2274,6 +2271,7 @@ public class AppActions {
                   MapTool.startServer(
                       dialog.getUsernameTextField().getText(),
                       config,
+                      serverProps.getUseUPnP(),
                       policy,
                       campaign,
                       playerDatabase,
@@ -2329,8 +2327,10 @@ public class AppActions {
             return;
           }
 
-          MapTool.getClient().expectDisconnection();
           LOAD_MAP.setSeenWarning(false);
+
+          MapTool.getClient().expectDisconnection();
+          MapTool.disconnect();
           MapTool.stopServer();
 
           // Install a temporary gimped campaign until we get the one from the
@@ -2429,10 +2429,13 @@ public class AppActions {
       campaign = CampaignFactory.createBasicCampaign();
       new CampaignManager().clearCampaignData();
     }
-    MapTool.getClient().expectDisconnection();
+
     LOAD_MAP.setSeenWarning(false);
-    MapTool.stopServer();
+
+    MapTool.getClient().expectDisconnection();
     MapTool.disconnect();
+    MapTool.stopServer();
+
     MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
     MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
 

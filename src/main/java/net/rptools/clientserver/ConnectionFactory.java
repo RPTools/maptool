@@ -66,6 +66,7 @@ public class ConnectionFactory {
 
           @Override
           public void onUnexpectedClose() {
+            MapTool.disconnect();
             MapTool.stopServer();
           }
         });

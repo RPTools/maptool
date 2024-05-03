@@ -158,18 +158,25 @@ public class MapToolClient {
   }
 
   private void onDisconnect(boolean isLocalServer, Connection connection) {
-    if (!isLocalServer || !disconnectExpected) {
-      // Update internal state
-      MapTool.disconnect();
-    }
+    /*
+     * Three main cases:
+     * 1. Expected disconnect. This will be part of a broader shutdown sequence and we don't need to
+     *    do anything to clean up client or server state.
+     * 2. Unexpected disconnect for remote server. Common case due to remote server shutdown or
+     *    other lost connection. We need to clean up the connection, show an error to the user, and
+     *    start a new personal server with a blank campaign.
+     * 3. Unexpected disconnect for local server. A rare case where we lost connection without
+     *    shutting down the server. We need to clean up the connection, stop the server, show an
+     *    error to the user, and start a new personal server with the current campaign.
+     */
 
-    if (disconnectExpected) {
-      // expected disconnect from someone else's server
-      if (!isLocalServer) {
-        // hide map so player doesn't get a brief GM view
-        MapTool.getFrame().setCurrentZoneRenderer(null);
+    if (!disconnectExpected) {
+      // Make sure the connection state is cleaned up since we can't count on it having been done.
+      MapTool.disconnect();
+      if (isLocalServer) {
+        MapTool.stopServer();
       }
-    } else {
+
       var errorText = I18N.getText("msg.error.server.disconnected");
       var connectionError = connection.getError();
       var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
@@ -181,11 +188,18 @@ public class MapToolClient {
       MapTool.getFrame().getAssetPanel().enableAssets();
       new CampaignManager().clearCampaignData();
       MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
+
+      // Keep any local campaign around in the new personal server.
+      final var campaign = isLocalServer ? getCampaign() : CampaignFactory.createBasicCampaign();
       try {
-        MapTool.startPersonalServer(CampaignFactory.createBasicCampaign());
+        MapTool.startPersonalServer(campaign);
       } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
         MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
       }
+    } else if (!isLocalServer) {
+      // expected disconnect from someone else's server
+      // hide map so player doesn't get a brief GM view
+      MapTool.getFrame().setCurrentZoneRenderer(null);
     }
   }
 }
