@@ -150,11 +150,8 @@ public class MapToolClient {
     this.campaign = campaign;
   }
 
-  public void setServerPolicy(ServerPolicy serverPolicy, boolean sendToServer) {
+  public void setServerPolicy(ServerPolicy serverPolicy) {
     this.serverPolicy = serverPolicy;
-    if (sendToServer) {
-      this.serverCommand.setServerPolicy(serverPolicy);
-    }
   }
 
   private void onDisconnect(boolean isLocalServer, Connection connection) {

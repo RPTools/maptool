@@ -541,11 +541,12 @@ public class MapTool {
   }
 
   public static void updateServerPolicy() {
-    client.setServerPolicy(client.getServerPolicy(), true);
+    client.getServerCommand().setServerPolicy(client.getServerPolicy());
   }
 
   public static void updateServerPolicy(ServerPolicy policy) {
-    client.setServerPolicy(policy, true);
+    client.setServerPolicy(policy);
+    client.getServerCommand().setServerPolicy(policy);
   }
 
   public static boolean isInFocus() {
@@ -957,7 +958,7 @@ public class MapTool {
   }
 
   public static void setServerPolicy(ServerPolicy policy) {
-    client.setServerPolicy(policy, false);
+    client.setServerPolicy(policy);
   }
 
   public static AssetTransferManager getAssetTransferManager() {
