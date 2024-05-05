@@ -17,15 +17,23 @@ package net.rptools.maptool.client;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.maptool.client.events.PlayerConnected;
+import net.rptools.maptool.client.events.PlayerDisconnected;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -42,6 +50,10 @@ import net.rptools.maptool.server.ServerPolicy;
 public class MapToolClient {
   private final LocalPlayer player;
   private final PlayerDatabase playerDatabase;
+
+  /** Case-insensitive ordered set of player names. */
+  private final List<Player> playerList;
+
   private final IMapToolConnection conn;
   private Campaign campaign;
   private ServerPolicy serverPolicy;
@@ -58,6 +70,7 @@ public class MapToolClient {
     this.campaign = new Campaign();
     this.player = player;
     this.playerDatabase = playerDatabase;
+    this.playerList = new ArrayList<>();
     this.serverPolicy = new ServerPolicy(serverPolicy);
 
     this.conn =
@@ -116,6 +129,8 @@ public class MapToolClient {
     if (conn.isAlive()) {
       conn.close();
     }
+
+    playerList.clear();
   }
 
   public void expectDisconnection() {
@@ -128,6 +143,30 @@ public class MapToolClient {
 
   public LocalPlayer getPlayer() {
     return player;
+  }
+
+  public List<Player> getPlayerList() {
+    return Collections.unmodifiableList(playerList);
+  }
+
+  public void addPlayer(Player player) {
+    if (!playerList.contains(player)) {
+      playerList.add(player);
+      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
+      new Players(playerDatabase).playerSignedIn(player);
+
+      playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
+    }
+  }
+
+  public void removePlayer(Player player) {
+    playerList.remove(player);
+    new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
+    new Players(playerDatabase).playerSignedOut(player);
+  }
+
+  public boolean isPlayerConnected(String playerName) {
+    return playerList.stream().anyMatch(p -> p.getName().equalsIgnoreCase(playerName));
   }
 
   public PlayerDatabase getPlayerDatabase() {

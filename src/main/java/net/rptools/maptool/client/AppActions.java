@@ -1276,7 +1276,7 @@ public class AppActions {
             MapTool.showError("msg.error.cantBootSelf");
             return;
           }
-          if (MapTool.isPlayerConnected(selectedPlayer.getName())) {
+          if (MapTool.getClient().isPlayerConnected(selectedPlayer.getName())) {
             String msg = I18N.getText("msg.confirm.bootPlayer", selectedPlayer.getName());
             if (MapTool.confirm(msg)) {
               MapTool.serverCommand().bootPlayer(selectedPlayer.getName());

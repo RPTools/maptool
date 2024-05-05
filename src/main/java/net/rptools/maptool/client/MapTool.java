@@ -41,7 +41,6 @@ import java.net.URI;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.text.MessageFormat;
 import java.util.*;
 import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
@@ -55,8 +54,6 @@ import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.events.ChatMessageAdded;
-import net.rptools.maptool.client.events.PlayerConnected;
-import net.rptools.maptool.client.events.PlayerDisconnected;
 import net.rptools.maptool.client.events.ServerDisconnected;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
 import net.rptools.maptool.client.swing.MapToolEventQueue;
@@ -91,7 +88,6 @@ import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerZoneListener;
-import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
@@ -153,7 +149,6 @@ public class MapTool {
   private static String vendor = "RPTools!"; // Default, will get from JAR Manifest during normal
   // runtime
 
-  private static List<Player> playerList;
   private static PlayerZoneListener playerZoneListener;
   private static ZoneLoadedListener zoneLoadedListener;
 
@@ -661,8 +656,6 @@ public class MapTool {
     assetTransferManager = new AssetTransferManager();
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
-    playerList = new ArrayList<>();
-
     setClientFrame(new MapToolFrame(menuBar));
 
     try {
@@ -740,39 +733,6 @@ public class MapTool {
    */
   public static IMapToolServer getServer() {
     return server;
-  }
-
-  public static void addPlayer(Player player) {
-    if (!playerList.contains(player)) {
-      playerList.add(player);
-      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
-      new Players(client.getPlayerDatabase()).playerSignedIn(player);
-
-      // LATER: Make this non-anonymous
-      playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
-
-      if (!player.equals(MapTool.getPlayer())) {
-        String msg =
-            MessageFormat.format(I18N.getText("msg.info.playerConnected"), player.getName());
-        addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
-      }
-    }
-  }
-
-  public static void removePlayer(Player player) {
-    if (player == null) {
-      return;
-    }
-    playerList.remove(player);
-    new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
-
-    new Players(client.getPlayerDatabase()).playerSignedOut(player);
-
-    if (MapTool.getPlayer() != null && !player.equals(MapTool.getPlayer())) {
-      String msg =
-          MessageFormat.format(I18N.getText("msg.info.playerDisconnected"), player.getName());
-      addLocalMessage(MessageUtil.getFormattedSystemMsg(msg));
-    }
   }
 
   /**
@@ -1084,11 +1044,12 @@ public class MapTool {
   }
 
   public static List<Player> getPlayerList() {
-    return playerList;
+    return client.getPlayerList();
   }
 
   /** Returns the list of non-gm names. */
   public static List<String> getNonGMs() {
+    var playerList = client.getPlayerList();
     List<String> nonGMs = new ArrayList<>(playerList.size());
     playerList.forEach(
         player -> {
@@ -1101,6 +1062,7 @@ public class MapTool {
 
   /** Returns the list of gm names. */
   public static List<String> getGMs() {
+    var playerList = client.getPlayerList();
     List<String> gms = new ArrayList<>(playerList.size());
     playerList.forEach(
         player -> {
@@ -1109,22 +1071,6 @@ public class MapTool {
           }
         });
     return gms;
-  }
-
-  /**
-   * checks if a specific player is connected to the game.
-   *
-   * @param player The name of the player to check.
-   * @return {@code true} if the player is connected otherwise {@code false}.
-   */
-  public static boolean isPlayerConnected(String player) {
-    for (int i = 0; i < playerList.size(); i++) {
-      Player p = playerList.get(i);
-      if (p.getName().equalsIgnoreCase(player)) {
-        return true;
-      }
-    }
-    return false;
   }
 
   public static void removeZone(Zone zone) {
@@ -1237,7 +1183,6 @@ public class MapTool {
     }
 
     new MapToolEventBus().getMainEventBus().post(new ServerDisconnected());
-    playerList.clear();
 
     MapTool.getFrame()
         .getConnectionStatusPanel()

@@ -18,6 +18,7 @@ import java.awt.EventQueue;
 import java.awt.Point;
 import java.awt.geom.Area;
 import java.io.IOException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -73,6 +74,7 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.AssetHeader;
+import net.rptools.maptool.util.MessageUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -789,7 +791,16 @@ public class ClientMessageHandler implements MessageHandler {
   private void handle(PlayerDisconnectedMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          MapTool.removePlayer(Player.fromDto(msg.getPlayer()));
+          var player = Player.fromDto(msg.getPlayer());
+          client.removePlayer(player);
+
+          if (!player.equals(client.getPlayer())) {
+            MapTool.addLocalMessage(
+                MessageUtil.getFormattedSystemMsg(
+                    MessageFormat.format(
+                        I18N.getText("msg.info.playerDisconnected"), player.getName())));
+          }
+
           MapTool.getFrame().refresh();
         });
   }
@@ -797,7 +808,16 @@ public class ClientMessageHandler implements MessageHandler {
   private void handle(PlayerConnectedMsg msg) {
     EventQueue.invokeLater(
         () -> {
-          MapTool.addPlayer(Player.fromDto(msg.getPlayer()));
+          var player = Player.fromDto(msg.getPlayer());
+          client.addPlayer(player);
+
+          if (!player.equals(client.getPlayer())) {
+            MapTool.addLocalMessage(
+                MessageUtil.getFormattedSystemMsg(
+                    MessageFormat.format(
+                        I18N.getText("msg.info.playerConnected"), player.getName())));
+          }
+
           MapTool.getFrame().refresh();
         });
   }
