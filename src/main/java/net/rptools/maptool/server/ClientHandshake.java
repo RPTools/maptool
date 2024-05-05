@@ -328,8 +328,8 @@ public class ClientHandshake implements Handshake, MessageHandler {
     MapTool.getFrame()
         .getToolbarPanel()
         .getMapselect()
-        .setVisible((!policy.getMapSelectUIHidden()) || MapTool.getPlayer().isGM());
-    if ((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM()) {
+        .setVisible((!policy.getMapSelectUIHidden()) || client.getPlayer().isGM());
+    if ((!policy.getDisablePlayerAssetPanel()) || client.getPlayer().isGM()) {
       MapTool.getFrame().getAssetPanel().enableAssets();
     } else {
       MapTool.getFrame().getAssetPanel().disableAssets();
