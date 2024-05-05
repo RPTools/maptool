@@ -2104,11 +2104,13 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
+          var client = MapTool.getClient();
 
-          ServerPolicy policy = MapTool.getServerPolicy();
+          ServerPolicy policy = client.getServerPolicy();
           policy.setIsMovementLocked(!policy.isMovementLocked());
 
-          MapTool.updateServerPolicy(policy);
+          client.setServerPolicy(policy);
+          client.getServerCommand().setServerPolicy(policy);
         }
       };
 
@@ -2126,11 +2128,13 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
+          var client = MapTool.getClient();
 
-          ServerPolicy policy = MapTool.getServerPolicy();
+          ServerPolicy policy = client.getServerPolicy();
           policy.setIsTokenEditorLocked(!policy.isTokenEditorLocked());
 
-          MapTool.updateServerPolicy(policy);
+          client.setServerPolicy(policy);
+          client.getServerCommand().setServerPolicy(policy);
         }
       };
 
@@ -2158,8 +2162,9 @@ public class AppActions {
                 StartServerDialog dialog = new StartServerDialog();
                 dialog.showDialog();
 
-                if (!dialog.accepted()) // Results stored in Preferences.userRoot()
-                return;
+                if (!dialog.accepted()) { // Results stored in Preferences.userRoot()
+                  return;
+                }
 
                 StartServerDialogPreferences serverProps =
                     new StartServerDialogPreferences(); // data retrieved from

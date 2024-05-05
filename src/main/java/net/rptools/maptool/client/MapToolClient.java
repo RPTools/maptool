@@ -58,7 +58,7 @@ public class MapToolClient {
     this.campaign = new Campaign();
     this.player = player;
     this.playerDatabase = playerDatabase;
-    this.serverPolicy = serverPolicy;
+    this.serverPolicy = new ServerPolicy(serverPolicy);
 
     this.conn =
         serverConfig == null
@@ -138,8 +138,24 @@ public class MapToolClient {
     return conn;
   }
 
+  /**
+   * @return A copy of the client's server policy.
+   */
   public ServerPolicy getServerPolicy() {
-    return serverPolicy;
+    return new ServerPolicy(serverPolicy);
+  }
+
+  /**
+   * Sets the client's server policy.
+   *
+   * <p>If this also needs to be updated remotely, call {@link
+   * net.rptools.maptool.server.ServerCommand#setServerPolicy(net.rptools.maptool.server.ServerPolicy)}
+   * as well.
+   *
+   * @param serverPolicy The new policy to set.
+   */
+  public void setServerPolicy(ServerPolicy serverPolicy) {
+    this.serverPolicy = new ServerPolicy(serverPolicy);
   }
 
   public Campaign getCampaign() {
@@ -148,10 +164,6 @@ public class MapToolClient {
 
   public void setCampaign(Campaign campaign) {
     this.campaign = campaign;
-  }
-
-  public void setServerPolicy(ServerPolicy serverPolicy) {
-    this.serverPolicy = serverPolicy;
   }
 
   private void onDisconnect(boolean isLocalServer, Connection connection) {

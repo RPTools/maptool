@@ -287,7 +287,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           ServerPolicy policy = ServerPolicy.fromDto(msg.getPolicy());
-          MapTool.setServerPolicy(policy);
+          client.setServerPolicy(policy);
           MapTool.getFrame().getToolbox().updateTools();
         });
   }

@@ -540,15 +540,6 @@ public class MapTool {
     }
   }
 
-  public static void updateServerPolicy() {
-    client.getServerCommand().setServerPolicy(client.getServerPolicy());
-  }
-
-  public static void updateServerPolicy(ServerPolicy policy) {
-    client.setServerPolicy(policy);
-    client.getServerCommand().setServerPolicy(policy);
-  }
-
   public static boolean isInFocus() {
     // TODO: This should probably also check owned windows
     return getFrame().isFocused();
@@ -955,10 +946,6 @@ public class MapTool {
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
-  }
-
-  public static void setServerPolicy(ServerPolicy policy) {
-    client.setServerPolicy(policy);
   }
 
   public static AssetTransferManager getAssetTransferManager() {
