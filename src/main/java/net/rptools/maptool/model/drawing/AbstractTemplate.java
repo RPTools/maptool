@@ -47,6 +47,12 @@ public abstract class AbstractTemplate extends AbstractDrawing {
     super(id);
   }
 
+  protected AbstractTemplate(AbstractTemplate other) {
+    super(other);
+    this.radius = other.radius;
+    this.vertex = new ZonePoint(other.vertex);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Class Variables
    *-------------------------------------------------------------------------------------------*/

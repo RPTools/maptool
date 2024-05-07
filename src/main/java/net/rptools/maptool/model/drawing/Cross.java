@@ -43,6 +43,18 @@ public class Cross extends AbstractDrawing {
     endPoint = new Point(endX, endY);
   }
 
+  public Cross(Cross other) {
+    super(other);
+
+    this.startPoint = new Point(other.startPoint);
+    this.endPoint = new Point(other.endPoint);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new Cross(this);
+  }
+
   @Override
   public @Nonnull Area getArea(Zone zone) {
     return new Area(getBounds(zone));
@@ -60,6 +72,19 @@ public class Cross extends AbstractDrawing {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setCrossDrawable(dto).build();
+  }
+
+  public static Cross fromDto(CrossDrawableDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var startPoint = dto.getStartPoint();
+    var endPoint = dto.getEndPoint();
+    var drawable =
+        new Cross(id, startPoint.getX(), startPoint.getY(), endPoint.getX(), endPoint.getY());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 
   @Override

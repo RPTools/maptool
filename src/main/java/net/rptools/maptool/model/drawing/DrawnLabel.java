@@ -72,6 +72,18 @@ public class DrawnLabel extends AbstractDrawing {
     font = aFont;
   }
 
+  public DrawnLabel(DrawnLabel other) {
+    super(other);
+    this.bounds = new Rectangle(other.bounds);
+    this.text = other.text;
+    this.font = other.font;
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawnLabel(this);
+  }
+
   public String getText() {
     return text;
   }
@@ -114,5 +126,16 @@ public class DrawnLabel extends AbstractDrawing {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setDrawnLabel(dto).build();
+  }
+
+  public static DrawnLabel fromDto(DrawnLabelDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var bounds = dto.getBounds();
+    var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }
