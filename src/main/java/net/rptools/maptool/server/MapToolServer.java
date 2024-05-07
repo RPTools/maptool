@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.server;
 
-import static net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType.PERSONAL_SERVER;
-
 import java.io.IOException;
 import java.util.Collections;
 import java.util.HashMap;
@@ -33,8 +31,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.player.PlayerDatabase;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
@@ -45,13 +42,13 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author drice
  */
-public class MapToolServer {
+public class MapToolServer implements IMapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final MapToolServerConnection conn;
   private final ServerConfig config;
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
 
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
@@ -63,8 +60,8 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
-  public MapToolServer(ServerConfig config, ServerPolicy policy, PlayerDatabase playerDb)
-      throws IOException {
+  public MapToolServer(
+      ServerConfig config, ServerPolicy policy, ServerSidePlayerDatabase playerDb) {
     this.config = config;
     this.policy = policy;
     playerDatabase = playerDb;
@@ -80,6 +77,30 @@ public class MapToolServer {
       heartbeatThread = new HeartbeatThread();
       heartbeatThread.start();
     }
+  }
+
+  @Override
+  public boolean isPersonalServer() {
+    return false;
+  }
+
+  @Override
+  public boolean isServerRegistered() {
+    return config.isServerRegistered();
+  }
+
+  @Override
+  public String getName() {
+    return config.getServerName();
+  }
+
+  @Override
+  public int getPort() {
+    return config.getPort();
+  }
+
+  public ServerSidePlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
   }
 
   public void configureClientConnection(Connection connection) {
@@ -167,6 +188,7 @@ public class MapToolServer {
     return config;
   }
 
+  @Override
   public void stop() {
     conn.close();
     if (heartbeatThread != null) {
@@ -306,15 +328,5 @@ public class MapToolServer {
     public void shutdown() {
       stop = true;
     }
-  }
-
-  ////
-  // STANDALONE SERVER
-  public static void main(String[] args) throws IOException {
-    // This starts the server thread.
-    PlayerDatabaseFactory.setCurrentPlayerDatabase(PERSONAL_SERVER);
-    PlayerDatabase playerDatabase = PlayerDatabaseFactory.getCurrentPlayerDatabase();
-    MapToolServer server =
-        new MapToolServer(new ServerConfig(), new ServerPolicy(), playerDatabase);
   }
 }

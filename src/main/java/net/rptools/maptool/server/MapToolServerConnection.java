@@ -19,13 +19,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.Handshake;
-import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.player.PlayerDatabase;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.server.proto.PlayerConnectedMsg;
 import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
@@ -36,19 +35,17 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author trevor
  */
-public class MapToolServerConnection
-    implements ServerObserver, HandshakeProvider, HandshakeObserver {
+public class MapToolServerConnection implements ServerObserver, HandshakeProvider {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final Map<Connection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
   private final Server connection;
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
 
   public MapToolServerConnection(
-      MapToolServer server, PlayerDatabase playerDatabase, ServerMessageHandler handler)
-      throws IOException {
+      MapToolServer server, ServerSidePlayerDatabase playerDatabase, ServerMessageHandler handler) {
     this.connection =
         ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
     this.server = server;
@@ -63,9 +60,9 @@ public class MapToolServerConnection
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
   public Handshake getConnectionHandshake(Connection conn) {
-    var handshake = new ServerHandshake(conn, playerDatabase, useEasyConnect);
+    var handshake = new ServerHandshake(server, conn, playerDatabase, useEasyConnect);
     handshakeMap.put(conn, handshake);
-    handshake.addObserver(this);
+    handshake.addObserver(h -> this.onCompleted(handshake));
     conn.addMessageHandler(handshake);
     return handshake;
   }
@@ -187,16 +184,9 @@ public class MapToolServerConnection
     connection.removeObserver(observer);
   }
 
-  @Override
-  public void onCompleted(Handshake handshake) {
-    if (!(handshake instanceof ServerHandshake serverHandshake)) {
-      log.error("Got the wrong handshake type: {}", handshake.getClass());
-      return;
-    }
-
-    handshake.removeObserver(this);
+  public void onCompleted(ServerHandshake handshake) {
     if (handshake.isSuccessful()) {
-      Player player = serverHandshake.getPlayer();
+      Player player = handshake.getPlayer();
 
       if (player != null) {
         playerMap.put(handshake.getConnection().getId().toUpperCase(), player);

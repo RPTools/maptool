@@ -20,6 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertLinesMatch;
 import java.math.BigDecimal;
 import java.util.Collections;
 import net.rptools.dicelib.expression.Result;
+import net.rptools.maptool.model.CampaignFactory;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
@@ -116,6 +117,8 @@ public class MapToolLineParserTest {
 
   @Test
   public void testMacroChangesTokenProperty() throws ParserException {
+    // We need the campaign to have the "Strength" property defined.
+    MapTool.getClient().setCampaign(CampaignFactory.createBasicCampaign());
 
     Token token = new Token();
     token.setProperty("Strength", "1");

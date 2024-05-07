@@ -282,7 +282,6 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
-          MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
         });
   }
@@ -294,7 +293,6 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
-          MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
         });
   }
