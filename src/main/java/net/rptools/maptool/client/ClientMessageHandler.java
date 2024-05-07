@@ -643,7 +643,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Campaign campaign = Campaign.fromDto(msg.getCampaign());
-          client.setCampaign(campaign);
+          MapTool.setCampaign(campaign);
 
           // Hide the "Connecting" overlay
           MapTool.getFrame().hideGlassPane();
@@ -1048,7 +1048,7 @@ public class ClientMessageHandler implements MessageHandler {
     var loaded = updatePlayerStatusMsg.getLoaded();
 
     Player player =
-        MapTool.getPlayerList().stream()
+        client.getPlayerList().stream()
             .filter(x -> x.getName().equals(playerName))
             .findFirst()
             .orElse(null);
