@@ -15,7 +15,9 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -29,6 +31,7 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -50,6 +53,7 @@ public class LookupTableFunction extends AbstractFunction {
         "getTableRoll",
         "setTableRoll",
         "clearTable",
+        "loadTable",        // bulk table import
         "addTableEntry",
         "deleteTableEntry",
         "createTable",
@@ -102,6 +106,8 @@ public class LookupTableFunction extends AbstractFunction {
       return setTableRoll(function, params);
     } else if ("clearTable".equalsIgnoreCase(function)) {
       return clearTable(function, params);
+    } else if ("loadTable".equalsIgnoreCase(function)) {
+      return loadTable(function, params);
     } else if ("addTableEntry".equalsIgnoreCase(function)) {
       return addTableEntry(function, params);
     } else if ("deleteTableEntry".equalsIgnoreCase(function)) {
@@ -129,54 +135,58 @@ public class LookupTableFunction extends AbstractFunction {
     } else if ("getTablePicksLeft".equalsIgnoreCase(function)) {
       return getTablePicksLeft(function, params);
     } else { // if tbl, table, tblImage or tableImage
-      FunctionUtil.checkNumberParam(function, params, 1, 3);
-      String name = params.get(0).toString();
+      return tbl_and_table(function, params);
+    }
+  }
 
-      String roll = null;
-      if (params.size() > 1) {
-        roll = params.get(1).toString().isEmpty() ? null : params.get(1).toString();
+  private @Nullable Serializable tbl_and_table(String function, List<Object> params) throws ParserException {
+    FunctionUtil.checkNumberParam(function, params, 1, 3);
+    String name = params.get(0).toString();
+
+    String roll = null;
+    if (params.size() > 1) {
+      roll = params.get(1).toString().isEmpty() ? null : params.get(1).toString();
+    }
+
+    LookupTable lookupTable = checkTableAccess(function, name);
+    LookupEntry result = lookupTable.getLookup(roll);
+    if (result == null) {
+      return null;
+    }
+
+    assert result.getValue() != null;
+    if (result.getValue().equals(LookupTable.NO_PICKS_LEFT)) {
+      return result.getValue();
+    }
+
+    if (function.equalsIgnoreCase("table") || function.equalsIgnoreCase("tbl")) {
+      String val = result.getValue();
+      try {
+        return new BigDecimal(val);
+      } catch (NumberFormatException nfe) {
+        return val;
       }
-
-      LookupTable lookupTable = checkTableAccess(function, name);
-      LookupEntry result = lookupTable.getLookup(roll);
-      if (result == null) {
-        return null;
+    } else if (function.equalsIgnoreCase("tableImage") || function.equalsIgnoreCase("tblImage")) { // We want the image URI through tblImage or tableImage
+      if (result.getImageId() == null) {
+        return "";
       }
+      StringBuilder assetId = new StringBuilder("asset://");
+      assetId.append(result.getImageId().toString());
 
-      assert result.getValue() != null;
-      if (result.getValue().equals(LookupTable.NO_PICKS_LEFT)) {
-        return result.getValue();
-      }
-
-      if (function.equalsIgnoreCase("table") || function.equalsIgnoreCase("tbl")) {
-        String val = result.getValue();
+      if (params.size() > 2) {
         try {
-            return new BigDecimal(val);
-        } catch (NumberFormatException nfe) {
-          return val;
+          Integer imageSize = FunctionUtil.paramAsInteger(function, params, 2, false);
+          int i = Math.max(imageSize, 1); // Constrain to a minimum of 1
+          assetId.append("-");
+          assetId.append(i);
+        } catch (ParserException pe) {
+          throw new ParserException(
+              I18N.getText("macro.function.LookupTableFunctions.invalidSize", function));
         }
-      } else if (function.equalsIgnoreCase("tableImage") || function.equalsIgnoreCase("tblImage")) { // We want the image URI through tblImage or tableImage
-        if (result.getImageId() == null) {
-          return ""; // empty string if no image is found (#538)
-        }
-        StringBuilder assetId = new StringBuilder("asset://");
-        assetId.append(result.getImageId().toString());
-
-        if (params.size() > 2) {
-          try {
-            Integer imageSize = FunctionUtil.paramAsInteger(function, params, 2, false);
-            int i = Math.max(imageSize, 1); // Constrain to a minimum of 1
-            assetId.append("-");
-            assetId.append(i);
-          } catch (ParserException pe) {
-            throw new ParserException(
-                I18N.getText("macro.function.LookupTableFunctions.invalidSize", function));
-          }
-        }
-        return assetId.toString();
-      } else {
-        throw new ParserException(I18N.getText("macro.function.general.unknownFunction", function));
       }
+      return assetId.toString();
+    } else {
+      throw new ParserException(I18N.getText("macro.function.general.unknownFunction", function));
     }
   }
 
@@ -316,7 +326,7 @@ public class LookupTableFunction extends AbstractFunction {
       return 0;
     List<LookupEntry> oldlist = new ArrayList<>(lookupTable.getEntryList());
     lookupTable.clearEntries();
-    for (LookupEntry e : oldlist)
+    for (LookupEntry e : oldlist) {
       if (e != entry) {
         lookupTable.addEntry(e.getMin(), e.getMax(), e.getValue(), e.getImageId());
       } else {
@@ -324,6 +334,7 @@ public class LookupTableFunction extends AbstractFunction {
 
         lookupTable.addEntry(e.getMin(), e.getMax(), result, imageId);
       }
+    }
     MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
     return 1;
   }
@@ -436,6 +447,75 @@ public class LookupTableFunction extends AbstractFunction {
     lookupTable.clearEntries();
     MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
     return "";
+  }
+
+  /**
+   * Loads bulk data into a table.  The table must already exist.  Usage:
+   * <p>
+   * {@code [h: loadTable(name, jsondata)]}
+   * </p>
+   * <p>
+   * The {@code jsondata} must be a JSON Array containing table entries, and
+   * each table entry must be a JSON Array containing:
+   * <ol>
+   *  <li>an integer representing the lower range of the die roll (decimals are truncated),</li>
+   *  <li>an integer representing the upper range of the die roll (decimals are truncated),</li>
+   *  <li>a String acting as the content of the row, and</li>
+   *  <li>a String acting as an image reference (as {@code asset://}, {@code image:}, or {@code MD5Key})</li>
+   * </ol>
+   * </p>
+   * @param function name of this MTscript function, "{@code loadTable}"
+   * @param params parameters of the MTscript function
+   * @return a number indicating the successful record count, or
+   * a {@link JsonArray} of all elements that failed to load
+   * @throws ParserException Thrown when syntax errors are detected in the input data.
+   * This includes negative numbers in either of the numeric fields of a table entry,
+   * a lower die roll that is greater than the upper die roll of a table entry and vice versa,
+   * missing fields, too many fields, and potentially many more.
+   */
+  private @NotNull JsonElement loadTable(String function, List<Object> params) throws ParserException {
+    checkTrusted(function);
+    FunctionUtil.checkNumberParam(function, params, 3, 3);
+    String name = params.get(0).toString();
+    LookupTable lookupTable = checkTableAccess(name, function);
+
+    Object data = params.get(1);
+    if (data instanceof String) {
+      data = com.google.gson.JsonParser.parseString(data.toString());
+    }
+    if (data instanceof JsonArray json) {
+      JsonArray errorRows = new JsonArray();
+      long counter = 0, rowindex = 0;
+      // Verify that all records are themselves JSONArray objects and each has 4 fields
+      for (JsonElement row : json) {
+        try {
+          if (row instanceof JsonArray array && array.size() == 4) {
+            int min = array.get(0).getAsInt();
+            int max = array.get(1).getAsInt();
+            String value = array.get(2).getAsString();
+            String image = array.get(3).getAsString();
+            if (min >= 1 && max >= min && !value.isEmpty()) {
+              // Image is allowed to be empty, but if given, it must be an asset ID
+              MD5Key imageID = null;
+              if (!image.isEmpty()) {
+                imageID = FunctionUtil.getAssetKeyFromString(image);
+              }
+              // All checks complete, add this row to the table
+              lookupTable.addEntry(min, max, value, imageID);
+              counter++;
+            }
+          }
+        } catch (UnsupportedOperationException|NumberFormatException|IllegalStateException e) {
+          // Make a list of all failing rows to return to the user.
+          errorRows.add(rowindex);
+        }
+        rowindex++;
+      }
+      MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
+      return counter == rowindex ? new JsonPrimitive(counter) : errorRows;
+    }
+    // FIXME Report error in standardized format
+    throw new ParserException("Second parameter must be a JSON Array");
   }
 
   private String setTableRoll(String function, List<Object> params) throws ParserException {
