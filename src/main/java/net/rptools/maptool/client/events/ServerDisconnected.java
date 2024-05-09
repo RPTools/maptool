@@ -12,10 +12,6 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.player;
+package net.rptools.maptool.client.events;
 
-public record PlayerDatabaseInfo(
-    boolean supportsBlocking,
-    boolean supportsIndividualPasswords,
-    boolean supportsAsymmetricalKeys,
-    boolean recordsOnlyConnectedPlayers) {}
+public record ServerDisconnected() {}

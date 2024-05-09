@@ -35,16 +35,6 @@ import net.rptools.maptool.server.proto.drawing.DrawableDto;
  */
 public class ConeTemplate extends RadiusTemplate {
 
-  public ConeTemplate() {}
-
-  public ConeTemplate(GUID id) {
-    super(id);
-  }
-
-  /*---------------------------------------------------------------------------------------------
-   * Instance Variables
-   *-------------------------------------------------------------------------------------------*/
-
   /**
    * The dirction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint along the spine
    * of the selected vertex. Saved as a string as a hack to get around the hessian library's problem
@@ -52,9 +42,25 @@ public class ConeTemplate extends RadiusTemplate {
    */
   private String direction = Direction.SOUTH_EAST.name();
 
+  public ConeTemplate() {}
+
+  public ConeTemplate(GUID id) {
+    super(id);
+  }
+
+  public ConeTemplate(ConeTemplate other) {
+    super(other);
+    this.direction = other.direction;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new ConeTemplate(this);
+  }
 
   /**
    * Get the direction for this ConeTemplate.
@@ -343,5 +349,19 @@ public class ConeTemplate extends RadiusTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setConeTemplate(dto).build();
+  }
+
+  public static ConeTemplate fromDto(ConeTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new ConeTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

@@ -37,6 +37,7 @@ import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
@@ -45,11 +46,7 @@ import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
-import net.rptools.maptool.model.player.LocalPlayer;
-import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory.PlayerDatabaseType;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
 import net.rptools.maptool.util.cipher.CipherUtil;
@@ -70,11 +67,10 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
 
+  private final MapToolClient client;
+
   /** The connection for the handshake. */
   private final Connection connection;
-
-  /** The player for the client. */
-  private final LocalPlayer player;
 
   /** Observers that want to be notified when the status changes. */
   private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
@@ -98,9 +94,9 @@ public class ClientHandshake implements Handshake, MessageHandler {
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(Connection connection, LocalPlayer player) {
+  public ClientHandshake(MapToolClient client, Connection connection) {
+    this.client = client;
     this.connection = connection;
-    this.player = player;
   }
 
   private synchronized JDialog getEasyConnectDialog() {
@@ -120,11 +116,22 @@ public class ClientHandshake implements Handshake, MessageHandler {
   }
 
   @Override
-  public void startHandshake() throws ExecutionException, InterruptedException {
-    var md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+  public void startHandshake() {
+    MD5Key md5key;
+    try {
+      md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+    } catch (ExecutionException | InterruptedException e) {
+      // Report the error the same way as any other handshake error.
+      errorMessage = I18N.getText("Handshake.msg.failedToGetPublicKey");
+      exception = e;
+      currentState = State.Error;
+      notifyObservers();
+      return;
+    }
+
     var clientInitMsg =
         ClientInitMsg.newBuilder()
-            .setPlayerName(player.getName())
+            .setPlayerName(client.getPlayer().getName())
             .setVersion(MapTool.getVersion())
             .setPublicKeyMd5(md5key.toString());
     var handshakeMsg = HandshakeMsg.newBuilder().setClientInitMsg(clientInitMsg).build();
@@ -212,8 +219,7 @@ public class ClientHandshake implements Handshake, MessageHandler {
     }
   }
 
-  private void handle(PublicKeyAddedMsg publicKeyAddedMsg)
-      throws ExecutionException, InterruptedException {
+  private void handle(PublicKeyAddedMsg publicKeyAddedMsg) {
     SwingUtilities.invokeLater(this::closeEasyConnectDialog);
     startHandshake();
   }
@@ -271,7 +277,9 @@ public class ClientHandshake implements Handshake, MessageHandler {
       CipherUtil.Key publicKey = new PublicPrivateKeyStore().getKeys().get();
       var handshakeChallenge =
           HandshakeChallenge.fromAsymmetricChallengeBytes(
-              player.getName(), useAuthTypeMsg.getChallenge(0).toByteArray(), publicKey);
+              client.getPlayer().getName(),
+              useAuthTypeMsg.getChallenge(0).toByteArray(),
+              publicKey);
       var expectedResponse = handshakeChallenge.getExpectedResponse();
       clientAuthMsg = clientAuthMsg.setChallengeResponse(ByteString.copyFrom(expectedResponse));
     } else {
@@ -279,15 +287,18 @@ public class ClientHandshake implements Handshake, MessageHandler {
       byte[] responseIv = new byte[CipherUtil.CIPHER_BLOCK_SIZE];
       rnd.nextBytes(responseIv);
 
-      player.setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
+      client.getPlayer().setPasswordSalt(useAuthTypeMsg.getSalt().toByteArray());
       var iv = useAuthTypeMsg.getIv().toByteArray();
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
-          Key key = player.getPassword();
+          Key key = client.getPlayer().getPassword();
           // Key key = playerDatabase.getPlayerPassword(player.getName()).get();
           var handshakeChallenge =
               HandshakeChallenge.fromSymmetricChallengeBytes(
-                  player.getName(), useAuthTypeMsg.getChallenge(i).toByteArray(), key, iv);
+                  client.getPlayer().getName(),
+                  useAuthTypeMsg.getChallenge(i).toByteArray(),
+                  key,
+                  iv);
           var expectedResponse = handshakeChallenge.getExpectedResponse(responseIv);
           clientAuthMsg =
               clientAuthMsg
@@ -310,21 +321,20 @@ public class ClientHandshake implements Handshake, MessageHandler {
 
   private void handle(ConnectionSuccessfulMsg connectionSuccessfulMsg) throws IOException {
     var policy = ServerPolicy.fromDto(connectionSuccessfulMsg.getServerPolicyDto());
-    MapTool.setServerPolicy(policy);
-    player.setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
+    client.setServerPolicy(policy);
+    client
+        .getPlayer()
+        .setRole(connectionSuccessfulMsg.getRoleDto() == RoleDto.GM ? Role.GM : Role.PLAYER);
     MapTool.getFrame()
         .getToolbarPanel()
         .getMapselect()
-        .setVisible((!policy.getMapSelectUIHidden()) || MapTool.getPlayer().isGM());
-    if ((!policy.getDisablePlayerAssetPanel()) || MapTool.getPlayer().isGM()) {
+        .setVisible((!policy.getMapSelectUIHidden()) || client.getPlayer().isGM());
+    if ((!policy.getDisablePlayerAssetPanel()) || client.getPlayer().isGM()) {
       MapTool.getFrame().getAssetPanel().enableAssets();
     } else {
       MapTool.getFrame().getAssetPanel().disableAssets();
     }
     if (!MapTool.isHostingServer()) {
-      PlayerDatabaseFactory.setCurrentPlayerDatabase(PlayerDatabaseType.LOCAL_PLAYER);
-      var playerDb = (LocalPlayerDatabase) PlayerDatabaseFactory.getCurrentPlayerDatabase();
-      playerDb.setLocalPlayer(player);
       if (!MapTool.isPersonalServer()) {
         new CampaignManager().clearCampaignData();
         if (connectionSuccessfulMsg.hasGameDataDto()) {

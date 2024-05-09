@@ -72,6 +72,30 @@ public class LineTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public LineTemplate(LineTemplate other) {
+    super(other);
+
+    this.doubleWide = other.doubleWide;
+    this.pathVertex = new ZonePoint(other.pathVertex);
+
+    if (other.path != null) {
+      this.path = new ArrayList<>(other.path.size());
+      for (final var cellPoint : other.path) {
+        this.path.add(new CellPoint(cellPoint));
+      }
+    }
+
+    if (other.pool != null) {
+      this.pool = new ArrayList<>(other.pool.size());
+      for (final var cellPoint : other.pool) {
+        this.pool.add(new CellPoint(cellPoint));
+      }
+    }
+
+    this.quadrant = other.quadrant;
+    this.mouseSlopeGreater = other.mouseSlopeGreater;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Overridden AbstractTemplate Methods
    *-------------------------------------------------------------------------------------------*/
@@ -381,6 +405,11 @@ public class LineTemplate extends AbstractTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   @Override
+  public Drawable copy() {
+    return new LineTemplate(this);
+  }
+
+  @Override
   public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
     if (zone == null) {
@@ -490,5 +519,25 @@ public class LineTemplate extends AbstractTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setLineTemplate(dto).build();
+  }
+
+  public static LineTemplate fromDto(LineTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new LineTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (!dto.getQuadrant().isEmpty()) {
+      drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+    }
+    drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
+    var pathVertex = dto.getPathVertex();
+    drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+    drawable.setDoubleWide(dto.getDoubleWide());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

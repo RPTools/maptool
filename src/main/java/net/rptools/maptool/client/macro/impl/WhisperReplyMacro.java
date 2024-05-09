@@ -36,7 +36,7 @@ public class WhisperReplyMacro extends AbstractMacro {
       return;
     }
     // Validate
-    if (!MapTool.isPlayerConnected(playerName)) {
+    if (!MapTool.getClient().isPlayerConnected(playerName)) {
       MapTool.addMessage(
           TextMessage.me(
               context.getTransformationHistory(),

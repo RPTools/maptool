@@ -157,7 +157,10 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
               SwingUtilities.invokeLater(
                   () -> {
                     if (MapTool.confirm("playerDB.dialog.deleteConfirm", p.name())) {
-                      Platform.runLater(() -> new Players().removePlayer(p.name()));
+                      Platform.runLater(
+                          () ->
+                              new Players(MapTool.getClient().getPlayerDatabase())
+                                  .removePlayer(p.name()));
                     }
                   });
             });
@@ -188,7 +191,7 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
   @Override
   public void close() {
     try {
-      new Players().commitChanges();
+      new Players(MapTool.getClient().getPlayerDatabase()).commitChanges();
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
         | InvalidKeySpecException
@@ -202,7 +205,8 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
 
   private void addPlayer(String name) {
     try {
-      PlayerInfo playerInfo = new Players().getPlayer(name).get();
+      PlayerInfo playerInfo =
+          new Players(MapTool.getClient().getPlayerDatabase()).getPlayer(name).get();
       playerInfoList.add(playerInfo);
     } catch (InterruptedException | ExecutionException e) {
       throw new RuntimeException(e);
@@ -214,7 +218,7 @@ public class PlayerDatabaseDialogController extends AbstractSwingJavaFXDialogCon
   }
 
   private void addPlayers() {
-    new Players()
+    new Players(MapTool.getClient().getPlayerDatabase())
         .getDatabasePlayers()
         .thenAccept(
             p ->

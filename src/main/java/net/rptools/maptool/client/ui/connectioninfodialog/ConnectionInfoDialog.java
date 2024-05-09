@@ -38,7 +38,7 @@ import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.server.MapToolServer;
+import net.rptools.maptool.server.IMapToolServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -90,7 +90,7 @@ public class ConnectionInfoDialog extends JDialog {
    *
    * @param server the server instance for the connection dialog
    */
-  public ConnectionInfoDialog(MapToolServer server) {
+  public ConnectionInfoDialog(IMapToolServer server) {
     super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);
@@ -103,8 +103,8 @@ public class ConnectionInfoDialog extends JDialog {
     JTextField portLabel = panel.getTextField("port");
     externalAddressLabel = panel.getTextField("externalAddress");
 
-    String name = server.getConfig().getServerName();
-    if (name == null) {
+    String name = server.getName();
+    if (name == null || name.isEmpty()) {
       name = "---";
     }
 
@@ -122,14 +122,14 @@ public class ConnectionInfoDialog extends JDialog {
       log.warn("Can't resolve our own IPv6 address!?", e);
     }
 
-    String port =
-        MapTool.isPersonalServer() ? "---" : Integer.toString(server.getConfig().getPort());
+    int port = server.getPort();
+    String portString = port < 0 ? "---" : Integer.toString(port);
 
     nameLabel.setText(name);
     localv4AddressLabel.setText(localv4Address);
     localv6AddressLabel.setText(localv6Address);
     externalAddressLabel.setText(I18N.getText("ConnectionInfoDialog.discovering"));
-    portLabel.setText(port);
+    portLabel.setText(portString);
 
     JButton okButton = (JButton) panel.getButton("okButton");
     bindOKButtonActions(okButton);

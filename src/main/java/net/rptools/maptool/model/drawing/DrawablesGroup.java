@@ -18,6 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import java.util.ArrayList;
 import java.util.List;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
@@ -39,6 +40,20 @@ public class DrawablesGroup extends AbstractDrawing {
   public DrawablesGroup(GUID id, List<DrawnElement> drawableList) {
     super(id);
     this.drawableList = drawableList;
+  }
+
+  public DrawablesGroup(DrawablesGroup other) {
+    super(other);
+
+    this.drawableList = new ArrayList<>(other.drawableList.size());
+    for (final var element : other.drawableList) {
+      this.drawableList.add(new DrawnElement(element));
+    }
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawablesGroup(this);
   }
 
   public List<DrawnElement> getDrawableList() {
@@ -92,6 +107,19 @@ public class DrawablesGroup extends AbstractDrawing {
 
     getDrawableList().forEach(d -> dto.addDrawnElements(d.toDto()));
     return DrawableDto.newBuilder().setDrawablesGroup(dto).build();
+  }
+
+  public static DrawablesGroup fromDto(DrawablesGroupDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var elements = new ArrayList<DrawnElement>();
+    var elementDtos = dto.getDrawnElementsList();
+    elementDtos.forEach(e -> elements.add(DrawnElement.fromDto(e)));
+    var drawable = new DrawablesGroup(id, elements);
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 
   @Override
