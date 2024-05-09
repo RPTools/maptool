@@ -12,10 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.player;
+package net.rptools.clientserver.simple.server;
 
-public record PlayerDatabaseInfo(
-    boolean supportsBlocking,
-    boolean supportsIndividualPasswords,
-    boolean supportsAsymmetricalKeys,
-    boolean recordsOnlyConnectedPlayers) {}
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.connection.Connection;
+
+public interface HandshakeProvider {
+  Handshake getConnectionHandshake(Connection conn);
+
+  void releaseHandshake(Connection conn);
+}

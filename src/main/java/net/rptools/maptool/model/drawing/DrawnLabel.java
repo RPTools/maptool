@@ -19,10 +19,12 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import javax.swing.CellRendererPane;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
 import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
@@ -35,7 +37,7 @@ import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
 public class DrawnLabel extends AbstractDrawing {
 
   /** The bounds of the display rectangle */
-  private Rectangle bounds = new Rectangle();
+  private Rectangle bounds;
 
   /** Text being painted. */
   private String text;
@@ -70,6 +72,18 @@ public class DrawnLabel extends AbstractDrawing {
     font = aFont;
   }
 
+  public DrawnLabel(DrawnLabel other) {
+    super(other);
+    this.bounds = new Rectangle(other.bounds);
+    this.text = other.text;
+    this.font = other.font;
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawnLabel(this);
+  }
+
   public String getText() {
     return text;
   }
@@ -78,11 +92,7 @@ public class DrawnLabel extends AbstractDrawing {
     return font;
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.drawing.Pen)
-   */
-  public void draw(Graphics2D aG) {
+  public void draw(Zone zone, Graphics2D aG) {
     if (renderer == null) {
       renderer = new CellRendererPane();
       textPane = DrawnTextTool.createTextPane(bounds, null, font);
@@ -92,18 +102,16 @@ public class DrawnLabel extends AbstractDrawing {
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {}
+  protected void drawBackground(Zone zone, Graphics2D g) {}
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     return bounds;
   }
 
-  public Area getArea() {
-    // TODO Auto-generated method stub
-    return null;
+  @Override
+  public @Nonnull Area getArea(Zone zone) {
+    return new Area();
   }
 
   @Override
@@ -111,12 +119,23 @@ public class DrawnLabel extends AbstractDrawing {
     var dto = DrawnLabelDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setBounds(Mapper.map(getBounds()))
+        .setBounds(Mapper.map(bounds))
         .setText(getText())
         .setFont(getFont());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setDrawnLabel(dto).build();
+  }
+
+  public static DrawnLabel fromDto(DrawnLabelDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var bounds = dto.getBounds();
+    var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

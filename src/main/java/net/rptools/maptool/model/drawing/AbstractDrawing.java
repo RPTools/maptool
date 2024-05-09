@@ -33,8 +33,12 @@ import net.rptools.maptool.model.Zone;
  * implementing classes.
  */
 public abstract class AbstractDrawing implements Drawable, ImageObserver {
-  /** The unique identifier for this drawable. It is immutable. */
-  private final GUID id;
+  /**
+   * The unique identifier for this drawable.
+   *
+   * <p>It should not typically be changed except to give copies a new ID.
+   */
+  private GUID id;
 
   private String layer;
   private String name;
@@ -47,12 +51,15 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
     this.id = id;
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see maptool.model.drawing.Drawable#draw(java.awt.Graphics2D, maptool.model.drawing.Pen)
-   */
-  public void draw(Graphics2D g, Pen pen) {
+  protected AbstractDrawing(AbstractDrawing other) {
+    // The only thing we don't preserve is the ID.
+    this.id = other.id;
+    this.layer = other.layer;
+    this.name = other.name;
+  }
+
+  @Override
+  public void draw(Zone zone, Graphics2D g, Pen pen) {
     if (pen == null) {
       pen = Pen.DEFAULT;
     }
@@ -72,7 +79,7 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
         // **** Legacy support for 1.1
         g.setColor(new Color(pen.getBackgroundColor()));
       }
-      drawBackground(g);
+      drawBackground(zone, g);
     }
     if (pen.getForegroundMode() == Pen.MODE_SOLID) {
       if (pen.getPaint() != null) {
@@ -81,15 +88,15 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
         // **** Legacy support for 1.1
         g.setColor(new Color(pen.getColor()));
       }
-      draw(g);
+      draw(zone, g);
     }
     g.setComposite(oldComposite);
     g.setStroke(oldStroke);
   }
 
-  protected abstract void draw(Graphics2D g);
+  protected abstract void draw(Zone zone, Graphics2D g);
 
-  protected abstract void drawBackground(Graphics2D g);
+  protected abstract void drawBackground(Zone zone, Graphics2D g);
 
   @VisibleForTesting
   protected Campaign getCampaign() {
@@ -103,6 +110,11 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
    */
   public GUID getId() {
     return id;
+  }
+
+  @Override
+  public void setId(GUID guid) {
+    this.id = guid;
   }
 
   public void setLayer(Zone.Layer layer) {

@@ -12,14 +12,11 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.server;
+package net.rptools.clientserver.simple;
 
-import java.util.concurrent.ExecutionException;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
-import net.rptools.maptool.model.player.Player;
 
-public interface Handshake extends MessageHandler {
+public interface Handshake {
 
   /**
    * Returns if the handshake has been successful or not.
@@ -51,13 +48,6 @@ public interface Handshake extends MessageHandler {
   Exception getException();
 
   /**
-   * Returns the player associated with the handshake.
-   *
-   * @return the player associated with the handshake.
-   */
-  Player getPlayer();
-
-  /**
    * Adds an observer to the handshake process.
    *
    * @param observer the observer of the handshake process.
@@ -71,11 +61,6 @@ public interface Handshake extends MessageHandler {
    */
   void removeObserver(HandshakeObserver observer);
 
-  /**
-   * Starts the handshake process.
-   *
-   * @throws ExecutionException when there is an exception in the background task.
-   * @throws InterruptedException when the background task is interrupted.
-   */
-  void startHandshake() throws ExecutionException, InterruptedException;
+  /** Starts the handshake process. */
+  void startHandshake();
 }

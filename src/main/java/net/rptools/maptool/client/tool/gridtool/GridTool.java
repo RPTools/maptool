@@ -37,10 +37,12 @@ import net.rptools.maptool.client.swing.ColorWell;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
+import net.rptools.maptool.model.zones.GridChanged;
 
 /** */
 public class GridTool extends DefaultTool {
@@ -75,7 +77,8 @@ public class GridTool extends DefaultTool {
     controlPanel = new AbeillePanel(new AdjustGridControlPanelView().getRootComponent());
 
     gridSizeSpinner = (JSpinner) controlPanel.getComponent("gridSize");
-    gridSizeSpinner.setModel(new SpinnerNumberModel());
+    gridSizeSpinner.setModel(
+        new SpinnerNumberModel(100, Grid.MIN_GRID_SIZE, Grid.MAX_GRID_SIZE, 1));
     gridSizeSpinner.addChangeListener(new UpdateGridListener());
 
     gridOffsetXTextField = (JTextField) controlPanel.getComponent("offsetX");
@@ -175,6 +178,8 @@ public class GridTool extends DefaultTool {
     grid.setOffset(getInt(gridOffsetXTextField, 0), getInt(gridOffsetYTextField, 0));
     zone.setGridColor(colorWell.getColor().getRGB());
     grid.setSize(Math.max((Integer) gridSizeSpinner.getValue(), Grid.MIN_GRID_SIZE));
+
+    new MapToolEventBus().getMainEventBus().post(new GridChanged(zone));
   }
 
   @Override

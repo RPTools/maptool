@@ -108,7 +108,7 @@ public class DrawingMiscFunctions extends DrawingFunctions {
   private JsonArray getCrossedPoints(final Zone map, final DrawnElement de, final String pathStr) {
     List<Map<String, Integer>> pathPoints = convertJSONStringToList(pathStr);
     JsonArray returnPoints = new JsonArray();
-    Area a = de.getDrawable().getArea();
+    Area a = de.getDrawable().getArea(map);
     int cnt = 0;
     Point previousPoint = new Point();
     for (Map<String, Integer> entry : pathPoints) {

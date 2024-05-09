@@ -22,21 +22,25 @@ import java.net.URI;
 import java.nio.ByteBuffer;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.server.ServerConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCConnection extends AbstractConnection
-    implements Connection, PeerConnectionObserver, RTCDataChannelObserver {
+public class WebRTCConnection extends AbstractConnection implements Connection {
+  public interface Listener {
+    void onLoginError();
+  }
+
   private static final Logger log = LogManager.getLogger(WebRTCConnection.class);
 
+  private final PeerConnectionObserver peerConnectionObserver = new PeerConnectionObserverImpl();
+  private final RTCDataChannelObserver rtcDataChannelObserver = new RTCDataChannelObserverImpl();
   private final PeerConnectionFactory factory = new PeerConnectionFactory();
-  private final ServerConfig config;
+  private final String serverName;
   private final String id;
   private final Gson gson = new Gson();
+  private final Listener listener;
   private WebSocketClient signalingClient;
   // only set on server side
   private WebRTCServer server;
@@ -49,9 +53,10 @@ public class WebRTCConnection extends AbstractConnection
   private Thread handleDisconnect;
 
   // used from client side
-  public WebRTCConnection(String id, ServerConfig config) {
+  public WebRTCConnection(String id, String serverName, Listener listener) {
     this.id = id;
-    this.config = config;
+    this.serverName = serverName;
+    this.listener = listener;
     init();
   }
 
@@ -59,11 +64,12 @@ public class WebRTCConnection extends AbstractConnection
   public WebRTCConnection(OfferMessageDto message, WebRTCServer webRTCServer) {
     this.id = message.source;
     this.server = webRTCServer;
-    this.config = server.getConfig();
+    this.serverName = server.getName();
+    this.listener = () -> {};
     this.signalingClient = server.getSignalingClient();
     init();
 
-    peerConnection = factory.createPeerConnection(rtcConfig, this);
+    peerConnection = factory.createPeerConnection(rtcConfig, peerConnectionObserver);
     peerConnection.setRemoteDescription(
         message.offer,
         new SetSessionDescriptionObserver() {
@@ -90,7 +96,7 @@ public class WebRTCConnection extends AbstractConnection
                   @Override
                   public void onSuccess() {
                     var msg = new AnswerMessageDto();
-                    msg.source = server.getConfig().getServerName();
+                    msg.source = serverName;
                     msg.destination = getId();
                     msg.answer = description;
                     sendSignalingMessage(gson.toJson(msg));
@@ -116,9 +122,11 @@ public class WebRTCConnection extends AbstractConnection
 
   private String getSource() {
     // on server side the id is already user@server
-    if (isServerSide()) return getId();
+    if (isServerSide()) {
+      return getId();
+    }
 
-    return getId() + "@" + config.getServerName();
+    return getId() + "@" + serverName;
   }
 
   private void startSignaling() {
@@ -147,7 +155,9 @@ public class WebRTCConnection extends AbstractConnection
           public void onClose(int code, String reason, boolean remote) {
             lastError = "WebSocket closed: (" + code + ") " + reason;
             log.info(prefix() + lastError);
-            if (!isAlive()) fireDisconnectAsync();
+            if (!isAlive()) {
+              fireDisconnectAsync();
+            }
           }
 
           @Override
@@ -208,7 +218,9 @@ public class WebRTCConnection extends AbstractConnection
 
   @Override
   public boolean isAlive() {
-    if (peerConnection == null) return false;
+    if (peerConnection == null) {
+      return false;
+    }
 
     return switch (peerConnection.getConnectionState()) {
       case CONNECTED, DISCONNECTED -> true;
@@ -269,15 +281,15 @@ public class WebRTCConnection extends AbstractConnection
 
   private void onLogin(LoginMessageDto message) {
     if (!message.success) {
-      MapTool.showError("Handshake.msg.playerAlreadyConnected");
+      listener.onLoginError();
       return;
     }
 
-    peerConnection = factory.createPeerConnection(rtcConfig, this);
+    peerConnection = factory.createPeerConnection(rtcConfig, peerConnectionObserver);
 
     var initDict = new RTCDataChannelInit();
     localDataChannel = peerConnection.createDataChannel("myDataChannel", initDict);
-    localDataChannel.registerObserver(this);
+    localDataChannel.registerObserver(rtcDataChannelObserver);
 
     var offerOptions = new RTCOfferOptions();
     peerConnection.createOffer(
@@ -293,7 +305,7 @@ public class WebRTCConnection extends AbstractConnection
                     var msg = new OfferMessageDto();
                     msg.offer = description;
                     msg.source = getSource();
-                    msg.destination = config.getServerName();
+                    msg.destination = serverName;
                     sendSignalingMessage(gson.toJson(msg));
                   }
 
@@ -315,175 +327,9 @@ public class WebRTCConnection extends AbstractConnection
     return isServerSide() ? "S " : "C ";
   }
 
-  @Override
-  public void onSignalingChange(RTCSignalingState state) {
-    // set thread name for better logs.
-    Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
-    log.info(prefix() + "PeerConnection.onSignalingChange: " + state);
-  }
-
-  @Override
-  public void onConnectionChange(RTCPeerConnectionState state) {
-    log.info(prefix() + "PeerConnection.onConnectionChange " + state);
-    switch (state) {
-      case FAILED -> {
-        lastError = "PeerConnection failed";
-        peerConnection = null;
-        fireDisconnectAsync();
-      }
-      case CONNECTED -> {
-        if (hasMoreMessages()) {
-          synchronized (sendThread) {
-            sendThread.notify();
-          }
-        }
-      }
-    }
-  }
-
-  @Override
-  public void onIceConnectionChange(RTCIceConnectionState state) {
-    log.info(prefix() + "PeerConnection.onIceConnectionChange " + state);
-  }
-
-  @Override
-  public void onStandardizedIceConnectionChange(RTCIceConnectionState state) {
-    log.info(prefix() + "PeerConnection.onStandardizedIceConnectionChange " + state);
-  }
-
-  @Override
-  public void onIceConnectionReceivingChange(boolean receiving) {
-    log.info(prefix() + "PeerConnection.onIceConnectionReceivingChange " + receiving);
-  }
-
-  @Override
-  public void onIceGatheringChange(RTCIceGatheringState state) {
-    log.info(prefix() + "PeerConnection.onIceGatheringChange " + state);
-  }
-
-  @Override
-  public void onIceCandidate(RTCIceCandidate candidate) {
-    var msg = new CandidateMessageDto();
-
-    if (isServerSide()) {
-      msg.source = config.getServerName();
-      msg.destination = getSource();
-    } else {
-      msg.destination = config.getServerName();
-      msg.source = getSource();
-    }
-    msg.candidate = candidate;
-    sendSignalingMessage(gson.toJson(msg));
-  }
-
-  @Override
-  public void onIceCandidateError(RTCPeerConnectionIceErrorEvent event) {
-    log.debug(
-        prefix()
-            + "PeerConnection.onIceCandidateError: code:"
-            + event.getErrorCode()
-            + " url: "
-            + event.getUrl()
-            + " address/port: "
-            + event.getAddress()
-            + ":"
-            + event.getPort()
-            + " text: "
-            + event.getErrorText());
-  }
-
-  @Override
-  public void onIceCandidatesRemoved(RTCIceCandidate[] candidates) {
-    log.info(prefix() + "PeerConnection.onIceCandidatesRemoved");
-  }
-
-  @Override
-  public void onAddStream(MediaStream stream) {
-    log.info(prefix() + "PeerConnection.onAddStream");
-  }
-
-  @Override
-  public void onRemoveStream(MediaStream stream) {
-    log.info(prefix() + "PeerConnection.onRemoveStream");
-  }
-
-  @Override
-  public void onDataChannel(RTCDataChannel newDataChannel) {
-    log.info(prefix() + "PeerConnection.onDataChannel");
-    this.localDataChannel = newDataChannel;
-    localDataChannel.registerObserver(this);
-
-    if (isServerSide()) {
-      server.onDataChannelOpened(this);
-    }
-  }
-
-  @Override
-  public void onRenegotiationNeeded() {
-    // set thread name for better logs
-    Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
-    log.info(prefix() + "PeerConnection.onRenegotiationNeeded");
-  }
-
-  @Override
-  public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
-    log.info(prefix() + "PeerConnection.onTrack(multiple Streams)");
-  }
-
-  @Override
-  public void onRemoveTrack(RTCRtpReceiver receiver) {
-    log.info(prefix() + "PeerConnection.onRemoveTrack");
-  }
-
-  @Override
-  public void onTrack(RTCRtpTransceiver transceiver) {
-    log.info(prefix() + "PeerConnection.onTrack");
-  }
-
   public void addIceCandidate(RTCIceCandidate candidate) {
     log.info(prefix() + "PeerConnection.addIceCandidate: " + candidate.toString());
     peerConnection.addIceCandidate(candidate);
-  }
-
-  // dataChannel
-  @Override
-  public void onBufferedAmountChange(long previousAmount) {
-    log.info(prefix() + "dataChannel onBufferedAmountChange " + previousAmount);
-  }
-
-  // dataChannel
-  @Override
-  public void onStateChange() {
-    var state = localDataChannel.getState();
-    log.info(prefix() + "localDataChannel onStateChange " + state);
-    switch (state) {
-      case OPEN -> {
-        // connection established we don't need the signaling server anymore
-        // for now disabled. We may get additional ice candidates.
-        if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
-
-        sendThread.start();
-      }
-      case CLOSED -> {
-        close();
-        fireDisconnectAsync();
-      }
-    }
-  }
-
-  // dataChannel
-  @Override
-  public void onMessage(RTCDataChannelBuffer channelBuffer) {
-    log.debug(
-        prefix() + "localDataChannel onMessage: got " + channelBuffer.data.capacity() + " bytes");
-
-    if (Thread.currentThread().getContextClassLoader() == null) {
-      ClassLoader cl = ClassLoader.getSystemClassLoader();
-      Thread.currentThread().setContextClassLoader(cl);
-    }
-
-    var message = readMessage(channelBuffer.data);
-    if (message != null) dispatchCompressedMessage(id, message);
   }
 
   private void fireDisconnectAsync() {
@@ -491,7 +337,9 @@ public class WebRTCConnection extends AbstractConnection
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) server.clearClients();
+              if (isServerSide()) {
+                server.clearClients();
+              }
             },
             "WebRTCConnection.handleDisconnect");
     handleDisconnect.start();
@@ -500,9 +348,13 @@ public class WebRTCConnection extends AbstractConnection
   @Override
   public void close() {
     // signalingClient should be closed if connection was established
-    if (!isServerSide() && signalingClient.isOpen()) signalingClient.close();
+    if (!isServerSide() && signalingClient.isOpen()) {
+      signalingClient.close();
+    }
 
-    if (sendThread.stopRequested) return;
+    if (sendThread.stopRequested) {
+      return;
+    }
 
     sendThread.requestStop();
     if (peerConnection != null) {
@@ -583,6 +435,177 @@ public class WebRTCConnection extends AbstractConnection
         fireDisconnect();
       }
       log.debug(prefix() + " sendThread ended");
+    }
+  }
+
+  private final class PeerConnectionObserverImpl implements PeerConnectionObserver {
+    @Override
+    public void onIceCandidate(RTCIceCandidate candidate) {
+      var msg = new CandidateMessageDto();
+
+      if (isServerSide()) {
+        msg.source = serverName;
+        msg.destination = getSource();
+      } else {
+        msg.destination = serverName;
+        msg.source = getSource();
+      }
+      msg.candidate = candidate;
+      sendSignalingMessage(gson.toJson(msg));
+    }
+
+    @Override
+    public void onAddStream(MediaStream stream) {
+      log.info(prefix() + "PeerConnection.onAddStream");
+    }
+
+    @Override
+    public void onAddTrack(RTCRtpReceiver receiver, MediaStream[] mediaStreams) {
+      log.info(prefix() + "PeerConnection.onTrack(multiple Streams)");
+    }
+
+    @Override
+    public void onConnectionChange(RTCPeerConnectionState state) {
+      log.info(prefix() + "PeerConnection.onConnectionChange " + state);
+      switch (state) {
+        case FAILED -> {
+          lastError = "PeerConnection failed";
+          peerConnection = null;
+          fireDisconnectAsync();
+        }
+        case CONNECTED -> {
+          if (hasMoreMessages()) {
+            synchronized (sendThread) {
+              sendThread.notify();
+            }
+          }
+        }
+      }
+    }
+
+    @Override
+    public void onDataChannel(RTCDataChannel newDataChannel) {
+      log.info(prefix() + "PeerConnection.onDataChannel");
+      localDataChannel = newDataChannel;
+      localDataChannel.registerObserver(rtcDataChannelObserver);
+
+      if (isServerSide()) {
+        server.onDataChannelOpened(WebRTCConnection.this);
+      }
+    }
+
+    @Override
+    public void onIceCandidateError(RTCPeerConnectionIceErrorEvent event) {
+      log.debug(
+          prefix()
+              + "PeerConnection.onIceCandidateError: code:"
+              + event.getErrorCode()
+              + " url: "
+              + event.getUrl()
+              + " address/port: "
+              + event.getAddress()
+              + ":"
+              + event.getPort()
+              + " text: "
+              + event.getErrorText());
+    }
+
+    @Override
+    public void onIceCandidatesRemoved(RTCIceCandidate[] candidates) {
+      log.info(prefix() + "PeerConnection.onIceCandidatesRemoved");
+    }
+
+    @Override
+    public void onIceConnectionChange(RTCIceConnectionState state) {
+      log.info(prefix() + "PeerConnection.onIceConnectionChange " + state);
+    }
+
+    @Override
+    public void onIceConnectionReceivingChange(boolean receiving) {
+      log.info(prefix() + "PeerConnection.onIceConnectionReceivingChange " + receiving);
+    }
+
+    @Override
+    public void onIceGatheringChange(RTCIceGatheringState state) {
+      log.info(prefix() + "PeerConnection.onIceGatheringChange " + state);
+    }
+
+    @Override
+    public void onRemoveStream(MediaStream stream) {
+      log.info(prefix() + "PeerConnection.onRemoveStream");
+    }
+
+    @Override
+    public void onRemoveTrack(RTCRtpReceiver receiver) {
+      log.info(prefix() + "PeerConnection.onRemoveTrack");
+    }
+
+    @Override
+    public void onRenegotiationNeeded() {
+      // set thread name for better logs
+      Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
+      log.info(prefix() + "PeerConnection.onRenegotiationNeeded");
+    }
+
+    @Override
+    public void onSignalingChange(RTCSignalingState state) {
+      // set thread name for better logs.
+      Thread.currentThread().setName("WebRTCConnection.WebRTCThread_" + getId());
+      log.info(prefix() + "PeerConnection.onSignalingChange: " + state);
+    }
+
+    @Override
+    public void onStandardizedIceConnectionChange(RTCIceConnectionState state) {
+      log.info(prefix() + "PeerConnection.onStandardizedIceConnectionChange " + state);
+    }
+
+    @Override
+    public void onTrack(RTCRtpTransceiver transceiver) {
+      log.info(prefix() + "PeerConnection.onTrack");
+    }
+  }
+
+  private final class RTCDataChannelObserverImpl implements RTCDataChannelObserver {
+    @Override
+    public void onBufferedAmountChange(long previousAmount) {
+      log.info(prefix() + "dataChannel onBufferedAmountChange " + previousAmount);
+    }
+
+    @Override
+    public void onStateChange() {
+      var state = localDataChannel.getState();
+      log.info(prefix() + "localDataChannel onStateChange " + state);
+      switch (state) {
+        case OPEN -> {
+          // connection established we don't need the signaling server anymore
+          // for now disabled. We may get additional ice candidates.
+          if (!isServerSide() && signalingClient.isOpen()) {
+            signalingClient.close();
+          }
+
+          sendThread.start();
+        }
+        case CLOSED -> {
+          close();
+          fireDisconnectAsync();
+        }
+      }
+    }
+
+    @Override
+    public void onMessage(RTCDataChannelBuffer channelBuffer) {
+      log.debug(
+          prefix() + "localDataChannel onMessage: got " + channelBuffer.data.capacity() + " bytes");
+
+      if (Thread.currentThread().getContextClassLoader() == null) {
+        ClassLoader cl = ClassLoader.getSystemClassLoader();
+        Thread.currentThread().setContextClassLoader(cl);
+      }
+
+      var message = readMessage(channelBuffer.data);
+      if (message != null) {
+        dispatchCompressedMessage(id, message);
+      }
     }
   }
 }

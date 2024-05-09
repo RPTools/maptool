@@ -282,7 +282,6 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
-          MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
         });
   }
@@ -294,7 +293,6 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
-          MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
         });
   }
@@ -416,10 +414,12 @@ public class ServerMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-          Grid grid = zone.getGrid();
-          grid.setSize(msg.getSize());
-          grid.setOffset(msg.getXOffset(), msg.getYOffset());
-          zone.setGridColor(msg.getColor());
+          if (zone != null) {
+            Grid grid = zone.getGrid();
+            grid.setSize(msg.getSize());
+            grid.setOffset(msg.getXOffset(), msg.getYOffset());
+            zone.setGridColor(msg.getColor());
+          }
         });
   }
 

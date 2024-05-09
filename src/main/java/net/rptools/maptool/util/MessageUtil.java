@@ -191,6 +191,11 @@ public class MessageUtil {
     return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
   }
 
+  public static String getDefaultBackgroundHex() {
+    var color = UIManager.getColor("Panel.background");
+    return String.format("#%06X", color.getRGB() & 0x00FFFFFF);
+  }
+
   public static String getDefaultForegroundHex() {
     var color = UIManager.getColor("Panel.foreground");
     return String.format("#%06X", color.getRGB() & 0x00FFFFFF);

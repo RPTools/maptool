@@ -37,7 +37,6 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
-import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -663,9 +662,17 @@ public class Zone {
     playerAlias = zone.playerAlias;
 
     for (final var entry : drawablesByLayer.entrySet()) {
-      entry.getValue().addAll(zone.drawablesByLayer.get(entry.getKey()));
+      final var otherDrawables = zone.drawablesByLayer.get(entry.getKey());
+      final var thisDrawables = entry.getValue();
+
+      for (final var element : otherDrawables) {
+        final var copy = new DrawnElement(element);
+        if (!keepIds) {
+          copy.getDrawable().setId(new GUID());
+        }
+        thisDrawables.add(copy);
+      }
     }
-    validateTemplateZoneIds();
 
     if (!zone.labels.isEmpty()) {
       for (GUID guid : zone.labels.keySet()) {
@@ -1507,17 +1514,6 @@ public class Zone {
     undo.addDrawable(pen, drawable);
   }
 
-  private void validateTemplateZoneIds() {
-    // Classes that extend Abstract template have a zone id so we need to make sure to update it
-    for (var list : drawablesByLayer.values()) {
-      for (var de : list) {
-        if (de.getDrawable() instanceof AbstractTemplate at) {
-          at.setZoneId(id);
-        }
-      }
-    }
-  }
-
   public boolean canUndo() {
     return undo.canUndo();
   }
@@ -2087,8 +2083,8 @@ public class Zone {
     for (ListIterator<DrawnElement> drawnIter = list.listIterator(); drawnIter.hasNext(); ) {
       DrawnElement drawn = drawnIter.next();
       // Are we covered ourselves ?
-      Area drawnArea = drawn.getDrawable().getArea();
-      if (drawnArea == null) {
+      Area drawnArea = drawn.getDrawable().getArea(this);
+      if (drawnArea.isEmpty()) {
         continue;
       }
       // The following is over-zealous optimization. Lines (1-dimensional) should be kept.
@@ -2220,7 +2216,6 @@ public class Zone {
     drawablesByLayer.put(Layer.GM, gmDrawables);
     drawablesByLayer.put(Layer.OBJECT, objectDrawables);
     drawablesByLayer.put(Layer.BACKGROUND, backgroundDrawables);
-    validateTemplateZoneIds();
 
     return this;
   }
@@ -2347,8 +2342,6 @@ public class Zone {
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();
     zone.width = dto.getWidth();
-
-    zone.validateTemplateZoneIds();
 
     return zone;
   }

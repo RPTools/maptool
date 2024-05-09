@@ -15,13 +15,14 @@
 package net.rptools.maptool.client;
 
 import java.io.IOException;
-import java.util.concurrent.ExecutionException;
+import java.util.ArrayList;
+import java.util.List;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.server.ClientHandshake;
-import net.rptools.maptool.server.Handshake;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.proto.Message;
 import org.apache.logging.log4j.LogManager;
@@ -30,36 +31,38 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author trevor
  */
-public class MapToolConnection {
+public class MapToolConnection implements IMapToolConnection {
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolConnection.class);
 
   private final LocalPlayer player;
   private Connection connection;
-  private Handshake handshake;
-  private Runnable onCompleted;
+  private ClientHandshake handshake;
+  private List<Runnable> onCompleted;
 
-  public MapToolConnection(ServerConfig config, LocalPlayer player) throws IOException {
-
+  public MapToolConnection(MapToolClient client, ServerConfig config, LocalPlayer player) {
     this.connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
     this.player = player;
-    this.handshake = new ClientHandshake(connection, player);
-    onCompleted = () -> {};
+    this.handshake = new ClientHandshake(client, connection);
+    onCompleted = new ArrayList<>();
   }
 
-  public void setOnCompleted(Runnable onCompleted) {
-    if (onCompleted == null) this.onCompleted = () -> {};
-    else this.onCompleted = onCompleted;
+  @Override
+  public void onCompleted(Runnable onCompleted) {
+    this.onCompleted.add(onCompleted);
   }
 
-  public void start() throws IOException, ExecutionException, InterruptedException {
+  @Override
+  public void start() throws IOException {
     connection.addMessageHandler(handshake);
     handshake.addObserver(
         (ignore) -> {
           connection.removeMessageHandler(handshake);
           if (handshake.isSuccessful()) {
-            onCompleted.run();
+            for (final var callback : onCompleted) {
+              callback.run();
+            }
           } else {
             // For client side only show the error message as its more likely to make sense
             // for players, the exception is logged just in case more info is required
@@ -69,7 +72,9 @@ public class MapToolConnection {
             }
             MapTool.showError(handshake.getErrorMessage());
             connection.close();
-            onCompleted.run();
+            for (final var callback : onCompleted) {
+              callback.run();
+            }
             AppActions.disconnectFromServer();
           }
         });
@@ -78,26 +83,32 @@ public class MapToolConnection {
     handshake.startHandshake();
   }
 
+  @Override
   public void addMessageHandler(ClientMessageHandler handler) {
     connection.addMessageHandler(handler);
   }
 
+  @Override
   public void addActivityListener(ActivityMonitorPanel activityMonitor) {
     connection.addActivityListener(activityMonitor);
   }
 
-  public void addDisconnectHandler(ServerDisconnectHandler serverDisconnectHandler) {
+  @Override
+  public void addDisconnectHandler(DisconnectHandler serverDisconnectHandler) {
     connection.addDisconnectHandler(serverDisconnectHandler);
   }
 
+  @Override
   public boolean isAlive() {
     return connection.isAlive();
   }
 
+  @Override
   public void close() throws IOException {
     connection.close();
   }
 
+  @Override
   public void sendMessage(Message msg) {
     log.debug(player.getName() + " sent " + msg.getMessageTypeCase());
     connection.sendMessage(msg.toByteArray());

@@ -29,6 +29,8 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
+import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
@@ -41,8 +43,8 @@ import net.rptools.maptool.model.player.PersistedPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.player.PlayerAwaitingApproval;
-import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
+import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.AuthTypeEnum;
 import net.rptools.maptool.server.proto.ClientAuthMsg;
 import net.rptools.maptool.server.proto.ClientInitMsg;
@@ -68,7 +70,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private static final Logger log = LogManager.getLogger(ServerHandshake.class);
 
   /** The database used for retrieving players. */
-  private final PlayerDatabase playerDatabase;
+  private final ServerSidePlayerDatabase playerDatabase;
+
+  private final MapToolServer server;
 
   /** The connection to the client. */
   private final Connection connection;
@@ -118,7 +122,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @param useEasyConnect If true, the client will use the easy connect method.
    */
   public ServerHandshake(
-      Connection connection, PlayerDatabase playerDatabase, boolean useEasyConnect) {
+      MapToolServer server,
+      Connection connection,
+      ServerSidePlayerDatabase playerDatabase,
+      boolean useEasyConnect) {
+    this.server = server;
     this.connection = connection;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = useEasyConnect;
@@ -144,7 +152,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
     return exception;
   }
 
-  @Override
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
   public synchronized Player getPlayer() {
     return player;
   }
@@ -355,7 +367,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private void sendConnectionSuccessful() throws ExecutionException, InterruptedException {
-    var server = MapTool.getServer();
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
             .setRoleDto(getPlayer().isGM() ? RoleDto.GM : RoleDto.PLAYER)
@@ -390,7 +401,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
           BadPaddingException,
           InvalidKeyException,
           InvalidAlgorithmParameterException {
-    var server = MapTool.getServer();
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
       setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.PLAYER_ALREADY_CONNECTED);
