@@ -12,6 +12,20 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.events;
+package net.rptools.maptool.server;
 
-public record ServerStopped() {}
+import net.rptools.maptool.model.player.PlayerDatabase;
+
+public interface IMapToolServer {
+  boolean isPersonalServer();
+
+  boolean isServerRegistered();
+
+  String getName();
+
+  int getPort();
+
+  PlayerDatabase getPlayerDatabase();
+
+  void stop();
+}

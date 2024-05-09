@@ -38,6 +38,15 @@ public class RadiusCellTemplate extends AbstractTemplate {
     super(id);
   }
 
+  public RadiusCellTemplate(RadiusCellTemplate other) {
+    super(other);
+  }
+
+  @Override
+  public Drawable copy() {
+    return new RadiusCellTemplate(this);
+  }
+
   /**
    * Paint the border at a specific radius.
    *
@@ -284,5 +293,18 @@ public class RadiusCellTemplate extends AbstractTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setRadiusCellTemplate(dto).build();
+  }
+
+  public static RadiusCellTemplate fromDto(RadiusCellTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new RadiusCellTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

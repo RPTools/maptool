@@ -14,7 +14,6 @@
  */
 package net.rptools.clientserver.simple;
 
-import java.util.concurrent.ExecutionException;
 import net.rptools.clientserver.simple.connection.Connection;
 
 public interface Handshake {
@@ -62,11 +61,6 @@ public interface Handshake {
    */
   void removeObserver(HandshakeObserver observer);
 
-  /**
-   * Starts the handshake process.
-   *
-   * @throws ExecutionException when there is an exception in the background task.
-   * @throws InterruptedException when the background task is interrupted.
-   */
-  void startHandshake() throws ExecutionException, InterruptedException;
+  /** Starts the handshake process. */
+  void startHandshake();
 }

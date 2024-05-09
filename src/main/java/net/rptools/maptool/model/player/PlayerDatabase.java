@@ -17,7 +17,6 @@ package net.rptools.maptool.model.player;
 import java.lang.reflect.InvocationTargetException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -54,42 +53,6 @@ public interface PlayerDatabase {
    * @return the player information.
    */
   Player getPlayer(String playerName) throws NoSuchAlgorithmException, InvalidKeySpecException;
-
-  /**
-   * Returns the {@link CipherUtil.Key} for the player. If the database only supports role based
-   * passwords the returned value will be empty.
-   *
-   * @param playerName The name of the player to check.
-   * @return the {@link CipherUtil.Key} to use.
-   */
-  Optional<CipherUtil.Key> getPlayerPassword(String playerName);
-
-  /**
-   * Returns the salt used for the player's password.
-   *
-   * @param playerName the name of the player to get the password salt for.
-   * @return the salt used for the password.
-   */
-  byte[] getPlayerPasswordSalt(String playerName);
-
-  /**
-   * Returns the player overriding the role in the database with the specified role.
-   *
-   * @param playerName The name of the player to retrieve.
-   * @param role The role for the player.
-   * @return The player.
-   */
-  Player getPlayerWithRole(String playerName, Player.Role role)
-      throws NoSuchAlgorithmException, InvalidKeySpecException;
-
-  /**
-   * Returns the password required for the role. If role authentication is not supported this will
-   * be empty.
-   *
-   * @param role The role to retrieve the password for.
-   * @return The password for the role.
-   */
-  Optional<CipherUtil.Key> getRolePassword(Player.Role role);
 
   /**
    * Returns if this player database supports disabling players.
@@ -135,7 +98,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are known to the database.
    */
-  default Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
+  default Set<Player> getAllPlayers() {
     return getOnlinePlayers();
   }
 
@@ -144,14 +107,7 @@ public interface PlayerDatabase {
    *
    * @return The players that are currently connected.
    */
-  Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException;
-
-  /**
-   * Returns if this player database records information about only currently connected players.
-   *
-   * @return if this player database records information about only currently connected players.
-   */
-  boolean recordsOnlyConnectedPlayers();
+  Set<Player> getOnlinePlayers();
 
   /**
    * Returns the authentication method for the player.

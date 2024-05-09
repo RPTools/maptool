@@ -14,7 +14,6 @@
  */
 package net.rptools.clientserver;
 
-import java.io.IOException;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.SocketConnection;
@@ -33,9 +32,10 @@ public class ConnectionFactory {
     return instance;
   }
 
-  public Connection createConnection(String id, ServerConfig config) throws IOException {
-    if (!config.getUseWebRTC() || config.isPersonalServer())
+  public Connection createConnection(String id, ServerConfig config) {
+    if (!config.getUseWebRTC()) {
       return new SocketConnection(id, config.getHostName(), config.getPort());
+    }
 
     return new WebRTCConnection(
         id,
@@ -49,9 +49,8 @@ public class ConnectionFactory {
   }
 
   public Server createServer(
-      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler)
-      throws IOException {
-    if (!config.getUseWebRTC() || config.isPersonalServer()) {
+      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
+    if (!config.getUseWebRTC()) {
       return new SocketServer(config.getPort(), handshake, messageHandler);
     }
 
@@ -67,6 +66,7 @@ public class ConnectionFactory {
 
           @Override
           public void onUnexpectedClose() {
+            MapTool.disconnect();
             MapTool.stopServer();
           }
         });

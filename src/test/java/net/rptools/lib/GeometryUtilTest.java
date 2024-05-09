@@ -47,13 +47,6 @@ public class GeometryUtilTest {
     Geometry geometry = GeometryUtil.toJts(area);
     Collection<Polygon> polygons = GeometryUtil.toJtsPolygons(area);
 
-    System.out.println(geometry);
-    if (expectedGeometry.getNumGeometries() == 1) {
-      System.out.println(expectedGeometry.getGeometryN(0));
-    } else {
-      System.out.println(expectedGeometry);
-    }
-
     assert expectedGeometry.equalsTopo(geometry) : "Geometry must have the correct topology";
 
     final var multiPolygon = geometryFactory.createMultiPolygon(polygons.toArray(Polygon[]::new));

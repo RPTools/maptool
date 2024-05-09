@@ -21,8 +21,6 @@ import org.apache.logging.log4j.Logger;
 
 /**
  * @author drice
- *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
- *     Java - Code Style - Code Templates
  */
 public class SocketConnection extends AbstractConnection implements Connection {
   /** Instance used for log messages. */
@@ -35,29 +33,30 @@ public class SocketConnection extends AbstractConnection implements Connection {
   private String hostName;
   private int port;
 
-  public SocketConnection(String id, String hostName, int port) throws IOException {
+  public SocketConnection(String id, String hostName, int port) {
     this.id = id;
     this.hostName = hostName;
     this.port = port;
   }
 
-  public SocketConnection(String id, Socket socket) throws IOException {
+  public SocketConnection(String id, Socket socket) {
     this.id = id;
-    this.hostName = socket.getInetAddress().getHostName();
-    this.port = socket.getPort();
-    initialize(socket);
-  }
-
-  private void initialize(Socket socket) throws IOException {
     this.socket = socket;
-    this.send = new SendThread(new BufferedOutputStream(socket.getOutputStream()));
-    this.receive = new ReceiveThread(this, socket.getInputStream());
-    this.send.start();
-    this.receive.start();
+
+    initialize(socket);
   }
 
   public String getId() {
     return id;
+  }
+
+  private void initialize(Socket socket) {
+    this.socket = socket;
+    this.send = new SendThread(socket);
+    this.receive = new ReceiveThread(socket);
+
+    this.send.start();
+    this.receive.start();
   }
 
   @Override
@@ -67,8 +66,11 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   public void sendMessage(Object channel, byte[] message) {
     addMessage(channel, message);
-    synchronized (send) {
-      send.notify();
+
+    if (send != null) {
+      synchronized (send) {
+        send.notify();
+      }
     }
   }
 
@@ -103,12 +105,12 @@ public class SocketConnection extends AbstractConnection implements Connection {
   // send thread
   // /////////////////////////////////////////////////////////////////////////
   private class SendThread extends Thread {
-    private final OutputStream out;
+    private final Socket socket;
     private boolean stopRequested = false;
 
-    public SendThread(OutputStream out) {
+    public SendThread(Socket socket) {
       setName("SocketConnection.SendThread");
-      this.out = out;
+      this.socket = socket;
     }
 
     public void requestStop() {
@@ -120,6 +122,15 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
     @Override
     public void run() {
+      final OutputStream out;
+      try {
+        out = new BufferedOutputStream(socket.getOutputStream());
+      } catch (IOException e) {
+        log.error("Unable to get socket output stream", e);
+        fireDisconnect();
+        return;
+      }
+
       try {
         while (!stopRequested && SocketConnection.this.isAlive()) {
           try {
@@ -154,14 +165,12 @@ public class SocketConnection extends AbstractConnection implements Connection {
   // receive thread
   // /////////////////////////////////////////////////////////////////////////
   private class ReceiveThread extends Thread {
-    private final SocketConnection conn;
-    private final InputStream in;
+    private final Socket socket;
     private boolean stopRequested = false;
 
-    public ReceiveThread(SocketConnection conn, InputStream in) {
+    public ReceiveThread(Socket socket) {
       setName("SocketConnection.ReceiveThread");
-      this.conn = conn;
-      this.in = in;
+      this.socket = socket;
     }
 
     public void requestStop() {
@@ -170,10 +179,19 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
     @Override
     public void run() {
-      while (!stopRequested && conn.isAlive()) {
+      final InputStream in;
+      try {
+        in = socket.getInputStream();
+      } catch (IOException e) {
+        log.error("Unable to get socket input stream", e);
+        SocketConnection.this.close();
+        return;
+      }
+
+      while (!stopRequested && SocketConnection.this.isAlive()) {
         try {
-          byte[] message = conn.readMessage(in);
-          conn.dispatchCompressedMessage(conn.id, message);
+          byte[] message = SocketConnection.this.readMessage(in);
+          SocketConnection.this.dispatchCompressedMessage(SocketConnection.this.id, message);
         } catch (IOException e) {
           log.error(e);
           fireDisconnect();
