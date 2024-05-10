@@ -41,6 +41,8 @@ import net.rptools.maptool.server.ServerMessageHandler;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class is used by a client to send commands to the server. The methods of this class are
@@ -48,6 +50,7 @@ import net.rptools.maptool.server.proto.drawing.IntPointDto;
  * the {@link ServerMessageHandler ServerMessageHandler}
  */
 public class ServerCommandClientImpl implements ServerCommand {
+  private static final Logger log = LogManager.getLogger(ServerCommandClientImpl.class);
 
   private final MapToolClient client;
   private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
@@ -515,7 +518,15 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   private void makeServerCall(Message msg) {
-    client.getConnection().sendMessage(msg);
+    log.info(
+        "{} making server call {}; state is {}",
+        client.getPlayer().getName(),
+        msg.getMessageTypeCase(),
+        client.getState());
+
+    if (client.getState() == MapToolClient.State.Connected) {
+      client.getConnection().sendMessage(msg);
+    }
   }
 
   public void setBoard(GUID zoneGUID, MD5Key mapAssetId, int x, int y) {
