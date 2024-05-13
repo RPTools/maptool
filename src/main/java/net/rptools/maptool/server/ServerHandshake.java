@@ -21,16 +21,16 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
+import java.util.function.BiConsumer;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.Handshake;
-import net.rptools.clientserver.simple.HandshakeObserver;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
@@ -65,9 +65,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /** Class used to handle the server side part of the connection handshake. */
-public class ServerHandshake implements Handshake, MessageHandler {
+public class ServerHandshake implements Handshake<Player>, MessageHandler {
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(ServerHandshake.class);
+
+  private final CompletableFuture<Player> future = new CompletableFuture<>();
+  private CompletionStage<Player> stage = future;
 
   /** The database used for retrieving players. */
   private final ServerSidePlayerDatabase playerDatabase;
@@ -77,29 +80,17 @@ public class ServerHandshake implements Handshake, MessageHandler {
   /** The connection to the client. */
   private final Connection connection;
 
-  /** Observers that want to be notified when the status changes. */
-  private final List<HandshakeObserver> observerList = new CopyOnWriteArrayList<>();
-
   /** The index in the array for the GM handshake challenge, only used for role based auth */
   private static final int GM_CHALLENGE = 0;
 
   /** The index in the array for the Player handshake challenge, only used for role based auth */
   private static final int PLAYER_CHALLENGE = 1;
 
-  /** Message for any error that has occurred, {@code null} if no error has occurred. */
-  private String errorMessage;
-
   /** The pin for the new public key easy connect request. */
   private String easyConnectPin;
 
   /** The username for the new public key easy connect request. */
   private String easyConnectName;
-
-  /**
-   * Any exception that occurred that causes an error, {@code null} if no exception which causes an
-   * error has occurred.
-   */
-  private Exception exception;
 
   /** The player that this connection is for. */
   private Player player;
@@ -130,47 +121,28 @@ public class ServerHandshake implements Handshake, MessageHandler {
     this.connection = connection;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = useEasyConnect;
+
+    whenComplete(
+        (result, error) -> {
+          connection.removeMessageHandler(this);
+
+          if (getEasyConnectName() != null) {
+            SwingUtilities.invokeLater(
+                () ->
+                    MapTool.getFrame()
+                        .getConnectionPanel()
+                        .removeAwaitingApproval(easyConnectName));
+          }
+        });
   }
 
   @Override
-  public boolean isSuccessful() {
-    return currentState == State.Success;
-  }
-
-  @Override
-  public synchronized String getErrorMessage() {
-    return errorMessage;
-  }
-
-  @Override
-  public synchronized Connection getConnection() {
-    return connection;
-  }
-
-  @Override
-  public synchronized Exception getException() {
-    return exception;
-  }
-
-  /**
-   * Returns the player associated with the handshake.
-   *
-   * @return the player associated with the handshake.
-   */
-  public synchronized Player getPlayer() {
-    return player;
+  public void whenComplete(BiConsumer<? super Player, ? super Throwable> callback) {
+    stage = stage.whenComplete(callback);
   }
 
   private synchronized void setPlayer(Player player) {
     this.player = player;
-  }
-
-  private synchronized void setErrorMessage(String errorMessage) {
-    this.errorMessage = errorMessage;
-  }
-
-  private synchronized void setException(Exception exception) {
-    this.exception = exception;
   }
 
   private synchronized void setCurrentState(State state) {
@@ -214,28 +186,26 @@ public class ServerHandshake implements Handshake, MessageHandler {
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
+        String errorMessage;
         if (code.equals(HandshakeResponseCodeMsg.INVALID_PASSWORD)) {
-          setErrorMessage(I18N.getText("Handshake.msg.incorrectPassword"));
+          errorMessage = I18N.getText("Handshake.msg.incorrectPassword");
         } else if (code.equals(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY)) {
-          setErrorMessage(I18N.getText("Handshake.msg.incorrectPublicKey"));
+          errorMessage = I18N.getText("Handshake.msg.incorrectPublicKey");
         } else {
-          setErrorMessage(I18N.getText("Handshake.msg.invalidHandshake"));
+          errorMessage = I18N.getText("Handshake.msg.invalidHandshake");
         }
-
-        notifyObservers();
+        future.completeExceptionally(new Failure(errorMessage));
         return;
       }
 
       switch (currentState) {
         case PlayerBlocked:
-          setErrorMessage(I18N.getText("Handshake.msg.invalidHandshake"));
           sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
           break;
         case AwaitingClientInit:
           if (msgType == HandshakeMsg.MessageTypeCase.CLIENT_INIT_MSG) {
             handle(handshakeMsg.getClientInitMsg());
           } else {
-            setErrorMessage(I18N.getText("Handshake.msg.invalidHandshake"));
             sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
           }
           break;
@@ -244,7 +214,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
           if (msgType == MessageTypeCase.CLIENT_AUTH_MESSAGE) {
             handle(handshakeMsg.getClientAuthMessage());
           } else {
-            setErrorMessage(I18N.getText("Handshake.msg.invalidHandshake"));
             sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_HANDSHAKE);
           }
           break;
@@ -255,10 +224,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
       }
     } catch (Exception e) {
       log.warn(e.toString());
-      setException(e);
       setCurrentState(State.Error);
-      setErrorMessage(e.getMessage());
-      notifyObservers();
+      future.completeExceptionally(new Failure(I18N.getText("Handshake.msg.unexpectedError"), e));
     }
   }
 
@@ -354,14 +321,14 @@ public class ServerHandshake implements Handshake, MessageHandler {
   private void sendConnectionSuccessful() throws ExecutionException, InterruptedException {
     var connectionSuccessfulMsg =
         ConnectionSuccessfulMsg.newBuilder()
-            .setRoleDto(getPlayer().isGM() ? RoleDto.GM : RoleDto.PLAYER)
+            .setRoleDto(player.isGM() ? RoleDto.GM : RoleDto.PLAYER)
             .setServerPolicyDto(server.getPolicy().toDto())
             .setGameDataDto(new DataStoreManager().toDto().get())
             .setAddOnLibraryListDto(new LibraryManager().addOnLibrariesToDto().get());
     var handshakeMsg =
         HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
     sendMessage(State.Success, handshakeMsg);
-    notifyObservers();
+    future.complete(player);
   }
 
   /**
@@ -386,13 +353,11 @@ public class ServerHandshake implements Handshake, MessageHandler {
           InvalidKeyException,
           InvalidAlgorithmParameterException {
     if (server.isPlayerConnected(clientInitMsg.getPlayerName())) {
-      setErrorMessage(I18N.getText("Handshake.msg.duplicateName"));
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.PLAYER_ALREADY_CONNECTED);
       return;
     }
 
     if (!MapTool.isDevelopment() && !MapTool.getVersion().equals(clientInitMsg.getVersion())) {
-      setErrorMessage(I18N.getText("Handshake.msg.wrongVersion"));
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.WRONG_VERSION);
     }
 
@@ -401,7 +366,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
     try {
       setPlayer(playerDatabase.getPlayer(clientInitMsg.getPlayerName()));
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-      setErrorMessage(I18N.getText("Handshake.msg.encodeInitFail", clientInitMsg.getPlayerName()));
       // Error fetching player is sent to client as invalid password intentionally.
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
       return;
@@ -413,7 +377,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
         return;
       }
       // Unknown player is sent to client as invalid password intentionally.
-      setErrorMessage(I18N.getText("Handshake.msg.unknownPlayer", clientInitMsg.getPlayerName()));
       sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PASSWORD);
       return;
     }
@@ -574,35 +537,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
     sendMessage(State.AwaitingClientPublicKeyAuth, handshakeMsg);
   }
 
-  /**
-   * Adds an observer to the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  public synchronized void addObserver(HandshakeObserver observer) {
-    observerList.add(observer);
-  }
-
-  /**
-   * Removes an observer from the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  public synchronized void removeObserver(HandshakeObserver observer) {
-    observerList.remove(observer);
-  }
-
-  /** Notifies observers that the handshake has completed or errored out.. */
-  private synchronized void notifyObservers() {
-    if (getEasyConnectName() != null) {
-      SwingUtilities.invokeLater(
-          () -> MapTool.getFrame().getConnectionPanel().removeAwaitingApproval(easyConnectName));
-    }
-    for (var observer : observerList) observer.onCompleted(this);
-  }
-
   @Override
   public void startHandshake() {
+    connection.addMessageHandler(this);
     setCurrentState(State.AwaitingClientInit);
   }
 

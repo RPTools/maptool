@@ -54,7 +54,7 @@ public class WebRTCServer extends AbstractServer {
 
   public WebRTCServer(
       String serverName,
-      HandshakeProvider handshake,
+      HandshakeProvider<?> handshake,
       MessageHandler messageHandler,
       Listener listener) {
     super(handshake, messageHandler);

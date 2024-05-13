@@ -14,53 +14,23 @@
  */
 package net.rptools.clientserver.simple;
 
-import net.rptools.clientserver.simple.connection.Connection;
+import java.util.function.BiConsumer;
 
-public interface Handshake {
+public interface Handshake<T> {
 
-  /**
-   * Returns if the handshake has been successful or not.
-   *
-   * @return {@code true} if the handshake has been successful, {code false} if it has failed or is
-   *     still in progress.
-   */
-  boolean isSuccessful();
-
-  /**
-   * Returns the message for the error -- if any -- that occurred during the handshake.
-   *
-   * @return the message for the error that occurred during handshake.
-   */
-  String getErrorMessage();
-
-  /**
-   * Returns the connection for this {@code ServerHandshake}.
-   *
-   * @return the connection for this {@code ServerHandshake}.
-   */
-  Connection getConnection();
-
-  /**
-   * Returns the exception -- if any -- that occurred during processing of the handshake.
-   *
-   * @return the exception that occurred during the processing of the handshake.
-   */
-  Exception getException();
-
-  /**
-   * Adds an observer to the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  void addObserver(HandshakeObserver observer);
-
-  /**
-   * Removes an observer from the handshake process.
-   *
-   * @param observer the observer of the handshake process.
-   */
-  void removeObserver(HandshakeObserver observer);
+  void whenComplete(BiConsumer<? super T, ? super Throwable> callback);
 
   /** Starts the handshake process. */
   void startHandshake();
+
+  class Failure extends Exception {
+    // TODO When we have access to I18N, force this to be translatable.
+    public Failure(String message) {
+      super(message);
+    }
+
+    public Failure(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
 }

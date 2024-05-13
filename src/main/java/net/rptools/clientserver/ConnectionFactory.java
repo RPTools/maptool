@@ -49,7 +49,7 @@ public class ConnectionFactory {
   }
 
   public Server createServer(
-      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
+      ServerConfig config, HandshakeProvider<?> handshake, MessageHandler messageHandler) {
     if (!config.getUseWebRTC()) {
       return new SocketServer(config.getPort(), handshake, messageHandler);
     }

@@ -19,6 +19,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.DisconnectHandler;
+import net.rptools.clientserver.simple.Handshake;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.ui.ActivityMonitorPanel;
 import net.rptools.maptool.model.player.LocalPlayer;
@@ -37,9 +38,9 @@ public class MapToolConnection implements IMapToolConnection {
   private static final Logger log = LogManager.getLogger(MapToolConnection.class);
 
   private final LocalPlayer player;
-  private Connection connection;
-  private ClientHandshake handshake;
-  private List<Runnable> onCompleted;
+  private final Connection connection;
+  private final Handshake<Void> handshake;
+  private final List<Runnable> onCompleted;
 
   public MapToolConnection(MapToolClient client, ServerConfig config, LocalPlayer player) {
     this.connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
@@ -55,29 +56,25 @@ public class MapToolConnection implements IMapToolConnection {
 
   @Override
   public void start() throws IOException {
-    connection.addMessageHandler(handshake);
-    handshake.addObserver(
-        (ignore) -> {
-          connection.removeMessageHandler(handshake);
-          if (handshake.isSuccessful()) {
-            for (final var callback : onCompleted) {
-              callback.run();
-            }
-          } else {
+    handshake.whenComplete(
+        (result, exception) -> {
+          if (exception != null) {
             // For client side only show the error message as its more likely to make sense
             // for players, the exception is logged just in case more info is required
-            var exception = handshake.getException();
-            if (exception != null) {
-              log.warn(exception);
-            }
-            MapTool.showError(handshake.getErrorMessage());
+            log.warn(exception);
+            MapTool.showError(exception.getMessage());
             connection.close();
             for (final var callback : onCompleted) {
               callback.run();
             }
             AppActions.disconnectFromServer();
+          } else {
+            for (final var callback : onCompleted) {
+              callback.run();
+            }
           }
         });
+
     // this triggers the handshake from the server side
     connection.open();
     handshake.startHandshake();
@@ -110,7 +107,7 @@ public class MapToolConnection implements IMapToolConnection {
 
   @Override
   public void sendMessage(Message msg) {
-    log.debug(player.getName() + " sent " + msg.getMessageTypeCase());
+    log.debug("{} sent {}", player.getName(), msg.getMessageTypeCase());
     connection.sendMessage(msg.toByteArray());
   }
 }

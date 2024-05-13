@@ -35,10 +35,9 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author trevor
  */
-public class MapToolServerConnection implements ServerObserver, HandshakeProvider {
+public class MapToolServerConnection implements ServerObserver, HandshakeProvider<Player> {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
-  private final Map<Connection, ServerHandshake> handshakeMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
   private final Server connection;
   private final ServerSidePlayerDatabase playerDatabase;
@@ -59,19 +58,19 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
    *
    * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
    */
-  public Handshake getConnectionHandshake(Connection conn) {
+  public Handshake<Player> getConnectionHandshake(Connection conn) {
     var handshake = new ServerHandshake(server, conn, playerDatabase, useEasyConnect);
-    handshakeMap.put(conn, handshake);
-    handshake.addObserver(h -> this.onCompleted(handshake));
-    conn.addMessageHandler(handshake);
-    return handshake;
-  }
 
-  @Override
-  public void releaseHandshake(Connection conn) {
-    var handshake = handshakeMap.get(conn);
-    handshakeMap.remove(conn);
-    conn.removeMessageHandler(handshake);
+    handshake.whenComplete(
+        (player, ex) -> {
+          if (ex != null) {
+            log.error("Handshake failure", ex);
+          } else {
+            playerMap.put(conn.getId().toUpperCase(), player);
+          }
+        });
+
+    return handshake;
   }
 
   public Player getPlayer(String id) {
@@ -182,20 +181,5 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
 
   public void removeObserver(ServerObserver observer) {
     connection.removeObserver(observer);
-  }
-
-  public void onCompleted(ServerHandshake handshake) {
-    if (handshake.isSuccessful()) {
-      Player player = handshake.getPlayer();
-
-      if (player != null) {
-        playerMap.put(handshake.getConnection().getId().toUpperCase(), player);
-      }
-    } else {
-      var exception = handshake.getException();
-      if (exception != null) {
-        log.error("Handshake failure: " + exception, exception);
-      }
-    }
   }
 }
