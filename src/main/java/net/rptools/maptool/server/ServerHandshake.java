@@ -174,23 +174,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
   }
 
   private synchronized void setCurrentState(State state) {
+    log.info("Transitioning from {} to {}", currentState, state);
     currentState = state;
-  }
-
-  private synchronized State getCurrentState() {
-    return currentState;
-  }
-
-  private synchronized void setEasyConnectPin(String pin) {
-    easyConnectPin = pin;
-  }
-
-  private String getEasyConnectPin() {
-    return easyConnectPin;
-  }
-
-  private synchronized void setEasyConnectName(String name) {
-    easyConnectName = name;
   }
 
   private synchronized String getEasyConnectName() {
@@ -205,16 +190,17 @@ public class ServerHandshake implements Handshake, MessageHandler {
    */
   private void sendErrorResponseAndNotify(HandshakeResponseCodeMsg errorCode) {
     var msg = HandshakeMsg.newBuilder().setHandshakeResponseCodeMsg(errorCode).build();
-    sendMessage(msg);
-    setCurrentState(State.PlayerBlocked);
+    sendMessage(State.PlayerBlocked, msg);
     // Do not notify users as it will disconnect and client won't get message instead wait
     // for client to disconnect after getting this message, if they don't then it will fail
     // with invalid handshake.
   }
 
-  private void sendMessage(HandshakeMsg message) {
+  private void sendMessage(State newState, HandshakeMsg message) {
+    setCurrentState(newState);
+
     var msgType = message.getMessageTypeCase();
-    log.info("Server sent to " + connection.getId() + ": " + msgType);
+    log.debug("Sevver sent to {}: {}", connection.getId(), msgType);
     connection.sendMessage(message.toByteArray());
   }
 
@@ -224,7 +210,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
       var handshakeMsg = HandshakeMsg.parseFrom(message);
       var msgType = handshakeMsg.getMessageTypeCase();
 
-      log.info("from " + id + " got: " + msgType);
+      log.debug("from {} got: {}", id, msgType);
 
       if (msgType == MessageTypeCase.HANDSHAKE_RESPONSE_CODE_MSG) {
         HandshakeResponseCodeMsg code = handshakeMsg.getHandshakeResponseCodeMsg();
@@ -297,7 +283,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
     if (getEasyConnectName() == null) {
       return; // Protect from event being fired more than once
     }
-    setEasyConnectName(null);
+    easyConnectName = null;
     try {
       var playerDb = (PersistedPlayerDatabase) playerDatabase;
       var pl = playerDatabase.getPlayer(p.name());
@@ -313,8 +299,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
       }
       var publicKeyAddedMsgBuilder = PublicKeyAddedMsg.newBuilder();
       publicKeyAddedMsgBuilder.setPublicKey(p.publicKey());
-      sendMessage(HandshakeMsg.newBuilder().setPublicKeyAddedMsg(publicKeyAddedMsgBuilder).build());
-      setCurrentState(State.AwaitingClientInit);
+      var msg = HandshakeMsg.newBuilder().setPublicKeyAddedMsg(publicKeyAddedMsgBuilder).build();
+      sendMessage(State.AwaitingClientInit, msg);
     } catch (NoSuchPaddingException
         | NoSuchAlgorithmException
         | InvalidAlgorithmParameterException
@@ -333,7 +319,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
           InterruptedException,
           NoSuchPaddingException,
           IllegalBlockSizeException,
-          NoSuchAlgorithmException,
           BadPaddingException,
           InvalidKeyException,
           InvalidAlgorithmParameterException {
@@ -375,8 +360,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .setAddOnLibraryListDto(new LibraryManager().addOnLibrariesToDto().get());
     var handshakeMsg =
         HandshakeMsg.newBuilder().setConnectionSuccessfulMsg(connectionSuccessfulMsg).build();
-    sendMessage(handshakeMsg);
-    setCurrentState(State.Success);
+    sendMessage(State.Success, handshakeMsg);
     notifyObservers();
   }
 
@@ -438,14 +422,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
       var blockedMsg =
           PlayerBlockedMsg.newBuilder().setReason(playerDatabase.getBlockedReason(player)).build();
       var msg = HandshakeMsg.newBuilder().setPlayerBlockedMsg(blockedMsg).build();
-      sendMessage(msg);
-      setCurrentState(State.Error);
+      sendMessage(State.Error, msg);
       return;
     }
 
     if (playerDatabase.getAuthMethod(player) == AuthMethod.ASYMMETRIC_KEY) {
-      var state = sendAsymmetricKeyAuthType();
-      setCurrentState(state);
+      sendAsymmetricKeyAuthType();
     } else {
       handshakeChallenges = new HandshakeChallenge[2];
       if (playerDatabase.supportsRolePasswords()) {
@@ -453,7 +435,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
       } else {
         sendSharedPasswordAuthType();
       }
-      setCurrentState(State.AwaitingClientPasswordAuth);
     }
   }
 
@@ -462,8 +443,8 @@ public class ServerHandshake implements Handshake, MessageHandler {
     easyConnectPin = String.format("%04d", new SecureRandom().nextInt(9999));
     easyConnectName = playerName;
     requestPublicKeyBuilder.setPin(easyConnectPin);
-    sendMessage(HandshakeMsg.newBuilder().setRequestPublicKeyMsg(requestPublicKeyBuilder).build());
-    currentState = State.AwaitingPublicKey;
+    var msg = HandshakeMsg.newBuilder().setRequestPublicKeyMsg(requestPublicKeyBuilder).build();
+    sendMessage(State.AwaitingPublicKey, msg);
   }
 
   /**
@@ -500,7 +481,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .setIv(ByteString.copyFrom(iv))
             .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
-    sendMessage(handshakeMsg);
+    sendMessage(State.AwaitingClientPasswordAuth, handshakeMsg);
   }
 
   /**
@@ -549,13 +530,12 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .addChallenge(
                 ByteString.copyFrom(handshakeChallenges[PLAYER_CHALLENGE].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
-    sendMessage(handshakeMsg);
+    sendMessage(State.AwaitingClientPasswordAuth, handshakeMsg);
   }
 
   /**
    * Send the authentication type message when using asymmetric keys
    *
-   * @return the new state for the state machine.
    * @throws ExecutionException when there is an error fetching the public key.
    * @throws InterruptedException when there is an error fetching the public key.
    * @throws NoSuchPaddingException when there is an error during encryption.
@@ -564,7 +544,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
    * @throws BadPaddingException when there is an error during encryption.
    * @throws InvalidKeyException when there is an error during encryption.
    */
-  private State sendAsymmetricKeyAuthType()
+  private void sendAsymmetricKeyAuthType()
       throws ExecutionException,
           InterruptedException,
           NoSuchPaddingException,
@@ -580,7 +560,6 @@ public class ServerHandshake implements Handshake, MessageHandler {
       } else {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY);
       }
-      return State.AwaitingPublicKey;
     }
     CipherUtil.Key publicKey = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
     String password = new PasswordGenerator().getPassword();
@@ -592,8 +571,7 @@ public class ServerHandshake implements Handshake, MessageHandler {
             .setAuthType(AuthTypeEnum.ASYMMETRIC_KEY)
             .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
     var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
-    sendMessage(handshakeMsg);
-    return State.AwaitingClientPublicKeyAuth;
+    sendMessage(State.AwaitingClientPublicKeyAuth, handshakeMsg);
   }
 
   /**
