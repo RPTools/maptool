@@ -526,14 +526,14 @@ public class LookupTableFunction extends AbstractFunction {
     LookupTable lookupTable = checkTableAccess(name, function);
     lookupTable.setRoll(roll);
     MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
-    return lookupTable.getRoll();
+    return lookupTable.getDefaultRoll();
   }
 
   private String getTableRoll(String function, List<Object> params) throws ParserException {
     FunctionUtil.checkNumberParam("getTableRoll", params, 1, 1);
     String name = params.getFirst().toString();
     LookupTable lookupTable = checkTableAccess(name, function);
-    return lookupTable.getRoll();
+    return lookupTable.getDefaultRoll();
   }
 
   private @NotNull BigDecimal setTableAccess(String function, List<Object> params) throws ParserException {

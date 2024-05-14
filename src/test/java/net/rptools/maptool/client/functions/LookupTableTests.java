@@ -78,7 +78,7 @@ public class LookupTableTests {
     }
 
     @Test
-    void table_countEntries() throws ParserException {
+    void table_countEntries() {
         populateTable();
 
         assertEquals(3, table.getEntryList().size());

@@ -272,7 +272,6 @@ public class LookupTable {
         LookupEntry entry = entryList.get(entryNum);
         entry.setPicked(true);
         entryList.set(entryNum, entry); // TODO Isn't this redundant??
-
         return entry;
       } else {
         return new LookupEntry(0, 0, NO_PICKS_LEFT, null);
