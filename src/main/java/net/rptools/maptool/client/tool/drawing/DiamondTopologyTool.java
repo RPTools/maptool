@@ -107,6 +107,8 @@ public class DiamondTopologyTool extends AbstractDrawingTool implements MouseMot
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     setIsEraser(isEraser(e));
 
     ZonePoint zp = getPoint(e);

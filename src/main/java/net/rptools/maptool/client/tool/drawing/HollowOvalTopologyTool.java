@@ -124,6 +124,7 @@ public class HollowOvalTopologyTool extends AbstractDrawingTool implements Mouse
   }
 
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
 
     setIsEraser(isEraser(e));
 

@@ -119,6 +119,8 @@ public class CrossTopologyTool extends AbstractDrawingTool implements MouseMotio
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     setIsEraser(isEraser(e));
 
     ZonePoint p = getPoint(e);
