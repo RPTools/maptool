@@ -309,8 +309,9 @@ public class ServerHandshake implements Handshake, MessageHandler {
           playerDb.setRole(pl.getName(), p.role());
           setPlayer(playerDatabase.getPlayer(pl.getName()));
         }
-        playerDb.commitChanges();
       }
+      playerDb.commitChanges();
+
       var publicKeyAddedMsgBuilder = PublicKeyAddedMsg.newBuilder();
       publicKeyAddedMsgBuilder.setPublicKey(p.publicKey());
       sendMessage(HandshakeMsg.newBuilder().setPublicKeyAddedMsg(publicKeyAddedMsgBuilder).build());
