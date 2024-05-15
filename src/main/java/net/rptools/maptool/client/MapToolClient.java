@@ -33,7 +33,6 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
@@ -210,7 +209,7 @@ public class MapToolClient {
     if (!playerList.contains(player)) {
       playerList.add(player);
       new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
-      new Players(playerDatabase).playerSignedIn(player);
+      playerDatabase.playerSignedIn(player);
 
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
     }
@@ -219,7 +218,7 @@ public class MapToolClient {
   public void removePlayer(Player player) {
     playerList.remove(player);
     new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
-    new Players(playerDatabase).playerSignedOut(player);
+    playerDatabase.playerSignedOut(player);
   }
 
   public boolean isPlayerConnected(String playerName) {
