@@ -666,6 +666,9 @@ public class MapTool {
       zoneLoadedListener = new ZoneLoadedListener();
 
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
+      // Set the Topology drawing mode to the last mode used for convenience
+      // Should only be one zone, but let's cover our bases.
+      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppPreferences.getTopologyTypes()));
 
       // Stop the pre-init client/server.
       disconnect();
@@ -1293,12 +1296,6 @@ public class MapTool {
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
-
-    // Set the Topology drawing mode to the last mode used for convenience
-    MapTool.getFrame()
-        .getCurrentZoneRenderer()
-        .getZone()
-        .setTopologyTypes(AppPreferences.getTopologyTypes());
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
