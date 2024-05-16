@@ -518,7 +518,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   private void makeServerCall(Message msg) {
-    log.info(
+    log.debug(
         "{} making server call {}; state is {}",
         client.getPlayer().getName(),
         msg.getMessageTypeCase(),

@@ -146,7 +146,7 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
   }
 
   private synchronized void setCurrentState(State state) {
-    log.info("Transitioning from {} to {}", currentState, state);
+    log.debug("Transitioning from {} to {}", currentState, state);
     currentState = state;
   }
 
