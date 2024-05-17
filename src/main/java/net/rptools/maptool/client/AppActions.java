@@ -2347,9 +2347,8 @@ public class AppActions {
               .getConnectionStatusPanel()
               .setStatus(ConnectionStatusPanel.Status.connected);
 
-          // Show the user something interesting until we've got the campaign
-          // Look in ClientMethodHandler.setCampaign() for the corresponding
-          // hideGlassPane
+          // Show the user something interesting while we're connecting. Look below for the
+          // corresponding hideGlassPane
           StaticMessageDialog progressDialog =
               new StaticMessageDialog(I18N.getText("msg.info.connecting"));
           MapTool.getFrame().showFilledGlassPane(progressDialog);
@@ -2379,6 +2378,10 @@ public class AppActions {
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
                       () -> {
                         MapTool.getFrame().hideGlassPane();
+
+                        // Show the user something interesting until we've got the campaign
+                        // Look in ClientMethodHandler.setCampaign() for the corresponding
+                        // hideGlassPane
                         MapTool.getFrame()
                             .showFilledGlassPane(
                                 new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));

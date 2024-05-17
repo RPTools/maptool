@@ -964,8 +964,7 @@ public class MapTool {
 
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
-    final var server =
-        new MapToolServer(new Campaign(campaign), player, config, policy, playerDatabase);
+    final var server = new MapToolServer(campaign, player, config, policy, playerDatabase);
     MapTool.server = server;
 
     if (announcer != null) {
@@ -993,17 +992,20 @@ public class MapTool {
       getFrame().getConnectionPanel().startHosting();
     }
 
-    // Create the local connection so we aren't left hanging.
-    installClient(
-        server.getLocalClient(),
-        () -> {
-          // connecting
-          MapTool.getFrame()
-              .getConnectionStatusPanel()
-              .setStatus(ConnectionStatusPanel.Status.server);
-          MapTool.addLocalMessage(
-              MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
-        });
+    client = server.getLocalClient();
+    setUpClient(client);
+    client
+        .getConnection()
+        .onCompleted(
+            () -> {
+              // connected
+              MapTool.getFrame()
+                  .getConnectionStatusPanel()
+                  .setStatus(ConnectionStatusPanel.Status.server);
+              MapTool.addLocalMessage(
+                  MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+            });
+    // endregion
 
     server.start();
   }
@@ -1150,17 +1152,24 @@ public class MapTool {
     server =
         new MapToolServer(
             campaign, player, null, new ServerPolicy(), new PersonalServerPlayerDatabase(player));
+
     client = server.getLocalClient();
+    setUpClient(client);
+    client
+        .getConnection()
+        .onCompleted(
+            () -> {
+              MapTool.getFrame()
+                  .getConnectionStatusPanel()
+                  .setStatus(ConnectionStatusPanel.Status.server);
+            });
 
-    MapTool.getFrame().getCommandPanel().clearAllIdentities();
-
-    client.start();
     setCampaign(campaign);
+
+    server.start();
   }
 
-  private static void installClient(MapToolClient client, Runnable onCompleted) {
-    MapTool.client = client;
-
+  private static void setUpClient(MapToolClient client) {
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     MapToolConnection clientConn = client.getConnection();
@@ -1169,14 +1178,16 @@ public class MapTool {
         () -> {
           clientFrame.getLookupTablePanel().updateView();
           clientFrame.getInitiativePanel().updateView();
-          onCompleted.run();
         });
   }
 
   public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
       throws IOException {
     var connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
-    installClient(new MapToolClient(player, connection), onCompleted);
+
+    client = new MapToolClient(player, connection);
+    setUpClient(client);
+    client.getConnection().onCompleted(onCompleted);
     client.start();
   }
 
