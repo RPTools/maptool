@@ -659,6 +659,7 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     setClientFrame(new MapToolFrame(menuBar));
+    taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     try {
       playerZoneListener = new PlayerZoneListener();
@@ -1281,8 +1282,6 @@ public class MapTool {
 
     // fire up autosaves
     getAutoSaveManager().start();
-
-    taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
