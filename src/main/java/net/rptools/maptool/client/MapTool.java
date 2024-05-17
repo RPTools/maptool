@@ -186,7 +186,7 @@ public class MapTool {
       var player = new LocalPlayer();
       server =
           new MapToolServer(
-              new Campaign(),
+              CampaignFactory.createBasicCampaign(),
               player,
               null,
               new ServerPolicy(),
@@ -666,6 +666,10 @@ public class MapTool {
 
     setClientFrame(new MapToolFrame(menuBar));
     taskbarFlasher = new TaskBarFlasher(clientFrame);
+
+    // Make sure the user sees something right away so that they aren't staring at a black screen.
+    // Technically this call does too much, but since it is a blank campaign it's okay.
+    setCampaign(client.getCampaign());
 
     try {
       playerZoneListener = new PlayerZoneListener();
@@ -1163,8 +1167,6 @@ public class MapTool {
                   .getConnectionStatusPanel()
                   .setStatus(ConnectionStatusPanel.Status.server);
             });
-
-    setCampaign(campaign);
 
     server.start();
   }
