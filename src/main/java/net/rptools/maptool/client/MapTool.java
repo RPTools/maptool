@@ -1755,7 +1755,6 @@ public class MapTool {
 
           EventQueue.invokeLater(
               () -> {
-                log.info("VISIBLE!");
                 clientFrame.setVisible(true);
                 splash.hideSplashScreen();
                 EventQueue.invokeLater(MapTool::postInitialize);
