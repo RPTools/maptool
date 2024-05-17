@@ -172,7 +172,7 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
     setCurrentState(newState);
 
     var msgType = message.getMessageTypeCase();
-    log.debug("Sevver sent to {}: {}", connection.getId(), msgType);
+    log.debug("Server sent to {}: {}", connection.getId(), msgType);
     connection.sendMessage(message.toByteArray());
   }
 
