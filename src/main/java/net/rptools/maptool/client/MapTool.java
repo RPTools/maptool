@@ -84,6 +84,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -639,6 +640,7 @@ public class MapTool {
   private static void initialize() {
     // First time
     AppSetup.install();
+    LibraryManager.init();
 
     // Clean up after ourselves
     FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
@@ -661,6 +663,7 @@ public class MapTool {
     try {
       playerZoneListener = new PlayerZoneListener();
       zoneLoadedListener = new ZoneLoadedListener();
+
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       startPersonalServer(cmpgn);
     } catch (Exception e) {
@@ -1750,8 +1753,10 @@ public class MapTool {
     EventQueue.invokeLater(
         () -> {
           initialize();
+
           EventQueue.invokeLater(
               () -> {
+                log.info("VISIBLE!");
                 clientFrame.setVisible(true);
                 splash.hideSplashScreen();
                 EventQueue.invokeLater(MapTool::postInitialize);
