@@ -88,7 +88,9 @@ import net.rptools.maptool.model.ZoneFactory;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PersonalServerPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
@@ -96,9 +98,7 @@ import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
-import net.rptools.maptool.server.IMapToolServer;
 import net.rptools.maptool.server.MapToolServer;
-import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
@@ -158,7 +158,7 @@ public class MapTool {
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
   private static LogConsoleFrame logConsoleFrame;
-  private static IMapToolServer server;
+  private static MapToolServer server;
   private static MapToolClient client;
 
   private static BackupManager backupManager;
@@ -183,7 +183,14 @@ public class MapTool {
 
   static {
     try {
-      server = new PersonalServer(new Campaign(), new LocalPlayer());
+      var player = new LocalPlayer();
+      server =
+          new MapToolServer(
+              new Campaign(),
+              player,
+              null,
+              new ServerPolicy(),
+              PlayerDatabaseFactory.getPersonalServerPlayerDatabase(player));
       client = server.getLocalClient();
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
@@ -742,7 +749,7 @@ public class MapTool {
   /**
    * @return the server, or null if player is a client.
    */
-  public static IMapToolServer getServer() {
+  public static MapToolServer getServer() {
     return server;
   }
 
@@ -964,7 +971,7 @@ public class MapTool {
     if (announcer != null) {
       announcer.stop();
     }
-    announcer = new ServiceAnnouncer(id, server.getConfig().getPort(), AppConstants.SERVICE_GROUP);
+    announcer = new ServiceAnnouncer(id, config.getPort(), AppConstants.SERVICE_GROUP);
     announcer.start();
 
     // Registered ?
@@ -1140,7 +1147,9 @@ public class MapTool {
     assetTransferManager.flush();
 
     final var player = new LocalPlayer();
-    server = new PersonalServer(campaign, player);
+    server =
+        new MapToolServer(
+            campaign, player, null, new ServerPolicy(), new PersonalServerPlayerDatabase(player));
     client = server.getLocalClient();
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();

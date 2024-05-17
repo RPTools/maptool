@@ -15,9 +15,11 @@
 package net.rptools.clientserver;
 
 import java.awt.EventQueue;
+import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.SocketConnection;
 import net.rptools.clientserver.simple.connection.WebRTCConnection;
+import net.rptools.clientserver.simple.server.NilServer;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.SocketServer;
 import net.rptools.clientserver.simple.server.WebRTCServer;
@@ -47,7 +49,11 @@ public class ConnectionFactory {
         });
   }
 
-  public Server createServer(ServerConfig config) {
+  public Server createServer(@Nullable ServerConfig config) {
+    if (config == null) {
+      return new NilServer();
+    }
+
     if (!config.getUseWebRTC()) {
       return new SocketServer(config.getPort());
     }

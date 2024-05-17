@@ -12,23 +12,13 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.server;
+package net.rptools.clientserver.simple.server;
 
-import net.rptools.maptool.client.MapToolClient;
-import net.rptools.maptool.model.player.PlayerDatabase;
+/** A server implementation that never receives connections */
+public class NilServer extends AbstractServer {
+  @Override
+  public void start() {}
 
-public interface IMapToolServer {
-  MapToolClient getLocalClient();
-
-  boolean isPersonalServer();
-
-  boolean isServerRegistered();
-
-  String getName();
-
-  int getPort();
-
-  PlayerDatabase getPlayerDatabase();
-
-  void stop();
+  @Override
+  public void close() {}
 }

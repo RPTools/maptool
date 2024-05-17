@@ -40,6 +40,10 @@ public class PlayerDatabaseFactory {
     return new LocalPlayerDatabase(player);
   }
 
+  public static PersonalServerPlayerDatabase getPersonalServerPlayerDatabase(LocalPlayer player) {
+    return new PersonalServerPlayerDatabase(player);
+  }
+
   public static DefaultPlayerDatabase getDefaultPlayerDatabase(
       String playerPassword, String gmPassword) {
     try {

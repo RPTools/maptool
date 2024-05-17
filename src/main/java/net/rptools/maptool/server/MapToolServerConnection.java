@@ -17,7 +17,6 @@ package net.rptools.maptool.server;
 import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.Router;
@@ -47,13 +46,17 @@ public class MapToolServerConnection implements ServerObserver {
   private final boolean useEasyConnect;
 
   public MapToolServerConnection(
-      MapToolServer server, ServerSidePlayerDatabase playerDatabase, ServerMessageHandler handler) {
+      MapToolServer server,
+      Server connection,
+      ServerSidePlayerDatabase playerDatabase,
+      ServerMessageHandler handler,
+      boolean useEasyConnect) {
     this.messageHandler = handler;
-    this.connection = ConnectionFactory.getInstance().createServer(server.getConfig());
+    this.connection = connection;
     this.router = new Router();
     this.server = server;
     this.playerDatabase = playerDatabase;
-    this.useEasyConnect = server.getConfig().getUseEasyConnect();
+    this.useEasyConnect = useEasyConnect;
     addObserver(this);
   }
 
@@ -143,12 +146,7 @@ public class MapToolServerConnection implements ServerObserver {
   }
 
   public void sendMessage(String id, Message message) {
-    log.debug(
-        server.getConfig().getServerName()
-            + " sent to "
-            + id
-            + ": "
-            + message.getMessageTypeCase());
+    log.debug("{} sent to {}: {}", server.getName(), id, message.getMessageTypeCase());
     router.sendMessage(id, message.toByteArray());
   }
 
@@ -163,17 +161,16 @@ public class MapToolServerConnection implements ServerObserver {
   }
 
   public void broadcastMessage(Message message) {
-    log.debug(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
+    log.debug("{} broadcast: {}", server.getName(), message.getMessageTypeCase());
     router.broadcastMessage(message.toByteArray());
   }
 
   public void broadcastMessage(String[] exclude, Message message) {
     log.debug(
-        server.getConfig().getServerName()
-            + " broadcast: "
-            + message.getMessageTypeCase()
-            + " except to "
-            + String.join(",", exclude));
+        "{} broadcast: {} except to {}",
+        server.getName(),
+        message.getMessageTypeCase(),
+        String.join(",", exclude));
     router.broadcastMessage(exclude, message.toByteArray());
   }
 

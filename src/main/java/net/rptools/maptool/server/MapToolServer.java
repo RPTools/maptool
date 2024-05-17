@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
+import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
@@ -45,7 +46,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author drice
  */
-public class MapToolServer implements IMapToolServer {
+public class MapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
@@ -76,7 +77,14 @@ public class MapToolServer implements IMapToolServer {
     playerDatabase = playerDb;
 
     localConnections = DirectConnection.create("local");
-    conn = new MapToolServerConnection(this, playerDatabase, new ServerMessageHandler(this));
+
+    conn =
+        new MapToolServerConnection(
+            this,
+            ConnectionFactory.getInstance().createServer(config),
+            playerDatabase,
+            new ServerMessageHandler(this),
+            config != null && config.getUseEasyConnect());
 
     // Make sure the server has a different copy than the client.
     this.campaign = new Campaign(campaign);
@@ -85,38 +93,26 @@ public class MapToolServer implements IMapToolServer {
         new MapToolClient(campaign, localPlayer, localConnections.clientSide(), policy, playerDb);
 
     assetProducerThread = new AssetProducerThread();
-    assetProducerThread.start();
-
-    // Start a heartbeat if requested
-    if (config.isServerRegistered()) {
-      heartbeatThread = new HeartbeatThread();
-      heartbeatThread.start();
-    }
   }
 
-  @Override
   public MapToolClient getLocalClient() {
     return localClient;
   }
 
-  @Override
   public boolean isPersonalServer() {
-    return false;
+    return config == null;
   }
 
-  @Override
   public boolean isServerRegistered() {
-    return config.isServerRegistered();
+    return config == null ? false : config.isServerRegistered();
   }
 
-  @Override
   public String getName() {
-    return config.getServerName();
+    return config == null ? "" : config.getServerName();
   }
 
-  @Override
   public int getPort() {
-    return config.getPort();
+    return config == null ? -1 : config.getPort();
   }
 
   public ServerSidePlayerDatabase getPlayerDatabase() {
@@ -166,10 +162,6 @@ public class MapToolServer implements IMapToolServer {
     conn.removeObserver(observer);
   }
 
-  public boolean isHostId(String playerId) {
-    return config.getHostPlayerId() != null && config.getHostPlayerId().equals(playerId);
-  }
-
   public MapToolServerConnection getConnection() {
     return conn;
   }
@@ -204,11 +196,6 @@ public class MapToolServer implements IMapToolServer {
     this.policy = policy;
   }
 
-  public ServerConfig getConfig() {
-    return config;
-  }
-
-  @Override
   public void stop() {
     conn.close();
     if (heartbeatThread != null) {
@@ -229,21 +216,33 @@ public class MapToolServer implements IMapToolServer {
     conn.connectionAccepted(localConnections.serverSide(), localClient.getPlayer());
 
     conn.open();
+
+    assetProducerThread.start();
+
+    // Start a heartbeat if requested
+    if (config != null && config.isServerRegistered()) {
+      heartbeatThread = new HeartbeatThread(config.getPort());
+      heartbeatThread.start();
+    }
   }
 
   private class HeartbeatThread extends Thread {
+    private final int port;
     private boolean stop = false;
     private static final int HEARTBEAT_DELAY = 10 * 60 * 1000; // 10 minutes
     private static final int HEARTBEAT_FLUX = 20 * 1000; // 20 seconds
 
     private boolean ever_had_an_error = false;
 
+    public HeartbeatThread(int port) {
+      this.port = port;
+    }
+
     @Override
     public void run() {
       int WARNING_TIME = 2; // number of heartbeats before popup warning
       int errors = 0;
       String IP_addr = ConnectionInfoDialog.getExternalAddress();
-      int port = getConfig().getPort();
 
       while (!stop) {
         try {
