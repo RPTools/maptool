@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.sheet.stats;
 
 import java.net.URL;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -28,4 +29,36 @@ import java.util.Set;
  * @param namespace The namespace of the add-on that provides the spreadsheet.
  */
 public record StatSheet(
-    String name, String description, URL entry, Set<String> propertyTypes, String namespace) {}
+    String name, String description, URL entry, Set<String> propertyTypes, String namespace) {
+  @Override
+  public boolean equals(Object obj) {
+    if (!(obj instanceof StatSheet other)) {
+      return false;
+    }
+    if (!Objects.equals(name, other.name)) {
+      return false;
+    }
+    if (!Objects.equals(description, other.description)) {
+      return false;
+    }
+    if (!Objects.equals(propertyTypes, other.propertyTypes)) {
+      return false;
+    }
+    if (!Objects.equals(namespace, other.namespace)) {
+      return false;
+    }
+
+    // Finally the URLs
+    var thisUrl = entry == null ? null : entry.toString();
+    var otherUrl = other.entry == null ? null : other.entry.toString();
+
+    return Objects.equals(thisUrl, otherUrl);
+  }
+
+  @Override
+  public int hashCode() {
+    // Hash the URL as a string. E.g., we don't need hostname resolution just for a hashcode.
+    return Objects.hash(
+        name, description, entry == null ? null : entry.toString(), propertyTypes, namespace);
+  }
+}
