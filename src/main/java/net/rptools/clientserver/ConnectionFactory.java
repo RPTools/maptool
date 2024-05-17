@@ -15,11 +15,9 @@
 package net.rptools.clientserver;
 
 import java.awt.EventQueue;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.SocketConnection;
 import net.rptools.clientserver.simple.connection.WebRTCConnection;
-import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.SocketServer;
 import net.rptools.clientserver.simple.server.WebRTCServer;
@@ -49,16 +47,13 @@ public class ConnectionFactory {
         });
   }
 
-  public Server createServer(
-      ServerConfig config, HandshakeProvider<?> handshake, MessageHandler messageHandler) {
+  public Server createServer(ServerConfig config) {
     if (!config.getUseWebRTC()) {
-      return new SocketServer(config.getPort(), handshake, messageHandler);
+      return new SocketServer(config.getPort());
     }
 
     return new WebRTCServer(
         config.getServerName(),
-        handshake,
-        messageHandler,
         new WebRTCServer.Listener() {
           @Override
           public void onLoginError() {

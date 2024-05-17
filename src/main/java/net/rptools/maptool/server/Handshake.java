@@ -12,11 +12,25 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.server;
+package net.rptools.maptool.server;
 
-import net.rptools.clientserver.simple.Handshake;
-import net.rptools.clientserver.simple.connection.Connection;
+import java.util.function.BiConsumer;
 
-public interface HandshakeProvider<T> {
-  Handshake<T> getConnectionHandshake(Connection conn);
+public interface Handshake<T> {
+
+  void whenComplete(BiConsumer<? super T, ? super Throwable> callback);
+
+  /** Starts the handshake process. */
+  void startHandshake();
+
+  class Failure extends Exception {
+    // TODO When we have access to I18N, force this to be translatable.
+    public Failure(String message) {
+      super(message);
+    }
+
+    public Failure(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
 }

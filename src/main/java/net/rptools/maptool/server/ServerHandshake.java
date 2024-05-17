@@ -30,7 +30,6 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.SwingUtilities;
-import net.rptools.clientserver.simple.Handshake;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
@@ -223,7 +222,7 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
           }
       }
     } catch (Exception e) {
-      log.warn(e.toString());
+      log.warn("Unexpected exception during server handshake", e);
       setCurrentState(State.Error);
       future.completeExceptionally(new Failure(I18N.getText("Handshake.msg.unexpectedError"), e));
     }

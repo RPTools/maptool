@@ -18,9 +18,8 @@ import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import net.rptools.clientserver.ConnectionFactory;
-import net.rptools.clientserver.simple.Handshake;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
-import net.rptools.clientserver.simple.server.HandshakeProvider;
 import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
@@ -36,8 +35,10 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author trevor
  */
-public class MapToolServerConnection implements ServerObserver, HandshakeProvider<Player> {
+public class MapToolServerConnection implements ServerObserver {
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+
+  private final MessageHandler messageHandler;
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
   private final Router router;
@@ -47,33 +48,13 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
 
   public MapToolServerConnection(
       MapToolServer server, ServerSidePlayerDatabase playerDatabase, ServerMessageHandler handler) {
-    this.connection =
-        ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
+    this.messageHandler = handler;
+    this.connection = ConnectionFactory.getInstance().createServer(server.getConfig());
     this.router = new Router();
     this.server = server;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = server.getConfig().getUseEasyConnect();
     addObserver(this);
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.clientserver.simple.server.ServerConnection# handleConnectionHandshake(java.net.Socket)
-   */
-  public Handshake<Player> getConnectionHandshake(Connection conn) {
-    var handshake = new ServerHandshake(server, conn, playerDatabase, useEasyConnect);
-
-    handshake.whenComplete(
-        (player, ex) -> {
-          if (ex != null) {
-            log.error("Handshake failure", ex);
-          } else {
-            playerMap.put(conn.getId().toUpperCase(), player);
-          }
-        });
-
-    return handshake;
   }
 
   public Player getPlayer(String id) {
@@ -99,6 +80,27 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
 
   /** Handle late connections */
   public void connectionAdded(Connection conn) {
+    var handshake = new ServerHandshake(server, conn, playerDatabase, useEasyConnect);
+
+    handshake.whenComplete(
+        (player, error) -> {
+          if (error != null) {
+            log.error("Handshake failure", error);
+            log.error("Client closing: bad handshake", error);
+            conn.close();
+          } else {
+            log.debug("About to add new client");
+            connectionAccepted(conn, player);
+          }
+        });
+    // Make sure the client is allowed
+    handshake.startHandshake();
+  }
+
+  private void connectionAccepted(Connection conn, Player connPlayer) {
+    playerMap.put(conn.getId().toUpperCase(), connPlayer);
+
+    conn.addMessageHandler(messageHandler);
     conn.addDisconnectHandler(this::connectionRemoved);
 
     // Make sure any stale connections are gone to avoid conflicts, then add the new one.

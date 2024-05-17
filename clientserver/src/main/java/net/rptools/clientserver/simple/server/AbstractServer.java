@@ -15,7 +15,7 @@
 package net.rptools.clientserver.simple.server;
 
 import java.util.*;
-import net.rptools.clientserver.simple.MessageHandler;
+import java.util.concurrent.CopyOnWriteArrayList;
 import net.rptools.clientserver.simple.connection.Connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,16 +24,9 @@ public abstract class AbstractServer implements Server {
 
   private static final Logger log = LogManager.getLogger(AbstractServer.class);
 
-  private final List<ServerObserver> observerList =
-      Collections.synchronizedList(new ArrayList<ServerObserver>());
+  private final List<ServerObserver> observerList = new CopyOnWriteArrayList<>();
 
-  private final HandshakeProvider<?> handshakeProvider;
-  private final MessageHandler messageHandler;
-
-  public AbstractServer(HandshakeProvider<?> handshakeProvider, MessageHandler messageHandler) {
-    this.handshakeProvider = handshakeProvider;
-    this.messageHandler = messageHandler;
-  }
+  public AbstractServer() {}
 
   public void addObserver(ServerObserver observer) {
     observerList.add(observer);
@@ -44,27 +37,9 @@ public abstract class AbstractServer implements Server {
   }
 
   protected void fireClientConnect(Connection conn) {
-    log.debug("Firing: clientConnect: " + conn.getId());
+    log.debug("Firing: clientConnect: {}", conn.getId());
     for (ServerObserver observer : observerList) {
       observer.connectionAdded(conn);
     }
-  }
-
-  protected void handleConnection(Connection conn) {
-    var handshake = handshakeProvider.getConnectionHandshake(conn);
-    handshake.whenComplete(
-        (result, error) -> {
-          if (error != null) {
-            log.error("Client closing: bad handshake", error);
-            conn.close();
-          } else {
-            conn.addMessageHandler(messageHandler);
-
-            log.debug("About to add new client");
-            fireClientConnect(conn);
-          }
-        });
-    // Make sure the client is allowed
-    handshake.startHandshake();
   }
 }
