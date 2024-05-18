@@ -22,9 +22,11 @@ import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.DirectConnection;
-import net.rptools.clientserver.simple.server.ServerObserver;
+import net.rptools.clientserver.simple.server.Router;
+import net.rptools.clientserver.simple.server.Server;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.client.MapToolRegistry;
@@ -35,8 +37,12 @@ import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
+import net.rptools.maptool.server.proto.PlayerConnectedMsg;
+import net.rptools.maptool.server.proto.PlayerDisconnectedMsg;
+import net.rptools.maptool.server.proto.SetCampaignMsg;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
@@ -51,14 +57,17 @@ public class MapToolServer {
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
   private final DirectConnection.Pair localConnections;
-  private final MapToolServerConnection conn;
+  private final Server server;
+  private final MessageHandler messageHandler;
+  private final Router router;
   private final ServerConfig config;
   private final ServerSidePlayerDatabase playerDatabase;
 
+  /** Maps connection IDs to their associated player */
+  private final Map<String, Player> playerMap = Collections.synchronizedMap(new HashMap<>());
+
   private final Map<String, AssetTransferManager> assetManagerMap =
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
-  private final Map<String, Connection> connectionMap =
-      Collections.synchronizedMap(new HashMap<String, Connection>());
   private final AssetProducerThread assetProducerThread;
 
   private Campaign campaign;
@@ -78,13 +87,9 @@ public class MapToolServer {
 
     localConnections = DirectConnection.create("local");
 
-    conn =
-        new MapToolServerConnection(
-            this,
-            ConnectionFactory.getInstance().createServer(config),
-            playerDatabase,
-            new ServerMessageHandler(this),
-            config != null && config.getUseEasyConnect());
+    server = ConnectionFactory.getInstance().createServer(config);
+    messageHandler = new ServerMessageHandler(this);
+    this.router = new Router();
 
     // Make sure the server has a different copy than the client.
     this.campaign = new Campaign(campaign);
@@ -97,6 +102,28 @@ public class MapToolServer {
 
   public MapToolClient getLocalClient() {
     return localClient;
+  }
+
+  private String getConnectionId(String playerId) {
+    synchronized (playerMap) {
+      for (Map.Entry<String, Player> entry : playerMap.entrySet()) {
+        if (entry.getValue().getName().equalsIgnoreCase(playerId)) {
+          return entry.getKey();
+        }
+      }
+    }
+    return null;
+  }
+
+  private Player getPlayer(String playerId) {
+    synchronized (playerMap) {
+      for (Player player : playerMap.values()) {
+        if (player.getName().equalsIgnoreCase(playerId)) {
+          return player;
+        }
+      }
+    }
+    return null;
   }
 
   public boolean isPersonalServer() {
@@ -115,36 +142,88 @@ public class MapToolServer {
     return config == null ? -1 : config.getPort();
   }
 
-  public ServerSidePlayerDatabase getPlayerDatabase() {
-    return playerDatabase;
+  private void connectionAdded(Connection conn) {
+    var handshake =
+        new ServerHandshake(
+            this, conn, playerDatabase, config != null && config.getUseEasyConnect());
+
+    handshake.whenComplete(
+        (player, error) -> {
+          if (error != null) {
+            log.error("Client closing: bad handshake", error);
+            conn.close();
+          } else {
+            log.debug("About to add new client");
+            addConnection(conn, player);
+          }
+        });
+    // Make sure the client is allowed
+    handshake.startHandshake();
   }
 
-  public void configureClientConnection(Connection connection) {
-    String id = connection.getId();
-    assetManagerMap.put(id, new AssetTransferManager());
-    connectionMap.put(id, connection);
+  private void addConnection(Connection conn, Player connPlayer) {
+    playerMap.put(conn.getId().toUpperCase(), connPlayer);
+
+    conn.addMessageHandler(messageHandler);
+    conn.addDisconnectHandler(this::releaseClientConnection);
+
+    // Make sure any stale connections are gone to avoid conflicts, then add the new one.
+    for (var reaped : router.reapClients()) {
+      try {
+        reaped.close();
+        releaseClientConnection(reaped);
+      } catch (Exception e) {
+        // Don't want to raise an error if notification of removing a dead connection failed
+      }
+    }
+    router.addConnection(conn);
+
+    assetManagerMap.put(conn.getId(), new AssetTransferManager());
+
+    synchronized (playerMap) {
+      for (Player player : playerMap.values()) {
+        var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.toDto());
+        sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
+      }
+    }
+    var msg = PlayerConnectedMsg.newBuilder().setPlayer(connPlayer.getTransferablePlayer().toDto());
+    broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+
+    var msg2 = SetCampaignMsg.newBuilder().setCampaign(campaign.toDto());
+    sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
-  public Connection getClientConnection(String id) {
-    return connectionMap.get(id);
-  }
+  public void bootPlayer(String playerId) {
+    var connectionId = getConnectionId(playerId);
+    var connection = router.getConnection(connectionId);
+    if (connection == null) {
+      return;
+    }
 
-  public String getConnectionId(String playerId) {
-    return conn.getConnectionId(playerId);
+    connection.close();
+    releaseClientConnection(connection);
   }
 
   /**
-   * Forceably disconnects a client and cleans up references to it
+   * Cleans up references to a disconnected client connection.
    *
-   * @param id the connection ID
+   * @param connection the connection to release
    */
-  public void releaseClientConnection(String id) {
-    Connection connection = getClientConnection(id);
-    if (connection != null) {
-      connection.close();
+  private void releaseClientConnection(Connection connection) {
+    // Likely closed already, but let's be sure.
+    connection.close();
+    router.removeConnection(connection);
+    assetManagerMap.remove(connection.getId());
+
+    // Notify everyone else about the disconnection.
+    var player = playerMap.remove(connection.getId().toUpperCase());
+    if (player != null) {
+      var msg =
+          PlayerDisconnectedMsg.newBuilder().setPlayer(player.getTransferablePlayer().toDto());
+      broadcastMessage(
+          new String[] {connection.getId()},
+          Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     }
-    assetManagerMap.remove(id);
-    connectionMap.remove(id);
   }
 
   public void addAssetProducer(String connectionId, AssetProducer producer) {
@@ -152,28 +231,16 @@ public class MapToolServer {
     manager.addProducer(producer);
   }
 
-  public void addObserver(ServerObserver observer) {
-    if (observer != null) {
-      conn.addObserver(observer);
-    }
-  }
-
-  public void removeObserver(ServerObserver observer) {
-    conn.removeObserver(observer);
-  }
-
-  public MapToolServerConnection getConnection() {
-    return conn;
-  }
-
-  public boolean isPlayerConnected(String id) {
-    return conn.getPlayer(id) != null;
+  public boolean isPlayerConnected(String playerId) {
+    return getPlayer(playerId) != null;
   }
 
   public void updatePlayerStatus(String playerName, GUID zoneId, boolean loaded) {
-    var player = conn.getPlayer(playerName);
-    player.setLoaded(loaded);
-    player.setZoneId(zoneId);
+    var player = getPlayer(playerName);
+    if (player != null) {
+      player.setLoaded(loaded);
+      player.setZoneId(zoneId);
+    }
   }
 
   public void setCampaign(Campaign campaign) {
@@ -197,7 +264,11 @@ public class MapToolServer {
   }
 
   public void stop() {
-    conn.close();
+    server.close();
+    for (var connection : router.removeAll()) {
+      connection.close();
+    }
+
     if (heartbeatThread != null) {
       heartbeatThread.shutdown();
     }
@@ -206,16 +277,16 @@ public class MapToolServer {
     }
   }
 
-  private static final Random random = new Random();
-
   public void start() throws IOException {
+
     localClient.start();
 
     // Adopt the local connection right away, no handshake required.
     localConnections.serverSide().open();
-    conn.connectionAccepted(localConnections.serverSide(), localClient.getPlayer());
+    addConnection(localConnections.serverSide(), localClient.getPlayer());
 
-    conn.open();
+    server.addObserver(this::connectionAdded);
+    server.start();
 
     assetProducerThread.start();
 
@@ -226,7 +297,34 @@ public class MapToolServer {
     }
   }
 
+  public void sendMessage(String id, Message message) {
+    log.debug("{} sent to {}: {}", getName(), id, message.getMessageTypeCase());
+    router.sendMessage(id, message.toByteArray());
+  }
+
+  public void sendMessage(String id, Object channel, Message message) {
+    log.debug(
+        "{} sent to {}: {} ({})", getName(), id, message.getMessageTypeCase(), channel.toString());
+    router.sendMessage(id, channel, message.toByteArray());
+  }
+
+  public void broadcastMessage(Message message) {
+    log.debug("{} broadcast: {}", getName(), message.getMessageTypeCase());
+    router.broadcastMessage(message.toByteArray());
+  }
+
+  public void broadcastMessage(String[] exclude, Message message) {
+    log.debug(
+        "{} broadcast: {} except to {}",
+        getName(),
+        message.getMessageTypeCase(),
+        String.join(",", exclude));
+    router.broadcastMessage(exclude, message.toByteArray());
+  }
+
   private class HeartbeatThread extends Thread {
+    private static final Random random = new Random();
+
     private final int port;
     private boolean stop = false;
     private static final int HEARTBEAT_DELAY = 10 * 60 * 1000; // 10 minutes
@@ -329,11 +427,10 @@ public class MapToolServer {
             if (chunk != null) {
               lookForMore = true;
               var msg = UpdateAssetTransferMsg.newBuilder().setChunk(chunk);
-              getConnection()
-                  .sendMessage(
-                      entry.getKey(),
-                      MapToolConstants.Channel.IMAGE,
-                      Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
+              sendMessage(
+                  entry.getKey(),
+                  MapToolConstants.Channel.IMAGE,
+                  Message.newBuilder().setUpdateAssetTransferMsg(msg).build());
             }
           }
           if (lookForMore) {
