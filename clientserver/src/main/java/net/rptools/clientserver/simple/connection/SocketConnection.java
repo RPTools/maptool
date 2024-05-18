@@ -46,6 +46,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
     initialize(socket);
   }
 
+  @Override
   public String getId() {
     return id;
   }
@@ -64,36 +65,26 @@ public class SocketConnection extends AbstractConnection implements Connection {
     initialize(new Socket(hostName, port));
   }
 
+  @Override
   public void sendMessage(Object channel, byte[] message) {
     addMessage(channel, message);
-
-    if (send != null) {
-      synchronized (send) {
-        send.notify();
-      }
-    }
   }
 
-  protected boolean isStopRequested() {
-    return send.stopRequested;
-  }
-
-  public synchronized void close() {
-    if (isStopRequested()) {
-      return;
-    }
-    send.requestStop();
-    receive.requestStop();
+  @Override
+  protected void onClose() {
+    receive.interrupt();
+    send.interrupt();
 
     try {
       socket.close();
     } catch (IOException e) {
-      log.warn(e.toString());
+      log.warn("Failed to close socket", e);
     }
   }
 
+  @Override
   public boolean isAlive() {
-    return !socket.isClosed();
+    return !isClosed() && !socket.isClosed();
   }
 
   @Override
@@ -106,18 +97,10 @@ public class SocketConnection extends AbstractConnection implements Connection {
   // /////////////////////////////////////////////////////////////////////////
   private class SendThread extends Thread {
     private final Socket socket;
-    private boolean stopRequested = false;
 
     public SendThread(Socket socket) {
       setName("SocketConnection.SendThread");
       this.socket = socket;
-    }
-
-    public void requestStop() {
-      this.stopRequested = true;
-      synchronized (this) {
-        this.notify();
-      }
     }
 
     @Override
@@ -131,32 +114,21 @@ public class SocketConnection extends AbstractConnection implements Connection {
         return;
       }
 
-      try {
-        while (!stopRequested && SocketConnection.this.isAlive()) {
-          try {
-            while (SocketConnection.this.hasMoreMessages()) {
-              try {
-                byte[] message = SocketConnection.this.nextMessage();
-                if (message == null) {
-                  continue;
-                }
-                SocketConnection.this.writeMessage(out, message);
-              } catch (IndexOutOfBoundsException e) {
-                // just ignore and wait
-              }
-            }
-            synchronized (this) {
-              if (!stopRequested) {
-                this.wait();
-              }
-            }
-          } catch (InterruptedException e) {
-            // do nothing
-          }
+      while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
+        // Blocks for a time until a message is received.
+        byte[] message = SocketConnection.this.nextMessage();
+        if (message == null) {
+          // No message available. Thread may also have been interrupted as part of stopping.
+          continue;
         }
-      } catch (IOException e) {
-        log.error(e);
-        fireDisconnect();
+
+        try {
+          SocketConnection.this.writeMessage(out, message);
+        } catch (IOException e) {
+          log.error(e);
+          fireDisconnect();
+          return;
+        }
       }
     }
   }
@@ -166,15 +138,10 @@ public class SocketConnection extends AbstractConnection implements Connection {
   // /////////////////////////////////////////////////////////////////////////
   private class ReceiveThread extends Thread {
     private final Socket socket;
-    private boolean stopRequested = false;
 
     public ReceiveThread(Socket socket) {
       setName("SocketConnection.ReceiveThread");
       this.socket = socket;
-    }
-
-    public void requestStop() {
-      stopRequested = true;
     }
 
     @Override
@@ -188,18 +155,17 @@ public class SocketConnection extends AbstractConnection implements Connection {
         return;
       }
 
-      while (!stopRequested && SocketConnection.this.isAlive()) {
+      while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
         try {
           byte[] message = SocketConnection.this.readMessage(in);
-          SocketConnection.this.dispatchCompressedMessage(SocketConnection.this.id, message);
+          SocketConnection.this.dispatchCompressedMessage(message);
         } catch (IOException e) {
           log.error(e);
           fireDisconnect();
           break;
         } catch (Throwable t) {
-          log.error(t);
           // don't let anything kill this thread via exception
-          t.printStackTrace();
+          log.error("Unexpected error", t);
         }
       }
     }
