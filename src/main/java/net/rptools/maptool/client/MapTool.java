@@ -46,6 +46,7 @@ import javax.annotation.Nonnull;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
+import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.FileUtil;
@@ -182,10 +183,8 @@ public class MapTool {
 
   static {
     try {
-      final var player = new LocalPlayer();
-      final var personalServer = new PersonalServer(player);
-      server = personalServer;
-      client = new MapToolClient(personalServer);
+      server = new PersonalServer(new Campaign(), new LocalPlayer());
+      client = server.getLocalClient();
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -958,10 +957,9 @@ public class MapTool {
 
     // TODO: the client and server campaign MUST be different objects.
     // Figure out a better init method
-    final var server = new MapToolServer(config, policy, playerDatabase);
+    final var server =
+        new MapToolServer(new Campaign(campaign), player, config, policy, playerDatabase);
     MapTool.server = server;
-
-    server.setCampaign(new Campaign(campaign)); // copy of FoW depends on server policies
 
     if (announcer != null) {
       announcer.stop();
@@ -990,7 +988,7 @@ public class MapTool {
 
     // Create the local connection so we aren't left hanging.
     installClient(
-        new MapToolClient(player, server),
+        server.getLocalClient(),
         () -> {
           // connecting
           MapTool.getFrame()
@@ -1001,7 +999,6 @@ public class MapTool {
         });
 
     server.start();
-    client.start();
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1143,8 +1140,8 @@ public class MapTool {
     assetTransferManager.flush();
 
     final var player = new LocalPlayer();
-    server = new PersonalServer(player);
-    client = new MapToolClient((PersonalServer) server);
+    server = new PersonalServer(campaign, player);
+    client = server.getLocalClient();
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
@@ -1157,7 +1154,7 @@ public class MapTool {
 
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
-    IMapToolConnection clientConn = client.getConnection();
+    MapToolConnection clientConn = client.getConnection();
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.onCompleted(
         () -> {
@@ -1169,7 +1166,8 @@ public class MapTool {
 
   public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
       throws IOException {
-    installClient(new MapToolClient(player, config), onCompleted);
+    var connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
+    installClient(new MapToolClient(player, connection), onCompleted);
     client.start();
   }
 

@@ -14,9 +14,12 @@
  */
 package net.rptools.maptool.server;
 
+import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.model.player.PlayerDatabase;
 
 public interface IMapToolServer {
+  MapToolClient getLocalClient();
+
   boolean isPersonalServer();
 
   boolean isServerRegistered();

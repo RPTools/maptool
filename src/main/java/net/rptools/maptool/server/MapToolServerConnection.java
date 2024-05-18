@@ -97,7 +97,7 @@ public class MapToolServerConnection implements ServerObserver {
     handshake.startHandshake();
   }
 
-  private void connectionAccepted(Connection conn, Player connPlayer) {
+  public void connectionAccepted(Connection conn, Player connPlayer) {
     playerMap.put(conn.getId().toUpperCase(), connPlayer);
 
     conn.addMessageHandler(messageHandler);

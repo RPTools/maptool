@@ -22,8 +22,10 @@ import java.util.Map.Entry;
 import java.util.Random;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
@@ -31,6 +33,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
+import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
@@ -46,6 +49,7 @@ public class MapToolServer implements IMapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
+  private final DirectConnection.Pair localConnections;
   private final MapToolServerConnection conn;
   private final ServerConfig config;
   private final ServerSidePlayerDatabase playerDatabase;
@@ -58,16 +62,27 @@ public class MapToolServer implements IMapToolServer {
 
   private Campaign campaign;
   private ServerPolicy policy;
+  private final MapToolClient localClient;
   private HeartbeatThread heartbeatThread;
 
   public MapToolServer(
-      ServerConfig config, ServerPolicy policy, ServerSidePlayerDatabase playerDb) {
+      Campaign campaign,
+      LocalPlayer localPlayer,
+      ServerConfig config,
+      ServerPolicy policy,
+      ServerSidePlayerDatabase playerDb) {
     this.config = config;
     this.policy = policy;
     playerDatabase = playerDb;
+
+    localConnections = DirectConnection.create("local");
     conn = new MapToolServerConnection(this, playerDatabase, new ServerMessageHandler(this));
 
-    campaign = new Campaign();
+    // Make sure the server has a different copy than the client.
+    this.campaign = new Campaign(campaign);
+
+    this.localClient =
+        new MapToolClient(campaign, localPlayer, localConnections.clientSide(), policy, playerDb);
 
     assetProducerThread = new AssetProducerThread();
     assetProducerThread.start();
@@ -77,6 +92,11 @@ public class MapToolServer implements IMapToolServer {
       heartbeatThread = new HeartbeatThread();
       heartbeatThread.start();
     }
+  }
+
+  @Override
+  public MapToolClient getLocalClient() {
+    return localClient;
   }
 
   @Override
@@ -202,6 +222,12 @@ public class MapToolServer implements IMapToolServer {
   private static final Random random = new Random();
 
   public void start() throws IOException {
+    localClient.start();
+
+    // Adopt the local connection right away, no handshake required.
+    localConnections.serverSide().open();
+    conn.connectionAccepted(localConnections.serverSide(), localClient.getPlayer());
+
     conn.open();
   }
 

@@ -20,7 +20,6 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;
@@ -33,10 +32,8 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.server.MapToolServer;
-import net.rptools.maptool.server.PersonalServer;
+import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.ServerCommand;
-import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -64,33 +61,31 @@ public class MapToolClient {
   /** Case-insensitive ordered set of player names. */
   private final List<Player> playerList;
 
-  private final IMapToolConnection conn;
+  private final MapToolConnection conn;
   private Campaign campaign;
   private ServerPolicy serverPolicy;
   private final ServerCommand serverCommand;
   private boolean disconnectExpected = false;
   private State currentState = State.New;
 
-  private MapToolClient(
-      boolean isForLocalServer,
+  /** Creates a client for a local server, whether personal or hosted. */
+  public MapToolClient(
+      Campaign campaign,
       LocalPlayer player,
-      PlayerDatabase playerDatabase,
-      ServerPolicy serverPolicy,
-      @Nullable ServerConfig serverConfig) {
-    this.campaign = new Campaign();
+      Connection connection,
+      ServerPolicy policy,
+      PlayerDatabase playerDatabase) {
+    this.campaign = campaign;
     this.player = player;
     this.playerDatabase = playerDatabase;
     this.playerList = new ArrayList<>();
-    this.serverPolicy = new ServerPolicy(serverPolicy);
+    this.serverPolicy = new ServerPolicy(policy);
 
-    this.conn =
-        serverConfig == null
-            ? new NilMapToolConnection()
-            : new MapToolConnection(this, serverConfig, player);
+    this.conn = new MapToolConnection(connection, player, null);
 
     this.serverCommand = new ServerCommandClientImpl(this);
 
-    this.conn.addDisconnectHandler(conn -> onDisconnect(isForLocalServer, conn));
+    this.conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
     this.conn.onCompleted(
         () -> {
           if (transitionToState(State.Started, State.Connected)) {
@@ -100,37 +95,27 @@ public class MapToolClient {
   }
 
   /**
-   * Creates a client for use with a personal server.
-   *
-   * @param server The personal server that will run with this client.
-   */
-  public MapToolClient(PersonalServer server) {
-    this(true, server.getLocalPlayer(), server.getPlayerDatabase(), new ServerPolicy(), null);
-  }
-
-  /**
    * Creates a client for use with a remote hosted server.
    *
    * @param player The player connecting to the server.
-   * @param config The configuration details needed to connect to the server.
    */
-  public MapToolClient(LocalPlayer player, ServerConfig config) {
-    this(
-        false,
-        player,
-        PlayerDatabaseFactory.getLocalPlayerDatabase(player),
-        new ServerPolicy(),
-        config);
-  }
+  public MapToolClient(LocalPlayer player, Connection connection) {
+    this.campaign = new Campaign();
+    this.player = player;
+    this.playerDatabase = PlayerDatabaseFactory.getLocalPlayerDatabase(player);
+    this.playerList = new ArrayList<>();
+    this.serverPolicy = new ServerPolicy();
 
-  /**
-   * Creates a client for a server hosted in the same MapTool process.
-   *
-   * @param player The player who started the server.
-   * @param server The local server.
-   */
-  public MapToolClient(LocalPlayer player, MapToolServer server) {
-    this(true, player, server.getPlayerDatabase(), server.getPolicy(), server.getConfig());
+    this.conn = new MapToolConnection(connection, player, new ClientHandshake(this, connection));
+    this.serverCommand = new ServerCommandClientImpl(this);
+
+    this.conn.addDisconnectHandler(conn -> onDisconnect(false, conn));
+    this.conn.onCompleted(
+        () -> {
+          if (transitionToState(State.Started, State.Connected)) {
+            this.conn.addMessageHandler(new ClientMessageHandler(this));
+          }
+        });
   }
 
   /**
@@ -229,7 +214,7 @@ public class MapToolClient {
     return playerDatabase;
   }
 
-  public IMapToolConnection getConnection() {
+  public MapToolConnection getConnection() {
     return conn;
   }
 

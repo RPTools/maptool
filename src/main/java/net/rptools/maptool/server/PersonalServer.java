@@ -14,6 +14,9 @@
  */
 package net.rptools.maptool.server;
 
+import net.rptools.clientserver.simple.connection.DirectConnection;
+import net.rptools.maptool.client.MapToolClient;
+import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.LocalPlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
@@ -21,10 +24,23 @@ import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 public class PersonalServer implements IMapToolServer {
   private final LocalPlayer localPlayer;
   private final LocalPlayerDatabase playerDatabase;
+  private final MapToolClient localClient;
 
-  public PersonalServer(LocalPlayer player) {
+  public PersonalServer(Campaign campaign, LocalPlayer player) {
     localPlayer = player;
     playerDatabase = PlayerDatabaseFactory.getLocalPlayerDatabase(player);
+
+    var localConnections = DirectConnection.create("local");
+    localConnections.serverSide().open();
+
+    this.localClient =
+        new MapToolClient(
+            campaign, player, localConnections.clientSide(), new ServerPolicy(), playerDatabase);
+  }
+
+  @Override
+  public MapToolClient getLocalClient() {
+    return localClient;
   }
 
   public LocalPlayer getLocalPlayer() {
