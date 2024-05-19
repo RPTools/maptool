@@ -21,6 +21,7 @@ import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.Handshake;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.HandshakeProvider;
+import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.model.player.Player;
@@ -39,6 +40,7 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
   private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
   private final Map<String, Player> playerMap = new ConcurrentHashMap<>();
   private final MapToolServer server;
+  private final Router router;
   private final Server connection;
   private final ServerSidePlayerDatabase playerDatabase;
   private final boolean useEasyConnect;
@@ -47,6 +49,7 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
       MapToolServer server, ServerSidePlayerDatabase playerDatabase, ServerMessageHandler handler) {
     this.connection =
         ConnectionFactory.getInstance().createServer(server.getConfig(), this, handler);
+    this.router = new Router();
     this.server = server;
     this.playerDatabase = playerDatabase;
     this.useEasyConnect = server.getConfig().getUseEasyConnect();
@@ -96,36 +99,44 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
 
   /** Handle late connections */
   public void connectionAdded(Connection conn) {
+    conn.addDisconnectHandler(this::connectionRemoved);
+
+    // Make sure any stale connections are gone to avoid conflicts, then add the new one.
+    for (var reaped : router.reapClients()) {
+      try {
+        // TODO I'm not sold on connectionRemoved() being the right call here. Surely our disconnect
+        //  handler should be covering this? But let's leave it for now.
+        connectionRemoved(reaped);
+        reaped.close();
+      } catch (Exception e) {
+        // Don't want to raise an error if notification of removing a dead connection failed
+      }
+    }
+    router.addConnection(conn);
+
     server.configureClientConnection(conn);
 
     Player connectedPlayer = playerMap.get(conn.getId().toUpperCase());
     for (Player player : playerMap.values()) {
       var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.toDto());
-      server
-          .getConnection()
-          .sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
+      sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
     }
     var msg =
         PlayerConnectedMsg.newBuilder().setPlayer(connectedPlayer.getTransferablePlayer().toDto());
-    server
-        .getConnection()
-        .broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
+    broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
 
     var msg2 = SetCampaignMsg.newBuilder().setCampaign(server.getCampaign().toDto());
-    server
-        .getConnection()
-        .sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
+    sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
   }
 
   public void connectionRemoved(Connection conn) {
+    router.removeConnection(conn);
+
     server.releaseClientConnection(conn.getId());
     var player = playerMap.get(conn.getId().toUpperCase()).getTransferablePlayer();
     var msg = PlayerDisconnectedMsg.newBuilder().setPlayer(player.toDto());
-    server
-        .getConnection()
-        .broadcastMessage(
-            new String[] {conn.getId()},
-            Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
+    broadcastMessage(
+        new String[] {conn.getId()}, Message.newBuilder().setPlayerDisconnectedMsg(msg).build());
     playerMap.remove(conn.getId().toUpperCase());
   }
 
@@ -136,25 +147,22 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
             + id
             + ": "
             + message.getMessageTypeCase());
-    connection.sendMessage(id, message.toByteArray());
+    router.sendMessage(id, message.toByteArray());
   }
 
   public void sendMessage(String id, Object channel, Message message) {
     log.debug(
-        server.getConfig().getServerName()
-            + " sent to "
-            + id
-            + ":"
-            + message.getMessageTypeCase()
-            + " ("
-            + channel.toString()
-            + ")");
-    connection.sendMessage(id, channel, message.toByteArray());
+        "{} sent to {}: {} ({})",
+        server.getName(),
+        id,
+        message.getMessageTypeCase(),
+        channel.toString());
+    router.sendMessage(id, channel, message.toByteArray());
   }
 
   public void broadcastMessage(Message message) {
     log.debug(server.getConfig().getServerName() + " broadcast: " + message.getMessageTypeCase());
-    connection.broadcastMessage(message.toByteArray());
+    router.broadcastMessage(message.toByteArray());
   }
 
   public void broadcastMessage(String[] exclude, Message message) {
@@ -164,7 +172,7 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
             + message.getMessageTypeCase()
             + " except to "
             + String.join(",", exclude));
-    connection.broadcastMessage(exclude, message.toByteArray());
+    router.broadcastMessage(exclude, message.toByteArray());
   }
 
   public void open() throws IOException {
@@ -173,6 +181,10 @@ public class MapToolServerConnection implements ServerObserver, HandshakeProvide
 
   public void close() {
     connection.close();
+
+    for (var connection : router.removeAll()) {
+      connection.close();
+    }
   }
 
   public void addObserver(ServerObserver observer) {

@@ -7,6 +7,8 @@ apply from: rootProject.file('buildSrc/shared.gradle')
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    implementation group: 'com.google.code.findbugs', name: 'jsr305', version: '3.0.2'
+
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-1.2-api', version: '2.20.0'	// Bridges v1 to v2 for other code in other libs
@@ -30,4 +32,16 @@ dependencies {
     // compression of messages between client and server
     implementation 'org.apache.commons:commons-compress:1.26.0'
     implementation 'com.github.luben:zstd-jni:1.5.5-11'
+
+    testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
+    // For mocking features during unit tests
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.10.0'
+}
+
+test {
+    useJUnitPlatform()
 }

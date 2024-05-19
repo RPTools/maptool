@@ -334,9 +334,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) {
-                server.clearClients();
-              }
             },
             "WebRTCConnection.handleDisconnect");
     handleDisconnect.start();

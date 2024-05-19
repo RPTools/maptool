@@ -15,18 +15,15 @@
 package net.rptools.clientserver.simple.server;
 
 import java.util.*;
-import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractServer implements DisconnectHandler, Server {
+public abstract class AbstractServer implements Server {
 
   private static final Logger log = LogManager.getLogger(AbstractServer.class);
 
-  private final Map<String, Connection> clients =
-      Collections.synchronizedMap(new HashMap<String, Connection>());
   private final List<ServerObserver> observerList =
       Collections.synchronizedList(new ArrayList<ServerObserver>());
 
@@ -46,83 +43,11 @@ public abstract class AbstractServer implements DisconnectHandler, Server {
     observerList.remove(observer);
   }
 
-  public void broadcastMessage(byte[] message) {
-    synchronized (clients) {
-      for (Connection conn : clients.values()) {
-        conn.sendMessage(message);
-      }
-    }
-  }
-
-  public void broadcastMessage(String[] exclude, byte[] message) {
-    Set<String> excludeSet = new HashSet<String>();
-    for (String e : exclude) {
-      excludeSet.add(e);
-    }
-    synchronized (clients) {
-      for (Map.Entry<String, Connection> entry : clients.entrySet()) {
-        if (!excludeSet.contains(entry.getKey())) {
-          entry.getValue().sendMessage(message);
-        }
-      }
-    }
-  }
-
-  public void sendMessage(String id, Object channel, byte[] message) {
-    Connection client = clients.get(id);
-    client.sendMessage(channel, message);
-  }
-
-  public void close() {
-    synchronized (clients) {
-      for (Connection conn : clients.values()) {
-        conn.close();
-      }
-    }
-  }
-
-  protected void reapClients() {
-    log.debug("About to reap clients");
-    synchronized (clients) {
-      log.debug("Reaping clients");
-
-      for (Iterator<Map.Entry<String, Connection>> i = clients.entrySet().iterator();
-          i.hasNext(); ) {
-        Map.Entry<String, Connection> entry = i.next();
-        Connection conn = entry.getValue();
-        if (!conn.isAlive()) {
-          log.debug("\tReaping: " + conn.getId());
-          i.remove();
-          try {
-            fireClientDisconnect(conn);
-            conn.close();
-          } catch (Exception e) {
-            // Don't want to raise an error if notification of removing a dead connection failed
-          }
-        }
-      }
-    }
-  }
-
   protected void fireClientConnect(Connection conn) {
     log.debug("Firing: clientConnect: " + conn.getId());
     for (ServerObserver observer : observerList) {
       observer.connectionAdded(conn);
     }
-  }
-
-  protected void fireClientDisconnect(Connection conn) {
-    log.debug("Firing: clientDisconnect: " + conn.getId());
-    for (ServerObserver observer : observerList) {
-      observer.connectionRemoved(conn);
-    }
-  }
-
-  ////
-  // DISCONNECT HANDLER
-  public void handleDisconnect(Connection conn) {
-    log.debug("HandleDisconnect: " + conn.getId());
-    fireClientDisconnect(conn);
   }
 
   protected void handleConnection(Connection conn) {
@@ -134,16 +59,9 @@ public abstract class AbstractServer implements DisconnectHandler, Server {
             conn.close();
           } else {
             conn.addMessageHandler(messageHandler);
-            conn.addDisconnectHandler(this);
 
             log.debug("About to add new client");
-            synchronized (clients) {
-              reapClients();
-
-              log.debug("Adding new client {}", conn.getId());
-              clients.put(conn.getId(), conn);
-              fireClientConnect(conn);
-            }
+            fireClientConnect(conn);
           }
         });
     // Make sure the client is allowed

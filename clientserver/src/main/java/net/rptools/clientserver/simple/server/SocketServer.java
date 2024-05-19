@@ -46,7 +46,6 @@ public class SocketServer extends AbstractServer {
 
   @Override
   public void close() {
-    super.close();
     listeningThread.suppressErrors();
     log.debug("Server closing down");
 

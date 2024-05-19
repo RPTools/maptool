@@ -168,7 +168,6 @@ public class WebRTCServer extends AbstractServer {
 
   @Override
   public void close() {
-    super.close();
     disconnectExpected = true;
     reconnectCounter = -1;
     signalingClient.close();
@@ -192,9 +191,5 @@ public class WebRTCServer extends AbstractServer {
             });
     reconnectThread.setName("WebRTCServer.reconnectThread");
     reconnectThread.start();
-  }
-
-  public void clearClients() {
-    reapClients();
   }
 }
