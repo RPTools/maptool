@@ -32,7 +32,7 @@ public class SocketServer extends AbstractServer {
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServer(int port, HandshakeProvider handshake, MessageHandler messageHandler) {
+  public SocketServer(int port, HandshakeProvider<?> handshake, MessageHandler messageHandler) {
     super(handshake, messageHandler);
     this.port = port;
   }

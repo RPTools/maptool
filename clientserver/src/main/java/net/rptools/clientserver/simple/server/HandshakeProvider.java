@@ -17,8 +17,6 @@ package net.rptools.clientserver.simple.server;
 import net.rptools.clientserver.simple.Handshake;
 import net.rptools.clientserver.simple.connection.Connection;
 
-public interface HandshakeProvider {
-  Handshake getConnectionHandshake(Connection conn);
-
-  void releaseHandshake(Connection conn);
+public interface HandshakeProvider<T> {
+  Handshake<T> getConnectionHandshake(Connection conn);
 }

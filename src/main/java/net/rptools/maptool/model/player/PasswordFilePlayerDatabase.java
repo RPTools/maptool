@@ -66,7 +66,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class PasswordFilePlayerDatabase
-    implements ServerSidePlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
+    implements ServerSidePlayerDatabase, PersistedPlayerDatabase {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -720,12 +720,29 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void playerSignedIn(Player player) {
+    var alreadyExists = playerExists(player.getName());
     loggedInPlayers.playerSignedIn(player);
+
+    if (!alreadyExists) {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, player.getName());
+    } else {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
+    }
   }
 
   @Override
   public void playerSignedOut(Player player) {
     loggedInPlayers.playerSignedOut(player);
+
+    if (playerExists(player.getName())) {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
+    } else {
+      propertyChangeSupport.firePropertyChange(
+          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, player, null);
+    }
   }
 
   @Override
