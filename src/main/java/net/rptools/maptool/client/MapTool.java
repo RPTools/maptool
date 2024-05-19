@@ -84,6 +84,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
@@ -639,6 +640,7 @@ public class MapTool {
   private static void initialize() {
     // First time
     AppSetup.install();
+    LibraryManager.init();
 
     // Clean up after ourselves
     FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
@@ -657,10 +659,12 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     setClientFrame(new MapToolFrame(menuBar));
+    taskbarFlasher = new TaskBarFlasher(clientFrame);
 
     try {
       playerZoneListener = new PlayerZoneListener();
       zoneLoadedListener = new ZoneLoadedListener();
+
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       startPersonalServer(cmpgn);
     } catch (Exception e) {
@@ -1279,8 +1283,6 @@ public class MapTool {
     // fire up autosaves
     getAutoSaveManager().start();
 
-    taskbarFlasher = new TaskBarFlasher(clientFrame);
-
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
@@ -1750,6 +1752,7 @@ public class MapTool {
     EventQueue.invokeLater(
         () -> {
           initialize();
+
           EventQueue.invokeLater(
               () -> {
                 clientFrame.setVisible(true);
