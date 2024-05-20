@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -270,25 +271,30 @@ public class MapToolClient {
         MapTool.stopServer();
       }
 
-      var errorText = I18N.getText("msg.error.server.disconnected");
-      var connectionError = connection.getError();
-      var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
-      MapTool.showError(errorMessage);
+      EventQueue.invokeLater(
+          () -> {
+            var errorText = I18N.getText("msg.error.server.disconnected");
+            var connectionError = connection.getError();
+            var errorMessage =
+                errorText + (connectionError != null ? (": " + connectionError) : "");
+            MapTool.showError(errorMessage);
 
-      // hide map so player doesn't get a brief GM view
-      MapTool.getFrame().setCurrentZoneRenderer(null);
-      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
-      MapTool.getFrame().getAssetPanel().enableAssets();
-      new CampaignManager().clearCampaignData();
-      MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
+            // hide map so player doesn't get a brief GM view
+            MapTool.getFrame().setCurrentZoneRenderer(null);
+            MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
+            MapTool.getFrame().getAssetPanel().enableAssets();
+            new CampaignManager().clearCampaignData();
+            MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
 
-      // Keep any local campaign around in the new personal server.
-      final var campaign = isLocalServer ? getCampaign() : CampaignFactory.createBasicCampaign();
-      try {
-        MapTool.startPersonalServer(campaign);
-      } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-        MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
-      }
+            // Keep any local campaign around in the new personal server.
+            final var campaign =
+                isLocalServer ? getCampaign() : CampaignFactory.createBasicCampaign();
+            try {
+              MapTool.startPersonalServer(campaign);
+            } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+              MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
+            }
+          });
     } else if (!isLocalServer) {
       // expected disconnect from someone else's server
       // hide map so player doesn't get a brief GM view
