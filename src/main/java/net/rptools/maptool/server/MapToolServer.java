@@ -20,12 +20,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
@@ -43,6 +45,8 @@ import net.rptools.maptool.server.proto.SetCampaignMsg;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.UPnPUtil;
+import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -66,18 +70,28 @@ public class MapToolServer {
       Collections.synchronizedMap(new HashMap<String, AssetTransferManager>());
   private final AssetProducerThread assetProducerThread;
 
+  private final boolean useUPnP;
+  private final ServiceAnnouncer announcer;
   private Campaign campaign;
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
 
   public MapToolServer(
+      String id,
       Campaign campaign,
-      ServerConfig config,
+      @Nullable ServerConfig config,
+      boolean useUPnP,
       ServerPolicy policy,
       ServerSidePlayerDatabase playerDb) {
     this.config = config;
+    this.useUPnP = useUPnP;
     this.policy = new ServerPolicy(policy);
     this.playerDatabase = playerDb;
+
+    this.announcer =
+        config == null
+            ? null
+            : new ServiceAnnouncer(id, config.getPort(), AppConstants.SERVICE_GROUP);
 
     server = ConnectionFactory.getInstance().createServer(this.config);
     messageHandler = new ServerMessageHandler(this);
@@ -268,20 +282,59 @@ public class MapToolServer {
     if (assetProducerThread != null) {
       assetProducerThread.shutdown();
     }
+
+    if (announcer != null) {
+      announcer.stop();
+    }
+
+    // Unregister ourselves
+    if (config != null && config.isServerRegistered()) {
+      try {
+        MapToolRegistry.getInstance().unregisterInstance();
+      } catch (Throwable t) {
+        MapTool.showError("While unregistering server instance", t);
+      }
+    }
+
+    // Close UPnP port mapping if used
+    if (useUPnP && config != null) {
+      int port = config.getPort();
+      UPnPUtil.closePort(port);
+    }
   }
 
   public void start() throws IOException {
+    // Use UPnP to open port in router
+    if (useUPnP && config != null) {
+      UPnPUtil.openPort(config.getPort());
+    }
+
+    // Registered ?
+    if (config != null && config.isServerRegistered()) {
+      try {
+        MapToolRegistry.RegisterResponse result =
+            MapToolRegistry.getInstance()
+                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
+        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
+          MapTool.showError("msg.error.alreadyRegistered");
+        } else {
+          heartbeatThread = new HeartbeatThread(config.getPort());
+          heartbeatThread.start();
+        }
+        // TODO: I don't like this
+      } catch (Exception e) {
+        MapTool.showError("msg.error.failedCannotRegisterServer", e);
+      }
+    }
+
+    if (announcer != null) {
+      announcer.start();
+    }
 
     server.addObserver(this::connectionAdded);
     server.start();
 
     assetProducerThread.start();
-
-    // Start a heartbeat if requested
-    if (config != null && config.isServerRegistered()) {
-      heartbeatThread = new HeartbeatThread(config.getPort());
-      heartbeatThread.start();
-    }
   }
 
   public void sendMessage(String id, Message message) {

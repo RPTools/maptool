@@ -68,7 +68,6 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
-import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -105,11 +104,9 @@ import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.rptools.parser.ParserException;
-import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -163,7 +160,6 @@ public class MapTool {
 
   private static BackupManager backupManager;
   private static AssetTransferManager assetTransferManager;
-  private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
   private static MapToolLineParser parser = new MapToolLineParser();
@@ -195,7 +191,12 @@ public class MapTool {
               playerDB);
       server =
           new MapToolServer(
-              new Campaign(client.getCampaign()), null, client.getServerPolicy(), playerDB);
+              "",
+              new Campaign(client.getCampaign()),
+              null,
+              false,
+              client.getServerPolicy(),
+              playerDB);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -965,35 +966,11 @@ public class MapTool {
 
     assetTransferManager.flush();
 
-    // Use UPnP to open port in router
-    if (useUPnP) {
-      UPnPUtil.openPort(config.getPort());
-    }
-
     var connections = DirectConnection.create("local");
     client = new MapToolClient(campaign, player, connections.clientSide(), policy, playerDatabase);
-    server = new MapToolServer(new Campaign(client.getCampaign()), config, policy, playerDatabase);
-
-    if (announcer != null) {
-      announcer.stop();
-    }
-    announcer = new ServiceAnnouncer(id, config.getPort(), AppConstants.SERVICE_GROUP);
-    announcer.start();
-
-    // Registered ?
-    if (config.isServerRegistered()) {
-      try {
-        MapToolRegistry.RegisterResponse result =
-            MapToolRegistry.getInstance()
-                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
-        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
-          MapTool.showError("msg.error.alreadyRegistered");
-        }
-        // TODO: I don't like this
-      } catch (Exception e) {
-        MapTool.showError("msg.error.failedCannotRegisterServer", e);
-      }
-    }
+    server =
+        new MapToolServer(
+            id, new Campaign(client.getCampaign()), config, useUPnP, policy, playerDatabase);
 
     if (MapTool.isHostingServer()) {
       getFrame().getConnectionPanel().startHosting();
@@ -1048,28 +1025,7 @@ public class MapTool {
     server.stop();
     getFrame().getConnectionPanel().stopHosting();
 
-    // Unregister ourselves
-    if (server.isServerRegistered()) {
-      try {
-        MapToolRegistry.getInstance().unregisterInstance();
-      } catch (Throwable t) {
-        MapTool.showError("While unregistering server instance", t);
-      }
-    }
-
-    if (announcer != null) {
-      announcer.stop();
-      announcer = null;
-    }
-
     server = null;
-
-    // Close UPnP port mapping if used
-    StartServerDialogPreferences serverProps = new StartServerDialogPreferences();
-    if (serverProps.getUseUPnP()) {
-      int port = serverProps.getPort();
-      UPnPUtil.closePort(port);
-    }
   }
 
   public static List<Player> getPlayerList() {
@@ -1172,7 +1128,12 @@ public class MapTool {
             campaign, playerDB.getPlayer(), connections.clientSide(), new ServerPolicy(), playerDB);
     server =
         new MapToolServer(
-            new Campaign(client.getCampaign()), null, client.getServerPolicy(), playerDB);
+            "",
+            new Campaign(client.getCampaign()),
+            null,
+            false,
+            client.getServerPolicy(),
+            playerDB);
 
     setUpClient(client);
     client
