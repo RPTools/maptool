@@ -68,24 +68,27 @@ public class MapToolClient {
   private boolean disconnectExpected = false;
   private State currentState = State.New;
 
-  /** Creates a client for a local server, whether personal or hosted. */
-  public MapToolClient(
+  private MapToolClient(
+      boolean isForLocalServer,
       Campaign campaign,
       LocalPlayer player,
       Connection connection,
       ServerPolicy policy,
       PlayerDatabase playerDatabase) {
+
     this.campaign = campaign;
     this.player = player;
     this.playerDatabase = playerDatabase;
     this.playerList = new ArrayList<>();
     this.serverPolicy = new ServerPolicy(policy);
 
-    this.conn = new MapToolConnection(connection, player, null);
+    this.conn =
+        new MapToolConnection(
+            connection, player, isForLocalServer ? null : new ClientHandshake(this, connection));
 
     this.serverCommand = new ServerCommandClientImpl(this);
 
-    this.conn.addDisconnectHandler(conn -> onDisconnect(true, conn));
+    this.conn.addDisconnectHandler(conn -> onDisconnect(isForLocalServer, conn));
     this.conn.onCompleted(
         () -> {
           if (transitionToState(State.Started, State.Connected)) {
@@ -94,28 +97,29 @@ public class MapToolClient {
         });
   }
 
+  /** Creates a client for a local server, whether personal or hosted. */
+  public MapToolClient(
+      Campaign campaign,
+      LocalPlayer player,
+      Connection connection,
+      ServerPolicy policy,
+      PlayerDatabase playerDatabase) {
+    this(true, campaign, player, connection, policy, playerDatabase);
+  }
+
   /**
    * Creates a client for use with a remote hosted server.
    *
    * @param player The player connecting to the server.
    */
   public MapToolClient(LocalPlayer player, Connection connection) {
-    this.campaign = new Campaign();
-    this.player = player;
-    this.playerDatabase = PlayerDatabaseFactory.getLocalPlayerDatabase(player);
-    this.playerList = new ArrayList<>();
-    this.serverPolicy = new ServerPolicy();
-
-    this.conn = new MapToolConnection(connection, player, new ClientHandshake(this, connection));
-    this.serverCommand = new ServerCommandClientImpl(this);
-
-    this.conn.addDisconnectHandler(conn -> onDisconnect(false, conn));
-    this.conn.onCompleted(
-        () -> {
-          if (transitionToState(State.Started, State.Connected)) {
-            this.conn.addMessageHandler(new ClientMessageHandler(this));
-          }
-        });
+    this(
+        false,
+        new Campaign(),
+        player,
+        connection,
+        new ServerPolicy(),
+        PlayerDatabaseFactory.getLocalPlayerDatabase(player));
   }
 
   /**
