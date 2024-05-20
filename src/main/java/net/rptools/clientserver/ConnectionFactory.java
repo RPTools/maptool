@@ -14,6 +14,7 @@
  */
 package net.rptools.clientserver;
 
+import java.awt.EventQueue;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.SocketConnection;
@@ -61,12 +62,14 @@ public class ConnectionFactory {
         new WebRTCServer.Listener() {
           @Override
           public void onLoginError() {
-            MapTool.showError("ServerDialog.error.serverAlreadyExists");
+            EventQueue.invokeLater(
+                () -> {
+                  MapTool.showError("ServerDialog.error.serverAlreadyExists");
+                });
           }
 
           @Override
           public void onUnexpectedClose() {
-            MapTool.disconnect();
             MapTool.stopServer();
           }
         });

@@ -84,7 +84,7 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
   @Override
   public boolean isAlive() {
-    return !isClosed() && !socket.isClosed();
+    return !socket.isClosed();
   }
 
   @Override
@@ -105,30 +105,32 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
     @Override
     public void run() {
-      final OutputStream out;
       try {
-        out = new BufferedOutputStream(socket.getOutputStream());
-      } catch (IOException e) {
-        log.error("Unable to get socket output stream", e);
-        fireDisconnect();
-        return;
-      }
-
-      while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
-        // Blocks for a time until a message is received.
-        byte[] message = SocketConnection.this.nextMessage();
-        if (message == null) {
-          // No message available. Thread may also have been interrupted as part of stopping.
-          continue;
-        }
-
+        final OutputStream out;
         try {
-          SocketConnection.this.writeMessage(out, message);
+          out = new BufferedOutputStream(socket.getOutputStream());
         } catch (IOException e) {
-          log.error(e);
-          fireDisconnect();
+          log.error("Unable to get socket output stream", e);
           return;
         }
+
+        while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
+          // Blocks for a time until a message is received.
+          byte[] message = SocketConnection.this.nextMessage();
+          if (message == null) {
+            // No message available. Thread may also have been interrupted as part of stopping.
+            continue;
+          }
+
+          try {
+            SocketConnection.this.writeMessage(out, message);
+          } catch (IOException e) {
+            log.error("Error while writing message. Closing connection.", e);
+            return;
+          }
+        }
+      } finally {
+        SocketConnection.this.close();
       }
     }
   }
@@ -146,27 +148,30 @@ public class SocketConnection extends AbstractConnection implements Connection {
 
     @Override
     public void run() {
-      final InputStream in;
       try {
-        in = socket.getInputStream();
-      } catch (IOException e) {
-        log.error("Unable to get socket input stream", e);
-        SocketConnection.this.close();
-        return;
-      }
-
-      while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
+        final InputStream in;
         try {
-          byte[] message = SocketConnection.this.readMessage(in);
-          SocketConnection.this.dispatchCompressedMessage(message);
+          in = socket.getInputStream();
         } catch (IOException e) {
-          log.error(e);
-          fireDisconnect();
-          break;
-        } catch (Throwable t) {
-          // don't let anything kill this thread via exception
-          log.error("Unexpected error", t);
+          log.error("Unable to get socket input stream", e);
+          return;
         }
+
+        while (!SocketConnection.this.isClosed() && SocketConnection.this.isAlive()) {
+          try {
+            byte[] message = SocketConnection.this.readMessage(in);
+            SocketConnection.this.dispatchCompressedMessage(message);
+          } catch (IOException e) {
+            log.error(e);
+            return;
+          } catch (Throwable t) {
+            // don't let anything kill this thread via exception
+            log.error("Unexpected error", t);
+          }
+        }
+      } finally {
+        SocketConnection.this.close();
+        fireDisconnect();
       }
     }
   }
