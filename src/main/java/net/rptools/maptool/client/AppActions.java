@@ -2373,7 +2373,7 @@ public class AppActions {
                       prefs.getUsePublicKey()
                           ? new PasswordGenerator().getPassword()
                           : prefs.getPassword();
-                  MapTool.createConnection(
+                  MapTool.connectToRemoteServer(
                       config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
                       () -> {

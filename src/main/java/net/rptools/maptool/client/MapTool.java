@@ -958,7 +958,7 @@ public class MapTool {
       ServerSidePlayerDatabase playerDatabase,
       LocalPlayer player)
       throws IOException {
-    if (server != null) {
+    if (server != null && server.getState() == MapToolServer.State.Started) {
       log.error("A server is already running.", new Exception());
       showError("msg.error.alreadyRunningServer");
       return;
@@ -1024,8 +1024,6 @@ public class MapTool {
 
     server.stop();
     getFrame().getConnectionPanel().stopHosting();
-
-    server = null;
   }
 
   public static List<Player> getPlayerList() {
@@ -1113,7 +1111,7 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-    if (server != null) {
+    if (server != null && server.getState() == MapToolServer.State.Started) {
       log.error("A server is already running.", new Exception());
       showError("msg.error.alreadyRunningServer");
       return;
@@ -1171,13 +1169,21 @@ public class MapTool {
         });
   }
 
-  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
-      throws IOException {
+  public static void connectToRemoteServer(
+      ServerConfig config, LocalPlayer player, Runnable onCompleted) throws IOException {
+    if (server != null && server.getState() == MapToolServer.State.Started) {
+      log.error("A local server is still running.", new Exception());
+      showError("msg.error.stillRunningServer");
+      return;
+    }
+
     var connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
 
+    server = null;
     client = new MapToolClient(player, connection);
     setUpClient(client);
     client.getConnection().onCompleted(onCompleted);
+
     client.start();
   }
 
