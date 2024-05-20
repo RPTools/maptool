@@ -47,6 +47,7 @@ import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.FileUtil;
@@ -90,7 +91,6 @@ import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PersonalServerPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
@@ -183,15 +183,19 @@ public class MapTool {
 
   static {
     try {
-      var player = new LocalPlayer();
+      var connections = DirectConnection.create("local");
+      var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
+
+      client =
+          new MapToolClient(
+              CampaignFactory.createBasicCampaign(),
+              playerDB.getPlayer(),
+              connections.clientSide(),
+              new ServerPolicy(),
+              playerDB);
       server =
           new MapToolServer(
-              CampaignFactory.createBasicCampaign(),
-              player,
-              null,
-              new ServerPolicy(),
-              PlayerDatabaseFactory.getPersonalServerPlayerDatabase(player));
-      client = server.getLocalClient();
+              new Campaign(client.getCampaign()), null, client.getServerPolicy(), playerDB);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -966,10 +970,9 @@ public class MapTool {
       UPnPUtil.openPort(config.getPort());
     }
 
-    // TODO: the client and server campaign MUST be different objects.
-    // Figure out a better init method
-    final var server = new MapToolServer(campaign, player, config, policy, playerDatabase);
-    MapTool.server = server;
+    var connections = DirectConnection.create("local");
+    client = new MapToolClient(campaign, player, connections.clientSide(), policy, playerDatabase);
+    server = new MapToolServer(new Campaign(client.getCampaign()), config, policy, playerDatabase);
 
     if (announcer != null) {
       announcer.stop();
@@ -996,7 +999,6 @@ public class MapTool {
       getFrame().getConnectionPanel().startHosting();
     }
 
-    client = server.getLocalClient();
     setUpClient(client);
     client
         .getConnection()
@@ -1011,7 +1013,18 @@ public class MapTool {
             });
     // endregion
 
+    client.start();
     server.start();
+
+    // Adopt the local connection, no handshake required.
+    connections.serverSide().open();
+    server.addLocalConnection(connections.serverSide(), player);
+    // Update the client, including running onCampaignLoad.
+    setCampaign(
+        client.getCampaign(),
+        Optional.ofNullable(clientFrame.getCurrentZoneRenderer())
+            .map(zr -> zr.getZone().getId())
+            .orElse(null));
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1152,12 +1165,15 @@ public class MapTool {
 
     assetTransferManager.flush();
 
-    final var player = new LocalPlayer();
+    var connections = DirectConnection.create("local");
+    var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
+    client =
+        new MapToolClient(
+            campaign, playerDB.getPlayer(), connections.clientSide(), new ServerPolicy(), playerDB);
     server =
         new MapToolServer(
-            campaign, player, null, new ServerPolicy(), new PersonalServerPlayerDatabase(player));
+            new Campaign(client.getCampaign()), null, client.getServerPolicy(), playerDB);
 
-    client = server.getLocalClient();
     setUpClient(client);
     client
         .getConnection()
@@ -1168,7 +1184,18 @@ public class MapTool {
                   .setStatus(ConnectionStatusPanel.Status.server);
             });
 
+    client.start();
     server.start();
+
+    // Adopt the local connection, no handshake required.
+    connections.serverSide().open();
+    server.addLocalConnection(connections.serverSide(), playerDB.getPlayer());
+    // Update the client, including running onCampaignLoad.
+    setCampaign(
+        client.getCampaign(),
+        Optional.ofNullable(clientFrame.getCurrentZoneRenderer())
+            .map(zr -> zr.getZone().getId())
+            .orElse(null));
   }
 
   private static void setUpClient(MapToolClient client) {

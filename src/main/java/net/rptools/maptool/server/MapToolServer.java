@@ -24,11 +24,9 @@ import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
-import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
@@ -36,7 +34,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.server.proto.Message;
@@ -56,7 +53,6 @@ public class MapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
-  private final DirectConnection.Pair localConnections;
   private final Server server;
   private final MessageHandler messageHandler;
   private final Router router;
@@ -72,36 +68,25 @@ public class MapToolServer {
 
   private Campaign campaign;
   private ServerPolicy policy;
-  private final MapToolClient localClient;
   private HeartbeatThread heartbeatThread;
 
   public MapToolServer(
       Campaign campaign,
-      LocalPlayer localPlayer,
       ServerConfig config,
       ServerPolicy policy,
       ServerSidePlayerDatabase playerDb) {
     this.config = config;
-    this.policy = policy;
-    playerDatabase = playerDb;
+    this.policy = new ServerPolicy(policy);
+    this.playerDatabase = playerDb;
 
-    localConnections = DirectConnection.create("local");
-
-    server = ConnectionFactory.getInstance().createServer(config);
+    server = ConnectionFactory.getInstance().createServer(this.config);
     messageHandler = new ServerMessageHandler(this);
     this.router = new Router();
 
     // Make sure the server has a different copy than the client.
     this.campaign = new Campaign(campaign);
 
-    this.localClient =
-        new MapToolClient(campaign, localPlayer, localConnections.clientSide(), policy, playerDb);
-
     assetProducerThread = new AssetProducerThread();
-  }
-
-  public MapToolClient getLocalClient() {
-    return localClient;
   }
 
   private String getConnectionId(String playerId) {
@@ -154,15 +139,15 @@ public class MapToolServer {
             conn.close();
           } else {
             log.debug("About to add new client");
-            addConnection(conn, player);
+            addRemoteConnection(conn, player);
           }
         });
     // Make sure the client is allowed
     handshake.startHandshake();
   }
 
-  private void addConnection(Connection conn, Player connPlayer) {
-    playerMap.put(conn.getId().toUpperCase(), connPlayer);
+  private void installConnection(Connection conn, Player player) {
+    playerMap.put(conn.getId().toUpperCase(), player);
 
     conn.addMessageHandler(messageHandler);
     conn.addDisconnectHandler(this::releaseClientConnection);
@@ -179,6 +164,14 @@ public class MapToolServer {
     router.addConnection(conn);
 
     assetManagerMap.put(conn.getId(), new AssetTransferManager());
+  }
+
+  public void addLocalConnection(Connection conn, Player localPlayer) {
+    installConnection(conn, localPlayer);
+  }
+
+  private void addRemoteConnection(Connection conn, Player connPlayer) {
+    installConnection(conn, connPlayer);
 
     synchronized (playerMap) {
       for (Player player : playerMap.values()) {
@@ -256,11 +249,11 @@ public class MapToolServer {
   }
 
   public ServerPolicy getPolicy() {
-    return policy;
+    return new ServerPolicy(policy);
   }
 
   public void updateServerPolicy(ServerPolicy policy) {
-    this.policy = policy;
+    this.policy = new ServerPolicy(policy);
   }
 
   public void stop() {
@@ -278,12 +271,6 @@ public class MapToolServer {
   }
 
   public void start() throws IOException {
-
-    localClient.start();
-
-    // Adopt the local connection right away, no handshake required.
-    localConnections.serverSide().open();
-    addConnection(localConnections.serverSide(), localClient.getPlayer());
 
     server.addObserver(this::connectionAdded);
     server.start();

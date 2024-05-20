@@ -37,7 +37,7 @@ public class PersonalServerPlayerDatabase implements ServerSidePlayerDatabase {
     return true; // Player always exists no matter what the name
   }
 
-  public Player getPlayer() {
+  public LocalPlayer getPlayer() {
     return player;
   }
 
