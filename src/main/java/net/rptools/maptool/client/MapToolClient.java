@@ -267,9 +267,7 @@ public class MapToolClient {
     if (!disconnectExpected) {
       // Make sure the connection state is cleaned up since we can't count on it having been done.
       MapTool.disconnect();
-      if (isLocalServer) {
-        MapTool.stopServer();
-      }
+      MapTool.stopServer();
 
       EventQueue.invokeLater(
           () -> {
