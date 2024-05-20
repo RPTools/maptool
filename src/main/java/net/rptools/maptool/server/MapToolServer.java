@@ -57,6 +57,12 @@ public class MapToolServer {
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
+  public enum State {
+    New,
+    Started,
+    Stopped
+  }
+
   private final Server server;
   private final MessageHandler messageHandler;
   private final Router router;
@@ -75,6 +81,8 @@ public class MapToolServer {
   private Campaign campaign;
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
+
+  private State currentState;
 
   public MapToolServer(
       String id,
@@ -101,6 +109,48 @@ public class MapToolServer {
     this.campaign = new Campaign(campaign);
 
     assetProducerThread = new AssetProducerThread();
+
+    currentState = State.New;
+  }
+
+  /**
+   * Transition from any state except {@code newState} to {@code newState}.
+   *
+   * @param newState The new state to set.
+   */
+  private boolean transitionToState(State newState) {
+    if (currentState == newState) {
+      log.warn(
+          "Failed to transition to state {} because that is already the current state", newState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
+    }
+  }
+
+  /**
+   * Transition from {@code expectedState} to {@code newState}.
+   *
+   * @param expectedState The state to transition from
+   * @param newState The new state to set.
+   */
+  private boolean transitionToState(State expectedState, State newState) {
+    if (currentState != expectedState) {
+      log.warn(
+          "Failed to transition from state {} to state {} because the current state is actually {}",
+          expectedState,
+          newState,
+          currentState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
+    }
+  }
+
+  public State getState() {
+    return currentState;
   }
 
   private String getConnectionId(String playerId) {
@@ -271,6 +321,10 @@ public class MapToolServer {
   }
 
   public void stop() {
+    if (!transitionToState(State.Stopped)) {
+      return;
+    }
+
     server.close();
     for (var connection : router.removeAll()) {
       connection.close();
@@ -304,6 +358,10 @@ public class MapToolServer {
   }
 
   public void start() throws IOException {
+    if (!transitionToState(State.New, State.Started)) {
+      return;
+    }
+
     // Use UPnP to open port in router
     if (useUPnP && config != null) {
       UPnPUtil.openPort(config.getPort());
