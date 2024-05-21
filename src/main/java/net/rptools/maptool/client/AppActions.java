@@ -2280,7 +2280,6 @@ public class AppActions {
                       policy,
                       campaign,
                       playerDatabase,
-                      true,
                       player);
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);

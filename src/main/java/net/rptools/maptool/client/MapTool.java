@@ -666,6 +666,11 @@ public class MapTool {
       zoneLoadedListener = new ZoneLoadedListener();
 
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
+
+      // Stop the pre-init client/server.
+      disconnect();
+      stopServer();
+
       startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
@@ -924,7 +929,6 @@ public class MapTool {
    * @param policy the server policy configuration to use.
    * @param campaign the campaign.
    * @param playerDatabase the player database to use for the connection.
-   * @param copyCampaign should the campaign be a copy of the one provided.
    * @throws IOException if new MapToolServer fails.
    */
   public static void startServer(
@@ -934,11 +938,10 @@ public class MapTool {
       ServerPolicy policy,
       Campaign campaign,
       ServerSidePlayerDatabase playerDatabase,
-      boolean copyCampaign,
       LocalPlayer player)
       throws IOException {
     if (server != null) {
-      Thread.dumpStack();
+      log.error("A server is already running.", new Exception());
       showError("msg.error.alreadyRunningServer");
       return;
     }
@@ -955,11 +958,7 @@ public class MapTool {
     final var server = new MapToolServer(config, policy, playerDatabase);
     MapTool.server = server;
 
-    if (copyCampaign) {
-      server.setCampaign(new Campaign(campaign)); // copy of FoW depends on server policies
-    } else {
-      server.setCampaign(campaign);
-    }
+    server.setCampaign(new Campaign(campaign)); // copy of FoW depends on server policies
 
     if (announcer != null) {
       announcer.stop();
@@ -1132,6 +1131,14 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    if (server != null) {
+      log.error("A server is already running.", new Exception());
+      showError("msg.error.alreadyRunningServer");
+      return;
+    }
+
+    assetTransferManager.flush();
+
     final var player = new LocalPlayer();
     server = new PersonalServer(player);
     client = new MapToolClient((PersonalServer) server);
