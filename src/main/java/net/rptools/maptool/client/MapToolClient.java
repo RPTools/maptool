@@ -66,7 +66,6 @@ public class MapToolClient {
   private Campaign campaign;
   private ServerPolicy serverPolicy;
   private final ServerCommand serverCommand;
-  private boolean disconnectExpected = false;
   private State currentState = State.New;
 
   private MapToolClient(
@@ -179,10 +178,6 @@ public class MapToolClient {
     }
   }
 
-  public void expectDisconnection() {
-    disconnectExpected = true;
-  }
-
   public ServerCommand getServerCommand() {
     return serverCommand;
   }
@@ -263,6 +258,7 @@ public class MapToolClient {
      *    shutting down the server. We need to clean up the connection, stop the server, show an
      *    error to the user, and start a new personal server with the current campaign.
      */
+    var disconnectExpected = currentState == State.Closed;
 
     if (!disconnectExpected) {
       // Make sure the connection state is cleaned up since we can't count on it having been done.

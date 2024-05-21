@@ -2228,7 +2228,6 @@ public class AppActions {
 
                 boolean failed = false;
                 try {
-                  MapTool.getClient().expectDisconnection();
                   MapTool.disconnect();
                   MapTool.stopServer();
 
@@ -2333,7 +2332,6 @@ public class AppActions {
 
           LOAD_MAP.setSeenWarning(false);
 
-          MapTool.getClient().expectDisconnection();
           MapTool.disconnect();
           MapTool.stopServer();
 
@@ -2439,7 +2437,6 @@ public class AppActions {
 
     LOAD_MAP.setSeenWarning(false);
 
-    MapTool.getClient().expectDisconnection();
     MapTool.disconnect();
     MapTool.stopServer();
 
