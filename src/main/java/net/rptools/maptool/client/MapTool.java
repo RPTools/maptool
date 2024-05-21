@@ -43,6 +43,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
@@ -90,6 +91,7 @@ import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.PersonalServerPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
@@ -943,7 +945,7 @@ public class MapTool {
    * Start the server from a campaign file and various settings.
    *
    * @param id the id of the server for announcement.
-   * @param config the server configuration.
+   * @param config the server configuration. Set to null only for a personal server.
    * @param policy the server policy configuration to use.
    * @param campaign the campaign.
    * @param playerDatabase the player database to use for the connection.
@@ -951,7 +953,7 @@ public class MapTool {
    */
   public static void startServer(
       String id,
-      ServerConfig config,
+      @Nullable ServerConfig config,
       boolean useUPnP,
       ServerPolicy policy,
       Campaign campaign,
@@ -972,7 +974,7 @@ public class MapTool {
         new MapToolServer(
             id, new Campaign(client.getCampaign()), config, useUPnP, policy, playerDatabase);
 
-    if (MapTool.isHostingServer()) {
+    if (!server.isPersonalServer()) {
       getFrame().getConnectionPanel().startHosting();
     }
 
@@ -985,10 +987,11 @@ public class MapTool {
               MapTool.getFrame()
                   .getConnectionStatusPanel()
                   .setStatus(ConnectionStatusPanel.Status.server);
-              MapTool.addLocalMessage(
-                  MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+              if (!server.isPersonalServer()) {
+                MapTool.addLocalMessage(
+                    MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+              }
             });
-    // endregion
 
     client.start();
     server.start();
@@ -1111,50 +1114,15 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-    if (server != null && server.getState() == MapToolServer.State.Started) {
-      log.error("A server is already running.", new Exception());
-      showError("msg.error.alreadyRunningServer");
-      return;
-    }
-
-    assetTransferManager.flush();
-
-    var connections = DirectConnection.create("local");
-    var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
-    client =
-        new MapToolClient(
-            campaign, playerDB.getPlayer(), connections.clientSide(), new ServerPolicy(), playerDB);
-    server =
-        new MapToolServer(
-            "",
-            new Campaign(client.getCampaign()),
-            null,
-            false,
-            client.getServerPolicy(),
-            playerDB);
-
-    setUpClient(client);
-    client
-        .getConnection()
-        .onCompleted(
-            () -> {
-              MapTool.getFrame()
-                  .getConnectionStatusPanel()
-                  .setStatus(ConnectionStatusPanel.Status.server);
-            });
-
-    client.start();
-    server.start();
-
-    // Adopt the local connection, no handshake required.
-    connections.serverSide().open();
-    server.addLocalConnection(connections.serverSide(), playerDB.getPlayer());
-    // Update the client, including running onCampaignLoad.
-    setCampaign(
-        client.getCampaign(),
-        Optional.ofNullable(clientFrame.getCurrentZoneRenderer())
-            .map(zr -> zr.getZone().getId())
-            .orElse(null));
+    var player = new LocalPlayer();
+    startServer(
+        "",
+        null,
+        false,
+        new ServerPolicy(),
+        campaign,
+        PlayerDatabaseFactory.getPersonalServerPlayerDatabase(player),
+        player);
   }
 
   private static void setUpClient(MapToolClient client) {
