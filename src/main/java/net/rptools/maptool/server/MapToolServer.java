@@ -23,6 +23,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.Router;
@@ -81,6 +82,7 @@ public class MapToolServer {
   private Campaign campaign;
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
+  private final DisconnectHandler onConnectionDisconnected;
 
   private State currentState;
 
@@ -111,6 +113,8 @@ public class MapToolServer {
     assetProducerThread = new AssetProducerThread();
 
     currentState = State.New;
+
+    this.onConnectionDisconnected = this::releaseClientConnection;
   }
 
   /**
@@ -200,7 +204,7 @@ public class MapToolServer {
         (player, error) -> {
           if (error != null) {
             log.error("Client closing: bad handshake", error);
-            conn.close();
+            releaseClientConnection(conn);
           } else {
             log.debug("About to add new client");
             addRemoteConnection(conn, player);
@@ -214,12 +218,11 @@ public class MapToolServer {
     playerMap.put(conn.getId().toUpperCase(), player);
 
     conn.addMessageHandler(messageHandler);
-    conn.addDisconnectHandler(this::releaseClientConnection);
+    conn.addDisconnectHandler(onConnectionDisconnected);
 
     // Make sure any stale connections are gone to avoid conflicts, then add the new one.
     for (var reaped : router.reapClients()) {
       try {
-        reaped.close();
         releaseClientConnection(reaped);
       } catch (Exception e) {
         // Don't want to raise an error if notification of removing a dead connection failed
@@ -257,7 +260,6 @@ public class MapToolServer {
       return;
     }
 
-    connection.close();
     releaseClientConnection(connection);
   }
 
@@ -267,7 +269,8 @@ public class MapToolServer {
    * @param connection the connection to release
    */
   private void releaseClientConnection(Connection connection) {
-    // Likely closed already, but let's be sure.
+    connection.removeDisconnectHandler(onConnectionDisconnected);
+
     connection.close();
     router.removeConnection(connection);
     assetManagerMap.remove(connection.getId());
@@ -327,8 +330,11 @@ public class MapToolServer {
 
     server.close();
     for (var connection : router.removeAll()) {
+      connection.removeDisconnectHandler(onConnectionDisconnected);
       connection.close();
     }
+
+    assetManagerMap.clear();
 
     if (heartbeatThread != null) {
       heartbeatThread.shutdown();
