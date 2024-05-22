@@ -17,7 +17,6 @@ package net.rptools.clientserver.simple.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.SocketConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,8 +31,7 @@ public class SocketServer extends AbstractServer {
   private ServerSocket socket;
   private ListeningThread listeningThread;
 
-  public SocketServer(int port, HandshakeProvider<?> handshake, MessageHandler messageHandler) {
-    super(handshake, messageHandler);
+  public SocketServer(int port) {
     this.port = port;
   }
 
@@ -46,7 +44,6 @@ public class SocketServer extends AbstractServer {
 
   @Override
   public void close() {
-    super.close();
     listeningThread.suppressErrors();
     log.debug("Server closing down");
 
@@ -107,7 +104,7 @@ public class SocketServer extends AbstractServer {
 
           String id = nextClientId(s);
           SocketConnection conn = new SocketConnection(id, s);
-          server.handleConnection(conn);
+          server.fireClientConnect(conn);
         } catch (IOException e) {
           if (!suppressErrors) {
             log.error(e.getMessage(), e);

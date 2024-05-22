@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.WebRTCConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessageDto;
 import net.rptools.clientserver.simple.webrtc.LoginMessageDto;
@@ -52,12 +51,7 @@ public class WebRTCServer extends AbstractServer {
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
-  public WebRTCServer(
-      String serverName,
-      HandshakeProvider<?> handshake,
-      MessageHandler messageHandler,
-      Listener listener) {
-    super(handshake, messageHandler);
+  public WebRTCServer(String serverName, Listener listener) {
     this.listener = listener;
     this.serverName = serverName;
 
@@ -151,7 +145,7 @@ public class WebRTCServer extends AbstractServer {
 
   public void onDataChannelOpened(WebRTCConnection connection) {
     try {
-      handleConnection(connection);
+      fireClientConnect(connection);
     } catch (Exception e) {
       log.error(e);
     }
@@ -168,7 +162,6 @@ public class WebRTCServer extends AbstractServer {
 
   @Override
   public void close() {
-    super.close();
     disconnectExpected = true;
     reconnectCounter = -1;
     signalingClient.close();
@@ -192,9 +185,5 @@ public class WebRTCServer extends AbstractServer {
             });
     reconnectThread.setName("WebRTCServer.reconnectThread");
     reconnectThread.start();
-  }
-
-  public void clearClients() {
-    reapClients();
   }
 }

@@ -38,7 +38,7 @@ import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.server.IMapToolServer;
+import net.rptools.maptool.server.MapToolServer;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -90,7 +90,7 @@ public class ConnectionInfoDialog extends JDialog {
    *
    * @param server the server instance for the connection dialog
    */
-  public ConnectionInfoDialog(IMapToolServer server) {
+  public ConnectionInfoDialog(MapToolServer server) {
     super(MapTool.getFrame(), I18N.getText("ConnectionInfoDialog.title"), true);
     setDefaultCloseOperation(DISPOSE_ON_CLOSE);
     setSize(275, 275);

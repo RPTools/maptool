@@ -14,18 +14,23 @@
  */
 package net.rptools.maptool.server;
 
-import net.rptools.maptool.model.player.PlayerDatabase;
+import java.util.function.BiConsumer;
 
-public interface IMapToolServer {
-  boolean isPersonalServer();
+public interface Handshake<T> {
 
-  boolean isServerRegistered();
+  void whenComplete(BiConsumer<? super T, ? super Throwable> callback);
 
-  String getName();
+  /** Starts the handshake process. */
+  void startHandshake();
 
-  int getPort();
+  class Failure extends Exception {
+    // TODO When we have access to I18N, force this to be translatable.
+    public Failure(String message) {
+      super(message);
+    }
 
-  PlayerDatabase getPlayerDatabase();
-
-  void stop();
+    public Failure(String message, Throwable cause) {
+      super(message, cause);
+    }
+  }
 }

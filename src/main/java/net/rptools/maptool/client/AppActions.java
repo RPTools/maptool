@@ -2228,7 +2228,6 @@ public class AppActions {
 
                 boolean failed = false;
                 try {
-                  MapTool.getClient().expectDisconnection();
                   MapTool.disconnect();
                   MapTool.stopServer();
 
@@ -2280,7 +2279,6 @@ public class AppActions {
                       policy,
                       campaign,
                       playerDatabase,
-                      true,
                       player);
                 } catch (UnknownHostException uh) {
                   MapTool.showError("msg.error.invalidLocalhost", uh);
@@ -2334,7 +2332,6 @@ public class AppActions {
 
           LOAD_MAP.setSeenWarning(false);
 
-          MapTool.getClient().expectDisconnection();
           MapTool.disconnect();
           MapTool.stopServer();
 
@@ -2348,9 +2345,8 @@ public class AppActions {
               .getConnectionStatusPanel()
               .setStatus(ConnectionStatusPanel.Status.connected);
 
-          // Show the user something interesting until we've got the campaign
-          // Look in ClientMethodHandler.setCampaign() for the corresponding
-          // hideGlassPane
+          // Show the user something interesting while we're connecting. Look below for the
+          // corresponding hideGlassPane
           StaticMessageDialog progressDialog =
               new StaticMessageDialog(I18N.getText("msg.info.connecting"));
           MapTool.getFrame().showFilledGlassPane(progressDialog);
@@ -2375,11 +2371,15 @@ public class AppActions {
                       prefs.getUsePublicKey()
                           ? new PasswordGenerator().getPassword()
                           : prefs.getPassword();
-                  MapTool.createConnection(
+                  MapTool.connectToRemoteServer(
                       config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
                       () -> {
                         MapTool.getFrame().hideGlassPane();
+
+                        // Show the user something interesting until we've got the campaign
+                        // Look in ClientMethodHandler.setCampaign() for the corresponding
+                        // hideGlassPane
                         MapTool.getFrame()
                             .showFilledGlassPane(
                                 new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
@@ -2437,7 +2437,6 @@ public class AppActions {
 
     LOAD_MAP.setSeenWarning(false);
 
-    MapTool.getClient().expectDisconnection();
     MapTool.disconnect();
     MapTool.stopServer();
 
