@@ -56,6 +56,7 @@ import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
+import net.rptools.maptool.client.MapToolConnection.HandshakeCompletionObserver;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.ServerDisconnected;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
@@ -183,22 +184,11 @@ public class MapTool {
     try {
       var connections = DirectConnection.create("local");
       var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
+      var campaign = CampaignFactory.createBasicCampaign();
+      var policy = new ServerPolicy();
 
-      client =
-          new MapToolClient(
-              CampaignFactory.createBasicCampaign(),
-              playerDB.getPlayer(),
-              connections.clientSide(),
-              new ServerPolicy(),
-              playerDB);
-      server =
-          new MapToolServer(
-              "",
-              new Campaign(client.getCampaign()),
-              null,
-              false,
-              client.getServerPolicy(),
-              playerDB);
+      server = new MapToolServer("", new Campaign(campaign), null, false, policy, playerDB);
+      client = new MapToolClient(server, campaign, playerDB.getPlayer(), connections.clientSide());
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -971,10 +961,8 @@ public class MapTool {
     assetTransferManager.flush();
 
     var connections = DirectConnection.create("local");
-    client = new MapToolClient(campaign, player, connections.clientSide(), policy, playerDatabase);
-    server =
-        new MapToolServer(
-            id, new Campaign(client.getCampaign()), config, useUPnP, policy, playerDatabase);
+    server = new MapToolServer(id, new Campaign(campaign), config, useUPnP, policy, playerDatabase);
+    client = new MapToolClient(server, campaign, player, connections.clientSide());
 
     if (!server.isPersonalServer()) {
       getFrame().getConnectionPanel().startHosting();
@@ -984,11 +972,19 @@ public class MapTool {
     client
         .getConnection()
         .onCompleted(
-            () -> {
-              // connected
-              MapTool.getFrame()
-                  .getConnectionStatusPanel()
-                  .setStatus(ConnectionStatusPanel.Status.server);
+            (success) -> {
+              if (success) {
+                // connected
+                EventQueue.invokeLater(
+                    () -> {
+                      MapTool.getFrame()
+                          .getConnectionStatusPanel()
+                          .setStatus(ConnectionStatusPanel.Status.server);
+                    });
+              } else {
+                // This should never happen. But if it does, just tear everything back down.
+                server.stop();
+              }
             });
 
     server.start();
@@ -1139,14 +1135,18 @@ public class MapTool {
     MapToolConnection clientConn = client.getConnection();
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.onCompleted(
-        () -> {
-          clientFrame.getLookupTablePanel().updateView();
-          clientFrame.getInitiativePanel().updateView();
+        (success) -> {
+          EventQueue.invokeLater(
+              () -> {
+                clientFrame.getLookupTablePanel().updateView();
+                clientFrame.getInitiativePanel().updateView();
+              });
         });
   }
 
   public static void connectToRemoteServer(
-      ServerConfig config, LocalPlayer player, Runnable onCompleted) throws IOException {
+      ServerConfig config, LocalPlayer player, HandshakeCompletionObserver onCompleted)
+      throws IOException {
     if (server != null && server.getState() == MapToolServer.State.Started) {
       log.error("A local server is still running.", new Exception());
       showError("msg.error.stillRunningServer");
@@ -1179,13 +1179,7 @@ public class MapTool {
   }
 
   public static void disconnect() {
-    try {
-      client.close();
-    } catch (IOException ioe) {
-      // This isn't critical, we're closing it anyway
-      log.debug("While closing connection", ioe);
-    }
-
+    client.close();
     new MapToolEventBus().getMainEventBus().post(new ServerDisconnected());
 
     MapTool.getFrame()

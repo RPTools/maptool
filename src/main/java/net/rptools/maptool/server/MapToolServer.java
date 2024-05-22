@@ -156,6 +156,10 @@ public class MapToolServer {
     }
   }
 
+  public ServerSidePlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
+  }
+
   public State getState() {
     return currentState;
   }
