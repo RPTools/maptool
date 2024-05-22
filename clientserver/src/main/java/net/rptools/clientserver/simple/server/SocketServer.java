@@ -37,7 +37,10 @@ public class SocketServer extends AbstractServer {
 
   @Override
   public void start() throws IOException {
-    socket = new ServerSocket(port);
+    var serverSocket = new ServerSocket(port);
+    // If the above throws, it will be as though we never started.
+
+    socket = serverSocket;
     listeningThread = new ListeningThread(this, socket);
     listeningThread.start();
   }

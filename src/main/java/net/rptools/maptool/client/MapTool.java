@@ -949,7 +949,9 @@ public class MapTool {
    * @param policy the server policy configuration to use.
    * @param campaign the campaign.
    * @param playerDatabase the player database to use for the connection.
-   * @throws IOException if new MapToolServer fails.
+   * @throws IOException if we fail to start the new server. In this case, the new client and server
+   *     will be available via {@link #getServer()} and {@link #getClient()}, but neither will be in
+   *     a started state.
    */
   public static void startServer(
       String id,
@@ -987,14 +989,20 @@ public class MapTool {
               MapTool.getFrame()
                   .getConnectionStatusPanel()
                   .setStatus(ConnectionStatusPanel.Status.server);
-              if (!server.isPersonalServer()) {
-                MapTool.addLocalMessage(
-                    MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
-              }
             });
 
-    client.start();
     server.start();
+    try {
+      client.start();
+    } catch (IOException e) {
+      // Oof. Server started but client can't.
+      server.stop();
+      throw e;
+    }
+    if (!server.isPersonalServer()) {
+      MapTool.addLocalMessage(
+          MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+    }
 
     // Adopt the local connection, no handshake required.
     connections.serverSide().open();

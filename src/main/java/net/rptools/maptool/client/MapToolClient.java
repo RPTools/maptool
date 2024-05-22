@@ -164,14 +164,26 @@ public class MapToolClient {
 
   public void start() throws IOException {
     if (transitionToState(State.New, State.Started)) {
-      conn.start();
+      try {
+        conn.start();
+      } catch (IOException e) {
+        // Make sure we're in a reasonable state before propagating.
+        log.error("Failed to start client", e);
+        transitionToState(State.Closed);
+        throw e;
+      }
     }
   }
 
   public void close() throws IOException {
     if (transitionToState(State.Closed)) {
       if (conn.isAlive()) {
-        conn.close();
+        try {
+          conn.close();
+        } catch (IOException e) {
+          log.error("Failed to close client", e);
+          throw e;
+        }
       }
 
       playerList.clear();
