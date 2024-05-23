@@ -320,6 +320,9 @@ public class PersistenceUtil {
         z.setName(n);
         z.imported(); // Resets creation timestamp and init panel, among other things
         z.optimize(); // Collapses overlaid or redundant drawables
+
+        // Make sure the imported zone is as fresh as possible (new IDs all the way down).
+        persistedMap.zone = new Zone(z, false);
       } else {
         // TODO: Not a map but it is something with a property.xml file in it.
         // Should we have a filetype property in there?
