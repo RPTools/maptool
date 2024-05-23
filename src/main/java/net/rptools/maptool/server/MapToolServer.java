@@ -28,6 +28,7 @@ import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
+import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
@@ -83,6 +84,7 @@ public class MapToolServer {
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
   private final DisconnectHandler onConnectionDisconnected;
+  private final ServerObserver serverObserver;
 
   private State currentState;
 
@@ -115,6 +117,7 @@ public class MapToolServer {
     currentState = State.New;
 
     this.onConnectionDisconnected = this::releaseClientConnection;
+    this.serverObserver = this::connectionAdded;
   }
 
   /**
@@ -151,6 +154,10 @@ public class MapToolServer {
       currentState = newState;
       return true;
     }
+  }
+
+  public ServerSidePlayerDatabase getPlayerDatabase() {
+    return playerDatabase;
   }
 
   public State getState() {
@@ -368,6 +375,17 @@ public class MapToolServer {
       return;
     }
 
+    server.addObserver(serverObserver);
+    try {
+      server.start();
+    } catch (IOException e) {
+      // Make sure we're in a reasonable state before propagating.
+      log.error("Failed to start server", e);
+      transitionToState(State.Stopped);
+      server.removeObserver(serverObserver);
+      throw e;
+    }
+
     // Use UPnP to open port in router
     if (useUPnP && config != null) {
       UPnPUtil.openPort(config.getPort());
@@ -394,9 +412,6 @@ public class MapToolServer {
     if (announcer != null) {
       announcer.start();
     }
-
-    server.addObserver(this::connectionAdded);
-    server.start();
 
     assetProducerThread.start();
   }
