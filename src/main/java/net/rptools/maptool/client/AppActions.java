@@ -2374,15 +2374,20 @@ public class AppActions {
                   MapTool.connectToRemoteServer(
                       config,
                       new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
-                      () -> {
-                        MapTool.getFrame().hideGlassPane();
-
-                        // Show the user something interesting until we've got the campaign
-                        // Look in ClientMethodHandler.setCampaign() for the corresponding
-                        // hideGlassPane
-                        MapTool.getFrame()
-                            .showFilledGlassPane(
-                                new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                      (success) -> {
+                        EventQueue.invokeLater(
+                            () -> {
+                              MapTool.getFrame().hideGlassPane();
+                              if (success) {
+                                // Show the user something interesting until we've got the campaign
+                                // Look in ClientMethodHandler.setCampaign() for the corresponding
+                                // hideGlassPane
+                                MapTool.getFrame()
+                                    .showFilledGlassPane(
+                                        new StaticMessageDialog(
+                                            I18N.getText("msg.info.campaignLoading")));
+                              }
+                            });
                       });
 
                 } catch (UnknownHostException e1) {
@@ -2426,7 +2431,16 @@ public class AppActions {
         }
       };
 
+  /**
+   * Disconnects the client and starts a personal server.
+   *
+   * <p>If we are hosting the server, the personal server will have the same campaign as the server.
+   * Otherwise a new basic campaign will be created.
+   */
   public static void disconnectFromServer() {
+    // hide map so player doesn't get a brief GM view
+    MapTool.getFrame().setCurrentZoneRenderer(null);
+
     Campaign campaign;
     if (MapTool.isHostingServer()) {
       campaign = MapTool.getCampaign();

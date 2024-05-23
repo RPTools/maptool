@@ -30,6 +30,9 @@ import org.apache.logging.log4j.Logger;
  * @author trevor
  */
 public class MapToolConnection {
+  public interface HandshakeCompletionObserver {
+    void onComplete(boolean success);
+  }
 
   /** Instance used for log messages. */
   private static final Logger log = LogManager.getLogger(MapToolConnection.class);
@@ -37,7 +40,7 @@ public class MapToolConnection {
   private final LocalPlayer player;
   private final Connection connection;
   private final Handshake<Void> handshake;
-  private final List<Runnable> onCompleted;
+  private final List<HandshakeCompletionObserver> onCompleted;
 
   public MapToolConnection(Connection connection, LocalPlayer player, Handshake<Void> handshake) {
     this.connection = connection;
@@ -46,7 +49,7 @@ public class MapToolConnection {
     onCompleted = new ArrayList<>();
   }
 
-  public void onCompleted(Runnable onCompleted) {
+  public void onCompleted(HandshakeCompletionObserver onCompleted) {
     this.onCompleted.add(onCompleted);
   }
 
@@ -55,7 +58,7 @@ public class MapToolConnection {
       // No handshake required. Transition immediately to connected.
       connection.open();
       for (final var callback : onCompleted) {
-        callback.run();
+        callback.onComplete(true);
       }
     } else {
       handshake.whenComplete(
@@ -67,12 +70,11 @@ public class MapToolConnection {
               MapTool.showError(exception.getMessage());
               connection.close();
               for (final var callback : onCompleted) {
-                callback.run();
+                callback.onComplete(false);
               }
-              AppActions.disconnectFromServer();
             } else {
               for (final var callback : onCompleted) {
-                callback.run();
+                callback.onComplete(true);
               }
             }
           });
@@ -99,7 +101,7 @@ public class MapToolConnection {
     return connection.isAlive();
   }
 
-  public void close() throws IOException {
+  public void close() {
     connection.close();
   }
 
