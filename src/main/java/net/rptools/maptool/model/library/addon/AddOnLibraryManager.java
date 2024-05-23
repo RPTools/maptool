@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.library.addon;
 
 import java.net.URL;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -27,6 +28,7 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.Library;
+import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto.AddOnLibraryEntryDto;
@@ -39,6 +41,8 @@ public class AddOnLibraryManager {
 
   /** The add-on libraries that are registered. */
   private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
+
+  private ExternalAddOnLibraryManager externalAddOnLibraryManager;
 
   /**
    * Is there a add-on library that would handle this path. This just checks the protocol and
@@ -83,6 +87,16 @@ public class AddOnLibraryManager {
     new MapToolEventBus()
         .getMainEventBus()
         .post(new AddOnsAddedEvent(Set.of(library.getLibraryInfo().join())));
+  }
+
+  /**
+   * Checks to see if the specified namespace is registered.
+   *
+   * @param namespace the namespace to check.
+   * @return {@code true} if the namespace is registered.
+   */
+  public boolean isNamespaceRegistered(String namespace) {
+    return namespaceLibraryMap.containsKey(namespace.toLowerCase());
   }
 
   /**
@@ -192,5 +206,70 @@ public class AddOnLibraryManager {
             namespaceLibraryMap.values().stream()
                 .filter(l -> l.getLegacyEvents().contains(eventName))
                 .collect(Collectors.toSet()));
+  }
+
+  /** Initializes the add-on library manager. */
+  public void init() {
+    externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
+  }
+
+  /**
+   * Replaces the add-on library with a newer version.
+   *
+   * @param library the library to replace the existing library with.
+   */
+  public void replaceLibrary(AddOnLibrary library) {
+    library
+        .getNamespace()
+        .thenAccept(
+            namespace -> {
+              deregisterLibrary(namespace);
+              registerLibrary(library);
+            });
+  }
+
+  /**
+   * Returns the information of external add-on libraries that are registered.
+   *
+   * @return the information of external add-on libraries that are registered.
+   */
+  public List<LibraryInfo> getExternalAddOnLibraries() {
+    return externalAddOnLibraryManager.getLibraries();
+  }
+
+  /**
+   * Returns if external add-on libraries are enabled.
+   *
+   * @return if external add-on libraries are enabled.
+   */
+  public boolean externalLibrariesEnabled() {
+    return externalAddOnLibraryManager.isEnabled();
+  }
+
+  /**
+   * Sets if external add-on libraries are enabled.
+   *
+   * @param enabled if external add-on libraries are enabled.
+   */
+  public void setExternalLibrariesEnabled(boolean enabled) {
+    externalAddOnLibraryManager.setEnabled(enabled);
+  }
+
+  /**
+   * Returns the path to the external add-on libraries.
+   *
+   * @return the path to the external add-on libraries.
+   */
+  public Path getExternalLibraryPath() {
+    return externalAddOnLibraryManager.getExternalLibraryPath();
+  }
+
+  /**
+   * Sets the path to the external add-on libraries.
+   *
+   * @param path the path to the external add-on libraries.
+   */
+  public void setExternalLibraryPath(Path path) {
+    externalAddOnLibraryManager.setExternalLibraryPath(path);
   }
 }

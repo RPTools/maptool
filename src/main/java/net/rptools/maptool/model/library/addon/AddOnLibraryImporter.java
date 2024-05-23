@@ -21,6 +21,7 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.ZipEntry;
@@ -133,6 +134,17 @@ public class AddOnLibraryImporter {
     }
 
     return importFromFile(tempFile);
+  }
+
+  /**
+   * Imports the add-on library from the specified directory
+   *
+   * @param dir the directory to import the library from.
+   * @return the {@link AddOnLibrary} that was imported.
+   * @throws IOException if an error occurs while reading the library.
+   */
+  public AddOnLibrary importFromDirectory(Path dir) throws IOException {
+    return null; // TODO: CDW
   }
 
   /**

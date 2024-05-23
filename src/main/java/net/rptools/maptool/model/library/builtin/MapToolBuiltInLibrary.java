@@ -222,7 +222,8 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
             shortDescription,
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile));
+            licenseFile.isEmpty() ? null : licenseFile,
+            null));
   }
 
   @Override
