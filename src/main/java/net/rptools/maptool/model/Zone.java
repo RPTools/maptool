@@ -363,12 +363,6 @@ public class Zone {
 
   public static final DrawablePaint DEFAULT_FOG = new DrawableColorPaint(Color.black);
 
-  // The zones should be ordered. We could have the server assign each zone
-  // an incrementing number as new zones are created, but that would take a lot
-  // more elegance than we really need. Instead, let's just keep track of the
-  // time when it was created. This should give us sufficient granularity, because
-  // seriously -- what's the likelihood of two GMs separately creating a new zone at exactly
-  // the same millisecond since the epoch?
   private long creationTime = System.currentTimeMillis();
 
   private GUID id = new GUID(); // Ideally would be 'final', but that complicates imported()
