@@ -19,14 +19,11 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
-import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.WebRTCConnection;
 import net.rptools.clientserver.simple.webrtc.CandidateMessageDto;
 import net.rptools.clientserver.simple.webrtc.LoginMessageDto;
 import net.rptools.clientserver.simple.webrtc.MessageDto;
 import net.rptools.clientserver.simple.webrtc.OfferMessageDto;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.server.ServerConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
@@ -35,8 +32,15 @@ import org.java_websocket.handshake.ServerHandshake;
 public class WebRTCServer extends AbstractServer {
   private static final Logger log = LogManager.getLogger(WebRTCServer.class);
 
+  public interface Listener {
+    void onLoginError();
+
+    void onUnexpectedClose();
+  }
+
+  private final Listener listener;
   private WebSocketClient signalingClient;
-  private final ServerConfig config;
+  private final String serverName;
   private final Gson gson = new Gson();
   private String lastError = null;
   private URI webSocketUri = null;
@@ -47,10 +51,9 @@ public class WebRTCServer extends AbstractServer {
   public static String WebSocketUrl = "ws://webrtc1.rptools.net:8080";
   private boolean disconnectExpected;
 
-  public WebRTCServer(
-      ServerConfig config, HandshakeProvider handshake, MessageHandler messageHandler) {
-    super(handshake, messageHandler);
-    this.config = config;
+  public WebRTCServer(String serverName, Listener listener) {
+    this.listener = listener;
+    this.serverName = serverName;
 
     try {
       webSocketUri = new URI(WebSocketUrl);
@@ -72,7 +75,7 @@ public class WebRTCServer extends AbstractServer {
         reconnectCounter = 30;
         log.info("S WebSocket connected\n");
         var msg = new LoginMessageDto();
-        msg.source = config.getServerName();
+        msg.source = serverName;
 
         sendSignalingMessage(gson.toJson(msg));
       }
@@ -86,12 +89,17 @@ public class WebRTCServer extends AbstractServer {
       public void onClose(int code, String reason, boolean remote) {
         lastError = "WebSocket closed: remote:" + remote + " (" + code + ") " + reason;
         log.info("S " + lastError);
-        if (disconnectExpected) return;
+        if (disconnectExpected) {
+          return;
+        }
 
         // if the connection get closed remotely the rptools.net server disconnected. Try to
         // reconnect.
-        if (reconnectCounter > 0) retryConnect();
-        else MapTool.stopServer();
+        if (reconnectCounter > 0) {
+          retryConnect();
+        } else {
+          listener.onUnexpectedClose();
+        }
       }
 
       @Override
@@ -111,7 +119,7 @@ public class WebRTCServer extends AbstractServer {
       case "login" -> {
         var loginMsg = gson.fromJson(message, LoginMessageDto.class);
         if (!loginMsg.success) {
-          MapTool.showError("ServerDialog.error.serverAlreadyExists");
+          listener.onLoginError();
         }
       }
       case "offer" -> {
@@ -131,13 +139,13 @@ public class WebRTCServer extends AbstractServer {
     return signalingClient;
   }
 
-  public ServerConfig getConfig() {
-    return config;
+  public String getName() {
+    return serverName;
   }
 
   public void onDataChannelOpened(WebRTCConnection connection) {
     try {
-      handleConnection(connection);
+      fireClientConnect(connection);
     } catch (Exception e) {
       log.error(e);
     }
@@ -154,7 +162,6 @@ public class WebRTCServer extends AbstractServer {
 
   @Override
   public void close() {
-    super.close();
     disconnectExpected = true;
     reconnectCounter = -1;
     signalingClient.close();
@@ -178,9 +185,5 @@ public class WebRTCServer extends AbstractServer {
             });
     reconnectThread.setName("WebRTCServer.reconnectThread");
     reconnectThread.start();
-  }
-
-  public void clearClients() {
-    reapClients();
   }
 }

@@ -24,8 +24,8 @@ import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.AppState;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -70,6 +70,30 @@ public class LineTemplate extends AbstractTemplate {
 
   public LineTemplate(GUID id) {
     super(id);
+  }
+
+  public LineTemplate(LineTemplate other) {
+    super(other);
+
+    this.doubleWide = other.doubleWide;
+    this.pathVertex = new ZonePoint(other.pathVertex);
+
+    if (other.path != null) {
+      this.path = new ArrayList<>(other.path.size());
+      for (final var cellPoint : other.path) {
+        this.path.add(new CellPoint(cellPoint));
+      }
+    }
+
+    if (other.pool != null) {
+      this.pool = new ArrayList<>(other.pool.size());
+      for (final var cellPoint : other.pool) {
+        this.pool.add(new CellPoint(cellPoint));
+      }
+    }
+
+    this.quadrant = other.quadrant;
+    this.mouseSlopeGreater = other.mouseSlopeGreater;
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -118,22 +142,18 @@ public class LineTemplate extends AbstractTemplate {
     if (!noPaint[3]) paintCloseHorizontalBorder(g, xOff, yOff, gridSize, getQuadrant());
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D, boolean,
-   *     boolean)
-   */
   @Override
-  protected void paint(Graphics2D g, boolean border, boolean area) {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    if (zone == null) {
       return;
     }
     // Need to paint? We need a line and to translate the painting
-    if (pathVertex == null) return;
-    if (getRadius() == 0) return;
-    if (calcPath() == null) return;
+    if (pathVertex == null || getRadius() == 0 || calcPath() == null) {
+      return;
+    }
 
     // Paint each element in the path
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ListIterator<CellPoint> i = path.listIterator();
     while (i.hasNext()) {
       CellPoint p = i.next();
@@ -384,15 +404,18 @@ public class LineTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Drawable copy() {
+    return new LineTemplate(this);
+  }
+
+  @Override
+  public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
+    if (zone == null) {
       return new Rectangle();
     }
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ZonePoint vertex = getVertex();
 
     // Find the point that is farthest away in the path, then adjust
@@ -406,7 +429,7 @@ public class LineTemplate extends AbstractTemplate {
       }
     }
     for (CellPoint pt : path) {
-      ZonePoint p = MapTool.getCampaign().getZone(getZoneId()).getGrid().convert(pt);
+      ZonePoint p = zone.getGrid().convert(pt);
       p = new ZonePoint(vertex.x + p.x, vertex.y + p.y);
 
       if (minp == null) {
@@ -452,11 +475,10 @@ public class LineTemplate extends AbstractTemplate {
   }
 
   @Override
-  public Area getArea() {
+  public @Nonnull Area getArea(Zone zone) {
     if (path == null) {
       calcPath();
     }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
     if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
       return new Area();
     }
@@ -483,7 +505,6 @@ public class LineTemplate extends AbstractTemplate {
     var dto = LineTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setMouseSlopeGreater(isMouseSlopeGreater())
@@ -498,5 +519,25 @@ public class LineTemplate extends AbstractTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setLineTemplate(dto).build();
+  }
+
+  public static LineTemplate fromDto(LineTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new LineTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (!dto.getQuadrant().isEmpty()) {
+      drawable.setQuadrant(AbstractTemplate.Quadrant.valueOf(dto.getQuadrant()));
+    }
+    drawable.setMouseSlopeGreater(dto.getMouseSlopeGreater());
+    var pathVertex = dto.getPathVertex();
+    drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+    drawable.setDoubleWide(dto.getDoubleWide());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

@@ -107,8 +107,7 @@ public class ZoneRenderer extends JComponent
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
-      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers;
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -172,6 +171,10 @@ public class ZoneRenderer extends JComponent
     this.zone = zone;
     zoneView = new ZoneView(zone);
     setZoneScale(new Scale());
+
+    drawableRenderers =
+        CollectionUtil.newFilledEnumMap(
+            Zone.Layer.class, layer -> new PartitionedDrawableRenderer(zone));
 
     var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();
@@ -1220,7 +1223,9 @@ public class ZoneRenderer extends JComponent
       timer.start("labels-1.1");
       ScreenPoint sp = ScreenPoint.fromZonePointRnd(this, zp.x, zp.y);
       var dim = flabel.getDimensions(g, label.getLabel());
-      Rectangle bounds = flabel.render(g, (int) sp.x, (int) sp.y, label.getLabel());
+      Rectangle bounds =
+          flabel.render(
+              g, (int) (sp.x - dim.width / 2), (int) (sp.y - dim.height / 2), label.getLabel());
       labelLocationList.add(new LabelLocation(bounds, label));
       timer.stop("labels-1.1");
     }
@@ -3555,6 +3560,9 @@ public class ZoneRenderer extends JComponent
     if (event.zone() != this.zone) {
       return;
     }
+
+    // A change in grid can change the size of templates.
+    flushDrawableRenderer();
     repaintDebouncer.dispatch();
   }
 
