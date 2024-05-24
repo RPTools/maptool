@@ -284,7 +284,7 @@ public class AddOnLibrary implements Library {
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
             licenseFile.isEmpty() ? null : licenseFile,
-                backingDirectory);
+            backingDirectory);
 
     for (var s : slashCommandsDto.getSlashCommandsList()) {
       slashCommands.put(
@@ -319,7 +319,15 @@ public class AddOnLibrary implements Library {
       AddonSlashCommandsDto slashCommandsDto,
       Map<String, Pair<MD5Key, Type>> pathAssetMap) {
 
-    return new AddOnLibrary(libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, slashCommandsDto, pathAssetMap, null);
+    return new AddOnLibrary(
+        libraryAssetKey,
+        dto,
+        mtsDto,
+        eventsDto,
+        statSheetsDto,
+        slashCommandsDto,
+        pathAssetMap,
+        null);
   }
 
   /**
@@ -329,7 +337,7 @@ public class AddOnLibrary implements Library {
    * @param dto The Drop In Libraries Data Transfer Object.
    * @param mtsDto The MTScript Properties Data Transfer Object.
    * @param eventsDto The Events Data Transfer Object.
-   * @param slashCommandsDto The Slash Commands Data Transfer Object.
+   * @param slashCommandsDto The Slash Commands Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
    * @param backingDirectory The directory that the library is in for development mode, or null if
    *     the add-on is not in development mode.
@@ -345,7 +353,14 @@ public class AddOnLibrary implements Library {
       Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap,
       Path backingDirectory) {
     return new AddOnLibrary(
-        libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, slashCommandsDto, pathAssetMap, backingDirectory);
+        libraryAssetKey,
+        dto,
+        mtsDto,
+        eventsDto,
+        statSheetsDto,
+        slashCommandsDto,
+        pathAssetMap,
+        backingDirectory);
   }
 
   @Override
