@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model.library;
 
+import java.nio.file.Path;
+
 /** Record that contains the information about a library. */
 public record LibraryInfo(
     String name,
@@ -27,5 +29,6 @@ public record LibraryInfo(
     String shortDescription,
     boolean allowsUrlAccess,
     String readMeFile,
-    String licenseFile) {}
+    String licenseFile,
+    Path backingDirectory) {}
 ;

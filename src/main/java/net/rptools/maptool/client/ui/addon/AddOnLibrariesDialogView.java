@@ -27,6 +27,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -34,6 +35,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
@@ -69,6 +71,12 @@ public class AddOnLibrariesDialogView extends JDialog {
   private JButton viewLicenseFileButton;
   private JButton copyThemeCSS;
   private JButton copyStatSheetThemeButton;
+  private JCheckBox enableExternalAddOnCheckBox;
+  private JTable externalAddonTable;
+  private JButton createAddonSkeletonButton;
+  private JTextField directoryTextField;
+  private JButton browseButton;
+  private JButton exportAddOn;
 
   private LibraryInfo selectedAddOn;
 
@@ -79,6 +87,9 @@ public class AddOnLibrariesDialogView extends JDialog {
     getRootPane().setDefaultButton(buttonClose);
     addOnLibraryTable.setModel(new AddOnLibrariesTableModel());
     addOnLibraryTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+    externalAddonTable.setModel(new ExternalAddOnLibrariesTableModel());
+    externalAddonTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
     buttonRemove.setEnabled(false);
     addOnLibraryTable
@@ -205,6 +216,38 @@ public class AddOnLibrariesDialogView extends JDialog {
                         .setContents(new StringSelection(themeCss), null);
                   });
         });
+
+    createAddonSkeletonButton.addActionListener(
+        e -> {
+          createAddonSkeleton();
+        });
+
+    enableExternalAddOnCheckBox.addActionListener(
+        e -> {
+          setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
+          directoryTextField.setEnabled(enableExternalAddOnCheckBox.isSelected());
+          new LibraryManager()
+              .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
+        });
+
+    browseButton.addActionListener(
+        e -> {
+          JFileChooser chooser = new JFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+        });
+
+    LibraryManager libraryManager = new LibraryManager();
+    enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
+    setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
+  }
+
+  private void setExternalAddOnControlsEnabled(boolean selected) {
+    externalAddonTable.setEnabled(enableExternalAddOnCheckBox.isSelected());
+    browseButton.setEnabled(enableExternalAddOnCheckBox.isSelected());
+  }
+
+  private void createAddonSkeleton() {
+    // TODO: CDW
   }
 
   /**

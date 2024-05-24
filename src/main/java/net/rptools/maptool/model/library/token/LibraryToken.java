@@ -297,6 +297,7 @@ class LibraryToken implements Library {
             shortDescription.isEmpty() ? notSet : shortDescription,
             allowsUriAccess,
             null,
+            null,
             null));
   }
 

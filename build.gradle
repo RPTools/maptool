@@ -496,6 +496,9 @@ dependencies {
     // Built In Add-on Libraries
     implementation 'com.github.RPTools:maptool-builtin-addons:1.3'
 
+    // File watcher library to work around some inconsistencies with java.nio.file.WatchService
+    implementation 'io.methvin:directory-watcher:0.18.0'
+
     // For advanced dice roller
     implementation 'com.github.RPTools:advanced-dice-roller:1.0.3'
 }
