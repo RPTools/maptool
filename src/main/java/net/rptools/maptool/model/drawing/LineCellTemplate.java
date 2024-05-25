@@ -18,13 +18,11 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.math.BigDecimal;
-import java.math.MathContext;
-import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.ListIterator;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -43,27 +41,26 @@ public class LineCellTemplate extends AbstractTemplate {
    *-------------------------------------------------------------------------------------------*/
 
   /** This vertex is used to determine the path. */
-  private ZonePoint pathVertex;
+  private ZonePoint pathVertex = null;
 
   /** The calculated path for this line. */
-  private List<CellPoint> path;
+  private transient List<CellPoint> path;
 
   /** The pool of points. */
-  private List<CellPoint> pool;
+  private transient List<CellPoint> pool;
 
-  /**
-   * The line is drawn in this quadrant. A string is used as a hack to get around the hessian
-   * library's problem w/ serialization of enums
-   */
-  private String quadrant = null;
-
-  /** Flag used to determine mouse position relative to vertex position */
-  private boolean mouseSlopeGreater;
+  /** The line is drawn in this quadrant. */
+  private transient Quadrant quadrant = null;
 
   public LineCellTemplate() {}
 
   public LineCellTemplate(GUID id) {
     super(id);
+  }
+
+  public LineCellTemplate(LineCellTemplate other) {
+    super(other);
+    this.pathVertex = new ZonePoint(other.pathVertex);
   }
 
   /*---------------------------------------------------------------------------------------------
@@ -92,8 +89,15 @@ public class LineCellTemplate extends AbstractTemplate {
     // Have to scan 3 points behind and ahead, since that is the maximum number of points
     // that can be added to the path from any single intersection.
     boolean[] noPaint = new boolean[4];
+    final var path = getPath();
+    if (path == null) {
+      return;
+    }
+
     for (int i = pElement - 3; i < pElement + 3; i++) {
-      if (i < 0 || i >= path.size() || i == pElement) continue;
+      if (i < 0 || i >= path.size() || i == pElement) {
+        continue;
+      }
       CellPoint p = path.get(i);
 
       // Ignore diagonal cells and cells that are not adjacent
@@ -112,28 +116,18 @@ public class LineCellTemplate extends AbstractTemplate {
     if (!noPaint[3]) paintCloseHorizontalBorder(g, xOff, yOff, gridSize, getQuadrant());
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#paint(java.awt.Graphics2D, boolean,
-   *     boolean)
-   */
   @Override
-  protected void paint(Graphics2D g, boolean border, boolean area) {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    if (zone == null) {
       return;
     }
-    // Need to paint? We need a line and to translate the painting
-    if (pathVertex == null) {
-      return;
-    }
-    if (getRadius() == 0) {
-      return;
-    }
-    if (calcPath() == null) {
+    final var path = getPath();
+    if (path == null) {
       return;
     }
 
     // Paint each element in the path
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+    int gridSize = zone.getGrid().getSize();
     ListIterator<CellPoint> i = path.listIterator();
     while (i.hasNext()) {
       CellPoint p = i.next();
@@ -141,13 +135,20 @@ public class LineCellTemplate extends AbstractTemplate {
       int yOff = p.y * gridSize;
       int distance = getDistance(p.x, p.y);
 
-      if (quadrant.equals(Quadrant.NORTH_EAST.name())) {
-        yOff = yOff - gridSize;
-      } else if (quadrant.equals(Quadrant.SOUTH_WEST.name())) {
-        xOff = xOff - gridSize;
-      } else if (quadrant.equals(Quadrant.NORTH_WEST.name())) {
-        xOff = xOff - gridSize;
-        yOff = yOff - gridSize;
+      switch (getQuadrant()) {
+        case NORTH_EAST -> {
+          yOff = yOff - gridSize;
+        }
+        case SOUTH_WEST -> {
+          xOff = xOff - gridSize;
+        }
+        case NORTH_WEST -> {
+          xOff = xOff - gridSize;
+          yOff = yOff - gridSize;
+        }
+        case SOUTH_EAST -> {
+          // Nothing to do.
+        }
       }
 
       // Paint what is needed.
@@ -188,86 +189,70 @@ public class LineCellTemplate extends AbstractTemplate {
   /**
    * Calculate the path
    *
+   * <p>The path is always calculated as if it were in the south-east quadrant. I.e., the x and y
+   * coordinates of the path points will never decrease.
+   *
    * @return The new path or <code>null</code> if there is no path.
    */
-  protected List<CellPoint> calcPath() {
-    if (getRadius() == 0) {
-      return null;
-    }
-    if (pathVertex == null) {
-      return null;
-    }
+  protected @Nullable List<CellPoint> calcPath() {
     int radius = getRadius();
-
-    // Is there a slope?
     ZonePoint vertex = getVertex();
+
+    if (radius == 0 || vertex == null || pathVertex == null) {
+      return null;
+    }
+    // Is there a slope?
     if (vertex.equals(pathVertex)) {
       return null;
     }
 
-    double dx = pathVertex.x - vertex.x;
-    double dy = pathVertex.y - vertex.y;
-    setQuadrant(
-        (dx < 0)
-            ? (dy < 0 ? Quadrant.NORTH_WEST : Quadrant.SOUTH_WEST)
-            : (dy < 0 ? Quadrant.NORTH_EAST : Quadrant.SOUTH_EAST));
+    double dx = Math.abs(pathVertex.x - vertex.x);
+    double dy = Math.abs(pathVertex.y - vertex.y);
+    final boolean isShallowSlope = dx >= dy;
 
+    // To start, a half cell deviation is enough to switch rows.
+    double deviationInY = 0.5;
+
+    final var path = new ArrayList<CellPoint>();
     // Start the line at 0,0
-    clearPath();
-    path = new ArrayList<CellPoint>();
-    path.add(getPointFromPool(0, 0));
+    CellPoint p = getPointFromPool(0, 0);
+    path.add(p);
 
-    MathContext mc = MathContext.DECIMAL128;
-    MathContext rmc = new MathContext(MathContext.DECIMAL64.getPrecision(), RoundingMode.CEILING);
-    if (dx != 0 && dy != 0) {
-      BigDecimal m = BigDecimal.valueOf(dy).divide(BigDecimal.valueOf(dx), mc).abs();
+    // In this loop we pretend we have a shallow slope. If that's not true, we'll fix it afterward.
+    double slope = isShallowSlope ? (dy / dx) : (dx / dy);
+    assert slope >= 0;
+    while (getDistance(p.x, p.y) < radius) {
+      p = getPointFromPool(p.x, p.y);
 
-      // Find the path
-      CellPoint p = path.get(path.size() - 1);
-      while (getDistance(p.x, p.y) < radius) {
-        int x = p.x;
-        int y = p.y;
+      // Step to the next column.
+      ++p.x;
 
-        // Which border does the point exit the cell?
-        double xValue = BigDecimal.valueOf(y + 1).divide(m, mc).round(rmc).doubleValue();
-        double yValue = BigDecimal.valueOf(x + 1).multiply(m, mc).round(rmc).doubleValue();
+      // Step to the next row if the ideal line has deviated enough.
+      // y-value always goes up, so we don't need to check the < 0 case.
+      deviationInY += slope;
+      if (deviationInY >= 1) {
+        ++p.y;
+        deviationInY -= 1;
+      }
 
-        if (xValue == x + 1 && yValue == y + 1) {
-          // Special case, right on the diagonal
-          path.add(getPointFromPool(x + 1, y + 1));
-        } else if (Math.round(xValue) == x + 1) {
-          path.add(getPointFromPool(x + 1, y + 1));
-        } else if (Math.round(xValue) == x) {
-          path.add(getPointFromPool(x, y + 1));
-        } else if (Math.round(yValue) == y + 1) {
-          path.add(getPointFromPool(x + 1, y + 1));
-        } else if (Math.round(yValue) == y) {
-          path.add(getPointFromPool(x + 1, y));
-        } else {
-          return path;
-        } // endif
-        p = path.get(path.size() - 1);
-      } // endwhile
+      path.add(p);
+    }
 
-      // Clear the last of the pool
-      if (pool != null) {
-        pool.clear();
-        pool = null;
-      } // endif
-    } else {
-      // Straight line
-      int xInc = dx != 0 ? 1 : 0;
-      int yInc = dy != 0 ? 1 : 0;
-      int x = xInc;
-      int y = yInc;
-      int xTouch = (dx != 0) ? 0 : -1;
-      int yTouch = (dy != 0) ? 0 : -1;
-      while (getDistance(x, y) <= radius) {
-        path.add(getPointFromPool(x, y));
-        x += xInc;
-        y += yInc;
-      } // endwhile
-    } // endif
+    if (!isShallowSlope) {
+      // All our x-values should be y-values and vice versa. So swap them all.
+      for (final var point : path) {
+        final var tmp = point.x;
+        point.x = point.y;
+        point.y = tmp;
+      }
+    }
+
+    // Clear out the last of the pool.
+    if (pool != null) {
+      pool.clear();
+      pool = null;
+    }
+
     return path;
   }
 
@@ -278,7 +263,7 @@ public class LineCellTemplate extends AbstractTemplate {
    * @param y The y coordinate of the new point.
    * @return The new point.
    */
-  public CellPoint getPointFromPool(int x, int y) {
+  private CellPoint getPointFromPool(int x, int y) {
     CellPoint p = null;
     if (pool != null) {
       p = pool.remove(pool.size() - 1);
@@ -293,21 +278,12 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   /**
-   * Add a point back to the pool.
-   *
-   * @param p Add this point back
-   */
-  public void addPointToPool(CellPoint p) {
-    if (pool != null) pool.add(p);
-  }
-
-  /**
    * Get the pathVertex for this LineTemplate.
    *
    * @return Returns the current value of pathVertex.
    */
   public ZonePoint getPathVertex() {
-    return pathVertex;
+    return pathVertex == null ? null : new ZonePoint(pathVertex);
   }
 
   /**
@@ -324,7 +300,8 @@ public class LineCellTemplate extends AbstractTemplate {
   }
 
   /** Clear the current path. This will cause it to be recalculated during the next draw. */
-  public void clearPath() {
+  private void clearPath() {
+    quadrant = null;
     if (path != null) {
       pool = path;
     }
@@ -336,134 +313,110 @@ public class LineCellTemplate extends AbstractTemplate {
    *
    * @return Returns the current value of quadrant.
    */
-  public Quadrant getQuadrant() {
-    if (quadrant != null) {
-      return Quadrant.valueOf(quadrant);
+  private @Nonnull Quadrant getQuadrant() {
+    if (quadrant == null) {
+      final var vertex = getVertex();
+      if (vertex == null || pathVertex == null || pathVertex.equals(vertex)) {
+        // Not a valid line, so quadrant is meaningless. Just pick one.
+        quadrant = Quadrant.NORTH_WEST;
+      } else {
+        double dx = pathVertex.x - vertex.x;
+        double dy = pathVertex.y - vertex.y;
+        quadrant =
+            (dx < 0)
+                ? (dy < 0 ? Quadrant.NORTH_WEST : Quadrant.SOUTH_WEST)
+                : (dy < 0 ? Quadrant.NORTH_EAST : Quadrant.SOUTH_EAST);
+      }
     }
-    return null;
-  }
 
-  /**
-   * Set the value of quadrant for this LineTemplate.
-   *
-   * @param quadrant The quadrant to set.
-   */
-  public void setQuadrant(Quadrant quadrant) {
-    if (quadrant != null) {
-      this.quadrant = quadrant.name();
-    } else {
-      this.quadrant = null;
-    }
-  }
-
-  /**
-   * Get the mouseSlopeGreater for this LineTemplate.
-   *
-   * @return Returns the current value of mouseSlopeGreater.
-   */
-  public boolean isMouseSlopeGreater() {
-    return mouseSlopeGreater;
-  }
-
-  /**
-   * Set the value of mouseSlopeGreater for this LineTemplate.
-   *
-   * @param aMouseSlopeGreater The mouseSlopeGreater to set.
-   */
-  public void setMouseSlopeGreater(boolean aMouseSlopeGreater) {
-    mouseSlopeGreater = aMouseSlopeGreater;
+    return quadrant;
   }
 
   /**
    * @return Getter for path
    */
-  public List<CellPoint> getPath() {
-    return path;
-  }
+  private @Nullable List<CellPoint> getPath() {
+    if (path == null) {
+      path = calcPath();
+    }
 
-  /**
-   * @param path Setter for the path to set
-   */
-  public void setPath(List<CellPoint> path) {
-    this.path = path;
+    return path;
   }
 
   /*---------------------------------------------------------------------------------------------
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Drawable copy() {
+    return new LineCellTemplate(this);
+  }
+
+  @Override
+  public Rectangle getBounds(Zone zone) {
     // Get all of the numbers needed for the calculation
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
+    if (zone == null) {
       return new Rectangle();
     }
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
-    ZonePoint vertex = getVertex();
-
-    // Find the point that is farthest away in the path, then adjust
-    ZonePoint minp = null;
-    ZonePoint maxp = null;
+    // The end of the path is the point further away from vertex.
+    final var path = getPath();
     if (path == null) {
-      calcPath();
-      if (path == null) {
-        // If the calculated path is still null, then the line is invalid.
-        return new Rectangle();
-      }
+      // If the path is null, the line is invalid.
+      return new Rectangle();
     }
-    for (CellPoint pt : path) {
-      ZonePoint p = MapTool.getCampaign().getZone(getZoneId()).getGrid().convert(pt);
-      p = new ZonePoint(vertex.x + p.x, vertex.y + p.y);
 
-      if (minp == null) {
-        minp = new ZonePoint(p.x, p.y);
-        maxp = new ZonePoint(p.x, p.y);
-      }
-      minp.x = Math.min(minp.x, p.x);
-      minp.y = Math.min(minp.y, p.y);
+    var first = new CellPoint(path.getFirst());
+    var last = new CellPoint(path.getLast());
 
-      maxp.x = Math.max(maxp.x, p.x);
-      maxp.y = Math.max(maxp.y, p.y);
-    }
-    maxp.x += gridSize;
-    maxp.y += gridSize;
+    // `first` should be (0, 0), but let's not rely on that.
+    final var quadrant = getQuadrant();
+    first.x *= getXMult(quadrant);
+    last.x *= getXMult(quadrant);
+    first.y *= getYMult(quadrant);
+    last.y *= getYMult(quadrant);
 
-    // The path is only calculated for the south-east quadrant, so
-    // appropriately reflect the bounding box around the starting vertex.
-    if (getXMult(getQuadrant()) < 0) {
-      minp.x -= gridSize;
-      maxp.x -= gridSize;
-    }
-    if (getYMult(getQuadrant()) < 0) {
-      minp.y -= gridSize;
-      maxp.y -= gridSize;
-    }
-    int width = (maxp.x - minp.x);
-    int height = (maxp.y - minp.y);
+    // Now convert to zone points.
+    ZonePoint firstZonePoint = zone.getGrid().convert(first);
+    ZonePoint lastZonePoint = zone.getGrid().convert(last);
+
+    ZonePoint vertex = getVertex();
+    int gridSize = zone.getGrid().getSize();
+    ZonePoint minZonePoint =
+        new ZonePoint(
+            vertex.x + Math.min(firstZonePoint.x, lastZonePoint.x),
+            vertex.y + Math.min(firstZonePoint.y, lastZonePoint.y));
+    ZonePoint maxZonePoint =
+        new ZonePoint(
+            vertex.x + Math.max(firstZonePoint.x, lastZonePoint.x) + gridSize,
+            vertex.y + Math.max(firstZonePoint.y, lastZonePoint.y) + gridSize);
 
     // Account for pen size
     // We don't really know what the pen size will be, so give a very rough
     // overestimate
     // We'll have to figure this out someday
-    minp.x -= 10;
-    minp.y -= 10;
-    width += 20;
-    height += 20;
+    minZonePoint.x -= 10;
+    minZonePoint.y -= 10;
+    maxZonePoint.x += 10;
+    maxZonePoint.y += 10;
 
-    return new Rectangle(minp.x, minp.y, width, height);
+    return new Rectangle(
+        minZonePoint.x,
+        minZonePoint.y,
+        maxZonePoint.x - minZonePoint.x,
+        maxZonePoint.y - minZonePoint.y);
   }
 
   @Override
-  public Area getArea() {
-    if (path == null) {
-      calcPath();
-    }
-    Zone zone = MapTool.getCampaign().getZone(getZoneId());
-    if (path == null || zone == null || getRadius() == 0 || pathVertex == null) {
+  public @Nonnull Area getArea(Zone zone) {
+    if (zone == null) {
       return new Area();
     }
+
+    final var path = getPath();
+    if (path == null) {
+      return new Area();
+    }
+
     // Create an area by merging all the squares along the path
     Area result = new Area();
     int gridSize = zone.getGrid().getSize();
@@ -476,13 +429,20 @@ public class LineCellTemplate extends AbstractTemplate {
       int xOff = p.x * gridSize;
       int yOff = p.y * gridSize;
 
-      if (quadrant.equals(Quadrant.NORTH_EAST.name())) {
-        yOff = yOff - gridSize;
-      } else if (quadrant.equals(Quadrant.SOUTH_WEST.name())) {
-        xOff = xOff - gridSize;
-      } else if (quadrant.equals(Quadrant.NORTH_WEST.name())) {
-        xOff = xOff - gridSize;
-        yOff = yOff - gridSize;
+      switch (q) {
+        case NORTH_EAST -> {
+          yOff = yOff - gridSize;
+        }
+        case SOUTH_WEST -> {
+          xOff = xOff - gridSize;
+        }
+        case NORTH_WEST -> {
+          xOff = xOff - gridSize;
+          yOff = yOff - gridSize;
+        }
+        case SOUTH_EAST -> {
+          // Nothing to do.
+        }
       }
 
       int rx = getVertex().x + getXMult(q) * xOff + ((getXMult(q) - 1) / 2) * gridSize;
@@ -494,24 +454,14 @@ public class LineCellTemplate extends AbstractTemplate {
 
   @Override
   public DrawableDto toDto() {
-
-    if (getQuadrant() == null) {
-      calcPath(); // force calculation of the quadrent
-    }
-
     var dto = LineCellTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
-        .setVertex(getVertex().toDto())
-        .setMouseSlopeGreater(isMouseSlopeGreater());
+        .setVertex(getVertex().toDto());
 
-    if (getQuadrant() != null) {
-      dto.setQuadrant(getQuadrant().name());
-    }
-    if (getPathVertex() != null) {
-      dto.setPathVertex(getPathVertex().toDto());
+    if (pathVertex != null) {
+      dto.setPathVertex(pathVertex.toDto());
     }
 
     if (getName() != null) {
@@ -519,5 +469,20 @@ public class LineCellTemplate extends AbstractTemplate {
     }
 
     return DrawableDto.newBuilder().setLineCellTemplate(dto).build();
+  }
+
+  public static LineCellTemplate fromDto(LineCellTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new LineCellTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    var pathVertex = dto.getPathVertex();
+    drawable.setPathVertex(new ZonePoint(pathVertex.getX(), pathVertex.getY()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

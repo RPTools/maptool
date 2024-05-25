@@ -15,14 +15,17 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
+import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
+import javax.annotation.Nonnull;
 import javax.swing.CellRendererPane;
+import javax.swing.text.Style;
 import net.rptools.maptool.client.swing.TwoToneTextPane;
-import net.rptools.maptool.client.tool.drawing.DrawnTextTool;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
@@ -35,13 +38,13 @@ import net.rptools.maptool.server.proto.drawing.DrawnLabelDto;
 public class DrawnLabel extends AbstractDrawing {
 
   /** The bounds of the display rectangle */
-  private Rectangle bounds = new Rectangle();
+  private final Rectangle bounds;
 
   /** Text being painted. */
-  private String text;
+  private final String text;
 
   /** The font used to paint the text. */
-  private String font;
+  private final String font;
 
   /** The pane used to render the text */
   private transient CellRendererPane renderer;
@@ -49,25 +52,23 @@ public class DrawnLabel extends AbstractDrawing {
   /** The text pane used to paint the text. */
   private transient TwoToneTextPane textPane;
 
-  /**
-   * Create a new drawn label.
-   *
-   * @param theText Text to be drawn
-   * @param theBounds The bounds containing the text.
-   * @param aFont The font used to draw the text as a string that can be passed to {@link
-   *     Font#decode(java.lang.String)}.
-   */
-  public DrawnLabel(String theText, Rectangle theBounds, String aFont) {
-    text = theText;
-    bounds = theBounds;
-    font = aFont;
-  }
-
   public DrawnLabel(GUID id, String theText, Rectangle theBounds, String aFont) {
     super(id);
     text = theText;
     bounds = theBounds;
     font = aFont;
+  }
+
+  public DrawnLabel(DrawnLabel other) {
+    super(other);
+    this.bounds = new Rectangle(other.bounds);
+    this.text = other.text;
+    this.font = other.font;
+  }
+
+  @Override
+  public Drawable copy() {
+    return new DrawnLabel(this);
   }
 
   public String getText() {
@@ -78,32 +79,26 @@ public class DrawnLabel extends AbstractDrawing {
     return font;
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#draw(java.awt.Graphics2D,
-   *     net.rptools.maptool.model.drawing.Pen)
-   */
-  public void draw(Graphics2D aG) {
+  public void draw(Zone zone, Graphics2D aG) {
     if (renderer == null) {
       renderer = new CellRendererPane();
-      textPane = DrawnTextTool.createTextPane(bounds, null, font);
+      textPane = createTextPane(bounds, font);
       textPane.setText(text);
     }
     renderer.paintComponent(aG, textPane, null, bounds);
   }
 
   @Override
-  protected void drawBackground(Graphics2D g) {}
+  protected void drawBackground(Zone zone, Graphics2D g) {}
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
+  @Override
+  public Rectangle getBounds(Zone zone) {
     return bounds;
   }
 
-  public Area getArea() {
-    // TODO Auto-generated method stub
-    return null;
+  @Override
+  public @Nonnull Area getArea(Zone zone) {
+    return new Area();
   }
 
   @Override
@@ -111,12 +106,43 @@ public class DrawnLabel extends AbstractDrawing {
     var dto = DrawnLabelDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setBounds(Mapper.map(getBounds()))
+        .setBounds(Mapper.map(bounds))
         .setText(getText())
         .setFont(getFont());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setDrawnLabel(dto).build();
+  }
+
+  public static DrawnLabel fromDto(DrawnLabelDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new DrawnLabel(id, dto.getText(), Mapper.map(dto.getBounds()), dto.getFont());
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
+  }
+
+  /**
+   * Create a text pane with the passed bounds, pen, and font data
+   *
+   * @param bounds Bounds of the new text pane
+   * @param font Font used to pain the text
+   * @return A text pane used to draw text
+   */
+  private static TwoToneTextPane createTextPane(Rectangle bounds, String font) {
+    // Create a text component and place it on the renderer's component
+    TwoToneTextPane textPane = new TwoToneTextPane();
+    textPane.setBounds(bounds);
+    textPane.setOpaque(false);
+    textPane.setBackground(new Color(0, 0, 0, 0)); // Transparent
+
+    // Create a style for the component
+    Style style = textPane.addStyle("default", null);
+    TwoToneTextPane.setFont(style, Font.decode(font));
+    textPane.setLogicalStyle(style);
+    return textPane;
   }
 }

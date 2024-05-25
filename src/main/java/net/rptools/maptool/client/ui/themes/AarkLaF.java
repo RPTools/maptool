@@ -12,6 +12,23 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.client.events;
+package net.rptools.maptool.client.ui.themes;
 
-public record ServerStopped() {}
+import com.formdev.flatlaf.FlatDarkLaf;
+
+public class AarkLaF extends FlatDarkLaf {
+  public static final String NAME = "Aark";
+
+  public static boolean setup() {
+    return setup(new AarkLaF());
+  }
+
+  public static void installLafInfo() {
+    installLafInfo(NAME, AarkLaF.class);
+  }
+
+  @Override
+  public String getName() {
+    return NAME;
+  }
+}

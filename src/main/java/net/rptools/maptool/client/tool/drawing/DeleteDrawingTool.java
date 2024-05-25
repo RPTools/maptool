@@ -93,7 +93,7 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
       var drawable = element.getDrawable();
       var id = drawable.getId();
       ZonePoint pos = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-      if (drawable.getBounds().contains(pos.x, pos.y)) {
+      if (drawable.getBounds(zone).contains(pos.x, pos.y)) {
         if (!selectedDrawings.contains(id)) selectedDrawings.add(id);
         else selectedDrawings.remove(id);
         break;
@@ -116,7 +116,7 @@ public class DeleteDrawingTool extends DefaultTool implements ZoneOverlay, Mouse
   }
 
   private void drawBox(Graphics2D g, DrawnElement element) {
-    var box = element.getDrawable().getBounds();
+    var box = element.getDrawable().getBounds(getZone());
     var pen = element.getPen();
 
     var scale = renderer.getScale();

@@ -15,13 +15,11 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.RenderingHints;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -38,69 +36,42 @@ public class BurstTemplate extends RadiusTemplate {
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
 
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
-
-  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
-  private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
-
   public BurstTemplate() {}
 
   public BurstTemplate(GUID id) {
     super(id);
   }
 
+  public BurstTemplate(BurstTemplate other) {
+    super(other);
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or
-   * direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when
-   * the radius is an even number and still stay in the squares, that case isn't allowed.
-   */
-  private void adjustShape() {
-    if (getZoneId() == null) return;
-    Zone zone;
-    if (MapTool.isHostingServer()) {
-      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
-    } else {
-      zone = MapTool.getCampaign().getZone(getZoneId());
-    }
-    if (zone == null) return;
+  @Override
+  public Drawable copy() {
+    return new BurstTemplate(this);
+  }
 
+  private Rectangle makeVertexShape(Zone zone) {
     int gridSize = zone.getGrid().getSize();
-    Rectangle r = (Rectangle) vertexRenderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r = (Rectangle) renderer.getShape();
-    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
-    r.x -= getRadius() * gridSize;
-    r.y -= getRadius() * gridSize;
-    r.width = r.height = (getRadius() * 2 + 1) * gridSize;
+    return new Rectangle(getVertex().x, getVertex().y, gridSize, gridSize);
+  }
+
+  private Rectangle makeShape(Zone zone) {
+    int gridSize = zone.getGrid().getSize();
+    return new Rectangle(
+        getVertex().x - getRadius() * gridSize,
+        getVertex().y - getRadius() * gridSize,
+        (getRadius() * 2 + 1) * gridSize,
+        (getRadius() * 2 + 1) * gridSize);
   }
 
   /*---------------------------------------------------------------------------------------------
    * Overridden *Template Methods
    *-------------------------------------------------------------------------------------------*/
-
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
-   */
-  @Override
-  public void setRadius(int squares) {
-    super.setRadius(squares);
-    adjustShape();
-  }
-
-  /**
-   * @see
-   *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
-   */
-  @Override
-  public void setVertex(ZonePoint vertex) {
-    super.setVertex(vertex);
-    adjustShape();
-  }
 
   /**
    * @see net.rptools.maptool.model.drawing.AbstractTemplate#getDistance(int, int)
@@ -111,8 +82,8 @@ public class BurstTemplate extends RadiusTemplate {
   }
 
   @Override
-  public Rectangle getBounds() {
-    Rectangle r = new Rectangle(renderer.getShape().getBounds());
+  public Rectangle getBounds(Zone zone) {
+    Rectangle r = makeShape(zone);
     // We don't know pen width, so add some padding to account for it
     r.x -= 5;
     r.y -= 5;
@@ -126,30 +97,28 @@ public class BurstTemplate extends RadiusTemplate {
    * Overridden AbstractDrawing Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#draw(java.awt.Graphics2D)
-   */
   @Override
-  protected void draw(Graphics2D g) {
-    renderer.draw(g);
-    vertexRenderer.draw(g);
+  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+    Object oldAA = g.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
+    try {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+      var shape = makeShape(zone);
+      if (border) {
+        g.draw(shape);
+        g.draw(makeVertexShape(zone));
+      }
+      if (area) {
+        g.fill(shape);
+      }
+    } finally {
+      g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, oldAA);
+    }
   }
 
-  /**
-   * @see net.rptools.maptool.model.drawing.AbstractDrawing#drawBackground(java.awt.Graphics2D)
-   */
   @Override
-  protected void drawBackground(Graphics2D g) {
-    Composite old = g.getComposite();
-    if (old != AlphaComposite.Clear)
-      g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, DEFAULT_BG_ALPHA));
-    renderer.drawBackground(g);
-    g.setComposite(old);
-  }
-
-  @Override
-  public Area getArea() {
-    return renderer.getArea();
+  public @Nonnull Area getArea(Zone zone) {
+    return new Area(makeShape(zone));
   }
 
   @Override
@@ -157,12 +126,24 @@ public class BurstTemplate extends RadiusTemplate {
     var dto = BurstTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setBurstTemplate(dto).build();
+  }
+
+  public static BurstTemplate fromDto(BurstTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new BurstTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

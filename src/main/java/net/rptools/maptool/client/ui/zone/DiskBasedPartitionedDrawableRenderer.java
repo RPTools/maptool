@@ -34,6 +34,7 @@ import java.util.Set;
 import javax.imageio.ImageIO;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -45,6 +46,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
   private static final BufferedImage NO_IMAGE = new BufferedImage(1, 1, Transparency.OPAQUE);
   private static final int CHUNK_SIZE = 256;
 
+  private final Zone zone;
   private final Map<String, BufferedImage> chunkMap = new HashMap<String, BufferedImage>();
 
   private double lastScale;
@@ -67,7 +69,8 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     }
   }
 
-  public DiskBasedPartitionedDrawableRenderer() {
+  public DiskBasedPartitionedDrawableRenderer(Zone zone) {
+    this.zone = zone;
     flush();
   }
 
@@ -193,7 +196,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
     for (DrawnElement element : drawableList) {
       Drawable drawable = element.getDrawable();
 
-      Rectangle2D drawnBounds = drawable.getBounds();
+      Rectangle2D drawnBounds = drawable.getBounds(zone);
       Rectangle2D chunkBounds =
           new Rectangle(
               (int) (gridx * (CHUNK_SIZE / scale)),
@@ -230,7 +233,7 @@ public class DiskBasedPartitionedDrawableRenderer implements DrawableRenderer {
       // if (gridx == 0 && gridy == 1) {
       // System.out.println("draw");
       // }
-      drawable.draw(g, pen);
+      drawable.draw(zone, g, pen);
       g.setComposite(oldComposite);
     }
 
