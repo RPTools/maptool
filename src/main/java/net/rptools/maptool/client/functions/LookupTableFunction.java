@@ -198,7 +198,7 @@ public class LookupTableFunction extends AbstractFunction {
    * @return table identified by <code>name</code>
    * @throws ParserException Thrown for any access errors to the named table (unknown, access prohibited, or table doesn't exist)
    */
-  private LookupTable checkTableAccess(String function, String name) throws ParserException {
+  private LookupTable checkTableAccess(String name, String function) throws ParserException {
     LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(name);
     if (!MapTool.getPlayer().isGM() && !lookupTable.getAllowLookup()) {
       if (lookupTable.getVisible()) {
