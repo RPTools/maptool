@@ -634,4 +634,38 @@ public class LookupTableFunction extends AbstractFunction {
           .forEachOrdered((lt) -> tables.add(lt.getName()));
     return tables;
   }
+
+  /**
+   * Function to return a MapTool table.
+   *
+   * @param tableName String containing the name of the desired table
+   * @param functionName String containing the name of the calling function, used by the error
+   *     message.
+   * @return LookupTable The desired MapTool table object
+   * @throws ParserException if there were more or less parameters than allowed
+   */
+  private LookupTable getMaptoolTable(String tableName, String functionName)
+      throws ParserException {
+
+    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(tableName);
+    if (!MapTool.getPlayer().isGM() && !lookupTable.getAllowLookup()) {
+      if (lookupTable.getVisible()) {
+        throw new ParserException(
+            functionName + "(): " + I18N.getText("msg.error.tableUnknown") + tableName);
+      } else {
+        throw new ParserException(
+            functionName
+                + "(): "
+                + I18N.getText("msg.error.tableAccessProhibited")
+                + ": "
+                + tableName);
+      }
+    }
+    if (lookupTable == null) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.LookupTableFunctions.unknownTable", functionName, tableName));
+    }
+    return lookupTable;
+  }
 }
