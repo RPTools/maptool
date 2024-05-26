@@ -244,13 +244,18 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * Resets the entries on a table in regards to whether such entries have been
+   * Resets the entries on a table with regard to whether such entries have been
    * selected already.  This is used in the PickOnce family of tables.
-   *
-   * resetTablePicks(tblName) - reset all entries on a table
-   * resetTablePicks(tblName, entriesToReset) - reset specific entries from a String List with "," delim
-   * resetTablePicks(tblName, entriesToReset, delim) - use custom delimiter
-   * resetTablePicks(tblName, entriesToReset, "json") - entriesToReset is a JsonArray
+   * <ul>
+   * <li>
+   * {@code resetTablePicks(tblName)} - reset all entries on a table
+   * <li>
+   * {@code resetTablePicks(tblName, entriesToReset)} - reset specific entries from a String List with "," delim
+   * <li>
+   * {@code resetTablePicks(tblName, entriesToReset, delim)} - use custom delimiter
+   * <li>
+   * {@code resetTablePicks(tblName, entriesToReset, "json")} - entriesToReset is a JsonArray
+   * </ul>
    *
    * @param function name of the MTscript function (used for error messages)
    * @param params list of function parameters
@@ -301,7 +306,7 @@ public class LookupTableFunction extends AbstractFunction {
 
     MD5Key imageId = entry.getImageId();
     if (imageId != null) {
-      entryDetails.addProperty("assetid", "asset://" + imageId.toString());
+      entryDetails.addProperty("assetid", "asset://" + imageId);
     } else {
       entryDetails.addProperty("assetid", "");
     }
@@ -377,7 +382,7 @@ public class LookupTableFunction extends AbstractFunction {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("deleteTable", params, 1, 1);
     String name = params.getFirst().toString();
-    LookupTable lookupTable = checkTableAccess(name, function);
+    checkTableAccess(name, function);
     MapTool.getCampaign().getLookupTableMap().remove(name);
     MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
     return "";
@@ -514,7 +519,7 @@ public class LookupTableFunction extends AbstractFunction {
       MapTool.serverCommand().updateCampaign(MapTool.getCampaign().getCampaignProperties());
       return counter == rowindex ? new JsonPrimitive(counter) : errorRows;
     }
-    // FIXME Report error in standardized format
+    // FIXME Report error using I18N
     throw new ParserException("Second parameter must be a JSON Array");
   }
 
