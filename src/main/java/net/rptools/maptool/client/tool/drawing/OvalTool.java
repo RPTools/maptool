@@ -126,6 +126,8 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
    */
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     if (oval != null) {
 
       ZonePoint sp = getPoint(e);

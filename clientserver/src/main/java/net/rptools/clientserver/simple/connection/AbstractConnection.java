@@ -16,13 +16,12 @@ package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.rptools.clientserver.ActivityListener;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
@@ -34,25 +33,25 @@ import org.apache.logging.log4j.Logger;
 public abstract class AbstractConnection implements Connection {
   private static final Logger log = LogManager.getLogger(AbstractConnection.class);
 
-  private final Map<Object, List<byte[]>> outQueueMap = new HashMap<>();
-  private final List<List<byte[]>> outQueueList = new LinkedList<>();
+  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private final BlockingQueue<byte[]> outQueue = new LinkedBlockingQueue<>();
+
   private final List<DisconnectHandler> disconnectHandlers = new CopyOnWriteArrayList<>();
   private final List<ActivityListener> listeners = new CopyOnWriteArrayList<>();
   private final List<MessageHandler> messageHandlers = new CopyOnWriteArrayList<>();
 
-  private List<byte[]> getOutQueue(Object channel) {
-    // Ordinarily I would synchronize this method, but I imagine the channels will be initialized
-    // once
-    // at the beginning of execution.  Thus get(channel) will only return once right at the
-    // beginning
-    // no sense incurring the cost of synchronizing the method on the class for that.
-    List<byte[]> queue = outQueueMap.get(channel);
-    if (queue == null) {
-      queue = Collections.synchronizedList(new ArrayList<byte[]>());
-      outQueueMap.put(channel, queue);
+  @Override
+  public final void close() {
+    if (closed.compareAndSet(false, true)) {
+      onClose();
     }
-    return queue;
   }
+
+  protected final boolean isClosed() {
+    return closed.get();
+  }
+
+  protected abstract void onClose();
 
   private byte[] compress(byte[] message) {
     try {
@@ -79,30 +78,17 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  protected synchronized void addMessage(Object channel, byte[] message) {
-    List<byte[]> queue = getOutQueue(channel);
-    queue.add(compress(message));
-    // Queue up for sending
-    outQueueList.add(queue);
+  protected void addMessage(Object channel, byte[] message) {
+    outQueue.add(compress(message));
   }
 
-  protected synchronized boolean hasMoreMessages() {
-    return !outQueueList.isEmpty();
-  }
-
-  protected synchronized byte[] nextMessage() {
-    if (!hasMoreMessages()) {
+  protected byte[] nextMessage() {
+    try {
+      // Bit paranoid, but don't wait forever for a message - that can perpetually block the thread.
+      return outQueue.poll(10, TimeUnit.MILLISECONDS);
+    } catch (InterruptedException e) {
       return null;
     }
-    List<byte[]> queue = outQueueList.remove(0);
-
-    if (queue.isEmpty()) return null;
-
-    byte[] message = queue.remove(0);
-    if (!queue.isEmpty()) {
-      outQueueList.add(queue);
-    }
-    return message;
   }
 
   public final void addMessageHandler(MessageHandler handler) {
@@ -113,9 +99,10 @@ public abstract class AbstractConnection implements Connection {
     messageHandlers.remove(handler);
   }
 
-  private void dispatchMessage(String id, byte[] message) {
-    if (messageHandlers.size() == 0) {
-      log.warn("message received but not messageHandlers registered.");
+  protected void dispatchMessage(byte[] message) {
+    var id = getId();
+    if (messageHandlers.isEmpty()) {
+      log.warn("message received but not messageHandlers registered for {}.", id);
     }
 
     for (MessageHandler handler : messageHandlers) {
@@ -123,9 +110,9 @@ public abstract class AbstractConnection implements Connection {
     }
   }
 
-  protected final void dispatchCompressedMessage(String id, byte[] compressedMessage) {
+  protected final void dispatchCompressedMessage(byte[] compressedMessage) {
     var message = inflate(compressedMessage);
-    dispatchMessage(id, message);
+    dispatchMessage(message);
   }
 
   protected final void writeMessage(OutputStream out, byte[] message) throws IOException {
@@ -239,7 +226,7 @@ public abstract class AbstractConnection implements Connection {
     listeners.remove(listener);
   }
 
-  private void notifyListeners(
+  protected void notifyListeners(
       ActivityListener.Direction direction,
       ActivityListener.State state,
       int totalTransferSize,

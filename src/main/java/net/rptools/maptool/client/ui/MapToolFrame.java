@@ -228,6 +228,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
+  private boolean dockingConfigured = false;
+
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
 
@@ -455,8 +457,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     restorePreferences();
     updateKeyStrokes();
 
-    // This will cause the frame to be set to visible (BAD jide, BAD! No cookie for you!)
-    configureDocking();
+    initializeFrames();
 
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
     chatTyperTimers = new ChatNotificationTimers();
@@ -545,8 +546,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void configureDocking() {
-    initializeFrames();
-
     getDockingManager().setProfileKey(DOCKING_PROFILE_NAME);
     getDockingManager().setOutlineMode(com.jidesoft.docking.DockingManager.PARTIAL_OUTLINE_MODE);
     getDockingManager().setUsePref(false);
@@ -617,6 +616,16 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       }
     }
     /* /Issue #2485 */
+  }
+
+  @Override
+  public void setVisible(boolean b) {
+    if (!dockingConfigured) {
+      dockingConfigured = true;
+      configureDocking();
+    }
+
+    super.setVisible(b);
   }
 
   public DockableFrame getFrame(MTFrame frame) {
@@ -1951,7 +1960,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void close() {
-    MapTool.getClient().expectDisconnection();
     MapTool.disconnect();
     MapTool.stopServer();
 

@@ -302,12 +302,6 @@ public class GridTool extends DefaultTool {
     }
   }
 
-  @Override
-  public void mouseMoved(java.awt.event.MouseEvent e) {
-    mouseX = e.getX();
-    mouseY = e.getY();
-  }
-
   ////
   // MOUSE WHEEL LISTENER
   /*

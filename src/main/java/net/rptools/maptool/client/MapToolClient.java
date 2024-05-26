@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client;
 
+import java.awt.EventQueue;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -33,12 +34,12 @@ import net.rptools.maptool.model.player.LocalPlayer;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.PlayerDatabase;
 import net.rptools.maptool.model.player.PlayerDatabaseFactory;
-import net.rptools.maptool.model.player.Players;
+import net.rptools.maptool.server.ClientHandshake;
 import net.rptools.maptool.server.MapToolServer;
-import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
-import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * The client side of a client-server channel.
@@ -48,93 +49,151 @@ import net.rptools.maptool.server.ServerPolicy;
  * net.rptools.maptool.client.MapTool} and elsewhere.
  */
 public class MapToolClient {
+  private static final Logger log = LogManager.getLogger(MapToolClient.class);
+
+  public enum State {
+    New,
+    Started,
+    Connected,
+    Closed
+  }
+
+  private final MapToolServer localServer;
   private final LocalPlayer player;
   private final PlayerDatabase playerDatabase;
 
   /** Case-insensitive ordered set of player names. */
   private final List<Player> playerList;
 
-  private final IMapToolConnection conn;
+  private final MapToolConnection conn;
   private Campaign campaign;
   private ServerPolicy serverPolicy;
   private final ServerCommand serverCommand;
-
-  private boolean disconnectExpected = false;
+  private State currentState = State.New;
 
   private MapToolClient(
-      boolean isForLocalServer,
+      @Nullable MapToolServer localServer,
+      Campaign campaign,
       LocalPlayer player,
-      PlayerDatabase playerDatabase,
-      ServerPolicy serverPolicy,
-      @Nullable ServerConfig serverConfig) {
-    this.campaign = new Campaign();
+      Connection connection,
+      ServerPolicy policy,
+      PlayerDatabase playerDatabase) {
+    this.localServer = localServer;
+    this.campaign = campaign;
     this.player = player;
     this.playerDatabase = playerDatabase;
     this.playerList = new ArrayList<>();
-    this.serverPolicy = new ServerPolicy(serverPolicy);
+    this.serverPolicy = new ServerPolicy(policy);
 
     this.conn =
-        serverConfig == null
-            ? new NilMapToolConnection()
-            : new MapToolConnection(this, serverConfig, player);
+        new MapToolConnection(
+            connection, player, localServer == null ? new ClientHandshake(this, connection) : null);
 
     this.serverCommand = new ServerCommandClientImpl(this);
 
-    this.conn.addDisconnectHandler(conn -> onDisconnect(isForLocalServer, conn));
+    this.conn.addDisconnectHandler(this::onDisconnect);
     this.conn.onCompleted(
-        () -> {
-          this.conn.addMessageHandler(new ClientMessageHandler(this));
+        (success) -> {
+          if (!success) {
+            // Failed handshake. Disconnect from the server, but treat it as unexpected.
+            this.conn.close();
+            return;
+          }
+
+          if (transitionToState(State.Started, State.Connected)) {
+            this.conn.addMessageHandler(new ClientMessageHandler(this));
+          }
         });
   }
 
-  /**
-   * Creates a client for use with a personal server.
-   *
-   * @param server The personal server that will run with this client.
-   */
-  public MapToolClient(PersonalServer server) {
-    this(true, server.getLocalPlayer(), server.getPlayerDatabase(), new ServerPolicy(), null);
+  /** Creates a client for a local server, whether personal or hosted. */
+  public MapToolClient(
+      MapToolServer localServer, Campaign campaign, LocalPlayer player, Connection connection) {
+    this(
+        localServer,
+        campaign,
+        player,
+        connection,
+        localServer.getPolicy(),
+        localServer.getPlayerDatabase());
   }
 
   /**
    * Creates a client for use with a remote hosted server.
    *
    * @param player The player connecting to the server.
-   * @param config The configuration details needed to connect to the server.
    */
-  public MapToolClient(LocalPlayer player, ServerConfig config) {
+  public MapToolClient(LocalPlayer player, Connection connection) {
     this(
-        false,
+        null,
+        new Campaign(),
         player,
-        PlayerDatabaseFactory.getLocalPlayerDatabase(player),
+        connection,
         new ServerPolicy(),
-        config);
+        PlayerDatabaseFactory.getLocalPlayerDatabase(player));
   }
 
   /**
-   * Creates a client for a server hosted in the same MapTool process.
+   * Transition from any state except {@code newState} to {@code newState}.
    *
-   * @param player The player who started the server.
-   * @param server The local server.
+   * @param newState The new state to set.
    */
-  public MapToolClient(LocalPlayer player, MapToolServer server) {
-    this(true, player, server.getPlayerDatabase(), server.getPolicy(), server.getConfig());
+  private boolean transitionToState(State newState) {
+    if (currentState == newState) {
+      log.warn(
+          "Failed to transition to state {} because that is already the current state", newState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
+    }
+  }
+
+  /**
+   * Transition from {@code expectedState} to {@code newState}.
+   *
+   * @param expectedState The state to transition from
+   * @param newState The new state to set.
+   */
+  private boolean transitionToState(State expectedState, State newState) {
+    if (currentState != expectedState) {
+      log.warn(
+          "Failed to transition from state {} to state {} because the current state is actually {}",
+          expectedState,
+          newState,
+          currentState);
+      return false;
+    } else {
+      currentState = newState;
+      return true;
+    }
+  }
+
+  public State getState() {
+    return currentState;
   }
 
   public void start() throws IOException {
-    conn.start();
-  }
-
-  public void close() throws IOException {
-    if (conn.isAlive()) {
-      conn.close();
+    if (transitionToState(State.New, State.Started)) {
+      try {
+        conn.start();
+      } catch (IOException e) {
+        // Make sure we're in a reasonable state before propagating.
+        log.error("Failed to start client", e);
+        transitionToState(State.Closed);
+        throw e;
+      }
     }
-
-    playerList.clear();
   }
 
-  public void expectDisconnection() {
-    disconnectExpected = true;
+  public void close() {
+    if (transitionToState(State.Closed)) {
+      if (conn.isAlive()) {
+        conn.close();
+      }
+
+      playerList.clear();
+    }
   }
 
   public ServerCommand getServerCommand() {
@@ -153,7 +212,7 @@ public class MapToolClient {
     if (!playerList.contains(player)) {
       playerList.add(player);
       new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
-      new Players(playerDatabase).playerSignedIn(player);
+      playerDatabase.playerSignedIn(player);
 
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));
     }
@@ -162,7 +221,7 @@ public class MapToolClient {
   public void removePlayer(Player player) {
     playerList.remove(player);
     new MapToolEventBus().getMainEventBus().post(new PlayerDisconnected(player));
-    new Players(playerDatabase).playerSignedOut(player);
+    playerDatabase.playerSignedOut(player);
   }
 
   public boolean isPlayerConnected(String playerName) {
@@ -173,7 +232,7 @@ public class MapToolClient {
     return playerDatabase;
   }
 
-  public IMapToolConnection getConnection() {
+  public MapToolConnection getConnection() {
     return conn;
   }
 
@@ -205,7 +264,7 @@ public class MapToolClient {
     this.campaign = campaign;
   }
 
-  private void onDisconnect(boolean isLocalServer, Connection connection) {
+  private void onDisconnect(Connection connection) {
     /*
      * Three main cases:
      * 1. Expected disconnect. This will be part of a broader shutdown sequence and we don't need to
@@ -217,37 +276,38 @@ public class MapToolClient {
      *    shutting down the server. We need to clean up the connection, stop the server, show an
      *    error to the user, and start a new personal server with the current campaign.
      */
+    var disconnectExpected = currentState == State.Closed;
 
     if (!disconnectExpected) {
+      // Keep any local server campaign around in the new personal server.
+      final var newPersonalServerCampaign =
+          localServer == null ? CampaignFactory.createBasicCampaign() : localServer.getCampaign();
+
       // Make sure the connection state is cleaned up since we can't count on it having been done.
       MapTool.disconnect();
-      if (isLocalServer) {
-        MapTool.stopServer();
-      }
+      MapTool.stopServer();
 
-      var errorText = I18N.getText("msg.error.server.disconnected");
-      var connectionError = connection.getError();
-      var errorMessage = errorText + (connectionError != null ? (": " + connectionError) : "");
-      MapTool.showError(errorMessage);
+      EventQueue.invokeLater(
+          () -> {
+            var errorText = I18N.getText("msg.error.server.disconnected");
+            var connectionError = connection.getError();
+            var errorMessage =
+                errorText + (connectionError != null ? (": " + connectionError) : "");
+            MapTool.showError(errorMessage);
 
-      // hide map so player doesn't get a brief GM view
-      MapTool.getFrame().setCurrentZoneRenderer(null);
-      MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
-      MapTool.getFrame().getAssetPanel().enableAssets();
-      new CampaignManager().clearCampaignData();
-      MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
+            // hide map so player doesn't get a brief GM view
+            MapTool.getFrame().setCurrentZoneRenderer(null);
+            MapTool.getFrame().getToolbarPanel().getMapselect().setVisible(true);
+            MapTool.getFrame().getAssetPanel().enableAssets();
+            new CampaignManager().clearCampaignData();
+            MapTool.getFrame().getToolbarPanel().setTokenSelectionGroupEnabled(true);
 
-      // Keep any local campaign around in the new personal server.
-      final var campaign = isLocalServer ? getCampaign() : CampaignFactory.createBasicCampaign();
-      try {
-        MapTool.startPersonalServer(campaign);
-      } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-        MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
-      }
-    } else if (!isLocalServer) {
-      // expected disconnect from someone else's server
-      // hide map so player doesn't get a brief GM view
-      MapTool.getFrame().setCurrentZoneRenderer(null);
+            try {
+              MapTool.startPersonalServer(newPersonalServerCampaign);
+            } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+              MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
+            }
+          });
     }
   }
 }

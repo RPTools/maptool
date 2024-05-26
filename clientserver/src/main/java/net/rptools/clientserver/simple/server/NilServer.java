@@ -14,11 +14,11 @@
  */
 package net.rptools.clientserver.simple.server;
 
-import net.rptools.clientserver.simple.Handshake;
-import net.rptools.clientserver.simple.connection.Connection;
+/** A server implementation that never receives connections */
+public class NilServer extends AbstractServer {
+  @Override
+  public void start() {}
 
-public interface HandshakeProvider {
-  Handshake getConnectionHandshake(Connection conn);
-
-  void releaseHandshake(Connection conn);
+  @Override
+  public void close() {}
 }

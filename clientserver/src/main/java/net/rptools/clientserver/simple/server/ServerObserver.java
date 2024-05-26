@@ -20,6 +20,4 @@ import net.rptools.clientserver.simple.connection.Connection;
 public interface ServerObserver {
 
   public void connectionAdded(Connection conn);
-
-  public void connectionRemoved(Connection conn);
 }

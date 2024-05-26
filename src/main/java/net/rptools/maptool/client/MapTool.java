@@ -43,9 +43,12 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.plaf.FontUIResource;
+import net.rptools.clientserver.ConnectionFactory;
+import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.FileUtil;
@@ -53,6 +56,7 @@ import net.rptools.lib.TaskBarFlasher;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
 import net.rptools.lib.sound.SoundManager;
+import net.rptools.maptool.client.MapToolConnection.HandshakeCompletionObserver;
 import net.rptools.maptool.client.events.ChatMessageAdded;
 import net.rptools.maptool.client.events.ServerDisconnected;
 import net.rptools.maptool.client.functions.UserDefinedMacroFunctions;
@@ -66,7 +70,6 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
-import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -84,9 +87,12 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZoneFactory;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.url.LibraryURLStreamHandler;
 import net.rptools.maptool.model.player.LocalPlayer;
+import net.rptools.maptool.model.player.PersonalServerPlayerDatabase;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.player.PlayerDatabaseFactory;
 import net.rptools.maptool.model.player.PlayerZoneListener;
 import net.rptools.maptool.model.player.ServerSidePlayerDatabase;
 import net.rptools.maptool.model.zones.TokensAdded;
@@ -94,20 +100,16 @@ import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.model.zones.ZoneRemoved;
 import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
-import net.rptools.maptool.server.IMapToolServer;
 import net.rptools.maptool.server.MapToolServer;
-import net.rptools.maptool.server.PersonalServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UPnPUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.webapi.MTWebAppServer;
 import net.rptools.parser.ParserException;
-import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -156,12 +158,11 @@ public class MapTool {
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
   private static LogConsoleFrame logConsoleFrame;
-  private static IMapToolServer server;
+  private static MapToolServer server;
   private static MapToolClient client;
 
   private static BackupManager backupManager;
   private static AssetTransferManager assetTransferManager;
-  private static ServiceAnnouncer announcer;
   private static AutoSaveManager autoSaveManager;
   private static TaskBarFlasher taskbarFlasher;
   private static MapToolLineParser parser = new MapToolLineParser();
@@ -181,10 +182,13 @@ public class MapTool {
 
   static {
     try {
-      final var player = new LocalPlayer();
-      final var personalServer = new PersonalServer(player);
-      server = personalServer;
-      client = new MapToolClient(personalServer);
+      var connections = DirectConnection.create("local");
+      var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
+      var campaign = CampaignFactory.createBasicCampaign();
+      var policy = new ServerPolicy();
+
+      server = new MapToolServer("", new Campaign(campaign), null, false, policy, playerDB);
+      client = new MapToolClient(server, campaign, playerDB.getPlayer(), connections.clientSide());
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -639,6 +643,7 @@ public class MapTool {
   private static void initialize() {
     // First time
     AppSetup.install();
+    LibraryManager.init();
 
     // Clean up after ourselves
     FileUtil.delete(AppUtil.getAppHome("tmp"), 2);
@@ -657,11 +662,25 @@ public class MapTool {
     assetTransferManager.addConsumerListener(new AssetTransferHandler());
 
     setClientFrame(new MapToolFrame(menuBar));
+    taskbarFlasher = new TaskBarFlasher(clientFrame);
+
+    // Make sure the user sees something right away so that they aren't staring at a black screen.
+    // Technically this call does too much, but since it is a blank campaign it's okay.
+    setCampaign(client.getCampaign());
 
     try {
       playerZoneListener = new PlayerZoneListener();
       zoneLoadedListener = new ZoneLoadedListener();
+
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
+      // Set the Topology drawing mode to the last mode used for convenience
+      // Should only be one zone, but let's cover our bases.
+      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppPreferences.getTopologyTypes()));
+
+      // Stop the pre-init client/server.
+      disconnect();
+      stopServer();
+
       startPersonalServer(cmpgn);
     } catch (Exception e) {
       MapTool.showError("While starting personal server", e);
@@ -731,7 +750,7 @@ public class MapTool {
   /**
    * @return the server, or null if player is a client.
    */
-  public static IMapToolServer getServer() {
+  public static MapToolServer getServer() {
     return server;
   }
 
@@ -916,86 +935,80 @@ public class MapTool {
    * Start the server from a campaign file and various settings.
    *
    * @param id the id of the server for announcement.
-   * @param config the server configuration.
+   * @param config the server configuration. Set to null only for a personal server.
    * @param policy the server policy configuration to use.
    * @param campaign the campaign.
    * @param playerDatabase the player database to use for the connection.
-   * @param copyCampaign should the campaign be a copy of the one provided.
-   * @throws IOException if new MapToolServer fails.
+   * @throws IOException if we fail to start the new server. In this case, the new client and server
+   *     will be available via {@link #getServer()} and {@link #getClient()}, but neither will be in
+   *     a started state.
    */
   public static void startServer(
       String id,
-      ServerConfig config,
+      @Nullable ServerConfig config,
       boolean useUPnP,
       ServerPolicy policy,
       Campaign campaign,
       ServerSidePlayerDatabase playerDatabase,
-      boolean copyCampaign,
       LocalPlayer player)
       throws IOException {
-    if (server != null) {
-      Thread.dumpStack();
+    if (server != null && server.getState() == MapToolServer.State.Started) {
+      log.error("A server is already running.", new Exception());
       showError("msg.error.alreadyRunningServer");
       return;
     }
 
     assetTransferManager.flush();
 
-    // Use UPnP to open port in router
-    if (useUPnP) {
-      UPnPUtil.openPort(config.getPort());
-    }
+    var connections = DirectConnection.create("local");
+    server = new MapToolServer(id, new Campaign(campaign), config, useUPnP, policy, playerDatabase);
+    client = new MapToolClient(server, campaign, player, connections.clientSide());
 
-    // TODO: the client and server campaign MUST be different objects.
-    // Figure out a better init method
-    final var server = new MapToolServer(config, policy, playerDatabase);
-    MapTool.server = server;
-
-    if (copyCampaign) {
-      server.setCampaign(new Campaign(campaign)); // copy of FoW depends on server policies
-    } else {
-      server.setCampaign(campaign);
-    }
-
-    if (announcer != null) {
-      announcer.stop();
-    }
-    announcer = new ServiceAnnouncer(id, server.getConfig().getPort(), AppConstants.SERVICE_GROUP);
-    announcer.start();
-
-    // Registered ?
-    if (config.isServerRegistered()) {
-      try {
-        MapToolRegistry.RegisterResponse result =
-            MapToolRegistry.getInstance()
-                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
-        if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
-          MapTool.showError("msg.error.alreadyRegistered");
-        }
-        // TODO: I don't like this
-      } catch (Exception e) {
-        MapTool.showError("msg.error.failedCannotRegisterServer", e);
-      }
-    }
-
-    if (MapTool.isHostingServer()) {
+    if (!server.isPersonalServer()) {
       getFrame().getConnectionPanel().startHosting();
     }
 
-    // Create the local connection so we aren't left hanging.
-    installClient(
-        new MapToolClient(player, server),
-        () -> {
-          // connecting
-          MapTool.getFrame()
-              .getConnectionStatusPanel()
-              .setStatus(ConnectionStatusPanel.Status.server);
-          MapTool.addLocalMessage(
-              MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
-        });
+    setUpClient(client);
+    client
+        .getConnection()
+        .onCompleted(
+            (success) -> {
+              if (success) {
+                // connected
+                EventQueue.invokeLater(
+                    () -> {
+                      MapTool.getFrame()
+                          .getConnectionStatusPanel()
+                          .setStatus(ConnectionStatusPanel.Status.server);
+                    });
+              } else {
+                // This should never happen. But if it does, just tear everything back down.
+                server.stop();
+              }
+            });
 
     server.start();
-    client.start();
+    try {
+      client.start();
+    } catch (IOException e) {
+      // Oof. Server started but client can't.
+      server.stop();
+      throw e;
+    }
+    if (!server.isPersonalServer()) {
+      MapTool.addLocalMessage(
+          MessageUtil.getFormattedSystemMsg(I18N.getText("msg.info.startServer")));
+    }
+
+    // Adopt the local connection, no handshake required.
+    connections.serverSide().open();
+    server.addLocalConnection(connections.serverSide(), player);
+    // Update the client, including running onCampaignLoad.
+    setCampaign(
+        client.getCampaign(),
+        Optional.ofNullable(clientFrame.getCurrentZoneRenderer())
+            .map(zr -> zr.getZone().getId())
+            .orElse(null));
   }
 
   public static ThumbnailManager getThumbnailManager() {
@@ -1018,29 +1031,6 @@ public class MapTool {
 
     server.stop();
     getFrame().getConnectionPanel().stopHosting();
-
-    // Unregister ourselves
-    if (server.isServerRegistered()) {
-      try {
-        MapToolRegistry.getInstance().unregisterInstance();
-      } catch (Throwable t) {
-        MapTool.showError("While unregistering server instance", t);
-      }
-    }
-
-    if (announcer != null) {
-      announcer.stop();
-      announcer = null;
-    }
-
-    server = null;
-
-    // Close UPnP port mapping if used
-    StartServerDialogPreferences serverProps = new StartServerDialogPreferences();
-    if (serverProps.getUseUPnP()) {
-      int port = serverProps.getPort();
-      UPnPUtil.closePort(port);
-    }
   }
 
   public static List<Player> getPlayerList() {
@@ -1128,34 +1118,48 @@ public class MapTool {
 
   public static void startPersonalServer(Campaign campaign)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
-    final var player = new LocalPlayer();
-    server = new PersonalServer(player);
-    client = new MapToolClient((PersonalServer) server);
-
-    MapTool.getFrame().getCommandPanel().clearAllIdentities();
-
-    client.start();
-    setCampaign(campaign);
+    var player = new LocalPlayer();
+    startServer(
+        "",
+        null,
+        false,
+        new ServerPolicy(),
+        campaign,
+        PlayerDatabaseFactory.getPersonalServerPlayerDatabase(player),
+        player);
   }
 
-  private static void installClient(MapToolClient client, Runnable onCompleted) {
-    MapTool.client = client;
-
+  private static void setUpClient(MapToolClient client) {
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
-    IMapToolConnection clientConn = client.getConnection();
+    MapToolConnection clientConn = client.getConnection();
     clientConn.addActivityListener(clientFrame.getActivityMonitor());
     clientConn.onCompleted(
-        () -> {
-          clientFrame.getLookupTablePanel().updateView();
-          clientFrame.getInitiativePanel().updateView();
-          onCompleted.run();
+        (success) -> {
+          EventQueue.invokeLater(
+              () -> {
+                clientFrame.getLookupTablePanel().updateView();
+                clientFrame.getInitiativePanel().updateView();
+              });
         });
   }
 
-  public static void createConnection(ServerConfig config, LocalPlayer player, Runnable onCompleted)
+  public static void connectToRemoteServer(
+      ServerConfig config, LocalPlayer player, HandshakeCompletionObserver onCompleted)
       throws IOException {
-    installClient(new MapToolClient(player, config), onCompleted);
+    if (server != null && server.getState() == MapToolServer.State.Started) {
+      log.error("A local server is still running.", new Exception());
+      showError("msg.error.stillRunningServer");
+      return;
+    }
+
+    var connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
+
+    server = null;
+    client = new MapToolClient(player, connection);
+    setUpClient(client);
+    client.getConnection().onCompleted(onCompleted);
+
     client.start();
   }
 
@@ -1175,13 +1179,7 @@ public class MapTool {
   }
 
   public static void disconnect() {
-    try {
-      client.close();
-    } catch (IOException ioe) {
-      // This isn't critical, we're closing it anyway
-      log.debug("While closing connection", ioe);
-    }
-
+    client.close();
     new MapToolEventBus().getMainEventBus().post(new ServerDisconnected());
 
     MapTool.getFrame()
@@ -1279,17 +1277,9 @@ public class MapTool {
     // fire up autosaves
     getAutoSaveManager().start();
 
-    taskbarFlasher = new TaskBarFlasher(clientFrame);
-
     // Jamz: After preferences are loaded, Asset Tree and ImagePanel are out of sync,
     // so after frame is all done loading we sync them back up.
     MapTool.getFrame().getAssetPanel().getAssetTree().initialize();
-
-    // Set the Topology drawing mode to the last mode used for convenience
-    MapTool.getFrame()
-        .getCurrentZoneRenderer()
-        .getZone()
-        .setTopologyTypes(AppPreferences.getTopologyTypes());
 
     // Register the instance that will listen for token hover events and create a stat sheet.
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
@@ -1750,6 +1740,7 @@ public class MapTool {
     EventQueue.invokeLater(
         () -> {
           initialize();
+
           EventQueue.invokeLater(
               () -> {
                 clientFrame.setVisible(true);
