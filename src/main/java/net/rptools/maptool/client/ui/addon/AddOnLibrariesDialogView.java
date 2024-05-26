@@ -48,7 +48,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
-import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 
 /** Dialog for managing add-on libraries. */
@@ -220,9 +219,7 @@ public class AddOnLibrariesDialogView extends JDialog {
         });
 
     createAddonSkeletonButton.addActionListener(
-        e -> {
-          createAddonSkeleton();
-        });
+        e -> createAddonSkeleton());
 
     enableExternalAddOnCheckBox.addActionListener(
         e -> {
