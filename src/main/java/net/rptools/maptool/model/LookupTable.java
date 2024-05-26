@@ -15,6 +15,10 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
+import java.util.*;
+import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.dicelib.expression.Result;
 import net.rptools.lib.MD5Key;
@@ -24,18 +28,13 @@ import net.rptools.maptool.server.proto.LookupTableDto;
 import net.rptools.parser.ParserException;
 import org.jetbrains.annotations.Contract;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.*;
-import java.util.stream.Collectors;
-
 /**
- * LookupTable represents a table of die roll ranges and a String value (with an optional
- * asset ID).
- * <p>
- * The general idea is that random picks from a list are often a die roll, such as "2d6",
- * that is then used to perform a lookup on a table.  The typical random encounter table,
- * for example, might look something like this:
+ * LookupTable represents a table of die roll ranges and a String value (with an optional asset ID).
+ *
+ * <p>The general idea is that random picks from a list are often a die roll, such as "2d6", that is
+ * then used to perform a lookup on a table. The typical random encounter table, for example, might
+ * look something like this:
+ *
  * <table><thead>
  *     <tr><th colspan="2">Die range (2d6)</th><th>Value</th><th>Table image</th></tr>
  * </thead>
@@ -46,51 +45,52 @@ import java.util.stream.Collectors;
  *     <tr><td>8</td><td>9</td><td>Bandits, brother/sister team</td><td><b>null</b></td></tr>
  *     <tr><td>10</td><td>12</td><td>City guard, squad of 4</td><td><b>null</b></td></tr>
  * </tbody></table>
- * <p>
- * If the <i>Die range</i> contains only a single value, then only that value will select that row.<br/>
- * The <i>default roll</i> is the "2d6" shown in the table header (column one).<br/>
- * The <i>Value</i> column is the String returned for a given lookup.<br/>
- * The <i>Table image</i> column contains either <code>null</code> or an {@link MD5Key} for an asset.
- * </p>
+ *
+ * <p>If the <i>Die range</i> contains only a single value, then only that value will select that
+ * row.<br>
+ * The <i>default roll</i> is the "2d6" shown in the table header (column one).<br>
+ * The <i>Value</i> column is the String returned for a given lookup.<br>
+ * The <i>Table image</i> column contains either <code>null</code> or an {@link MD5Key} for an
+ * asset.
  */
 public class LookupTable {
 
   private static final ExpressionParser expressionParser = new ExpressionParser();
 
   /**
-   * The complete list of entries in the table.
-   * (Future implementation changes will likely be sorted so that binary searches
-   * can find entries more quickly.)
+   * The complete list of entries in the table. (Future implementation changes will likely be sorted
+   * so that binary searches can find entries more quickly.)
    */
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
+
   private @Nullable String name;
+
   /**
    * The die expression to use when one isn't provided when retrieving values.
-   * <p>
-   * If no value is set, the default implementation will choose a row randomly,
-   * ignoring the min/max values (so each row has an equal chance of being selected).
+   *
+   * <p>If no value is set, the default implementation will choose a row randomly, ignoring the
+   * min/max values (so each row has an equal chance of being selected).
    */
   private @Nullable String defaultRoll;
+
   private @Nullable MD5Key tableImage;
-  /**
-   * Whether the table is visible for players in the Table panel.
-   */
+
+  /** Whether the table is visible for players in the Table panel. */
   private @Nonnull Boolean visible = true;
-  /**
-   * Whether players can read elements from the table.
-   */
+
+  /** Whether players can read elements from the table. */
   private @Nonnull Boolean allowLookup = true;
+
   /**
-   * Flags a table as "Pick Once", i.e. each entry can only be chosen once
-   * before the table must be reset().
+   * Flags a table as "Pick Once", i.e. each entry can only be chosen once before the table must be
+   * reset().
    */
   private @Nonnull Boolean pickOnce = false;
 
   /**
-   * Unique string returned when all picks from a Pick Once table have
-   * been selected.
-   * <p>
-   * DO NOT use this string as a table value! 😁
+   * Unique string returned when all picks from a Pick Once table have been selected.
+   *
+   * <p>DO NOT use this string as a table value! 😁
    */
   public static final String NO_PICKS_LEFT = "NO_PICKS_LEFT";
 
@@ -107,8 +107,8 @@ public class LookupTable {
   }
 
   /**
-   * Sets the <code>defaultRoll</code> field that is used to choose a random element
-   * from the table when no die roll expression is provided.  See {@link #getLookup()}.
+   * Sets the <code>defaultRoll</code> field that is used to choose a random element from the table
+   * when no die roll expression is provided. See {@link #getLookup()}.
    *
    * @param roll String expression representing default roll
    */
@@ -117,9 +117,9 @@ public class LookupTable {
   }
 
   /**
-   * Removes all entries from the table, but does not reset the default roll
-   * or other fields.  (Note that for Pick Once tables, the pick status is
-   * part of each entry, so those are cleared by this method as well.)
+   * Removes all entries from the table, but does not reset the default roll or other fields. (Note
+   * that for Pick Once tables, the pick status is part of each entry, so those are cleared by this
+   * method as well.)
    */
   public void clearEntries() {
     entryList.clear();
@@ -147,16 +147,15 @@ public class LookupTable {
     return getLookup(null);
   }
 
-//  public String getRoll() {
-//    return getDefaultRoll();
-//  }
+  //  public String getRoll() {
+  //    return getDefaultRoll();
+  //  }
 
   /**
    * Set the table name.
-   * <p>
-   * This method should not be called after the table is added to
-   * the campaign properties, as the <code>Map<></code> therein relies on the
-   * name for the hash code.
+   *
+   * <p>This method should not be called after the table is added to the campaign properties, as the
+   * <code>Map<></code> therein relies on the name for the hash code.
    *
    * @param name name of the table
    */
@@ -222,8 +221,8 @@ public class LookupTable {
   }
 
   /**
-   * Evaluates the <code>roll</code> expression and returns the appropriate table entry.
-   * The {@link #getLookup(String)} method delegates here for non-Pick Once tables.
+   * Evaluates the <code>roll</code> expression and returns the appropriate table entry. The {@link
+   * #getLookup(String)} method delegates here for non-Pick Once tables.
    *
    * @param roll dice expression
    * @return selected table entry; returns <code>null</code> if there's no matching range
@@ -253,12 +252,11 @@ public class LookupTable {
   }
 
   /**
-   * Returns an entry from a Pick Once table that hasn't already been selected.
-   * The {@link #getLookup(String)} method delegates here for Pick Once tables.
-   * <p>
-   * For this method, the <code>roll</code> parameter must be a string that
-   * can be converted to integer via {@link Integer#parseInt(String)} -- a
-   * dice expression is not allowed.
+   * Returns an entry from a Pick Once table that hasn't already been selected. The {@link
+   * #getLookup(String)} method delegates here for Pick Once tables.
+   *
+   * <p>For this method, the <code>roll</code> parameter must be a string that can be converted to
+   * integer via {@link Integer#parseInt(String)} -- a dice expression is not allowed.
    *
    * @param roll String representing which entry to retrieve
    * @return the table entry corresponding to the <code>roll</code> parameter
@@ -282,13 +280,13 @@ public class LookupTable {
   }
 
   /**
-   * Constrains the parameter to be within the range of values depicted by the table entries.
-   * Values less than the lowest minimum entry are set the minimum, while values larger than
-   * the largest maximum entry are set to the maximum.
-   * <p>
-   * There is no check to determine whether <code>val</code> actually identifies a specific
-   * table entry per the min/max values, so the return value (if unmodified) may not
-   * represent an actual table entry.
+   * Constrains the parameter to be within the range of values depicted by the table entries. Values
+   * less than the lowest minimum entry are set the minimum, while values larger than the largest
+   * maximum entry are set to the maximum.
+   *
+   * <p>There is no check to determine whether <code>val</code> actually identifies a specific table
+   * entry per the min/max values, so the return value (if unmodified) may not represent an actual
+   * table entry.
    *
    * @param val value to be constrained
    * @return the constrained value
@@ -316,23 +314,24 @@ public class LookupTable {
 
   /**
    * Has two modes of operation.
+   *
    * <ul>
-   *     <li>For standard tables, it retrieves the {@link #defaultRoll}
-   * if it has been set, or calculates a dice expression to use and returns that.
-   *     <li>For Pick Once tables, it ignores the {@link #defaultRoll}
-   * and instead rolls a random number which indexes into a subset of the table made up only
-   * of entries which have not been previously selected.  The <code>value</code> of that
-   * entry is returned.
+   *   <li>For standard tables, it retrieves the {@link #defaultRoll} if it has been set, or
+   *       calculates a dice expression to use and returns that.
+   *   <li>For Pick Once tables, it ignores the {@link #defaultRoll} and instead rolls a random
+   *       number which indexes into a subset of the table made up only of entries which have not
+   *       been previously selected. The <code>value</code> of that entry is returned.
    * </ul>
    *
-   * @return the <code>value</code> field from the table for the associated entry; Pick Once
-   * tables also have their <code>picked</code> flag set so that they are not picked again
+   * @return the <code>value</code> field from the table for the associated entry; Pick Once tables
+   *     also have their <code>picked</code> flag set so that they are not picked again
    */
   public String getDefaultRoll() {
     if (getPickOnce()) {
       // For Pick Once tables this returns a random pick from those entries in the list that
       // have not been picked.
-      LookupEntry[] unpicked = entryList.stream().filter(e -> !e.picked).toArray(LookupEntry[]::new);
+      LookupEntry[] unpicked =
+          entryList.stream().filter(e -> !e.picked).toArray(LookupEntry[]::new);
       try {
         if (unpicked.length != 0) {
           Result result = expressionParser.evaluate("d" + unpicked.length);
@@ -369,8 +368,8 @@ public class LookupTable {
 
   /**
    * Sets the picked flag on each table entry to false.
-   * <p>
-   * This method returns immediately if the table is not a Pick Once table.
+   *
+   * <p>This method returns immediately if the table is not a Pick Once table.
    */
   public void reset() {
     if (pickOnce) {
@@ -504,11 +503,14 @@ public class LookupTable {
      * @deprecated here to prevent xstream from breaking b24-b25
      */
     @SuppressWarnings("DeprecatedIsStillUsed")
-    @Deprecated private @Nullable String result;
+    @Deprecated
+    private @Nullable String result;
 
-    public LookupEntry(int min, int max,
-                       @org.jetbrains.annotations.Nullable String value,
-                       @org.jetbrains.annotations.Nullable MD5Key imageId) {
+    public LookupEntry(
+        int min,
+        int max,
+        @org.jetbrains.annotations.Nullable String value,
+        @org.jetbrains.annotations.Nullable MD5Key imageId) {
       this.min = min;
       this.max = max;
       this.value = value;
@@ -597,8 +599,8 @@ public class LookupTable {
   /**
    * Retrieves the visible flag for the LookupTable.
    *
-   * @return <code>true</code> indicates that the table will be visible to players.
-   * Otherwise, the table will be hidden from players.
+   * @return <code>true</code> indicates that the table will be visible to players. Otherwise, the
+   *     table will be hidden from players.
    */
   public boolean getVisible() {
     return visible;
@@ -607,8 +609,8 @@ public class LookupTable {
   /**
    * Sets the visible flag for the LookupTable.
    *
-   * @param value <code>true</code> specifies that the table will be visible to players.
-   *     Otherwise, the table will be hidden from players.
+   * @param value <code>true</code> specifies that the table will be visible to players. Otherwise,
+   *     the table will be hidden from players.
    */
   public void setVisible(boolean value) {
     visible = value;
@@ -618,8 +620,8 @@ public class LookupTable {
    * Retrieves the allowLookup flag for the LookupTable.
    *
    * @return <code>true</code> indicates that players can call for values from this table.
-   * Otherwise, players will be prevented from calling values from this table.
-   * GM's can ALWAYS perform lookups against a table.
+   *     Otherwise, players will be prevented from calling values from this table. GM's can ALWAYS
+   *     perform lookups against a table.
    */
   public boolean getAllowLookup() {
     return allowLookup;
@@ -629,8 +631,8 @@ public class LookupTable {
    * Sets the allowLookup flag for the LookupTable.
    *
    * @param value <code>true</code> indicates that players can call for values from this table.
-   * Otherwise, players will be prevented from calling values from this table.
-   * GM's can ALWAYS perform lookups against a table.
+   *     Otherwise, players will be prevented from calling values from this table. GM's can ALWAYS
+   *     perform lookups against a table.
    */
   public void setAllowLookup(boolean value) {
     allowLookup = value;

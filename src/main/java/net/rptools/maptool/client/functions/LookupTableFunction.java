@@ -18,6 +18,11 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
@@ -33,12 +38,6 @@ import org.apache.commons.lang.StringUtils;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.Serializable;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-
 public class LookupTableFunction extends AbstractFunction {
 
   public LookupTableFunction() {
@@ -53,7 +52,7 @@ public class LookupTableFunction extends AbstractFunction {
         "getTableRoll",
         "setTableRoll",
         "clearTable",
-        "loadTable",        // bulk table import
+        "loadTable", // bulk table import
         "addTableEntry",
         "deleteTableEntry",
         "createTable",
@@ -139,7 +138,8 @@ public class LookupTableFunction extends AbstractFunction {
     }
   }
 
-  private @Nullable Serializable tbl_and_table(String function, List<Object> params) throws ParserException {
+  private @Nullable Serializable tbl_and_table(String function, List<Object> params)
+      throws ParserException {
     FunctionUtil.checkNumberParam(function, params, 1, 3);
     String name = params.get(0).toString();
 
@@ -166,7 +166,9 @@ public class LookupTableFunction extends AbstractFunction {
       } catch (NumberFormatException nfe) {
         return val;
       }
-    } else if (function.equalsIgnoreCase("tableImage") || function.equalsIgnoreCase("tblImage")) { // We want the image URI through tblImage or tableImage
+    } else if (function.equalsIgnoreCase("tableImage")
+        || function.equalsIgnoreCase(
+            "tblImage")) { // We want the image URI through tblImage or tableImage
       if (result.getImageId() == null) {
         return "";
       }
@@ -191,12 +193,14 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * Returns the lookupTable object identified by <code>name</code> if
-   * it exists in the campaign.  Otherwise, throws <code>ParserException</code>.
+   * Returns the lookupTable object identified by <code>name</code> if it exists in the campaign.
+   * Otherwise, throws <code>ParserException</code>.
+   *
    * @param function name of MTscript function (for error message)
    * @param name name of table
    * @return table identified by <code>name</code>
-   * @throws ParserException Thrown for any access errors to the named table (unknown, access prohibited, or table doesn't exist)
+   * @throws ParserException Thrown for any access errors to the named table (unknown, access
+   *     prohibited, or table doesn't exist)
    */
   private LookupTable checkTableAccess(String name, String function) throws ParserException {
     LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(name);
@@ -224,7 +228,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getPicksLeft();
   }
 
-  private @NotNull BigDecimal getTablePickOnce(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal getTablePickOnce(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("getTablePickOnce", params, 1, 1);
     String name = params.getFirst().toString();
@@ -232,7 +237,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getPickOnce() ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
-  private @NotNull BigDecimal setTablePickOnce(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal setTablePickOnce(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("setTablePickOnce", params, 2, 2);
     String name = params.get(0).toString();
@@ -244,24 +250,23 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * Resets the entries on a table with regard to whether such entries have been
-   * selected already.  This is used in the PickOnce family of tables.
+   * Resets the entries on a table with regard to whether such entries have been selected already.
+   * This is used in the PickOnce family of tables.
+   *
    * <ul>
-   * <li>
-   * {@code resetTablePicks(tblName)} - reset all entries on a table
-   * <li>
-   * {@code resetTablePicks(tblName, entriesToReset)} - reset specific entries from a String List with "," delim
-   * <li>
-   * {@code resetTablePicks(tblName, entriesToReset, delim)} - use custom delimiter
-   * <li>
-   * {@code resetTablePicks(tblName, entriesToReset, "json")} - entriesToReset is a JsonArray
+   *   <li>{@code resetTablePicks(tblName)} - reset all entries on a table
+   *   <li>{@code resetTablePicks(tblName, entriesToReset)} - reset specific entries from a String
+   *       List with "," delim
+   *   <li>{@code resetTablePicks(tblName, entriesToReset, delim)} - use custom delimiter
+   *   <li>{@code resetTablePicks(tblName, entriesToReset, "json")} - entriesToReset is a JsonArray
    * </ul>
    *
    * @param function name of the MTscript function (used for error messages)
    * @param params list of function parameters
    * @throws ParserException Thrown when an invalid or missing parameter is supplied
    */
-  private @NotNull String resetTablePicks(String function, List<Object> params) throws ParserException {
+  private @NotNull String resetTablePicks(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam(function, params, 1, 3);
     String tblName = params.get(0).toString();
@@ -286,7 +291,8 @@ public class LookupTableFunction extends AbstractFunction {
     return "";
   }
 
-  private @NotNull Object getTableEntry(String function, List<Object> params) throws ParserException {
+  private @NotNull Object getTableEntry(String function, List<Object> params)
+      throws ParserException {
     FunctionUtil.checkNumberParam(function, params, 2, 2);
     String name = params.get(0).toString();
     LookupTable lookupTable = checkTableAccess(name, function);
@@ -295,8 +301,7 @@ public class LookupTableFunction extends AbstractFunction {
     if (entry == null) return "";
 
     int rollInt = Integer.parseInt(roll);
-    if (rollInt < entry.getMin() || rollInt > entry.getMax())
-      return "";
+    if (rollInt < entry.getMin() || rollInt > entry.getMax()) return "";
 
     JsonObject entryDetails = new JsonObject();
     entryDetails.addProperty("min", entry.getMin());
@@ -327,8 +332,7 @@ public class LookupTableFunction extends AbstractFunction {
     LookupEntry entry = lookupTable.getLookup(roll);
     if (entry == null) return 0;
     int rollInt = Integer.parseInt(roll);
-    if (rollInt < entry.getMin() || rollInt > entry.getMax())
-      return 0;
+    if (rollInt < entry.getMin() || rollInt > entry.getMax()) return 0;
     List<LookupEntry> oldlist = new ArrayList<>(lookupTable.getEntryList());
     lookupTable.clearEntries();
     for (LookupEntry e : oldlist) {
@@ -357,7 +361,8 @@ public class LookupTableFunction extends AbstractFunction {
     return "";
   }
 
-  private @NotNull String setTableImage(String function, List<Object> params) throws ParserException {
+  private @NotNull String setTableImage(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("setTableImage", params, 2, 2);
     String name = params.get(0).toString();
@@ -368,7 +373,8 @@ public class LookupTableFunction extends AbstractFunction {
     return "";
   }
 
-  private @NotNull Serializable getTableImage(String function, List<Object> params) throws ParserException {
+  private @NotNull Serializable getTableImage(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("getTableImage", params, 1, 1);
     String name = params.getFirst().toString();
@@ -408,7 +414,8 @@ public class LookupTableFunction extends AbstractFunction {
     return "";
   }
 
-  private @NotNull String deleteTableEntry(String function, List<Object> params) throws ParserException {
+  private @NotNull String deleteTableEntry(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("deleteTableEntry", params, 2, 2);
     String name = params.get(0).toString();
@@ -427,7 +434,8 @@ public class LookupTableFunction extends AbstractFunction {
     return "";
   }
 
-  private @NotNull String addTableEntry(String function, List<Object> params) throws ParserException {
+  private @NotNull String addTableEntry(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("addTableEntry", params, 4, 5);
     String name = params.get(0).toString();
@@ -455,30 +463,32 @@ public class LookupTableFunction extends AbstractFunction {
   }
 
   /**
-   * Loads bulk data into a table.  The table must already exist.  Usage:
-   * <p>
-   * {@code [h: loadTable(name, jsondata)]}
-   * </p>
-   * <p>
-   * The {@code jsondata} must be a JSON Array containing table entries, and
-   * each table entry must be a JSON Array containing:
+   * Loads bulk data into a table. The table must already exist. Usage:
+   *
+   * <p>{@code [h: loadTable(name, jsondata)]}
+   *
+   * <p>The {@code jsondata} must be a JSON Array containing table entries, and each table entry
+   * must be a JSON Array containing:
+   *
    * <ol>
-   *  <li>an integer representing the lower range of the die roll (decimals are truncated),</li>
-   *  <li>an integer representing the upper range of the die roll (decimals are truncated),</li>
-   *  <li>a String acting as the content of the row, and</li>
-   *  <li>a String acting as an image reference (as {@code asset://}, {@code image:}, or {@code MD5Key})</li>
+   *   <li>an integer representing the lower range of the die roll (decimals are truncated),
+   *   <li>an integer representing the upper range of the die roll (decimals are truncated),
+   *   <li>a String acting as the content of the row, and
+   *   <li>a String acting as an image reference (as {@code asset://}, {@code image:}, or {@code
+   *       MD5Key})
    * </ol>
-   * </p>
+   *
    * @param function name of this MTscript function, "{@code loadTable}"
    * @param params parameters of the MTscript function
-   * @return a number indicating the successful record count, or
-   * a {@link JsonArray} of all elements that failed to load
-   * @throws ParserException Thrown when syntax errors are detected in the input data.
-   * This includes negative numbers in either of the numeric fields of a table entry,
-   * a lower die roll that is greater than the upper die roll of a table entry and vice versa,
-   * missing fields, too many fields, and potentially many more.
+   * @return a number indicating the successful record count, or a {@link JsonArray} of all elements
+   *     that failed to load
+   * @throws ParserException Thrown when syntax errors are detected in the input data. This includes
+   *     negative numbers in either of the numeric fields of a table entry, a lower die roll that is
+   *     greater than the upper die roll of a table entry and vice versa, missing fields, too many
+   *     fields, and potentially many more.
    */
-  private @NotNull JsonElement loadTable(String function, List<Object> params) throws ParserException {
+  private @NotNull JsonElement loadTable(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam(function, params, 3, 3);
     String name = params.get(0).toString();
@@ -510,7 +520,7 @@ public class LookupTableFunction extends AbstractFunction {
               counter++;
             }
           }
-        } catch (UnsupportedOperationException|NumberFormatException|IllegalStateException e) {
+        } catch (UnsupportedOperationException | NumberFormatException | IllegalStateException e) {
           // Make a list of all failing rows to return to the user.
           errorRows.add(rowindex);
         }
@@ -541,7 +551,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getDefaultRoll();
   }
 
-  private @NotNull BigDecimal setTableAccess(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal setTableAccess(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("setTableAccess", params, 2, 2);
     String name = params.get(0).toString();
@@ -552,7 +563,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
-  private @NotNull BigDecimal getTableAccess(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal getTableAccess(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("getTableAccess", params, 1, 1);
     String name = params.getFirst().toString();
@@ -560,7 +572,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getAllowLookup() ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
-  private @NotNull BigDecimal setTableVisible(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal setTableVisible(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("setTableVisible", params, 2, 2);
     String name = params.get(0).toString();
@@ -571,7 +584,8 @@ public class LookupTableFunction extends AbstractFunction {
     return lookupTable.getVisible() ? BigDecimal.ONE : BigDecimal.ZERO;
   }
 
-  private @NotNull BigDecimal getTableVisible(String function, List<Object> params) throws ParserException {
+  private @NotNull BigDecimal getTableVisible(String function, List<Object> params)
+      throws ParserException {
     checkTrusted(function);
     FunctionUtil.checkNumberParam("getTableVisible", params, 1, 1);
     String name = params.getFirst().toString();

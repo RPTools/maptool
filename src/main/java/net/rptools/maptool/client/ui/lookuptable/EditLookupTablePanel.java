@@ -14,6 +14,16 @@
  */
 package net.rptools.maptool.client.ui.lookuptable;
 
+import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.*;
+import javax.swing.table.AbstractTableModel;
+import javax.swing.table.TableCellRenderer;
+import javax.swing.table.TableModel;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
@@ -25,17 +35,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
-
-import javax.swing.*;
-import javax.swing.table.AbstractTableModel;
-import javax.swing.table.TableCellRenderer;
-import javax.swing.table.TableModel;
-import java.awt.*;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class EditLookupTablePanel extends AbeillePanel<LookupTableTableModel> {
   private static final long serialVersionUID = 2341539768448195059L;
