@@ -20,7 +20,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Locale;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
