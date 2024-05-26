@@ -272,4 +272,20 @@ public class AddOnLibraryManager {
   public void setExternalLibraryPath(Path path) {
     externalAddOnLibraryManager.setExternalLibraryPath(path);
   }
+
+  /**
+   * Registers the add-on library as an external library.
+   * @param addOnLibrary The add-on library to register.
+   */
+  public void registerExternalLibrary(AddOnLibrary addOnLibrary) {
+    externalAddOnLibraryManager.registerExternalAddOnLibrary(addOnLibrary);
+  }
+
+  /**
+   * De-registers the add-on library with the given namespace.
+   * @param namespace The namespace of the library.
+   */
+  public void deregisterExternalLibrary(String namespace) {
+    externalAddOnLibraryManager.deregisterExternalAddOnLibrary(namespace);
+  }
 }
