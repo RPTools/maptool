@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model.player;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -48,39 +46,8 @@ public class Players {
     NOT_SUPPORTED
   }
 
-  /**
-   * Property change event name for when a player is added. Some databases may not support this
-   * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
-   * to players in the database.
-   */
-  public static final String PROPERTY_CHANGE_PLAYER_ADDED =
-      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED;
-
-  /**
-   * Property change event name for when a player is removed. Some databases may not support this
-   * event, so you will also need to listen to {@link #PROPERTY_CHANGE_DATABASE_CHANGED} for changes
-   * to players in the database.
-   */
-  public static final String PROPERTY_CHANGE_PLAYER_REMOVED =
-      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED;
-
-  /** Property change event name for when a player is changed. */
-  public static final String PROPERTY_CHANGE_PLAYER_CHANGED =
-      PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED;
-
-  /**
-   * Property change event name for when the database is changed or there are mas updates. Some
-   * databases may only support this event and not player added/removed/changed
-   */
-  public static final String PROPERTY_CHANGE_DATABASE_CHANGED =
-      PlayerDBPropertyChange.PROPERTY_CHANGE_DATABASE_CHANGED;
-
   /** Instance for logging messages. */
   private static final Logger log = LogManager.getLogger(Players.class);
-
-  /** instance variable for property change support. */
-  private static final PropertyChangeSupport propertyChangeSupport =
-      new PropertyChangeSupport(Players.class);
 
   private final PlayerDatabase playerDatabase;
 
@@ -212,7 +179,7 @@ public class Players {
    *
    * @return {@code true} if the player database supports per player passwords.
    */
-  public boolean supportsPerPlayerPasswords() {
+  private boolean supportsPerPlayerPasswords() {
     return !playerDatabase.supportsRolePasswords();
   }
 
@@ -221,7 +188,7 @@ public class Players {
    *
    * @return {@code true} if the player database supports asymmetric keys.
    */
-  public boolean supportsAsymmetricKeys() {
+  private boolean supportsAsymmetricKeys() {
     return playerDatabase.supportsAsymmetricalKeys();
   }
 
@@ -402,118 +369,6 @@ public class Players {
     } else {
       log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
       return ChangePlayerStatus.NOT_SUPPORTED;
-    }
-  }
-
-  /**
-   * Removes the specified player from the database.
-   *
-   * @param name the name of the player to remove.
-   * @return {@link ChangePlayerStatus#OK} if successful, otherwise the reason for the failure.
-   */
-  public ChangePlayerStatus removePlayer(String name) {
-    if (playerDatabase instanceof PersistedPlayerDatabase playerDb) {
-      playerDb.deletePlayer(name);
-      return ChangePlayerStatus.OK;
-    } else {
-      log.error(I18N.getText("msg.error.playerDB.cantUpdatePlayer", name));
-      return ChangePlayerStatus.NOT_SUPPORTED;
-    }
-  }
-
-  /**
-   * Adds a property change listener for player database events.
-   *
-   * @param listener The property change listener to add.
-   */
-  public static void addPropertyChangeListener(PropertyChangeListener listener) {
-    propertyChangeSupport.addPropertyChangeListener(listener);
-  }
-
-  /**
-   * Removes a property change listener for player database events.
-   *
-   * @param listener The property change listener to remove.
-   */
-  public static void removePropertyChangeListener(PropertyChangeListener listener) {
-    propertyChangeSupport.removePropertyChangeListener(listener);
-  }
-
-  /**
-   * Commits the pending changes writing them out to the persistent storage.
-   *
-   * @throws NoSuchPaddingException if there is an error hashing the password.
-   * @throws NoSuchAlgorithmException if there is an error hashing the password.
-   * @throws InvalidKeySpecException if there is an error hashing the password.
-   * @throws PasswordDatabaseException if there is an error adding the player to the file.
-   * @throws InvalidKeyException if there is an error hashing the password.
-   */
-  public void commitChanges()
-      throws NoSuchPaddingException,
-          NoSuchAlgorithmException,
-          InvalidKeySpecException,
-          PasswordDatabaseException,
-          InvalidKeyException {
-    if (playerDatabase instanceof PersistedPlayerDatabase db) {
-      db.commitChanges();
-    }
-  }
-
-  /**
-   * Rolls back any pending changes that haven't been written to the file.
-   *
-   * @throws NoSuchPaddingException if there is an error hashing the password.
-   * @throws NoSuchAlgorithmException if there is an error hashing the password.
-   * @throws InvalidKeySpecException if there is an error hashing the password.
-   * @throws PasswordDatabaseException if there is an error adding the player to the file.
-   * @throws InvalidKeyException i
-   */
-  public void rollbackChanges()
-      throws NoSuchPaddingException,
-          NoSuchAlgorithmException,
-          InvalidKeySpecException,
-          PasswordDatabaseException,
-          InvalidKeyException {
-    if (playerDatabase instanceof PersistedPlayerDatabase db) {
-      db.rollbackChanges();
-    }
-  }
-
-  /**
-   * Notify that a player has signed in.
-   *
-   * @param player the player that has signed in.
-   */
-  public void playerSignedIn(Player player) {
-    var oldInfo = getPlayerInfo(player.getName());
-    playerDatabase.playerSignedIn(player);
-    var newInfo = getPlayerInfo(player.getName());
-    if (newInfo != null) {
-      if (oldInfo != null) {
-        propertyChangeSupport.firePropertyChange(
-            PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
-      } else {
-        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_ADDED, null, newInfo);
-      }
-    }
-  }
-
-  /**
-   * Notify that a player has signed out.
-   *
-   * @param player the player that has signed out.
-   */
-  public void playerSignedOut(Player player) {
-    var oldInfo = getPlayerInfo(player.getName());
-    playerDatabase.playerSignedOut(player);
-    var newInfo = getPlayerInfo(player.getName());
-    if (oldInfo != null) {
-      if (newInfo != null) {
-        propertyChangeSupport.firePropertyChange(
-            PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, oldInfo, newInfo);
-      } else {
-        propertyChangeSupport.firePropertyChange(PROPERTY_CHANGE_PLAYER_REMOVED, oldInfo, null);
-      }
     }
   }
 }

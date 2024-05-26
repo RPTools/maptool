@@ -36,7 +36,6 @@ import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.server.MapToolServerConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -56,7 +55,7 @@ public class CipherUtil {
   private static final String MESSAGE_DIGEST_ALGORITHM = "SHA3-256";
 
   /** Logger used for log messages. */
-  private static final Logger log = LogManager.getLogger(MapToolServerConnection.class);
+  private static final Logger log = LogManager.getLogger(CipherUtil.class);
 
   /** The length of the generated key. */
   public static final int DEFAULT_GENERATED_KEY_LEN = 128;

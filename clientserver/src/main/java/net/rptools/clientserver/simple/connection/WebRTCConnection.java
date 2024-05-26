@@ -20,6 +20,7 @@ import dev.onvoid.webrtc.media.MediaStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.ByteBuffer;
+import java.util.concurrent.atomic.AtomicBoolean;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.clientserver.simple.webrtc.*;
 import org.apache.logging.log4j.LogManager;
@@ -51,6 +52,8 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
   private final SendThread sendThread = new SendThread();
   private Thread handleDisconnect;
+
+  private final AtomicBoolean closed = new AtomicBoolean(false);
 
   // used from client side
   public WebRTCConnection(String id, String serverName, Listener listener) {
@@ -208,12 +211,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
   public void sendMessage(Object channel, byte[] message) {
     log.debug(prefix() + "added message");
     addMessage(channel, message);
-    if (peerConnection != null
-        && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
-      synchronized (sendThread) {
-        sendThread.notify();
-      }
-    }
   }
 
   @Override
@@ -337,26 +334,19 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
         new Thread(
             () -> {
               fireDisconnect();
-              if (isServerSide()) {
-                server.clearClients();
-              }
             },
             "WebRTCConnection.handleDisconnect");
     handleDisconnect.start();
   }
 
   @Override
-  public void close() {
+  protected void onClose() {
     // signalingClient should be closed if connection was established
     if (!isServerSide() && signalingClient.isOpen()) {
       signalingClient.close();
     }
 
-    if (sendThread.stopRequested) {
-      return;
-    }
-
-    sendThread.requestStop();
+    sendThread.interrupt();
     if (peerConnection != null) {
       peerConnection.close();
       peerConnection = null;
@@ -369,71 +359,53 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
   }
 
   private class SendThread extends Thread {
-    private boolean stopRequested = false;
-
     public SendThread() {
       super("WebRTCConnection.SendThread_" + WebRTCConnection.this.getId());
-    }
-
-    public void requestStop() {
-      this.stopRequested = true;
-      synchronized (this) {
-        this.notify();
-      }
     }
 
     @Override
     public void run() {
       log.debug(prefix() + " sendThread started");
-      try {
-        while (!stopRequested && WebRTCConnection.this.isAlive()) {
-          while (WebRTCConnection.this.hasMoreMessages()
-              && peerConnection.getConnectionState() == RTCPeerConnectionState.CONNECTED) {
-            byte[] message = WebRTCConnection.this.nextMessage();
-            if (message == null) {
-              continue;
-            }
 
-            ByteBuffer buffer = ByteBuffer.allocate(message.length + Integer.BYTES);
-            buffer.putInt(message.length).put(message).rewind();
-
-            int chunkSize = 16 * 1024;
-
-            while (buffer.remaining() > 0) {
-              var amountToSend = buffer.remaining() <= chunkSize ? buffer.remaining() : chunkSize;
-              ByteBuffer part = buffer;
-
-              if (amountToSend != buffer.capacity()) {
-                // we need to allocation a new ByteBuffer because send calls ByteBuffer.array()
-                // which would return
-                // the whole byte[] and not only the slice. But the lib doesn't use
-                // ByteBuffer.arrayOffset().
-                var slice = buffer.slice(buffer.position(), amountToSend);
-                part = ByteBuffer.allocate(amountToSend);
-                part.put(slice);
-              }
-
-              buffer.position(buffer.position() + amountToSend);
-              localDataChannel.send(new RTCDataChannelBuffer(part, true));
-              log.debug(prefix() + " sent " + part.capacity() + " bytes");
-            }
-          }
-          synchronized (this) {
-            if (!stopRequested) {
-              try {
-                log.debug(prefix() + "sendThread -> sleep");
-                this.wait();
-                log.debug(prefix() + "sendThread -> woke up");
-              } catch (InterruptedException e) {
-                log.debug(prefix() + "sendThread -> interrupted");
-              }
-            }
-          }
+      while (!WebRTCConnection.this.isClosed() && WebRTCConnection.this.isAlive()) {
+        // Blocks for a time until a message is received.
+        byte[] message = WebRTCConnection.this.nextMessage();
+        if (message == null) {
+          // No message available. Thread may also have been interrupted as part of stopping.
+          continue;
         }
-      } catch (Exception e) {
-        log.error(prefix() + e);
-        fireDisconnect();
+
+        ByteBuffer buffer = ByteBuffer.allocate(message.length + Integer.BYTES);
+        buffer.putInt(message.length).put(message).rewind();
+
+        int chunkSize = 16 * 1024;
+
+        while (buffer.remaining() > 0) {
+          var amountToSend = Math.min(buffer.remaining(), chunkSize);
+          ByteBuffer part = buffer;
+
+          if (amountToSend != buffer.capacity()) {
+            // we need to allocation a new ByteBuffer because send calls ByteBuffer.array()
+            // which would return
+            // the whole byte[] and not only the slice. But the lib doesn't use
+            // ByteBuffer.arrayOffset().
+            var slice = buffer.slice(buffer.position(), amountToSend);
+            part = ByteBuffer.allocate(amountToSend);
+            part.put(slice);
+          }
+
+          buffer.position(buffer.position() + amountToSend);
+          try {
+            localDataChannel.send(new RTCDataChannelBuffer(part, true));
+          } catch (Exception e) {
+            log.error(prefix() + e);
+            fireDisconnect();
+            return;
+          }
+          log.debug(prefix() + " sent " + part.capacity() + " bytes");
+        }
       }
+
       log.debug(prefix() + " sendThread ended");
     }
   }
@@ -472,13 +444,6 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
           lastError = "PeerConnection failed";
           peerConnection = null;
           fireDisconnectAsync();
-        }
-        case CONNECTED -> {
-          if (hasMoreMessages()) {
-            synchronized (sendThread) {
-              sendThread.notify();
-            }
-          }
         }
       }
     }
@@ -604,7 +569,7 @@ public class WebRTCConnection extends AbstractConnection implements Connection {
 
       var message = readMessage(channelBuffer.data);
       if (message != null) {
-        dispatchCompressedMessage(id, message);
+        dispatchCompressedMessage(message);
       }
     }
   }

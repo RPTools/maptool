@@ -280,12 +280,6 @@ public class BoardTool extends DefaultTool {
     }
   }
 
-  @Override
-  public void mouseMoved(java.awt.event.MouseEvent e) {
-    mouseX = e.getX();
-    mouseY = e.getY();
-  }
-
   /** A simple enum for correlating keys with directions */
   private enum Direction {
     Left,

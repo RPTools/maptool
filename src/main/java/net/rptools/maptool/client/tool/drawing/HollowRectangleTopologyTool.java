@@ -116,6 +116,8 @@ public class HollowRectangleTopologyTool extends AbstractDrawingTool
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     setIsEraser(isEraser(e));
 
     ZonePoint p = getPoint(e);
