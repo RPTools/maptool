@@ -17,7 +17,6 @@ package net.rptools.maptool.client.walker;
 import java.awt.geom.Area;
 import java.util.Map;
 import java.util.Set;
-import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
@@ -46,8 +45,6 @@ public interface ZoneWalker {
   public double getDistance();
 
   public Path<CellPoint> getPath();
-
-  public Path<CellPoint> getPath(RenderPathWorker renderPathWorker);
 
   public CellPoint getLastPoint();
 

@@ -47,7 +47,7 @@ public class SysInfoDialog {
     infoTextArea.setWrapStyleWord(true);
     infoTextArea.setFont(new Font("Monospaced", Font.PLAIN, 13));
     infoTextArea.setText(I18N.getText("action.gatherDebugInfoWait"));
-    EventQueue.invokeLater(new InfoTextSwingWorker());
+    new InfoTextSwingWorker().execute();
 
     JScrollPane scrollPane = new JScrollPane(infoTextArea);
     scrollPane.setHorizontalScrollBarPolicy(31);
