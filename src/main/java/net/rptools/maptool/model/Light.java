@@ -100,16 +100,22 @@ public final class Light implements Serializable {
     return shape;
   }
 
-  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, boolean scaleWithToken) {
+  public @Nonnull Area getArea(
+      @Nonnull Token token, @Nonnull Zone zone, double multiplier, boolean scaleWithToken) {
+    // TODO Methinks we don't apply multiplier if darkness.
     return zone.getGrid()
         .getShapedArea(
             getShape(),
             token,
-            getRadius(),
+            multiplier * getRadius(),
             getWidth(),
             getArcAngle(),
             (int) getFacingOffset(),
             scaleWithToken);
+  }
+
+  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, boolean scaleWithToken) {
+    return getArea(token, zone, 1.0, scaleWithToken);
   }
 
   public boolean isGM() {

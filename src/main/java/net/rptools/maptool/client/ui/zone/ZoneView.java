@@ -330,20 +330,19 @@ public class ZoneView {
 
   private List<ContributedLight> calculateLitAreaForLightSource(
       @Nonnull Token lightSourceToken, double multiplier, @Nonnull LightSource lightSource) {
+    // TODO Make the call adjust multiplier for non-NORMAL lights if necessary. In here we should
+    //  just apply the request regardless of the light source.
+
     if (lightSource.getType() != LightSource.Type.NORMAL) {
       return Collections.emptyList();
     }
 
     final var p = FogUtil.calculateVisionCenter(lightSourceToken, zone);
     final var translateTransform = AffineTransform.getTranslateInstance(p.x, p.y);
-    final var magnifyTransform = AffineTransform.getScaleInstance(multiplier, multiplier);
 
-    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone);
+    // Jamz: OK, let not have lowlight vision type multiply darkness radius TODO Huh???
     // Calculate exposed area
-    // Jamz: OK, let not have lowlight vision type multiply darkness radius
-    if (multiplier != 1 && lightSource.getType() == LightSource.Type.NORMAL) {
-      lightSourceArea.transform(magnifyTransform);
-    }
+    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone, multiplier);
     lightSourceArea.transform(translateTransform);
 
     Area lightSourceVisibleArea = lightSourceArea;
@@ -373,17 +372,15 @@ public class ZoneView {
     for (final var light : lightSource.getLightList()) {
       final var notScaledLightArea =
           light.getArea(lightSourceToken, zone, lightSource.isScaleWithToken());
-      if (notScaledLightArea == null) {
-        continue;
-      }
-      final var lightArea = new Area(notScaledLightArea);
 
       // Lowlight vision does not magnify darkness.
-      if (multiplier != 1
-          && lightSource.getType() == LightSource.Type.NORMAL
-          && light.getLumens() >= 0) {
-        lightArea.transform(magnifyTransform);
-      }
+      final var shouldMagnify = // multiplier != 1 &&
+          lightSource.getType() == LightSource.Type.NORMAL && light.getLumens() >= 0;
+
+      final var lightArea =
+          shouldMagnify
+              ? light.getArea(lightSourceToken, zone, multiplier, lightSource.isScaleWithToken())
+              : new Area(notScaledLightArea);
 
       lightArea.subtract(cummulativeNotTransformedArea);
       lightArea.transform(translateTransform);

@@ -231,6 +231,17 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   }
 
   /* Area for all lights combined */
+  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, double multiplier) {
+    // TODO Methinks we don't apply multiplier if not NORMAL.
+    Area area = new Area();
+    for (Light light : lightList) {
+      area.add(light.getArea(token, zone, multiplier, isScaleWithToken()));
+    }
+
+    return area;
+  }
+
+  /* Area for all lights combined */
   public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone) {
     Area area = new Area();
     for (Light light : lightList) {
