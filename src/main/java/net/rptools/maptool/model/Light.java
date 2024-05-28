@@ -102,12 +102,16 @@ public final class Light implements Serializable {
 
   public @Nonnull Area getArea(
       @Nonnull Token token, @Nonnull Zone zone, double multiplier, boolean scaleWithToken) {
-    // TODO Methinks we don't apply multiplier if darkness.
+    var radius = getRadius();
+    // Darkness does not get magnified.
+    if (lumens >= 0) {
+      radius *= multiplier;
+    }
     return zone.getGrid()
         .getShapedArea(
             getShape(),
             token,
-            multiplier * getRadius(),
+            radius,
             getWidth(),
             getArcAngle(),
             (int) getFacingOffset(),
