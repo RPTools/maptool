@@ -141,7 +141,7 @@ public class AppActions {
   public static final Action NEXT_TOKEN =
       new ZoneClientAction() {
         {
-          init("menu.nextToken");
+          init("action.nextToken");
         }
 
         @Override
