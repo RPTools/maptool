@@ -238,6 +238,15 @@ public class MapToolServer {
     router.addConnection(conn);
 
     assetManagerMap.put(conn.getId(), new AssetTransferManager());
+
+    synchronized (playerMap) {
+      for (Player remotePlayer : playerMap.values()) {
+        var msg = PlayerConnectedMsg.newBuilder().setPlayer(remotePlayer.toDto());
+        sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
+      }
+    }
+    var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.getTransferablePlayer().toDto());
+    broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
   }
 
   public void addLocalConnection(Connection conn, Player localPlayer) {
@@ -246,15 +255,6 @@ public class MapToolServer {
 
   private void addRemoteConnection(Connection conn, Player connPlayer) {
     installConnection(conn, connPlayer);
-
-    synchronized (playerMap) {
-      for (Player player : playerMap.values()) {
-        var msg = PlayerConnectedMsg.newBuilder().setPlayer(player.toDto());
-        sendMessage(conn.getId(), Message.newBuilder().setPlayerConnectedMsg(msg).build());
-      }
-    }
-    var msg = PlayerConnectedMsg.newBuilder().setPlayer(connPlayer.getTransferablePlayer().toDto());
-    broadcastMessage(Message.newBuilder().setPlayerConnectedMsg(msg).build());
 
     var msg2 = SetCampaignMsg.newBuilder().setCampaign(campaign.toDto());
     sendMessage(conn.getId(), Message.newBuilder().setSetCampaignMsg(msg2).build());
