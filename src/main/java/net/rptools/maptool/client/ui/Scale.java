@@ -89,13 +89,21 @@ public class Scale implements Serializable {
       return;
     }
 
-    var oldScale = this.scale;
-    this.scale = scale;
     // Determine zoomLevel appropriate for given scale
-    this.zoomLevel =
+    var zoomLevel =
         (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
-
-    getPropertyChangeSupport().firePropertyChange(PROPERTY_SCALE, oldScale, this.scale);
+    // Check that we haven't gone out of bounds with our zooming.
+    if (zoomLevel < -MAX_ZOOM_LEVEL) {
+      setZoomLevel(-MAX_ZOOM_LEVEL);
+    } else if (zoomLevel > MAX_ZOOM_LEVEL) {
+      setZoomLevel(MAX_ZOOM_LEVEL);
+    } else {
+      // Acceptable scale. Use it.
+      var oldScale = this.scale;
+      this.scale = scale;
+      this.zoomLevel = zoomLevel;
+      getPropertyChangeSupport().firePropertyChange(PROPERTY_SCALE, oldScale, this.scale);
+    }
   }
 
   private void setScaleFromZoomLevel() {
