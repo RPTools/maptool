@@ -23,6 +23,7 @@ import java.io.Serializable;
 public class Scale implements Serializable {
   public static final String PROPERTY_SCALE = "scale";
   public static final String PROPERTY_OFFSET = "offset";
+  private static final int MIN_ZOOM_LEVEL = -175;
   private static final int MAX_ZOOM_LEVEL = 175;
 
   private final double oneToOneScale = 1; // Let this be configurable at some point
@@ -93,8 +94,8 @@ public class Scale implements Serializable {
     var zoomLevel =
         (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
     // Check that we haven't gone out of bounds with our zooming.
-    if (zoomLevel < -MAX_ZOOM_LEVEL) {
-      setZoomLevel(-MAX_ZOOM_LEVEL);
+    if (zoomLevel < MIN_ZOOM_LEVEL) {
+      setZoomLevel(MIN_ZOOM_LEVEL);
     } else if (zoomLevel > MAX_ZOOM_LEVEL) {
       setZoomLevel(MAX_ZOOM_LEVEL);
     } else {
@@ -125,7 +126,8 @@ public class Scale implements Serializable {
   }
 
   private void setZoomLevel(int zoomLevel) {
-    this.zoomLevel = Math.clamp(zoomLevel, -MAX_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+    this.zoomLevel = Math.clamp(zoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+    System.out.println(this.zoomLevel);
     setScaleFromZoomLevel();
   }
 
