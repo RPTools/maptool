@@ -16,6 +16,7 @@ package net.rptools.clientserver.simple.connection;
 
 import java.io.*;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -161,6 +162,9 @@ public class SocketConnection extends AbstractConnection implements Connection {
           try {
             byte[] message = SocketConnection.this.readMessage(in);
             SocketConnection.this.dispatchCompressedMessage(message);
+          } catch (SocketTimeoutException e) {
+            log.warn("Lost client {}", SocketConnection.this.getId(), e);
+            return;
           } catch (IOException e) {
             log.error(e);
             return;

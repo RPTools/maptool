@@ -17,6 +17,7 @@ package net.rptools.clientserver.simple.server;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.TimeUnit;
 import net.rptools.clientserver.simple.connection.SocketConnection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -103,6 +104,9 @@ public class SocketServer extends AbstractServer {
       while (!stopRequested) {
         try {
           Socket s = socket.accept();
+          // Client heartbeat frequency is 20 seconds, so a minute should permit two or three
+          // heartbeats to come in if still connected.
+          s.setSoTimeout((int) TimeUnit.MILLISECONDS.convert(1, TimeUnit.MINUTES));
           log.debug("Client connecting ...");
 
           String id = nextClientId(s);
