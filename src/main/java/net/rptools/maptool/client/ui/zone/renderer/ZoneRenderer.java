@@ -432,7 +432,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             }
 
             Path<? extends AbstractPoint> path =
-                set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
+                set.getWalker() != null ? set.getWalker().getPath() : set.getGridlessPath();
             // Jamz: add final path render here?
 
             List<GUID> filteredTokens = new ArrayList<GUID>();
@@ -1450,7 +1450,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         if (token == keyToken && token.getLayer().supportsWalker()) {
           renderPath(
               g,
-              walker != null ? walker.getPath() : set.gridlessPath,
+              walker != null ? walker.getPath() : set.getGridlessPath(),
               token.getFootprint(zone.getGrid()));
         }
 
@@ -1594,7 +1594,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       final var grid = zone.getGrid();
       tokenRectangle = token.getFootprint(grid).getBounds(grid, lastPoint);
     } else {
-      final var path = set.gridlessPath;
+      final var path = set.getGridlessPath();
       if (path.getCellPath().isEmpty()) {
         return false;
       }
@@ -1617,7 +1617,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
     double distanceTraveled = 0;
     ZonePoint lastPoint = null;
-    for (ZonePoint zp : set.gridlessPath.getCellPath()) {
+    for (ZonePoint zp : set.getGridlessPath().getCellPath()) {
       if (lastPoint == null) {
         lastPoint = zp;
         continue;

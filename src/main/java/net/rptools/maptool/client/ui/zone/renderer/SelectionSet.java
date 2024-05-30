@@ -38,7 +38,8 @@ public class SelectionSet {
   private ZoneWalker walker;
   private final Token token;
 
-  Path<ZonePoint> gridlessPath;
+  private Path<ZonePoint> gridlessPath;
+  private ZonePoint currentGridlessPoint;
 
   /** Pixel distance (x) from keyToken's origin. */
   int offsetX;
@@ -73,8 +74,11 @@ public class SelectionSet {
         walker.setWaypoints(tokenPoint, tokenPoint);
       }
     } else {
-      gridlessPath = new Path<ZonePoint>();
-      gridlessPath.addPathCell(new ZonePoint(token.getX(), token.getY()));
+      gridlessPath = new Path<>();
+
+      currentGridlessPoint = new ZonePoint(token.getX(), token.getY());
+      gridlessPath.addWayPoint(new ZonePoint(currentGridlessPoint));
+      gridlessPath.addPathCell(new ZonePoint(currentGridlessPoint));
     }
   }
 
@@ -82,7 +86,10 @@ public class SelectionSet {
    * @return path computation.
    */
   public @Nonnull Path<ZonePoint> getGridlessPath() {
-    return gridlessPath;
+    var result = gridlessPath.copy();
+    result.addWayPoint(new ZonePoint(currentGridlessPoint));
+    result.addPathCell(new ZonePoint(currentGridlessPoint));
+    return result;
   }
 
   public ZoneWalker getWalker() {
@@ -152,11 +159,8 @@ public class SelectionSet {
               renderer);
       renderPathThreadPool.execute(renderPathTask);
     } else {
-      if (gridlessPath.getCellPath().size() > 1) {
-        gridlessPath.replaceLastPoint(zp);
-      } else {
-        gridlessPath.addPathCell(zp);
-      }
+      currentGridlessPoint.x = zp.x;
+      currentGridlessPoint.y = zp.y;
     }
   }
 
@@ -194,7 +198,8 @@ public class SelectionSet {
 
       zp = renderer.getZone().getGrid().convert(cp);
     } else {
-      zp = gridlessPath.getLastJunctionPoint();
+      // Gridless path will never be empty if set.
+      zp = gridlessPath.getWayPointList().getLast();
     }
     return zp;
   }
