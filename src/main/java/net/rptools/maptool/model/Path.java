@@ -39,6 +39,22 @@ public class Path<T extends AbstractPoint> {
     return this;
   }
 
+  public Path<T> copy() {
+    var result = new Path<T>();
+    for (var cell : cellList) {
+      result.cellList.add(copyPoint(cell));
+    }
+    for (var waypoint : waypointList) {
+      result.waypointList.add(copyPoint(waypoint));
+    }
+    return result;
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <U extends AbstractPoint> U copyPoint(U point) {
+    return (U) point.clone();
+  }
+
   public void addPathCell(T point) {
     cellList.add(point);
   }
@@ -273,31 +289,35 @@ public class Path<T extends AbstractPoint> {
     return path;
   }
 
-  public static Path fromDto(PathDto dto) {
+  public static Path<?> fromDto(PathDto dto) {
     if (dto.getPointType() == PathDto.PointType.CELL_POINT) {
       final var path = new Path<CellPoint>();
-      dto.getCellsList().forEach(p -> path.addPathCell(new CellPoint(p.getX(), p.getY())));
-      dto.getWaypointsList().forEach(p -> path.addWayPoint(new CellPoint(p.getX(), p.getY())));
+      dto.getCellsList().forEach(p -> path.cellList.add(new CellPoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.waypointList.add(new CellPoint(p.getX(), p.getY())));
       return path;
     } else {
       final var path = new Path<ZonePoint>();
-      dto.getCellsList().forEach(p -> path.addPathCell(new ZonePoint(p.getX(), p.getY())));
-      dto.getWaypointsList().forEach(p -> path.addWayPoint(new ZonePoint(p.getX(), p.getY())));
+      dto.getCellsList().forEach(p -> path.cellList.add(new ZonePoint(p.getX(), p.getY())));
+      dto.getWaypointsList().forEach(p -> path.waypointList.add(new ZonePoint(p.getX(), p.getY())));
       return path;
     }
   }
 
   public PathDto toDto() {
-    var cellPath = getCellPath();
-    if (cellPath.size() == 0) return null;
+    if (cellList.isEmpty()) {
+      return null;
+    }
 
     var dto = PathDto.newBuilder();
 
-    if (cellPath.get(0) instanceof CellPoint) dto.setPointType(PathDto.PointType.CELL_POINT);
-    else dto.setPointType(PathDto.PointType.ZONE_POINT);
+    if (cellList.getFirst() instanceof CellPoint) {
+      dto.setPointType(PathDto.PointType.CELL_POINT);
+    } else {
+      dto.setPointType(PathDto.PointType.ZONE_POINT);
+    }
 
-    cellPath.forEach(p -> dto.addCells(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
-    getWayPointList().forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+    cellList.forEach(p -> dto.addCells(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
+    waypointList.forEach(p -> dto.addWaypoints(IntPointDto.newBuilder().setX(p.x).setY(p.y)));
 
     return dto.build();
   }
