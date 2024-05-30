@@ -83,7 +83,6 @@ public class DiceHelperTest {
 
     assertEquals("Dice: 1, 10, 1, 11, 4, Successes: 3", DiceHelper.explodingSuccessDice(5,6, 3, -1));
   }
-
   @Test
   public void rerollDiceOnceTest() throws Exception{
     RunData.setCurrent(new RunData(null));
@@ -91,10 +90,11 @@ public class DiceHelperTest {
 
     assertEquals(16, DiceHelper.rerollDice(3,6,2));
   }
-
   @Test
   public void countShadowRunTest(){
     RunData.setCurrent(new RunData(null));
     RunData.setSeed(102312L);
+
+    assertEquals("Hits: 3 Ones: 2 *Gremlin Glitch*  Results: 1 6 4 1 6 5 4 ", DiceHelper.countShadowRun(5, 30, true, DiceHelper.ShadowrunEdition.EDITION_5));
   }
 }
