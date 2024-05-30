@@ -16,7 +16,7 @@ package net.rptools.maptool.model.player;
 
 import java.beans.PropertyChangeListener;
 
-interface PlayerDBPropertyChange {
+public interface PlayerDBPropertyChange {
 
   /**
    * Property change event name for when a player is added. Some databases may not support this

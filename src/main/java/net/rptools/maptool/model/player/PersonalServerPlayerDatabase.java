@@ -14,31 +14,22 @@
  */
 package net.rptools.maptool.model.player;
 
-import java.lang.reflect.InvocationTargetException;
-import java.security.NoSuchAlgorithmException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.HashSet;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
-public class PersonalServerPlayerDatabase implements PlayerDatabase {
+public class PersonalServerPlayerDatabase implements ServerSidePlayerDatabase {
 
   private final LocalPlayer player;
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
-  public PersonalServerPlayerDatabase() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    player =
-        new LocalPlayer(
-            AppPreferences.getDefaultUserName(),
-            Role.GM,
-            ServerConfig.getPersonalServerGMPassword());
+  public PersonalServerPlayerDatabase(LocalPlayer player) {
+    this.player = player;
   }
 
   @Override
@@ -46,9 +37,12 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
     return true; // Player always exists no matter what the name
   }
 
+  public LocalPlayer getPlayer() {
+    return player;
+  }
+
   @Override
-  public Player getPlayer(String playerName)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public Player getPlayer(String playerName) {
     return player;
   }
 
@@ -99,8 +93,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public boolean isPlayerRegistered(String name)
-      throws InterruptedException, InvocationTargetException {
+  public boolean isPlayerRegistered(String name) {
     return player != null && player.getName() != null && player.getName().equals(name);
   }
 
@@ -125,13 +118,8 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
+  public Set<Player> getOnlinePlayers() {
     return new HashSet<>(loggedInPlayers.getPlayers());
-  }
-
-  @Override
-  public boolean recordsOnlyConnectedPlayers() {
-    return true;
   }
 
   @Override
@@ -149,8 +137,7 @@ public class PersonalServerPlayerDatabase implements PlayerDatabase {
   }
 
   @Override
-  public Player getPlayerWithRole(String playerName, Player.Role role)
-      throws NoSuchAlgorithmException, InvalidKeySpecException {
+  public Player getPlayerWithRole(String playerName, Player.Role role) {
     return player; // There is no non GM personal server player so just return the GM
   }
 }

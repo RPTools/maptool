@@ -310,7 +310,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /** Run all callback macros for "onChangeSelection". */
   public static void doSelectedChanged() {
     for (HTMLFrame frame : frames.values()) {
-      if (frame.isVisible()) {
+      if (!frame.isHidden()) {
         HTMLPanelContainer.selectedChanged(frame.macroCallbacks);
       }
     }
@@ -319,7 +319,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   /** Run all callback macros for "onChangeImpersonated". */
   public static void doImpersonatedChanged() {
     for (HTMLFrame frame : frames.values()) {
-      if (frame.isVisible()) {
+      if (!frame.isHidden()) {
         HTMLPanelContainer.impersonatedChanged(frame.macroCallbacks);
       }
     }
@@ -333,7 +333,7 @@ public class HTMLFrame extends DockableFrame implements HTMLPanelContainer {
   public static void doTokenChanged(Token token) {
     if (token != null) {
       for (HTMLFrame frame : frames.values()) {
-        if (frame.isVisible()) {
+        if (!frame.isHidden()) {
           HTMLPanelContainer.tokenChanged(token, frame.macroCallbacks);
         }
       }

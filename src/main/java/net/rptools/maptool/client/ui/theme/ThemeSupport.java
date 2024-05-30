@@ -461,6 +461,7 @@ public class ThemeSupport {
         new ThemeDetails("Aah(Large Print)", AahLAF_LP.class, "Aah-LP.png", false),
         new ThemeDetails("Aah(Small Print)", AahLAF_SP.class, "Aah-SP.png", false),
         new ThemeDetails("Aah(Very Large Print)", AahLAF_VLP.class, "Aah-VLP.png", false),
+        new ThemeDetails("Aark", AarkLaF.class, "Aark.png", true),
       };
 
   /** The current theme being used. */

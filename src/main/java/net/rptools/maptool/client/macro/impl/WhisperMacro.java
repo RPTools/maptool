@@ -55,7 +55,7 @@ public class WhisperMacro extends AbstractMacro {
     playerName = (!playerNameMatch.equals("")) ? playerNameMatch : playerName;
 
     // Validate
-    if (!MapTool.isPlayerConnected(playerName)) {
+    if (!MapTool.getClient().isPlayerConnected(playerName)) {
       MapTool.addMessage(
           TextMessage.me(
               context.getTransformationHistory(),
