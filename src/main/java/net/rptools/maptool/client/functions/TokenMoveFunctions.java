@@ -25,6 +25,7 @@ import java.awt.geom.Rectangle2D;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -485,39 +486,27 @@ public class TokenMoveFunctions extends AbstractFunction {
     Zone zone = zr.getZone();
     Grid grid = zone.getGrid();
 
-    Path<ZonePoint> gridlessPath;
-    /*
-     * Lee: causes an NPE when used on a newly dropped token. While a true solution would probably be to create a "path" based on the token's coords when it is dropped on the map, the easy out
-     * here would be to just return a "0".
-     *
-     * Final Edit: attempting to create a default path for new drops had undesirable effects. Therefore, let's opt for the easy fix
-     */
-    int x = 0, y = 0;
-
-    try {
-      x = source.getLastPath().getCellPath().get(0).x;
-      y = source.getLastPath().getCellPath().get(0).y;
-    } catch (NullPointerException e) {
+    List<? extends AbstractPoint> cellPath =
+        source.getLastPath() == null ? Collections.emptyList() : source.getLastPath().getCellPath();
+    if (cellPath.isEmpty()) {
       return "0";
     }
 
     if (useTerrainModifiers && !returnFractionOnly) {
-      if (source.getLastPath().getLastWaypoint() instanceof CellPoint) {
-        CellPoint cp = (CellPoint) source.getLastPath().getLastWaypoint();
+      if (cellPath.getLast() instanceof CellPoint cp) {
         double trueDistance = cp.getDistanceTraveled(zone);
-
         return new BigDecimal(trueDistance).stripTrailingZeros().toPlainString();
       }
     }
 
     if (source.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
       if (zone.getGrid().getCapabilities().isPathingSupported()) {
+        var firstPoint = cellPath.getFirst();
         List<CellPoint> cplist = new ArrayList<CellPoint>();
         walker = grid.createZoneWalker();
-        walker.replaceLastWaypoint(new CellPoint(x, y));
-        for (AbstractPoint point : source.getLastPath().getCellPath()) {
+        walker.replaceLastWaypoint(new CellPoint(firstPoint.x, firstPoint.y));
+        for (AbstractPoint point : cellPath) {
           CellPoint tokenPoint = new CellPoint(point.x, point.y);
-          // walker.setWaypoints(tokenPoint);
           walker.replaceLastWaypoint(tokenPoint);
           cplist.add(tokenPoint);
         }
@@ -534,21 +523,18 @@ public class TokenMoveFunctions extends AbstractFunction {
         // return Integer.toString(walker.getDistance());
       }
     } else {
-      gridlessPath = new Path<ZonePoint>();
-      for (AbstractPoint point : source.getLastPath().getCellPath()) {
-        gridlessPath.addPathCell(new ZonePoint(point.x, point.y));
-      }
       double c = 0;
-      ZonePoint lastPoint = null;
-      for (ZonePoint zp : gridlessPath.getCellPath()) {
+      // Should be a ZonePoint, but the calculation just doesn't care.
+      AbstractPoint lastPoint = null;
+      for (var point : cellPath) {
         if (lastPoint == null) {
-          lastPoint = zp;
+          lastPoint = point;
           continue;
         }
-        int a = lastPoint.x - zp.x;
-        int b = lastPoint.y - zp.y;
+        int a = lastPoint.x - point.x;
+        int b = lastPoint.y - point.y;
         c += Math.hypot(a, b);
-        lastPoint = zp;
+        lastPoint = point;
       }
       c /= zone.getGrid().getSize(); // Number of "cells"
       c *= zone.getUnitsPerCell(); // "actual" distance traveled
