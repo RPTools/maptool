@@ -126,7 +126,7 @@ public class Path<T extends AbstractPoint> {
       path = (Path<T>) processPath;
 
     } else if (!keyToken.isSnapToGrid() && followerToken.isSnapToGrid()) {
-      NaiveWalker nw = new NaiveWalker(zone);
+      NaiveWalker nw = new NaiveWalker();
       Path<CellPoint> processPath = new Path<CellPoint>();
 
       CellPoint prevPoint = grid.convert(new ZonePoint(startPoint.x, startPoint.y));

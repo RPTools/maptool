@@ -20,6 +20,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Set;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.Path;
@@ -73,8 +74,8 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     }
   }
 
-  public CellPoint replaceLastWaypoint(CellPoint point) {
-    return replaceLastWaypoint(
+  public void replaceLastWaypoint(CellPoint point) {
+    replaceLastWaypoint(
         point,
         false,
         Collections.singleton(TerrainModifierOperation.NONE),
@@ -86,7 +87,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   }
 
   @Override
-  public CellPoint replaceLastWaypoint(
+  public void replaceLastWaypoint(
       CellPoint point,
       boolean restrictMovement,
       Set<TerrainModifierOperation> terrainModifiersIgnored,
@@ -105,7 +106,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     this.tokenMbl = tokenMbl;
 
     if (partialPaths.isEmpty()) {
-      return null;
+      return;
     }
     PartialPath oldPartial = partialPaths.remove(partialPaths.size() - 1);
 
@@ -115,7 +116,6 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
     partialPaths.add(
         new PartialPath(oldPartial.start, point, calculatePath(oldPartial.start, point)));
-    return oldPartial.end;
   }
 
   public Path<CellPoint> getPath(RenderPathWorker renderPathWorker) {
@@ -123,7 +123,7 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
     return getPath();
   }
 
-  public Path<CellPoint> getPath() {
+  public @Nonnull Path<CellPoint> getPath() {
     Path<CellPoint> path = new Path<>();
 
     synchronized (partialPaths) {

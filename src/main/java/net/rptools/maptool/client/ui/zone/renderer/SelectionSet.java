@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -80,7 +81,7 @@ public class SelectionSet {
   /**
    * @return path computation.
    */
-  public Path<ZonePoint> getGridlessPath() {
+  public @Nonnull Path<ZonePoint> getGridlessPath() {
     return gridlessPath;
   }
 
