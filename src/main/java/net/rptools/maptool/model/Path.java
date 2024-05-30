@@ -23,8 +23,12 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.NaiveWalker;
 import net.rptools.maptool.server.proto.PathDto;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class Path<T extends AbstractPoint> {
+  private static final Logger log = LogManager.getLogger(Path.class);
+
   private final List<T> cellList = new LinkedList<T>();
   private final List<T> waypointList = new LinkedList<T>();
 
@@ -55,53 +59,44 @@ public class Path<T extends AbstractPoint> {
     return (U) point.clone();
   }
 
-  public void addPathCell(T point) {
-    cellList.add(point);
+  public void appendWaypoint(T waypoint) {
+    cellList.add(copyPoint(waypoint));
+    waypointList.add(copyPoint(waypoint));
   }
 
-  public void addAllPathCells(List<T> cells) {
-    cellList.addAll(cells);
+  public void appendPartialPath(List<T> cells) {
+    if (cells.isEmpty()) {
+      return;
+    }
+
+    // If we have no waypoints yet, we must treat the first of `cells` as a waypoint.
+    if (waypointList.isEmpty()) {
+      log.warn("Attempt to add a partial path to a path, but no starting waypoint has been set.");
+      // Note that we always add the last point as a waypoint, so don't redundantly do so here.
+      if (cells.size() >= 2) {
+        waypointList.add(copyPoint(cells.getFirst()));
+      }
+    }
+
+    for (var cell : cells) {
+      cellList.add(copyPoint(cell));
+    }
+    waypointList.add(copyPoint(cells.getLast()));
   }
 
   public List<T> getCellPath() {
     return Collections.unmodifiableList(cellList);
   }
 
-  public void replaceLastPoint(T point) {
-    cellList.remove(cellList.size() - 1);
-    cellList.add(point);
-  }
-
-  public void addWayPoint(T point) {
-    waypointList.add(point);
-  }
-
   public boolean isWaypoint(T point) {
     return waypointList.contains(point);
   }
 
-  public T getLastWaypoint() {
-    if (waypointList.isEmpty()) return null;
-    return waypointList.get(waypointList.size() - 1);
-  }
-
   /**
-   * Lee: I wonder why this convenience method was never put in. Rectifying...
-   *
    * @return way point list for path
    */
   public List<T> getWayPointList() {
-    return waypointList;
-  }
-
-  /**
-   * Returns the last waypoint if there is one, or the last T point if there is not.
-   *
-   * @return a non-<code>null</code> location
-   */
-  public T getLastJunctionPoint() {
-    T temp = getLastWaypoint();
-    return temp != null ? temp : cellList.get(cellList.size() - 1);
+    return Collections.unmodifiableList(waypointList);
   }
 
   @SuppressWarnings("unchecked")
@@ -130,8 +125,10 @@ public class Path<T extends AbstractPoint> {
       Path<ZonePoint> processPath = new Path<ZonePoint>();
       for (T p : cellList) {
         ZonePoint tempPoint = (ZonePoint) buildVal.clone();
-        processPath.addPathCell(tempPoint);
-        if (waypointList.contains(p)) processPath.addWayPoint(tempPoint);
+        processPath.cellList.add(tempPoint);
+        if (waypointList.contains(p)) {
+          processPath.waypointList.add(tempPoint);
+        }
 
         if (buildVal.x < endPoint.x) buildVal.x += 100;
         else if (buildVal.x > endPoint.x) buildVal.x -= 100;
@@ -172,11 +169,11 @@ public class Path<T extends AbstractPoint> {
         for (T p : waypointCheck) {
           if (p instanceof ZonePoint) convPoint = grid.convert((ZonePoint) p);
           else convPoint = (CellPoint) p;
-          processPath.addAllPathCells(nw.calculatePath(prevPoint, convPoint));
+          processPath.cellList.addAll(nw.calculatePath(prevPoint, convPoint));
           prevPoint = convPoint;
         }
       }
-      processPath.addAllPathCells(nw.calculatePath(prevPoint, terminalPoint));
+      processPath.cellList.addAll(nw.calculatePath(prevPoint, terminalPoint));
 
       path = (Path<T>) processPath;
 
@@ -187,7 +184,7 @@ public class Path<T extends AbstractPoint> {
         T next = (T) convPoint.clone();
         next.x -= cellOffsetX;
         next.y -= cellOffsetY;
-        path.addWayPoint(next);
+        path.waypointList.add(next);
       }
 
     } else {
@@ -195,14 +192,14 @@ public class Path<T extends AbstractPoint> {
         T np = (T) cp.clone();
         np.x -= cellOffsetX;
         np.y -= cellOffsetY;
-        path.addPathCell(np);
+        path.cellList.add(np);
       }
 
       for (T cp : waypointList) {
         T np = (T) cp.clone();
         np.x -= cellOffsetX;
         np.y -= cellOffsetY;
-        path.addWayPoint(np);
+        path.waypointList.add(np);
       }
 
       /*

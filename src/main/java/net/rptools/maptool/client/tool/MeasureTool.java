@@ -159,8 +159,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
                       .convert(new ScreenPoint(mouseX, mouseY).convertToZone(renderer));
               walker.toggleWaypoint(cp);
             } else if (gridlessPath != null) {
-              gridlessPath.addWayPoint(new ZonePoint(currentGridlessPoint));
-              gridlessPath.addPathCell(new ZonePoint(currentGridlessPoint));
+              gridlessPath.appendWaypoint(currentGridlessPoint);
             }
           }
         });
@@ -180,7 +179,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       } else {
         currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
         gridlessPath = new Path<>();
-        gridlessPath.addPathCell(new ZonePoint(currentGridlessPoint));
+        gridlessPath.appendWaypoint(currentGridlessPoint);
       }
       renderer.repaint();
       return;

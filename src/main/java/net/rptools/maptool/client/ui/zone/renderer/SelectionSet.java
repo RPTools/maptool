@@ -77,8 +77,7 @@ public class SelectionSet {
       gridlessPath = new Path<>();
 
       currentGridlessPoint = new ZonePoint(token.getX(), token.getY());
-      gridlessPath.addWayPoint(new ZonePoint(currentGridlessPoint));
-      gridlessPath.addPathCell(new ZonePoint(currentGridlessPoint));
+      gridlessPath.appendWaypoint(currentGridlessPoint);
     }
   }
 
@@ -87,8 +86,7 @@ public class SelectionSet {
    */
   public @Nonnull Path<ZonePoint> getGridlessPath() {
     var result = gridlessPath.copy();
-    result.addWayPoint(new ZonePoint(currentGridlessPoint));
-    result.addPathCell(new ZonePoint(currentGridlessPoint));
+    result.appendWaypoint(currentGridlessPoint);
     return result;
   }
 
@@ -173,8 +171,7 @@ public class SelectionSet {
     if (walker != null && token.isSnapToGrid() && renderer.getZone().getGrid() != null) {
       walker.toggleWaypoint(renderer.getZone().getGrid().convert(location));
     } else {
-      gridlessPath.addWayPoint(location);
-      gridlessPath.addPathCell(location);
+      gridlessPath.appendWaypoint(location);
     }
   }
 

@@ -128,19 +128,14 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
 
     synchronized (partialPaths) {
       if (!partialPaths.isEmpty()) {
-        path.addPathCell(partialPaths.get(0).start);
+        path.appendWaypoint(partialPaths.getFirst().start);
+
         for (PartialPath partial : partialPaths) {
-          if (partial.path.size() > 1) {
-            // Remove duplicated cells (end of a path = start of next path)
-            path.addAllPathCells(partial.path.subList(1, partial.path.size()));
+          // First point is already in (end of a path = start of next path)
+          if (!partial.path.isEmpty()) {
+            path.appendPartialPath(partial.path.subList(1, partial.path.size()));
           }
         }
-      }
-    }
-
-    for (CellPoint cp : path.getCellPath()) {
-      if (isWaypoint(cp)) {
-        path.addWayPoint(cp);
       }
     }
 
@@ -223,7 +218,6 @@ public abstract class AbstractZoneWalker implements ZoneWalker {
   protected abstract List<CellPoint> calculatePath(CellPoint start, CellPoint end);
 
   protected static class PartialPath {
-
     final CellPoint start;
     final CellPoint end;
     final List<CellPoint> path;
