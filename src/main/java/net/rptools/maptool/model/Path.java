@@ -17,9 +17,6 @@ package net.rptools.maptool.model;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.zone.renderer.SelectionSet;
-import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.NaiveWalker;
 import net.rptools.maptool.server.proto.PathDto;
 import net.rptools.maptool.server.proto.drawing.IntPointDto;
@@ -99,203 +96,97 @@ public class Path<T extends AbstractPoint> {
     return Collections.unmodifiableList(waypointList);
   }
 
-  @SuppressWarnings("unchecked")
-  public Path<T> derive(
-      SelectionSet set,
-      Token keyToken,
-      Token followerToken,
-      ZonePoint startPoint,
-      ZonePoint endPoint) {
-
-    /*
-     * Lee: aiming to fix the following here (snapped = snapped to grid): a. fixing snapped tokens full path when following an unsnapped key token b. fixing zone point precision for unsnapped
-     * tokens following a snapped key token
-     */
-
-    Path<T> path = new Path<T>();
-    // Lee: caching
-    ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
-    Zone zone = zr.getZone();
-    Grid grid = zone.getGrid();
-
-    if (keyToken.isSnapToGrid() && !followerToken.isSnapToGrid()) {
-      ZonePoint buildVal = startPoint;
-      Path<ZonePoint> processPath = new Path<ZonePoint>();
-      for (T p : cellList) {
-        ZonePoint tempPoint = (ZonePoint) buildVal.clone();
-        processPath.cellList.add(tempPoint);
-        if (waypointList.contains(p)) {
-          processPath.waypointList.add(tempPoint);
-        }
-
-        if (buildVal.x < endPoint.x) buildVal.x += 100;
-        else if (buildVal.x > endPoint.x) buildVal.x -= 100;
-        if (buildVal.y < endPoint.y) buildVal.y += 100;
-        else if (buildVal.y > endPoint.y) buildVal.y -= 100;
-      }
-
-      path = (Path<T>) processPath;
-
-    } else if (!keyToken.isSnapToGrid() && followerToken.isSnapToGrid()) {
-      NaiveWalker nw = new NaiveWalker();
-      Path<CellPoint> processPath = new Path<CellPoint>();
-
-      CellPoint prevPoint = grid.convert(new ZonePoint(startPoint.x, startPoint.y));
-      CellPoint terminalPoint = grid.convert(endPoint);
-      CellPoint convPoint;
-
-      Path<ZonePoint> wpl = set.getGridlessPath();
-      List<T> waypointCheck = new LinkedList();
-      List<ZonePoint> cp = wpl.getCellPath();
-      ZonePoint keyStart = cp.get(0);
-      ZonePoint diffFromKey = new ZonePoint(keyStart.x - startPoint.x, keyStart.y - startPoint.y);
-
-      // Lee: list is unmodifiable, working around it
-      int indexCheck = 0;
-      for (ZonePoint zp : cp) {
-
-        if (indexCheck != 0 && indexCheck != cp.size() - 1 && !waypointCheck.contains(zp)) {
-          zp.x = zp.x + diffFromKey.x;
-          zp.y = zp.y + diffFromKey.y;
-          waypointCheck.add((T) zp);
-        }
-
-        indexCheck++;
-      }
-
-      if (!waypointCheck.isEmpty()) {
-        for (T p : waypointCheck) {
-          if (p instanceof ZonePoint) convPoint = grid.convert((ZonePoint) p);
-          else convPoint = (CellPoint) p;
-          processPath.cellList.addAll(nw.calculatePath(prevPoint, convPoint));
-          prevPoint = convPoint;
-        }
-      }
-      processPath.cellList.addAll(nw.calculatePath(prevPoint, terminalPoint));
-
-      path = (Path<T>) processPath;
-
-      for (T p : waypointCheck) {
-        if (p instanceof ZonePoint) convPoint = grid.convert((ZonePoint) p);
-        else convPoint = (CellPoint) p;
-
-        T next = (T) convPoint.clone();
-        path.waypointList.add(next);
-      }
-
-    } else {
-      AbstractPoint originPoint, tokenCell;
-      if (keyToken.isSnapToGrid()) {
-        originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
-      } else {
-        originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
-      }
-      if (followerToken.isSnapToGrid()) {
-        tokenCell =
-            zone.getGrid().convert(new ZonePoint(followerToken.getX(), followerToken.getY()));
-      } else {
-        tokenCell = new ZonePoint(followerToken.getX(), followerToken.getY());
-      }
-
-      var cellOffsetX = originPoint.x - tokenCell.x;
-      var cellOffsetY = originPoint.y - tokenCell.y;
-
-      for (T cp : cellList) {
-        T np = (T) cp.clone();
-        np.x -= cellOffsetX;
-        np.y -= cellOffsetY;
-        path.cellList.add(np);
-      }
-
-      for (T cp : waypointList) {
-        T np = (T) cp.clone();
-        np.x -= cellOffsetX;
-        np.y -= cellOffsetY;
-        path.waypointList.add(np);
-      }
-
-      /*
-       * Not exactly sure what Lee was trying to do here?
-       * I believe he was trying to return all the "cells" a non-STG token moved though?
-       * I'll leave the code below in case someone wants to clean it up later.
-       * For now, I've restored partial logic back to 1.4.0.5 above.
-       */
-
-      /*
-      	// Lee: solo movement
-      	if (keyToken.isSnapToGrid()) {
-      		for (T cp : cellList) {
-      			T np = (T) cp.clone();
-      			np.x -= cellOffsetX;
-      			np.y -= cellOffsetY;
-      			path.addPathCell(np);
-      		}
-
-      		for (T cp : waypointList) {
-      			T np = (T) cp.clone();
-      			np.x -= cellOffsetX;
-      			np.y -= cellOffsetY;
-      			path.addWayPoint(np);
-      		}
-      	} else {
-      		Path<CellPoint> reflectedPath = new Path<CellPoint>();
-      		NaiveWalker nw = new NaiveWalker(zone);
-      		Path<ZonePoint> wpl = set.getGridlessPath();
-
-      		if (cellList.size() > 2) {
-
-      			CellPoint prevPoint = grid.convert(new ZonePoint(startPoint.x, startPoint.y));
-      			CellPoint terminalPoint = grid.convert(endPoint);
-      			CellPoint convPoint;
-
-      			// Lee: since we already have the start point
-      			((List<T>) cellList).remove(0);
-
-      			for (T p : cellList) {
-      				convPoint = grid.convert((ZonePoint) p);
-      				reflectedPath.addAllPathCells(nw.calculatePath(prevPoint, convPoint));
-      				prevPoint = convPoint;
-      			}
-
-      		} else {
-      			reflectedPath.addAllPathCells(
-      					nw.calculatePath(grid.convert(startPoint), grid.convert(endPoint)));
-      		}
-
-      		ZonePoint buildVal = startPoint;
-      		Path<ZonePoint> processPath = new Path<ZonePoint>();
-
-      		for (CellPoint p : reflectedPath.getCellPath()) {
-      			ZonePoint tempPoint = (ZonePoint) buildVal.clone();
-      			processPath.addPathCell(tempPoint);
-
-      			if (buildVal.x < endPoint.x)
-      				buildVal.x += 100;
-      			else if (buildVal.x > endPoint.x)
-      				buildVal.x -= 100;
-      			if (buildVal.y < endPoint.y)
-      				buildVal.y += 100;
-      			else if (buildVal.y > endPoint.y)
-      				buildVal.y -= 100;
-      		}
-
-      		// processPath.addWayPoint(startPoint);
-      		for (T cp : waypointList) {
-      			ZonePoint np = (ZonePoint) cp;
-      			if (np != startPoint && np != endPoint)
-      				processPath.addWayPoint(np);
-      		}
-
-      		processPath.addWayPoint(endPoint);
-
-      		// Lee: replacing the last point in derived path for the more
-      		// accurate landing point
-      		processPath.replaceLastPoint(endPoint);
-      		path = (Path<T>) processPath;
-      	}
-      */
+  /** Create a related path that can be applied to a follower token. */
+  public Path<?> derive(Grid grid, Token keyToken, Token followerToken) {
+    if (keyToken.isSnapToGrid() && followerToken.isSnapToGrid()) {
+      // Assume T = CellPoint.
+      var originCell = grid.convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
+      var tokenCell = grid.convert(new ZonePoint(followerToken.getX(), followerToken.getY()));
+      return deriveSameSnapToGrid(this, originCell.x - tokenCell.x, originCell.y - tokenCell.y);
+    } else if (!keyToken.isSnapToGrid() && !followerToken.isSnapToGrid()) {
+      // Assume T = ZonePoint.
+      var originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
+      var tokenPoint = new ZonePoint(followerToken.getX(), followerToken.getY());
+      return deriveSameSnapToGrid(this, originPoint.x - tokenPoint.x, originPoint.y - tokenPoint.y);
+    } else if (keyToken.isSnapToGrid()) {
+      // Assume T = CellPoint.
+      return deriveFromSnapToGrid(
+          (Path<CellPoint>) this,
+          grid,
+          keyToken.getX() - followerToken.getX(),
+          keyToken.getY() - followerToken.getY());
+    } else /* (!keyToken.isSnapToGrid) */ {
+      // Assume T = ZonePoint.
+      return deriveFromNotSnapToGrid(
+          (Path<ZonePoint>) this,
+          grid,
+          keyToken.getX() - followerToken.getX(),
+          keyToken.getY() - followerToken.getY());
     }
-    return path;
+  }
+
+  private static <T extends AbstractPoint> Path<T> deriveSameSnapToGrid(
+      Path<T> path, int offsetX, int offsetY) {
+    var result = new Path<T>();
+    // Not much to do here except copy the list, offsetting the follower.
+    for (T point : path.cellList) {
+      var newPoint = copyPoint(point);
+      newPoint.x -= offsetX;
+      newPoint.y -= offsetY;
+      result.cellList.add(newPoint);
+    }
+
+    for (T point : path.waypointList) {
+      var newPoint = copyPoint(point);
+      newPoint.x -= offsetX;
+      newPoint.y -= offsetY;
+      result.waypointList.add(newPoint);
+    }
+    return result;
+  }
+
+  private static Path<ZonePoint> deriveFromSnapToGrid(
+      Path<CellPoint> path, Grid grid, int zoneOffsetX, int zoneOffsetY) {
+    var result = new Path<ZonePoint>();
+    // Only use the waypoint list, otherwise we get a path full of nothing but waypoints.
+    for (CellPoint point : path.waypointList) {
+      var newPoint = grid.convert(point);
+      newPoint.x -= zoneOffsetX;
+      newPoint.y -= zoneOffsetY;
+      result.appendWaypoint(newPoint);
+    }
+
+    return result;
+  }
+
+  private static Path<CellPoint> deriveFromNotSnapToGrid(
+      Path<ZonePoint> path, Grid grid, int zoneOffsetX, int zoneOffsetY) {
+    var result = new Path<CellPoint>();
+    // The waypoints are easy: just map them to the best grid cell. But we need to fill in all the
+    // intervening points, so use a naive walker for that.
+    // The cell points of path should just be the waypoints, so just ignore them.
+
+    CellPoint previous = null;
+    for (ZonePoint point : path.waypointList) {
+      var newPoint = new ZonePoint(point);
+      newPoint.x -= zoneOffsetX;
+      newPoint.y -= zoneOffsetY;
+      var current = grid.convert(newPoint);
+
+      if (previous == null) {
+        result.appendWaypoint(current);
+        previous = current;
+        continue;
+      }
+
+      var walker = new NaiveWalker();
+      var walkerPath = walker.calculatePath(previous, current);
+      // Path will be a list: [previous, ..., current]. We already have previous, so chop that off.
+      result.appendPartialPath(walkerPath.subList(1, walkerPath.size()));
+      previous = current;
+    }
+
+    return result;
   }
 
   public static Path<?> fromDto(PathDto dto) {
@@ -313,13 +204,11 @@ public class Path<T extends AbstractPoint> {
   }
 
   public PathDto toDto() {
-    if (cellList.isEmpty()) {
-      return null;
-    }
-
     var dto = PathDto.newBuilder();
 
-    if (cellList.getFirst() instanceof CellPoint) {
+    // An empty path cannot tell what kind of points it is supposed to contain. Arbitrarily assign
+    // it as cell points.
+    if (cellList.isEmpty() || cellList.getFirst() instanceof CellPoint) {
       dto.setPointType(PathDto.PointType.CELL_POINT);
     } else {
       dto.setPointType(PathDto.PointType.ZONE_POINT);

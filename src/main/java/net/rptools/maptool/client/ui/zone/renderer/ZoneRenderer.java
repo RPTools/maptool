@@ -460,17 +460,11 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
                * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
                * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
                */
-              var endPoint = new ZonePoint(token.getX() + offsetX, token.getY() + offsetY);
-              var tokenPath =
-                  path.derive(
-                      set, keyToken, token, token.getOriginPoint(), new ZonePoint(endPoint));
+              var tokenPath = path.derive(zone.getGrid(), keyToken, token);
 
-              token.setX(endPoint.x);
-              token.setY(endPoint.y);
+              token.setX(token.getX() + offsetX);
+              token.setY(token.getY() + offsetY);
               token.setLastPath(tokenPath);
-
-              // Lee: setting originPoint to landing point
-              token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));
 
               flush(token);
               MapTool.serverCommand().putToken(zone.getId(), token);

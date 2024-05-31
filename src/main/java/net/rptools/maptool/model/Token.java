@@ -242,8 +242,6 @@ public class Token implements Cloneable {
   private int lastY;
   private Path<? extends AbstractPoint> lastPath;
 
-  // Lee: for use in added path calculations
-  private transient ZonePoint tokenOrigin = null;
   private boolean snapToScale = true; // Whether the scaleX and scaleY represent snap-to-grid
   // measurements
 
@@ -1264,19 +1262,6 @@ public class Token implements Cloneable {
   public void setY(int y) {
     lastY = this.y;
     this.y = y;
-  }
-
-  // Lee: added functions necessary for path computations
-  public void setOriginPoint(ZonePoint p) {
-    tokenOrigin = p;
-  }
-
-  public ZonePoint getOriginPoint() {
-    if (tokenOrigin == null) {
-      tokenOrigin = new ZonePoint(getX(), getY());
-    }
-
-    return tokenOrigin;
   }
 
   public void setLastPath(Path<? extends AbstractPoint> path) {
