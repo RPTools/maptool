@@ -429,8 +429,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             List<GUID> filteredTokens = new ArrayList<GUID>();
             moveTimer.stop("setup");
 
-            int offsetX, offsetY;
-
             moveTimer.start("eachtoken");
             for (GUID tokenGUID : selectionSet) {
               Token token = zone.getToken(tokenGUID);
@@ -440,38 +438,20 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
                 continue;
               }
 
-              if (token.isSnapToGrid()
-                  && (!AppPreferences.getTokensSnapWhileDragging() || !keyToken.isSnapToGrid())) {
-                // convert to Cellpoint and back to ensure token ends up at correct X and Y
-                CellPoint cellEnd =
-                    zone.getGrid()
-                        .convert(
-                            new ZonePoint(
-                                token.getX() + set.getOffsetX(), token.getY() + set.getOffsetY()));
-                ZonePoint pointEnd = cellEnd.convertToZonePoint(zone.getGrid());
-                offsetX = pointEnd.x - token.getX();
-                offsetY = pointEnd.y - token.getY();
-              } else {
-                offsetX = set.getOffsetX();
-                offsetY = set.getOffsetY();
-              }
-
-              /*
-               * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
-               * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
-               */
               var tokenPath = path.derive(zone.getGrid(), keyToken, token);
-
-              token.setX(token.getX() + offsetX);
-              token.setY(token.getY() + offsetY);
               token.setLastPath(tokenPath);
+
+              var lastPoint = tokenPath.getWayPointList().getLast();
+              var endPoint =
+                  switch (lastPoint) {
+                    case CellPoint cp -> zone.getGrid().convert(cp);
+                    case ZonePoint zp -> zp;
+                  };
+              token.setX(endPoint.x);
+              token.setY(endPoint.y);
 
               flush(token);
               MapTool.serverCommand().putToken(zone.getId(), token);
-
-              // No longer need this version
-              // Lee: redundant flush() already did this above
-              // replacementImageMap.remove(token);
 
               // Only add certain tokens to the list to process in the move
               // Macro function(s).
