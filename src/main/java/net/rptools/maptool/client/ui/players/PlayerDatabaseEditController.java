@@ -37,7 +37,6 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javax.crypto.NoSuchPaddingException;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
 import net.rptools.maptool.language.I18N;
@@ -319,7 +318,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
 
   /** Updates the values in the database based on the form values. */
   private void updateDatabase() {
-    Players players = new Players(MapTool.getClient().getPlayerDatabase());
+    Players players = new Players();
     Role role =
         roleCombo.getSelectionModel().getSelectedItem().equals(GM_ROLE_NAME)
             ? Role.GM
@@ -367,10 +366,7 @@ public class PlayerDatabaseEditController implements SwingJavaFXDialogController
       validationErrors.add(ValidationErrors.NAME_MISSING);
     } else if (playerNameText.isEditable()) {
       try {
-        PlayerInfo playerInfo =
-            new Players(MapTool.getClient().getPlayerDatabase())
-                .getPlayer(playerNameText.getText())
-                .get();
+        PlayerInfo playerInfo = new Players().getPlayer(playerNameText.getText()).get();
         if (playerInfo != null) {
           validationErrors.add(ValidationErrors.PLAYER_EXISTS);
         }

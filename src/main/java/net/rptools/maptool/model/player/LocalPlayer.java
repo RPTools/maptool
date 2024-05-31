@@ -17,7 +17,6 @@ package net.rptools.maptool.model.player;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Arrays;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.util.cipher.CipherUtil;
 
@@ -26,10 +25,6 @@ public class LocalPlayer extends Player {
 
   private final String plainTextPassword;
   private CipherUtil.Key password;
-
-  public LocalPlayer() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    this(AppPreferences.getDefaultUserName(), Role.GM, "");
-  }
 
   public LocalPlayer(String name, Role role, String plainTextPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -62,6 +57,10 @@ public class LocalPlayer extends Player {
 
   public CipherUtil.Key getPassword() {
     return password;
+  }
+
+  public String getPlainTextPassword() {
+    return plainTextPassword;
   }
 
   @Override

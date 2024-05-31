@@ -57,60 +57,66 @@ message WallTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
-  bool mouse_slope_greater = 6;
-  IntPointDto path_vertex = 7;
-  bool double_wide = 8;
-  repeated IntPointDto points = 9;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  IntPointDto path_vertex = 8;
+  bool double_wide = 9;
+  repeated IntPointDto points = 10;
 }
 
 message LineTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
-  bool mouse_slope_greater = 6;
-  string quadrant = 7;
-  IntPointDto path_vertex = 8;
-  bool double_wide = 9;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
+  bool double_wide = 10;
 }
 
 message BlastTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
-  string direction = 6;
-  int32 offset_x = 7;
-  int32 offset_y = 8;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
+  int32 offset_x = 8;
+  int32 offset_y = 9;
 }
 
 message ConeTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
-  string direction = 6;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
+  string direction = 7;
 }
 
 message BurstTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message RadiusTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message LineCellTemplateDto {
@@ -120,15 +126,18 @@ message LineCellTemplateDto {
   string zoneId = 4;
   IntPointDto vertex = 5;
   int32 radius = 6;
-  IntPointDto path_vertex = 7;
+  bool mouse_slope_greater = 7;
+  string quadrant = 8;
+  IntPointDto path_vertex = 9;
 }
 
 message RadiusCellTemplateDto {
   string id = 1;
   string layer = 2;
   google.protobuf.StringValue name = 3;
-  IntPointDto vertex = 4;
-  int32 radius = 5;
+  string zoneId = 4;
+  IntPointDto vertex = 5;
+  int32 radius = 6;
 }
 
 message DrawablesGroupDto {

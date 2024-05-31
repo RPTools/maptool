@@ -19,10 +19,6 @@ public class ZonePoint extends AbstractPoint {
     super(x, y);
   }
 
-  public ZonePoint(ZonePoint other) {
-    this(other.x, other.y);
-  }
-
   @Override
   public String toString() {
     return "ZonePoint" + super.toString();

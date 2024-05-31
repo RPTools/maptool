@@ -17,6 +17,7 @@ package net.rptools.maptool.client.tool.drawing;
 import java.awt.Point;
 import java.awt.Polygon;
 import java.awt.event.MouseMotionListener;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.LineSegment;
 import net.rptools.maptool.model.drawing.Pen;
@@ -39,9 +40,9 @@ public class PolygonTool extends LineTool implements MouseMotionListener {
   }
 
   @Override
-  protected void completeDrawable(Pen pen, Drawable drawable) {
+  protected void completeDrawable(GUID zoneGUID, Pen pen, Drawable drawable) {
     LineSegment line = (LineSegment) drawable;
-    super.completeDrawable(pen, new ShapeDrawable(getPolygon(line)));
+    super.completeDrawable(zoneGUID, pen, new ShapeDrawable(getPolygon(line)));
   }
 
   @Override

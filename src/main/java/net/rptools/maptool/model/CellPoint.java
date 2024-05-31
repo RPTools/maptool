@@ -43,10 +43,6 @@ public class CellPoint extends AbstractPoint {
     this.distanceTraveledWithoutTerrain = distanceTraveledWithoutTerrain;
   }
 
-  public CellPoint(CellPoint other) {
-    this(other.x, other.y);
-  }
-
   @Override
   public String toString() {
     return "CellPoint" + super.toString();

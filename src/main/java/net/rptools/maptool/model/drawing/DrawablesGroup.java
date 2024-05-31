@@ -18,11 +18,8 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import java.util.ArrayList;
 import java.util.List;
-import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.DrawablesGroupDto;
 
@@ -42,29 +39,15 @@ public class DrawablesGroup extends AbstractDrawing {
     this.drawableList = drawableList;
   }
 
-  public DrawablesGroup(DrawablesGroup other) {
-    super(other);
-
-    this.drawableList = new ArrayList<>(other.drawableList.size());
-    for (final var element : other.drawableList) {
-      this.drawableList.add(new DrawnElement(element));
-    }
-  }
-
-  @Override
-  public Drawable copy() {
-    return new DrawablesGroup(this);
-  }
-
   public List<DrawnElement> getDrawableList() {
     return drawableList;
   }
 
   @Override
-  public Rectangle getBounds(Zone zone) {
+  public Rectangle getBounds() {
     Rectangle bounds = null;
     for (DrawnElement element : drawableList) {
-      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds(zone));
+      Rectangle drawnBounds = new Rectangle(element.getDrawable().getBounds());
       // Handle pen size
       Pen pen = element.getPen();
       int penSize = (int) (pen.getThickness() / 2 + 1);
@@ -81,18 +64,18 @@ public class DrawablesGroup extends AbstractDrawing {
   }
 
   @Override
-  public @Nonnull Area getArea(Zone zone) {
-    Area area = new Area();
+  public Area getArea() {
+    Area area = null;
     for (DrawnElement element : drawableList) {
       boolean isEraser = element.getPen().isEraser();
-
-      if (isEraser) {
-        // Optimization: erasing from nothing is a no-op.
-        if (!area.isEmpty()) {
-          area.subtract(element.getDrawable().getArea(zone));
-        }
+      if (area == null) {
+        if (!isEraser) area = new Area(element.getDrawable().getArea());
       } else {
-        area.add(element.getDrawable().getArea(zone));
+        if (isEraser) {
+          area.subtract(element.getDrawable().getArea());
+        } else {
+          area.add(element.getDrawable().getArea());
+        }
       }
     }
     return area;
@@ -109,29 +92,16 @@ public class DrawablesGroup extends AbstractDrawing {
     return DrawableDto.newBuilder().setDrawablesGroup(dto).build();
   }
 
-  public static DrawablesGroup fromDto(DrawablesGroupDto dto) {
-    var id = GUID.valueOf(dto.getId());
-    var elements = new ArrayList<DrawnElement>();
-    var elementDtos = dto.getDrawnElementsList();
-    elementDtos.forEach(e -> elements.add(DrawnElement.fromDto(e)));
-    var drawable = new DrawablesGroup(id, elements);
-    if (dto.hasName()) {
-      drawable.setName(dto.getName().getValue());
-    }
-    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
-    return drawable;
-  }
-
   @Override
-  protected void draw(Zone zone, Graphics2D g) {
+  protected void draw(Graphics2D g) {
     // This should never be called
     for (DrawnElement element : drawableList) {
-      element.getDrawable().draw(zone, g, element.getPen());
+      element.getDrawable().draw(g, element.getPen());
     }
   }
 
   @Override
-  protected void drawBackground(Zone zone, Graphics2D g) {
+  protected void drawBackground(Graphics2D g) {
     // This should never be called
   }
 }

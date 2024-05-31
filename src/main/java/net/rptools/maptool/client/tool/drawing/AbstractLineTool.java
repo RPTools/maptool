@@ -95,7 +95,7 @@ public abstract class AbstractLineTool extends AbstractDrawingTool {
     if (isBackgroundFill(e) && line.getPoints().size() > 2) {
       drawable = new ShapeDrawable(getPolygon(trimLine));
     }
-    completeDrawable(getPen(), drawable);
+    completeDrawable(renderer.getZone().getId(), getPen(), drawable);
 
     line = null;
     currentX = -1;

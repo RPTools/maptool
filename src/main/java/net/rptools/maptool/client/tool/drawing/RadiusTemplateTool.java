@@ -220,6 +220,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
     } // endif
     template = createBaseTemplate();
     template.setVertex(vertex);
+    template.setZoneId(renderer.getZone().getId());
     controlOffset = null;
     renderer.repaint();
   }
@@ -315,7 +316,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       AffineTransform newTransform = g.getTransform();
       newTransform.concatenate(getPaintTransform(renderer));
       g.setTransform(newTransform);
-      template.draw(renderer.getZone(), g, pen);
+      template.draw(g, pen);
       Paint paint = pen.getPaint() != null ? pen.getPaint().getPaint() : null;
       paintCursor(g, paint, pen.getThickness(), template.getVertex());
       g.setTransform(old);
@@ -356,6 +357,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
   @Override
   protected void detachFrom(ZoneRenderer renderer) {
     super.detachFrom(renderer);
+    template.setZoneId(null);
     renderer.repaint();
   }
 
@@ -364,6 +366,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
    */
   @Override
   protected void attachTo(ZoneRenderer renderer) {
+    template.setZoneId(renderer.getZone().getId());
     renderer.repaint();
     super.attachTo(renderer);
   }
@@ -412,7 +415,7 @@ public class RadiusTemplateTool extends AbstractDrawingTool implements MouseMoti
       template.setRadius(getRadiusAtMouse(e));
       ZonePoint vertex = template.getVertex();
       ZonePoint newPoint = new ZonePoint(vertex.x, vertex.y);
-      completeDrawable(getPen(), template);
+      completeDrawable(renderer.getZone().getId(), getPen(), template);
       setIsEraser(false);
       resetTool(newPoint);
     }

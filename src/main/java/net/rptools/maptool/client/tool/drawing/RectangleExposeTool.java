@@ -64,17 +64,17 @@ public class RectangleExposeTool extends RectangleTool {
   }
 
   @Override
-  protected void completeDrawable(Pen pen, Drawable drawable) {
+  protected void completeDrawable(GUID zoneId, Pen pen, Drawable drawable) {
     if (!MapTool.getPlayer().isGM()) {
       MapTool.showError("msg.error.fogexpose");
       MapTool.getFrame().refresh();
       return;
     }
-    Zone zone = getZone();
+    Zone zone = MapTool.getCampaign().getZone(zoneId);
 
-    Rectangle bounds = drawable.getBounds(zone);
+    Rectangle bounds = drawable.getBounds();
     Area area = new Area(bounds);
-    Set<GUID> selectedToks = renderer.getSelectedTokenSet();
+    Set<GUID> selectedToks = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (pen.isEraser()) {
       zone.hideArea(area, selectedToks);
       MapTool.serverCommand().hideFoW(zone.getId(), area, selectedToks);

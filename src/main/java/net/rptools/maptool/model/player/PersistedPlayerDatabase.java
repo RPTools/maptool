@@ -23,7 +23,7 @@ import javax.crypto.NoSuchPaddingException;
 import net.rptools.maptool.model.player.Player.Role;
 
 /** Interface implemented by player databases that persist their information between runs. */
-public interface PersistedPlayerDatabase extends PlayerDatabase, PlayerDBPropertyChange {
+public interface PersistedPlayerDatabase {
 
   /**
    * Disables the specified player. This will not boot the player from the server.

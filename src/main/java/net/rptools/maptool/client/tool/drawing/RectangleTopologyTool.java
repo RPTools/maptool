@@ -108,8 +108,6 @@ public class RectangleTopologyTool extends AbstractDrawingTool implements MouseM
 
   @Override
   public void mouseMoved(MouseEvent e) {
-    super.mouseMoved(e);
-
     setIsEraser(isEraser(e));
 
     ZonePoint p = getPoint(e);

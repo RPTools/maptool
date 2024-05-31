@@ -30,12 +30,8 @@ public class AI_Tool extends DefaultTool {
   @Override
   public void actionPerformed(ActionEvent e) {
     AppPreferences.setUseAstarPathfinding(isSelected());
-
-    var client = MapTool.getClient();
-    var policy = client.getServerPolicy();
-    policy.setUsingAstarPathfinding(isSelected());
-    client.setServerPolicy(policy);
-    client.getServerCommand().setServerPolicy(policy);
+    MapTool.getServerPolicy().setUsingAstarPathfinding(isSelected());
+    MapTool.updateServerPolicy();
 
     // Trigger AI_UseVblTool's isAvailable
     MapTool.getFrame().getToolbox().updateTools();

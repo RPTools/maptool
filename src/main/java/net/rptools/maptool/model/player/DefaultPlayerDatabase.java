@@ -29,13 +29,13 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  * This class provides the implementation for the default player database, where any one can connect
  * as long as they know the role password. This follows the standard behaviour for 1.9 and earlier.
  */
-public class DefaultPlayerDatabase implements ServerSidePlayerDatabase {
+public class DefaultPlayerDatabase implements PlayerDatabase {
 
   private final CipherUtil.Key playerPassword;
   private final CipherUtil.Key gmPassword;
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
 
-  public DefaultPlayerDatabase(String playerPassword, String gmPassword)
+  DefaultPlayerDatabase(String playerPassword, String gmPassword)
       throws NoSuchAlgorithmException,
           InvalidKeySpecException,
           NoSuchPaddingException,
@@ -109,8 +109,13 @@ public class DefaultPlayerDatabase implements ServerSidePlayerDatabase {
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() {
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
     return loggedInPlayers.getPlayers();
+  }
+
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return true;
   }
 
   @Override

@@ -251,7 +251,7 @@ public class DrawingFunctions extends AbstractFunction {
     dinfo.addProperty("name", d.getName());
     dinfo.addProperty("layer", el.getDrawable().getLayer().name());
     dinfo.addProperty("type", getDrawbleType(d));
-    dinfo.add("bounds", boundsToJSON(map, d));
+    dinfo.add("bounds", boundsToJSON(d));
     dinfo.addProperty("penColor", paintToString(el.getPen().getPaint()));
     dinfo.addProperty("fillColor", paintToString(el.getPen().getBackgroundPaint()));
     dinfo.addProperty("opacity", el.getPen().getOpacity());
@@ -262,12 +262,12 @@ public class DrawingFunctions extends AbstractFunction {
     return dinfo;
   }
 
-  private JsonObject boundsToJSON(Zone map, AbstractDrawing d) {
+  private JsonObject boundsToJSON(AbstractDrawing d) {
     JsonObject binfo = new JsonObject();
-    binfo.addProperty("x", d.getBounds(map).x);
-    binfo.addProperty("y", d.getBounds(map).y);
-    binfo.addProperty("width", d.getBounds(map).width);
-    binfo.addProperty("height", d.getBounds(map).height);
+    binfo.addProperty("x", d.getBounds().x);
+    binfo.addProperty("y", d.getBounds().y);
+    binfo.addProperty("width", d.getBounds().width);
+    binfo.addProperty("height", d.getBounds().height);
     return binfo;
   }
 

@@ -76,7 +76,7 @@ public class DiamondTool extends AbstractDrawingTool implements MouseMotionListe
           return;
         }
         // ToolHelper.drawDiamondMeasurement(renderer, null, diamond);
-        completeDrawable(getPen(), new ShapeDrawable(diamond, false));
+        completeDrawable(renderer.getZone().getId(), getPen(), new ShapeDrawable(diamond, false));
         diamond = null;
       }
       setIsEraser(isEraser(e));
