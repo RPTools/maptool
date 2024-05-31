@@ -395,7 +395,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
     removeMoveSelectionSet(keyTokenId);
     MapTool.serverCommand().stopTokenMove(getZone().getId(), keyTokenId);
-    Token keyToken = zone.getToken(keyTokenId);
+    Token keyToken = new Token(zone.getToken(keyTokenId), true);
 
     /*
      * Lee: if the lead token is snapped-to-grid and has not moved, every follower should return to where they were. Flag set at PointerTool and StampTool's stopTokenDrag() Handling the rest here.
@@ -422,15 +422,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
             boolean topologyTokenMoved = false; // If any token has topology we need to reset FoW
 
-            // Lee: the 1st of evils. changing it to handle proper computation
-            // for a key token's snapped state
-            AbstractPoint originPoint, tokenCell;
-            if (keyToken.isSnapToGrid()) {
-              originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
-            } else {
-              originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
-            }
-
             Path<? extends AbstractPoint> path =
                 set.getWalker() != null ? set.getWalker().getPath() : set.getGridlessPath();
             // Jamz: add final path render here?
@@ -447,21 +438,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
               // set but getToken() will return null.
               if (token == null) {
                 continue;
-              }
-
-              // Lee: get offsets based on key token's snapped state
-              if (token.isSnapToGrid()) {
-                tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
-              } else {
-                tokenCell = new ZonePoint(token.getX(), token.getY());
-              }
-
-              int cellOffX, cellOffY;
-              if (token.isSnapToGrid() == keyToken.isSnapToGrid()) {
-                cellOffX = originPoint.x - tokenCell.x;
-                cellOffY = originPoint.y - tokenCell.y;
-              } else {
-                cellOffX = cellOffY = 0; // not used unless both are of same SnapToGrid
               }
 
               if (token.isSnapToGrid()
@@ -484,8 +460,14 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
                * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
                * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
                */
+              var endPoint = new ZonePoint(token.getX() + offsetX, token.getY() + offsetY);
+              var tokenPath =
+                  path.derive(
+                      set, keyToken, token, token.getOriginPoint(), new ZonePoint(endPoint));
 
-              token.applyMove(set, path, offsetX, offsetY, keyToken, cellOffX, cellOffY);
+              token.setX(endPoint.x);
+              token.setY(endPoint.y);
+              token.setLastPath(tokenPath);
 
               // Lee: setting originPoint to landing point
               token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));

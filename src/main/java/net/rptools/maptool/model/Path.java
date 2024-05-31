@@ -104,8 +104,6 @@ public class Path<T extends AbstractPoint> {
       SelectionSet set,
       Token keyToken,
       Token followerToken,
-      int cellOffsetX,
-      int cellOffsetY,
       ZonePoint startPoint,
       ZonePoint endPoint) {
 
@@ -182,12 +180,26 @@ public class Path<T extends AbstractPoint> {
         else convPoint = (CellPoint) p;
 
         T next = (T) convPoint.clone();
-        next.x -= cellOffsetX;
-        next.y -= cellOffsetY;
         path.waypointList.add(next);
       }
 
     } else {
+      AbstractPoint originPoint, tokenCell;
+      if (keyToken.isSnapToGrid()) {
+        originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
+      } else {
+        originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
+      }
+      if (followerToken.isSnapToGrid()) {
+        tokenCell =
+            zone.getGrid().convert(new ZonePoint(followerToken.getX(), followerToken.getY()));
+      } else {
+        tokenCell = new ZonePoint(followerToken.getX(), followerToken.getY());
+      }
+
+      var cellOffsetX = originPoint.x - tokenCell.x;
+      var cellOffsetY = originPoint.y - tokenCell.y;
+
       for (T cp : cellList) {
         T np = (T) cp.clone();
         np.x -= cellOffsetX;
