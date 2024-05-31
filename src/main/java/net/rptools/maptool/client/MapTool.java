@@ -29,6 +29,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.SecondaryLoop;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
@@ -42,6 +43,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
+import javafx.application.Platform;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -1472,6 +1474,15 @@ public class MapTool {
     return "NOT_CONFIGURED";
   }
 
+  private static void initJavaFX() {
+    var eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+    SecondaryLoop secondaryLoop = eventQueue.createSecondaryLoop();
+    Platform.startup(secondaryLoop::exit);
+    secondaryLoop.enter();
+
+    Platform.setImplicitExit(false); // necessary to use JavaFX later
+  }
+
   public static void main(String[] args) {
     log.info("********************************************************************************");
     log.info("**                                                                            **");
@@ -1609,7 +1620,9 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
+    initJavaFX();
+
+    final SplashScreen splash = new SplashScreen(getVersion());
 
     try {
       ThemeSupport.loadTheme();
