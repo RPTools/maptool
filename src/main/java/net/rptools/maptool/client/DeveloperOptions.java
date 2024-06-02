@@ -41,7 +41,12 @@ public class DeveloperOptions {
 
     /** When enabled, recalculates the grid shape each time it is needed. */
     IgnoreGridShapeCache("ignoreGridShapeCache"),
-    ;
+
+    /**
+     * When enabled, highlights the important points used during token drags, for example, the drag
+     * anchor and starting position of the cursor.
+     */
+    DebugTokenDragging("debugTokenDragging");
 
     private final String key;
 

@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
@@ -330,25 +331,29 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
 
-  public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint point) {
+  public @Nullable ZonePoint getKeyTokenDragAnchorPosition(GUID keyToken) {
+    SelectionSet set = selectionSetMap.get(keyToken);
+    if (set == null) {
+      return null;
+    }
+    return set.getKeyTokenDragAnchorPosition();
+  }
+
+  public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint dragAnchorPosition) {
     SelectionSet set = selectionSetMap.get(keyToken);
     if (set == null) {
       return false;
     }
-    Token token = zone.getToken(keyToken);
-    int x = point.x - token.getX();
-    int y = point.y - token.getY();
 
-    return set.offsetX != x || set.offsetY != y;
+    return !set.getKeyTokenDragAnchorPosition().equals(dragAnchorPosition);
   }
 
-  public void updateMoveSelectionSet(GUID keyToken, ZonePoint offset) {
+  public void updateMoveSelectionSet(GUID keyToken, ZonePoint latestPoint) {
     SelectionSet set = selectionSetMap.get(keyToken);
     if (set == null) {
       return;
     }
-    Token token = zone.getToken(keyToken);
-    set.setOffset(offset.x - token.getX(), offset.y - token.getY());
+    set.update(latestPoint);
     repaintDebouncer.dispatch(); // Jamz: may cause flicker when using AI
   }
 
@@ -441,14 +446,15 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
               var tokenPath = path.derive(zone.getGrid(), keyToken, token);
               token.setLastPath(tokenPath);
 
+              // This is the last *anchor* point.
               var lastPoint = tokenPath.getWayPointList().getLast();
               var endPoint =
                   switch (lastPoint) {
-                    case CellPoint cp -> zone.getGrid().convert(cp);
+                    case CellPoint cp -> token.getDragAnchorAsIfLocatedInCell(zone, cp);
                     case ZonePoint zp -> zp;
                   };
-              token.setX(endPoint.x);
-              token.setY(endPoint.y);
+              token.moveDragAnchorTo(zone, endPoint);
+              log.info("Token end pos: {}, {}", token.getX(), token.getY());
 
               flush(token);
               MapTool.serverCommand().putToken(zone.getId(), token);
