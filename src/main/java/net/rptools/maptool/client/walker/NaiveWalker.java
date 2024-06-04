@@ -16,20 +16,11 @@ package net.rptools.maptool.client.walker;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.TokenFootprint;
-import net.rptools.maptool.model.Zone;
 
-public class NaiveWalker extends AbstractZoneWalker {
-  public NaiveWalker(Zone zone) {
-    super(zone);
-  }
+// Like a ZoneWalker, but only supports calculatePath().
+public class NaiveWalker {
 
-  private double distance;
-
-  @Override
   public List<CellPoint> calculatePath(CellPoint start, CellPoint end) {
     List<CellPoint> list = new ArrayList<CellPoint>();
 
@@ -50,22 +41,6 @@ public class NaiveWalker extends AbstractZoneWalker {
 
       count++;
     }
-    distance = (list.size() - 1) * 5;
     return list;
-  }
-
-  public double getDistance() {
-    return distance;
-  }
-
-  @Override
-  public void setFootprint(TokenFootprint footprint) {
-    // Not needed/used here
-    System.out.println("Should not see this ever!");
-  }
-
-  @Override
-  public Map<CellPoint, Set<CellPoint>> getBlockedMoves() {
-    return null;
   }
 }

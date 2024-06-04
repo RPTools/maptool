@@ -51,7 +51,6 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.swing.SwingUtil;
-import net.rptools.maptool.client.ui.zone.renderer.SelectionSet;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -243,8 +242,6 @@ public class Token implements Cloneable {
   private int lastY;
   private Path<? extends AbstractPoint> lastPath;
 
-  // Lee: for use in added path calculations
-  private transient ZonePoint tokenOrigin = null;
   private boolean snapToScale = true; // Whether the scaleX and scaleY represent snap-to-grid
   // measurements
 
@@ -1265,46 +1262,6 @@ public class Token implements Cloneable {
   public void setY(int y) {
     lastY = this.y;
     this.y = y;
-  }
-
-  // Lee: added functions necessary for path computations
-  public void setOriginPoint(ZonePoint p) {
-    tokenOrigin = p;
-  }
-
-  public ZonePoint getOriginPoint() {
-    if (tokenOrigin == null) {
-      tokenOrigin = new ZonePoint(getX(), getY());
-    }
-
-    return tokenOrigin;
-  }
-
-  /*
-   * Lee: changing this to apply new X and Y values (as end point) for the token BEFORE its path is
-   * computed. Path to be saved will be computed here instead of in ZoneRenderer
-   */
-  public void applyMove(
-      SelectionSet set,
-      Path<? extends AbstractPoint> followerPath,
-      int xOffset,
-      int yOffset,
-      Token keyToken,
-      int cellOffX,
-      int cellOffY) {
-    setX(x + xOffset);
-    setY(y + yOffset);
-    lastPath =
-        followerPath != null
-            ? followerPath.derive(
-                set,
-                keyToken,
-                this,
-                cellOffX,
-                cellOffY,
-                getOriginPoint(),
-                new ZonePoint(getX(), getY()))
-            : null;
   }
 
   public void setLastPath(Path<? extends AbstractPoint> path) {
