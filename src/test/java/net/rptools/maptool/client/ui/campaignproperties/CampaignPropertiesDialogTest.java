@@ -35,7 +35,8 @@ public class CampaignPropertiesDialogTest {
 
           JButton button = cpd.getImportPredefinedButton();
 
-          assertEquals(button.getText(), I18N.getText("CampaignPropertiesDialog.button.importPredefined"));
+          assertEquals(
+              button.getText(), I18N.getText("CampaignPropertiesDialog.button.importPredefined"));
         });
   }
 
