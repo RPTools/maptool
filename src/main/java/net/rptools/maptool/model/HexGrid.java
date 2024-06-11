@@ -604,29 +604,6 @@ public abstract class HexGrid extends Grid {
     return getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
   }
 
-  @Override
-  protected AffineTransform getGridOffset(Token token) {
-    // Adjust to grid if token is an even number of grid cells
-    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
-    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
-
-    final AffineTransform at = new AffineTransform();
-
-    if ((shortFootprintSide / getSize()) % 2 == 0) {
-      double coordinateOffsetV = getCellOffsetV();
-      double coordinateOffsetU = -0.5 * (edgeProjection + edgeLength);
-      if (isHexHorizontal()) {
-        // Swap x and y;
-        at.translate(coordinateOffsetV, coordinateOffsetU);
-      } else {
-        at.translate(coordinateOffsetU, coordinateOffsetV);
-      }
-    }
-
-    return at;
-  }
-
   protected abstract OffsetTranslator getOffsetTranslator();
 
   public static HexGrid fromDto(HexGridDto dto) {
