@@ -230,10 +230,10 @@ public abstract class HexGrid extends Grid {
   private GeneralPath createHalfShape(
       double minorRadius, double edgeProjection, double edgeLength) {
     GeneralPath hex = new GeneralPath();
-    hex.moveTo(0, (int) minorRadius);
-    hex.lineTo((int) edgeProjection, 0);
-    hex.lineTo((int) (edgeProjection + edgeLength), 0);
-    hex.lineTo((int) (edgeProjection + edgeLength + edgeProjection), (int) minorRadius);
+    hex.moveTo(0, minorRadius);
+    hex.lineTo(edgeProjection, 0);
+    hex.lineTo(edgeProjection + edgeLength, 0);
+    hex.lineTo(edgeProjection + edgeLength + edgeProjection, minorRadius);
 
     orientHex(hex);
     return hex;
