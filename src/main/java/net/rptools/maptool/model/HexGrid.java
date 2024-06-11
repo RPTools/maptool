@@ -500,12 +500,6 @@ public abstract class HexGrid extends Grid {
     BiConsumer<Double, Double> lineTo =
         isHexHorizontal() ? ((x, y) -> path.lineTo(y, x)) : ((x, y) -> path.lineTo(x, y));
 
-    // The coordinate system we have to work in is a bit weird. First off all, we don't measure from
-    // the center of the origin cell, but from its top-left (northwest) corner. Secondly, the cell
-    // offset of the grid is applied to the result, so we have to account for them as well.
-    // This is written from the perspective of a vertical hex, but swapping the coordinates is
-    // enough to make the horizontal equivalent.
-
     var x = edgeLength / 2 + edgeProjection;
     var y = -gridRadius * 2 * minorRadius;
     moveTo.accept(x, y);
