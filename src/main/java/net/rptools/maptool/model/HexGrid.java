@@ -626,9 +626,9 @@ public abstract class HexGrid extends Grid {
       double coordinateOffsetU = -0.5 * (edgeProjection + edgeLength);
       if (isHexHorizontal()) {
         // Swap x and y;
-        at.translate(coordinateOffsetU, coordinateOffsetV);
-      } else {
         at.translate(coordinateOffsetV, coordinateOffsetU);
+      } else {
+        at.translate(coordinateOffsetU, coordinateOffsetV);
       }
     }
 
