@@ -126,9 +126,7 @@ public abstract class HexGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
-    // don't use size. it has already been used to set the minorRadius
-    // and will only introduce a rounding error.
+  protected Area createCellShape() {
     var hex = new GeneralPath();
     hex.moveTo(0, minorRadius);
     hex.lineTo(edgeProjection, 0);

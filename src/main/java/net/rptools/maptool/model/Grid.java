@@ -84,7 +84,7 @@ public abstract class Grid implements Cloneable {
   }
 
   protected Object readResolve() {
-    cellShape = createCellShape(getSize());
+    cellShape = createCellShape();
     return this;
   }
 
@@ -274,7 +274,12 @@ public abstract class Grid implements Cloneable {
     return null;
   }
 
-  protected abstract Area createCellShape(int size);
+  /**
+   * Build the shape of a cell for the current grid size.
+   *
+   * @return The cell shape.
+   */
+  protected abstract Area createCellShape();
 
   /**
    * @param offsetX The grid's x offset component
@@ -339,7 +344,7 @@ public abstract class Grid implements Cloneable {
    */
   public void setSize(int size) {
     this.size = constrainSize(size);
-    cellShape = createCellShape(size);
+    cellShape = createCellShape();
     fireGridChanged();
   }
 
@@ -838,7 +843,7 @@ public abstract class Grid implements Cloneable {
    * @return the {@link Area} conforming to the current grid layout for the given radius
    */
   protected Area createGridArea(int gridRadius) {
-    final Area cellArea = new Area(createCellShape(getSize()));
+    final Area cellArea = new Area(getCellShape());
     final Set<Point> points = generateRadius(gridRadius);
     Area gridArea = new Area();
 
@@ -945,7 +950,7 @@ public abstract class Grid implements Cloneable {
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
-    grid.cellShape = grid.createCellShape(grid.size);
+    grid.cellShape = grid.createCellShape();
 
     return grid;
   }
