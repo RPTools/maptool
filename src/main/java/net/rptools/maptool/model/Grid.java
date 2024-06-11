@@ -518,7 +518,7 @@ public abstract class Grid implements Cloneable {
   }
 
   private void fireGridChanged() {
-    gridShapeCache.clear();
+    getGridShapeCache().clear();
     new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
   }
 
