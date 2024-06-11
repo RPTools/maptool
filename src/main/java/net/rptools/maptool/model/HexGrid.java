@@ -211,18 +211,19 @@ public abstract class HexGrid extends Grid {
   }
 
   private void setDimensions(int size, double diameter) {
+    // Update internal variables to agree with the new dimensions.
     minorRadius = size / 2.;
-
-    // We get degenerate hexes below this, so constrain things.
-    diameter = Math.max(diameter, minorRadius);
-
     hexRatio = size / diameter;
+    // Since we're just scaling a regular hexagon, these simple relations still hold.
+    edgeLength = diameter / 2;
+    edgeProjection = edgeLength / 2;
 
-    // In order to get edges of equal length while obeying the circumradius and inradius, this is
-    // the quadratic to solve: $3 * edge^2 + 2*diameter * edge - (size^2 + diameter^2) = 0$
-    // That gets us to ...
-    edgeLength = (-diameter + 2 * Math.sqrt(diameter * diameter + 0.75 * size * size)) / 3.;
-    edgeProjection = (diameter - edgeLength) / 2;
+    // If we instead wanted equal edge lengths, we have to solve this equation:
+    // $3 * edge^2 + 2*diameter * edge - (size^2 + diameter^2) = 0$
+    // Giving:
+    // edgeLength = (-diameter + 2 * Math.sqrt(diameter * diameter + 0.75 * size * size)) / 3.
+    // and:
+    // edgeProjection = (diameter - edgeLength) / 2
   }
 
   private GeneralPath createHalfShape(
