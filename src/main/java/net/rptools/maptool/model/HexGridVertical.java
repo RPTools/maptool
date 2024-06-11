@@ -18,7 +18,6 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
@@ -274,29 +273,5 @@ public class HexGridVertical extends HexGrid {
     double mapY = (newY - newX) * getVRadius();
     double mapX = ((newX + newY) * heightHalf) + heightHalf;
     return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
-  }
-
-  @Override
-  protected AffineTransform getGridOffset(Token token) {
-    // Adjust to grid if token is an even number of grid cells
-    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
-    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
-
-    final AffineTransform at = new AffineTransform();
-    final double coordinateOffsetX;
-    final double coordinateOffsetY;
-
-    if ((shortFootprintSide / getSize()) % 2 == 0) {
-      coordinateOffsetX = getCellWidth() * -1.375;
-      coordinateOffsetY = getCellHeight() * -1.5;
-    } else {
-      coordinateOffsetX = -getCellWidth();
-      coordinateOffsetY = getCellOffsetV() * 2;
-    }
-
-    at.translate(coordinateOffsetX, coordinateOffsetY);
-
-    return at;
   }
 }

@@ -97,13 +97,13 @@ public abstract class HexGrid extends Grid {
    * <p>For a regular hexagon this is half the edge length, but for stretched hexagons it could be
    * different.
    */
-  private transient double edgeProjection;
+  protected transient double edgeProjection;
 
   /**
    * Length all edges. For a regular hexagon, this will also be the distance from the center point
    * to any vertex, but for a stretch hexagon this does not hold different.
    */
-  private transient double edgeLength;
+  protected transient double edgeLength;
 
   public HexGrid() {
     super();
@@ -506,8 +506,8 @@ public abstract class HexGrid extends Grid {
     // This is written from the perspective of a vertical hex, but swapping the coordinates is
     // enough to make the horizontal equivalent.
 
-    var x = edgeLength + 2 * edgeProjection - getCellOffsetU();
-    var y = -gridRadius * 2 * minorRadius + minorRadius - getCellOffsetV();
+    var x = edgeLength / 2 + edgeProjection;
+    var y = -gridRadius * 2 * minorRadius;
     moveTo.accept(x, y);
 
     for (int i = 1; i <= gridRadius; ++i) {
@@ -610,6 +610,29 @@ public abstract class HexGrid extends Grid {
   protected Area getScaledGridArea(Token token, int gridRadius) {
     gridRadius += (int) (token.getFootprint(this).getBounds(this).getWidth() / getSize() / 2);
     return getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
+  }
+
+  @Override
+  protected AffineTransform getGridOffset(Token token) {
+    // Adjust to grid if token is an even number of grid cells
+    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
+    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
+    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
+
+    final AffineTransform at = new AffineTransform();
+
+    if ((shortFootprintSide / getSize()) % 2 == 0) {
+      double coordinateOffsetV = getCellOffsetV();
+      double coordinateOffsetU = -0.5 * (edgeProjection + edgeLength);
+      if (isHexHorizontal()) {
+        // Swap x and y;
+        at.translate(coordinateOffsetU, coordinateOffsetV);
+      } else {
+        at.translate(coordinateOffsetV, coordinateOffsetU);
+      }
+    }
+
+    return at;
   }
 
   protected abstract OffsetTranslator getOffsetTranslator();

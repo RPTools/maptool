@@ -305,28 +305,4 @@ public class HexGridHorizontal extends HexGrid {
     double mapY = ((newX + newY) * heightHalf) + heightHalf;
     return new ZonePoint((int) (mapX) + getOffsetX(), (int) (mapY) + getOffsetY());
   }
-
-  @Override
-  protected AffineTransform getGridOffset(Token token) {
-    // Adjust to grid if token is an even number of grid cells
-    double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
-    double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
-    double shortFootprintSide = Math.min(footprintWidth, footprintHeight);
-
-    final AffineTransform at = new AffineTransform();
-    final double coordinateOffsetX;
-    final double coordinateOffsetY;
-
-    if ((shortFootprintSide / getSize()) % 2 != 0) {
-      coordinateOffsetX = -getCellWidth();
-      coordinateOffsetY = getCellOffsetU() * 2;
-    } else {
-      coordinateOffsetX = getCellWidth() * -1.5;
-      coordinateOffsetY = getCellHeight() * -1.375;
-    }
-
-    at.translate(coordinateOffsetX, coordinateOffsetY);
-
-    return at;
-  }
 }
