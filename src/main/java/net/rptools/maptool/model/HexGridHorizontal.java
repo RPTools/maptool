@@ -156,30 +156,20 @@ public class HexGridHorizontal extends HexGrid {
       movementKeys = new HashMap<KeyStroke, Action>(12); // parameter is 9/0.75 (load factor)
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD7, 0), new MovementKey(callback, -1, -1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD8, 0), new
-      // MovementKey(callback, 0, -1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, 1, -1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -1, 0));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new
-      // MovementKey(callback, 0, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, 1, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD1, 0), new MovementKey(callback, -1, 1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD2, 0), new
-      // MovementKey(callback, 0, 1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD3, 0), new MovementKey(callback, 1, 1));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_LEFT, 0), new MovementKey(callback, -1, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_RIGHT, 0), new MovementKey(callback, 1, 0));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), new MovementKey(callback, 0,
-      // -1));
-      //			movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), new MovementKey(callback,
-      // 0, 1));
     }
     actionMap.putAll(movementKeys);
   }
@@ -234,7 +224,7 @@ public class HexGridHorizontal extends HexGrid {
   }
 
   @Override
-  protected Dimension setCellOffset() {
+  public Dimension getCellOffset() {
     return new Dimension((int) getCellOffsetV(), (int) getCellOffsetU());
   }
 

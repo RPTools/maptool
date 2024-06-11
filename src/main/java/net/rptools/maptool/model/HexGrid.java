@@ -16,7 +16,6 @@ package net.rptools.maptool.model;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
@@ -34,7 +33,6 @@ import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.HexGridDto;
 
@@ -47,7 +45,7 @@ import net.rptools.maptool.server.proto.HexGridDto;
 public abstract class HexGrid extends Grid {
 
   // A regular hexagon is one where all angles are 60 degrees.
-  // the ratio = minor_radius / edge_length
+  // the ratio = minor_radius / diameter
   public static final double REGULAR_HEX_RATIO = Math.sqrt(3) / 2;
 
   /** One DirectionCalculator object is shared by all instances of this hex grid class. */
@@ -82,40 +80,30 @@ public abstract class HexGrid extends Grid {
     return new Point2D.Double(0, 0);
   }
 
-  /** minorRadius / edgeLength */
+  /**
+   * vRadius / uRadius, or size / diameter
+   *
+   * <p>Together with {@link #getSize()} this completely defines the hex proportions. All other
+   * properties (except orientation) can be derived from these two.
+   */
   private double hexRatio = REGULAR_HEX_RATIO;
 
-  /**
-   * One-half the length of an edge. Set to sqrt(edgeLength^2 - minorRadius^2), i.e. one side of a
-   * right triangle.
-   */
-  private double edgeProjection;
-
   /** Distance from centerpoint to middle of a face. Set to gridSize/2. */
-  private double minorRadius;
+  private transient double minorRadius;
 
   /**
-   * Distance from centerpoint to vertex. Set to minorRadius/hexRatio (basically, uses 30 degree
-   * cosine to calculate sqrt(3)/2).
+   * The projection of a sloped edge onto the diameter.
+   *
+   * <p>For a regular hexagon this is half the edge length, but for stretched hexagons it could be
+   * different.
    */
-  private double edgeLength;
-
-  // Hex defining variables scaled for zoom
-  private double scaledEdgeProjection;
-  private double scaledMinorRadius;
-  private double scaledEdgeLength;
-
-  /** Cached value from the last request to scale the hex grid */
-  private double lastScale = -1;
-
-  /** Cached value of the hex shape using <code>lastScale</code> */
-  private transient GeneralPath scaledHex;
+  private transient double edgeProjection;
 
   /**
-   * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
-   * the cell's bounding rectangle.
+   * Length all edges. For a regular hexagon, this will also be the distance from the center point
+   * to any vertex, but for a stretch hexagon this does not hold different.
    */
-  private Dimension cellOffset;
+  private transient double edgeLength;
 
   public HexGrid() {
     super();
@@ -130,34 +118,6 @@ public abstract class HexGrid extends Grid {
     return false;
   }
 
-  public boolean isHexVertical() {
-    return false;
-  }
-
-  public double getEdgeProjection() {
-    return edgeProjection;
-  }
-
-  public void setEdgeProjection(double edgeProjection) {
-    this.edgeProjection = edgeProjection;
-  }
-
-  public double getMinorRadius() {
-    return minorRadius;
-  }
-
-  public void setMinorRadius(double minorRadius) {
-    this.minorRadius = minorRadius;
-  }
-
-  public double getEdgeLength() {
-    return edgeLength;
-  }
-
-  public void setEdgeLength(double edgeLength) {
-    this.edgeLength = edgeLength;
-  }
-
   @Override
   public Point2D.Double getCellCenter(CellPoint cell) {
     // hex grids have their pixel xy at their center
@@ -169,10 +129,16 @@ public abstract class HexGrid extends Grid {
   protected Area createCellShape(int size) {
     // don't use size. it has already been used to set the minorRadius
     // and will only introduce a rounding error.
-    Area a = new Area(createShape(minorRadius, edgeProjection, edgeLength));
-    //    System.out.println("HexGrid.createCellShape(): " + a.getBounds().width + ":" +
-    // a.getBounds().height);
-    return a;
+    var hex = new GeneralPath();
+    hex.moveTo(0, minorRadius);
+    hex.lineTo(edgeProjection, 0);
+    hex.lineTo(edgeProjection + edgeLength, 0);
+    hex.lineTo(edgeProjection + edgeLength + edgeProjection, minorRadius);
+    hex.lineTo(edgeProjection + edgeLength, getSize());
+    hex.lineTo(edgeProjection, getSize());
+    orientHex(hex);
+
+    return new Area(hex);
   }
 
   @Override
@@ -205,11 +171,6 @@ public abstract class HexGrid extends Grid {
     return edgeLength / 2 + edgeProjection;
   }
 
-  @Override
-  public Dimension getCellOffset() {
-    return cellOffset;
-  }
-
   /**
    * A generic form of getCellOffset() where V is the axis of edge to edge hexes.
    *
@@ -229,13 +190,10 @@ public abstract class HexGrid extends Grid {
     return -getURadius();
   }
 
-  /**
-   * The offset required to translate from the center of a cell to the top right (x_min, y_min) of
-   * the cell's bounding rectangle.
-   *
-   * @return a {@link Dimension} object where width and height is translated to the grid
-   */
-  protected abstract Dimension setCellOffset();
+  protected Object readResolve() {
+    setDimensions(getSize(), getSize() / hexRatio);
+    return this;
+  }
 
   @Override
   public void setSize(int size) {
@@ -245,46 +203,27 @@ public abstract class HexGrid extends Grid {
     // Using size as the edge-to-edge distance or
     // minor diameter of the hex.
     size = constrainSize(size);
+    // Preserve the "aspect ratio" in this method.
+    setDimensions(size, size / hexRatio);
 
-    minorRadius = (double) size / 2;
-    edgeLength = minorRadius / hexRatio;
-    // edgeProjection = Math.sqrt(edgeLength * edgeLength - minorRadius * minorRadius); //
-    // Pythagorus
-    edgeProjection = edgeLength / 2; // It's an isosceles triangle, after all!
-
-    scaledHex = null;
-
-    // Cell offset gives the offset to apply to the cell zone coords to draw images/tokens
-    cellOffset = setCellOffset();
     // The call to the super.setSize() must be last as it calls createCellShape()
     // which needs the values set above.
     super.setSize(size);
   }
 
-  protected void createShape(double scale) {
-    if (lastScale == scale && scaledHex != null) {
-      return;
-    }
-    scaledMinorRadius = minorRadius * scale;
-    scaledEdgeLength = edgeLength * scale;
-    scaledEdgeProjection = edgeProjection * scale;
+  private void setDimensions(int size, double diameter) {
+    minorRadius = size / 2.;
 
-    scaledHex = createHalfShape(scaledMinorRadius, scaledEdgeProjection, scaledEdgeLength);
+    // We get degenerate hexes below this, so constrain things.
+    diameter = Math.max(diameter, minorRadius);
 
-    lastScale = scale;
-  }
+    hexRatio = size / diameter;
 
-  private GeneralPath createShape(double minorRadius, double edgeProjection, double edgeLength) {
-    GeneralPath hex = new GeneralPath();
-    hex.moveTo(0, (int) minorRadius);
-    hex.lineTo((int) edgeProjection, 0);
-    hex.lineTo((int) (edgeProjection + edgeLength), 0);
-    hex.lineTo((int) (edgeProjection + edgeLength + edgeProjection), (int) minorRadius);
-    hex.lineTo((int) (edgeProjection + edgeLength), (int) (minorRadius * 2));
-    hex.lineTo((int) (edgeProjection), (int) (minorRadius * 2));
-
-    orientHex(hex);
-    return hex;
+    // In order to get edges of equal length while obeying the circumradius and inradius, this is
+    // the quadratic to solve: $3 * edge^2 + 2*diameter * edge - (size^2 + diameter^2) = 0$
+    // That gets us to ...
+    edgeLength = (-diameter + 2 * Math.sqrt(diameter * diameter + 0.75 * size * size)) / 3.;
+    edgeProjection = (diameter - edgeLength) / 2;
   }
 
   private GeneralPath createHalfShape(
@@ -317,9 +256,6 @@ public abstract class HexGrid extends Grid {
     }
     // If we are SnapToGrid, round off the position and check that instead.
     CellPoint cp = convertZP(actual.x, actual.y);
-    if (cp.x == 3 && cp.y == 0) {
-      cp.y = 0; // hook for setting breakpoint in debugger while testing
-    }
 
     ZonePoint snappedZP = convertCP(cp.x, cp.y);
     if (!exposedFog.contains(snappedZP.x, snappedZP.y)) {
@@ -355,12 +291,6 @@ public abstract class HexGrid extends Grid {
             exposedFog); // can we exit our own cell?
     return result;
   }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see net.rptools.maptool.model.Grid#validateMove(java.awt.Rectangle, int, int, java.awt.geom.Area)
-   */
 
   private boolean checkOneSlice(ZonePoint zp, int dir, Area exposedFog) {
     Shape s = calculator.getFogAreaToCheck(dir);
@@ -412,7 +342,11 @@ public abstract class HexGrid extends Grid {
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
-    createShape(renderer.getScale());
+    var scale = renderer.getScale();
+    var scaledMinorRadius = minorRadius * scale;
+    var scaledEdgeLength = edgeLength * scale;
+    var scaledEdgeProjection = edgeProjection * scale;
+    var scaledHex = createHalfShape(scaledMinorRadius, scaledEdgeProjection, scaledEdgeLength);
 
     int offU = getOffU(renderer);
     int offV = getOffV(renderer);
@@ -496,9 +430,6 @@ public abstract class HexGrid extends Grid {
 
     double m = edgeProjection / minorRadius;
 
-    // System.out.format("gx:%d gy:%d px:%d py:%d m:%f\n", xSect, ySect, xPxl, yPxl, m);
-    // System.out.format("gx:%d gy:%d px:%d py:%d\n", xSect, ySect, zp.x, zp.y);
-
     switch (xSect & 1) {
       case 0:
         if (yPxl <= minorRadius) {
@@ -509,7 +440,6 @@ public abstract class HexGrid extends Grid {
         } else {
           if (xPxl < (yPxl - minorRadius) * m) {
             gridX = xSect - 1;
-            // gridY = ySect;
           }
         }
         break;
@@ -517,24 +447,17 @@ public abstract class HexGrid extends Grid {
         if (yPxl >= minorRadius) {
           if (xPxl < (edgeProjection - (yPxl - minorRadius) * m)) {
             gridX = xSect - 1;
-            // gridY = ySect;
-          } else {
-            // gridX = xSect;
-            // gridY = ySect;
           }
         } else {
           if (xPxl < (yPxl * m)) {
             gridX = xSect - 1;
-            // gridY = ySect;
           } else {
-            // gridX = xSect;
             gridY = ySect - 1;
           }
         }
 
         break;
     }
-    // System.out.format("gx:%d gy:%d\n", gridX, gridY);
     return new CellPoint(gridX, gridY);
   }
 
@@ -548,7 +471,9 @@ public abstract class HexGrid extends Grid {
   protected ZonePoint convertCP(int cpU, int cpV) {
     int u, v;
 
-    u = (int) Math.round(cpU * (edgeProjection + edgeLength) + edgeLength) + getOffsetU();
+    u =
+        (int) Math.round(cpU * (edgeProjection + edgeLength) + (edgeLength / 2 + edgeProjection))
+            + getOffsetU();
     v = (int) (cpV * 2 * minorRadius + ((cpU & 1) == 0 ? 1 : 2) * minorRadius + getOffsetV());
 
     return new ZonePoint(u, v);
@@ -561,17 +486,7 @@ public abstract class HexGrid extends Grid {
 
   @Override
   public void setSecondDimension(double length) {
-    if (length < minorRadius * 2) {
-      hexRatio = REGULAR_HEX_RATIO;
-    } else {
-      // some linear algebra and a quadratic equation results in:
-      double aspectRatio = length / (2 * minorRadius);
-      double a = 0.75;
-      double c = -(aspectRatio * aspectRatio + 1) * minorRadius * minorRadius;
-      double b = minorRadius * aspectRatio;
-      edgeLength = (-b + Math.sqrt(b * b - 4 * a * c)) / (2 * a);
-      hexRatio = minorRadius / edgeLength;
-    }
+    setDimensions(getSize(), length);
   }
 
   @Override
@@ -626,34 +541,21 @@ public abstract class HexGrid extends Grid {
 
   public static HexGrid fromDto(HexGridDto dto) {
     HexGrid grid = null;
-    if (dto.getVertical()) grid = new HexGridVertical();
-    else grid = new HexGridHorizontal();
+    if (dto.getVertical()) {
+      grid = new HexGridVertical();
+    } else {
+      grid = new HexGridHorizontal();
+    }
 
-    grid.hexRatio = dto.getHexRatio();
-    grid.edgeProjection = dto.getEdgeProjection();
-    grid.minorRadius = dto.getMinorRadius();
-    grid.edgeLength = dto.getEdgeLength();
-    grid.scaledEdgeProjection = dto.getScaledEdgeProjection();
-    grid.scaledMinorRadius = dto.getScaledMinorRadius();
-    grid.scaledEdgeLength = dto.getScaledEdgeLength();
-    grid.lastScale = dto.getLastScale();
-    var point = dto.getCellOffset();
-    grid.cellOffset = new Dimension(point.getX(), point.getY());
+    // Exact values do not matter, just the proportions. Grid itself will scale to the right size.
+    grid.setDimensions(100, 100 / grid.hexRatio);
     return grid;
   }
 
   protected void fillDto(GridDto.Builder dto) {
     var hexDto = HexGridDto.newBuilder();
-    hexDto.setVertical(this instanceof HexGridVertical);
+    hexDto.setVertical(!this.isHexHorizontal());
     hexDto.setHexRatio(hexRatio);
-    hexDto.setEdgeProjection(edgeProjection);
-    hexDto.setMinorRadius(minorRadius);
-    hexDto.setEdgeLength(edgeLength);
-    hexDto.setScaledEdgeProjection(scaledEdgeProjection);
-    hexDto.setScaledMinorRadius(scaledMinorRadius);
-    hexDto.setScaledEdgeLength(scaledEdgeLength);
-    hexDto.setLastScale(lastScale);
-    hexDto.setCellOffset(Mapper.map(cellOffset));
     dto.setHexGrid(hexDto);
   }
 
