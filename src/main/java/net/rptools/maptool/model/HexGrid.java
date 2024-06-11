@@ -527,8 +527,6 @@ public abstract class HexGrid extends Grid {
       gridArea.add(createHex(getSize(), -getSize(), hexRadius, Math.toRadians(90)));
     }
 
-    setGridShapeCache(gridRadius, gridArea);
-
     return gridArea;
   }
 

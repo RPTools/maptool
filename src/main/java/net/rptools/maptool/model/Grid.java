@@ -92,7 +92,7 @@ public abstract class Grid implements Cloneable {
     return gridShapeCache;
   }
 
-  protected synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
+  private synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
     final AffineTransform at = new AffineTransform();
     final double gridScale = (double) MAX_GRID_SIZE / getSize();
     at.scale(gridScale, gridScale);
@@ -848,8 +848,6 @@ public abstract class Grid implements Cloneable {
       gridArea.add(cellArea.createTransformedArea(at));
     }
 
-    setGridShapeCache(gridRadius, gridArea);
-
     return gridArea;
   }
 
@@ -923,7 +921,8 @@ public abstract class Grid implements Cloneable {
     // Or if the flag is enabled, recreate cache
     if (DeveloperOptions.Toggle.IgnoreGridShapeCache.isEnabled()
         || !getGridShapeCache().containsKey(gridRadius)) {
-      createGridArea(gridRadius);
+      var newArea = createGridArea(gridRadius);
+      setGridShapeCache(gridRadius, newArea);
     }
 
     double rescale = getSize() / (double) MAX_GRID_SIZE;
