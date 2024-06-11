@@ -39,7 +39,6 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -67,12 +66,13 @@ public abstract class Grid implements Cloneable {
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
   private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
-  protected Map<KeyStroke, Action> movementKeys = null;
+
+  protected transient Map<KeyStroke, Action> movementKeys = null;
+  private transient Zone zone;
+  private transient Area cellShape;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
-  private Zone zone;
-  private Area cellShape;
 
   public Grid() {
     setSize(AppPreferences.getDefaultGridSize());
@@ -81,6 +81,11 @@ public abstract class Grid implements Cloneable {
   public Grid(Grid grid) {
     setSize(grid.getSize());
     setOffset(grid.offsetX, grid.offsetY);
+  }
+
+  protected Object readResolve() {
+    cellShape = createCellShape(getSize());
+    return this;
   }
 
   protected synchronized Map<Integer, Area> getGridShapeCache() {
@@ -265,10 +270,6 @@ public abstract class Grid implements Cloneable {
     return cellShape;
   }
 
-  protected void setCellShape(Area cellShape) {
-    this.cellShape = cellShape;
-  }
-
   public BufferedImage getCellHighlight() {
     return null;
   }
@@ -371,6 +372,7 @@ public abstract class Grid implements Cloneable {
       double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
 
       // Test for gridless maps
+      var cellShape = getCellShape();
       if (cellShape == null) {
         double tokenBoundsWidth = token.getBounds(getZone()).getWidth() / 2;
         visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
@@ -944,11 +946,8 @@ public abstract class Grid implements Cloneable {
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
-    if (dto.hasCellShape()) {
-      grid.cellShape = Mapper.map(dto.getCellShape());
-    } else {
-      grid.cellShape = null;
-    }
+    grid.cellShape = grid.createCellShape(grid.size);
+
     return grid;
   }
 
@@ -960,9 +959,6 @@ public abstract class Grid implements Cloneable {
     dto.setOffsetX(offsetX);
     dto.setOffsetY(offsetY);
     dto.setSize(size);
-    if (cellShape != null) {
-      dto.setCellShape(Mapper.map(cellShape));
-    }
     return dto.build();
   }
 

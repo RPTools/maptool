@@ -583,7 +583,6 @@ message GridDto {
   int32 offset_x = 1;
   int32 offset_y = 2;
   int32 size = 3;
-  AreaDto cell_shape = 4;
   oneof type {
     SquareGridDto square_grid = 5;
     GridlessGridDto gridless_grid = 6;

@@ -191,6 +191,7 @@ public abstract class HexGrid extends Grid {
   }
 
   protected Object readResolve() {
+    super.readResolve();
     setDimensions(getSize(), getSize() / hexRatio);
     return this;
   }
