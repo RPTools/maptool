@@ -17,16 +17,16 @@ package net.rptools.maptool.model;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.util.Set;
+import java.util.function.BiConsumer;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
@@ -492,42 +492,118 @@ public abstract class HexGrid extends Grid {
 
   @Override
   protected Area createGridArea(int gridRadius) {
-    final Area cellArea = new Area(createCellShape(getSize()));
-    final Set<Point> points = generateRing(gridRadius);
-    Area gridArea = new Area();
+    // Start at the top and go clockwise.
+    var path = new Path2D.Double();
 
-    // HACK! Hex cellShape is ever so off from grid so adding them to a single Area can produce gap
-    // artifacts in the rendering
-    // TODO: Look at cellShape and see if it needs adjusting, and if so what does that affect
-    // downstream if anything?
-    final double hexScale = 1.025;
+    BiConsumer<Double, Double> moveTo =
+        isHexHorizontal() ? ((x, y) -> path.moveTo(y, x)) : ((x, y) -> path.moveTo(x, y));
+    BiConsumer<Double, Double> lineTo =
+        isHexHorizontal() ? ((x, y) -> path.lineTo(y, x)) : ((x, y) -> path.lineTo(x, y));
 
-    for (Point point : points) {
-      final CellPoint cellPoint = new CellPoint(point.x, point.y);
-      final ZonePoint zp = cellPoint.convertToZonePoint(this);
+    // The coordinate system we have to work in is a bit weird. First off all, we don't measure from
+    // the center of the origin cell, but from its top-left (northwest) corner. Secondly, the cell
+    // offset of the grid is applied to the result, so we have to account for them as well.
+    // This is written from the perspective of a vertical hex, but swapping the coordinates is
+    // enough to make the horizontal equivalent.
 
-      final AffineTransform at = new AffineTransform();
-      at.translate(zp.x, zp.y);
+    var x = edgeLength + 2 * edgeProjection - getCellOffsetU();
+    var y = -gridRadius * 2 * minorRadius + minorRadius - getCellOffsetV();
+    moveTo.accept(x, y);
 
-      if (isHexHorizontal()) {
-        at.scale(1, hexScale);
-      } else {
-        at.scale(hexScale, 1);
-      }
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step east.
+      x += edgeLength;
+      lineTo.accept(x, y);
 
-      gridArea.add(cellArea.createTransformedArea(at));
+      // One step southeast
+      x += edgeProjection;
+      y += minorRadius;
+      lineTo.accept(x, y);
     }
 
-    // Fill inner Hex Area with one large area to save time
-    final int hexRadius = gridRadius * getSize();
+    // Finish up the northeast cell, then continue southward.
+    x -= edgeProjection;
+    y += minorRadius;
+    lineTo.accept(x, y);
 
-    if (isHexHorizontal()) {
-      gridArea.add(createHex(getSize(), getSize(), hexRadius, 0));
-    } else {
-      gridArea.add(createHex(getSize(), -getSize(), hexRadius, Math.toRadians(90)));
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step southeast
+      x += edgeProjection;
+      y += minorRadius;
+      lineTo.accept(x, y);
+
+      // One step southwest.
+      x -= edgeProjection;
+      y += minorRadius;
+      lineTo.accept(x, y);
     }
 
-    return gridArea;
+    // Finish up the southeast cell, then continue southwest.
+    x -= edgeLength;
+    lineTo.accept(x, y);
+
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step southwest.
+      x -= edgeProjection;
+      y += minorRadius;
+      lineTo.accept(x, y);
+
+      // One step west.
+      x -= edgeLength;
+      lineTo.accept(x, y);
+    }
+
+    // Finish up the southern cell, then continue northwest.
+    x -= edgeProjection;
+    y -= minorRadius;
+    lineTo.accept(x, y);
+
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step west;
+      x -= edgeLength;
+      lineTo.accept(x, y);
+
+      // One step northwest
+      x -= edgeProjection;
+      y -= minorRadius;
+      lineTo.accept(x, y);
+    }
+
+    // Finish up the southwest cell, then continue northward.
+    x += edgeProjection;
+    y -= minorRadius;
+    lineTo.accept(x, y);
+
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step northwest.
+      x -= edgeProjection;
+      y -= minorRadius;
+      lineTo.accept(x, y);
+
+      // One step norhteast.
+      x += edgeProjection;
+      y -= minorRadius;
+      lineTo.accept(x, y);
+    }
+
+    // Finish up the northwest cell, then continue northeast.
+    x += edgeLength;
+    lineTo.accept(x, y);
+
+    for (int i = 1; i <= gridRadius; ++i) {
+      // One step northeast.
+      x += edgeProjection;
+      y -= minorRadius;
+      lineTo.accept(x, y);
+
+      // One step east
+      x += edgeLength;
+      lineTo.accept(x, y);
+    }
+
+    path.closePath();
+
+    return new Area(path);
   }
 
   @Override
