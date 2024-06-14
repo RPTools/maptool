@@ -364,6 +364,8 @@ message TokenDto {
   string notes_type = 68;
   string gm_notes_type = 69;
   StatSheetPropertiesDto stat_sheet_properties = 70;
+  map<string, bool> map_vbl_immunity = 72;
+  repeated string token_vbl_immunity = 73;
 }
 
 message PathDto {
