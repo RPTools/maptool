@@ -245,7 +245,9 @@ public class ZoneView {
       Set<String> excludeTokens) {
     var topology = topologyAreas.get(topologyType);
 
-    if (topology == null) {
+    if (topology == null
+        || (!excludeTypes.isEmpty() && excludeTypes.contains(topologyType))
+        || !excludeTokens.isEmpty()) {
       log.debug("ZoneView topology area for {} is null, generating...", topologyType.name());
 
       if (excludeTypes.contains(topologyType)) {
@@ -261,7 +263,9 @@ public class ZoneView {
         }
       }
 
-      topologyAreas.put(topologyType, topology);
+      if (excludeTypes.isEmpty() && excludeTokens.isEmpty()) {
+        topologyAreas.put(topologyType, topology);
+      }
     }
 
     return topology;
