@@ -1623,6 +1623,7 @@ public class MapTool {
     initJavaFX();
 
     final SplashScreen splash = new SplashScreen(getVersion());
+    splash.setVisible(true);
 
     try {
       ThemeSupport.loadTheme();
@@ -1734,7 +1735,8 @@ public class MapTool {
           EventQueue.invokeLater(
               () -> {
                 clientFrame.setVisible(true);
-                splash.hideSplashScreen();
+                splash.setVisible(false);
+                splash.dispose();
                 EventQueue.invokeLater(MapTool::postInitialize);
               });
         });

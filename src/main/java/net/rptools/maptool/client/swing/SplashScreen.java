@@ -15,20 +15,23 @@
 package net.rptools.maptool.client.swing;
 
 import java.awt.Dimension;
+import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GridBagLayout;
+import java.awt.Image;
 import java.awt.RenderingHints;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.InputStream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import javafx.application.Platform;
-import javafx.embed.swing.JFXPanel;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.scene.Group;
 import javafx.scene.Scene;
 import javafx.scene.SnapshotParameters;
 import javafx.scene.effect.Effect;
 import javafx.scene.effect.Glow;
-import javafx.scene.image.ImageView;
 import javafx.scene.image.WritableImage;
 import javafx.scene.paint.Color;
 import javafx.scene.text.Font;
@@ -36,25 +39,34 @@ import javafx.scene.text.Text;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
 import javax.swing.JFrame;
+import javax.swing.JPanel;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import org.javatuples.Pair;
 
 public class SplashScreen extends JFrame {
   private static final String FONT_RESOURCE = "/net/rptools/maptool/client/fonts/Horta.ttf";
 
-  private static int imgWidth = 490;
-  private static int imgHeight = 290;
+  private static final int imgWidth = 490;
+  private static final int imgHeight = 290;
   private static final int versionTextX = 48;
   private static final int versionTextY = 37;
 
   public SplashScreen(String versionText) {
-    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-    final JFXPanel fxPanel = new JFXPanel();
+    versionText = Character.isDigit(versionText.charAt(0)) ? "v" + versionText : versionText;
 
     setUndecorated(true);
     setType(Type.UTILITY);
 
-    add(fxPanel);
+    Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+    int w = imgWidth;
+    int h = imgHeight;
+    int x = (screenSize.width - w) / 2;
+    int y = (screenSize.height - h) / 2;
+    setBounds(x, y, imgWidth, imgHeight);
+
+    setLocationRelativeTo(null);
+    setLayout(new GridBagLayout());
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
     try {
@@ -65,45 +77,19 @@ public class SplashScreen extends JFrame {
       setBackground(new java.awt.Color(0, 0, 0));
     }
 
-    Platform.runLater(
-        () -> {
-          initFX(
-              fxPanel, Character.isDigit(versionText.charAt(0)) ? "v" + versionText : versionText);
-          int w = imgWidth;
-          int h = imgHeight;
-          int x = (screenSize.width - w) / 2;
-          int y = (screenSize.height - h) / 2;
-          setBounds(x, y, imgWidth, imgHeight);
-          setVisible(true);
+    var image = createLaunchSplash("Launching... " + versionText);
+
+    setContentPane(
+        new JPanel() {
+          @Override
+          protected void paintComponent(Graphics g) {
+            g.drawImage(image, 0, 0, imgWidth, imgHeight, null);
+          }
         });
   }
 
-  public void hideSplashScreen() {
-    setVisible(false);
-    dispose();
-  }
-
-  private static void initFX(JFXPanel fxPanel, String versionText) {
-    // This method is invoked on the JavaFX thread
-    Group root = new Group();
-    Scene scene = new Scene(root, Color.TRANSPARENT);
-
-    if (Character.isDigit(versionText.charAt(0))) {
-      versionText = "v" + versionText;
-    }
-
-    javafx.scene.image.Image splashImage =
-        SwingFXUtils.toFXImage(createLaunchSplash("Launching... " + versionText), null);
-    ImageView splashView = new ImageView(splashImage);
-    imgWidth = (int) splashImage.getWidth();
-    imgHeight = (int) splashImage.getHeight();
-    root.getChildren().add(splashView);
-
-    fxPanel.setScene(scene);
-  }
-
   private static BufferedImage createLaunchSplash(String versionText) {
-    var splashIcon = RessourceManager.getImage(Images.MAPTOOL_SPLASH);
+    Image splashIcon = RessourceManager.getImage(Images.MAPTOOL_SPLASH);
     final Color versionColor = Color.rgb(3, 78, 149, 1); // Color.rgb(27, 85, 139, 1)
 
     InputStream is = SplashScreen.class.getResourceAsStream(FONT_RESOURCE);
@@ -118,22 +104,27 @@ public class SplashScreen extends JFrame {
     g2d.setRenderingHints(rh);
     g2d.drawImage(splashIcon, 0, 0, null);
 
-    // Adding glow twice to make it more pronounced...
-    g2d.drawImage(
-        textToImage(versionText, Color.WHITESMOKE, versionFont, true),
-        versionTextX,
-        versionTextY,
-        null);
-    g2d.drawImage(
-        textToImage(versionText, Color.WHITESMOKE, versionFont, true),
-        versionTextX,
-        versionTextY,
-        null);
-    g2d.drawImage(
-        textToImage(versionText, versionColor, versionFont, false),
-        versionTextX,
-        versionTextY,
-        null);
+    var future =
+        CompletableFuture.supplyAsync(
+            () -> {
+              // Adding glow twice to make it more pronounced...
+              var glowingText = textToImage(versionText, Color.WHITESMOKE, versionFont, true);
+              var regularText = textToImage(versionText, versionColor, versionFont, false);
+              return new Pair<>(glowingText, regularText);
+            },
+            Platform::runLater);
+
+    try {
+      var result = future.get();
+      // Adding glow twice to make it more pronounced...
+      g2d.drawImage(result.getValue0(), versionTextX, versionTextY, null);
+      g2d.drawImage(result.getValue0(), versionTextX, versionTextY, null);
+      g2d.drawImage(result.getValue1(), versionTextX, versionTextY, null);
+
+    } catch (InterruptedException | ExecutionException e) {
+      // Oh no... we can't show the version. Oh, well.
+    }
+
     g2d.dispose();
 
     return buffImage;
