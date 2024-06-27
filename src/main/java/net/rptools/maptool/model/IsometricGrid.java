@@ -241,9 +241,13 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
-    int x[] = {size, size * 2, size, 0};
-    int y[] = {0, size / 2, size, size / 2};
+  protected Area createCellShape() {
+    return createCellShape(getSize());
+  }
+
+  private Area createCellShape(int size) {
+    int[] x = {size, size * 2, size, 0};
+    int[] y = {0, size / 2, size, size / 2};
     return new Area(new Polygon(x, y, 4));
   }
 
@@ -400,7 +404,7 @@ public class IsometricGrid extends Grid {
         footprint.x = -footprint.width / 2;
         footprint.y = -footprint.height / 2;
         // convert the cell footprint to an area
-        Area cellShape = getZone().getGrid().createCellShape(footprint.height);
+        Area cellShape = createCellShape(footprint.height);
         // convert the area to isometric view
         AffineTransform mtx = new AffineTransform();
         mtx.translate(-footprint.width / 2, -footprint.height / 2);
@@ -432,7 +436,7 @@ public class IsometricGrid extends Grid {
     footprint.x = -footprint.width / 2;
     footprint.y = -footprint.height / 2;
     // convert the cell footprint to an area
-    Area cellShape = getZone().getGrid().createCellShape(footprint.height);
+    Area cellShape = createCellShape(footprint.height);
     // convert the area to isometric view
     AffineTransform mtx = new AffineTransform();
     mtx.translate(bounds.getBounds().getX(), bounds.getBounds().getY());
