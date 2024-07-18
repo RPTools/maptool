@@ -87,6 +87,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     campaign.setDefaultTokenPropertyType(defaultPropertyType);
   }
 
+  public void finalizeCellEditing() {
+    if (getTokenPropertiesTable().isEditing()) {
+      getTokenPropertiesTable().getCellEditor().stopCellEditing();
+    }
+  }
+
   public JList getTokenTypeList() {
     JList list = (JList) getComponent("tokenTypeList");
     if (list == null) {
@@ -285,6 +291,11 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
         e ->
             EventQueue.invokeLater(
                 () -> {
+                  JTable propertiesTable = getTokenPropertiesTable();
+                  if (propertiesTable.isEditing()) {
+                    TableCellEditor cellEditor = propertiesTable.getCellEditor();
+                    cellEditor.stopCellEditing();
+                  }
                   var model = getTokenPropertiesTableModel();
                   model.addProperty();
                 }));
