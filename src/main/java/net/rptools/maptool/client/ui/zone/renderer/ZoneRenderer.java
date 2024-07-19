@@ -1284,8 +1284,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             mapImage,
             getViewOffsetX() + (int) (zone.getBoardX() * scaleFactor),
             getViewOffsetY() + (int) (zone.getBoardY() * scaleFactor),
-            (int) (mapImage.getWidth() * scaleFactor),
-            (int) (mapImage.getHeight() * scaleFactor),
+            (int) (mapImage.getWidth() * scaleFactor * zone.getImageScaleX()),
+            (int) (mapImage.getHeight() * scaleFactor * zone.getImageScaleY()),
             null);
       }
       bbg.dispose();
