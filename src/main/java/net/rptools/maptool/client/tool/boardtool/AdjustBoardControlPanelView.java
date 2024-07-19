@@ -19,6 +19,8 @@ import javax.swing.*;
 
 public class AdjustBoardControlPanelView {
   private JPanel mainPanel;
+  private JSpinner spinner1;
+  private JSpinner spinner2;
 
   public JComponent getRootComponent() {
     return mainPanel;
