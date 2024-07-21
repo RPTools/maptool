@@ -256,7 +256,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     button.addActionListener(
         l -> {
           finalizeCellEditing();
-          var selectedRow = getTokenPropertiesTable().getSelectedRow();
+          JTable propertiesTable = getTokenPropertiesTable();
+          var selectedRow = propertiesTable.getSelectedRow();
           if (selectedRow <= 0) {
             return;
           }
@@ -264,7 +265,8 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
           var model = getTokenPropertiesTableModel();
           model.movePropertyUp(selectedRow);
           --selectedRow;
-          getTokenPropertiesTable().setRowSelectionInterval(selectedRow, selectedRow);
+          propertiesTable.setRowSelectionInterval(selectedRow, selectedRow);
+          propertiesTable.scrollRectToVisible(propertiesTable.getCellRect(selectedRow, 0, true));
         });
     button.setEnabled(false);
   }
@@ -274,15 +276,17 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     button.addActionListener(
         l -> {
           finalizeCellEditing();
-          var selectedRow = getTokenPropertiesTable().getSelectedRow();
-          if (selectedRow < 0 || selectedRow >= getTokenPropertiesTable().getRowCount() - 1) {
+          JTable propertiesTable = getTokenPropertiesTable();
+          var selectedRow = propertiesTable.getSelectedRow();
+          if (selectedRow < 0 || selectedRow >= propertiesTable.getRowCount() - 1) {
             return;
           }
 
           var model = getTokenPropertiesTableModel();
           model.movePropertyDown(selectedRow);
           ++selectedRow;
-          getTokenPropertiesTable().setRowSelectionInterval(selectedRow, selectedRow);
+          propertiesTable.setRowSelectionInterval(selectedRow, selectedRow);
+          propertiesTable.scrollRectToVisible(propertiesTable.getCellRect(selectedRow, 0, true));
         });
     button.setEnabled(false);
   }
@@ -294,8 +298,12 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
             EventQueue.invokeLater(
                 () -> {
                   finalizeCellEditing();
+                  JTable propertiesTable = getTokenPropertiesTable();
                   var model = getTokenPropertiesTableModel();
                   model.addProperty();
+                  int count = model.getRowCount();
+                  propertiesTable.scrollRectToVisible(
+                      propertiesTable.getCellRect(count - 1, 0, true));
                 }));
     button.setEnabled(false);
   }
