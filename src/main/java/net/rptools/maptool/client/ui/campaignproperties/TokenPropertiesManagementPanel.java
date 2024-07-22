@@ -430,6 +430,9 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                   getTokenTypeList().getSelectedValue() == null
                       ? null
                       : getTokenTypeList().getSelectedValue().toString();
+
+              finalizeCellEditing();
+
               if (propertyType == null) {
                 reset();
                 getPropertyAddButton().setEnabled(false);
