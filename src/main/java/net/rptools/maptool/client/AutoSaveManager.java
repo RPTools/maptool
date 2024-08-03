@@ -170,13 +170,15 @@ public class AutoSaveManager {
   }
 
   /** Check to see if autosave recovery is necessary. */
-  public void check() {
+  public boolean check() {
     if (AUTOSAVE_FILE.exists()) {
       boolean okay;
       okay = MapTool.confirm("msg.confirm.recoverAutosave", AUTOSAVE_FILE.lastModified());
       if (okay) {
         AppActions.loadCampaign(AUTOSAVE_FILE);
+        return true;
       }
     }
+    return false;
   }
 }

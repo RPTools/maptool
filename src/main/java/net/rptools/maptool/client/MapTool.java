@@ -1264,12 +1264,27 @@ public class MapTool {
 
   private static void postInitialize() {
     // Check to see if there is an autosave file from MT crashing
-    getAutoSaveManager().check();
+    boolean recover = getAutoSaveManager().check();
 
-    if (!loadCampaignOnStartPath.isEmpty()) {
-      File campaignFile = new File(loadCampaignOnStartPath);
-      if (campaignFile.exists()) {
-        AppActions.loadCampaign(campaignFile);
+    if (!recover) {
+      File campaignFile;
+      // if not loading auto-save, load campaign from command-line arguments
+      if (!loadCampaignOnStartPath.isEmpty()) {
+        campaignFile = new File(loadCampaignOnStartPath);
+        if (campaignFile.exists()) {
+          AppActions.loadCampaign(campaignFile);
+        }
+      }
+      // alternately load MRU campaign if preference set
+      else if (AppPreferences.getLoadMRUCampaignAtStart()) {
+        try {
+          campaignFile = AppPreferences.getMruCampaigns().getFirst();
+          if (campaignFile.exists()) {
+            AppActions.loadCampaign(campaignFile);
+          }
+        } catch (NoSuchElementException nse) {
+          log.info("MRU Campaign not loaded. List is empty.");
+        }
       }
     }
 
