@@ -363,12 +363,6 @@ public class Zone {
 
   public static final DrawablePaint DEFAULT_FOG = new DrawableColorPaint(Color.black);
 
-  // The zones should be ordered. We could have the server assign each zone
-  // an incrementing number as new zones are created, but that would take a lot
-  // more elegance than we really need. Instead, let's just keep track of the
-  // time when it was created. This should give us sufficient granularity, because
-  // seriously -- what's the likelihood of two GMs separately creating a new zone at exactly
-  // the same millisecond since the epoch?
   private long creationTime = System.currentTimeMillis();
 
   private GUID id = new GUID(); // Ideally would be 'final', but that complicates imported()
@@ -478,10 +472,6 @@ public class Zone {
     drawablesByLayer.put(Layer.BACKGROUND, backgroundDrawables);
   }
 
-  /**
-   * Note: When adding new fields to this class, make sure to update all constructors, {@link
-   * #imported()}, {@link #readResolve()}, and potentially {@link #optimize()}.
-   */
   public Zone() {
     // TODO: Was this needed?
     // setGrid(new SquareGrid());
@@ -611,16 +601,11 @@ public class Zone {
   }
 
   /**
-   * Note: When adding new fields to this class, make sure to update all constructors, {@link
-   * #imported()}, {@link #readResolve()}, and potentially {@link #optimize()}.
+   * Create a new zone with old zone's properties and with new token ids.
    *
    * <p>JFJ 2010-10-27 Don't forget that since there are new zones AND new tokens created here from
    * the old one being passed in, if you have any data that needs to transfer over, you will need to
    * manually copy it as is done below for various items.
-   */
-
-  /**
-   * Create a new zone with old zone's properties and with new token ids.
    *
    * @param zone The zone to copy.
    */
@@ -637,6 +622,7 @@ public class Zone {
   public Zone(Zone zone, boolean keepIds) {
     if (keepIds) {
       this.id = zone.getId();
+      this.creationTime = zone.creationTime;
     }
 
     backgroundPaint = zone.backgroundPaint;
@@ -755,14 +741,9 @@ public class Zone {
 
   /**
    * Should be invoked only when a Zone has been imported from an external source and needs to be
-   * cleaned up before being used. Currently this cleanup consists of allocating a new GUID, setting
-   * the creation time to `now', and resetting the initiative list (setting the related zone and
-   * clearing the model).
+   * cleaned up before being used.
    */
   public void imported() {
-    id = new GUID();
-    creationTime = System.currentTimeMillis();
-    initiativeList.setZone(this);
     initiativeList.clearModel();
   }
 
@@ -2123,6 +2104,8 @@ public class Zone {
       // no player alias is set.
       playerAlias = null;
     }
+
+    grid.setZone(this);
 
     // 1.3b76 -> 1.3b77
     // adding the exposed area for Individual FOW

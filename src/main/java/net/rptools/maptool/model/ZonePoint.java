@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.model;
 
-public class ZonePoint extends AbstractPoint {
+public final class ZonePoint extends AbstractPoint {
   public ZonePoint(int x, int y) {
     super(x, y);
   }

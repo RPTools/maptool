@@ -25,6 +25,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.function.BiConsumer;
@@ -91,7 +92,15 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
 
   @Override
   public void whenComplete(BiConsumer<? super Void, ? super Throwable> callback) {
-    stage = stage.whenComplete(callback);
+    stage =
+        stage.whenComplete(
+            (result, error) -> {
+              // Hand back the original exception, not the wrapped one.
+              if (error instanceof CompletionException e) {
+                error = e.getCause();
+              }
+              callback.accept(result, error);
+            });
   }
 
   private void setCurrentState(State state) {

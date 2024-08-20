@@ -442,6 +442,9 @@ public class PreferencesDialog extends JDialog {
   /** Checkbox for showing the token label border. */
   private final JCheckBox showLabelBorderCheckBox;
 
+  // ** Checkbox for loading the most recently used campaign on startup */
+  private final JCheckBox loadMRUcheckbox;
+
   /**
    * Array of LocalizedComboItems representing the default grid types for the preferences dialog.
    * Each item in the array consists of a grid type and its corresponding localized display name.
@@ -664,7 +667,7 @@ public class PreferencesDialog extends JDialog {
     allowExternalMacroAccessCheckBox = panel.getCheckBox("allowExternalMacroAccessCheckBox");
     fileSyncPath = panel.getTextField("fileSyncPath");
     fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
-
+    loadMRUcheckbox = (JCheckBox) panel.getCheckBox("loadMRUcheckbox");
     final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
     installDirTextField.setText(AppUtil.getInstallDirectory().toString());
 
@@ -976,6 +979,8 @@ public class PreferencesDialog extends JDialog {
           }
         });
 
+    loadMRUcheckbox.addActionListener(
+        e -> AppPreferences.setLoadMRUCampaignAtStart(loadMRUcheckbox.isSelected()));
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
             AppPreferences.setAllowExternalMacroAccess(
@@ -1551,6 +1556,7 @@ public class PreferencesDialog extends JDialog {
     defaultUsername.setText(AppPreferences.getDefaultUserName());
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
+    loadMRUcheckbox.setSelected(AppPreferences.getLoadMRUCampaignAtStart());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
     tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.getTokensWarnWhenDeleted());
     tokensStartSnapToGridCheckBox.setSelected(AppPreferences.getTokensStartSnapToGrid());

@@ -68,7 +68,6 @@ public class VisionOverlayRenderer {
 
   private void renderWorld(Graphics2D worldG, PlayerView view, Token token) {
     // The vision of the token is not necessarily related to the current view.
-    // final var tokenView = view.derive(Collections.singleton(token));
     final var tokenView = new PlayerView(view.getRole(), List.of(token));
 
     Area currentTokenVisionArea = zoneView.getVisibleArea(token, tokenView);

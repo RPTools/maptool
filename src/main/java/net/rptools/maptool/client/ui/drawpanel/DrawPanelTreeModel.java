@@ -29,7 +29,6 @@ import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
@@ -56,16 +55,10 @@ public class DrawPanelTreeModel implements TreeModel {
       return byLayer.get(layer);
     }
 
-    private final String displayName;
     private final Zone.Layer layer;
 
     private View(Zone.Layer layer) {
-      this.displayName = I18N.getText("panel.DrawExplorer.View." + layer.name());
       this.layer = layer;
-    }
-
-    public String getDisplayName() {
-      return displayName;
     }
 
     public Zone.Layer getLayer() {
