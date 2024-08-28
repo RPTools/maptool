@@ -22,10 +22,13 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.language.I18N;
@@ -37,6 +40,7 @@ import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
 import net.rptools.maptool.model.library.proto.AddonSlashCommandsDto;
 import net.rptools.maptool.model.library.proto.MTScriptPropertiesDto;
+import net.rptools.maptool.util.FileUtil;
 import org.apache.tika.mime.MediaType;
 import org.javatuples.Pair;
 
@@ -144,7 +148,85 @@ public class AddOnLibraryImporter {
    * @throws IOException if an error occurs while reading the library.
    */
   public AddOnLibrary importFromDirectory(Path dir) throws IOException {
-    return null; // TODO: CDW
+
+    var infoPath = dir.resolve(LIBRARY_INFO_FILE);
+    if (!Files.exists(infoPath))
+      throw new IOException(I18N.getText("library.error.addOn.noConfigFile", dir));
+
+    var builder = AddOnLibraryDto.newBuilder();
+    JsonFormat.parser()
+            .ignoringUnknownFields()
+            .merge(Files.newBufferedReader(infoPath), builder);
+
+    var pathAssetMap = processAssetsFromDirectory(builder.getNamespace(), dir);
+
+    var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
+    var mtsPropPath = dir.resolve(MACROSCRIPT_PROPERTY_FILE);
+    if (Files.exists(mtsPropPath))
+      JsonFormat.parser()
+              .ignoringUnknownFields()
+              .merge(Files.newBufferedReader(mtsPropPath), mtsPropBuilder);
+
+    var eventPropBuilder = AddOnLibraryEventsDto.newBuilder();
+    var eventPropPath = dir.resolve(EVENT_PROPERTY_FILE);
+    if (Files.exists(eventPropPath))
+      JsonFormat.parser()
+              .ignoringUnknownFields()
+              .merge(Files.newBufferedReader(eventPropPath), eventPropBuilder);
+
+    var statSheetsBuilder = AddOnStatSheetsDto.newBuilder();
+    var statSheetsPath = dir.resolve(STATS_SHEET_FILE);
+    if (Files.exists(statSheetsPath))
+      JsonFormat.parser()
+              .ignoringUnknownFields()
+              .merge(Files.newBufferedReader(statSheetsPath), statSheetsBuilder);
+
+    var slashCommandsBuilder = AddonSlashCommandsDto.newBuilder();
+    var slashCommandsPath = dir.resolve(SLASH_COMMAND_FILE);
+    if (Files.exists(slashCommandsPath))
+      JsonFormat.parser()
+              .ignoringUnknownFields()
+              .merge(Files.newBufferedReader(slashCommandsPath), slashCommandsBuilder);
+
+    addMetaDataFromDirectory(builder.getNamespace(), dir, pathAssetMap);
+
+    // Directory assets must be zipped up. When external add-on libraries are sent to remotes,
+    // they should act as normal add-on libraries.
+    var addOnLib = builder.build();
+
+    var zipPath = Files.createTempFile(builder.getNamespace(), null);
+    try (var zipOut = new ZipOutputStream(Files.newOutputStream(zipPath, StandardOpenOption.WRITE))) {
+      var paths = pathAssetMap.keySet().stream()
+              .map(path -> {
+                if (path.startsWith(METADATA_DIR))
+                  return path.substring(METADATA_DIR.length());
+                return CONTENT_DIRECTORY + path;
+              })
+              .collect(Collectors.toSet());
+
+      for (var pathString : paths) {
+        zipOut.putNextEntry(new ZipEntry(pathString));
+        var p = dir.resolve(pathString);
+        if (Files.isRegularFile(p)) zipOut.write(Files.readAllBytes(p));
+        zipOut.closeEntry();
+      }
+    }
+
+    var data = Files.readAllBytes(zipPath);
+    Files.delete(zipPath);
+
+    var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
+    addAsset(asset);
+
+
+    return AddOnLibrary.fromDto(
+            asset.getMD5Key(),
+            addOnLib,
+            mtsPropBuilder.build(),
+            eventPropBuilder.build(),
+            statSheetsBuilder.build(),
+            slashCommandsBuilder.build(),
+            pathAssetMap);
   }
 
   /**
@@ -155,7 +237,6 @@ public class AddOnLibraryImporter {
    * @throws IOException if an error occurs while reading the asset.
    */
   public AddOnLibrary importFromFile(File file) throws IOException {
-    var diiBuilder = AddOnLibraryDto.newBuilder();
 
     try (var zip = new ZipFile(file)) {
       ZipEntry entry = zip.getEntry(LIBRARY_INFO_FILE);
@@ -168,7 +249,7 @@ public class AddOnLibraryImporter {
           .merge(new InputStreamReader(zip.getInputStream(entry)), builder);
 
       // MT MacroScript properties
-      var pathAssetMap = processAssets(builder.getNamespace(), zip);
+      var pathAssetMap = processAssetsFromZip(builder.getNamespace(), zip);
       var mtsPropBuilder = MTScriptPropertiesDto.newBuilder();
       ZipEntry mtsPropsZipEntry = zip.getEntry(MACROSCRIPT_PROPERTY_FILE);
       if (mtsPropsZipEntry != null) {
@@ -207,7 +288,7 @@ public class AddOnLibraryImporter {
       }
 
       // Copy Metadata
-      addMetaData(builder.getNamespace(), zip, pathAssetMap);
+      addMetaDataFromZip(builder.getNamespace(), zip, pathAssetMap);
 
       var addOnLib = builder.build();
       byte[] data = Files.readAllBytes(file.toPath());
@@ -252,7 +333,7 @@ public class AddOnLibraryImporter {
    * @param pathAssetMap the map of asset paths and asset details.
    * @throws IOException
    */
-  private void addMetaData(
+  private void addMetaDataFromZip(
       String namespace, ZipFile zip, Map<String, Pair<MD5Key, Type>> pathAssetMap)
       throws IOException {
     var entries = zip.stream().filter(e -> !e.getName().contains("/")).toList();
@@ -270,6 +351,29 @@ public class AddOnLibraryImporter {
   }
 
   /**
+   * Adds the metadata from the add-on directory to the metadata directory.
+   *
+   * @param namespace The namespace of the add-on.
+   * @param dir The directory of the add-on.
+   * @param pathAssetMap The asset details output.
+   * @throws IOException If there is an error reading assets from the directory.
+   */
+  private void addMetaDataFromDirectory(String namespace, Path dir, Map<String, Pair<MD5Key, Type>> pathAssetMap)
+    throws IOException {
+    var entries = Files.list(dir).filter(p -> !Files.isDirectory(p)).collect(Collectors.toSet());
+    for (var entry : entries) {
+      var path = METADATA_DIR + entry.getFileName().toString();
+      var bytes = Files.readAllBytes(entry);
+
+      var mediaType = Asset.getMediaType(entry.getFileName().toString(), bytes);
+
+      var asset = Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + path, bytes);
+      addAsset(asset);
+      pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
+    }
+  }
+
+  /**
    * Reads the assets from the add-on library and adds them to the asset manager.
    *
    * @param namespace the namespace of the add-on library.
@@ -277,7 +381,7 @@ public class AddOnLibraryImporter {
    * @return a map of asset paths and asset details.
    * @throws IOException if there is an error reading the assets from the add-on library.
    */
-  private Map<String, Pair<MD5Key, Type>> processAssets(String namespace, ZipFile zip)
+  private Map<String, Pair<MD5Key, Type>> processAssetsFromZip(String namespace, ZipFile zip)
       throws IOException {
     var pathAssetMap = new HashMap<String, Pair<MD5Key, Type>>();
     var entries =
@@ -295,6 +399,37 @@ public class AddOnLibraryImporter {
         addAsset(asset);
         pathAssetMap.put(path, Pair.with(asset.getMD5Key(), asset.getType()));
       }
+    }
+    return pathAssetMap;
+  }
+
+  /**
+   * Reads the assets from a flat directory. This is primarily used for external libraries, such as
+   * development-mode libraries.
+   * @param namespace The namespace to classify assets under.
+   * @param dir The directory to process as an add-on.
+   * @return A map containing asset paths and details.
+   * @throws IOException If there is an error reading assets from the directory.
+   */
+  private Map<String, Pair<MD5Key, Type>> processAssetsFromDirectory(String namespace, Path dir) throws IOException {
+    var pathAssetMap = new HashMap<String, Pair<MD5Key, Type>>();
+    var contentDir = dir.resolve(CONTENT_DIRECTORY);
+
+    // Empty libraries are still permitted.
+    if (!Files.exists(contentDir))
+      return pathAssetMap;
+
+    for (Path entry : FileUtil.listRecursively(contentDir).collect(Collectors.toSet())) {
+      if (Files.isDirectory(entry)) continue;
+      entry = dir.relativize(entry);
+      var pathString = entry.toString().substring(CONTENT_DIRECTORY.length()).replace('\\', '/');
+      var bytes = Files.readAllBytes(dir.resolve(entry));
+
+      var mediaType = Asset.getMediaType(entry.toString(), bytes);
+
+      var asset = Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + pathString, bytes);
+      addAsset(asset);
+      pathAssetMap.put(pathString, Pair.with(asset.getMD5Key(), asset.getType()));
     }
     return pathAssetMap;
   }

@@ -18,12 +18,12 @@ import io.methvin.watcher.DirectoryWatcher;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+
+import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
 
 public class ExternalAddOnLibraryManager {
@@ -82,17 +82,14 @@ public class ExternalAddOnLibraryManager {
             });
   }
 
-  public void deregisterExternalAddOnLibrary(AddOnLibrary addOnLibrary) {
-    addOnLibrary
-        .getNamespace()
-        .thenAccept(
-            namespace -> {
-              namespaceLibraryMap.remove(namespace);
-              namespaceLibraryMap.remove(namespace);
-              addOnLibrary.getLibraryInfo().thenAccept(externalLibraryInfo::remove);
-              addOnLibraryManager.deregisterLibrary(namespace);
-              cacheExternalLibraryInfo();
-            });
+  public void deregisterExternalAddOnLibrary(String namespace) {
+    var removed = namespaceLibraryMap.remove(namespace.toLowerCase());
+    if (removed != null) {
+      removed.cleanup();
+      new MapToolEventBus()
+              .getMainEventBus()
+              .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
+    }
   }
 
   private void cacheExternalLibraryInfo() {
@@ -221,8 +218,7 @@ public class ExternalAddOnLibraryManager {
                 }
                 case DELETE -> {
                   if (event.path().relativize(externalLibraryPath).getNameCount() == 1) {
-                    deregisterExternalAddOnLibrary(
-                        namespaceLibraryMap.get(event.path().getFileName().toString()));
+                    deregisterExternalAddOnLibrary(event.path().getFileName().toString());
                   }
                 }
                 case MODIFY -> {

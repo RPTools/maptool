@@ -24,6 +24,7 @@ import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
@@ -218,9 +219,7 @@ public class AddOnLibrariesDialogView extends JDialog {
         });
 
     createAddonSkeletonButton.addActionListener(
-        e -> {
-          createAddonSkeleton();
-        });
+        e -> createAddonSkeleton());
 
     enableExternalAddOnCheckBox.addActionListener(
         e -> {
@@ -247,7 +246,13 @@ public class AddOnLibrariesDialogView extends JDialog {
   }
 
   private void createAddonSkeleton() {
-    // TODO: CDW
+    LibraryManager library = new LibraryManager();
+    try {
+      library.registerExternalAddOnLibrary(new AddOnLibraryImporter()
+              .importFromDirectory(Path.of(directoryTextField.getText())));
+    } catch (IOException e) {
+      MapTool.showError("library.import.ioError", e);
+    }
   }
 
   /**
