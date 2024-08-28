@@ -40,7 +40,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
-import org.eclipse.jetty.util.StringUtil;
+import org.apache.commons.lang.StringUtils;
 
 @SuppressWarnings("serial")
 public class ButtonGroupPopupMenu extends JPopupMenu {
@@ -278,7 +278,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                       }
                       if (alreadyExists) {
                         String tokenName = token.getName();
-                        if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                        if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                           tokenName = tokenName + "(" + token.getGMName() + ")";
                         }
                         alreadyExists =
@@ -301,7 +301,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                   }
                   if (alreadyExists) {
                     String tokenName = token.getName();
-                    if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+                    if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                       tokenName += "(" + token.getGMName() + ")";
                     }
                     alreadyExists =
@@ -358,7 +358,7 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
               List<MacroButtonProperties> toAdd = new ArrayList<>(newButtonProps.size());
               int nextIndex = token.getMacroNextIndex();
               String tokenName = token.getName();
-              if (MapTool.getPlayer().isGM() && !StringUtil.isEmpty(token.getGMName())) {
+              if (MapTool.getPlayer().isGM() && !StringUtils.isEmpty(token.getGMName())) {
                 tokenName = tokenName + "(" + token.getGMName() + ")";
               }
               for (MacroButtonProperties nextProps : newButtonProps) {

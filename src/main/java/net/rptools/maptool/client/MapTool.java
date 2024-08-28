@@ -29,6 +29,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
+import java.awt.SecondaryLoop;
 import java.awt.Toolkit;
 import java.awt.Transparency;
 import java.awt.event.WindowAdapter;
@@ -42,6 +43,7 @@ import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
+import javafx.application.Platform;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
@@ -108,7 +110,6 @@ import net.rptools.maptool.transfer.AssetTransferManager;
 import net.rptools.maptool.util.MessageUtil;
 import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmOptions;
-import net.rptools.maptool.webapi.MTWebAppServer;
 import net.rptools.parser.ParserException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -167,8 +168,6 @@ public class MapTool {
   private static TaskBarFlasher taskbarFlasher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
-
-  private static final MTWebAppServer webAppServer = new MTWebAppServer();
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
   private static boolean debug = false;
@@ -1265,12 +1264,27 @@ public class MapTool {
 
   private static void postInitialize() {
     // Check to see if there is an autosave file from MT crashing
-    getAutoSaveManager().check();
+    boolean recover = getAutoSaveManager().check();
 
-    if (!loadCampaignOnStartPath.isEmpty()) {
-      File campaignFile = new File(loadCampaignOnStartPath);
-      if (campaignFile.exists()) {
-        AppActions.loadCampaign(campaignFile);
+    if (!recover) {
+      File campaignFile;
+      // if not loading auto-save, load campaign from command-line arguments
+      if (!loadCampaignOnStartPath.isEmpty()) {
+        campaignFile = new File(loadCampaignOnStartPath);
+        if (campaignFile.exists()) {
+          AppActions.loadCampaign(campaignFile);
+        }
+      }
+      // alternately load MRU campaign if preference set
+      else if (AppPreferences.getLoadMRUCampaignAtStart()) {
+        try {
+          campaignFile = AppPreferences.getMruCampaigns().getFirst();
+          if (campaignFile.exists()) {
+            AppActions.loadCampaign(campaignFile);
+          }
+        } catch (NoSuchElementException nse) {
+          log.info("MRU Campaign not loaded. List is empty.");
+        }
       }
     }
 
@@ -1343,26 +1357,6 @@ public class MapTool {
       return AppPreferences.getUseToolTipForInlineRoll();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();
-    }
-  }
-
-  public static MTWebAppServer getWebAppServer() {
-    return webAppServer;
-  }
-
-  public static void startWebAppServer(final int port) {
-    try {
-      Thread webAppThread =
-          new Thread(
-              () -> {
-                webAppServer.setPort(port);
-                webAppServer.startServer();
-              });
-
-      webAppThread.start();
-    } catch (Exception e) { // TODO: This needs to be logged
-      System.out.println("Unable to start web server");
-      e.printStackTrace();
     }
   }
 
@@ -1493,6 +1487,15 @@ public class MapTool {
     }
 
     return "NOT_CONFIGURED";
+  }
+
+  private static void initJavaFX() {
+    var eventQueue = Toolkit.getDefaultToolkit().getSystemEventQueue();
+    SecondaryLoop secondaryLoop = eventQueue.createSecondaryLoop();
+    Platform.startup(secondaryLoop::exit);
+    secondaryLoop.enter();
+
+    Platform.setImplicitExit(false); // necessary to use JavaFX later
   }
 
   public static void main(String[] args) {
@@ -1632,7 +1635,10 @@ public class MapTool {
     // System properties
     System.setProperty("swing.aatext", "true");
 
-    final SplashScreen splash = new SplashScreen((isDevelopment()) ? getVersion() : getVersion());
+    initJavaFX();
+
+    final SplashScreen splash = new SplashScreen(getVersion());
+    splash.setVisible(true);
 
     try {
       ThemeSupport.loadTheme();
@@ -1744,7 +1750,8 @@ public class MapTool {
           EventQueue.invokeLater(
               () -> {
                 clientFrame.setVisible(true);
-                splash.hideSplashScreen();
+                splash.setVisible(false);
+                splash.dispose();
                 EventQueue.invokeLater(MapTool::postInitialize);
               });
         });

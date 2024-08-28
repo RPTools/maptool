@@ -213,6 +213,7 @@ public class CampaignPropertiesDialog extends JDialog {
       MapTool.getFrame()
           .showFilledGlassPane(
               new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
+      tokenPropertiesPanel.finalizeCellEditing();
       tokenPropertiesPanel
           .getRenameTypes()
           .forEach(

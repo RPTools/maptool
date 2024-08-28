@@ -25,6 +25,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
+import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
@@ -38,7 +39,6 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
-import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 import org.apache.logging.log4j.LogManager;
@@ -66,12 +66,13 @@ public abstract class Grid implements Cloneable {
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
   private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
-  protected Map<KeyStroke, Action> movementKeys = null;
+
+  protected transient Map<KeyStroke, Action> movementKeys = null;
+  private transient Zone zone;
+  private transient Area cellShape;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
-  private Zone zone;
-  private Area cellShape;
 
   public Grid() {
     setSize(AppPreferences.getDefaultGridSize());
@@ -82,11 +83,16 @@ public abstract class Grid implements Cloneable {
     setOffset(grid.offsetX, grid.offsetY);
   }
 
+  protected Object readResolve() {
+    cellShape = createCellShape();
+    return this;
+  }
+
   protected synchronized Map<Integer, Area> getGridShapeCache() {
     return gridShapeCache;
   }
 
-  protected synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
+  private synchronized void setGridShapeCache(int gridRadius, Area newGridArea) {
     final AffineTransform at = new AffineTransform();
     final double gridScale = (double) MAX_GRID_SIZE / getSize();
     at.scale(gridScale, gridScale);
@@ -264,15 +270,16 @@ public abstract class Grid implements Cloneable {
     return cellShape;
   }
 
-  protected void setCellShape(Area cellShape) {
-    this.cellShape = cellShape;
-  }
-
   public BufferedImage getCellHighlight() {
     return null;
   }
 
-  protected abstract Area createCellShape(int size);
+  /**
+   * Build the shape of a cell for the current grid size.
+   *
+   * @return The cell shape.
+   */
+  protected abstract Area createCellShape();
 
   /**
    * @param offsetX The grid's x offset component
@@ -337,7 +344,7 @@ public abstract class Grid implements Cloneable {
    */
   public void setSize(int size) {
     this.size = constrainSize(size);
-    cellShape = createCellShape(size);
+    cellShape = createCellShape();
     fireGridChanged();
   }
 
@@ -352,7 +359,7 @@ public abstract class Grid implements Cloneable {
    * @param scaleWithToken used to increase the area based on token footprint
    * @return Area
    */
-  public Area getShapedArea(
+  public @Nonnull Area getShapedArea(
       ShapeType shape,
       Token token,
       double range,
@@ -370,6 +377,7 @@ public abstract class Grid implements Cloneable {
       double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
 
       // Test for gridless maps
+      var cellShape = getCellShape();
       if (cellShape == null) {
         double tokenBoundsWidth = token.getBounds(getZone()).getWidth() / 2;
         visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
@@ -515,7 +523,7 @@ public abstract class Grid implements Cloneable {
   }
 
   private void fireGridChanged() {
-    gridShapeCache.clear();
+    getGridShapeCache().clear();
     new MapToolEventBus().getMainEventBus().post(new GridChanged(this.zone));
   }
 
@@ -835,7 +843,7 @@ public abstract class Grid implements Cloneable {
    * @return the {@link Area} conforming to the current grid layout for the given radius
    */
   protected Area createGridArea(int gridRadius) {
-    final Area cellArea = new Area(createCellShape(getSize()));
+    final Area cellArea = new Area(getCellShape());
     final Set<Point> points = generateRadius(gridRadius);
     Area gridArea = new Area();
 
@@ -844,8 +852,6 @@ public abstract class Grid implements Cloneable {
       at.translate((point.x) * getSize(), (point.y) * getSize());
       gridArea.add(cellArea.createTransformedArea(at));
     }
-
-    setGridShapeCache(gridRadius, gridArea);
 
     return gridArea;
   }
@@ -920,7 +926,8 @@ public abstract class Grid implements Cloneable {
     // Or if the flag is enabled, recreate cache
     if (DeveloperOptions.Toggle.IgnoreGridShapeCache.isEnabled()
         || !getGridShapeCache().containsKey(gridRadius)) {
-      createGridArea(gridRadius);
+      var newArea = createGridArea(gridRadius);
+      setGridShapeCache(gridRadius, newArea);
     }
 
     double rescale = getSize() / (double) MAX_GRID_SIZE;
@@ -943,11 +950,8 @@ public abstract class Grid implements Cloneable {
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
-    if (dto.hasCellShape()) {
-      grid.cellShape = Mapper.map(dto.getCellShape());
-    } else {
-      grid.cellShape = null;
-    }
+    grid.cellShape = grid.createCellShape();
+
     return grid;
   }
 
@@ -959,9 +963,6 @@ public abstract class Grid implements Cloneable {
     dto.setOffsetX(offsetX);
     dto.setOffsetY(offsetY);
     dto.setSize(size);
-    if (cellShape != null) {
-      dto.setCellShape(Mapper.map(cellShape));
-    }
     return dto.build();
   }
 

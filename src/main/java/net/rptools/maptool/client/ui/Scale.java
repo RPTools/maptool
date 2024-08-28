@@ -17,67 +17,48 @@ package net.rptools.maptool.client.ui;
 import java.awt.Point;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.Serial;
 import java.io.Serializable;
 
 public class Scale implements Serializable {
+  public static final String PROPERTY_SCALE = "scale";
+  public static final String PROPERTY_OFFSET = "offset";
+  private static final int MIN_ZOOM_LEVEL = -175;
+  private static final int MAX_ZOOM_LEVEL = 175;
 
   private final double oneToOneScale = 1; // Let this be configurable at some point
   private double scale = oneToOneScale;
   private final double scaleIncrement = .075;
 
   private int zoomLevel = 0;
-
-  public static final String PROPERTY_SCALE = "scale";
-  public static final String PROPERTY_OFFSET = "offset";
-
-  private transient PropertyChangeSupport propertyChangeSupport;
-
   private int offsetX;
   private int offsetY;
-
-  private final int width;
-  private final int height;
-
-  private boolean initialized;
-
-  // LEGACY for 1.3b31 and earlier
-  private transient int scaleIndex; // 'transient' prevents serialization; prep for 1.4
+  private transient PropertyChangeSupport propertyChangeSupport;
 
   public Scale() {
-    this(0, 0);
-  }
-
-  public Scale(int width, int height) {
-    this.width = width;
-    this.height = height;
+    this.offsetX = 0;
+    this.offsetY = 0;
   }
 
   public Scale(Scale copy) {
-    this.width = copy.width;
-    this.height = copy.height;
     this.offsetX = copy.offsetX;
     this.offsetY = copy.offsetY;
-    this.zoomLevel = copy.zoomLevel;
-    this.initialized = copy.initialized;
-    this.scale = copy.scale;
-    // this.oneToOneScale = copy.oneToOneScale;
-    // this.scaleIncrement = copy.scaleIncrement;
+    setScale(copy.scale);
+  }
+
+  @Serial
+  private Object readResolve() {
+    // Make sure the zoom level is correct.
+    setScale(this.scale);
+    return this;
   }
 
   public void addPropertyChangeListener(PropertyChangeListener listener) {
     getPropertyChangeSupport().addPropertyChangeListener(listener);
   }
 
-  public void addPropertyChangeListener(String property, PropertyChangeListener listener) {
-    getPropertyChangeSupport().addPropertyChangeListener(property, listener);
-  }
-
   public void removePropertyChangeListener(PropertyChangeListener listener) {
     getPropertyChangeSupport().removePropertyChangeListener(listener);
-  }
-
-  public void removePropertyChangeListener(String property, PropertyChangeListener listener) {
-    getPropertyChangeSupport().removePropertyChangeListener(property, listener);
   }
 
   public int getOffsetX() {
@@ -110,14 +91,28 @@ public class Scale implements Serializable {
     }
 
     // Determine zoomLevel appropriate for given scale
-    zoomLevel = (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
-
-    setScaleNoZoomLevel(scale);
+    var zoomLevel =
+        (int) Math.round(Math.log(scale / oneToOneScale) / Math.log(1 + scaleIncrement));
+    // Check that we haven't gone out of bounds with our zooming.
+    if (zoomLevel < MIN_ZOOM_LEVEL) {
+      setZoomLevel(MIN_ZOOM_LEVEL);
+    } else if (zoomLevel > MAX_ZOOM_LEVEL) {
+      setZoomLevel(MAX_ZOOM_LEVEL);
+    } else {
+      // Acceptable scale. Use it.
+      var oldScale = this.scale;
+      this.scale = scale;
+      this.zoomLevel = zoomLevel;
+      getPropertyChangeSupport().firePropertyChange(PROPERTY_SCALE, oldScale, this.scale);
+    }
   }
 
-  private void setScaleNoZoomLevel(double scale) {
+  private void setScaleFromZoomLevel() {
     double oldScale = this.scale;
-    this.scale = scale;
+
+    // Check for zero just to avoid any possible imprecision.
+    this.scale =
+        zoomLevel == 0 ? oneToOneScale : oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel);
 
     getPropertyChangeSupport().firePropertyChange(PROPERTY_SCALE, oldScale, scale);
   }
@@ -126,29 +121,27 @@ public class Scale implements Serializable {
     return oneToOneScale;
   }
 
-  public double reset() {
-    double oldScale = this.scale;
-    scale = oneToOneScale;
-    zoomLevel = 0;
-
-    getPropertyChangeSupport().firePropertyChange(PROPERTY_SCALE, oldScale, scale);
-    return oldScale;
+  public void reset() {
+    setZoomLevel(0);
   }
 
-  public double scaleUp() {
-    zoomLevel++;
-    setScaleNoZoomLevel(oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel));
-    return scale;
+  private void setZoomLevel(int zoomLevel) {
+    this.zoomLevel = Math.clamp(zoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
+    setScaleFromZoomLevel();
   }
 
-  public double scaleDown() {
-    zoomLevel--;
-    setScaleNoZoomLevel(oneToOneScale * Math.pow(1 + scaleIncrement, zoomLevel));
-    return scale;
+  private void scaleUp() {
+    setZoomLevel(zoomLevel + 1);
+  }
+
+  private void scaleDown() {
+    setZoomLevel(zoomLevel - 1);
   }
 
   public void zoomReset(int x, int y) {
-    zoomTo(x, y, reset());
+    var oldScale = scale;
+    reset();
+    zoomTo(x, y, oldScale);
   }
 
   public void zoomIn(int x, int y) {
@@ -169,46 +162,11 @@ public class Scale implements Serializable {
     zoomTo(x, y, oldScale);
   }
 
-  public boolean isInitialized() {
-    return initialized;
-  }
-
   private PropertyChangeSupport getPropertyChangeSupport() {
     if (propertyChangeSupport == null) {
       propertyChangeSupport = new PropertyChangeSupport(this);
     }
     return propertyChangeSupport;
-  }
-
-  /**
-   * Fit the image into the given space by finding the zoom level that allows the image to fit. Then
-   * center the image.
-   *
-   * @param width width of the image
-   * @param height height of the image
-   * @return true if this call did something, false if the init has already been called
-   */
-  public boolean initialize(int width, int height) {
-
-    if (initialized) {
-      return false;
-    }
-
-    centerIn(width, height);
-
-    initialized = true;
-    return true;
-  }
-
-  public void centerIn(int width, int height) {
-
-    int currWidth = (int) (this.width * getScale());
-    int currHeight = (int) (this.height * getScale());
-
-    int x = (width - currWidth) / 2;
-    int y = (height - currHeight) / 2;
-
-    setOffset(x, y);
   }
 
   private void zoomTo(int x, int y, double oldScale) {

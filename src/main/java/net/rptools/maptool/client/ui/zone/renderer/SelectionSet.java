@@ -18,6 +18,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.RenderPathWorker;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -37,7 +38,8 @@ public class SelectionSet {
   private ZoneWalker walker;
   private final Token token;
 
-  Path<ZonePoint> gridlessPath;
+  private Path<ZonePoint> gridlessPath;
+  private ZonePoint currentGridlessPoint;
 
   /** Pixel distance (x) from keyToken's origin. */
   int offsetX;
@@ -72,16 +74,20 @@ public class SelectionSet {
         walker.setWaypoints(tokenPoint, tokenPoint);
       }
     } else {
-      gridlessPath = new Path<ZonePoint>();
-      gridlessPath.addPathCell(new ZonePoint(token.getX(), token.getY()));
+      gridlessPath = new Path<>();
+
+      currentGridlessPoint = new ZonePoint(token.getX(), token.getY());
+      gridlessPath.appendWaypoint(currentGridlessPoint);
     }
   }
 
   /**
    * @return path computation.
    */
-  public Path<ZonePoint> getGridlessPath() {
-    return gridlessPath;
+  public @Nonnull Path<ZonePoint> getGridlessPath() {
+    var result = gridlessPath.copy();
+    result.appendWaypoint(currentGridlessPoint);
+    return result;
   }
 
   public ZoneWalker getWalker() {
@@ -151,11 +157,8 @@ public class SelectionSet {
               renderer);
       renderPathThreadPool.execute(renderPathTask);
     } else {
-      if (gridlessPath.getCellPath().size() > 1) {
-        gridlessPath.replaceLastPoint(zp);
-      } else {
-        gridlessPath.addPathCell(zp);
-      }
+      currentGridlessPoint.x = zp.x;
+      currentGridlessPoint.y = zp.y;
     }
   }
 
@@ -168,8 +171,7 @@ public class SelectionSet {
     if (walker != null && token.isSnapToGrid() && renderer.getZone().getGrid() != null) {
       walker.toggleWaypoint(renderer.getZone().getGrid().convert(location));
     } else {
-      gridlessPath.addWayPoint(location);
-      gridlessPath.addPathCell(location);
+      gridlessPath.appendWaypoint(location);
     }
   }
 
@@ -193,7 +195,8 @@ public class SelectionSet {
 
       zp = renderer.getZone().getGrid().convert(cp);
     } else {
-      zp = gridlessPath.getLastJunctionPoint();
+      // Gridless path will never be empty if set.
+      zp = gridlessPath.getWayPointList().getLast();
     }
     return zp;
   }

@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
@@ -31,10 +30,9 @@ import net.rptools.maptool.util.StringUtil;
  * and changing the zoom level to that amount.
  */
 public class ZoomStatusBar extends JTextField implements ActionListener {
-  private static final Dimension minSize = new Dimension(50, 10);
-
   public ZoomStatusBar() {
-    super("", RIGHT);
+    super("", 9);
+    setHorizontalAlignment(RIGHT);
     setToolTipText(I18N.getString("ZoomStatusBar.tooltip"));
     addActionListener(this);
   }
@@ -61,26 +59,6 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
     }
   }
 
-  /*
-   * (non-Javadoc)
-   *
-   * @see javax.swing.JComponent#getMinimumSize()
-   */
-  @Override
-  public Dimension getMinimumSize() {
-    return minSize;
-  }
-
-  /*
-   * (non-Javadoc)
-   *
-   * @see javax.swing.JComponent#getPreferredSize()
-   */
-  @Override
-  public Dimension getPreferredSize() {
-    return getMinimumSize();
-  }
-
   public void clear() {
     setText("");
   }
@@ -90,7 +68,18 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
       double scale = MapTool.getFrame().getCurrentZoneRenderer().getZoneScale().getScale();
       scale *= 100;
-      zoom = String.format("%d%%", (int) scale);
+
+      if (scale < 10) {
+        zoom = String.format("%.4f%%", scale);
+      } else if (scale < 100) {
+        zoom = String.format("%.3f%%", scale);
+      } else if (scale < 1000) {
+        zoom = String.format("%.2f%%", scale);
+      } else if (scale < 10000) {
+        zoom = String.format("%.1f%%", scale);
+      } else {
+        zoom = String.format("%.0f%%", scale);
+      }
     }
     setText(zoom);
   }

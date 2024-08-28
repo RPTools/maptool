@@ -17,21 +17,31 @@ package net.rptools.maptool.client.ui.htmlframe;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.sun.webkit.WebPage;
 import com.sun.webkit.dom.HTMLSelectElementImpl;
 import java.awt.*;
 import java.awt.event.ActionListener;
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.LinkedList;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.regex.Matcher;
 import javafx.beans.value.ObservableValue;
 import javafx.concurrent.Worker;
+import javafx.event.EventType;
 import javafx.scene.Scene;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.input.DataFormat;
+import javafx.scene.input.DragEvent;
+import javafx.scene.input.Dragboard;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.TransferMode;
 import javafx.scene.web.*;
 import javafx.stage.Stage;
 import javafx.stage.StageStyle;
@@ -230,6 +240,8 @@ public class HTMLWebViewManager {
     webEngine.setPromptHandler(HTMLWebViewManager::showPrompt);
     webEngine.setCreatePopupHandler(HTMLWebViewManager::showPopup);
     webEngine.setOnError(HTMLWebViewManager::showError);
+
+    addWorkaroundFor3679(this.webView);
 
     // Workaround to load Java Bridge before everything else.
     webEngine.onStatusChangedProperty().set(this::setBridge);
@@ -767,4 +779,141 @@ public class HTMLWebViewManager {
   private void scrollTo(int x, int y) {
     webEngine.executeScript("window.scrollTo(" + x + ", " + y + ")");
   }
+
+  // region Drag-and-drop workaround for [#3679](https://github.com/RPTools/maptool/issues/3679)
+  // This is exactly what WebView itself does, except that we do not cache the mimes and values.
+  // Doing so leads to more questions than answers and lacking invalidation causes the bug.
+
+  private static void addWorkaroundFor3679(WebView webView) {
+    final var webEngine = webView.getEngine();
+    final WebPage page;
+    try {
+      MethodHandles.Lookup lookup = MethodHandles.lookup();
+      lookup = MethodHandles.privateLookupIn(WebEngine.class, lookup);
+      MethodHandle getPageHandle = lookup.findGetter(WebEngine.class, "page", WebPage.class);
+
+      page = (WebPage) getPageHandle.invokeExact(webEngine);
+    } catch (Throwable throwable) {
+      log.error("Unable to access WebPage from WebEngine", throwable);
+      return;
+    }
+
+    webView.setOnDragEntered(event -> dragHandler(page, event));
+    webView.setOnDragExited(event -> dragHandler(page, event));
+    webView.setOnDragOver(event -> dragHandler(page, event));
+    webView.setOnDragDropped(event -> dragHandler(page, event));
+    webView.setOnDragDetected(event -> onDragDetected(page, event));
+    webView.setOnDragDone(event -> onDragDone(page, event));
+  }
+
+  private static int getWKDndEventType(EventType<DragEvent> et) {
+    int commandId = 0;
+    if (et == DragEvent.DRAG_ENTERED) {
+      commandId = WebPage.DND_DST_ENTER;
+    } else if (et == DragEvent.DRAG_EXITED) {
+      commandId = WebPage.DND_DST_EXIT;
+    } else if (et == DragEvent.DRAG_OVER) {
+      commandId = WebPage.DND_DST_OVER;
+    } else if (et == DragEvent.DRAG_DROPPED) {
+      commandId = WebPage.DND_DST_DROP;
+    }
+    return commandId;
+  }
+
+  private static final int WK_DND_ACTION_NONE = 0x0;
+  private static final int WK_DND_ACTION_COPY = 0x1;
+  private static final int WK_DND_ACTION_MOVE = 0x2;
+  private static final int WK_DND_ACTION_LINK = 0x40000000;
+
+  private static int getWKDndAction(TransferMode... tms) {
+    int dndActionId = WK_DND_ACTION_NONE;
+    for (TransferMode tm : tms) {
+      if (tm == TransferMode.COPY) {
+        dndActionId |= WK_DND_ACTION_COPY;
+      } else if (tm == TransferMode.MOVE) {
+        dndActionId |= WK_DND_ACTION_MOVE;
+      } else if (tm == TransferMode.LINK) {
+        dndActionId |= WK_DND_ACTION_LINK;
+      }
+    }
+    return dndActionId;
+  }
+
+  private static TransferMode[] getFXDndAction(int wkDndAction) {
+    LinkedList<TransferMode> tms = new LinkedList<>();
+    if ((wkDndAction & WK_DND_ACTION_COPY) != 0) {
+      tms.add(TransferMode.COPY);
+    }
+    if ((wkDndAction & WK_DND_ACTION_MOVE) != 0) {
+      tms.add(TransferMode.MOVE);
+    }
+    if ((wkDndAction & WK_DND_ACTION_LINK) != 0) {
+      tms.add(TransferMode.LINK);
+    }
+    return tms.toArray(new TransferMode[0]);
+  }
+
+  // Drag target
+
+  private static void dragHandler(WebPage page, DragEvent event) {
+    try {
+      Dragboard db = event.getDragboard();
+      LinkedList<String> mimes = new LinkedList<>();
+      LinkedList<String> values = new LinkedList<>();
+      for (DataFormat df : db.getContentTypes()) {
+        Object content = db.getContent(df);
+        if (content != null) {
+          for (String mime : df.getIdentifiers()) {
+            mimes.add(mime);
+            values.add(content.toString());
+          }
+        }
+      }
+
+      if (!mimes.isEmpty()) {
+        int wkDndEventType = getWKDndEventType(event.getEventType());
+        int wkDndAction =
+            page.dispatchDragOperation(
+                wkDndEventType,
+                mimes.toArray(new String[0]),
+                values.toArray(new String[0]),
+                (int) event.getX(),
+                (int) event.getY(),
+                (int) event.getScreenX(),
+                (int) event.getScreenY(),
+                getWKDndAction(db.getTransferModes().toArray(new TransferMode[0])));
+
+        if (!(wkDndEventType == WebPage.DND_DST_DROP && wkDndAction == WK_DND_ACTION_NONE)) {
+          event.acceptTransferModes(getFXDndAction(wkDndAction));
+        }
+        event.consume();
+      }
+    } catch (SecurityException ex) {
+      log.error("Security exception", ex);
+    }
+  }
+
+  // Drag source
+
+  private static void onDragDetected(WebPage page, MouseEvent event) {
+    if (page.isDragConfirmed()) {
+      page.confirmStartDrag();
+      event.consume();
+    }
+  }
+
+  private static void onDragDone(WebPage page, DragEvent event) {
+    page.dispatchDragOperation(
+        WebPage.DND_SRC_DROP,
+        null,
+        null,
+        (int) event.getX(),
+        (int) event.getY(),
+        (int) event.getScreenX(),
+        (int) event.getScreenY(),
+        getWKDndAction(event.getAcceptedTransferMode()));
+    event.consume();
+  }
+
+  // endregion
 }

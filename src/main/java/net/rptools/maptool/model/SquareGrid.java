@@ -249,7 +249,8 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
+  protected Area createCellShape() {
+    var size = getSize();
     return new Area(new Rectangle(0, 0, size, size));
   }
 
