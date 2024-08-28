@@ -218,8 +218,7 @@ public class AddOnLibrariesDialogView extends JDialog {
                   });
         });
 
-    createAddonSkeletonButton.addActionListener(
-        e -> createAddonSkeleton());
+    createAddonSkeletonButton.addActionListener(e -> createAddonSkeleton());
 
     enableExternalAddOnCheckBox.addActionListener(
         e -> {
@@ -248,8 +247,8 @@ public class AddOnLibrariesDialogView extends JDialog {
   private void createAddonSkeleton() {
     LibraryManager library = new LibraryManager();
     try {
-      library.registerExternalAddOnLibrary(new AddOnLibraryImporter()
-              .importFromDirectory(Path.of(directoryTextField.getText())));
+      library.registerExternalAddOnLibrary(
+          new AddOnLibraryImporter().importFromDirectory(Path.of(directoryTextField.getText())));
     } catch (IOException e) {
       MapTool.showError("library.import.ioError", e);
     }

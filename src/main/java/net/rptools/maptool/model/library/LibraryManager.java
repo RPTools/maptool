@@ -224,8 +224,8 @@ public class LibraryManager {
   }
 
   /**
-   * Deregister the add-on in library associated with the specified namespace.
-   * This will deregister the add-on if it is external.
+   * Deregister the add-on in library associated with the specified namespace. This will deregister
+   * the add-on if it is external.
    *
    * @param namespace the namespace to deregister.
    */
@@ -258,15 +258,17 @@ public class LibraryManager {
 
   /**
    * Register an add-on as an external add-on.
+   *
    * @param addOnLibrary The add-on to register.
-   * @return Whether the add-on was successfully registered.
-   *         If the result is `false`, the reason will be logged as an error.
+   * @return Whether the add-on was successfully registered. If the result is `false`, the reason
+   *     will be logged as an error.
    */
   public boolean registerExternalAddOnLibrary(AddOnLibrary addOnLibrary) {
     try {
       addOnLibraryManager.registerExternalLibrary(addOnLibrary);
       if (MapTool.isHostingServer())
-        MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
+        MapTool.serverCommand()
+            .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
     } catch (InterruptedException | ExecutionException e) {
       log.error("Error registering external add-on", e);
       return false;

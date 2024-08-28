@@ -21,7 +21,6 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
-
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
@@ -87,8 +86,8 @@ public class ExternalAddOnLibraryManager {
     if (removed != null) {
       removed.cleanup();
       new MapToolEventBus()
-              .getMainEventBus()
-              .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
+          .getMainEventBus()
+          .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
     }
   }
 

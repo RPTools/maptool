@@ -154,9 +154,7 @@ public class AddOnLibraryImporter {
       throw new IOException(I18N.getText("library.error.addOn.noConfigFile", dir));
 
     var builder = AddOnLibraryDto.newBuilder();
-    JsonFormat.parser()
-            .ignoringUnknownFields()
-            .merge(Files.newBufferedReader(infoPath), builder);
+    JsonFormat.parser().ignoringUnknownFields().merge(Files.newBufferedReader(infoPath), builder);
 
     var pathAssetMap = processAssetsFromDirectory(builder.getNamespace(), dir);
 
@@ -164,29 +162,29 @@ public class AddOnLibraryImporter {
     var mtsPropPath = dir.resolve(MACROSCRIPT_PROPERTY_FILE);
     if (Files.exists(mtsPropPath))
       JsonFormat.parser()
-              .ignoringUnknownFields()
-              .merge(Files.newBufferedReader(mtsPropPath), mtsPropBuilder);
+          .ignoringUnknownFields()
+          .merge(Files.newBufferedReader(mtsPropPath), mtsPropBuilder);
 
     var eventPropBuilder = AddOnLibraryEventsDto.newBuilder();
     var eventPropPath = dir.resolve(EVENT_PROPERTY_FILE);
     if (Files.exists(eventPropPath))
       JsonFormat.parser()
-              .ignoringUnknownFields()
-              .merge(Files.newBufferedReader(eventPropPath), eventPropBuilder);
+          .ignoringUnknownFields()
+          .merge(Files.newBufferedReader(eventPropPath), eventPropBuilder);
 
     var statSheetsBuilder = AddOnStatSheetsDto.newBuilder();
     var statSheetsPath = dir.resolve(STATS_SHEET_FILE);
     if (Files.exists(statSheetsPath))
       JsonFormat.parser()
-              .ignoringUnknownFields()
-              .merge(Files.newBufferedReader(statSheetsPath), statSheetsBuilder);
+          .ignoringUnknownFields()
+          .merge(Files.newBufferedReader(statSheetsPath), statSheetsBuilder);
 
     var slashCommandsBuilder = AddonSlashCommandsDto.newBuilder();
     var slashCommandsPath = dir.resolve(SLASH_COMMAND_FILE);
     if (Files.exists(slashCommandsPath))
       JsonFormat.parser()
-              .ignoringUnknownFields()
-              .merge(Files.newBufferedReader(slashCommandsPath), slashCommandsBuilder);
+          .ignoringUnknownFields()
+          .merge(Files.newBufferedReader(slashCommandsPath), slashCommandsBuilder);
 
     addMetaDataFromDirectory(builder.getNamespace(), dir, pathAssetMap);
 
@@ -195,13 +193,15 @@ public class AddOnLibraryImporter {
     var addOnLib = builder.build();
 
     var zipPath = Files.createTempFile(builder.getNamespace(), null);
-    try (var zipOut = new ZipOutputStream(Files.newOutputStream(zipPath, StandardOpenOption.WRITE))) {
-      var paths = pathAssetMap.keySet().stream()
-              .map(path -> {
-                if (path.startsWith(METADATA_DIR))
-                  return path.substring(METADATA_DIR.length());
-                return CONTENT_DIRECTORY + path;
-              })
+    try (var zipOut =
+        new ZipOutputStream(Files.newOutputStream(zipPath, StandardOpenOption.WRITE))) {
+      var paths =
+          pathAssetMap.keySet().stream()
+              .map(
+                  path -> {
+                    if (path.startsWith(METADATA_DIR)) return path.substring(METADATA_DIR.length());
+                    return CONTENT_DIRECTORY + path;
+                  })
               .collect(Collectors.toSet());
 
       for (var pathString : paths) {
@@ -218,15 +218,14 @@ public class AddOnLibraryImporter {
     var asset = Type.MTLIB.getFactory().apply(addOnLib.getNamespace(), data);
     addAsset(asset);
 
-
     return AddOnLibrary.fromDto(
-            asset.getMD5Key(),
-            addOnLib,
-            mtsPropBuilder.build(),
-            eventPropBuilder.build(),
-            statSheetsBuilder.build(),
-            slashCommandsBuilder.build(),
-            pathAssetMap);
+        asset.getMD5Key(),
+        addOnLib,
+        mtsPropBuilder.build(),
+        eventPropBuilder.build(),
+        statSheetsBuilder.build(),
+        slashCommandsBuilder.build(),
+        pathAssetMap);
   }
 
   /**
@@ -358,8 +357,8 @@ public class AddOnLibraryImporter {
    * @param pathAssetMap The asset details output.
    * @throws IOException If there is an error reading assets from the directory.
    */
-  private void addMetaDataFromDirectory(String namespace, Path dir, Map<String, Pair<MD5Key, Type>> pathAssetMap)
-    throws IOException {
+  private void addMetaDataFromDirectory(
+      String namespace, Path dir, Map<String, Pair<MD5Key, Type>> pathAssetMap) throws IOException {
     var entries = Files.list(dir).filter(p -> !Files.isDirectory(p)).collect(Collectors.toSet());
     for (var entry : entries) {
       var path = METADATA_DIR + entry.getFileName().toString();
@@ -406,18 +405,19 @@ public class AddOnLibraryImporter {
   /**
    * Reads the assets from a flat directory. This is primarily used for external libraries, such as
    * development-mode libraries.
+   *
    * @param namespace The namespace to classify assets under.
    * @param dir The directory to process as an add-on.
    * @return A map containing asset paths and details.
    * @throws IOException If there is an error reading assets from the directory.
    */
-  private Map<String, Pair<MD5Key, Type>> processAssetsFromDirectory(String namespace, Path dir) throws IOException {
+  private Map<String, Pair<MD5Key, Type>> processAssetsFromDirectory(String namespace, Path dir)
+      throws IOException {
     var pathAssetMap = new HashMap<String, Pair<MD5Key, Type>>();
     var contentDir = dir.resolve(CONTENT_DIRECTORY);
 
     // Empty libraries are still permitted.
-    if (!Files.exists(contentDir))
-      return pathAssetMap;
+    if (!Files.exists(contentDir)) return pathAssetMap;
 
     for (Path entry : FileUtil.listRecursively(contentDir).collect(Collectors.toSet())) {
       if (Files.isDirectory(entry)) continue;
@@ -427,7 +427,8 @@ public class AddOnLibraryImporter {
 
       var mediaType = Asset.getMediaType(entry.toString(), bytes);
 
-      var asset = Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + pathString, bytes);
+      var asset =
+          Type.fromMediaType(mediaType).getFactory().apply(namespace + "/" + pathString, bytes);
       addAsset(asset);
       pathAssetMap.put(pathString, Pair.with(asset.getMD5Key(), asset.getType()));
     }
