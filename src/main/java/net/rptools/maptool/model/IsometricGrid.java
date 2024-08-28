@@ -177,12 +177,19 @@ public class IsometricGrid extends Grid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Square")) {
+      return campaignFootprints.get("Square");
+    } else {
       try {
         footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
       } catch (IOException ioe) {
-        MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
+        MapTool.showError("Could not load Square Grid footprints", ioe);
       }
+      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+      ModifiedProperties.setGridFootprints("Square", footprintList);
+      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
     }
     return footprintList;
   }

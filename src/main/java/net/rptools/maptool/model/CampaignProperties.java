@@ -77,6 +77,8 @@ public class CampaignProperties {
   private Map<String, BarTokenOverlay> tokenBars = new LinkedHashMap<>();
   private Map<String, String> characterSheets = new HashMap<>();
 
+  private Map<String, List<TokenFootprint>> gridFootprints = new HashMap<>();
+
   /** Flag indicating that owners have special permissions */
   private boolean initiativeOwnerPermissions = AppPreferences.getInitOwnerPermissions();
 
@@ -144,6 +146,9 @@ public class CampaignProperties {
       characterSheets.put(type, properties.characterSheets.get(type));
     }
     defaultTokenPropertyType = properties.defaultTokenPropertyType;
+    if (properties.gridFootprints != null) {
+      gridFootprints = properties.gridFootprints;
+    }
   }
 
   public void mergeInto(CampaignProperties properties) {
@@ -163,6 +168,11 @@ public class CampaignProperties {
     properties.tokenStates.putAll(tokenStates);
     properties.tokenBars.putAll(tokenBars);
     properties.defaultTokenPropertyType = defaultTokenPropertyType;
+    if (properties.gridFootprints != null) {
+      properties.gridFootprints.putAll(gridFootprints);
+    } else {
+      properties.gridFootprints = gridFootprints;
+    }
   }
 
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
@@ -465,6 +475,14 @@ public class CampaignProperties {
     this.characterSheets.putAll(characterSheets);
   }
 
+  public Map<String, List<TokenFootprint>> getGridFootprints() {
+    return gridFootprints;
+  }
+
+  public void setGridFootprints(String gridType, List<TokenFootprint> footprintList) {
+    gridFootprints.put(gridType, footprintList);
+  }
+
   protected Object readResolve() {
     if (tokenTypeMap == null) {
       tokenTypeMap = new HashMap<>();
@@ -571,6 +589,11 @@ public class CampaignProperties {
     } else {
       props.defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
     }
+    dto.getGridFootprints()
+        .forEach(
+            (k, v) -> {
+              // TODO Finish DTO Import for Footprints
+            });
 
     return props;
   }
@@ -618,6 +641,7 @@ public class CampaignProperties {
     dto.addAllSightTypes(
         sightTypeMap.values().stream().map(SightType::toDto).collect(Collectors.toList()));
     dto.setDefaultTokenPropertyType(StringValue.of(defaultTokenPropertyType));
+    //TODO Finish DTO Export for Footprints
     return dto.build();
   }
 }

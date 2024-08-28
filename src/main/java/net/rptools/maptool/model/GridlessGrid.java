@@ -63,12 +63,19 @@ public class GridlessGrid extends Grid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("None")) {
+      return campaignFootprints.get("None");
+    } else {
       try {
         footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
       } catch (IOException ioe) {
-        MapTool.showError("GridlessGrid.error.notLoaded", ioe);
+        MapTool.showError("Could not load Gridless Grid footprints", ioe);
       }
+      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+      ModifiedProperties.setGridFootprints("None", footprintList);
+      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
     }
     return footprintList;
   }

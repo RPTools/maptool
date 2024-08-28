@@ -172,14 +172,21 @@ public class HexGridVertical extends HexGrid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Vertical Hex")) {
+      return campaignFootprints.get("Vertical Hex");
+    } else {
       try {
         footprintList =
             loadFootprints(
                 "net/rptools/maptool/model/hexGridVertFootprints.xml", getOffsetTranslator());
       } catch (IOException ioe) {
-        MapTool.showError("Could not load Hex Grid footprints", ioe);
+        MapTool.showError("Could not load VHex Grid footprints", ioe);
       }
+      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+      ModifiedProperties.setGridFootprints("Vertical Hex", footprintList);
+      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
     }
     return footprintList;
   }
