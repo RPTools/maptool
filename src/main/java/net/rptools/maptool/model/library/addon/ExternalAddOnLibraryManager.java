@@ -15,6 +15,7 @@
 package net.rptools.maptool.model.library.addon;
 
 import io.methvin.watcher.DirectoryWatcher;
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,7 +28,7 @@ import net.rptools.maptool.model.library.LibraryInfo;
 
 public class ExternalAddOnLibraryManager {
 
-  /** The add-on library manager that is used to register the add-on libraries. */
+  /** The add-on library manager that is used to register the external add-on libraries. */
   private final AddOnLibraryManager addOnLibraryManager;
 
   /** The add-on libraries that are registered. */
@@ -67,10 +68,10 @@ public class ExternalAddOnLibraryManager {
         .thenAccept(
             namespace -> {
               if (addOnLibraryManager.isNamespaceRegistered(namespace)) {
-                addOnLibraryManager.deregisterLibrary(namespace);
+                addOnLibraryManager.deregisterLibrary(namespace); // TODO: CDW This should only happen on import
               }
               namespaceLibraryMap.put(namespace, addOnLibrary);
-              addOnLibraryManager.registerLibrary(addOnLibrary);
+              addOnLibraryManager.registerLibrary(addOnLibrary); // TODO: CDW This should only happen on import
               addOnLibrary
                   .getLibraryInfo()
                   .thenAccept(
@@ -87,7 +88,7 @@ public class ExternalAddOnLibraryManager {
       removed.cleanup();
       new MapToolEventBus()
           .getMainEventBus()
-          .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join())));
+          .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join()))); // TODO: CDW This should only happen on import
     }
   }
 
@@ -103,7 +104,7 @@ public class ExternalAddOnLibraryManager {
   public void refreshExternalAddOnLibrary(String namespace, Path path) {
     try {
       var lib = new AddOnLibraryImporter().importFromDirectory(path);
-      addOnLibraryManager.replaceLibrary(lib);
+      addOnLibraryManager.replaceLibrary(lib); // TODO: CDW This should only happen on import
     } catch (IOException e) {
       throw new RuntimeException(e); // TODO: CDW
     }
@@ -184,6 +185,7 @@ public class ExternalAddOnLibraryManager {
   private void startWatching() {
     try {
       lock.lock();
+      refreshAll();
       if (isEnabled && externalLibraryPath != null && Files.exists(externalLibraryPath)) {
         if (directoryWatcher != null) {
           directoryWatcher.watchAsync();
@@ -196,6 +198,20 @@ public class ExternalAddOnLibraryManager {
       throw new RuntimeException(e); // TODO: CDW
     } finally {
       lock.unlock();
+    }
+  }
+
+  private void refreshAll() {
+    File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
+    if (directories != null) {
+      for (File directory : directories) {
+        try {
+          var lib = new AddOnLibraryImporter().importFromDirectory(directory.toPath());
+          registerExternalAddOnLibrary(lib);
+        } catch (IOException e) {
+          throw new RuntimeException(e); // TODO: CDW
+        }
+      }
     }
   }
 
@@ -231,3 +247,5 @@ public class ExternalAddOnLibraryManager {
         .build();
   }
 }
+
+// TODO: CDW changes to the add on library directory will not automatically update the add on library that MT uses

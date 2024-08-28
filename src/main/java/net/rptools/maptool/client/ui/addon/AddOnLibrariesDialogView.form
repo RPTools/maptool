@@ -283,7 +283,7 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <grid id="3827a" layout-manager="GridLayoutManager" row-count="2" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                  <grid id="3827a" layout-manager="GridLayoutManager" row-count="2" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
                     <margin top="0" left="0" bottom="0" right="0"/>
                     <constraints>
                       <grid row="1" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -293,7 +293,7 @@
                     <children>
                       <component id="35630" class="javax.swing.JButton" binding="copyStatSheetThemeButton" default-binding="true">
                         <constraints>
-                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTStatSheetTheme"/>
@@ -301,26 +301,42 @@
                       </component>
                       <component id="456e5" class="javax.swing.JButton" binding="copyThemeCSS">
                         <constraints>
-                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.copyMTThemeCSS"/>
                         </properties>
                       </component>
-                      <component id="3aa17" class="javax.swing.JButton" binding="createAddonSkeletonButton">
+                      <component id="9fe05" class="javax.swing.JButton" binding="exportAddOn">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.export"/>
+                        </properties>
+                      </component>
+                      <component id="3032" class="javax.swing.JButton">
                         <constraints>
                           <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.directory.refresh"/>
+                        </properties>
+                      </component>
+                      <component id="3aa17" class="javax.swing.JButton" binding="createAddonSkeletonButton">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
                           <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.createNew"/>
                         </properties>
                       </component>
-                      <component id="9fe05" class="javax.swing.JButton" binding="exportAddOn">
+                      <component id="517e1" class="javax.swing.JButton">
                         <constraints>
-                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
                         </constraints>
                         <properties>
-                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.export"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="library.dialog.addon.import"/>
                         </properties>
                       </component>
                     </children>

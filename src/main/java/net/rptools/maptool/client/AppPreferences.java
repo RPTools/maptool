@@ -629,6 +629,12 @@ public class AppPreferences {
   /** The configuration key for specifying the width of the border around map labels for tokens. */
   private static final String KEY_MAP_LABEL_SHOW_BORDER = "mapLabelShowBorder";
 
+  /** The configuration key for specifying if external add-on libraries are enabled. */
+  private static final String KEY_EXTERNAL_ADD_ON_LIBRARIES = "externalAddOnLibraries";
+
+  /** The configuration key for specifying the path to external add-on libraries. */
+  private static final String KEY_EXTERNAL_ADD_ON_LIBRARIES_PATH = "externalAddOnLibrariesPath";
+
   /** The default background color for the NPC map label. */
   private static final Color DEFAULT_NPC_MAP_LABEL_BG_COLOR = Color.LIGHT_GRAY;
 
@@ -668,6 +674,9 @@ public class AppPreferences {
 
   /** The default border arc for token map labels. */
   private static final boolean DEFAULT_MAP_LABEL_SHOW_BORDER = true;
+
+  /** The default value for enabling external add-on libraries. */
+  private static final boolean DEFAULT_EXTERNAL_ADDON_LIBRARIES = false;
 
   public static void setHaloLineWidth(int size) {
     prefs.putInt(KEY_HALO_LINE_WIDTH, size);
@@ -1963,5 +1972,41 @@ public class AppPreferences {
    */
   public static void setShowMapLabelBorder(boolean show) {
     prefs.putBoolean(KEY_MAP_LABEL_SHOW_BORDER, show);
+  }
+
+  /**
+   * Returns the value of the external add-on library mode for add-on development.
+   *
+   * @return {@code true} if the developer mode is enabled, {@code false} otherwise.
+   */
+  public static boolean getExternalLibraryManagerEnabled() {
+    return prefs.getBoolean(KEY_EXTERNAL_ADD_ON_LIBRARIES, DEFAULT_EXTERNAL_ADDON_LIBRARIES);
+  }
+
+  /**
+   * Sets the external add-on library mode for add on development.
+   *
+   * @param mode {@code true} to enable the developer mode, {@code false} to disable it.
+   */
+  public static void setExternalLibraryManagerEnabled(boolean mode) {
+    prefs.putBoolean(KEY_EXTERNAL_ADD_ON_LIBRARIES, mode);
+  }
+
+  /**
+   * Returns the path to the external add-on libraries.
+   *
+   * @return the path to the external add-on libraries.
+   */
+  public static String getExternalAddOnLibrariesPath() {
+    return prefs.get(KEY_EXTERNAL_ADD_ON_LIBRARIES_PATH, null);
+  }
+
+  /**
+   * Sets the path to the external add-on libraries.
+   *
+   * @param path the path to the external add-on libraries.
+   */
+  public static void setExternalAddOnLibrariesPath(String path) {
+    prefs.put(KEY_EXTERNAL_ADD_ON_LIBRARIES_PATH, path);
   }
 }

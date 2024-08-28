@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
@@ -211,6 +212,11 @@ public class AddOnLibraryManager {
   /** Initializes the add-on library manager. */
   public void init() {
     externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
+    String path = AppPreferences.getExternalAddOnLibrariesPath();
+    if (path != null && !path.isEmpty()) {
+      externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
+      externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
+    }
   }
 
   /**

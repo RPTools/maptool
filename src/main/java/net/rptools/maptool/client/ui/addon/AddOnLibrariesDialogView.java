@@ -41,6 +41,7 @@ import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
@@ -226,18 +227,32 @@ public class AddOnLibrariesDialogView extends JDialog {
           directoryTextField.setEnabled(enableExternalAddOnCheckBox.isSelected());
           new LibraryManager()
               .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
+          AppPreferences.setExternalLibraryManagerEnabled(enableExternalAddOnCheckBox.isSelected());
         });
 
     browseButton.addActionListener(
         e -> {
           JFileChooser chooser = new JFileChooser();
           chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.showOpenDialog(MapTool.getFrame());
+          if (chooser.getSelectedFile() != null) {
+            directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+            AppPreferences.setExternalAddOnLibrariesPath(
+                chooser.getSelectedFile().getAbsolutePath());
+          }
         });
 
     LibraryManager libraryManager = new LibraryManager();
     enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
+    directoryTextField.setText(AppPreferences.getExternalAddOnLibrariesPath());
     setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
+    if (enableExternalAddOnCheckBox.isSelected()) {
+      refreshLibraries();
+    }
   }
+
+  private void refreshLibraries() {}
 
   private void setExternalAddOnControlsEnabled(boolean selected) {
     externalAddonTable.setEnabled(enableExternalAddOnCheckBox.isSelected());
