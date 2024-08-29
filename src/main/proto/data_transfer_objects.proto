@@ -138,12 +138,7 @@ message CampaignPropertiesDto {
 
 message FootprintListDto {
  string gridName = 1;
- map<string, FootprintDto> footprintList = 2;
-}
-
-message FootprintDto {
-  string name = 1;
-  repeated IntPointDto points = 2;
+ map<string, TokenFootPrintDto> footprintList = 2;
 }
 
 message SightTypeDto {

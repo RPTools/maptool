@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.model;
 
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
@@ -74,6 +76,23 @@ public class TokenFootprint {
   @Override
   public String toString() {
     return getLocalizedName();
+  }
+
+  public JsonObject toJson() {
+    JsonObject jsonRep = new JsonObject();
+    JsonArray occupiedString = new JsonArray();
+    var cellArray = getOccupiedCells(new CellPoint(0, 0)).toArray();
+    for (int j = 0; j < cellArray.length; j++) {
+      CellPoint currentCell = (CellPoint) cellArray[j];
+      JsonObject jsonPoint = new JsonObject();
+      jsonPoint.addProperty("x", currentCell.x);
+      jsonPoint.addProperty("y", currentCell.y);
+      occupiedString.add(jsonPoint);
+    }
+    jsonRep.addProperty("name", name);
+    jsonRep.add("cells", occupiedString);
+    jsonRep.addProperty("scale", scale);
+    return jsonRep;
   }
 
   public void addOffsetTranslator(OffsetTranslator translator) {
