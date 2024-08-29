@@ -16,15 +16,12 @@ package net.rptools.maptool.client.ui.addon;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
-import java.nio.file.Path;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
@@ -50,6 +47,7 @@ import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
 /** Dialog for managing add-on libraries. */
 public class AddOnLibrariesDialogView extends JDialog {
@@ -78,7 +76,7 @@ public class AddOnLibrariesDialogView extends JDialog {
   private JButton createAddonSkeletonButton;
   private JTextField directoryTextField;
   private JButton browseButton;
-  private JButton exportAddOn;
+  private JButton exportAddOnButton;
 
   private LibraryInfo selectedAddOn;
 
@@ -92,6 +90,10 @@ public class AddOnLibrariesDialogView extends JDialog {
 
     externalAddonTable.setModel(new ExternalAddOnLibrariesTableModel());
     externalAddonTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    externalAddonTable.setDefaultRenderer(
+        ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
+    externalAddonTable.setDefaultEditor(
+        ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
 
     buttonRemove.setEnabled(false);
     addOnLibraryTable
@@ -143,11 +145,7 @@ public class AddOnLibrariesDialogView extends JDialog {
 
     // call onClose() on ESCAPE
     contentPane.registerKeyboardAction(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            onClose();
-          }
-        },
+        e -> onClose(),
         KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
         JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -182,42 +180,40 @@ public class AddOnLibrariesDialogView extends JDialog {
         });
 
     copyThemeCSS.addActionListener(
-        e -> {
-          new LibraryManager()
-              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
-              .ifPresent(
-                  library -> {
-                    URI uri = URI.create(AppConstants.MT_THEME_CSS);
-                    String themeCss = null;
-                    try {
-                      themeCss = library.readAsString(uri.toURL()).get();
-                    } catch (InterruptedException | ExecutionException | IOException ex) {
-                      throw new RuntimeException(ex);
-                    }
-                    Toolkit.getDefaultToolkit()
-                        .getSystemClipboard()
-                        .setContents(new StringSelection(themeCss), null);
-                  });
-        });
+        e ->
+            new LibraryManager()
+                .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+                .ifPresent(
+                    library -> {
+                      URI uri = URI.create(AppConstants.MT_THEME_CSS);
+                      String themeCss = null;
+                      try {
+                        themeCss = library.readAsString(uri.toURL()).get();
+                      } catch (InterruptedException | ExecutionException | IOException ex) {
+                        throw new RuntimeException(ex);
+                      }
+                      Toolkit.getDefaultToolkit()
+                          .getSystemClipboard()
+                          .setContents(new StringSelection(themeCss), null);
+                    }));
 
     copyStatSheetThemeButton.addActionListener(
-        e -> {
-          new LibraryManager()
-              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
-              .ifPresent(
-                  library -> {
-                    URI uri = URI.create(AppConstants.MT_THEME_STAT_SHEET_CSS);
-                    String themeCss = null;
-                    try {
-                      themeCss = library.readAsString(uri.toURL()).get();
-                    } catch (InterruptedException | ExecutionException | IOException ex) {
-                      throw new RuntimeException(ex);
-                    }
-                    Toolkit.getDefaultToolkit()
-                        .getSystemClipboard()
-                        .setContents(new StringSelection(themeCss), null);
-                  });
-        });
+        e ->
+            new LibraryManager()
+                .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+                .ifPresent(
+                    library -> {
+                      URI uri = URI.create(AppConstants.MT_THEME_STAT_SHEET_CSS);
+                      String themeCss = null;
+                      try {
+                        themeCss = library.readAsString(uri.toURL()).get();
+                      } catch (InterruptedException | ExecutionException | IOException ex) {
+                        throw new RuntimeException(ex);
+                      }
+                      Toolkit.getDefaultToolkit()
+                          .getSystemClipboard()
+                          .setContents(new StringSelection(themeCss), null);
+                    }));
 
     createAddonSkeletonButton.addActionListener(e -> createAddonSkeleton());
 
@@ -255,18 +251,20 @@ public class AddOnLibrariesDialogView extends JDialog {
   private void refreshLibraries() {}
 
   private void setExternalAddOnControlsEnabled(boolean selected) {
-    externalAddonTable.setEnabled(enableExternalAddOnCheckBox.isSelected());
-    browseButton.setEnabled(enableExternalAddOnCheckBox.isSelected());
+    externalAddonTable.setEnabled(selected);
+    browseButton.setEnabled(selected);
   }
 
   private void createAddonSkeleton() {
+    // TODO: CDW - Implement
+    /*
     LibraryManager library = new LibraryManager();
     try {
       library.registerExternalAddOnLibrary(
           new AddOnLibraryImporter().importFromDirectory(Path.of(directoryTextField.getText())));
     } catch (IOException e) {
       MapTool.showError("library.import.ioError", e);
-    }
+    }**/
   }
 
   /**

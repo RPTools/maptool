@@ -27,11 +27,7 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.model.library.addon.AddOnLibrary;
-import net.rptools.maptool.model.library.addon.AddOnLibraryData;
-import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
-import net.rptools.maptool.model.library.addon.AddOnSlashCommandManager;
-import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
+import net.rptools.maptool.model.library.addon.*;
 import net.rptools.maptool.model.library.builtin.BuiltInLibraryManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.token.LibraryTokenManager;
@@ -87,7 +83,7 @@ public class LibraryManager {
    *
    * @return the list of external add-on libraries.
    */
-  public List<LibraryInfo> getExternalAddOnLibraries() {
+  public List<ExternalLibraryInfo> getExternalAddOnLibraries() {
     return addOnLibraryManager.getExternalAddOnLibraries();
   }
 
@@ -208,7 +204,7 @@ public class LibraryManager {
   /**
    * Register and add-on library.
    *
-   * @param addOn the Add On to register.
+   * @param addOn the Add-On to register.
    */
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
@@ -237,7 +233,7 @@ public class LibraryManager {
   }
 
   /**
-   * Register a add-on in library, replacing any existing library.
+   * Register an add-on in library, replacing any existing library.
    *
    * @param addOnLibrary the add-on in library to register.
    */
@@ -257,23 +253,23 @@ public class LibraryManager {
   }
 
   /**
-   * Register an add-on as an external add-on.
+   * Register an add-on as an external add-on. This will <em>not</em> make the add-on available to
+   * MapTool. To make the add-on available to MapTool, use {@link #importFromExternal(String)}
    *
-   * @param addOnLibrary The add-on to register.
-   * @return Whether the add-on was successfully registered. If the result is `false`, the reason
-   *     will be logged as an error.
+   * @param path The path of the add-on to register.
    */
-  public boolean registerExternalAddOnLibrary(AddOnLibrary addOnLibrary) {
-    try {
-      addOnLibraryManager.registerExternalLibrary(addOnLibrary);
-      if (MapTool.isHostingServer())
-        MapTool.serverCommand()
-            .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
-    } catch (InterruptedException | ExecutionException e) {
-      log.error("Error registering external add-on", e);
-      return false;
-    }
-    return true;
+  public void registerExternalAddOnLibrary(Path path) {
+    addOnLibraryManager.registerExternalLibrary(path);
+  }
+
+  /**
+   * Import an add-on from an external source. This will make the add-on available to MapTool.
+   * Importing an updated version of an add-on will replace the existing add-on.
+   *
+   * @param namespace The namespace of the add-on to import.
+   */
+  public void importFromExternal(String namespace) {
+    addOnLibraryManager.importFromExternal(namespace);
   }
 
   /**
@@ -409,6 +405,7 @@ public class LibraryManager {
    * initialization next time they are added.
    */
   public void removeAddOnLibraries() {
+
     for (var lib : addOnLibraryManager.getLibraries()) {
       lib.getLibraryData()
           .thenAccept(

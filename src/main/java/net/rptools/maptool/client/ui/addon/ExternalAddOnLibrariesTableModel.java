@@ -15,11 +15,10 @@
 package net.rptools.maptool.client.ui.addon;
 
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
 public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
 
@@ -34,23 +33,26 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
   }
 
   @Override
-  public Object getValueAt(int rowIndex, int columnIndex) {
-    List<LibraryInfo> addons = new LibraryManager().getExternalAddOnLibraries();
+  public Class<?> getColumnClass(int columnIndex) {
+    return columnIndex == 4 ? ExternalLibraryInfo.class : String.class;
+  }
 
+  @Override
+  public boolean isCellEditable(int rowIndex, int columnIndex) {
+    return columnIndex == 4;
+  }
+
+  @Override
+  public Object getValueAt(int rowIndex, int columnIndex) {
+    List<ExternalLibraryInfo> addons = new LibraryManager().getExternalAddOnLibraries();
+
+    var info = addons.get(rowIndex);
     return switch (columnIndex) {
-      case 0 -> addons.get(rowIndex).name();
-      case 1 -> addons.get(rowIndex).version();
-      case 2 -> addons.get(rowIndex).namespace();
-      case 3 -> addons.get(rowIndex).backingDirectory();
-      case 4 -> {
-        var button = new JButton();
-        button.setText("library.dialog.addon.refresh");
-        button.addActionListener(
-            e -> {
-              refresh(rowIndex);
-            });
-        yield button;
-      }
+      case 0 -> info.libraryInfo().name();
+      case 1 -> info.libraryInfo().version();
+      case 2 -> info.libraryInfo().namespace();
+      case 3 -> info.libraryInfo().backingDirectory();
+      case 4 -> info;
       default -> null;
     };
   }

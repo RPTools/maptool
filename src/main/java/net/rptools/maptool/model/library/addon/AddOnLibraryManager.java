@@ -29,7 +29,6 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.Library;
-import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto.AddOnLibraryEntryDto;
@@ -186,7 +185,7 @@ public class AddOnLibraryManager {
             .map(CompletableFuture::join)
             .collect(Collectors.toSet());
 
-    if (libs.size() > 0) {
+    if (!libs.isEmpty()) {
       new MapToolEventBus().getMainEventBus().post(new AddOnsRemovedEvent(libs));
       for (var library : namespaceLibraryMap.values()) {
         library.cleanup();
@@ -239,7 +238,7 @@ public class AddOnLibraryManager {
    *
    * @return the information of external add-on libraries that are registered.
    */
-  public List<LibraryInfo> getExternalAddOnLibraries() {
+  public List<ExternalLibraryInfo> getExternalAddOnLibraries() {
     return externalAddOnLibraryManager.getLibraries();
   }
 
@@ -282,26 +281,19 @@ public class AddOnLibraryManager {
   /**
    * Registers the add-on library as an external library.
    *
-   * @param addOnLibrary The add-on library to register.
+   * @param path The path to the library.
    */
-  public void registerExternalLibrary(AddOnLibrary addOnLibrary) {
-    externalAddOnLibraryManager.registerExternalAddOnLibrary(addOnLibrary);
+  public void registerExternalLibrary(Path path) {
+    externalAddOnLibraryManager.registerExternalAddOnLibrary(path);
   }
 
   /**
-   * De-registers the add-on library with the given namespace.
+   * Makes the external library with the given namespace available to MapTool. Importing an existing
+   * library will replace the existing library.
    *
    * @param namespace The namespace of the library.
    */
-  public void deregisterExternalLibrary(String namespace) {
-    externalAddOnLibraryManager.deregisterExternalAddOnLibrary(namespace);
-  }
-
-  /**
-   * Makes the external library with the given namespace available to MapTool.
-   * @param namespace The namespace of the library.
-   */
-  public void makeExternalLibraryAvailable(String namespace) {
-    externalAddOnLibraryManager.makeAvailable(namespace);
+  public void importFromExternal(String namespace) {
+    externalAddOnLibraryManager.importLibrary(namespace);
   }
 }
