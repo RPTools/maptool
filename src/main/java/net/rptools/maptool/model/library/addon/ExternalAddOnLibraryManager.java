@@ -26,6 +26,11 @@ import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
 
+/**
+ * Manages the external add-on libraries that are baked by the file system. This manager will watch
+ * the external add-on library directory for changes and will update the add-on libraries
+ * available but will not automatically update the add-on libraries that MapTool has loaded.
+ */
 public class ExternalAddOnLibraryManager {
 
   /** The add-on library manager that is used to register the external add-on libraries. */
@@ -62,6 +67,10 @@ public class ExternalAddOnLibraryManager {
     externalLibraryInfo = Collections.synchronizedList(new ArrayList<>());
   }
 
+  /**
+   * Registers an external add-on library.
+   * @param addOnLibrary the add-on library to register.
+   */
   public void registerExternalAddOnLibrary(AddOnLibrary addOnLibrary) {
     addOnLibrary
         .getNamespace()
@@ -82,16 +91,17 @@ public class ExternalAddOnLibraryManager {
             });
   }
 
+  /**
+   * Deregisters an external add-on library.
+   * @param namespace the namespace of the add-on library to deregister.
+   */
   public void deregisterExternalAddOnLibrary(String namespace) {
-    var removed = namespaceLibraryMap.remove(namespace.toLowerCase());
-    if (removed != null) {
-      removed.cleanup();
-      new MapToolEventBus()
-          .getMainEventBus()
-          .post(new AddOnsRemovedEvent(Set.of(removed.getLibraryInfo().join()))); // TODO: CDW This should only happen on import
-    }
+    namespaceLibraryMap.remove(namespace.toLowerCase());
   }
 
+  /**
+   * Caches the external library information.
+   */
   private void cacheExternalLibraryInfo() {
     externalLibraryInfo.clear();
     var infoList =
@@ -101,6 +111,11 @@ public class ExternalAddOnLibraryManager {
     externalLibraryInfo.addAll(infoList);
   }
 
+  /**
+   * Refreshes an external add-on library.
+   * @param namespace the namespace of the add-on library to refresh.
+   * @param path the path to the add-on library.
+   */
   public void refreshExternalAddOnLibrary(String namespace, Path path) {
     try {
       var lib = new AddOnLibraryImporter().importFromDirectory(path);
@@ -110,10 +125,18 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Gets the external libraries that have been registered.
+   * @return the external libraries.
+   */
   public List<LibraryInfo> getLibraries() {
     return externalLibraryInfo;
   }
 
+  /**
+   * Is the external add-on library manager enabled.
+   * @return {@code true} if the external add-on library manager is enabled.
+   */
   public boolean isEnabled() {
     try {
       lock.lock();
@@ -123,6 +146,10 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Sets the enabled state of the external add-on library manager.
+   * @param enabled the enabled state.
+   */
   public void setEnabled(boolean enabled) {
     try {
       lock.lock();
@@ -139,6 +166,10 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Gets the path to the external add-on libraries.
+   * @return the path to the external add-on libraries.
+   */
   public Path getExternalLibraryPath() {
     try {
       lock.lock();
@@ -148,6 +179,10 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Sets the path to the external add-on libraries.
+   * @param path the path to the external add-on libraries.
+   */
   public void setExternalLibraryPath(Path path) {
     if (path != null && path.equals(externalLibraryPath)) {
       return;
@@ -166,6 +201,9 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Stops watching the external add-on library directory.
+   */
   private void stopWatching() {
     try {
       lock.lock();
@@ -182,6 +220,9 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Starts watching the external add-on library directory.
+   */
   private void startWatching() {
     try {
       lock.lock();
@@ -201,6 +242,9 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Refreshes all the external add-on libraries.
+   */
   private void refreshAll() {
     File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
     if (directories != null) {
@@ -215,6 +259,24 @@ public class ExternalAddOnLibraryManager {
     }
   }
 
+  /**
+   * Makes the add-on library with the specified namespace available to MapTool.
+   * @param namespace the namespace of the add-on library to make available.
+   */
+  public void makeAvailable(String namespace) {
+    if (isEnabled) {
+      var lib = namespaceLibraryMap.get(namespace);
+      if (lib != null) {
+        addOnLibraryManager.registerLibrary(lib);
+      }
+    }
+  }
+
+  /**
+   * Stops the add-on library with the specified namespace from being available to MapTool.
+   * @return the namespace of the add-on library to stop being available.
+   * @throws IOException if an error occurs.
+   */
   private DirectoryWatcher createDirectoryWatcher() throws IOException {
     return DirectoryWatcher.builder()
         .path(externalLibraryPath)

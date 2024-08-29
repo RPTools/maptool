@@ -296,4 +296,12 @@ public class AddOnLibraryManager {
   public void deregisterExternalLibrary(String namespace) {
     externalAddOnLibraryManager.deregisterExternalAddOnLibrary(namespace);
   }
+
+  /**
+   * Makes the external library with the given namespace available to MapTool.
+   * @param namespace The namespace of the library.
+   */
+  public void makeExternalLibraryAvailable(String namespace) {
+    externalAddOnLibraryManager.makeAvailable(namespace);
+  }
 }
