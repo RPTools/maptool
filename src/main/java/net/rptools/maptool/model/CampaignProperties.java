@@ -17,16 +17,8 @@ package net.rptools.maptool.model;
 import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -384,9 +376,19 @@ public class CampaignProperties {
     return result;
   }
 
+  public void resetTokenFootprints() {
+    initTokenFootprints(true);
+  }
+
   private void initTokenFootprints() {
-    if (!gridFootprints.isEmpty()) {
+    initTokenFootprints(false);
+  }
+
+  private void initTokenFootprints(boolean reset) {
+    if (!gridFootprints.isEmpty() && !reset) {
       return;
+    } else if (!gridFootprints.isEmpty()) {
+      gridFootprints.clear();
     }
     // Potential for importing defaults from app preferences instead.
 
@@ -533,6 +535,44 @@ public class CampaignProperties {
 
   public void setGridFootprints(String gridType, List<TokenFootprint> footprintList) {
     gridFootprints.put(gridType, footprintList);
+  }
+
+  public void setGridFootprint(String footprintName, String gridType, TokenFootprint newPrint) {
+    if (!gridFootprints.containsKey(gridType)) {
+      gridFootprints.put(gridType, new ArrayList<TokenFootprint>());
+    }
+    List<TokenFootprint> allFootprints = new ArrayList(gridFootprints.get(gridType));
+    if (!allFootprints.isEmpty()) {
+      for (var i = 0; i < allFootprints.size(); i++) {
+        String testName = allFootprints.get(i).getName();
+        if (Objects.equals(testName, footprintName)) {
+          allFootprints.set(i, newPrint);
+          return;
+        }
+      }
+    }
+    allFootprints.add(newPrint);
+    setGridFootprints(gridType, allFootprints);
+  }
+
+  public void removeGridFootprint(String gridtype, String name) {
+    if (!gridFootprints.containsKey(gridtype) || gridFootprints.get(gridtype).isEmpty()) {
+      return;
+    } else {
+      List<TokenFootprint> allFootprints = new ArrayList(gridFootprints.get(gridtype));
+      int removeIndex = -1;
+      for (var i = 0; i < allFootprints.size(); i++) {
+        String testName = allFootprints.get(i).getName();
+        if (Objects.equals(testName, name)) {
+          removeIndex = i;
+          break;
+        }
+      }
+      if (removeIndex != -1) {
+        allFootprints.remove(removeIndex);
+        setGridFootprints(gridtype, allFootprints);
+      }
+    }
   }
 
   protected Object readResolve() {

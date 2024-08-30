@@ -33,6 +33,7 @@ public class TokenFootprint {
   private final Set<Point> cellSet = new HashSet<Point>();
 
   private String name;
+  private String localizedName = null;
   private GUID id;
   private boolean isDefault;
   private double scale = 1;
@@ -60,6 +61,7 @@ public class TokenFootprint {
     footPrint.id = GUID.valueOf(dto.getId());
     footPrint.isDefault = dto.getIsDefault();
     footPrint.scale = dto.getScale();
+    footPrint.localizedName = dto.getLocalizedName();
     return footPrint;
   }
 
@@ -70,6 +72,9 @@ public class TokenFootprint {
     dto.setId(id.toString());
     dto.setIsDefault(isDefault);
     dto.setScale(scale);
+    if (localizedName != null) {
+      dto.setLocalizedName(localizedName);
+    }
     return dto.build();
   }
 
@@ -92,6 +97,7 @@ public class TokenFootprint {
     jsonRep.addProperty("name", name);
     jsonRep.add("cells", occupiedString);
     jsonRep.addProperty("scale", scale);
+    jsonRep.addProperty("localizedName", localizedName);
     return jsonRep;
   }
 
@@ -103,6 +109,7 @@ public class TokenFootprint {
     Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
 
     // Implied
+    // Not a centre point on square grid, in fact is top-left??
     occupiedSet.add(centerPoint);
 
     // Relative
@@ -139,10 +146,17 @@ public class TokenFootprint {
 
   /** Returns the localized name of the footprint */
   public String getLocalizedName() {
-    if (localizeName) {
-      return I18N.getString("TokenFootprint.name." + name.toLowerCase());
+    if (localizeName && localizedName == null) {
+      localizedName = I18N.getString("TokenFootprint.name." + name.toLowerCase());
+      return localizedName;
+    } else if (localizedName != null) {
+      return localizedName;
     }
     return name;
+  }
+
+  public void setLocalizedName(String text) {
+    localizedName = text;
   }
 
   public Rectangle getBounds(Grid grid) {

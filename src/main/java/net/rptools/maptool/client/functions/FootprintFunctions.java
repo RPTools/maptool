@@ -16,12 +16,16 @@ package main.java.net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import java.awt.Point;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.regex.PatternSyntaxException;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.exceptions.*;
+import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.TokenFootprint;
+import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -41,7 +45,8 @@ public class FootprintFunctions extends AbstractFunction {
         "setTokenFootprint",
         "removeTokenFootprint",
         "getFootprintNames",
-        "getGridTypes");
+        "getGridTypes",
+        "resetFootprintsToDefault");
   }
 
   /** The singleton instance. */
@@ -83,9 +88,14 @@ public class FootprintFunctions extends AbstractFunction {
           result = getTokenFootPrints(parameters.get(0).toString(), null);
         }
       } else if (functionName.equalsIgnoreCase("setTokenFootprint")) {
-        // TODO Set Token Footprint Function setTokenFootprint(name, scale, points)
+        FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
+        setTokenFootprint(
+            parameters.get(0).toString(),
+            parameters.get(1).toString(),
+            net.rptools.maptool.util.FunctionUtil.paramAsJsonObject(functionName, parameters, 2));
       } else if (functionName.equalsIgnoreCase("removeTokenFootprint")) {
-        // TODO Remove Token Footprint Function removeTokenFootprint(grid, name)
+        FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
+        removeTokenFootprint(parameters.get(0).toString(), parameters.get(1).toString());
       } else if (functionName.equalsIgnoreCase("getFootprintNames")) {
         if ((parameters.size() >= 1 && !(parameters.get(0) instanceof String))) {
           throw new ParserException(
@@ -102,6 +112,8 @@ public class FootprintFunctions extends AbstractFunction {
       } else if (functionName.equalsIgnoreCase("getGridTypes")) {
         result =
             "[\"Vertical Hex\",\"Horizontal Hex\",\"Square\",\"Isometric\",\"Isometric Hex\",\"Isometric Hex\",\"None\"]";
+      } else if (functionName.equalsIgnoreCase("resetFootprintsToDefault")) {
+        resetFootprintsToDefault();
       } else {
         throw new ParserException(
             net.rptools.maptool.language.I18N.getText(
@@ -144,9 +156,7 @@ public class FootprintFunctions extends AbstractFunction {
 
   String getTokenFootPrints(String gridType, String footprintName) {
     Map<String, List<TokenFootprint>> campaignFootprints =
-        net.rptools.maptool.client.MapTool.getCampaign()
-            .getCampaignProperties()
-            .getGridFootprints();
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (gridType == null) {
       JsonObject asJSON = new JsonObject();
       for (var entry : campaignFootprints.entrySet()) {
@@ -180,5 +190,34 @@ public class FootprintFunctions extends AbstractFunction {
       }
       return "null";
     }
+  }
+
+  void setTokenFootprint(String name, String gridtype, JsonObject data) {
+    var cellList = data.get("cells").getAsJsonArray();
+    Point[] newCells = new Point[cellList.size()];
+    for (var i = 0; i < cellList.size(); i++) {
+      var cell = cellList.get(i).getAsJsonObject();
+      newCells[i] = new Point(cell.get("x").getAsInt(), cell.get("y").getAsInt());
+    }
+    TokenFootprint newPrint =
+        new TokenFootprint(name, false, data.get("scale").getAsDouble(), newCells);
+    if (data.has("localizedName")) {
+      newPrint.setLocalizedName(data.get("localizedName").getAsString());
+    }
+    CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+    ModifiedProperties.setGridFootprint(name, gridtype, newPrint);
+    MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
+  }
+
+  void removeTokenFootprint(String name, String gridtype) {
+    CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+    ModifiedProperties.removeGridFootprint(name, gridtype);
+    MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
+  }
+
+  void resetFootprintsToDefault() {
+    CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+    ModifiedProperties.resetTokenFootprints();
+    MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
   }
 }

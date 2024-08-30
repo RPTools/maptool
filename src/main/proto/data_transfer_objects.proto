@@ -716,4 +716,5 @@ message TokenFootPrintDto {
   bool is_default = 4;;
   double scale = 5;
   bool localize_name = 6;
+  string localized_name = 7;
 }
