@@ -86,10 +86,7 @@ public class AppSetup {
       File resourceFile = new File(dir, resourceName);
 
       try {
-        log.info("Installing " +
-
-
-            name + " in:" + resourceFile);
+        log.info("Installing  name in:" + resourceFile);
         FileUtils.copyURLToFile(inputUrl, resourceFile);
       } catch (IOException e) {
         log.error("ERROR copying " + inputUrl + " to " + resourceFile, e);
