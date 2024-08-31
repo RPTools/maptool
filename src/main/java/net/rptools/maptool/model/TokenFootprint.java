@@ -108,9 +108,8 @@ public class TokenFootprint {
   public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
     Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
 
-    // Implied
-    // Not a centre point on square grid, in fact is top-left??
-    occupiedSet.add(centerPoint);
+    // not implied any more, explicitly part of footprint data
+    // occupiedSet.add(centerPoint);
 
     // Relative
     for (Point offset : cellSet) {

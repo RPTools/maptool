@@ -13,7 +13,12 @@
 -->
   <a class="net.rptools.maptool.model.TokenFootprint-array">
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>1/6</name>
       <id>
         <baGUID>wKgPDgy5+1YBAAAAQKgJDA==</baGUID>
@@ -22,7 +27,12 @@
       <scale>0.408</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>1/4</name>
       <id>
         <baGUID>wKgPDgy5+1YCAAAAQKgJDA==</baGUID>
@@ -31,7 +41,12 @@
       <scale>0.5</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>1/3</name>
       <id>
         <baGUID>wKgPDgy5+1YDAAAAQKgJDA==</baGUID>
@@ -40,7 +55,12 @@
       <scale>0.577</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>1/2</name>
       <id>
         <baGUID>wKgPDgy5+1YEAAAAQKgJDA==</baGUID>
@@ -49,7 +69,12 @@
       <scale>0.707</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>2/3</name>
       <id>
         <baGUID>wKgPDgy5+1YFAAAAQKgJDA==</baGUID>
@@ -58,7 +83,12 @@
       <scale>0.816</scale>
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
-      <cellSet/>
+      <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
+      </cellSet>
       <name>Medium</name>
       <id>
         <baGUID>fwABAQllXDgBAAAAOAABAQ==</baGUID>
@@ -69,6 +99,10 @@
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
         <java.awt.Point>
           <x>1</x>
           <y>0</y>
@@ -88,6 +122,10 @@
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
         <java.awt.Point>
           <x>-1</x>
           <y>1</y>
@@ -123,6 +161,10 @@
     </net.rptools.maptool.model.TokenFootprint>
     <net.rptools.maptool.model.TokenFootprint>
       <cellSet>
+        <java.awt.Point>
+          <x>0</x>
+          <y>0</y>
+        </java.awt.Point>
         <java.awt.Point>
           <x>-1</x>
           <y>2</y>
