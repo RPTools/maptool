@@ -42,6 +42,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
@@ -80,15 +81,27 @@ public class AddOnLibrariesDialogView extends JDialog {
 
   private LibraryInfo selectedAddOn;
 
+  private final ExternalAddOnLibrariesTableModel externalAddOnLibrariesTableModel;
+  private final AddOnLibrariesTableModel addOnLibrariesTableModel;
+
   /** Creates a new instance of the dialog. */
   public AddOnLibrariesDialogView() {
     setContentPane(contentPane);
     setModal(true);
     getRootPane().setDefaultButton(buttonClose);
-    addOnLibraryTable.setModel(new AddOnLibrariesTableModel());
+
+    var eventBus = new MapToolEventBus().getMainEventBus();
+
+    addOnLibrariesTableModel = new AddOnLibrariesTableModel();
+    eventBus.register(addOnLibrariesTableModel);
+
+    addOnLibraryTable.setModel(addOnLibrariesTableModel);
     addOnLibraryTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
 
-    externalAddonTable.setModel(new ExternalAddOnLibrariesTableModel());
+    externalAddOnLibrariesTableModel = new ExternalAddOnLibrariesTableModel();
+    externalAddonTable.setModel(externalAddOnLibrariesTableModel);
+    eventBus.register(externalAddOnLibrariesTableModel);
+
     externalAddonTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
     externalAddonTable.setDefaultRenderer(
         ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
@@ -307,6 +320,9 @@ public class AddOnLibrariesDialogView extends JDialog {
   /** Closes the dialog. */
   private void onClose() {
     dispose();
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.unregister(externalAddOnLibrariesTableModel);
+    eventBus.unregister(addOnLibrariesTableModel);
   }
 
   /** Add an add-on library to the library manager. */
@@ -358,12 +374,5 @@ public class AddOnLibrariesDialogView extends JDialog {
                     a ->
                         a.ifPresent(
                             asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
-  }
-
-  public static void main(String[] args) {
-    AddOnLibrariesDialogView dialog = new AddOnLibrariesDialogView();
-    dialog.pack();
-    dialog.setVisible(true);
-    System.exit(0);
   }
 }

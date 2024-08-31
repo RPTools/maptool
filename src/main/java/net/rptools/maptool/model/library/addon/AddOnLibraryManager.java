@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.library.addon;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -25,6 +26,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
@@ -42,6 +44,7 @@ public class AddOnLibraryManager {
   /** The add-on libraries that are registered. */
   private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
 
+  /** The external add-on library manager. */
   private ExternalAddOnLibraryManager externalAddOnLibraryManager;
 
   /**
@@ -208,17 +211,28 @@ public class AddOnLibraryManager {
                 .collect(Collectors.toSet()));
   }
 
-  /** Initializes the add-on library manager. */
+  /**
+   * Initializes the add-on library manager.
+   *
+   */
   public void init() {
     externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
     externalAddOnLibraryManager.init();
 
-
-
     String path = AppPreferences.getExternalAddOnLibrariesPath();
     if (path != null && !path.isEmpty()) {
-      externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
-      externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
+      try {
+        externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
+        externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
+      } catch (IOException e) {
+        MapTool.showError("Error setting external library path", e);
+        try {
+          externalAddOnLibraryManager.setExternalLibraryPath(null);
+          externalAddOnLibraryManager.setEnabled(false);
+        } catch (IOException ex) {
+          // Do nothing.
+        }
+      }
     }
   }
 
@@ -259,8 +273,10 @@ public class AddOnLibraryManager {
    * Sets if external add-on libraries are enabled.
    *
    * @param enabled if external add-on libraries are enabled.
+   *
+   * @throws IOException if an I/O error occurs.
    */
-  public void setExternalLibrariesEnabled(boolean enabled) {
+  public void setExternalLibrariesEnabled(boolean enabled) throws IOException {
     externalAddOnLibraryManager.setEnabled(enabled);
   }
 
@@ -277,8 +293,10 @@ public class AddOnLibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
+   *
+   * @throws IOException if an I/O error occurs.
    */
-  public void setExternalLibraryPath(Path path) {
+  public void setExternalLibraryPath(Path path) throws IOException {
     externalAddOnLibraryManager.setExternalLibraryPath(path);
   }
 
@@ -286,8 +304,10 @@ public class AddOnLibraryManager {
    * Registers the add-on library as an external library.
    *
    * @param path The path to the library.
+   *
+   * @throws IOException if an I/O error occurs.
    */
-  public void registerExternalLibrary(Path path) {
+  public void registerExternalLibrary(Path path) throws IOException {
     externalAddOnLibraryManager.registerExternalAddOnLibrary(path);
   }
 
@@ -297,7 +317,7 @@ public class AddOnLibraryManager {
    *
    * @param namespace The namespace of the library.
    */
-  public void importFromExternal(String namespace) {
+  public void importFromExternal(String namespace) throws IOException {
     externalAddOnLibraryManager.importLibrary(namespace);
   }
 }

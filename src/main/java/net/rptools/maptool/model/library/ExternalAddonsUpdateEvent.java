@@ -14,18 +14,5 @@
  */
 package net.rptools.maptool.model.library;
 
-/** Record that contains the information about a library. */
-public record LibraryInfo(
-    String name,
-    String namespace,
-    String version,
-    String website,
-    String gitUrl,
-    String[] authors,
-    String license,
-    String description,
-    String shortDescription,
-    boolean allowsUrlAccess,
-    String readMeFile,
-    String licenseFile) {}
-;
+/** Event that is fired when the list of external addons is updated. */
+public record ExternalAddonsUpdateEvent() {}

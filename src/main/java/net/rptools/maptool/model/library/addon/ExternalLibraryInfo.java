@@ -14,20 +14,23 @@
  */
 package net.rptools.maptool.model.library.addon;
 
+import java.nio.file.Path;
 import net.rptools.maptool.model.library.LibraryInfo;
 
 /**
  * Represents the information about external add-on library.
  *
  * @param namespace The namespace of the add-on.
- * @param library The library created by the loading of the add-on from disk.
  * @param libraryInfo The library info of the add-on.
  * @param updatedOnDisk Whether the add-on has been updated on disk.
  * @param isInstalled Whether the add-on is installed.
+ * @param backingDirectory The backing directory of the add-on.
+ * @param subDirectoryName The subdirectory name of the add-on in the add-on development dir.
  */
 public record ExternalLibraryInfo(
     String namespace,
-    AddOnLibrary library,
     LibraryInfo libraryInfo,
     boolean updatedOnDisk,
-    boolean isInstalled) {}
+    boolean isInstalled,
+    Path backingDirectory,
+    String subDirectoryName) {}

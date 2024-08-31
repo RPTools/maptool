@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.model.library;
 
+import java.io.IOException;
 import java.net.URL;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -71,6 +72,10 @@ public class LibraryManager {
   private static final AddOnSlashCommandManager addOnSlashCommandManager =
       new AddOnSlashCommandManager();
 
+  /**
+   * Initializes the library manager. This method should be called after
+   * instantiation of the library manager.
+   */
   public static void init() {
     libraryTokenManager.init();
     builtInLibraryManager.loadBuiltIns();
@@ -118,8 +123,10 @@ public class LibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
+   *
+   * @throws IOException if an error occurs while setting the path.
    */
-  public void setExternalLibraryPath(Path path) {
+  public void setExternalLibraryPath(Path path) throws IOException {
     addOnLibraryManager.setExternalLibraryPath(path);
   }
 
@@ -257,8 +264,10 @@ public class LibraryManager {
    * MapTool. To make the add-on available to MapTool, use {@link #importFromExternal(String)}
    *
    * @param path The path of the add-on to register.
+   *
+   * @throws IOException if an error occurs while registering the add-on.
    */
-  public void registerExternalAddOnLibrary(Path path) {
+  public void registerExternalAddOnLibrary(Path path) throws IOException {
     addOnLibraryManager.registerExternalLibrary(path);
   }
 
@@ -268,7 +277,10 @@ public class LibraryManager {
    *
    * @param namespace The namespace of the add-on to import.
    */
-  public void importFromExternal(String namespace) {
+  public void importFromExternal(String namespace) throws IOException {
+    if (addOnLibraryManager.namespaceRegistered(namespace)) {
+      addOnLibraryManager.deregisterLibrary(namespace);
+    }
     addOnLibraryManager.importFromExternal(namespace);
   }
 

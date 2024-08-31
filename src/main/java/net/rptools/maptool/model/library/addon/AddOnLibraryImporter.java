@@ -35,6 +35,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.proto.AddOnLibraryDto;
 import net.rptools.maptool.model.library.proto.AddOnLibraryEventsDto;
 import net.rptools.maptool.model.library.proto.AddOnStatSheetsDto;
@@ -141,6 +142,39 @@ public class AddOnLibraryImporter {
   }
 
   /**
+   * Imports the {@link LibraryInfo} from the specified directory. If the {@code LIBRARY_INFO_FILE}
+   * does not exist in this directory then null will be returned.
+   *
+   * @param dir The directory to import the library info from.
+   * @return the {@link LibraryInfo} that was imported, {@code null} if the library info file does
+   *     not exist.
+   * @throws IOException if an error occurs while reading the library.
+   */
+  public LibraryInfo getLibraryInfoFromDirectory(Path dir) throws IOException {
+    var infoPath = dir.resolve(LIBRARY_INFO_FILE).toAbsolutePath();
+    if (!Files.exists(infoPath)) {
+      return null;
+    }
+
+    var builder = AddOnLibraryDto.newBuilder();
+    JsonFormat.parser().ignoringUnknownFields().merge(Files.newBufferedReader(infoPath), builder);
+
+    return new LibraryInfo(
+        builder.getName(),
+        builder.getNamespace(),
+        builder.getVersion(),
+        builder.getWebsite(),
+        builder.getGitUrl(),
+        builder.getAuthorsList().toArray(new String[0]),
+        builder.getLicense(),
+        builder.getDescription(),
+        builder.getShortDescription(),
+        builder.getAllowsUriAccess(),
+        builder.getReadMeFile(),
+        builder.getLicenseFile());
+  }
+
+  /**
    * Imports the add-on library from the specified directory
    *
    * @param dir the directory to import the library from.
@@ -150,8 +184,9 @@ public class AddOnLibraryImporter {
   public AddOnLibrary importFromDirectory(Path dir) throws IOException {
 
     var infoPath = dir.resolve(LIBRARY_INFO_FILE);
-    if (!Files.exists(infoPath))
+    if (!Files.exists(infoPath)) {
       throw new IOException(I18N.getText("library.error.addOn.noConfigFile", dir));
+    }
 
     var builder = AddOnLibraryDto.newBuilder();
     JsonFormat.parser().ignoringUnknownFields().merge(Files.newBufferedReader(infoPath), builder);

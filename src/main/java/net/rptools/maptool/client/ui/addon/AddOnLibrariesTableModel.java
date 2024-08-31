@@ -14,11 +14,13 @@
  */
 package net.rptools.maptool.client.ui.addon;
 
+import com.google.common.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryType;
@@ -84,5 +86,25 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
       log.error("Error displaying add-on libraries", e);
     }
     super.fireTableDataChanged();
+  }
+
+  /**
+   * Handle the AddOnsUpdatedEvent event by firing a table data changed event.
+   *
+   * @param event the AddOnsUpdatedEvent event.
+   */
+  @Subscribe
+  public void handleAddOnsUpdatedEvent(AddOnsAddedEvent event) {
+    fireTableDataChanged();
+  }
+
+  /**
+   * Handle the AddOnsRemovedEvent event by firing a table data changed event.
+   *
+   * @param event the AddOnsRemovedEvent event.
+   */
+  @Subscribe
+  public void handleAddOnsRemovedEvent(AddOnsAddedEvent event) {
+    fireTableDataChanged();
   }
 }

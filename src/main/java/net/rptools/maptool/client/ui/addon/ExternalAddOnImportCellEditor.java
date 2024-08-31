@@ -15,7 +15,9 @@
 package net.rptools.maptool.client.ui.addon;
 
 import java.awt.*;
+import java.io.IOException;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
 import net.rptools.maptool.language.I18N;
@@ -31,7 +33,11 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
   public ExternalAddOnImportCellEditor() {
     button.addActionListener(
         e -> {
-          new LibraryManager().importFromExternal(info.libraryInfo().namespace());
+          try {
+            new LibraryManager().importFromExternal(info.libraryInfo().namespace());
+          } catch (IOException ex) {
+            throw new RuntimeException(ex); // TODO: CDW
+          }
           stopCellEditing();
         });
   }
@@ -65,6 +71,11 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
     }
     button.setText(I18N.getText(buttonTextKey));
 
-    return button;
+    var panel = new JPanel();
+    panel.setLayout(new BorderLayout());
+    panel.add(button, BorderLayout.CENTER);
+    panel.setBackground(isSelected ? table.getSelectionBackground() : table.getBackground());
+    panel.setBorder(new EmptyBorder(1, 5, 2, 5));
+    return panel;
   }
 }

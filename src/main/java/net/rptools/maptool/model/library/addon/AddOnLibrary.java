@@ -283,8 +283,7 @@ public class AddOnLibrary implements Library {
             shortDescription,
             allowsUriAccess,
             readMeFile.isEmpty() ? null : readMeFile,
-            licenseFile.isEmpty() ? null : licenseFile,
-            backingDirectory);
+            licenseFile.isEmpty() ? null : licenseFile);
 
     for (var s : slashCommandsDto.getSlashCommandsList()) {
       slashCommands.put(

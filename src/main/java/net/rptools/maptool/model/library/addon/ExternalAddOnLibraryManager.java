@@ -24,6 +24,10 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.model.library.AddOnsAddedEvent;
+import net.rptools.maptool.model.library.AddOnsRemovedEvent;
+import net.rptools.maptool.model.library.ExternalAddonsUpdateEvent;
+import net.rptools.maptool.model.library.LibraryInfo;
 
 /**
  * Manages the external add-on libraries that are baked by the file system. This manager will watch
@@ -69,110 +73,100 @@ public class ExternalAddOnLibraryManager {
   /**
    * Handles the event when an add-on library is added to MapTool.
    *
-   * @param library the add-on library that was added to MapTool.
+   * @param event the add-on library that was added to MapTool.
    */
   @Subscribe
-  public void onLibraryAdded(AddOnLibrary library) {
-    library
-        .getNamespace()
-        .thenAccept(
-            namespace -> {
-              if (namespaceInfoMap.containsKey(namespace)) {
-                var oldInfo = namespaceInfoMap.get(namespace);
-                // We do not want to use the library or the library info from the add-on library as
-                // disk may be different
-                var newInfo =
-                    new ExternalLibraryInfo(
-                        namespace, oldInfo.library(), oldInfo.libraryInfo(), false, true);
-                namespaceInfoMap.put(namespace, newInfo);
-              }
-            });
+  public void onLibraryAdded(AddOnsAddedEvent event) {
+    boolean updated = false;
+    for (LibraryInfo libraryInfo : event.addOns()) {
+      var namespace = libraryInfo.namespace().toLowerCase();
+      if (namespaceInfoMap.containsKey(namespace)) {
+        var oldInfo = namespaceInfoMap.get(namespace);
+        var newInfo =
+            new ExternalLibraryInfo(
+                namespace,
+                oldInfo.libraryInfo(),
+                false,
+                true,
+                oldInfo.backingDirectory(),
+                externalLibraryPath.relativize(oldInfo.backingDirectory()).toString());
+        namespaceInfoMap.put(namespace, newInfo);
+        updated = true;
+      }
+    }
+    if (updated) {
+      new MapToolEventBus().getMainEventBus().post(new ExternalAddonsUpdateEvent());
+    }
   }
 
   /**
    * Handles the event when an add-on library is removed from MapTool.
    *
-   * @param library the add-on library that was removed from MapTool.
+   * @param event the add-on library that was removed from MapTool.
    */
   @Subscribe
-  public void onLibraryRemoved(AddOnLibrary library) {
-    library
-        .getNamespace()
-        .thenAccept(
-            namespace -> {
-              if (namespaceInfoMap.containsKey(namespace)) {
-                var oldInfo = namespaceInfoMap.get(namespace);
-                // We do not want to use the library or the library info from the add-on library as
-                // disk may be different
-                var newInfo =
-                    new ExternalLibraryInfo(
-                        namespace, oldInfo.library(), oldInfo.libraryInfo(), true, false);
-                namespaceInfoMap.put(namespace, newInfo);
-              }
-            });
-  }
-
-  /**
-   * Handles the event when an add-on library is updated in MapTool.
-   *
-   * @param library the add-on library that was updated in MapTool.
-   */
-  @Subscribe
-  public void onLibraryUpdated(AddOnLibrary library) {
-    library
-        .getNamespace()
-        .thenAccept(
-            namespace -> {
-              if (namespaceInfoMap.containsKey(namespace)) {
-                var oldInfo = namespaceInfoMap.get(namespace);
-                // We do not want to use the library or the library info from the add-on library as
-                // disk may be different
-                var newInfo =
-                    new ExternalLibraryInfo(
-                        namespace, oldInfo.library(), oldInfo.libraryInfo(), false, true);
-                namespaceInfoMap.put(namespace, newInfo);
-              }
-            });
+  public void onLibraryRemoved(AddOnsRemovedEvent event) {
+    boolean updated = false;
+    for (LibraryInfo libraryInfo : event.addOns()) {
+      var namespace = libraryInfo.namespace().toLowerCase();
+      if (namespaceInfoMap.containsKey(namespace)) {
+        var oldInfo = namespaceInfoMap.get(namespace);
+        var newInfo =
+            new ExternalLibraryInfo(
+                namespace,
+                oldInfo.libraryInfo(),
+                true,
+                false,
+                oldInfo.backingDirectory(),
+                externalLibraryPath.relativize(oldInfo.backingDirectory()).toString());
+        namespaceInfoMap.put(namespace, newInfo);
+        updated = true;
+      }
+    }
+    if (updated) {
+      new MapToolEventBus().getMainEventBus().post(new ExternalAddonsUpdateEvent());
+    }
   }
 
   /**
    * Registers an external add-on library.
    *
-   * @param addOnLibrary the add-on library to register.
+   * @param info Information about the add-on library to register.
    */
-  private void registerExternalAddOnLibrary(AddOnLibrary addOnLibrary) {
-    addOnLibrary
-        .getNamespace()
-        .thenAccept(
-            namespace ->
-                addOnLibrary
-                    .getLibraryInfo()
-                    .thenAccept(
-                        libraryInfo -> {
-                          boolean isInstalled =
-                              addOnLibraryManager.isNamespaceRegistered(namespace);
-                          var externalInfo =
-                              new ExternalLibraryInfo(
-                                  namespace, addOnLibrary, libraryInfo, true, isInstalled);
-                          namespaceInfoMap.put(namespace, externalInfo);
-                        }));
+  private void registerExternalAddOnLibrary(ExternalLibraryInfo info) {
+    boolean isInstalled = addOnLibraryManager.isNamespaceRegistered(info.namespace());
+    var externalInfo =
+        new ExternalLibraryInfo(
+            info.namespace(),
+            info.libraryInfo(),
+            true,
+            isInstalled,
+            info.backingDirectory(),
+            externalLibraryPath.relativize(info.backingDirectory()).toString());
+    namespaceInfoMap.put(info.namespace().toLowerCase(), externalInfo);
   }
 
   /**
    * Deregisters an external add-on library.
    *
-   * @param namespace the namespace of the add-on library to deregister.
+   * @param path the backing path of the add-on library to deregister.
    */
-  public void deregisterExternalAddOnLibrary(String namespace) {
-    namespaceInfoMap.remove(namespace.toLowerCase());
+  public void deregisterExternalAddOnLibrary(Path path) {
+    namespaceInfoMap.values().stream()
+        .filter(info -> info.backingDirectory().equals(path))
+        .findFirst()
+        .ifPresent(info -> namespaceInfoMap.remove(info.namespace().toLowerCase()));
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.post(new ExternalAddonsUpdateEvent());
   }
 
   /**
    * Refreshes an external add-on library.
    *
    * @param path the path to the add-on library.
+   * @throws IOException if an error occurs.
    */
-  public void refreshExternalAddOnLibrary(Path path) {
+  public void refreshExternalAddOnLibrary(Path path) throws IOException {
     registerExternalAddOnLibrary(path); // Allows us to change behaviour later without breaking API
   }
 
@@ -180,14 +174,25 @@ public class ExternalAddOnLibraryManager {
    * Registers an external add-on library.
    *
    * @param path the path to the add-on library.
+   *
+   * @throws IOException if an error occurs.
    */
-  public void registerExternalAddOnLibrary(Path path) {
-    try {
-      var lib = new AddOnLibraryImporter().importFromDirectory(path);
-      registerExternalAddOnLibrary(lib);
-    } catch (IOException e) {
-      throw new RuntimeException(e); // TODO: CDW
-    }
+  public void registerExternalAddOnLibrary(Path path) throws IOException {
+      var lib = new AddOnLibraryImporter().getLibraryInfoFromDirectory(path);
+      if (lib == null) {
+        return;
+      }
+      var info =
+          new ExternalLibraryInfo(
+              lib.namespace(),
+              lib,
+              false,
+              false,
+              path,
+              externalLibraryPath.relativize(path).toString());
+      registerExternalAddOnLibrary(info);
+      var eventBus = new MapToolEventBus().getMainEventBus();
+      eventBus.post(new ExternalAddonsUpdateEvent());
   }
 
   /**
@@ -217,8 +222,10 @@ public class ExternalAddOnLibraryManager {
    * Sets the enabled state of the external add-on library manager.
    *
    * @param enabled the enabled state.
+   *
+   * @throws IOException if an error occurs.
    */
-  public void setEnabled(boolean enabled) {
+  public void setEnabled(boolean enabled) throws IOException {
     try {
       lock.lock();
       if (isEnabled != enabled) {
@@ -252,8 +259,10 @@ public class ExternalAddOnLibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
+   *
+   * @throws IOException if an error occurs.
    */
-  public void setExternalLibraryPath(Path path) {
+  public void setExternalLibraryPath(Path path) throws IOException {
     if (path != null && path.equals(externalLibraryPath)) {
       return;
     }
@@ -270,24 +279,24 @@ public class ExternalAddOnLibraryManager {
   }
 
   /** Stops watching the external add-on library directory. */
-  private void stopWatching() {
+  private void stopWatching() throws IOException {
     try {
       lock.lock();
       if (directoryWatcher != null) {
-        try {
-          directoryWatcher.close();
-          directoryWatcher = null;
-        } catch (IOException e) {
-          throw new RuntimeException(e); // TODO: CDW
-        }
+        directoryWatcher.close();
+        directoryWatcher = null;
       }
     } finally {
       lock.unlock();
     }
   }
 
-  /** Starts watching the external add-on library directory. */
-  private void startWatching() {
+  /**
+   * Starts watching the external add-on library directory.
+   *
+   * @throws IOException if an error occurs.
+   */
+  private void startWatching() throws IOException {
     try {
       lock.lock();
       refreshAll();
@@ -299,29 +308,28 @@ public class ExternalAddOnLibraryManager {
           directoryWatcher.watchAsync();
         }
       }
-    } catch (IOException e) {
-      throw new RuntimeException(e); // TODO: CDW
     } finally {
       lock.unlock();
     }
   }
 
-  /** Refreshes all the external add-on libraries. */
-  private void refreshAll() {
+  /**
+   * Refreshes all the external add-on libraries.
+   *
+   * @throws IOException if an error occurs.
+   */
+  private void refreshAll() throws IOException {
     if (externalLibraryPath == null) {
       return;
     }
     File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
     if (directories != null) {
       for (File directory : directories) {
-        try {
-          var lib = new AddOnLibraryImporter().importFromDirectory(directory.toPath());
-          registerExternalAddOnLibrary(lib);
-        } catch (IOException e) {
-          throw new RuntimeException(e); // TODO: CDW
-        }
+        registerExternalAddOnLibrary(directory.toPath());
       }
     }
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.post(new ExternalAddonsUpdateEvent());
   }
 
   /**
@@ -329,11 +337,12 @@ public class ExternalAddOnLibraryManager {
    *
    * @param namespace the namespace of the add-on library to make available.
    */
-  public void importLibrary(String namespace) {
+  public void importLibrary(String namespace) throws IOException {
     if (isEnabled) {
-      var lib = namespaceInfoMap.get(namespace);
-      if (lib != null) {
-        addOnLibraryManager.registerLibrary(lib.library());
+      var libInfo = namespaceInfoMap.get(namespace.toLowerCase());
+      if (libInfo != null) {
+        var lib = new AddOnLibraryImporter().importFromDirectory(libInfo.backingDirectory());
+        addOnLibraryManager.registerLibrary(lib);
       }
     }
   }
@@ -349,27 +358,23 @@ public class ExternalAddOnLibraryManager {
         .path(externalLibraryPath)
         .listener(
             event -> {
+              int basePathNameCount = externalLibraryPath.getNameCount();
+              var path = event.path();
+              if (path.getNameCount() <= basePathNameCount) {
+                return;
+              }
+              if (!path.startsWith(externalLibraryPath)) {
+                return;
+              }
+              path = externalLibraryPath.resolve(path.getName(basePathNameCount));
               switch (event.eventType()) {
-                case CREATE -> {
-                  if (event.path().relativize(externalLibraryPath).getNameCount() == 1) {
-                    registerExternalAddOnLibrary(event.path());
-                  }
-                }
-                case DELETE -> {
-                  if (event.path().relativize(externalLibraryPath).getNameCount() == 1) {
-                    deregisterExternalAddOnLibrary(event.path().getFileName().toString());
-                  }
-                }
-                case MODIFY -> {
-                  if (event.path().relativize(externalLibraryPath).getNameCount() == 1) {
-                    refreshExternalAddOnLibrary(event.path());
-                  }
-                }
+                case CREATE -> registerExternalAddOnLibrary(path);
+                case DELETE -> deregisterExternalAddOnLibrary(path);
+                case MODIFY -> refreshExternalAddOnLibrary(path);
               }
             })
         .build();
   }
 }
 
-// TODO: CDW changes to the add on library directory will not automatically update the add on
-// library that MT uses
+// TODO: CDW dont crash on invalid library file

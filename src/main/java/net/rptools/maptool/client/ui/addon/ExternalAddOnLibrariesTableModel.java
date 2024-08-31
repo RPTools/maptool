@@ -14,9 +14,11 @@
  */
 package net.rptools.maptool.client.ui.addon;
 
+import com.google.common.eventbus.Subscribe;
 import java.util.List;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.ExternalAddonsUpdateEvent;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
@@ -55,7 +57,7 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 0 -> info.libraryInfo().name();
       case 1 -> info.libraryInfo().version();
       case 2 -> info.libraryInfo().namespace();
-      case 3 -> info.libraryInfo().backingDirectory();
+      case 3 -> info.subDirectoryName();
       case 4 -> info.isInstalled();
       case 5 -> info.updatedOnDisk();
       case 6 -> info;
@@ -75,5 +77,15 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 6 -> I18N.getText("library.dialog.addon.refresh");
       default -> null;
     };
+  }
+
+  /**
+   * Handle the event when external addons are added.
+   *
+   * @param event the AddOnsAddedEvent event.
+   */
+  @Subscribe
+  public void handleExternalAddOnsAdded(ExternalAddonsUpdateEvent event) {
+    fireTableDataChanged();
   }
 }
