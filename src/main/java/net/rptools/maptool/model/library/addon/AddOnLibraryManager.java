@@ -211,6 +211,10 @@ public class AddOnLibraryManager {
   /** Initializes the add-on library manager. */
   public void init() {
     externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
+    externalAddOnLibraryManager.init();
+
+
+
     String path = AppPreferences.getExternalAddOnLibrariesPath();
     if (path != null && !path.isEmpty()) {
       externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));

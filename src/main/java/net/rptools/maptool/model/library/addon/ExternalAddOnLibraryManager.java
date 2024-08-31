@@ -261,9 +261,7 @@ public class ExternalAddOnLibraryManager {
       lock.lock();
       externalLibraryPath = path;
       stopWatching();
-      if (path == null) {
-        isEnabled = false;
-      } else {
+      if (path != null) {
         startWatching();
       }
     } finally {
@@ -310,6 +308,9 @@ public class ExternalAddOnLibraryManager {
 
   /** Refreshes all the external add-on libraries. */
   private void refreshAll() {
+    if (externalLibraryPath == null) {
+      return;
+    }
     File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
     if (directories != null) {
       for (File directory : directories) {

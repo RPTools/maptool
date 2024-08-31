@@ -18,6 +18,8 @@ import java.awt.*;
 import javax.swing.*;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
 public class ExternalAddOnImportCellEditor extends AbstractCellEditor
@@ -29,7 +31,7 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
   public ExternalAddOnImportCellEditor() {
     button.addActionListener(
         e -> {
-          System.out.println("Button clicked: " + info.namespace());
+          new LibraryManager().importFromExternal(info.libraryInfo().namespace());
           stopCellEditing();
         });
   }
@@ -55,7 +57,13 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
       JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
     button.setEnabled(true);
     info = (ExternalLibraryInfo) value;
-    button.setText(info.namespace());
+    String buttonTextKey;
+    if (info.isInstalled()) {
+      buttonTextKey = "library.dialog.reimport";
+    } else {
+      buttonTextKey = "library.dialog.import";
+    }
+    button.setText(I18N.getText(buttonTextKey));
 
     return button;
   }

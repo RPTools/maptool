@@ -246,6 +246,7 @@ public class AddOnLibrariesDialogView extends JDialog {
     if (enableExternalAddOnCheckBox.isSelected()) {
       refreshLibraries();
     }
+    pack();
   }
 
   private void refreshLibraries() {}

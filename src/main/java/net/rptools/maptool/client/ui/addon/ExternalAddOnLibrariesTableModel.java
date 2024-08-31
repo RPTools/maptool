@@ -29,17 +29,21 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
 
   @Override
   public int getColumnCount() {
-    return 5;
+    return 7;
   }
 
   @Override
   public Class<?> getColumnClass(int columnIndex) {
-    return columnIndex == 4 ? ExternalLibraryInfo.class : String.class;
+    return switch (columnIndex) {
+      case 4, 5 -> Boolean.class;
+      case 6 -> ExternalLibraryInfo.class;
+      default -> String.class;
+    };
   }
 
   @Override
   public boolean isCellEditable(int rowIndex, int columnIndex) {
-    return columnIndex == 4;
+    return getColumnClass(columnIndex) == ExternalLibraryInfo.class;
   }
 
   @Override
@@ -52,7 +56,9 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 1 -> info.libraryInfo().version();
       case 2 -> info.libraryInfo().namespace();
       case 3 -> info.libraryInfo().backingDirectory();
-      case 4 -> info;
+      case 4 -> info.isInstalled();
+      case 5 -> info.updatedOnDisk();
+      case 6 -> info;
       default -> null;
     };
   }
@@ -64,12 +70,10 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
       case 1 -> I18N.getText("library.dialog.addon.version");
       case 2 -> I18N.getText("library.dialog.addon.namespace");
       case 3 -> I18N.getText("library.dialog.addon.subdir");
-      case 4 -> I18N.getText("library.dialog.addon.refresh");
+      case 4 -> I18N.getText("library.dialog.addon.imported");
+      case 5 -> I18N.getText("library.dialog.addon.updated");
+      case 6 -> I18N.getText("library.dialog.addon.refresh");
       default -> null;
     };
-  }
-
-  void refresh(int rowIndex) {
-    // TODO: CDW
   }
 }
