@@ -29,7 +29,6 @@ import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.reflections.Reflections;
-import org.reflections.scanners.ResourcesScanner;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
@@ -105,9 +104,18 @@ public class AppSetup {
    */
   public static void installDefaultUIThemes() {
     if (!themesInstalled) {
-      Reflections reflections =
-          new Reflections(AppConstants.DEFAULT_UI_THEMES, new ResourcesScanner());
-      Set<String> resourcePathSet = reflections.getResources(Pattern.compile(".*\\.theme"));
+      Set<String> resourcePathSet =
+          new Reflections(
+                  new ConfigurationBuilder()
+                      .forPackage(AppConstants.DEFAULT_UI_THEMES)
+                      .setScanners(Scanners.Resources))
+              .getResources(Pattern.compile(".*")).stream()
+                  .filter(s -> s.startsWith(AppConstants.DEFAULT_UI_THEMES))
+                  .collect(Collectors.toSet())
+                  .stream()
+                  .filter(s -> s.endsWith(".theme"))
+                  .filter(s -> s.startsWith(AppConstants.DEFAULT_UI_THEMES))
+                  .collect(Collectors.toSet());
 
       for (String resourcePath : resourcePathSet) {
         URL inputUrl = AppSetup.class.getClassLoader().getResource(resourcePath);
