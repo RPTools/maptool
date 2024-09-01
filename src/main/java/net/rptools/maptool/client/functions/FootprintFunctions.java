@@ -90,23 +90,29 @@ public class FootprintFunctions extends AbstractFunction {
         } else if (parameters.isEmpty()) {
           result = getTokenFootPrints(null, null);
         } else if (parameters.size() > 1) {
-          if(!gridTypes.contains(parameters.get(0).toString())){
+          if (!gridTypes.contains(parameters.get(0).toString())) {
             throw new ParserException(
-                    net.rptools.maptool.language.I18N.getText("macro.function.footprintFunctions.unknownGridType", parameters.get(0).toString()));
+                net.rptools.maptool.language.I18N.getText(
+                    "macro.function.footprintFunctions.unknownGridType",
+                    parameters.get(0).toString()));
           }
           result = getTokenFootPrints(parameters.get(0).toString(), parameters.get(1).toString());
         } else {
-          if(!gridTypes.contains(parameters.get(0).toString())){
+          if (!gridTypes.contains(parameters.get(0).toString())) {
             throw new ParserException(
-                    net.rptools.maptool.language.I18N.getText("macro.function.footprintFunctions.unknownGridType", parameters.get(0).toString()));
+                net.rptools.maptool.language.I18N.getText(
+                    "macro.function.footprintFunctions.unknownGridType",
+                    parameters.get(0).toString()));
           }
           result = getTokenFootPrints(parameters.get(0).toString(), null);
         }
       } else if (functionName.equalsIgnoreCase("setTokenFootprint")) {
         FunctionUtil.checkNumberParam(functionName, parameters, 3, 3);
-        if(!gridTypes.contains(parameters.get(0).toString())){
+        if (!gridTypes.contains(parameters.get(0).toString())) {
           throw new ParserException(
-                  net.rptools.maptool.language.I18N.getText("macro.function.footprintFunctions.unknownGridType", parameters.get(0).toString()));
+              net.rptools.maptool.language.I18N.getText(
+                  "macro.function.footprintFunctions.unknownGridType",
+                  parameters.get(0).toString()));
         }
         setTokenFootprint(
             parameters.get(0).toString(),
@@ -114,9 +120,11 @@ public class FootprintFunctions extends AbstractFunction {
             net.rptools.maptool.util.FunctionUtil.paramAsJsonObject(functionName, parameters, 2));
       } else if (functionName.equalsIgnoreCase("removeTokenFootprint")) {
         FunctionUtil.checkNumberParam(functionName, parameters, 2, 2);
-        if(!gridTypes.contains(parameters.get(0).toString())){
+        if (!gridTypes.contains(parameters.get(0).toString())) {
           throw new ParserException(
-                  net.rptools.maptool.language.I18N.getText("macro.function.footprintFunctions.unknownGridType", parameters.get(0).toString()));
+              net.rptools.maptool.language.I18N.getText(
+                  "macro.function.footprintFunctions.unknownGridType",
+                  parameters.get(0).toString()));
         }
         removeTokenFootprint(parameters.get(0).toString(), parameters.get(1).toString());
       } else if (functionName.equalsIgnoreCase("getFootprintNames")) {
@@ -130,15 +138,16 @@ public class FootprintFunctions extends AbstractFunction {
         } else if (parameters.isEmpty()) {
           result = getFootprintNames(null);
         } else {
-          if(!gridTypes.contains(parameters.get(0).toString())){
+          if (!gridTypes.contains(parameters.get(0).toString())) {
             throw new ParserException(
-                    net.rptools.maptool.language.I18N.getText("macro.function.footprintFunctions.unknownGridType", parameters.get(0).toString()));
+                net.rptools.maptool.language.I18N.getText(
+                    "macro.function.footprintFunctions.unknownGridType",
+                    parameters.get(0).toString()));
           }
           result = getFootprintNames(parameters.get(0).toString());
         }
       } else if (functionName.equalsIgnoreCase("getGridTypes")) {
-        result =
-            "[\"Vertical Hex\",\"Horizontal Hex\",\"Square\",\"None\"]";
+        result = "[\"Vertical Hex\",\"Horizontal Hex\",\"Square\",\"None\"]";
       } else if (functionName.equalsIgnoreCase("resetFootprintsToDefault")) {
         resetFootprintsToDefault();
       } else {
@@ -154,8 +163,8 @@ public class FootprintFunctions extends AbstractFunction {
   }
 
   /* Returns a String representing the JSON object containing footprints within the given grid type
-  * or if gridType is null it returns a JSON object containing all of the above JSON objects for all grids.
-  * */
+   * or if gridType is null it returns a JSON object containing all of the above JSON objects for all grids.
+   * */
   String getFootprintNames(String gridType) {
     Map<String, List<TokenFootprint>> campaignFootprints =
         net.rptools.maptool.client.MapTool.getCampaign()
