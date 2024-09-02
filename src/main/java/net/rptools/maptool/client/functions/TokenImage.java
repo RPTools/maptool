@@ -18,6 +18,7 @@ import com.google.gson.JsonObject;
 import java.awt.Image;
 import java.math.BigDecimal;
 import java.util.List;
+import com.jidesoft.utils.Base64;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -71,7 +72,8 @@ public class TokenImage extends AbstractFunction {
         "getImage",
         "setTokenOpacity",
         "getAssetProperties",
-        "getTokenOpacity");
+        "getTokenOpacity",
+        "createAsset");
   }
 
   /**
@@ -171,6 +173,35 @@ public class TokenImage extends AbstractFunction {
       }
     }
 
+    StringBuilder assetId = new StringBuilder("asset://");
+    if (functionName.equalsIgnoreCase("createAsset")) {
+      FunctionUtil.checkNumberParam(functionName, args, 2, 2);
+      String imageName = args.get(0).toString();
+      String imageString = args.get(1).toString();
+      if(imageName == "" || imageString == "") {
+        throw new ParserException(
+                I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+      } else {
+        if (imageString.length() > 8) {
+          byte[] imageBytes = Base64.decode(imageString);
+          String imageCheck = new String(imageBytes, 0, 4);
+          /* header check for: webp || jpg || png */
+          if (imageCheck.equals("RIFF") || imageCheck.equals("ÿØÿà") || imageCheck.equals("‰PNG")) {
+            Asset asset = Asset.createImageAsset(imageName, imageBytes);
+            AssetManager.putAsset(asset);
+            assetId.append(asset.getMD5Key().toString());
+            return assetId;
+          } else {
+            throw new ParserException(
+                    I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+        } else {
+          throw new ParserException(
+                  I18N.getText("macro.function.general.wrongParamType", functionName));
+        }
+      }
+    }
+
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
     if (functionName.equalsIgnoreCase("getImage")) {
@@ -195,7 +226,6 @@ public class TokenImage extends AbstractFunction {
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
     }
 
-    StringBuilder assetId = new StringBuilder("asset://");
     if (functionName.equalsIgnoreCase("getTokenImage")) {
       if (token.getImageAssetId() == null) {
         return "";
