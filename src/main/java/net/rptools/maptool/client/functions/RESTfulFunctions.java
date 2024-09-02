@@ -220,8 +220,7 @@ public class RESTfulFunctions extends AbstractFunction {
     // Execute the call and check the response...
     try (Response response = client.newCall(request).execute()) {
       if (!response.isSuccessful() && !fullResponse) {
-        throw new ParserException(
-            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+        return I18N.getText("macro.function.rest.error.response", functionName, response.code());
       }
 
       if (fullResponse) {
@@ -231,7 +230,7 @@ public class RESTfulFunctions extends AbstractFunction {
       }
 
     } catch (IllegalArgumentException | IOException e) {
-      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
+      return I18N.getText("macro.function.rest.error.unknown", functionName, e);
     }
   }
 
