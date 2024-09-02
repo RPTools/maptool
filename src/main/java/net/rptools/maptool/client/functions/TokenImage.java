@@ -15,10 +15,10 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonObject;
+import com.jidesoft.utils.Base64;
 import java.awt.Image;
 import java.math.BigDecimal;
 import java.util.List;
-import com.jidesoft.utils.Base64;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -178,9 +178,9 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
-      if(imageName == "" || imageString == "") {
+      if (imageName == "" || imageString == "") {
         throw new ParserException(
-                I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else {
         if (imageString.length() > 8) {
           byte[] imageBytes = Base64.decode(imageString);
@@ -192,12 +192,11 @@ public class TokenImage extends AbstractFunction {
             assetId.append(asset.getMD5Key().toString());
             return assetId;
           } else {
-            throw new ParserException(
-                    I18N.getText("dragdrop.unsupportedType", functionName));
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
           }
         } else {
           throw new ParserException(
-                  I18N.getText("macro.function.general.wrongParamType", functionName));
+              I18N.getText("macro.function.general.wrongParamType", functionName));
         }
       }
     }
