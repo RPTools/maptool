@@ -25,13 +25,13 @@ import java.util.regex.PatternSyntaxException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.exceptions.*;
 import net.rptools.maptool.model.CampaignProperties;
+import net.rptools.maptool.model.CellPoint;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.rptools.maptool.model.CellPoint;
 
 /**
  * functions for dealing with token footprint retrieval and modification.

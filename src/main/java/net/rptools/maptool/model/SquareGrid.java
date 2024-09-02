@@ -24,7 +24,6 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -227,15 +226,15 @@ public class SquareGrid extends Grid {
     if (campaignFootprints.containsKey("Square")) {
       return campaignFootprints.get("Square");
     } /*else {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load Square Grid footprints", ioe);
-      }
-      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
-      ModifiedProperties.setGridFootprints("Square", footprintList);
-      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-    }*/
+        try {
+          footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
+        } catch (IOException ioe) {
+          MapTool.showError("Could not load Square Grid footprints", ioe);
+        }
+        CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+        ModifiedProperties.setGridFootprints("Square", footprintList);
+        MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
+      }*/
     return footprintList;
   }
 

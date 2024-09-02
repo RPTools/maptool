@@ -18,7 +18,6 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -68,7 +67,7 @@ public class GridlessGrid extends Grid {
     if (campaignFootprints.containsKey("None")) {
       return campaignFootprints.get("None");
     }
-      /*else {
+    /*else {
       try {
         footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
       } catch (IOException ioe) {

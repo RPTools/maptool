@@ -21,7 +21,6 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -177,17 +176,17 @@ public class HexGridVertical extends HexGrid {
     if (campaignFootprints.containsKey("Vertical Hex")) {
       return campaignFootprints.get("Vertical Hex");
     } /*else {
-      try {
-        footprintList =
-            loadFootprints(
-                "net/rptools/maptool/model/hexGridVertFootprints.xml", getOffsetTranslator());
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load VHex Grid footprints", ioe);
-      }
-      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
-      ModifiedProperties.setGridFootprints("Vertical Hex", footprintList);
-      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-    }*/
+        try {
+          footprintList =
+              loadFootprints(
+                  "net/rptools/maptool/model/hexGridVertFootprints.xml", getOffsetTranslator());
+        } catch (IOException ioe) {
+          MapTool.showError("Could not load VHex Grid footprints", ioe);
+        }
+        CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+        ModifiedProperties.setGridFootprints("Vertical Hex", footprintList);
+        MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
+      }*/
     return footprintList;
   }
 

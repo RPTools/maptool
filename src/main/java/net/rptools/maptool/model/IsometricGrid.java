@@ -18,7 +18,6 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -182,16 +181,16 @@ public class IsometricGrid extends Grid {
     if (campaignFootprints.containsKey("Square")) {
       return campaignFootprints.get("Square");
     } /*else {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load Square Grid footprints", ioe);
+        try {
+          footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
+        } catch (IOException ioe) {
+          MapTool.showError("Could not load Square Grid footprints", ioe);
+        }
+        CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
+        ModifiedProperties.setGridFootprints("Square", footprintList);
+        MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
       }
-      CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
-      ModifiedProperties.setGridFootprints("Square", footprintList);
-      MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-    }
-    */
+      */
     return footprintList;
   }
 
