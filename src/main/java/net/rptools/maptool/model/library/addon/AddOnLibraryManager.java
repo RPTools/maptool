@@ -211,27 +211,21 @@ public class AddOnLibraryManager {
                 .collect(Collectors.toSet()));
   }
 
-  /**
-   * Initializes the add-on library manager.
-   *
-   */
+  /** Initializes the add-on library manager. */
   public void init() {
     externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
-    externalAddOnLibraryManager.init();
-
     String path = AppPreferences.getExternalAddOnLibrariesPath();
-    if (path != null && !path.isEmpty()) {
+
+    try {
+      externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
+      externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
+      externalAddOnLibraryManager.init();
+    } catch (IOException e) {
+      MapTool.showError("Error setting external library path", e);
       try {
-        externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
-        externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
-      } catch (IOException e) {
-        MapTool.showError("Error setting external library path", e);
-        try {
-          externalAddOnLibraryManager.setExternalLibraryPath(null);
-          externalAddOnLibraryManager.setEnabled(false);
-        } catch (IOException ex) {
-          // Do nothing.
-        }
+        externalAddOnLibraryManager.setEnabled(false);
+      } catch (IOException ex) {
+        // Do nothing as it shouldn't happen, but if it does there is no action we can take
       }
     }
   }
@@ -273,7 +267,6 @@ public class AddOnLibraryManager {
    * Sets if external add-on libraries are enabled.
    *
    * @param enabled if external add-on libraries are enabled.
-   *
    * @throws IOException if an I/O error occurs.
    */
   public void setExternalLibrariesEnabled(boolean enabled) throws IOException {
@@ -293,7 +286,6 @@ public class AddOnLibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
-   *
    * @throws IOException if an I/O error occurs.
    */
   public void setExternalLibraryPath(Path path) throws IOException {
@@ -304,7 +296,6 @@ public class AddOnLibraryManager {
    * Registers the add-on library as an external library.
    *
    * @param path The path to the library.
-   *
    * @throws IOException if an I/O error occurs.
    */
   public void registerExternalLibrary(Path path) throws IOException {

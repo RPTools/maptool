@@ -379,7 +379,9 @@
                                     <preferred-size width="150" height="-1"/>
                                   </grid>
                                 </constraints>
-                                <properties/>
+                                <properties>
+                                  <editable value="false"/>
+                                </properties>
                               </component>
                               <component id="4e8f9" class="javax.swing.JButton" binding="browseButton">
                                 <constraints>

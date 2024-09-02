@@ -23,7 +23,9 @@ import java.nio.file.Path;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.ReentrantLock;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
 import net.rptools.maptool.model.library.ExternalAddonsUpdateEvent;
@@ -43,10 +45,13 @@ public class ExternalAddOnLibraryManager {
   private final Map<String, ExternalLibraryInfo> namespaceInfoMap = new ConcurrentHashMap<>();
 
   /** Is the external add-on library manager enabled. */
-  private boolean isEnabled = false;
+  private boolean enabled = false;
 
   /** The path to the external add-on libraries. */
   private Path externalLibraryPath = null;
+
+  /** Is the external add-on library manager initialised. */
+  private boolean initialised = false;
 
   /** Directory watcher for watching the external add-on library directory. */
   private DirectoryWatcher directoryWatcher;
@@ -64,8 +69,26 @@ public class ExternalAddOnLibraryManager {
     this.addOnLibraryManager = addOnLibraryManager;
   }
 
-  /** Initializes the external add-on library manager. */
-  public void init() {
+  /**
+   * Initializes the external add-on library manager. It is safe to call {@see
+   * setExternalLibraryPath(Path)} and {@see setEnabled(boolean)} before calling this method, but no
+   * directory watching will occur until this method is called.
+   *
+   * @throws IOException if an error occurs.
+   * @throws IllegalStateException if the external add-on library manager has already been
+   *     initialised.
+   */
+  public void init() throws IOException {
+    try {
+      lock.lock();
+      if (initialised) {
+        throw new IllegalStateException("External add-on library manager already initialised");
+      }
+      initialised = true;
+      startWatching();
+    } finally {
+      lock.unlock();
+    }
     var eventBus = new MapToolEventBus().getMainEventBus();
     eventBus.register(this);
   }
@@ -174,25 +197,25 @@ public class ExternalAddOnLibraryManager {
    * Registers an external add-on library.
    *
    * @param path the path to the add-on library.
-   *
    * @throws IOException if an error occurs.
    */
   public void registerExternalAddOnLibrary(Path path) throws IOException {
-      var lib = new AddOnLibraryImporter().getLibraryInfoFromDirectory(path);
-      if (lib == null) {
-        return;
-      }
-      var info =
-          new ExternalLibraryInfo(
-              lib.namespace(),
-              lib,
-              false,
-              false,
-              path,
-              externalLibraryPath.relativize(path).toString());
-      registerExternalAddOnLibrary(info);
-      var eventBus = new MapToolEventBus().getMainEventBus();
-      eventBus.post(new ExternalAddonsUpdateEvent());
+    var lib = new AddOnLibraryImporter().getLibraryInfoFromDirectory(path);
+    if (lib == null) {
+      return;
+    }
+    boolean isInstalled = addOnLibraryManager.isNamespaceRegistered(lib.namespace());
+    var info =
+        new ExternalLibraryInfo(
+            lib.namespace(),
+            lib,
+            false,
+            isInstalled,
+            path,
+            externalLibraryPath.relativize(path).toString());
+    registerExternalAddOnLibrary(info);
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.post(new ExternalAddonsUpdateEvent());
   }
 
   /**
@@ -212,7 +235,7 @@ public class ExternalAddOnLibraryManager {
   public boolean isEnabled() {
     try {
       lock.lock();
-      return isEnabled;
+      return enabled;
     } finally {
       lock.unlock();
     }
@@ -222,14 +245,13 @@ public class ExternalAddOnLibraryManager {
    * Sets the enabled state of the external add-on library manager.
    *
    * @param enabled the enabled state.
-   *
    * @throws IOException if an error occurs.
    */
   public void setEnabled(boolean enabled) throws IOException {
     try {
       lock.lock();
-      if (isEnabled != enabled) {
-        isEnabled = enabled;
+      if (this.enabled != enabled) {
+        this.enabled = enabled;
         if (enabled) {
           startWatching();
         } else {
@@ -259,7 +281,6 @@ public class ExternalAddOnLibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
-   *
    * @throws IOException if an error occurs.
    */
   public void setExternalLibraryPath(Path path) throws IOException {
@@ -270,7 +291,7 @@ public class ExternalAddOnLibraryManager {
       lock.lock();
       externalLibraryPath = path;
       stopWatching();
-      if (path != null) {
+      if (path != null && enabled) {
         startWatching();
       }
     } finally {
@@ -300,7 +321,7 @@ public class ExternalAddOnLibraryManager {
     try {
       lock.lock();
       refreshAll();
-      if (isEnabled && externalLibraryPath != null && Files.exists(externalLibraryPath)) {
+      if (enabled && externalLibraryPath != null && Files.exists(externalLibraryPath)) {
         if (directoryWatcher != null) {
           directoryWatcher.watchAsync();
         } else {
@@ -319,13 +340,17 @@ public class ExternalAddOnLibraryManager {
    * @throws IOException if an error occurs.
    */
   private void refreshAll() throws IOException {
-    if (externalLibraryPath == null) {
+    if (!initialised || !enabled || externalLibraryPath == null) {
       return;
     }
     File[] directories = externalLibraryPath.toFile().listFiles(File::isDirectory);
     if (directories != null) {
       for (File directory : directories) {
-        registerExternalAddOnLibrary(directory.toPath());
+        try {
+          registerExternalAddOnLibrary(directory.toPath());
+        } catch (IOException e) {
+          MapTool.showError(I18N.getText("library.dialog.read.failed", directory));
+        }
       }
     }
     var eventBus = new MapToolEventBus().getMainEventBus();
@@ -338,7 +363,7 @@ public class ExternalAddOnLibraryManager {
    * @param namespace the namespace of the add-on library to make available.
    */
   public void importLibrary(String namespace) throws IOException {
-    if (isEnabled) {
+    if (enabled) {
       var libInfo = namespaceInfoMap.get(namespace.toLowerCase());
       if (libInfo != null) {
         var lib = new AddOnLibraryImporter().importFromDirectory(libInfo.backingDirectory());
@@ -358,23 +383,31 @@ public class ExternalAddOnLibraryManager {
         .path(externalLibraryPath)
         .listener(
             event -> {
-              int basePathNameCount = externalLibraryPath.getNameCount();
-              var path = event.path();
-              if (path.getNameCount() <= basePathNameCount) {
-                return;
-              }
-              if (!path.startsWith(externalLibraryPath)) {
-                return;
-              }
-              path = externalLibraryPath.resolve(path.getName(basePathNameCount));
-              switch (event.eventType()) {
-                case CREATE -> registerExternalAddOnLibrary(path);
-                case DELETE -> deregisterExternalAddOnLibrary(path);
-                case MODIFY -> refreshExternalAddOnLibrary(path);
+              try {
+                int basePathNameCount = externalLibraryPath.getNameCount();
+                var path = event.path();
+                if (path.getNameCount() <= basePathNameCount) {
+                  return;
+                }
+                if (!path.startsWith(externalLibraryPath)) {
+                  return;
+                }
+                path = externalLibraryPath.resolve(path.getName(basePathNameCount));
+                switch (event.eventType()) {
+                  case CREATE -> registerExternalAddOnLibrary(path);
+                  case DELETE -> {
+                    if (path.toFile().exists()) {
+                      refreshExternalAddOnLibrary(path);
+                    } else {
+                      deregisterExternalAddOnLibrary(path);
+                    }
+                  }
+                  case MODIFY -> refreshExternalAddOnLibrary(path);
+                }
+              } catch (IOException e) {
+                MapTool.showError(I18N.getText("library.dialog.read.failed", event.path()));
               }
             })
         .build();
   }
 }
-
-// TODO: CDW dont crash on invalid library file

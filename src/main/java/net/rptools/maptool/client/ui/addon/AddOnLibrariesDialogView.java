@@ -40,6 +40,7 @@ import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -234,8 +235,12 @@ public class AddOnLibrariesDialogView extends JDialog {
         e -> {
           setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
           directoryTextField.setEnabled(enableExternalAddOnCheckBox.isSelected());
-          new LibraryManager()
-              .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
+          try {
+            new LibraryManager()
+                .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
+          } catch (IOException ex) {
+            // do nothing
+          }
           AppPreferences.setExternalLibraryManagerEnabled(enableExternalAddOnCheckBox.isSelected());
         });
 
@@ -270,15 +275,10 @@ public class AddOnLibrariesDialogView extends JDialog {
   }
 
   private void createAddonSkeleton() {
-    // TODO: CDW - Implement
-    /*
-    LibraryManager library = new LibraryManager();
-    try {
-      library.registerExternalAddOnLibrary(
-          new AddOnLibraryImporter().importFromDirectory(Path.of(directoryTextField.getText())));
-    } catch (IOException e) {
-      MapTool.showError("library.import.ioError", e);
-    }**/
+    var dialog = new CreateNewAddonDialog();
+    dialog.pack();
+    SwingUtil.centerOver(dialog, MapTool.getFrame());
+    dialog.setVisible(true);
   }
 
   /**

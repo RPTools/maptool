@@ -73,8 +73,8 @@ public class LibraryManager {
       new AddOnSlashCommandManager();
 
   /**
-   * Initializes the library manager. This method should be called after
-   * instantiation of the library manager.
+   * Initializes the library manager. This method should be called after instantiation of the
+   * library manager.
    */
   public static void init() {
     libraryTokenManager.init();
@@ -106,7 +106,7 @@ public class LibraryManager {
    *
    * @param enabled if external add-on libraries are enabled.
    */
-  public void setExternalLibrariesEnabled(boolean enabled) {
+  public void setExternalLibrariesEnabled(boolean enabled) throws IOException {
     addOnLibraryManager.setExternalLibrariesEnabled(enabled);
   }
 
@@ -123,7 +123,6 @@ public class LibraryManager {
    * Sets the path to the external add-on libraries.
    *
    * @param path the path to the external add-on libraries.
-   *
    * @throws IOException if an error occurs while setting the path.
    */
   public void setExternalLibraryPath(Path path) throws IOException {
@@ -264,7 +263,6 @@ public class LibraryManager {
    * MapTool. To make the add-on available to MapTool, use {@link #importFromExternal(String)}
    *
    * @param path The path of the add-on to register.
-   *
    * @throws IOException if an error occurs while registering the add-on.
    */
   public void registerExternalAddOnLibrary(Path path) throws IOException {

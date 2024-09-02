@@ -20,6 +20,7 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellEditor;
 import javax.swing.table.TableCellRenderer;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
@@ -36,7 +37,8 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
           try {
             new LibraryManager().importFromExternal(info.libraryInfo().namespace());
           } catch (IOException ex) {
-            throw new RuntimeException(ex); // TODO: CDW
+            MapTool.showError(
+                I18N.getText("library.dialog.import.failed", info.libraryInfo().namespace()));
           }
           stopCellEditing();
         });

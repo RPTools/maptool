@@ -153,6 +153,9 @@ public class AppPreferences {
   /** Represents the key used to retrieve the number of minutes between auto saves. */
   private static final String KEY_AUTO_SAVE_INCREMENT = "autoSaveIncrement";
 
+  /** Represents the key used to retrieve the parent directory used when creating new add-ons. */
+  private static final String KEY_CREATE_ADD_ON_PARENT_DIR = "createAddOnParentDir";
+
   /**
    * The default value for the {@code KEY_AUTO_SAVE_INCREMENT} preference option.
    *
@@ -2008,5 +2011,23 @@ public class AppPreferences {
    */
   public static void setExternalAddOnLibrariesPath(String path) {
     prefs.put(KEY_EXTERNAL_ADD_ON_LIBRARIES_PATH, path);
+  }
+
+  /**
+   * Returns the value of the preference used for the parent directory of the add-on creation
+   *
+   * @return the parent directory of the add-on creation
+   */
+  public static String getCreateAddOnParentDir() {
+    return prefs.get(KEY_CREATE_ADD_ON_PARENT_DIR, "");
+  }
+
+  /**
+   * Sets the parent directory of the add-on creation
+   *
+   * @param path the parent directory of the add-on creation
+   */
+  public static void setCreateAddOnParentDir(String path) {
+    prefs.put(KEY_CREATE_ADD_ON_PARENT_DIR, path);
   }
 }
