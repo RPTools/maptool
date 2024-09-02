@@ -67,7 +67,8 @@ public class GridlessGrid extends Grid {
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (campaignFootprints.containsKey("None")) {
       return campaignFootprints.get("None");
-    } else {
+    }
+      /*else {
       try {
         footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
       } catch (IOException ioe) {
@@ -77,6 +78,7 @@ public class GridlessGrid extends Grid {
       ModifiedProperties.setGridFootprints("None", footprintList);
       MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
     }
+      */
     return footprintList;
   }
 

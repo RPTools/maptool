@@ -12,7 +12,7 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package main.java.net.rptools.maptool.client.functions;
+package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -31,6 +31,7 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import net.rptools.maptool.model.CellPoint;
 
 /**
  * functions for dealing with token footprint retrieval and modification.
@@ -205,7 +206,7 @@ public class FootprintFunctions extends AbstractFunction {
       for (var entry : campaignFootprints.entrySet()) {
         JsonObject footprintListJSON = new JsonObject();
         for (TokenFootprint f : entry.getValue()) {
-          footprintListJSON.add(f.getName(), f.toJson());
+          footprintListJSON.add(f.getName(), FootprintToJsonObject(f));
         }
         asJSON.add(entry.getKey(), footprintListJSON);
       }
@@ -220,7 +221,7 @@ public class FootprintFunctions extends AbstractFunction {
       JsonObject asJSON = new JsonObject();
       for (int i = 0; i < allFootprints.length; i++) {
         TokenFootprint footprint = (TokenFootprint) allFootprints[i];
-        asJSON.add(footprint.getName(), footprint.toJson());
+        asJSON.add(footprint.getName(), FootprintToJsonObject(footprint));
       }
       return asJSON.toString();
     } else {
@@ -229,7 +230,7 @@ public class FootprintFunctions extends AbstractFunction {
         if (!Objects.equals(footprint.getName(), footprintName)) {
           continue;
         }
-        return footprint.toJson().toString();
+        return FootprintToJsonObject(footprint).toString();
       }
       return "null";
     }
@@ -248,6 +249,9 @@ public class FootprintFunctions extends AbstractFunction {
     if (data.has("localizedName")) {
       newPrint.setLocalizedName(data.get("localizedName").getAsString());
     }
+    if (data.has("isDefault")) {
+      newPrint.setDefault(data.get("isDefault").getAsBoolean());
+    }
     CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
     ModifiedProperties.setGridFootprint(name, gridtype, newPrint);
     MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
@@ -265,5 +269,24 @@ public class FootprintFunctions extends AbstractFunction {
     CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
     ModifiedProperties.resetTokenFootprints();
     MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
+  }
+
+  public JsonObject FootprintToJsonObject(TokenFootprint footprint) {
+    JsonObject jsonRep = new JsonObject();
+    JsonArray occupiedString = new JsonArray();
+    var cellArray = footprint.getOccupiedCells(new CellPoint(0, 0)).toArray();
+    for (int j = 0; j < cellArray.length; j++) {
+      CellPoint currentCell = (CellPoint) cellArray[j];
+      JsonObject jsonPoint = new JsonObject();
+      jsonPoint.addProperty("x", currentCell.x);
+      jsonPoint.addProperty("y", currentCell.y);
+      occupiedString.add(jsonPoint);
+    }
+    jsonRep.addProperty("name", footprint.getName());
+    jsonRep.add("cells", occupiedString);
+    jsonRep.addProperty("scale", footprint.getScale());
+    jsonRep.addProperty("localizedName", footprint.getLocalizedName());
+    jsonRep.addProperty("isDefault", footprint.isDefault());
+    return jsonRep;
   }
 }

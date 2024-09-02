@@ -19,7 +19,6 @@ import com.google.common.cache.CacheBuilder;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-import main.java.net.rptools.maptool.client.functions.FootprintFunctions; // why
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;

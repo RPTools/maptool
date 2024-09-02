@@ -137,6 +137,7 @@ public abstract class Grid implements Cloneable {
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
 
+  /*
   protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
       throws IOException {
     Object obj = FileUtil.objFromResource(path);
@@ -149,6 +150,7 @@ public abstract class Grid implements Cloneable {
     }
     return footprintList;
   }
+  */
 
   public TokenFootprint getDefaultFootprint() {
     for (TokenFootprint footprint : getFootprints()) {

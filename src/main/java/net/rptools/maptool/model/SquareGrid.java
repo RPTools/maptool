@@ -226,7 +226,7 @@ public class SquareGrid extends Grid {
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (campaignFootprints.containsKey("Square")) {
       return campaignFootprints.get("Square");
-    } else {
+    } /*else {
       try {
         footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
       } catch (IOException ioe) {
@@ -235,7 +235,7 @@ public class SquareGrid extends Grid {
       CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
       ModifiedProperties.setGridFootprints("Square", footprintList);
       MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-    }
+    }*/
     return footprintList;
   }
 

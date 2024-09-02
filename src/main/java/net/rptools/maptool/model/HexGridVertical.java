@@ -176,7 +176,7 @@ public class HexGridVertical extends HexGrid {
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (campaignFootprints.containsKey("Vertical Hex")) {
       return campaignFootprints.get("Vertical Hex");
-    } else {
+    } /*else {
       try {
         footprintList =
             loadFootprints(
@@ -187,7 +187,7 @@ public class HexGridVertical extends HexGrid {
       CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
       ModifiedProperties.setGridFootprints("Vertical Hex", footprintList);
       MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-    }
+    }*/
     return footprintList;
   }
 

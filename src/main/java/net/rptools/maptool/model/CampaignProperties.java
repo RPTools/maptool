@@ -140,7 +140,8 @@ public class CampaignProperties {
     }
     defaultTokenPropertyType = properties.defaultTokenPropertyType;
     if (properties.gridFootprints != null) {
-      gridFootprints = properties.gridFootprints;
+      gridFootprints.clear();
+      gridFootprints.putAll(properties.gridFootprints);
     }
   }
 
@@ -164,7 +165,7 @@ public class CampaignProperties {
     if (properties.gridFootprints != null) {
       properties.gridFootprints.putAll(gridFootprints);
     } else {
-      properties.gridFootprints = gridFootprints;
+      properties.gridFootprints = new HashMap<>(gridFootprints);
     }
   }
 
@@ -356,7 +357,6 @@ public class CampaignProperties {
     tokenTypeMap.put(getDefaultTokenPropertyType(), list);
   }
 
-  // Undesired reimplementation from Grid.java
   protected List<TokenFootprint> loadFootprints(
       String path, net.rptools.maptool.model.TokenFootprint.OffsetTranslator... translators) {
     List<TokenFootprint> result = null;

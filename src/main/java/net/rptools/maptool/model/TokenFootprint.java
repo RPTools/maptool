@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
@@ -83,39 +81,23 @@ public class TokenFootprint {
     return getLocalizedName();
   }
 
-  public JsonObject toJson() {
-    JsonObject jsonRep = new JsonObject();
-    JsonArray occupiedString = new JsonArray();
-    var cellArray = getOccupiedCells(new CellPoint(0, 0)).toArray();
-    for (int j = 0; j < cellArray.length; j++) {
-      CellPoint currentCell = (CellPoint) cellArray[j];
-      JsonObject jsonPoint = new JsonObject();
-      jsonPoint.addProperty("x", currentCell.x);
-      jsonPoint.addProperty("y", currentCell.y);
-      occupiedString.add(jsonPoint);
-    }
-    jsonRep.addProperty("name", name);
-    jsonRep.add("cells", occupiedString);
-    jsonRep.addProperty("scale", scale);
-    jsonRep.addProperty("localizedName", localizedName);
-    return jsonRep;
-  }
-
   public void addOffsetTranslator(OffsetTranslator translator) {
     translatorList.add(translator);
   }
 
-  public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
+  /* TokenFootprint is a list of cells relative to the (0,0)
+  This function returns the actual points when the (0,0) of the footprint is located at the reference point.
+  For Square Grids, the reference point is at the top left
+  For Hex Grids, the reference point is at the centre
+   */
+  public Set<CellPoint> getOccupiedCells(CellPoint referencePoint) {
     Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
-
-    // not implied any more, explicitly part of footprint data
-    // occupiedSet.add(centerPoint);
 
     // Relative
     for (Point offset : cellSet) {
-      CellPoint cp = new CellPoint(centerPoint.x + offset.x, centerPoint.y + offset.y);
+      CellPoint cp = new CellPoint(referencePoint.x + offset.x, referencePoint.y + offset.y);
       for (OffsetTranslator translator : translatorList) {
-        translator.translate(centerPoint, cp);
+        translator.translate(referencePoint, cp);
       }
       occupiedSet.add(cp);
     }
