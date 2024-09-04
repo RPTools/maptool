@@ -122,10 +122,10 @@ public class NewAddOnBuilder {
   }
 
   private String getReadMe() {
-    return I18N.getText("library.dialog.readme.default");
+    return I18N.getText("library.dialog.addon.create.readeMe");
   }
 
   private String getLicenseText() {
-    return I18N.getText("library.dialog.license.default");
+    return I18N.getText("library.dialog.addon.create.licenseText");
   }
 }
