@@ -59,7 +59,9 @@ public class TokenFootprint {
     footPrint.id = GUID.valueOf(dto.getId());
     footPrint.isDefault = dto.getIsDefault();
     footPrint.scale = dto.getScale();
-    footPrint.localizedName = dto.getLocalizedName();
+    if (!dto.getLocalizedName().equals("")) {
+      footPrint.localizedName = dto.getLocalizedName();
+    }
     return footPrint;
   }
 
@@ -127,13 +129,20 @@ public class TokenFootprint {
 
   /** Returns the localized name of the footprint */
   public String getLocalizedName() {
+    return getLocalizedName(false);
+  }
+
+  public String getLocalizedName(boolean actual) {
     if (localizeName && localizedName == null) {
       localizedName = I18N.getString("TokenFootprint.name." + name.toLowerCase());
       return localizedName;
     } else if (localizedName != null) {
       return localizedName;
+    } else if (!actual) {
+      return name;
+    } else {
+      return localizedName;
     }
-    return name;
   }
 
   public void setLocalizedName(String text) {

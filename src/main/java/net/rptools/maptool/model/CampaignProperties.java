@@ -45,6 +45,7 @@ import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.server.proto.FootprintListDto;
 import net.rptools.maptool.server.proto.LightSourceListDto;
 import net.rptools.maptool.server.proto.TokenPropertyListDto;
+import net.rptools.maptool.tool.TokenFootprintCreator;
 
 public class CampaignProperties {
 
@@ -357,25 +358,6 @@ public class CampaignProperties {
     tokenTypeMap.put(getDefaultTokenPropertyType(), list);
   }
 
-  protected List<TokenFootprint> loadFootprints(
-      String path, net.rptools.maptool.model.TokenFootprint.OffsetTranslator... translators) {
-    List<TokenFootprint> result = null;
-    try {
-      Object obj = net.rptools.lib.FileUtil.objFromResource(path);
-      @SuppressWarnings("unchecked")
-      List<TokenFootprint> footprintList = (List<TokenFootprint>) obj;
-      for (TokenFootprint footprint : footprintList) {
-        for (net.rptools.maptool.model.TokenFootprint.OffsetTranslator ot : translators) {
-          footprint.addOffsetTranslator(ot);
-        }
-      }
-      result = footprintList;
-    } catch (IOException ioe) {
-      MapTool.showError("Could not load VHex Grid footprints", ioe);
-    }
-    return result;
-  }
-
   public void resetTokenFootprints() {
     initTokenFootprints(true);
   }
@@ -392,28 +374,10 @@ public class CampaignProperties {
     }
     // Potential for importing defaults from app preferences instead.
 
-    setGridFootprints(
-        "Horizontal Hex",
-        loadFootprints(
-            "net/rptools/maptool/model/hexGridHorizFootprints.xml",
-            (originPoint, offsetPoint) -> {
-              if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
-                offsetPoint.x++;
-              }
-            }));
-    setGridFootprints(
-        "Vertical Hex",
-        loadFootprints(
-            "net/rptools/maptool/model/hexGridVertFootprints.xml",
-            (originPoint, offsetPoint) -> {
-              if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
-                offsetPoint.y++;
-              }
-            }));
-    setGridFootprints(
-        "None", loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml"));
-    setGridFootprints(
-        "Square", loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml"));
+    setGridFootprints("Horizontal Hex", TokenFootprintCreator.makeHorizHex());
+    setGridFootprints("Vertical Hex", TokenFootprintCreator.makeVertHex());
+    setGridFootprints("None", TokenFootprintCreator.makeGridless());
+    setGridFootprints("Square", TokenFootprintCreator.makeSquare());
   }
 
   private void initTokenStatesMap() {
@@ -547,6 +511,7 @@ public class CampaignProperties {
         String testName = allFootprints.get(i).getName();
         if (Objects.equals(testName, footprintName)) {
           allFootprints.set(i, newPrint);
+          setGridFootprints(gridType, allFootprints);
           return;
         }
       }

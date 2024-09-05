@@ -285,7 +285,7 @@ public class FootprintFunctions extends AbstractFunction {
     jsonRep.addProperty("name", footprint.getName());
     jsonRep.add("cells", occupiedString);
     jsonRep.addProperty("scale", footprint.getScale());
-    jsonRep.addProperty("localizedName", footprint.getLocalizedName());
+    jsonRep.addProperty("localizedName", footprint.getLocalizedName(true));
     jsonRep.addProperty("isDefault", footprint.isDefault());
     return jsonRep;
   }

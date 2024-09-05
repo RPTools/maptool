@@ -14,24 +14,22 @@
  */
 package net.rptools.maptool.tool;
 
-import com.thoughtworks.xstream.XStream;
 import java.awt.Point;
 import java.util.Arrays;
 import java.util.List;
-import net.rptools.lib.FileUtil;
 import net.rptools.maptool.model.TokenFootprint;
 
 public class TokenFootprintCreator {
   public static void main(String[] args) {
     // List<TokenFootprint> footprintList = makeHorizHex();
-    List<TokenFootprint> footprintList = makeVertHex();
+    // List<TokenFootprint> footprintList = makeVertHex();
     // List<TokenFootprint> footprintList = makeSquare();
     // List<TokenFootprint> footprintList = makeGridless();
-    XStream xstream = FileUtil.getConfiguredXStream();
-    System.out.println(xstream.toXML(footprintList));
+    // XStream xstream = FileUtil.getConfiguredXStream();
+    // System.out.println(xstream.toXML(footprintList));
   }
 
-  private static Point[] points(int[][] points) {
+  public static Point[] points(int[][] points) {
     Point[] pa = new Point[points.length];
     for (int i = 0; i < points.length; i++) {
       pa[i] = new Point(points[i][0], points[i][1]);
@@ -39,15 +37,12 @@ public class TokenFootprintCreator {
     return pa;
   }
 
-  private static Point[] squarePoints(int size) {
-    Point[] pa = new Point[size * size - 1];
+  public static Point[] squarePoints(int size) {
+    Point[] pa = new Point[size * size];
 
     int indx = 0;
     for (int y = 0; y < size; y++) {
       for (int x = 0; x < size; x++) {
-        if (y == 0 && x == 0) {
-          continue;
-        }
         pa[indx] = new Point(x, y);
         indx++;
       }
@@ -55,11 +50,15 @@ public class TokenFootprintCreator {
     return pa;
   }
 
-  private static List<TokenFootprint> makeSquare() {
+  public static List<TokenFootprint> makeSquare() {
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // SQUARE
-            new TokenFootprint("Medium", true, 1.0),
+            new TokenFootprint("Diminutive", false, 0.5, squarePoints(1)),
+            new TokenFootprint("Fine", false, 0.5, squarePoints(1)),
+            new TokenFootprint("Tiny", false, 0.5, squarePoints(1)),
+            new TokenFootprint("Small", false, 0.75, squarePoints(1)),
+            new TokenFootprint("Medium", true, 1.0, squarePoints(1)),
             new TokenFootprint("Large", squarePoints(2)),
             new TokenFootprint("Huge", squarePoints(3)),
             new TokenFootprint("Gargantuan", squarePoints(4)),
@@ -67,81 +66,57 @@ public class TokenFootprintCreator {
     return footprintList;
   }
 
-  private static List<TokenFootprint> makeVertHex() {
+  public static List<TokenFootprint> makeVertHex() {
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // HEXES
-            new TokenFootprint("1/6", false, .408),
-            new TokenFootprint("1/4", false, .500),
-            new TokenFootprint("1/3", false, .577),
-            new TokenFootprint("1/2", false, .707),
-            new TokenFootprint("2/3", false, .816),
-            new TokenFootprint("Medium", true, 1.0),
+            new TokenFootprint("1/6", false, .408, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/4", false, .500, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/3", false, .577, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
+            new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
+            new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
             new TokenFootprint(
                 "Large",
                 points(
                     new int[][] {
-                      {0, 1},
-                      {1, 0},
+                      {0, 0}, {0, 1}, {1, 0},
                     })),
             new TokenFootprint(
                 "Huge",
-                points(
-                    new int[][] {
-                      {-1, -1},
-                      {-1, 0},
-                      {0, -1},
-                      {0, 1},
-                      {1, -1},
-                      {1, 0}
-                    })),
+                points(new int[][] {{0, 0}, {-1, -1}, {-1, 0}, {0, -1}, {0, 1}, {1, -1}, {1, 0}})),
             new TokenFootprint(
                 "Humongous",
                 points(
                     new int[][] {
-                      {-2, -1},
-                      {-2, 0},
-                      {-2, 1},
-                      {-1, -2},
-                      {-1, -1},
-                      {-1, 0},
-                      {-1, 1},
-                      {0, -2},
-                      {0, -1},
-                      {0, 1},
-                      {0, 2},
-                      {1, -2},
-                      {1, -1},
-                      {1, 0},
-                      {1, 1},
-                      {2, -1},
-                      {2, 0},
-                      {2, 1}
+                      {0, 0}, {-2, -1}, {-2, 0}, {-2, 1}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1},
+                      {0, -2}, {0, -1}, {0, 1}, {0, 2}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {2, -1},
+                      {2, 0}, {2, 1}
                     })));
     return footprintList;
   }
 
-  private static List<TokenFootprint> makeHorizHex() {
+  public static List<TokenFootprint> makeHorizHex() {
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // Horizontal Hex Grid - Flipped x <> y from Vert grid
-            new TokenFootprint("1/6", false, .408),
-            new TokenFootprint("1/4", false, .500),
-            new TokenFootprint("1/3", false, .577),
-            new TokenFootprint("1/2", false, .707),
-            new TokenFootprint("2/3", false, .816),
-            new TokenFootprint("Medium", true, 1.0),
+            new TokenFootprint("1/6", false, .408, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/4", false, .500, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/3", false, .577, points(new int[][] {{0, 0}})),
+            new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
+            new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
+            new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
             new TokenFootprint(
                 "Large",
                 points(
                     new int[][] {
-                      {1, 0},
-                      {0, 1},
+                      {0, 0}, {1, 0}, {0, 1},
                     })),
             new TokenFootprint(
                 "Huge",
                 points(
                     new int[][] {
+                      {0, 0},
                       {0, 1},
                       {1, 0},
                       {-1, 0},
@@ -153,29 +128,14 @@ public class TokenFootprintCreator {
                 "Humongous",
                 points(
                     new int[][] {
-                      {-1, -2},
-                      {0, -2},
-                      {1, -2},
-                      {-2, -1},
-                      {-1, -1},
-                      {0, -1},
-                      {1, -1},
-                      {-2, 0},
-                      {-1, 0},
-                      {1, 0},
-                      {2, 0},
-                      {-2, 1},
-                      {-1, 1},
-                      {0, 1},
-                      {1, 1},
-                      {-1, 2},
-                      {0, 2},
-                      {1, 2}
+                      {0, 0}, {-1, -2}, {0, -2}, {1, -2}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1},
+                      {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}, {-1, 2},
+                      {0, 2}, {1, 2}
                     })));
     return footprintList;
   }
 
-  private static List<TokenFootprint> makeGridless() {
+  public static List<TokenFootprint> makeGridless() {
     List<TokenFootprint> footprintList =
         Arrays.asList(
             new TokenFootprint("-11", false, 0.086),
