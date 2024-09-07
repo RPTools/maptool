@@ -134,21 +134,6 @@ public abstract class Grid implements Cloneable {
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
 
-  /*
-  protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
-      throws IOException {
-    Object obj = FileUtil.objFromResource(path);
-    @SuppressWarnings("unchecked")
-    List<TokenFootprint> footprintList = (List<TokenFootprint>) obj;
-    for (TokenFootprint footprint : footprintList) {
-      for (OffsetTranslator ot : translators) {
-        footprint.addOffsetTranslator(ot);
-      }
-    }
-    return footprintList;
-  }
-  */
-
   public TokenFootprint getDefaultFootprint() {
     for (TokenFootprint footprint : getFootprints()) {
       if (footprint.isDefault()) {

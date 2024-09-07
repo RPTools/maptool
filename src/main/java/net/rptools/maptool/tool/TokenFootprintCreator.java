@@ -20,14 +20,7 @@ import java.util.List;
 import net.rptools.maptool.model.TokenFootprint;
 
 public class TokenFootprintCreator {
-  public static void main(String[] args) {
-    // List<TokenFootprint> footprintList = makeHorizHex();
-    // List<TokenFootprint> footprintList = makeVertHex();
-    // List<TokenFootprint> footprintList = makeSquare();
-    // List<TokenFootprint> footprintList = makeGridless();
-    // XStream xstream = FileUtil.getConfiguredXStream();
-    // System.out.println(xstream.toXML(footprintList));
-  }
+  public static void main(String[] args) {}
 
   public static Point[] points(int[][] points) {
     Point[] pa = new Point[points.length];
@@ -76,12 +69,7 @@ public class TokenFootprintCreator {
             new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
             new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
             new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
-            new TokenFootprint(
-                "Large",
-                points(
-                    new int[][] {
-                      {0, 0}, {0, 1}, {1, 0},
-                    })),
+            new TokenFootprint("Large", points(new int[][] {{0, 0}, {0, 1}, {1, 0}})),
             new TokenFootprint(
                 "Huge",
                 points(new int[][] {{0, 0}, {-1, -1}, {-1, 0}, {0, -1}, {0, 1}, {1, -1}, {1, 0}})),
@@ -106,12 +94,7 @@ public class TokenFootprintCreator {
             new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
             new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
             new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
-            new TokenFootprint(
-                "Large",
-                points(
-                    new int[][] {
-                      {0, 0}, {1, 0}, {0, 1},
-                    })),
+            new TokenFootprint("Large", points(new int[][] {{0, 0}, {1, 0}, {0, 1}})),
             new TokenFootprint(
                 "Huge",
                 points(

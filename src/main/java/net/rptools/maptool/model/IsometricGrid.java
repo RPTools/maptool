@@ -18,6 +18,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -47,7 +48,6 @@ public class IsometricGrid extends Grid {
 
   private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
   private static int[] FACING_ANGLES;
-  private static List<TokenFootprint> footprintList;
   private static BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
 
@@ -180,18 +180,8 @@ public class IsometricGrid extends Grid {
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (campaignFootprints.containsKey("Square")) {
       return campaignFootprints.get("Square");
-    } /*else {
-        try {
-          footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-        } catch (IOException ioe) {
-          MapTool.showError("Could not load Square Grid footprints", ioe);
-        }
-        CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
-        ModifiedProperties.setGridFootprints("Square", footprintList);
-        MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-      }
-      */
-    return footprintList;
+    }
+    return new ArrayList<>();
   }
 
   @Override

@@ -22,6 +22,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -188,20 +189,8 @@ public class HexGridHorizontal extends HexGrid {
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
     if (campaignFootprints.containsKey("Horizontal Hex")) {
       return campaignFootprints.get("Horizontal Hex");
-    } /*else {
-        try {
-          footprintList =
-              loadFootprints(
-                  "net/rptools/maptool/model/hexGridHorizFootprints.xml", getOffsetTranslator());
-        } catch (IOException ioe) {
-          MapTool.showError("Could not load HHex Grid footprints", ioe);
-        }
-        CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
-        ModifiedProperties.setGridFootprints("Horizontal Hex", footprintList);
-        MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);
-      }
-      */
-    return footprintList;
+    }
+    return new ArrayList<>();
   }
 
   @Override
