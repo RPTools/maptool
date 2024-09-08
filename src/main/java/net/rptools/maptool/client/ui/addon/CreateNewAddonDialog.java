@@ -20,6 +20,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,6 +37,7 @@ import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.addon.creator.NewAddOnBuilder;
+import net.rptools.maptool.client.ui.addon.creator.NewAddOnCreator;
 import net.rptools.maptool.language.I18N;
 
 public class CreateNewAddonDialog extends JDialog {
@@ -195,6 +197,16 @@ public class CreateNewAddonDialog extends JDialog {
             .setCreateMTSProperties(mtsPropCheckBox.isSelected())
             .build();
     dispose();
+    if (!dir.mkdirs()) {
+      JOptionPane.showMessageDialog(
+          this, I18N.getText("library.dialog.failedToCreateDir", dir.toString()));
+      return;
+    }
+    try {
+      new NewAddOnCreator(newAddon).create(dir.toPath());
+    } catch (IOException e) {
+      JOptionPane.showMessageDialog(this, e.getMessage());
+    }
   }
 
   private void onCancel() {

@@ -68,10 +68,10 @@ import org.javatuples.Pair;
 public class AddOnLibrary implements Library {
 
   /** The name of the event for first time initialization. */
-  private static final String FIRST_INIT_EVENT = "onFirstInit";
+  public static final String FIRST_INIT_EVENT = "onFirstInit";
 
   /** The name of the event for initialization. */
-  private static final String INIT_EVENT = "onInit";
+  public static final String INIT_EVENT = "onInit";
 
   /** The prefix for the name of the JavaScript context for this addon. */
   private static final String JS_CONTEXT_PREFIX = "addon:";
@@ -80,13 +80,13 @@ public class AddOnLibrary implements Library {
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
 
   /** The directory where the files exposed URI are stored. */
-  private static final String URL_PUBLIC_DIR = "public/";
+  public static final String URL_PUBLIC_DIR = "public/";
 
   /** The directory where MT MacroScripts are stored. */
-  private static final String MTSCRIPT_DIR = "mtscript/";
+  public static final String MTSCRIPT_DIR = "mtscript/";
 
   /** The directory where public MT MacroScripts are stored. */
-  private static final String MTSCRIPT_PUBLIC_DIR = "public/";
+  public static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
   /** Logger instance for this class. */
   private static final Logger logger = LogManager.getLogger(AddOnLibrary.class);
