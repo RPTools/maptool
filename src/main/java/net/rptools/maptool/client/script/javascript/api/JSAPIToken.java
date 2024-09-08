@@ -22,6 +22,7 @@ import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
@@ -124,9 +125,31 @@ public class JSAPIToken implements MapToolJSAPIInterface {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
-      return "" + this.token.getProperty(name);
+      Object val = this.token.getProperty(name);
+      // Fall back to the property type's default value
+      // since it's not useful to return nulls and require
+      // javascript to have to handle defaults when getInfo isn't even bound,
+      // especially when the value gets unset if it matches the default.
+      if (val == null) {
+        List<TokenProperty> propertyList =
+            MapTool.getCampaign()
+                .getCampaignProperties()
+                .getTokenPropertyList(this.token.getPropertyType());
+        if (propertyList != null) {
+          for (TokenProperty property : propertyList) {
+            if (name.equalsIgnoreCase(property.getName())) {
+              val = property.getDefaultValue();
+              break;
+            }
+          }
+        }
+      }
+      if (val == null) {
+        return null;
+      }
+      return "" + val;
     }
-    return "";
+    return null;
   }
 
   @HostAccess.Export
