@@ -23,7 +23,9 @@ import java.math.BigInteger;
 import java.math.RoundingMode;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.rptools.maptool.client.AppUtil;
@@ -214,25 +216,27 @@ public class FileUtil {
    *     children.
    */
   public static Stream<Path> listRecursively(Path dir) throws IOException {
-    var list = Files.list(dir).collect(Collectors.toSet());
-    try {
-      return Stream.concat(
-          list.stream(),
-          list.stream()
-              .flatMap(
-                  p -> {
-                    if (Files.isDirectory(p))
-                      try {
-                        return listRecursively(p).map(p::resolve);
-                      } catch (IOException e) {
-                        throw new RuntimeException(e);
-                      }
-                    return null;
-                  })
-              .filter(Objects::nonNull));
-    } catch (RuntimeException e) {
-      // This is to bypass an uncaught exception in the above lambda that calls in place.
-      throw (IOException) e.getCause();
+    try (var pathStream = Files.list(dir)) {
+      var list = pathStream.collect(Collectors.toSet());
+      try {
+        return Stream.concat(
+            list.stream(),
+            list.stream()
+                .flatMap(
+                    p -> {
+                      if (Files.isDirectory(p))
+                        try {
+                          return listRecursively(p).map(p::resolve);
+                        } catch (IOException e) {
+                          throw new RuntimeException(e);
+                        }
+                      return null;
+                    })
+                .filter(Objects::nonNull));
+      } catch (RuntimeException e) {
+        // This is to bypass an uncaught exception in the above lambda that calls in place.
+        throw (IOException) e.getCause();
+      }
     }
   }
 }

@@ -22,6 +22,9 @@ import net.rptools.maptool.model.library.ExternalAddonsUpdateEvent;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
+/**
+ * The ExternalAddOnLibrariesTableModel class is a table model for the external add-on libraries.
+ */
 public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
 
   @Override

@@ -25,12 +25,19 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
+/**
+ * Cell editor for the import button in the external add-on dialog.
+ */
 public class ExternalAddOnImportCellEditor extends AbstractCellEditor
     implements TableCellEditor, TableCellRenderer {
 
+  /** The button that is displayed in the cell. */
   private final JButton button = new JButton();
+
+  /** The external library info for the currently displayed row. */
   private ExternalLibraryInfo info;
 
+  /** Creates a new cell editor. */
   public ExternalAddOnImportCellEditor() {
     button.addActionListener(
         e -> {
@@ -61,6 +68,7 @@ public class ExternalAddOnImportCellEditor extends AbstractCellEditor
     return getButton(table, value, isSelected, hasFocus, row, column);
   }
 
+  /** Returns the button component for the given cell. */
   private Component getButton(
       JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
     button.setEnabled(true);

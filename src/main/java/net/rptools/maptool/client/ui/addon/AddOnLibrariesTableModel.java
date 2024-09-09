@@ -27,19 +27,32 @@ import net.rptools.maptool.model.library.LibraryType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+/**
+ * The AddOnLibrariesTableModel class is a table model for displaying add-on libraries in the
+ * a JTable.
+ */
 public class AddOnLibrariesTableModel extends AbstractTableModel {
+
+  /** The logger. */
   private static final Logger log = LogManager.getLogger(AddOnLibrariesDialogController.class);
 
+  /** The list of add-on libraries. */
   private final List<LibraryInfo> addons = new ArrayList<>();
 
+  /** The AddOnLibrariesTableModel constructor. */
   public AddOnLibrariesTableModel() {
     try {
       addons.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
     } catch (ExecutionException | InterruptedException e) {
-      log.error("Error displaying add-on libraries", e);
+      log.error(I18N.getText("library.dialog.error.displayingAddons"), e);
     }
   }
 
+  /**
+   * Get the add-on library at the specified row of the table.
+   * @param row the row.
+   * @return the add-on library.
+   */
   public LibraryInfo getAddOn(int row) {
     return addons.get(row);
   }

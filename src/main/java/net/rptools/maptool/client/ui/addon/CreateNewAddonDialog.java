@@ -40,28 +40,69 @@ import net.rptools.maptool.client.ui.addon.creator.NewAddOnBuilder;
 import net.rptools.maptool.client.ui.addon.creator.NewAddOnCreator;
 import net.rptools.maptool.language.I18N;
 
+/**
+ * Dialog for creating a new Add-On library skeleton.
+ */
 public class CreateNewAddonDialog extends JDialog {
 
+  /** The content pane. */
   private JPanel contentPane;
+
+  /** OK button which will create the new Add-On. */
   private JButton buttonOK;
+
+  /** Cancel button which will close the dialog. */
   private JButton buttonCancel;
+
+  /** Text field for the Add-On name. */
   private JTextField nameTextField;
+
+  /** Text field for the Add-On version. */
   private JTextField versionTextField;
+
+  /** Check box for creating events. */
   private JCheckBox eventsCheckBox;
+
+  /** Text pane for the Add-On description. */
   private JTextPane descriptionTextPane;
+
+  /** Button for browsing for the directory to create the new add-on in. */
   private JButton directoryBrowseButton;
+
+  /** Text field for the Add-On namespace. */
   private JTextField namespaceTextField;
+
+  /** Text field for the Git URL. */
   private JTextField gitURLTextField;
+
+  /** Text field for the website URL. */
   private JTextField websiteTextField;
+
+  /** Text field for the license. */
   private JTextField licenseTextField;
+
+  /** Text field for the authors. */
   private JTextField authorsTextField;
+
+  /** Text field for the parent directory. */
   private JTextField parentDirectoryTextField;
+
+  /** Check box for creating slash commands. */
   private JCheckBox slashCommandCheckBox;
+
+  /** Check box for creating MTS properties. */
   private JCheckBox mtsPropCheckBox;
+
+  /** Check box for creating UDFs. */
   private JCheckBox udfCheckBox;
+
+  /** Text field for the short description. */
   private JTextField shortDescTextBox;
+
+  /** Text field for the directory name. */
   private JTextField directoryTextField;
 
+  /** Creates a new CreateNewAddonDialog. */
   public CreateNewAddonDialog() {
     setContentPane(contentPane);
     setModal(true);
@@ -147,6 +188,9 @@ public class CreateNewAddonDialog extends JDialog {
     validateInputs();
   }
 
+  /**
+   * Sets the default values for the new add-on fields.
+   */
   private void setDefaults() {
     namespaceTextField.setText("net.some-example.addon");
     nameTextField.setText("Example Add-On");
@@ -156,6 +200,9 @@ public class CreateNewAddonDialog extends JDialog {
     parentDirectoryTextField.setText(AppPreferences.getCreateAddOnParentDir());
   }
 
+  /**
+   * Validates the input fields.
+   */
   private void validateInputs() {
     buttonOK.setEnabled(
         !namespaceTextField.getText().isEmpty()
@@ -166,6 +213,11 @@ public class CreateNewAddonDialog extends JDialog {
             && !authorsTextField.getText().isEmpty());
   }
 
+  /**
+   * Handles the OK button click.
+   * This will attempt to create the new add-on skeleton based on the users inputs and then close
+   * the dialog.
+   */
   private void onOK() {
     var parentDir = new File(parentDirectoryTextField.getText());
     if (!parentDir.exists()) {
@@ -203,12 +255,16 @@ public class CreateNewAddonDialog extends JDialog {
       return;
     }
     try {
-      new NewAddOnCreator(newAddon).create(dir.toPath());
+      new NewAddOnCreator(newAddon, dir.toPath()).create();
     } catch (IOException e) {
       JOptionPane.showMessageDialog(this, e.getMessage());
     }
   }
 
+  /**
+   * Handles the cancel button click.
+   * This closes the dialog without attempting to create the new add-on skeleton.
+   */
   private void onCancel() {
     dispose();
   }

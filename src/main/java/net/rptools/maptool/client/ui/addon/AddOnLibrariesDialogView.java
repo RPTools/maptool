@@ -54,35 +54,88 @@ import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 /** Dialog for managing add-on libraries. */
 public class AddOnLibrariesDialogView extends JDialog {
 
-  private JPanel contentPane;
+  /** Removes an add-on library. */
   private JButton buttonRemove;
+
+  /** Closes the dialog. */
   private JButton buttonClose;
+
+  /** The tabbed pane for the dialog. */
   private JTabbedPane tabbedPane;
+
+  /** Table containing the imported add-ons */
   private JTable addOnLibraryTable;
+
+  /** The text pane for the add-on description. */
   private JTextPane addOnDescriptionTextPane;
+
+  /** Adds an add-on library. */
   private JButton buttonAdd;
+
+  /** The name of the selected add-on. */
   private JLabel addOnNameLabel;
+
+  /** The version of the selected add-on. */
   private JLabel addOnVersionLabel;
+
+  /** The authors of the selected add-on. */
   private JLabel addOnAuthorsLabel;
+
+  /** The namespace of the selected add-on. */
   private JLabel addOnNamespaceLabel;
+
+  /** The short description of the selected add-on. */
   private JLabel addOnShortDescLabel;
+
+  /** The website of the selected add-on. */
   private JLabel addOnWebsiteLabel;
+
+  /** The git URL of the selected add-on. */
   private JLabel addOnGitUrlLabel;
+
+  /** The license of the selected add-on. */
   private JLabel addOnLicenseLabel;
+
+  /** The button for viewing the README file of the selected add-on. */
   private JButton viewReadMeFileButton;
+
+  /** The button for viewing the license file of the selected add-on. */
   private JButton viewLicenseFileButton;
+
+  /** The button for copying the theme CSS. */
   private JButton copyThemeCSS;
+
+  /** The button for copying the stat sheet theme. */
   private JButton copyStatSheetThemeButton;
+
+  /** The checkbox for enabling external add-ons. */
   private JCheckBox enableExternalAddOnCheckBox;
+
+  /** The table for external add-ons. */
   private JTable externalAddonTable;
+
+  /** The button for creating an add-on skeleton. */
   private JButton createAddonSkeletonButton;
+
+  /** The text field for the add-on development directory. */
   private JTextField directoryTextField;
+
+  /** The button for browsing to select the add-on development directory. */
   private JButton browseButton;
+
+  /** Exports the selected add-on. */
   private JButton exportAddOnButton;
 
+  /** The content pane for the dialog. */
+  private JPanel contentPane;
+
+  /** The information for the selected add-on. */
   private LibraryInfo selectedAddOn;
 
+  /** The model for the external add-on libraries table. */
   private final ExternalAddOnLibrariesTableModel externalAddOnLibrariesTableModel;
+
+  /** The model for the add-on libraries table. */
   private final AddOnLibrariesTableModel addOnLibrariesTableModel;
 
   /** Creates a new instance of the dialog. */
@@ -267,13 +320,22 @@ public class AddOnLibrariesDialogView extends JDialog {
     pack();
   }
 
-  private void refreshLibraries() {}
+  private void refreshLibraries() {
+    // TODO: CDW Implement this method
+  }
 
+  /**
+   * Sets the enabled state of the external add-on controls.
+   * @param selected the state to set.
+   */
   private void setExternalAddOnControlsEnabled(boolean selected) {
     externalAddonTable.setEnabled(selected);
     browseButton.setEnabled(selected);
   }
 
+  /**
+   * Creates a new add-on skeleton.
+   */
   private void createAddonSkeleton() {
     var dialog = new CreateNewAddonDialog();
     dialog.pack();
@@ -352,6 +414,10 @@ public class AddOnLibrariesDialogView extends JDialog {
     }
   }
 
+  /**
+   * Views the license file for the given library.
+   * @param libInfo the library to view the license file for.
+   */
   private void viewLicenseFile(LibraryInfo libInfo) {
     Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
     lib.ifPresent(
@@ -364,6 +430,10 @@ public class AddOnLibrariesDialogView extends JDialog {
                             asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
   }
 
+  /**
+   * Views the README file for the given library.
+   * @param libInfo the library to view the README file for.
+   */
   private void viewReadMeFile(LibraryInfo libInfo) {
     Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
     lib.ifPresent(
