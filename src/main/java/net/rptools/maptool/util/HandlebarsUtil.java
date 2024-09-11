@@ -72,8 +72,6 @@ public class HandlebarsUtil<T> {
    */
   public String apply(T bean) throws IOException {
     try {
-
-      Handlebars handlebars = new Handlebars();
       var context = Context.newBuilder(bean).resolver(JavaBeanValueResolver.INSTANCE).build();
       return template.apply(context);
     } catch (IOException e) {
