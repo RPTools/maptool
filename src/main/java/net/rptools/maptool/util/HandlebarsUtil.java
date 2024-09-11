@@ -22,7 +22,13 @@ import com.github.jknack.handlebars.helper.AssignHelper;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
 import com.github.jknack.handlebars.helper.NumberHelper;
 import com.github.jknack.handlebars.helper.StringHelpers;
+import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
+import com.github.jknack.handlebars.io.TemplateLoader;
+import com.github.jknack.handlebars.io.URLTemplateLoader;
+import java.io.File;
 import java.io.IOException;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Arrays;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
@@ -41,15 +47,63 @@ public class HandlebarsUtil<T> {
   /** Logging class instance. */
   private static final Logger log = LogManager.getLogger(Token.class);
 
+  /** Handlebars partial template loader that uses Add-On Library URIs */
+  private static class LibraryTemplateLoader extends URLTemplateLoader {
+    /** Path to template being resolved, relative paths are resolved relative to its parent. */
+    Path current;
+
+    private LibraryTemplateLoader(String current, String prefix, String suffix) {
+      if (!current.startsWith("/")) {
+        current = "/" + current;
+      }
+      this.current = new File(current).toPath();
+      setPrefix(prefix);
+      setSuffix(suffix);
+    }
+
+    private LibraryTemplateLoader(String current, String prefix) {
+      this(current, prefix, DEFAULT_SUFFIX);
+    }
+
+    private LibraryTemplateLoader(String current) {
+      this(current, DEFAULT_PREFIX, DEFAULT_SUFFIX);
+    }
+
+    /** Normalize locations by removing redundant path components */
+    @Override
+    protected String normalize(final String location) {
+      return new File(location).toPath().normalize().toString();
+    }
+
+    /** Resolve possibly relative uri relative to current rooted below prefix */
+    @Override
+    public String resolve(final String uri) {
+      var location = current.resolveSibling(uri).normalize().toString();
+      if (location.startsWith("/")) {
+        location = location.substring(1);
+      }
+      return getPrefix() + location + getSuffix();
+    }
+
+    @Override
+    protected URL getResource(String location) throws IOException {
+      if (location.startsWith("/")) {
+        location = location.substring(1);
+      }
+      return new URL("lib://" + location);
+    }
+  }
+
   /**
    * Creates a new instance of the utility class.
    *
    * @param stringTemplate The template to compile.
+   * @param loader The template loader for loading included partial templates
    * @throws IOException If there is an error compiling the template.
    */
-  public HandlebarsUtil(String stringTemplate) throws IOException {
+  private HandlebarsUtil(String stringTemplate, TemplateLoader loader) throws IOException {
     try {
-      Handlebars handlebars = new Handlebars();
+      Handlebars handlebars = new Handlebars(loader);
       StringHelpers.register(handlebars);
       Arrays.stream(ConditionalHelpers.values())
           .forEach(h -> handlebars.registerHelper(h.name(), h));
@@ -61,6 +115,27 @@ public class HandlebarsUtil<T> {
       log.error("Handlebars Error: {}", e.getMessage());
       throw e;
     }
+  }
+
+  /**
+   * Creates a new instance of the utility class.
+   *
+   * @param stringTemplate The template to compile.
+   * @param entry The lib:// URL of the template to load partial templates relative to
+   * @throws IOException If there is an error compiling the template.
+   */
+  public HandlebarsUtil(String stringTemplate, URL entry) throws IOException {
+    this(stringTemplate, new LibraryTemplateLoader(entry.getHost() + entry.getPath()));
+  }
+
+  /**
+   * Creates a new instance of the utility class.
+   *
+   * @param stringTemplate The template to compile.
+   * @throws IOException If there is an error compiling the template.
+   */
+  public HandlebarsUtil(String stringTemplate) throws IOException {
+    this(stringTemplate, new ClassPathTemplateLoader());
   }
 
   /**
