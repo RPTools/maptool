@@ -20,6 +20,7 @@ import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.helper.AssignHelper;
 import com.github.jknack.handlebars.helper.ConditionalHelpers;
+import com.github.jknack.handlebars.helper.IncludeHelper;
 import com.github.jknack.handlebars.helper.NumberHelper;
 import com.github.jknack.handlebars.helper.StringHelpers;
 import com.github.jknack.handlebars.io.ClassPathTemplateLoader;
@@ -109,6 +110,7 @@ public class HandlebarsUtil<T> {
           .forEach(h -> handlebars.registerHelper(h.name(), h));
       NumberHelper.register(handlebars);
       handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
+      handlebars.registerHelper(IncludeHelper.NAME, IncludeHelper.INSTANCE);
 
       template = handlebars.compileInline(stringTemplate);
     } catch (IOException e) {
