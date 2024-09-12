@@ -50,7 +50,9 @@ public class UPnPUtil {
         NetworkInterface ni = e.nextElement();
         try {
           var addresses = Collections.list(ni.getInetAddresses());
-          if (ni.isLoopback()) {
+          if (addresses.isEmpty()) {
+            log.info("UPnP:  Rejecting interface '{}' as it has no addresses", ni.getDisplayName());
+          } else if (ni.isLoopback()) {
             log.info(
                 "UPnP:  Rejecting interface '{}' [{}] as it is a loopback",
                 ni.getDisplayName(),
