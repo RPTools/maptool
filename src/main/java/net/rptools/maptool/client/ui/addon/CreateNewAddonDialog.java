@@ -40,9 +40,7 @@ import net.rptools.maptool.client.ui.addon.creator.NewAddOnBuilder;
 import net.rptools.maptool.client.ui.addon.creator.NewAddOnCreator;
 import net.rptools.maptool.language.I18N;
 
-/**
- * Dialog for creating a new Add-On library skeleton.
- */
+/** Dialog for creating a new Add-On library skeleton. */
 public class CreateNewAddonDialog extends JDialog {
 
   /** The content pane. */
@@ -188,9 +186,7 @@ public class CreateNewAddonDialog extends JDialog {
     validateInputs();
   }
 
-  /**
-   * Sets the default values for the new add-on fields.
-   */
+  /** Sets the default values for the new add-on fields. */
   private void setDefaults() {
     namespaceTextField.setText("net.some-example.addon");
     nameTextField.setText("Example Add-On");
@@ -200,9 +196,7 @@ public class CreateNewAddonDialog extends JDialog {
     parentDirectoryTextField.setText(AppPreferences.getCreateAddOnParentDir());
   }
 
-  /**
-   * Validates the input fields.
-   */
+  /** Validates the input fields. */
   private void validateInputs() {
     buttonOK.setEnabled(
         !namespaceTextField.getText().isEmpty()
@@ -214,9 +208,8 @@ public class CreateNewAddonDialog extends JDialog {
   }
 
   /**
-   * Handles the OK button click.
-   * This will attempt to create the new add-on skeleton based on the users inputs and then close
-   * the dialog.
+   * Handles the OK button click. This will attempt to create the new add-on skeleton based on the
+   * users inputs and then close the dialog.
    */
   private void onOK() {
     var parentDir = new File(parentDirectoryTextField.getText());
@@ -249,11 +242,6 @@ public class CreateNewAddonDialog extends JDialog {
             .setCreateMTSProperties(mtsPropCheckBox.isSelected())
             .build();
     dispose();
-    if (!dir.mkdirs()) {
-      JOptionPane.showMessageDialog(
-          this, I18N.getText("library.dialog.failedToCreateDir", dir.toString()));
-      return;
-    }
     try {
       new NewAddOnCreator(newAddon, dir.toPath()).create();
     } catch (IOException e) {
@@ -262,8 +250,8 @@ public class CreateNewAddonDialog extends JDialog {
   }
 
   /**
-   * Handles the cancel button click.
-   * This closes the dialog without attempting to create the new add-on skeleton.
+   * Handles the cancel button click. This closes the dialog without attempting to create the new
+   * add-on skeleton.
    */
   private void onCancel() {
     dispose();

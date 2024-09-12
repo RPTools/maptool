@@ -36,6 +36,7 @@ import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
@@ -43,6 +44,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
+import net.rptools.maptool.client.ui.addon.creator.MTLibCreator;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
@@ -123,11 +125,11 @@ public class AddOnLibrariesDialogView extends JDialog {
   /** The button for browsing to select the add-on development directory. */
   private JButton browseButton;
 
-  /** Exports the selected add-on. */
-  private JButton exportAddOnButton;
-
   /** The content pane for the dialog. */
   private JPanel contentPane;
+
+  /** Creates a .mtlib (zip) file for the selected add-on. */
+  private JButton createMTLibButton;
 
   /** The information for the selected add-on. */
   private LibraryInfo selectedAddOn;
@@ -137,6 +139,9 @@ public class AddOnLibrariesDialogView extends JDialog {
 
   /** The model for the add-on libraries table. */
   private final AddOnLibrariesTableModel addOnLibrariesTableModel;
+
+  /** The currently selected external add-on. */
+  private ExternalLibraryInfo selectedExternalAddon;
 
   /** Creates a new instance of the dialog. */
   public AddOnLibrariesDialogView() {
@@ -161,6 +166,21 @@ public class AddOnLibrariesDialogView extends JDialog {
         ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
     externalAddonTable.setDefaultEditor(
         ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
+    externalAddonTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            e -> {
+              int selectedRow = externalAddonTable.getSelectedRow();
+              if (selectedRow == -1) {
+                createMTLibButton.setEnabled(false);
+                selectedExternalAddon = null;
+              } else {
+                createMTLibButton.setEnabled(true);
+                selectedExternalAddon =
+                    (ExternalLibraryInfo)
+                        externalAddOnLibrariesTableModel.getValueAt(selectedRow, 6);
+              }
+            });
 
     buttonRemove.setEnabled(false);
     addOnLibraryTable
@@ -310,6 +330,32 @@ public class AddOnLibrariesDialogView extends JDialog {
           }
         });
 
+    createMTLibButton.addActionListener(
+        e -> {
+          if (selectedExternalAddon == null) {
+            return;
+          }
+
+          var fileChooser = new JFileChooser();
+          fileChooser.setFileFilter(
+              new FileNameExtensionFilter(
+                  I18N.getText("library.dialog.addon.fileFilter"), "mtlib"));
+          if (fileChooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            var outputPath = fileChooser.getSelectedFile().toPath();
+            if (!outputPath.toString().endsWith(".mtlib")) {
+              outputPath = outputPath.resolveSibling(outputPath.getFileName() + ".mtlib");
+            }
+            var creator =
+                new MTLibCreator(
+                    selectedExternalAddon.backingDirectory(),
+                    outputPath.getParent(),
+                    outputPath.getFileName().toString());
+            creator.create();
+          }
+        });
+
+    createMTLibButton.setEnabled(false);
+
     LibraryManager libraryManager = new LibraryManager();
     enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
     directoryTextField.setText(AppPreferences.getExternalAddOnLibrariesPath());
@@ -320,12 +366,15 @@ public class AddOnLibrariesDialogView extends JDialog {
     pack();
   }
 
+  /** Refreshes the external add-on libraries table information. */
   private void refreshLibraries() {
-    // TODO: CDW Implement this method
+    var model = (ExternalAddOnLibrariesTableModel) externalAddonTable.getModel();
+    model.refresh();
   }
 
   /**
    * Sets the enabled state of the external add-on controls.
+   *
    * @param selected the state to set.
    */
   private void setExternalAddOnControlsEnabled(boolean selected) {
@@ -333,9 +382,7 @@ public class AddOnLibrariesDialogView extends JDialog {
     browseButton.setEnabled(selected);
   }
 
-  /**
-   * Creates a new add-on skeleton.
-   */
+  /** Creates a new add-on skeleton. */
   private void createAddonSkeleton() {
     var dialog = new CreateNewAddonDialog();
     dialog.pack();
@@ -416,6 +463,7 @@ public class AddOnLibrariesDialogView extends JDialog {
 
   /**
    * Views the license file for the given library.
+   *
    * @param libInfo the library to view the license file for.
    */
   private void viewLicenseFile(LibraryInfo libInfo) {
@@ -427,11 +475,18 @@ public class AddOnLibrariesDialogView extends JDialog {
                 .thenAccept(
                     a ->
                         a.ifPresent(
-                            asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
+                            asset ->
+                                new ViewAssetDialog(
+                                        asset,
+                                        I18N.getText("library.dialog.addon.license"),
+                                        640,
+                                        480)
+                                    .showModal())));
   }
 
   /**
    * Views the README file for the given library.
+   *
    * @param libInfo the library to view the README file for.
    */
   private void viewReadMeFile(LibraryInfo libInfo) {
@@ -443,6 +498,12 @@ public class AddOnLibrariesDialogView extends JDialog {
                 .thenAccept(
                     a ->
                         a.ifPresent(
-                            asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
+                            asset ->
+                                new ViewAssetDialog(
+                                        asset,
+                                        I18N.getText("library.dialog.addon.readme"),
+                                        640,
+                                        480)
+                                    .showModal())));
   }
 }

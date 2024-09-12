@@ -18,6 +18,7 @@ import java.util.List;
 
 /**
  * Represents a new AddOn to be created.
+ *
  * @param name The name of the AddOn.
  * @param version The version of the AddOn.
  * @param namespace The namespace of the AddOn.

@@ -28,8 +28,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 /**
- * The AddOnLibrariesTableModel class is a table model for displaying add-on libraries in the
- * a JTable.
+ * The AddOnLibrariesTableModel class is a table model for displaying add-on libraries in the a
+ * JTable.
  */
 public class AddOnLibrariesTableModel extends AbstractTableModel {
 
@@ -50,6 +50,7 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
 
   /**
    * Get the add-on library at the specified row of the table.
+   *
    * @param row the row.
    * @return the add-on library.
    */

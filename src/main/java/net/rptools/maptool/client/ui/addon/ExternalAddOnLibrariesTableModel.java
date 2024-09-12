@@ -89,6 +89,11 @@ public class ExternalAddOnLibrariesTableModel extends AbstractTableModel {
    */
   @Subscribe
   public void handleExternalAddOnsAdded(ExternalAddonsUpdateEvent event) {
+    refresh();
+  }
+
+  /** Refresh the table data. */
+  public void refresh() {
     fireTableDataChanged();
   }
 }

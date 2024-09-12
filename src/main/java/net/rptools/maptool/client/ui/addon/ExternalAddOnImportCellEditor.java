@@ -25,9 +25,7 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
-/**
- * Cell editor for the import button in the external add-on dialog.
- */
+/** Cell editor for the import button in the external add-on dialog. */
 public class ExternalAddOnImportCellEditor extends AbstractCellEditor
     implements TableCellEditor, TableCellRenderer {
 

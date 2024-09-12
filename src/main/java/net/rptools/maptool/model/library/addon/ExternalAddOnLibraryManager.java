@@ -373,6 +373,24 @@ public class ExternalAddOnLibraryManager {
   }
 
   /**
+   * Checks to see if the specified path is an ignored sub-path when watching the external add-on
+   *
+   * @param path the path to check.
+   * @return {@code true} if the path is an ignored sub-path.
+   */
+  private boolean isIgnoredSubPath(Path path) {
+    if (path.startsWith(".git")) {
+      return true;
+    }
+
+    if (path.getFileName().toString().toLowerCase().endsWith(".mtlib")) {
+      return true;
+    }
+
+    return false;
+  }
+
+  /**
    * Stops the add-on library with the specified namespace from being available to MapTool.
    *
    * @return the namespace of the add-on library to stop being available.
@@ -390,6 +408,10 @@ public class ExternalAddOnLibraryManager {
                   return;
                 }
                 if (!path.startsWith(externalLibraryPath)) {
+                  return;
+                }
+                var subPath = externalLibraryPath.relativize(path);
+                if (isIgnoredSubPath(subPath)) {
                   return;
                 }
                 path = externalLibraryPath.resolve(path.getName(basePathNameCount));

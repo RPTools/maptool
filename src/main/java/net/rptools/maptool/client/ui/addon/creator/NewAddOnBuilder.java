@@ -18,9 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.language.I18N;
 
-/**
- * Builder for creating a {@link NewAddOn}.
- */
+/** Builder for creating a {@link NewAddOn}. */
 public class NewAddOnBuilder {
 
   /** The name of the add-on. */
@@ -64,6 +62,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the name of the add-on.
+   *
    * @param name the name of the add-on
    * @return this builder.
    */
@@ -74,6 +73,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the version of the add-on.
+   *
    * @param version the version of the add-on
    * @return this builder.
    */
@@ -84,6 +84,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the namespace of the add-on.
+   *
    * @param namespace the namespace of the add-on
    * @return this builder.
    */
@@ -94,6 +95,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the git URL of the add-on.
+   *
    * @param gitURL the git URL of the add-on
    * @return this builder.
    */
@@ -104,6 +106,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the website of the add-on.
+   *
    * @param website the website of the add-on
    * @return this builder.
    */
@@ -114,6 +117,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the license of the add-on.
+   *
    * @param license the license of the add-on
    * @return this builder.
    */
@@ -124,6 +128,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the short description of the add-on.
+   *
    * @param shortDescription the short description of the add-on
    * @return this builder.
    */
@@ -134,6 +139,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the description of the add-on.
+   *
    * @param description the description of the add-on
    * @return this builder.
    */
@@ -144,6 +150,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets the authors of the add-on.
+   *
    * @param authors the authors of the add-on
    * @return this builder.
    */
@@ -155,6 +162,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets whether to create events.
+   *
    * @param events whether to create events.
    * @return this builder.
    */
@@ -165,6 +173,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets whether to create slash commands.
+   *
    * @param slashCommands whether to create slash commands.
    * @return this builder.
    */
@@ -175,6 +184,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets whether to create MTS properties.
+   *
    * @param mtsProperties whether to create MTS properties.
    * @return this builder.
    */
@@ -185,6 +195,7 @@ public class NewAddOnBuilder {
 
   /**
    * Sets whether to create UDFs.
+   *
    * @param udfs whether to create UDFs.
    * @return this builder.
    */
@@ -195,6 +206,7 @@ public class NewAddOnBuilder {
 
   /**
    * Builds a new {@link NewAddOn} from the current state of the builder.
+   *
    * @return a new {@link NewAddOn}.
    */
   public NewAddOn build() {
@@ -218,6 +230,7 @@ public class NewAddOnBuilder {
 
   /**
    * Gets the default README text.
+   *
    * @return the default README text.
    */
   private String getReadMe() {
@@ -226,6 +239,7 @@ public class NewAddOnBuilder {
 
   /**
    * Gets the default license text.
+   *
    * @return the default license text.
    */
   private String getLicenseText() {
