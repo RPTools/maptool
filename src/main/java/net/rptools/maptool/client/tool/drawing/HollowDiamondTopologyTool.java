@@ -106,6 +106,8 @@ public class HollowDiamondTopologyTool extends AbstractDrawingTool implements Mo
 
   @Override
   public void mouseMoved(MouseEvent e) {
+    super.mouseMoved(e);
+
     setIsEraser(isEraser(e));
 
     ZonePoint zp = getPoint(e);

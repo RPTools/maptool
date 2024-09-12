@@ -158,7 +158,7 @@ public class GridlessGrid extends Grid {
   }
 
   @Override
-  protected Area createCellShape(int size) {
+  protected Area createCellShape() {
     // Doesn't do this
     return null;
   }

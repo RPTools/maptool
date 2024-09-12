@@ -14,26 +14,19 @@
  */
 package net.rptools.maptool.client.tool.boardtool;
 
-import java.awt.Dimension;
-import java.awt.Image;
-import java.awt.Point;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.awt.geom.Point2D;
+import java.text.ParseException;
 import java.util.Map;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JButton;
-import javax.swing.JRadioButton;
-import javax.swing.JTextField;
-import javax.swing.KeyStroke;
-import javax.swing.SwingUtilities;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
@@ -46,7 +39,8 @@ import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Allows user to re-position the background map (internally called the 'board'). This entire class
@@ -55,6 +49,7 @@ import net.rptools.maptool.util.StringUtil;
  */
 public class BoardTool extends DefaultTool {
   private static final long serialVersionUID = 98389912045059L;
+  private static final Logger log = LogManager.getLogger(BoardTool.class);
 
   // Context variables
   private static Zone zone;
@@ -62,6 +57,8 @@ public class BoardTool extends DefaultTool {
 
   // Status variables
   private static Point boardPosition = new Point(0, 0);
+  private static Point2D boardSize = new Point2D.Float(1f, 1f);
+  private static Point2D boardScale = new Point2D.Float(1f, 1f);
   private static Dimension snap = new Dimension(1, 1);
 
   // Action control variables
@@ -70,8 +67,10 @@ public class BoardTool extends DefaultTool {
   private Point boardStart;
 
   // UI button fields
-  private final JTextField boardPositionXTextField;
-  private final JTextField boardPositionYTextField;
+  private final JSpinner boardPositionXSpinner;
+  private final JSpinner boardPositionYSpinner;
+  private final JSpinner boardSizeXSpinner;
+  private final JSpinner boardSizeYSpinner;
   private final AbeillePanel controlPanel;
   private final JRadioButton snapNoneButton;
   private final JRadioButton snapGridButton;
@@ -82,11 +81,21 @@ public class BoardTool extends DefaultTool {
     // Create the control panel
     controlPanel = new AbeillePanel(new AdjustBoardControlPanelView().getRootComponent());
 
-    boardPositionXTextField = (JTextField) controlPanel.getComponent("offsetX");
-    boardPositionXTextField.addKeyListener(new UpdateBoardListener());
+    boardPositionXSpinner = (JSpinner) controlPanel.getComponent("offsetX");
+    boardPositionXSpinner.setModel(
+        new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
+    boardPositionXSpinner.addChangeListener(new spinnerListener());
 
-    boardPositionYTextField = (JTextField) controlPanel.getComponent("offsetY");
-    boardPositionYTextField.addKeyListener(new UpdateBoardListener());
+    boardPositionYSpinner = (JSpinner) controlPanel.getComponent("offsetY");
+    boardPositionYSpinner.setModel(
+        new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
+    boardPositionYSpinner.addChangeListener(new spinnerListener());
+
+    //    getBoardSizing();
+
+    boardSizeXSpinner = (JSpinner) controlPanel.getComponent("sizeX");
+
+    boardSizeYSpinner = (JSpinner) controlPanel.getComponent("sizeY");
 
     ActionListener enforceRules = evt -> enforceButtonRules();
     snapNoneButton = (JRadioButton) controlPanel.getComponent("snapNone");
@@ -132,6 +141,27 @@ public class BoardTool extends DefaultTool {
     return tileSize;
   }
 
+  /** Figure out how big the board image is. */
+  private void getBoardSizing() {
+    if (renderer != null) {
+      boardScale = new Point2D.Float(zone.getImageScaleX(), zone.getImageScaleY());
+      if (zone.getMapAssetId() != null) {
+        Image board = ImageManager.getImage(zone.getMapAssetId());
+        boardSize = new Point2D.Float(board.getWidth(null), board.getHeight(null));
+
+        boardSizeXSpinner.setModel(
+            new SpinnerNumberModel(
+                boardSize.getX() * boardScale.getX(), Grid.MIN_GRID_SIZE, Integer.MAX_VALUE, 1));
+        boardSizeYSpinner.setModel(
+            new SpinnerNumberModel(
+                boardSize.getY() * boardScale.getY(), Grid.MIN_GRID_SIZE, Integer.MAX_VALUE, 1));
+
+        boardSizeXSpinner.addChangeListener(new spinnerListener());
+        boardSizeYSpinner.addChangeListener(new spinnerListener());
+      }
+    }
+  }
+
   /** Moves the board to the nearest snap intersection. Modifies GUI. */
   private void snapBoard() {
     boardPosition.x = (Math.round(boardPosition.x / snap.width) * snap.width);
@@ -152,8 +182,8 @@ public class BoardTool extends DefaultTool {
   }
 
   private void updateGUI() {
-    boardPositionXTextField.setText(Integer.toString(boardPosition.x));
-    boardPositionYTextField.setText(Integer.toString(boardPosition.y));
+    boardPositionXSpinner.setValue(boardPosition.x);
+    boardPositionYSpinner.setValue(boardPosition.y);
   }
 
   /**
@@ -163,13 +193,16 @@ public class BoardTool extends DefaultTool {
   private void copyBoardToControlPanel() {
     boardPosition.x = zone.getBoardX();
     boardPosition.y = zone.getBoardY();
+    getBoardSizing();
     snapBoard();
     updateGUI();
   }
 
   private void copyControlPanelToBoard() {
-    boardPosition.x = getInt(boardPositionXTextField, 0);
-    boardPosition.y = getInt(boardPositionYTextField, 0);
+    boardPosition.x = (int) boardPositionXSpinner.getModel().getValue();
+    boardPosition.y = (int) boardPositionYSpinner.getModel().getValue();
+    zone.setImageScaleX((float) boardScale.getX());
+    zone.setImageScaleY((float) boardScale.getY());
     zone.setBoard(boardPosition);
   }
 
@@ -181,16 +214,6 @@ public class BoardTool extends DefaultTool {
   @Override
   public String getInstructions() {
     return "tool.boardtool.instructions";
-  }
-
-  /**
-   * Parses the text field of the component into a number, returning the default value if the text
-   * field is _not_ a number.
-   */
-  private int getInt(JTextComponent component, int defaultValue) {
-    // Get the string from the component, then
-    // call the more-generic getInt-from-a-string
-    return StringUtil.parseInteger(component.getText(), defaultValue);
   }
 
   /*
@@ -280,12 +303,6 @@ public class BoardTool extends DefaultTool {
     }
   }
 
-  @Override
-  public void mouseMoved(java.awt.event.MouseEvent e) {
-    mouseX = e.getX();
-    mouseY = e.getY();
-  }
-
   /** A simple enum for correlating keys with directions */
   private enum Direction {
     Left,
@@ -358,5 +375,38 @@ public class BoardTool extends DefaultTool {
     }
     updateGUI();
     zone.setBoard(boardPosition);
+  }
+
+  private class spinnerListener implements ChangeListener {
+    @Override
+    public void stateChanged(ChangeEvent e) {
+      JSpinner spinner = (JSpinner) e.getSource();
+      try {
+        spinner.commitEdit();
+      } catch (ParseException pe) {
+        // Edited value is invalid, revert the spinner to the last valid value,
+        JComponent editor = spinner.getEditor();
+        if (editor instanceof JSpinner.DefaultEditor) {
+          ((JSpinner.DefaultEditor) editor).getTextField().setValue(spinner.getValue());
+        }
+      }
+      if (spinner.getName().startsWith("size")) {
+        updateImageScale(spinner);
+      }
+
+      copyControlPanelToBoard();
+    }
+
+    private void updateImageScale(JSpinner spinner) {
+      if (spinner.getName().endsWith("X")) {
+        boardScale.setLocation(
+            ((SpinnerNumberModel) spinner.getModel()).getNumber().floatValue() / boardSize.getX(),
+            boardScale.getY());
+      } else {
+        boardScale.setLocation(
+            boardScale.getX(),
+            ((SpinnerNumberModel) spinner.getModel()).getNumber().floatValue() / boardSize.getY());
+      }
+    }
   }
 }

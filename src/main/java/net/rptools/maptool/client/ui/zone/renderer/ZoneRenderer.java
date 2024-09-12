@@ -77,11 +77,9 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /** */
-public class ZoneRenderer extends JComponent
-    implements DropTargetListener, Comparable<ZoneRenderer> {
+public class ZoneRenderer extends JComponent implements DropTargetListener {
 
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
@@ -107,8 +105,7 @@ public class ZoneRenderer extends JComponent
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
-      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers;
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -172,6 +169,10 @@ public class ZoneRenderer extends JComponent
     this.zone = zone;
     zoneView = new ZoneView(zone);
     setZoneScale(new Scale());
+
+    drawableRenderers =
+        CollectionUtil.newFilledEnumMap(
+            Zone.Layer.class, layer -> new PartitionedDrawableRenderer(zone));
 
     var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();
@@ -394,7 +395,7 @@ public class ZoneRenderer extends JComponent
 
     removeMoveSelectionSet(keyTokenId);
     MapTool.serverCommand().stopTokenMove(getZone().getId(), keyTokenId);
-    Token keyToken = zone.getToken(keyTokenId);
+    Token keyToken = new Token(zone.getToken(keyTokenId), true);
 
     /*
      * Lee: if the lead token is snapped-to-grid and has not moved, every follower should return to where they were. Flag set at PointerTool and StampTool's stopTokenDrag() Handling the rest here.
@@ -421,23 +422,12 @@ public class ZoneRenderer extends JComponent
 
             boolean topologyTokenMoved = false; // If any token has topology we need to reset FoW
 
-            // Lee: the 1st of evils. changing it to handle proper computation
-            // for a key token's snapped state
-            AbstractPoint originPoint, tokenCell;
-            if (keyToken.isSnapToGrid()) {
-              originPoint = zone.getGrid().convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
-            } else {
-              originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
-            }
-
             Path<? extends AbstractPoint> path =
-                set.getWalker() != null ? set.getWalker().getPath() : set.gridlessPath;
+                set.getWalker() != null ? set.getWalker().getPath() : set.getGridlessPath();
             // Jamz: add final path render here?
 
             List<GUID> filteredTokens = new ArrayList<GUID>();
             moveTimer.stop("setup");
-
-            int offsetX, offsetY;
 
             moveTimer.start("eachtoken");
             for (GUID tokenGUID : selectionSet) {
@@ -448,53 +438,20 @@ public class ZoneRenderer extends JComponent
                 continue;
               }
 
-              // Lee: get offsets based on key token's snapped state
-              if (token.isSnapToGrid()) {
-                tokenCell = zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
-              } else {
-                tokenCell = new ZonePoint(token.getX(), token.getY());
-              }
+              var tokenPath = path.derive(zone.getGrid(), keyToken, token);
+              token.setLastPath(tokenPath);
 
-              int cellOffX, cellOffY;
-              if (token.isSnapToGrid() == keyToken.isSnapToGrid()) {
-                cellOffX = originPoint.x - tokenCell.x;
-                cellOffY = originPoint.y - tokenCell.y;
-              } else {
-                cellOffX = cellOffY = 0; // not used unless both are of same SnapToGrid
-              }
-
-              if (token.isSnapToGrid()
-                  && (!AppPreferences.getTokensSnapWhileDragging() || !keyToken.isSnapToGrid())) {
-                // convert to Cellpoint and back to ensure token ends up at correct X and Y
-                CellPoint cellEnd =
-                    zone.getGrid()
-                        .convert(
-                            new ZonePoint(
-                                token.getX() + set.getOffsetX(), token.getY() + set.getOffsetY()));
-                ZonePoint pointEnd = cellEnd.convertToZonePoint(zone.getGrid());
-                offsetX = pointEnd.x - token.getX();
-                offsetY = pointEnd.y - token.getY();
-              } else {
-                offsetX = set.getOffsetX();
-                offsetY = set.getOffsetY();
-              }
-
-              /*
-               * Lee: the problem now is to keep the precise coordinate computations for unsnapped tokens following a snapped key token. The derived path in the following section contains rounded
-               * down values because the integer cell values were passed. If these were double in nature, the precision would be kept, but that would be too difficult to change at this stage...
-               */
-
-              token.applyMove(set, path, offsetX, offsetY, keyToken, cellOffX, cellOffY);
-
-              // Lee: setting originPoint to landing point
-              token.setOriginPoint(new ZonePoint(token.getX(), token.getY()));
+              var lastPoint = tokenPath.getWayPointList().getLast();
+              var endPoint =
+                  switch (lastPoint) {
+                    case CellPoint cp -> zone.getGrid().convert(cp);
+                    case ZonePoint zp -> zp;
+                  };
+              token.setX(endPoint.x);
+              token.setY(endPoint.y);
 
               flush(token);
               MapTool.serverCommand().putToken(zone.getId(), token);
-
-              // No longer need this version
-              // Lee: redundant flush() already did this above
-              // replacementImageMap.remove(token);
 
               // Only add certain tokens to the list to process in the move
               // Macro function(s).
@@ -1327,8 +1284,8 @@ public class ZoneRenderer extends JComponent
             mapImage,
             getViewOffsetX() + (int) (zone.getBoardX() * scaleFactor),
             getViewOffsetY() + (int) (zone.getBoardY() * scaleFactor),
-            (int) (mapImage.getWidth() * scaleFactor),
-            (int) (mapImage.getHeight() * scaleFactor),
+            (int) (mapImage.getWidth() * scaleFactor * zone.getImageScaleX()),
+            (int) (mapImage.getHeight() * scaleFactor * zone.getImageScaleY()),
             null);
       }
       bbg.dispose();
@@ -1449,7 +1406,7 @@ public class ZoneRenderer extends JComponent
         if (token == keyToken && token.getLayer().supportsWalker()) {
           renderPath(
               g,
-              walker != null ? walker.getPath() : set.gridlessPath,
+              walker != null ? walker.getPath() : set.getGridlessPath(),
               token.getFootprint(zone.getGrid()));
         }
 
@@ -1593,7 +1550,7 @@ public class ZoneRenderer extends JComponent
       final var grid = zone.getGrid();
       tokenRectangle = token.getFootprint(grid).getBounds(grid, lastPoint);
     } else {
-      final var path = set.gridlessPath;
+      final var path = set.getGridlessPath();
       if (path.getCellPath().isEmpty()) {
         return false;
       }
@@ -1616,7 +1573,7 @@ public class ZoneRenderer extends JComponent
 
     double distanceTraveled = 0;
     ZonePoint lastPoint = null;
-    for (ZonePoint zp : set.gridlessPath.getCellPath()) {
+    for (ZonePoint zp : set.getGridlessPath().getCellPath()) {
       if (lastPoint == null) {
         lastPoint = zp;
         continue;
@@ -3557,16 +3514,10 @@ public class ZoneRenderer extends JComponent
     if (event.zone() != this.zone) {
       return;
     }
-    repaintDebouncer.dispatch();
-  }
 
-  //
-  // COMPARABLE
-  public int compareTo(@NotNull ZoneRenderer o) {
-    if (o != this) {
-      return (int) (zone.getCreationTime() - o.zone.getCreationTime());
-    }
-    return 0;
+    // A change in grid can change the size of templates.
+    flushDrawableRenderer();
+    repaintDebouncer.dispatch();
   }
 
   // Begin token common macro identification

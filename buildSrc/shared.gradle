@@ -1,0 +1,35 @@
+// In this section you declare where to find the dependencies of your project
+repositories {
+    mavenLocal()
+    mavenCentral()
+    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
+    maven { url = 'https://jitpack.io' }
+    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+}
+
+java {
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
+
+spotless {
+    java {
+        target project.fileTree(project.projectDir) {
+            include 'src/**/*.java'
+        }
+        licenseHeaderFile rootProject.file('spotless.license.java')
+        toggleOffOn()
+        // Now using the Google Java style guide
+        googleJavaFormat("1.17.0")
+    }
+
+    format 'misc', {
+        target '**/*.gradle', '**/.gitignore'
+
+        // spotless has built-in rules for most basic formatting tasks
+        trimTrailingWhitespace()
+        // or spaces. Takes an integer argument if you don't like 4
+        indentWithSpaces(4)
+    }
+}

@@ -25,7 +25,6 @@ import java.awt.geom.Path2D;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.LineSegment;
@@ -74,7 +73,7 @@ public class PolygonTopologyTool extends LineTool implements MouseMotionListener
   }
 
   @Override
-  protected void completeDrawable(GUID zoneGUID, Pen pen, Drawable drawable) {
+  protected void completeDrawable(Pen pen, Drawable drawable) {
     Area area = new Area();
 
     if (drawable instanceof LineSegment) {

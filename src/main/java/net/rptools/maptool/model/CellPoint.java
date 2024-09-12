@@ -26,7 +26,7 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
  *
  * @author trevor
  */
-public class CellPoint extends AbstractPoint {
+public final class CellPoint extends AbstractPoint {
 
   public double distanceTraveled; // Only populated by AStarWalker classes to be used upstream
   public double
@@ -41,6 +41,10 @@ public class CellPoint extends AbstractPoint {
     super(x, y);
     this.distanceTraveled = distanceTraveled;
     this.distanceTraveledWithoutTerrain = distanceTraveledWithoutTerrain;
+  }
+
+  public CellPoint(CellPoint other) {
+    this(other.x, other.y);
   }
 
   @Override

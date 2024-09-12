@@ -18,7 +18,7 @@ import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.MapTool;
+import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -35,16 +35,6 @@ import net.rptools.maptool.server.proto.drawing.DrawableDto;
  */
 public class ConeTemplate extends RadiusTemplate {
 
-  public ConeTemplate() {}
-
-  public ConeTemplate(GUID id) {
-    super(id);
-  }
-
-  /*---------------------------------------------------------------------------------------------
-   * Instance Variables
-   *-------------------------------------------------------------------------------------------*/
-
   /**
    * The dirction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint along the spine
    * of the selected vertex. Saved as a string as a hack to get around the hessian library's problem
@@ -52,9 +42,25 @@ public class ConeTemplate extends RadiusTemplate {
    */
   private String direction = Direction.SOUTH_EAST.name();
 
+  public ConeTemplate() {}
+
+  public ConeTemplate(GUID id) {
+    super(id);
+  }
+
+  public ConeTemplate(ConeTemplate other) {
+    super(other);
+    this.direction = other.direction;
+  }
+
   /*---------------------------------------------------------------------------------------------
    * Instance Methods
    *-------------------------------------------------------------------------------------------*/
+
+  @Override
+  public Drawable copy() {
+    return new ConeTemplate(this);
+  }
 
   /**
    * Get the direction for this ConeTemplate.
@@ -257,21 +263,9 @@ public class ConeTemplate extends RadiusTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  /**
-   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
-   */
-  public Rectangle getBounds() {
-    if (MapTool.getCampaign().getZone(getZoneId()) == null) {
-      // How does this happen ?! Anyway, try to use the current zone (since that's what we're
-      // drawing anyway, seems reasonable
-      if (MapTool.getFrame().getCurrentZoneRenderer() == null) {
-        // Wha?!
-        return new Rectangle();
-      }
-      setZoneId(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId());
-    }
-
-    int gridSize = MapTool.getCampaign().getZone(getZoneId()).getGrid().getSize();
+  @Override
+  public Rectangle getBounds(Zone zone) {
+    int gridSize = zone.getGrid().getSize();
     int quadrantSize = getRadius() * gridSize + BOUNDS_PADDING;
 
     // Find the x,y loc
@@ -307,11 +301,7 @@ public class ConeTemplate extends RadiusTemplate {
   }
 
   @Override
-  public Area getArea() {
-    if (getZoneId() == null) {
-      return new Area();
-    }
-    Zone zone = getCampaign().getZone(getZoneId());
+  public @Nonnull Area getArea(Zone zone) {
     if (zone == null) {
       return new Area();
     }
@@ -352,7 +342,6 @@ public class ConeTemplate extends RadiusTemplate {
     var dto = ConeTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
-        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto())
         .setDirection(getDirection().name());
@@ -360,5 +349,19 @@ public class ConeTemplate extends RadiusTemplate {
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setConeTemplate(dto).build();
+  }
+
+  public static ConeTemplate fromDto(ConeTemplateDto dto) {
+    var id = GUID.valueOf(dto.getId());
+    var drawable = new ConeTemplate(id);
+    drawable.setRadius(dto.getRadius());
+    var vertex = dto.getVertex();
+    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
+    drawable.setDirection(AbstractTemplate.Direction.valueOf(dto.getDirection()));
+    if (dto.hasName()) {
+      drawable.setName(dto.getName().getValue());
+    }
+    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
+    return drawable;
   }
 }

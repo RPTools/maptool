@@ -18,20 +18,22 @@ plugins {
     id "base"
     id "java"
     id "org.ajoberstar.grgit" version "5.2.1"
-    id "com.diffplug.spotless" version "6.25.0"
     id 'org.openjfx.javafxplugin' version '0.0.13'
     id 'org.beryx.runtime' version '1.13.0'
     id "com.google.protobuf" version "0.9.4"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
+
+    id "com.diffplug.spotless" version "6.25.0" apply false
 }
+
+allprojects {
+    apply plugin: "com.diffplug.spotless"
+}
+
+apply from: rootProject.file('buildSrc/shared.gradle')
 
 // Definitions
 defaultTasks 'clean', 'build'
-
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
 
 def javaArgs = [
         "-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
@@ -112,31 +114,17 @@ ext {
     println "OS Detected: " + osdetector.os
 }
 
+
 spotless {
     java {
-        target project.fileTree(project.rootDir) {
+        target project.fileTree(project.projectDir) {
             include 'src/**/*.java'
             exclude '**/JTextAreaAppender.java'
             exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Flat*ContrastIJTheme.java'
             exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Utils.java'
         }
-        licenseHeaderFile 'spotless.license.java'
-        toggleOffOn()
-
-        // Now using the Google Java style guide
-        googleJavaFormat("1.17.0")
-    }
-
-    format 'misc', {
-        target '**/*.gradle', '**/.gitignore'
-
-        // spotless has built-in rules for most basic formatting tasks
-        trimTrailingWhitespace()
-        // or spaces. Takes an integer argument if you don't like 4
-        indentWithSpaces(4)
     }
 }
-
 
 // org.openjfx.javafxplugin
 javafx {
@@ -325,22 +313,12 @@ runtime {
         }
     }
 }
-// In this section you declare where to find the dependencies of your project
-repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    mavenLocal()
-    mavenCentral()
-    maven { url = 'https://maptool.craigs-stuff.net/repo/' }
-    maven { url = 'https://jitpack.io' }
-    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
-    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
-}
-
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
     forms group: 'com.jetbrains.intellij.java', name: 'java-compiler-ant-tasks', version: '233.14475.56'
+
+    implementation project(':clientserver')
 
     implementation group: 'org.apache.logging.log4j', name: 'log4j-core', version: '2.22.1'
     implementation group: 'org.apache.logging.log4j', name: 'log4j-api', version: '2.22.1'
@@ -393,17 +371,6 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-grids', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
-
-    // webserver for old webapp that is scheduled for removal
-    implementation 'org.eclipse.jetty:jetty-server:9.4.51.v20230217'
-    implementation 'org.eclipse.jetty:jetty-servlet:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty:jetty-webapp:9.4.44.v20210927'
-    implementation 'org.eclipse.jetty:jetty-continuation:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-client:9.4.53.v20231009'
-    implementation 'org.eclipse.jetty.websocket:websocket-server:9.4.54.v20240208'
-    implementation 'org.eclipse.jetty.websocket:websocket-servlet:9.4.42.v20210604'
-    implementation 'org.eclipse.jetty.websocket:websocket-api:9.4.42.v20210604'
-
 
     // old json lib only used for one macro function. Use gson instead
     implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
@@ -492,16 +459,6 @@ dependencies {
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
 
-    // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.6'
-    implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
-    if (osdetector.os.is('windows'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:windows-x86_64'
-    else if (osdetector.os.is('osx'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:macos-x86_64'
-    else if (osdetector.os.is('linux'))
-        implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0:linux-x86_64'
-
     // protobuf
     implementation "io.grpc:grpc-protobuf:1.61.1"
     implementation "com.google.protobuf:protobuf-java-util:3.25.2"
@@ -516,9 +473,6 @@ dependencies {
     implementation 'org.jsoup:jsoup:1.17.2'
     // eventbus
     implementation 'com.google.guava:guava:33.0.0-jre'
-    // compression of messages between client and server
-    implementation 'org.apache.commons:commons-compress:1.26.0'
-    implementation 'com.github.luben:zstd-jni:1.5.5-11'
     // intellij forms runtime
     implementation 'com.jetbrains.intellij.java:java-gui-forms-rt:241.12019'
     // layout for forms created in code

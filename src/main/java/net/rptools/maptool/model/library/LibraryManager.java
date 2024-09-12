@@ -74,7 +74,7 @@ public class LibraryManager {
   private static final AddOnSlashCommandManager addOnSlashCommandManager =
       new AddOnSlashCommandManager();
 
-  static {
+  public static void init() {
     libraryTokenManager.init();
     builtInLibraryManager.loadBuiltIns();
     new MapToolEventBus().getMainEventBus().register(addOnSlashCommandManager);

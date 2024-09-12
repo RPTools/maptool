@@ -14,8 +14,7 @@
  */
 package net.rptools.maptool.client.functions;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonElement;
+import com.google.gson.*;
 import com.google.gson.reflect.TypeToken;
 import java.awt.Desktop;
 import java.io.IOException;
@@ -218,10 +217,11 @@ public class RESTfulFunctions extends AbstractFunction {
       throws ParserException {
 
     // Execute the call and check the response...
+    JsonObject errjson = new JsonObject();
     try (Response response = client.newCall(request).execute()) {
       if (!response.isSuccessful() && !fullResponse) {
-        throw new ParserException(
-            I18N.getText("macro.function.rest.error.response", functionName, response.code()));
+        errjson.addProperty("error", response.code());
+        return errjson;
       }
 
       if (fullResponse) {
@@ -231,7 +231,8 @@ public class RESTfulFunctions extends AbstractFunction {
       }
 
     } catch (IllegalArgumentException | IOException e) {
-      throw new ParserException(I18N.getText("macro.function.rest.error.unknown", functionName, e));
+      errjson.addProperty("error", e.toString());
+      return errjson;
     }
   }
 
