@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -280,6 +281,39 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   @HostAccess.Export
   public List<String> getActiveStates() {
     return this.token.getSetStates();
+  }
+
+  @HostAccess.Export
+  public BigDecimal getBar(String barName) {
+    Object currentBar = this.token.getState(barName);
+    return currentBar == null ? BigDecimal.ZERO : (BigDecimal) currentBar;
+  }
+
+  @HostAccess.Export
+  public void setBar(String barName, double aValue) {
+    BigDecimal value = BigDecimal.valueOf(aValue);
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(barName, value);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, barName, value);
+    }
+  }
+
+  @HostAccess.Export
+  public boolean isBarVisible(String barName) {
+    Object currentBar = this.token.getState(barName);
+    return currentBar != null;
+  }
+
+  @HostAccess.Export
+  public void setBarVisible(String barName, boolean show) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(barName, show);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, barName, show);
+    }
   }
 
   @HostAccess.Export
