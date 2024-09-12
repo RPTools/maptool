@@ -20,6 +20,7 @@ import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
@@ -48,7 +49,23 @@ public class UPnPUtil {
       while (e.hasMoreElements()) {
         NetworkInterface ni = e.nextElement();
         try {
-          if (ni.isUp() && !ni.isLoopback() && !ni.isVirtual()) {
+          var addresses = Collections.list(ni.getInetAddresses());
+          if (ni.isLoopback()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is a loopback",
+                ni.getDisplayName(),
+                addresses);
+          } else if (ni.isVirtual()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is virtual",
+                ni.getDisplayName(),
+                addresses);
+          } else if (!ni.isUp()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is not up",
+                ni.getDisplayName(),
+                addresses);
+          } else {
             int found = 0;
             try {
               log.info(
