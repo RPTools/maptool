@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.script.javascript.api;
 
+import java.math.BigDecimal;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
@@ -22,6 +23,7 @@ import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
@@ -120,11 +122,60 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
+  public String getRawProperty(String name) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      Object val = this.token.getProperty(name);
+      // Short-circuit to returning null so we don't return "null"
+      if (val == null) {
+        return null;
+      }
+      return "" + val;
+    }
+    return null;
+  }
+
+  @HostAccess.Export
   public String getProperty(String name) {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
     if (trusted || token.isOwner(playerId)) {
-      return "" + this.token.getProperty(name);
+      Object val = this.token.getProperty(name);
+      // Fall back to the property type's default value
+      // since it's not useful to return nulls and require
+      // javascript to have to handle defaults when getInfo isn't even bound,
+      // especially when the value gets unset if it matches the default.
+      // Evaluation is not performed automatically, use getEvaluatedProperty for that.
+      if (val == null) {
+        List<TokenProperty> propertyList =
+            MapTool.getCampaign()
+                .getCampaignProperties()
+                .getTokenPropertyList(this.token.getPropertyType());
+        if (propertyList != null) {
+          for (TokenProperty property : propertyList) {
+            if (name.equalsIgnoreCase(property.getName())) {
+              val = property.getDefaultValue();
+              break;
+            }
+          }
+        }
+      }
+      if (val == null) {
+        return null;
+      }
+      return "" + val;
+    }
+    return null;
+  }
+
+  @HostAccess.Export
+  public String getEvaluatedProperty(String name) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      Object val = this.token.getEvaluatedProperty(name);
+      return "" + val;
     }
     return "";
   }
@@ -230,6 +281,39 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   @HostAccess.Export
   public List<String> getActiveStates() {
     return this.token.getSetStates();
+  }
+
+  @HostAccess.Export
+  public BigDecimal getBar(String barName) {
+    Object currentBar = this.token.getState(barName);
+    return currentBar == null ? BigDecimal.ZERO : (BigDecimal) currentBar;
+  }
+
+  @HostAccess.Export
+  public void setBar(String barName, double aValue) {
+    BigDecimal value = BigDecimal.valueOf(aValue);
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(barName, value);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, barName, value);
+    }
+  }
+
+  @HostAccess.Export
+  public boolean isBarVisible(String barName) {
+    Object currentBar = this.token.getState(barName);
+    return currentBar != null;
+  }
+
+  @HostAccess.Export
+  public void setBarVisible(String barName, boolean show) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (trusted || token.isOwner(playerId)) {
+      this.token.setState(barName, show);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setState, barName, show);
+    }
   }
 
   @HostAccess.Export
