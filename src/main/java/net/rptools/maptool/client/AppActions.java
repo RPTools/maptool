@@ -2162,8 +2162,9 @@ public class AppActions {
                 StartServerDialog dialog = new StartServerDialog();
                 dialog.showDialog();
 
-                if (!dialog.accepted()) // Results stored in Preferences.userRoot()
-                return;
+                if (!dialog.accepted()) { // Results stored in Preferences.userRoot()
+                  return;
+                }
 
                 StartServerDialogPreferences serverProps =
                     new StartServerDialogPreferences(); // data retrieved from
@@ -2232,7 +2233,15 @@ public class AppActions {
 
                   // Use UPnP to open port in router
                   if (serverProps.getUseUPnP()) {
-                    UPnPUtil.openPort(serverProps.getPort());
+                    MapTool.getFrame()
+                        .showFilledGlassPane(
+                            new StaticMessageDialog(
+                                I18N.getText("msg.info.server.upnp.discovering")));
+                    try {
+                      UPnPUtil.openPort(serverProps.getPort());
+                    } finally {
+                      MapTool.getFrame().hideGlassPane();
+                    }
                   }
                   // Right now set this is set to whatever the last server settings were. If we
                   // wanted to turn it on and
