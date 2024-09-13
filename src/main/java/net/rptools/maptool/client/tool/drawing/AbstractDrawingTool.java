@@ -34,6 +34,7 @@ import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
@@ -116,7 +117,7 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     AffineTransform transform = getPaintTransform(renderer);
     AffineTransform oldTransform = g.getTransform();
     g.transform(transform);
-    drawing.draw(renderer.getZone(), g, pen);
+    drawing.draw(g, pen);
     g.setTransform(oldTransform);
   }
 
@@ -219,7 +220,8 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
   }
 
   protected Area getTokenTopology(Zone.TopologyType topologyType) {
-    List<Token> topologyTokens = getZone().getTokensWithTopology(topologyType);
+    List<Token> topologyTokens =
+        MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
 
     Area tokenTopology = new Area();
     for (Token topologyToken : topologyTokens) {
@@ -324,16 +326,15 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
    * Render a drawable on a zone. This method consolidates all of the calls to the server in one
    * place so that it is easier to keep them in sync.
    *
+   * @param zoneId Id of the zone where the <code>drawable</code> is being drawn.
    * @param pen The pen used to draw.
    * @param drawable What is being drawn.
    */
-  protected void completeDrawable(Pen pen, Drawable drawable) {
-    var zone = getZone();
-
+  protected void completeDrawable(GUID zoneId, Pen pen, Drawable drawable) {
     if (!hasPaint(pen)) {
       return;
     }
-    if (drawable.getBounds(zone) == null) {
+    if (drawable.getBounds() == null) {
       return;
     }
     if (MapTool.getPlayer().isGM()) {
@@ -347,10 +348,11 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     MapToolUtil.uploadTexture(pen.getBackgroundPaint());
 
     // Tell the local/server to render the drawable.
-    MapTool.serverCommand().draw(zone.getId(), pen, drawable);
+    MapTool.serverCommand().draw(zoneId, pen, drawable);
 
     // Allow it to be undone
-    zone.addDrawable(pen, drawable);
+    Zone z = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+    z.addDrawable(pen, drawable);
   }
 
   private boolean hasPaint(Pen pen) {

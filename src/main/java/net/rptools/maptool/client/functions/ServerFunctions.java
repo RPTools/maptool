@@ -17,7 +17,6 @@ package net.rptools.maptool.client.functions;
 import java.math.BigDecimal;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.parser.Parser;
@@ -57,11 +56,9 @@ public class ServerFunctions extends AbstractFunction {
         if (parameters.size() == 1) {
           BigDecimal ml = (BigDecimal) parameters.get(0);
           if (ml.intValue() == 0 || ml.intValue() == 1) {
-            MapToolClient client = MapTool.getClient();
-            ServerPolicy policy = client.getServerPolicy();
+            ServerPolicy policy = MapTool.getServerPolicy();
             policy.setIsMovementLocked(ml.intValue() != 0);
-            client.setServerPolicy(policy);
-            client.getServerCommand().setServerPolicy(policy);
+            MapTool.updateServerPolicy(policy);
           } else {
             throw new ParserException(
                 I18N.getText("macro.function.general.argumentTypeInvalid", "setmovelock"));

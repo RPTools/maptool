@@ -17,8 +17,9 @@ package net.rptools.maptool.model.drawing;
 import com.google.protobuf.StringValue;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.geom.Area;
-import javax.annotation.Nonnull;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
@@ -32,19 +33,17 @@ import net.rptools.maptool.server.proto.drawing.RadiusCellTemplateDto;
  * @author naciron
  */
 public class RadiusCellTemplate extends AbstractTemplate {
+
+  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
+  private final ShapeDrawable renderer = new ShapeDrawable(new Rectangle());
+
+  /** Renderer for the blast. The {@link Shape} is just a rectangle. */
+  private final ShapeDrawable vertexRenderer = new ShapeDrawable(new Rectangle());
+
   public RadiusCellTemplate() {}
 
   public RadiusCellTemplate(GUID id) {
     super(id);
-  }
-
-  public RadiusCellTemplate(RadiusCellTemplate other) {
-    super(other);
-  }
-
-  @Override
-  public Drawable copy() {
-    return new RadiusCellTemplate(this);
   }
 
   /**
@@ -151,13 +150,20 @@ public class RadiusCellTemplate extends AbstractTemplate {
     }
   }
 
-  @Override
-  protected void paint(Zone zone, Graphics2D g, boolean border, boolean area) {
+  /**
+   * Paint the border or area of the template
+   *
+   * @param g Where to paint
+   * @param border Paint the border?
+   * @param area Paint the area?
+   */
+  protected void paint(Graphics2D g, boolean border, boolean area) {
     int radius = getRadius();
+    GUID zoneId = getZoneId();
 
-    if (zone == null || radius == 0) {
-      return;
-    }
+    if (radius == 0) return;
+    Zone zone = MapTool.getCampaign().getZone(zoneId);
+    if (zone == null) return;
 
     // Find the proper distance
     int gridSize = zone.getGrid().getSize();
@@ -169,12 +175,8 @@ public class RadiusCellTemplate extends AbstractTemplate {
         int yOff = y * gridSize;
 
         // Template specific painting
-        if (border) {
-          paintBorder(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
-        }
-        if (area) {
-          paintArea(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
-        }
+        if (border) paintBorder(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
+        if (area) paintArea(g, x, y, xOff, yOff, gridSize, getDistance(x, y));
       } // endfor
     } // endfor
   }
@@ -219,8 +221,15 @@ public class RadiusCellTemplate extends AbstractTemplate {
    * Drawable Interface Methods
    *-------------------------------------------------------------------------------------------*/
 
-  @Override
-  public Rectangle getBounds(Zone zone) {
+  /**
+   * @see net.rptools.maptool.model.drawing.Drawable#getBounds()
+   */
+  public Rectangle getBounds() {
+    if (getZoneId() == null) {
+      // This avoids a NPE when loading up a campaign
+      return new Rectangle();
+    }
+    Zone zone = MapTool.getCampaign().getZone(getZoneId());
     if (zone == null) {
       return new Rectangle();
     }
@@ -234,6 +243,40 @@ public class RadiusCellTemplate extends AbstractTemplate {
     var h = quadrantSize * 2 - gridSize;
 
     return new Rectangle(x, y, w, h);
+  }
+
+  /**
+   * This methods adjusts the rectangle in the renderer to match the new radius, vertex, or
+   * direction. Due to the fact that it is impossible to draw to the cardinal directions evenly when
+   * the radius is an even number and still stay in the squares, that case isn't allowed.
+   */
+  private void adjustShape() {
+    if (getZoneId() == null) return;
+    Zone zone;
+    if (MapTool.isHostingServer()) {
+      zone = MapTool.getServer().getCampaign().getZone(getZoneId());
+    } else {
+      zone = MapTool.getCampaign().getZone(getZoneId());
+    }
+    if (zone == null) return;
+
+    int gridSize = zone.getGrid().getSize();
+    Rectangle r = (Rectangle) vertexRenderer.getShape();
+    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
+    r = (Rectangle) renderer.getShape();
+    r.setBounds(getVertex().x, getVertex().y, gridSize, gridSize);
+    r.x -= getRadius() * gridSize;
+    r.y -= getRadius() * gridSize;
+    r.width = r.height = (getRadius() * 2 + 1) * gridSize;
+  }
+
+  /**
+   * @see net.rptools.maptool.model.drawing.AbstractTemplate#setRadius(int)
+   */
+  @Override
+  public void setRadius(int squares) {
+    super.setRadius(squares);
+    adjustShape();
   }
 
   /**
@@ -251,8 +294,22 @@ public class RadiusCellTemplate extends AbstractTemplate {
     return distance;
   }
 
+  /**
+   * @see
+   *     net.rptools.maptool.model.drawing.AbstractTemplate#setVertex(net.rptools.maptool.model.ZonePoint)
+   */
   @Override
-  public @Nonnull Area getArea(Zone zone) {
+  public void setVertex(ZonePoint vertex) {
+    super.setVertex(vertex);
+    adjustShape();
+  }
+
+  @Override
+  public Area getArea() {
+    if (getZoneId() == null) {
+      return new Area();
+    }
+    Zone zone = getCampaign().getZone(getZoneId());
     if (zone == null) {
       return new Area();
     }
@@ -287,24 +344,12 @@ public class RadiusCellTemplate extends AbstractTemplate {
     var dto = RadiusCellTemplateDto.newBuilder();
     dto.setId(getId().toString())
         .setLayer(getLayer().name())
+        .setZoneId(getZoneId().toString())
         .setRadius(getRadius())
         .setVertex(getVertex().toDto());
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
     return DrawableDto.newBuilder().setRadiusCellTemplate(dto).build();
-  }
-
-  public static RadiusCellTemplate fromDto(RadiusCellTemplateDto dto) {
-    var id = GUID.valueOf(dto.getId());
-    var drawable = new RadiusCellTemplate(id);
-    drawable.setRadius(dto.getRadius());
-    var vertex = dto.getVertex();
-    drawable.setVertex(new ZonePoint(vertex.getX(), vertex.getY()));
-    if (dto.hasName()) {
-      drawable.setName(dto.getName().getValue());
-    }
-    drawable.setLayer(Zone.Layer.valueOf(dto.getLayer()));
-    return drawable;
   }
 }

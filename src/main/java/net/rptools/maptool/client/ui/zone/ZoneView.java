@@ -336,9 +336,14 @@ public class ZoneView {
 
     final var p = FogUtil.calculateVisionCenter(lightSourceToken, zone);
     final var translateTransform = AffineTransform.getTranslateInstance(p.x, p.y);
+    final var magnifyTransform = AffineTransform.getScaleInstance(multiplier, multiplier);
 
+    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone);
     // Calculate exposed area
-    final var lightSourceArea = lightSource.getArea(lightSourceToken, zone, multiplier);
+    // Jamz: OK, let not have lowlight vision type multiply darkness radius
+    if (multiplier != 1 && lightSource.getType() == LightSource.Type.NORMAL) {
+      lightSourceArea.transform(magnifyTransform);
+    }
     lightSourceArea.transform(translateTransform);
 
     Area lightSourceVisibleArea = lightSourceArea;
@@ -360,16 +365,35 @@ public class ZoneView {
 
     final var litAreas = new ArrayList<ContributedLight>();
 
-    for (final var lightArea : lightSource.getLightAreas(lightSourceToken, zone, multiplier)) {
-      var area = lightArea.area();
-      var light = lightArea.light();
+    // Tracks the cummulative inner ranges of light sources so that we can cut them out of the
+    // outer ranges and end up with disjoint sets, even when magnifying.
+    // Note that this "hole punching" has nothing to do with lumen strength, it's just a way of
+    // making smaller ranges act as lower bounds for larger ranges.
+    final var cummulativeNotTransformedArea = new Area();
+    for (final var light : lightSource.getLightList()) {
+      final var notScaledLightArea =
+          light.getArea(lightSourceToken, zone, lightSource.isScaleWithToken());
+      if (notScaledLightArea == null) {
+        continue;
+      }
+      final var lightArea = new Area(notScaledLightArea);
 
-      area.transform(translateTransform);
-      area.intersect(lightSourceVisibleArea);
+      // Lowlight vision does not magnify darkness.
+      if (multiplier != 1
+          && lightSource.getType() == LightSource.Type.NORMAL
+          && light.getLumens() >= 0) {
+        lightArea.transform(magnifyTransform);
+      }
+
+      lightArea.subtract(cummulativeNotTransformedArea);
+      lightArea.transform(translateTransform);
+      lightArea.intersect(lightSourceVisibleArea);
 
       litAreas.add(
           new ContributedLight(
-              new LitArea(light.getLumens(), area), new LightInfo(lightSource, light)));
+              new LitArea(light.getLumens(), lightArea), new LightInfo(lightSource, light)));
+
+      cummulativeNotTransformedArea.add(notScaledLightArea);
     }
 
     // Magnification can cause different ranges for a single light source to overlap. This is not

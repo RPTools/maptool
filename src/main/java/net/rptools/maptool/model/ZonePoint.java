@@ -19,8 +19,8 @@ public final class ZonePoint extends AbstractPoint {
     super(x, y);
   }
 
-  public ZonePoint(ZonePoint other) {
-    this(other.x, other.y);
+  public ZonePoint(ZonePoint point) {
+    super(point.x, point.y);
   }
 
   @Override

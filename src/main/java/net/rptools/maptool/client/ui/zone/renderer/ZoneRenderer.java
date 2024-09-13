@@ -77,9 +77,11 @@ import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.jetbrains.annotations.NotNull;
 
 /** */
-public class ZoneRenderer extends JComponent implements DropTargetListener {
+public class ZoneRenderer extends JComponent
+    implements DropTargetListener, Comparable<ZoneRenderer> {
 
   private static final long serialVersionUID = 3832897780066104884L;
   private static final Logger log = LogManager.getLogger(ZoneRenderer.class);
@@ -105,7 +107,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   private final SelectionModel selectionModel;
 
   private Scale zoneScale;
-  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers;
+  private final Map<Zone.Layer, DrawableRenderer> drawableRenderers =
+      CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new PartitionedDrawableRenderer());
   private final List<ZoneOverlay> overlayList = new ArrayList<ZoneOverlay>();
   private final Map<Zone.Layer, List<TokenLocation>> tokenLocationMap =
       new HashMap<Zone.Layer, List<TokenLocation>>();
@@ -169,10 +172,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     this.zone = zone;
     zoneView = new ZoneView(zone);
     setZoneScale(new Scale());
-
-    drawableRenderers =
-        CollectionUtil.newFilledEnumMap(
-            Zone.Layer.class, layer -> new PartitionedDrawableRenderer(zone));
 
     var renderHelper = new RenderHelper(this, tempBufferPool);
     this.compositor = new ZoneCompositor();
@@ -3514,10 +3513,16 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     if (event.zone() != this.zone) {
       return;
     }
-
-    // A change in grid can change the size of templates.
-    flushDrawableRenderer();
     repaintDebouncer.dispatch();
+  }
+
+  //
+  // COMPARABLE
+  public int compareTo(@NotNull ZoneRenderer o) {
+    if (o != this) {
+      return (int) (zone.getCreationTime() - o.zone.getCreationTime());
+    }
+    return 0;
   }
 
   // Begin token common macro identification

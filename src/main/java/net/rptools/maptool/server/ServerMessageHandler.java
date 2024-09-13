@@ -282,6 +282,7 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
+          MapTool.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setGmMacroButtonPropertiesArray(campaignMacros);
         });
   }
@@ -293,6 +294,7 @@ public class ServerMessageHandler implements MessageHandler {
               msg.getMacrosList().stream()
                   .map(MacroButtonProperties::fromDto)
                   .collect(Collectors.toList());
+          MapTool.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
           server.getCampaign().setMacroButtonPropertiesArray(campaignMacros);
         });
   }
@@ -414,12 +416,10 @@ public class ServerMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-          if (zone != null) {
-            Grid grid = zone.getGrid();
-            grid.setSize(msg.getSize());
-            grid.setOffset(msg.getXOffset(), msg.getYOffset());
-            zone.setGridColor(msg.getColor());
-          }
+          Grid grid = zone.getGrid();
+          grid.setSize(msg.getSize());
+          grid.setOffset(msg.getXOffset(), msg.getYOffset());
+          zone.setGridColor(msg.getColor());
         });
   }
 
@@ -690,7 +690,7 @@ public class ServerMessageHandler implements MessageHandler {
 
   private void handle(BootPlayerMsg bootPlayerMsg) {
     // And just to be sure, remove them from the server
-    server.bootPlayer(bootPlayerMsg.getPlayerName());
+    server.releaseClientConnection(server.getConnectionId(bootPlayerMsg.getPlayerName()));
   }
 
   private void handle(String id, UpdatePlayerStatusMsg updatePlayerStatusMsg) {
@@ -704,11 +704,11 @@ public class ServerMessageHandler implements MessageHandler {
   }
 
   private void sendToClients(String excludedId, Message message) {
-    server.broadcastMessage(new String[] {excludedId}, message);
+    server.getConnection().broadcastMessage(new String[] {excludedId}, message);
   }
 
   private void sendToAllClients(Message message) {
-    server.broadcastMessage(message);
+    server.getConnection().broadcastMessage(message);
   }
 
   private void bringTokensToFront(GUID zoneGUID, Set<GUID> tokenSet) {
@@ -750,10 +750,12 @@ public class ServerMessageHandler implements MessageHandler {
               AssetManager.getAssetInfo(assetID).getProperty(AssetManager.NAME),
               AssetManager.getAssetCacheFile(assetID));
       var msg = StartAssetTransferMsg.newBuilder().setHeader(producer.getHeader().toDto());
-      server.sendMessage(
-          id,
-          MapToolConstants.Channel.IMAGE,
-          Message.newBuilder().setStartAssetTransferMsg(msg).build());
+      server
+          .getConnection()
+          .sendMessage(
+              id,
+              MapToolConstants.Channel.IMAGE,
+              Message.newBuilder().setStartAssetTransferMsg(msg).build());
       server.addAssetProducer(id, producer);
 
     } catch (IllegalArgumentException iae) {
@@ -762,14 +764,14 @@ public class ServerMessageHandler implements MessageHandler {
       // image instead of blowing up
       Asset asset = Asset.createBrokenImageAsset(assetID);
       var msg = PutAssetMsg.newBuilder().setAsset(asset.toDto());
-      server.sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
+      server.getConnection().sendMessage(id, Message.newBuilder().setPutAssetMsg(msg).build());
     }
   }
 
   private void getZone(String id, GUID zoneGUID) {
     var zone = server.getCampaign().getZone(zoneGUID);
     var msg = PutZoneMsg.newBuilder().setZone(zone.toDto());
-    server.sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
+    server.getConnection().sendMessage(id, Message.newBuilder().setPutZoneMsg(msg).build());
   }
 
   private void putToken(String clientId, GUID zoneGUID, Token token) {
@@ -791,7 +793,9 @@ public class ServerMessageHandler implements MessageHandler {
               .setTokenGuid(token.getId().toString())
               .setProperty(TokenUpdateDto.valueOf(Token.Update.setZOrder.name()))
               .addValues(0, TokenPropertyValueDto.newBuilder().setIntValue(zOrder));
-      server.sendMessage(clientId, Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
+      server
+          .getConnection()
+          .sendMessage(clientId, Message.newBuilder().setUpdateTokenPropertyMsg(msg).build());
     }
   }
 

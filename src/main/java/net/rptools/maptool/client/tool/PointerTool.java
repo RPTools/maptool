@@ -662,12 +662,13 @@ public class PointerTool extends DefaultTool {
   // MouseMotion
   @Override
   public void mouseMoved(MouseEvent e) {
-    super.mouseMoved(e);
-
     if (renderer == null) {
       return;
     }
+    super.mouseMoved(e);
 
+    // mouseX = e.getX(); // done by super.mouseMoved()
+    // mouseY = e.getY();
     if (isShowingPointer) {
       ZonePoint zp = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
       Pointer pointer =

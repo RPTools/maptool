@@ -25,7 +25,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
-import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.lib.FileUtil;
@@ -359,7 +358,7 @@ public abstract class Grid implements Cloneable {
    * @param scaleWithToken used to increase the area based on token footprint
    * @return Area
    */
-  public @Nonnull Area getShapedArea(
+  public Area getShapedArea(
       ShapeType shape,
       Token token,
       double range,

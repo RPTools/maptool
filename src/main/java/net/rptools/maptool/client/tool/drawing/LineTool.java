@@ -65,13 +65,12 @@ public class LineTool extends AbstractLineTool implements MouseMotionListener {
 
   @Override
   public void mouseMoved(MouseEvent e) {
-    super.mouseMoved(e);
-
     if (getLine() != null) {
       if (tempPoint != null) {
         removePoint(tempPoint);
       }
       tempPoint = addPoint(e);
     }
+    super.mouseMoved(e);
   }
 }

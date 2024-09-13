@@ -77,22 +77,22 @@ public class PolygonExposeTool extends PolygonTool implements MouseMotionListene
 
     if (line == null) return; // Escape has been pressed
     addPoint(e);
-    completeDrawable(getPen(), line);
+    completeDrawable(renderer.getZone().getId(), getPen(), line);
     resetTool();
   }
 
   @Override
-  protected void completeDrawable(Pen pen, Drawable drawable) {
+  protected void completeDrawable(GUID zoneId, Pen pen, Drawable drawable) {
     if (!MapTool.getPlayer().isGM()) {
       MapTool.showError("msg.error.fogexpose");
       MapTool.getFrame().refresh();
       return;
     }
-    Zone zone = getZone();
+    Zone zone = MapTool.getCampaign().getZone(zoneId);
 
     Polygon polygon = getPolygon((LineSegment) drawable);
     Area area = new Area(polygon);
-    Set<GUID> selectedToks = renderer.getSelectedTokenSet();
+    Set<GUID> selectedToks = MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokenSet();
     if (pen.isEraser()) {
       zone.hideArea(area, selectedToks);
       MapTool.serverCommand().hideFoW(zone.getId(), area, selectedToks);

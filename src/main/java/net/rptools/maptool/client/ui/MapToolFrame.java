@@ -228,8 +228,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   private final DragImageGlassPane dragImageGlassPane = new DragImageGlassPane();
 
-  private boolean dockingConfigured = false;
-
   private final class KeyListenerDeleteDraw implements KeyListener {
     private final JTree tree;
 
@@ -457,7 +455,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     restorePreferences();
     updateKeyStrokes();
 
-    initializeFrames();
+    // This will cause the frame to be set to visible (BAD jide, BAD! No cookie for you!)
+    configureDocking();
 
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
     chatTyperTimers = new ChatNotificationTimers();
@@ -546,6 +545,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void configureDocking() {
+    initializeFrames();
+
     getDockingManager().setProfileKey(DOCKING_PROFILE_NAME);
     getDockingManager().setOutlineMode(com.jidesoft.docking.DockingManager.PARTIAL_OUTLINE_MODE);
     getDockingManager().setUsePref(false);
@@ -616,16 +617,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       }
     }
     /* /Issue #2485 */
-  }
-
-  @Override
-  public void setVisible(boolean b) {
-    if (!dockingConfigured) {
-      dockingConfigured = true;
-      configureDocking();
-    }
-
-    super.setVisible(b);
   }
 
   public DockableFrame getFrame(MTFrame frame) {
@@ -1190,13 +1181,11 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
               tree.addSelectionInterval(rowIndex, rowIndex);
               if (row instanceof DrawnElement && e.getClickCount() == 2) {
                 DrawnElement de = (DrawnElement) row;
-                var renderer = getCurrentZoneRenderer();
-                var zone = renderer.getZone();
                 getCurrentZoneRenderer()
                     .centerOn(
                         new ZonePoint(
-                            (int) de.getDrawable().getBounds(zone).getCenterX(),
-                            (int) de.getDrawable().getBounds(zone).getCenterY()));
+                            (int) de.getDrawable().getBounds().getCenterX(),
+                            (int) de.getDrawable().getBounds().getCenterY()));
               }
               /*
                * int[] treeRows = tree.getSelectionRows(); java.util.Arrays.sort(treeRows); drawablesPanel.clearSelectedIds(); for (int i = 0; i < treeRows.length; i++) { TreePath p =
@@ -1960,8 +1949,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void close() {
+    ServerDisconnectHandler.disconnectExpected = true;
     MapTool.disconnect();
-    MapTool.stopServer();
 
     getDockingManager()
         .saveLayoutDataToFile(AppUtil.getAppHome("config").getAbsolutePath() + "/layout.dat");

@@ -599,7 +599,7 @@ public class MacroLinkFunction extends AbstractFunction {
     playerName = (!playerNameMatch.equals("")) ? playerNameMatch : playerName;
 
     // Validate
-    if (!MapTool.getClient().isPlayerConnected(playerName)) {
+    if (!MapTool.isPlayerConnected(playerName)) {
       MapTool.addLocalMessage(I18N.getText("msg.error.playerNotConnected", playerName));
       return;
     }

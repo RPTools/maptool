@@ -29,7 +29,6 @@ import java.util.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.DeveloperOptions;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -45,7 +44,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
   private static final int CHUNK_SIZE = 256;
   private static List<BufferedImage> unusedChunkList = new LinkedList<BufferedImage>();
 
-  private final Zone zone;
   private final Set<String> noImageSet = new HashSet<String>();
   private final List<Tuple> chunkList = new LinkedList<Tuple>();
   private int maxChunks;
@@ -57,10 +55,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
   private int verticalChunkCount;
 
   private boolean dirty = false;
-
-  public PartitionedDrawableRenderer(Zone zone) {
-    this.zone = zone;
-  }
 
   public void flush() {
     int unusedSize = unusedChunkList.size();
@@ -224,13 +218,12 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
     for (DrawnElement element : drawableList) {
       timer.start("createChunk:calculate");
       Drawable drawable = element.getDrawable();
-      Rectangle drawableBounds = drawable.getBounds(zone);
-      if (drawableBounds == null) {
+      if (drawable.getBounds() == null) {
         timer.stop("createChunk:calculate");
         continue;
       }
 
-      Rectangle2D drawnBounds = new Rectangle(drawableBounds);
+      Rectangle2D drawnBounds = new Rectangle(drawable.getBounds());
       Rectangle2D chunkBounds =
           new Rectangle(
               (int) (gridx * (CHUNK_SIZE / scale)),
@@ -287,7 +280,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
         Graphics2D g2 = image.createGraphics();
         g2.drawImage(groupImage, 0, 0, CHUNK_SIZE, CHUNK_SIZE, null);
         g2.dispose();
-      } else drawable.draw(zone, g, pen);
+      } else drawable.draw(g, pen);
       g.setComposite(oldComposite);
       timer.stop("createChunk:Draw");
     }

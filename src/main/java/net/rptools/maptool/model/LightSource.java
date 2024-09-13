@@ -216,50 +216,6 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
     return ignoresVBL;
   }
 
-  public record LightArea(Light light, Area area) {}
-
-  public @Nonnull List<LightArea> getLightAreas(
-      @Nonnull Token token, @Nonnull Zone zone, double multiplier) {
-    // Tracks the cumulative inner ranges of light sources so that we can cut them out of the
-    // outer ranges and end up with disjoint sets, even when magnifying.
-    // Note that this "hole punching" has nothing to do with lumen strength, it's just a way of
-    // making smaller ranges act as lower bounds for larger ranges.
-
-    // Auras do not get magnified.
-    if (type != Type.NORMAL) {
-      multiplier = 1.0;
-    }
-
-    final var result = new ArrayList<LightArea>();
-    final var cummulativeNotTransformedArea = new Area();
-
-    for (final var light : lightList) {
-      final var notScaledLightArea = light.getArea(token, zone, scaleWithToken);
-
-      final var lightArea = light.getArea(token, zone, multiplier, scaleWithToken);
-      lightArea.subtract(cummulativeNotTransformedArea);
-      result.add(new LightArea(light, lightArea));
-
-      cummulativeNotTransformedArea.add(notScaledLightArea);
-    }
-    return result;
-  }
-
-  /* Area for all lights combined */
-  public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, double multiplier) {
-    // Auras do not get magnified.
-    if (type != Type.NORMAL) {
-      multiplier = 1.0;
-    }
-
-    Area area = new Area();
-    for (Light light : lightList) {
-      area.add(light.getArea(token, zone, multiplier, isScaleWithToken()));
-    }
-
-    return area;
-  }
-
   /*
    * Area for a single light, subtracting any previous lights
    */
@@ -276,7 +232,12 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
 
   /* Area for all lights combined */
   public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone) {
-    return getArea(token, zone, 1.0);
+    Area area = new Area();
+    for (Light light : lightList) {
+      area.add(light.getArea(token, zone, isScaleWithToken()));
+    }
+
+    return area;
   }
 
   @SuppressWarnings("unchecked")

@@ -14,23 +14,68 @@
  */
 package net.rptools.maptool.server;
 
-import java.util.function.BiConsumer;
+import java.util.concurrent.ExecutionException;
+import net.rptools.clientserver.simple.MessageHandler;
+import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.maptool.model.player.Player;
 
-public interface Handshake<T> {
+public interface Handshake extends MessageHandler {
 
-  void whenComplete(BiConsumer<? super T, ? super Throwable> callback);
+  /**
+   * Returns if the handshake has been successful or not.
+   *
+   * @return {@code true} if the handshake has been successful, {code false} if it has failed or is
+   *     still in progress.
+   */
+  boolean isSuccessful();
 
-  /** Starts the handshake process. */
-  void startHandshake();
+  /**
+   * Returns the message for the error -- if any -- that occurred during the handshake.
+   *
+   * @return the message for the error that occurred during handshake.
+   */
+  String getErrorMessage();
 
-  class Failure extends Exception {
-    // TODO When we have access to I18N, force this to be translatable.
-    public Failure(String message) {
-      super(message);
-    }
+  /**
+   * Returns the connection for this {@code ServerHandshake}.
+   *
+   * @return the connection for this {@code ServerHandshake}.
+   */
+  Connection getConnection();
 
-    public Failure(String message, Throwable cause) {
-      super(message, cause);
-    }
-  }
+  /**
+   * Returns the exception -- if any -- that occurred during processing of the handshake.
+   *
+   * @return the exception that occurred during the processing of the handshake.
+   */
+  Exception getException();
+
+  /**
+   * Returns the player associated with the handshake.
+   *
+   * @return the player associated with the handshake.
+   */
+  Player getPlayer();
+
+  /**
+   * Adds an observer to the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void addObserver(HandshakeObserver observer);
+
+  /**
+   * Removes an observer from the handshake process.
+   *
+   * @param observer the observer of the handshake process.
+   */
+  void removeObserver(HandshakeObserver observer);
+
+  /**
+   * Starts the handshake process.
+   *
+   * @throws ExecutionException when there is an exception in the background task.
+   * @throws InterruptedException when the background task is interrupted.
+   */
+  void startHandshake() throws ExecutionException, InterruptedException;
 }

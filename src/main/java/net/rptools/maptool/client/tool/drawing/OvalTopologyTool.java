@@ -109,8 +109,6 @@ public class OvalTopologyTool extends AbstractDrawingTool implements MouseMotion
 
   @Override
   public void mouseMoved(MouseEvent e) {
-    super.mouseMoved(e);
-
     setIsEraser(isEraser(e));
     if (oval != null) {
       ZonePoint sp = getPoint(e);

@@ -21,6 +21,7 @@ import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
@@ -50,14 +51,14 @@ import org.apache.logging.log4j.Logger;
  * the {@link ServerMessageHandler ServerMessageHandler}
  */
 public class ServerCommandClientImpl implements ServerCommand {
+
+  private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
+  private final LinkedBlockingQueue<MD5Key> assetRetrieveQueue = new LinkedBlockingQueue<MD5Key>();
   private static final Logger log = LogManager.getLogger(ServerCommandClientImpl.class);
 
-  private final MapToolClient client;
-  private final TimedEventQueue movementUpdateQueue = new TimedEventQueue(100);
-
-  public ServerCommandClientImpl(MapToolClient client) {
-    this.client = client;
+  public ServerCommandClientImpl() {
     movementUpdateQueue.start();
+    // new AssetRetrievalThread().start();
   }
 
   public void heartbeat(String data) {
@@ -87,7 +88,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void setCampaignName(String name) {
-    client.getCampaign().setName(name);
+    MapTool.getCampaign().setName(name);
     MapTool.getFrame().setTitle();
     var msg = SetCampaignNameMsg.newBuilder().setName(name);
     makeServerCall(Message.newBuilder().setSetCampaignNameMsg(msg).build());
@@ -165,7 +166,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   }
 
   public void editToken(GUID zoneGUID, Token token) {
-    client.getCampaign().getZone(zoneGUID).editToken(token);
+    MapTool.getCampaign().getZone(zoneGUID).editToken(token);
     var msg = EditTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
     makeServerCall(Message.newBuilder().setEditTokenMsg(msg).build());
   }
@@ -174,7 +175,7 @@ public class ServerCommandClientImpl implements ServerCommand {
     // Hack to generate zone event. All functions that update tokens call this method
     // after changing the token. But they don't tell the zone about it so classes
     // waiting for the zone change event don't get it.
-    client.getCampaign().getZone(zoneGUID).putToken(token);
+    MapTool.getCampaign().getZone(zoneGUID).putToken(token);
     var msg = PutTokenMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setToken(token.toDto());
     makeServerCall(Message.newBuilder().setPutTokenMsg(msg).build());
   }
@@ -182,7 +183,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   @Override
   public void removeToken(GUID zoneGUID, GUID tokenGUID) {
     // delete local token immediately
-    client.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
+    MapTool.getCampaign().getZone(zoneGUID).removeToken(tokenGUID);
     var msg =
         RemoveTokenMsg.newBuilder()
             .setZoneGuid(zoneGUID.toString())
@@ -193,7 +194,7 @@ public class ServerCommandClientImpl implements ServerCommand {
   @Override
   public void removeTokens(GUID zoneGUID, List<GUID> tokenGUIDs) {
     // delete local tokens immediately
-    client.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
+    MapTool.getCampaign().getZone(zoneGUID).removeTokens(tokenGUIDs);
     var msg = RemoveTokensMsg.newBuilder().setZoneGuid(zoneGUID.toString());
     msg.addAllTokenGuid(tokenGUIDs.stream().map(t -> t.toString()).collect(Collectors.toList()));
     makeServerCall(Message.newBuilder().setRemoveTokensMsg(msg).build());
@@ -418,7 +419,7 @@ public class ServerCommandClientImpl implements ServerCommand {
 
   public void exposeFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks) {
     // Expose locally right away.
-    client.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
+    MapTool.getCampaign().getZone(zoneGUID).exposeArea(area, selectedToks);
     var msg = ExposeFowMsg.newBuilder().setZoneGuid(zoneGUID.toString()).setArea(Mapper.map(area));
     msg.addAllTokenGuid(selectedToks.stream().map(g -> g.toString()).collect(Collectors.toList()));
     makeServerCall(Message.newBuilder().setExposeFowMsg(msg).build());
@@ -517,15 +518,9 @@ public class ServerCommandClientImpl implements ServerCommand {
     makeServerCall(Message.newBuilder().setClearExposedAreaMsg(msg).build());
   }
 
-  private void makeServerCall(Message msg) {
-    log.debug(
-        "{} making server call {}; state is {}",
-        client.getPlayer().getName(),
-        msg.getMessageTypeCase(),
-        client.getState());
-
-    if (client.getState() == MapToolClient.State.Connected) {
-      client.getConnection().sendMessage(msg);
+  private static void makeServerCall(Message msg) {
+    if (MapTool.getConnection() != null) {
+      MapTool.getConnection().sendMessage(msg);
     }
   }
 
@@ -802,7 +797,7 @@ public class ServerCommandClientImpl implements ServerCommand {
    * some time interval. If a new event arrives before the time interval elapses, it is replaced. In
    * this way, only the most current version of the event is released.
    */
-  private class TimedEventQueue extends Thread {
+  private static class TimedEventQueue extends Thread {
 
     Message msg;
     long delay;

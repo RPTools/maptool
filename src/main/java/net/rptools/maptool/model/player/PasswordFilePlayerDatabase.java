@@ -66,7 +66,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public final class PasswordFilePlayerDatabase
-    implements ServerSidePlayerDatabase, PersistedPlayerDatabase {
+    implements PlayerDatabase, PersistedPlayerDatabase, PlayerDBPropertyChange {
 
   private static final Logger log = LogManager.getLogger(PasswordFilePlayerDatabase.class);
   private static final String PUBLIC_KEY_DIR = "keys";
@@ -88,6 +88,11 @@ public final class PasswordFilePlayerDatabase
   private final ReentrantLock passwordFileLock = new ReentrantLock();
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
+
+  public PasswordFilePlayerDatabase(File passwordFile)
+      throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
+    this(passwordFile, null);
+  }
 
   PasswordFilePlayerDatabase(File passwordFile, File additionalUsers)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
@@ -720,29 +725,12 @@ public final class PasswordFilePlayerDatabase
 
   @Override
   public void playerSignedIn(Player player) {
-    var alreadyExists = playerExists(player.getName());
     loggedInPlayers.playerSignedIn(player);
-
-    if (!alreadyExists) {
-      propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_ADDED, null, player.getName());
-    } else {
-      propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
-    }
   }
 
   @Override
   public void playerSignedOut(Player player) {
     loggedInPlayers.playerSignedOut(player);
-
-    if (playerExists(player.getName())) {
-      propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_CHANGED, null, player.getName());
-    } else {
-      propertyChangeSupport.firePropertyChange(
-          PlayerDBPropertyChange.PROPERTY_CHANGE_PLAYER_REMOVED, player, null);
-    }
   }
 
   @Override
@@ -751,7 +739,7 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getAllPlayers() {
+  public Set<Player> getAllPlayers() throws InterruptedException, InvocationTargetException {
     Set<Player> players = new HashSet<>(getOnlinePlayers());
 
     players.addAll(
@@ -763,8 +751,13 @@ public final class PasswordFilePlayerDatabase
   }
 
   @Override
-  public Set<Player> getOnlinePlayers() {
+  public Set<Player> getOnlinePlayers() throws InterruptedException, InvocationTargetException {
     return new HashSet<>(loggedInPlayers.getPlayers());
+  }
+
+  @Override
+  public boolean recordsOnlyConnectedPlayers() {
+    return false;
   }
 
   /**
