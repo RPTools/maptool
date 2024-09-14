@@ -21,16 +21,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroManager.MacroDetails;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.data.LibraryData;
-import org.jsoup.Jsoup;
-import org.jsoup.nodes.Element;
-import org.jsoup.parser.Tag;
 
 /** Interface for classes that represents a framework library. */
 public interface Library {
@@ -76,45 +72,6 @@ public interface Library {
    * @throws IOException if there is an io error reading the location.
    */
   CompletableFuture<String> readAsString(URL location) throws IOException;
-
-  /**
-   * Reads the location as a string parses the HTML in the string and sets the base to the correct
-   * location.
-   *
-   * @param location the location to read.
-   * @return the contents of the location as a string.
-   * @throws IOException if there is an io error reading the location.
-   */
-  default CompletableFuture<String> readAsHTMLContent(URL location) throws IOException {
-    String htmlString = "";
-    try {
-      Optional<Library> library = new LibraryManager().getLibrary(location).get();
-      if (library.isEmpty()) {
-        throw new IOException("Location not found");
-      }
-
-      htmlString = library.get().readAsString(location).get();
-
-      var document = Jsoup.parse(htmlString);
-      var head = document.select("head").first();
-      if (head != null) {
-        String baseURL = location.toExternalForm().replaceFirst("\\?.*", "");
-        baseURL = baseURL.substring(0, baseURL.lastIndexOf("/") + 1);
-        var baseElement = new Element(Tag.valueOf("base"), "").attr("href", baseURL);
-        if (head.children().isEmpty()) {
-          head.appendChild(baseElement);
-        } else {
-          head.child(0).before(baseElement);
-        }
-
-        htmlString = document.html();
-      }
-
-    } catch (InterruptedException | ExecutionException e) {
-      throw new IOException(e);
-    }
-    return CompletableFuture.completedFuture(htmlString);
-  }
 
   /**
    * Returns an {@link InputStream} for the location specified.
