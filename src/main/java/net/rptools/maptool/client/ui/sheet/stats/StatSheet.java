@@ -15,12 +15,14 @@
 package net.rptools.maptool.client.ui.sheet.stats;
 
 import java.io.IOException;
+import java.net.URL;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
+import net.rptools.maptool.util.HTMLUtil;
 import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -39,10 +41,11 @@ public class StatSheet {
    * @param content the content of the stat sheet.
    * @param location the location of the stat sheet.
    */
-  public void setContent(Token token, String content, StatSheetLocation location) {
+  public void setContent(Token token, String content, URL entry, StatSheetLocation location) {
     try {
       var statSheetContext = new StatSheetContext(token, MapTool.getPlayer(), location);
-      var output = new HandlebarsUtil<>(content).apply(statSheetContext);
+      var output =
+          HTMLUtil.fixHTMLBase(new HandlebarsUtil<>(content, entry).apply(statSheetContext), entry);
       Platform.runLater(
           () -> {
             var overlay =
