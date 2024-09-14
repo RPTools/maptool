@@ -77,11 +77,6 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
   }
 
   @Override
-  public CompletableFuture<String> readAsHTMLContent(URL location) throws IOException {
-    return BuiltInLibrary.super.readAsHTMLContent(location);
-  }
-
-  @Override
   public CompletableFuture<InputStream> read(URL location) throws IOException {
     return addOnLibrary.read(location);
   }
