@@ -127,7 +127,6 @@ public class Scale implements Serializable {
 
   private void setZoomLevel(int zoomLevel) {
     this.zoomLevel = Math.clamp(zoomLevel, MIN_ZOOM_LEVEL, MAX_ZOOM_LEVEL);
-    System.out.println(this.zoomLevel);
     setScaleFromZoomLevel();
   }
 

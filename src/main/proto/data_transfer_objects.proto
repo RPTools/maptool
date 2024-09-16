@@ -585,7 +585,6 @@ message GridDto {
   int32 offset_x = 1;
   int32 offset_y = 2;
   int32 size = 3;
-  AreaDto cell_shape = 4;
   oneof type {
     SquareGridDto square_grid = 5;
     GridlessGridDto gridless_grid = 6;
@@ -600,14 +599,6 @@ message IsometricGridDto {}
 message HexGridDto {
   bool vertical = 1;
   double hex_ratio = 2;
-  double edge_projection = 3;
-  double minor_radius = 4;
-  double edge_length = 5;
-  double scaled_edge_projection = 6;
-  double scaled_minor_radius = 7;
-  double scaled_edge_length = 8;
-  double last_scale = 9;
-  IntPointDto cellOffset = 10;
 }
 
 enum TokenUpdateDto {

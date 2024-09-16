@@ -116,6 +116,11 @@ public class AppPreferences {
   /** Represents the key used to access the most recently used campaigns for the menu option. */
   private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
 
+  /** Represents the key used to load the most recent campaign on launch. Defaults to false */
+  private static final String KEY_LOAD_MRU_CAMPAIGN_AT_START = "loadMRUCampaignAtStart";
+
+  private static final boolean DEFAULT_LOAD_MRU_CAMPAIGN_AT_START = false;
+
   /** Represents the key used to save the paint textures to the preferences. */
   private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
 
@@ -1341,6 +1346,14 @@ public class AppPreferences {
 
   public static void setAllowExternalMacroAccess(boolean value) {
     prefs.putBoolean(KEY_ALLOW_EXTERNAL_MACRO_ACCESS, value);
+  }
+
+  public static boolean getLoadMRUCampaignAtStart() {
+    return prefs.getBoolean(KEY_LOAD_MRU_CAMPAIGN_AT_START, DEFAULT_LOAD_MRU_CAMPAIGN_AT_START);
+  }
+
+  public static void setLoadMRUCampaignAtStart(boolean value) {
+    prefs.putBoolean(KEY_LOAD_MRU_CAMPAIGN_AT_START, value);
   }
 
   public static WalkerMetric getMovementMetric() {

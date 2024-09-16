@@ -2105,6 +2105,8 @@ public class Zone {
       playerAlias = null;
     }
 
+    grid.setZone(this);
+
     // 1.3b76 -> 1.3b77
     // adding the exposed area for Individual FOW
     if (exposedAreaMeta == null) {
