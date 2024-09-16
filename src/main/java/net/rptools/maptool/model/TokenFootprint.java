@@ -36,7 +36,6 @@ public class TokenFootprint {
   private boolean isDefault;
   private double scale = 1;
   private boolean localizeName = false;
-
   private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
   public TokenFootprint() {
@@ -110,8 +109,30 @@ public class TokenFootprint {
     this(name, false, 1, points);
   }
 
+  public TokenFootprint(
+      String name, boolean isDefault, Double scale, boolean localizeName, Point... points) {
+    this(name, isDefault, scale, points);
+    this.localizeName = localizeName;
+  }
+
+  public TokenFootprint(
+      String name,
+      boolean isDefault,
+      Double scale,
+      boolean localizeName,
+      OffsetTranslator translator,
+      Point... points) {
+    this(name, isDefault, scale, points);
+    this.localizeName = localizeName;
+    this.addOffsetTranslator(translator);
+  }
+
   public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public void setLocalizeName(boolean localize) {
+    this.localizeName = localize;
   }
 
   public boolean isDefault() {

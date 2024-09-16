@@ -47,65 +47,107 @@ public class TokenFootprintCreator {
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // SQUARE
-            new TokenFootprint("Diminutive", false, 0.5, squarePoints(1)),
-            new TokenFootprint("Fine", false, 0.5, squarePoints(1)),
-            new TokenFootprint("Tiny", false, 0.5, squarePoints(1)),
-            new TokenFootprint("Small", false, 0.75, squarePoints(1)),
-            new TokenFootprint("Medium", true, 1.0, squarePoints(1)),
-            new TokenFootprint("Large", squarePoints(2)),
-            new TokenFootprint("Huge", squarePoints(3)),
-            new TokenFootprint("Gargantuan", squarePoints(4)),
-            new TokenFootprint("Colossal", squarePoints(6)));
+            new TokenFootprint("Diminutive", false, 0.5, true, squarePoints(1)),
+            new TokenFootprint("Fine", false, 0.5, true, squarePoints(1)),
+            new TokenFootprint("Tiny", false, 0.5, true, squarePoints(1)),
+            new TokenFootprint("Small", false, 0.75, true, squarePoints(1)),
+            new TokenFootprint("Medium", true, 1.0, true, squarePoints(1)),
+            new TokenFootprint("Large", false, 1.0, true, squarePoints(2)),
+            new TokenFootprint("Huge", false, 1.0, true, squarePoints(3)),
+            new TokenFootprint("Gargantuan", false, 1.0, true, squarePoints(4)),
+            new TokenFootprint("Colossal", false, 1.0, true, squarePoints(6)));
     return footprintList;
   }
 
   public static List<TokenFootprint> makeVertHex() {
+
+    /* Needs Update if Grid Coordinate System Changes */
+    TokenFootprint.OffsetTranslator vertOffsetTranslator =
+        (originPoint, offsetPoint) -> {
+          if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+            offsetPoint.y++;
+          }
+        };
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // HEXES
-            new TokenFootprint("1/6", false, .408, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/4", false, .500, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/3", false, .577, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
-            new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
-            new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
-            new TokenFootprint("Large", points(new int[][] {{0, 0}, {0, 1}, {1, 0}})),
+            new TokenFootprint(
+                "1/6", false, .408, false, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/4", false, .500, false, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/3", false, .577, false, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/2", false, .707, false, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "2/3", false, .816, false, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "Medium", true, 1.0, true, vertOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "Large",
+                false,
+                1.0,
+                true,
+                vertOffsetTranslator,
+                points(new int[][] {{0, 0}, {0, 1}, {1, 0}})),
             new TokenFootprint(
                 "Huge",
+                false,
+                1.0,
+                true,
+                vertOffsetTranslator,
                 points(new int[][] {{0, 0}, {-1, -1}, {-1, 0}, {0, -1}, {0, 1}, {1, -1}, {1, 0}})),
             new TokenFootprint(
                 "Humongous",
+                false,
+                1.0,
+                true,
+                vertOffsetTranslator,
                 points(
                     new int[][] {
                       {0, 0}, {-2, -1}, {-2, 0}, {-2, 1}, {-1, -2}, {-1, -1}, {-1, 0}, {-1, 1},
                       {0, -2}, {0, -1}, {0, 1}, {0, 2}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {2, -1},
                       {2, 0}, {2, 1}
                     })));
-    /* Needs Update if Grid Coordinate System Changes */
-    for (var footprint : footprintList) {
-      footprint.addOffsetTranslator(
-          (originPoint, offsetPoint) -> {
-            if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
-              offsetPoint.y++;
-            }
-          });
-    }
     return footprintList;
   }
 
   public static List<TokenFootprint> makeHorizHex() {
+    /* Needs Update if Grid Coordinate System Changes */
+    TokenFootprint.OffsetTranslator horizOffsetTranslator =
+        (originPoint, offsetPoint) -> {
+          if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
+            offsetPoint.x++;
+          }
+        };
     List<TokenFootprint> footprintList =
         Arrays.asList(
             // Horizontal Hex Grid - Flipped x <> y from Vert grid
-            new TokenFootprint("1/6", false, .408, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/4", false, .500, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/3", false, .577, points(new int[][] {{0, 0}})),
-            new TokenFootprint("1/2", false, .707, points(new int[][] {{0, 0}})),
-            new TokenFootprint("2/3", false, .816, points(new int[][] {{0, 0}})),
-            new TokenFootprint("Medium", true, 1.0, points(new int[][] {{0, 0}})),
-            new TokenFootprint("Large", points(new int[][] {{0, 0}, {1, 0}, {0, 1}})),
+            new TokenFootprint(
+                "1/6", false, .408, false, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/4", false, .500, false, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/3", false, .577, false, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "1/2", false, .707, false, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "2/3", false, .816, false, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "Medium", true, 1.0, true, horizOffsetTranslator, points(new int[][] {{0, 0}})),
+            new TokenFootprint(
+                "Large",
+                false,
+                1.0,
+                true,
+                horizOffsetTranslator,
+                points(new int[][] {{0, 0}, {1, 0}, {0, 1}})),
             new TokenFootprint(
                 "Huge",
+                false,
+                1.0,
+                true,
+                horizOffsetTranslator,
                 points(
                     new int[][] {
                       {0, 0},
@@ -118,21 +160,16 @@ public class TokenFootprintCreator {
                     })),
             new TokenFootprint(
                 "Humongous",
+                false,
+                1.0,
+                true,
+                horizOffsetTranslator,
                 points(
                     new int[][] {
                       {0, 0}, {-1, -2}, {0, -2}, {1, -2}, {-2, -1}, {-1, -1}, {0, -1}, {1, -1},
                       {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}, {-1, 2},
                       {0, 2}, {1, 2}
                     })));
-    /* Needs Update if Grid Coordinate System Changes */
-    for (var footprint : footprintList) {
-      footprint.addOffsetTranslator(
-          (originPoint, offsetPoint) -> {
-            if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
-              offsetPoint.x++;
-            }
-          });
-    }
     return footprintList;
   }
 
