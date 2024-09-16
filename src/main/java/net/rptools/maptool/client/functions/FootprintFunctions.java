@@ -252,6 +252,24 @@ public class FootprintFunctions extends AbstractFunction {
     if (data.has("isDefault")) {
       newPrint.setDefault(data.get("isDefault").getAsBoolean());
     }
+
+    /* Needs Update if Grid Coordinate System Changes */
+    if (gridtype == "Horizontal Hex") {
+      newPrint.addOffsetTranslator(
+          (originPoint, offsetPoint) -> {
+            if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
+              offsetPoint.x++;
+            }
+          });
+    } else if (gridtype == "Vertical Hex") {
+      newPrint.addOffsetTranslator(
+          (originPoint, offsetPoint) -> {
+            if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+              offsetPoint.y++;
+            }
+          });
+    }
+
     CampaignProperties ModifiedProperties = MapTool.getCampaign().getCampaignProperties();
     ModifiedProperties.setGridFootprint(name, gridtype, newPrint);
     MapTool.getCampaign().mergeCampaignProperties(ModifiedProperties);

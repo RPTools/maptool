@@ -81,6 +81,15 @@ public class TokenFootprintCreator {
                       {0, -2}, {0, -1}, {0, 1}, {0, 2}, {1, -2}, {1, -1}, {1, 0}, {1, 1}, {2, -1},
                       {2, 0}, {2, 1}
                     })));
+    /* Needs Update if Grid Coordinate System Changes */
+    for (var footprint : footprintList) {
+      footprint.addOffsetTranslator(
+          (originPoint, offsetPoint) -> {
+            if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+              offsetPoint.y++;
+            }
+          });
+    }
     return footprintList;
   }
 
@@ -115,6 +124,15 @@ public class TokenFootprintCreator {
                       {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {-2, 1}, {-1, 1}, {0, 1}, {1, 1}, {-1, 2},
                       {0, 2}, {1, 2}
                     })));
+    /* Needs Update if Grid Coordinate System Changes */
+    for (var footprint : footprintList) {
+      footprint.addOffsetTranslator(
+          (originPoint, offsetPoint) -> {
+            if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
+              offsetPoint.x++;
+            }
+          });
+    }
     return footprintList;
   }
 
