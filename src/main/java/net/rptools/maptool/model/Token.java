@@ -2189,6 +2189,10 @@ public class Token implements Cloneable {
     tokenVBLImmunity = immunityData;
   }
 
+  public void clearTokenVBLImmunity() {
+    tokenVBLImmunity.clear();
+  }
+
   public void addTokenVBLImmunity(String tokenID) {
     tokenVBLImmunity.add(tokenID);
   }
@@ -2915,6 +2919,7 @@ public class Token implements Cloneable {
         setFlippedIso(!isFlippedIso());
         break;
       case setTokenVBLImmunity:
+        // unknown caller, unknown usage
         // setTokenVBLImmunity(parameters.get(1).getStringValue());
         break;
       case addTokenVBLImmunity:

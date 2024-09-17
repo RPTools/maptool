@@ -26,6 +26,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import net.rptools.maptool.client.MapTool;
@@ -225,7 +226,8 @@ public class Topology_Functions extends AbstractFunction {
         || functionName.equalsIgnoreCase("addTokenVBLImmunity")
         || functionName.equalsIgnoreCase("removeTokenVBLImmunity")
         || functionName.equalsIgnoreCase("setMapVBLImmunity")
-        || functionName.equalsIgnoreCase("toggleMapVBLImmunity")) {
+        || functionName.equalsIgnoreCase("toggleMapVBLImmunity")
+        || functionName.equalsIgnoreCase("clearTokenVBLImmunity")) {
       childEvaluateSetTopologyImmunity(resolver, functionName, parameters);
     } else if (functionName.equalsIgnoreCase("getTokenVBLImmunity")
         || functionName.equalsIgnoreCase("getMapVBLImmunity")) {
@@ -653,8 +655,13 @@ public class Topology_Functions extends AbstractFunction {
     }
 
     if (functionName.equalsIgnoreCase("setTokenVBLImmunity")) {
-      // Need to make it an array
-      // token.setTokenVBLImmunity(parameters.get(1).toString());
+      JsonArray setList =
+          net.rptools.maptool.util.FunctionUtil.paramAsJsonArray(functionName, parameters, 1);
+      HashSet<String> newSet = new HashSet<String>();
+      for (JsonElement entry : setList) {
+        newSet.add(entry.getAsString());
+      }
+      token.setTokenVBLImmunity(newSet);
     } else if (functionName.equalsIgnoreCase("addTokenVBLImmunity")) {
       token.addTokenVBLImmunity(parameters.get(1).toString());
     } else if (functionName.equalsIgnoreCase("removeTokenVBLImmunity")) {
@@ -664,6 +671,8 @@ public class Topology_Functions extends AbstractFunction {
           parameters.get(1).toString(), BigDecimal.ONE.equals(parameters.get(2)));
     } else if (functionName.equalsIgnoreCase("toggleMapVBLImmunity")) {
       token.toggleMapVBLImmunity(parameters.get(1).toString());
+    } else if (functionName.equalsIgnoreCase("clearTokenVBLImmunity")) {
+      token.clearTokenVBLImmunity();
     }
   }
 
