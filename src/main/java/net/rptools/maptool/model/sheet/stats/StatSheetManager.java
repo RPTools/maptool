@@ -150,7 +150,7 @@ public class StatSheetManager {
    * @throws IOException if an error occurs reading the stat sheet.
    */
   public void addStatSheet(StatSheet statSheet, Library library) throws IOException {
-    var html = library.readAsHTMLContent(statSheet.entry()).join();
+    var html = library.readAsString(statSheet.entry()).join();
     statSheets.put(statSheet, html);
   }
 
