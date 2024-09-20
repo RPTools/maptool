@@ -374,10 +374,13 @@ public class CampaignProperties {
     }
     // Potential for importing defaults from app preferences instead.
 
+    var squareFP = TokenFootprintCreator.makeSquare();
+
     setGridFootprints("Horizontal Hex", TokenFootprintCreator.makeHorizHex());
     setGridFootprints("Vertical Hex", TokenFootprintCreator.makeVertHex());
     setGridFootprints("None", TokenFootprintCreator.makeGridless());
-    setGridFootprints("Square", TokenFootprintCreator.makeSquare());
+    setGridFootprints("Square", new ArrayList<>(squareFP));
+    setGridFootprints("Isometric", new ArrayList<>(squareFP));
   }
 
   private void initTokenStatesMap() {

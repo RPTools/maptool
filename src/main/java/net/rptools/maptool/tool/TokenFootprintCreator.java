@@ -64,7 +64,7 @@ public class TokenFootprintCreator {
     /* Needs Update if Grid Coordinate System Changes */
     TokenFootprint.OffsetTranslator vertOffsetTranslator =
         (originPoint, offsetPoint) -> {
-          if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
+          if ((originPoint.x & 1 ) == 1 && (offsetPoint.x & 1) == 0) {
             offsetPoint.y++;
           }
         };
@@ -116,7 +116,7 @@ public class TokenFootprintCreator {
     /* Needs Update if Grid Coordinate System Changes */
     TokenFootprint.OffsetTranslator horizOffsetTranslator =
         (originPoint, offsetPoint) -> {
-          if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
+          if ((originPoint.y & 1 ) == 1 && (offsetPoint.y & 1) == 0) {
             offsetPoint.x++;
           }
         };
