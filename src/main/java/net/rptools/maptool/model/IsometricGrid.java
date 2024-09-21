@@ -178,8 +178,8 @@ public class IsometricGrid extends Grid {
   public List<TokenFootprint> getFootprints() {
     Map<String, List<TokenFootprint>> campaignFootprints =
         MapTool.getCampaign().getCampaignProperties().getGridFootprints();
-    if (campaignFootprints.containsKey("Square")) {
-      return campaignFootprints.get("Square");
+    if (campaignFootprints.containsKey("Isometric")) {
+      return campaignFootprints.get("Isometric");
     }
     return new ArrayList<>();
   }

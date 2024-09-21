@@ -74,6 +74,7 @@ public class FootprintFunctions extends AbstractFunction {
     gridTypes.add("Vertical Hex");
     gridTypes.add("Horizontal Hex");
     gridTypes.add("Square");
+    gridTypes.add("Isometric");
     gridTypes.add("None");
 
     try {
@@ -148,7 +149,7 @@ public class FootprintFunctions extends AbstractFunction {
           result = getFootprintNames(parameters.get(0).toString());
         }
       } else if (functionName.equalsIgnoreCase("getGridTypes")) {
-        result = "[\"Vertical Hex\",\"Horizontal Hex\",\"Square\",\"None\"]";
+        result = "[\"Vertical Hex\",\"Horizontal Hex\",\"Square\",\"Isometric\",\"None\"]";
       } else if (functionName.equalsIgnoreCase("resetFootprintsToDefault")) {
         resetFootprintsToDefault();
       } else {
@@ -257,14 +258,14 @@ public class FootprintFunctions extends AbstractFunction {
     if (gridtype == "Horizontal Hex") {
       newPrint.addOffsetTranslator(
           (originPoint, offsetPoint) -> {
-            if ((originPoint.y & 1 ) == 1 && (offsetPoint.y & 1) == 0) {
+            if ((originPoint.y & 1) == 1 && (offsetPoint.y & 1) == 0) {
               offsetPoint.x++;
             }
           });
     } else if (gridtype == "Vertical Hex") {
       newPrint.addOffsetTranslator(
           (originPoint, offsetPoint) -> {
-            if ((originPoint.x & 1 ) == 1 && (offsetPoint.x & 1) == 0) {
+            if ((originPoint.x & 1) == 1 && (offsetPoint.x & 1) == 0) {
               offsetPoint.y++;
             }
           });
