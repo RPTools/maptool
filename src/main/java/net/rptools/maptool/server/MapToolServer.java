@@ -32,6 +32,7 @@ import net.rptools.clientserver.simple.server.ServerObserver;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
+import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
@@ -388,7 +389,14 @@ public class MapToolServer {
 
     // Use UPnP to open port in router
     if (useUPnP && config != null) {
-      UPnPUtil.openPort(config.getPort());
+      MapTool.getFrame()
+          .showFilledGlassPane(
+              new StaticMessageDialog(I18N.getText("msg.info.server.upnp.discovering")));
+      try {
+        UPnPUtil.openPort(config.getPort());
+      } finally {
+        MapTool.getFrame().hideGlassPane();
+      }
     }
 
     // Registered ?
