@@ -225,7 +225,8 @@ public class Token implements Cloneable {
     addTokenVBLImmunity,
     removeTokenVBLImmunity,
     toggleMapVBLImmunity,
-    setMapVBLImmunity
+    setMapVBLImmunity,
+    clearTokenVBLImmunity
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -2919,20 +2920,23 @@ public class Token implements Cloneable {
         setFlippedIso(!isFlippedIso());
         break;
       case setTokenVBLImmunity:
-        // unknown caller, unknown usage
-        // setTokenVBLImmunity(parameters.get(1).getStringValue());
+        setTokenVBLImmunity(
+            new HashSet<String>(List.of(parameters.get(0).getStringValue().split(", "))));
         break;
       case addTokenVBLImmunity:
-        addTokenVBLImmunity(parameters.get(1).getStringValue());
+        addTokenVBLImmunity(parameters.get(0).getStringValue());
         break;
       case removeTokenVBLImmunity:
-        removeTokenVBLImmunity(parameters.get(1).getStringValue());
+        removeTokenVBLImmunity(parameters.get(0).getStringValue());
         break;
       case setMapVBLImmunity:
-        setMapVBLImmunity(parameters.get(1).getStringValue(), parameters.get(2).getBoolValue());
+        setMapVBLImmunity(parameters.get(0).getStringValue(), parameters.get(1).getBoolValue());
         break;
       case toggleMapVBLImmunity:
-        toggleMapVBLImmunity(parameters.get(1).getStringValue());
+        toggleMapVBLImmunity(parameters.get(0).getStringValue());
+        break;
+      case clearTokenVBLImmunity:
+        clearTokenVBLImmunity();
         break;
     }
     if (lightChanged) {

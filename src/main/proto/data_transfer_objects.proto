@@ -658,6 +658,12 @@ enum TokenUpdateDto {
     flipIso = 55;
     setSpeechName = 56;
     removeFacing = 57;
+    setTokenVBLImmunity = 58;
+    addTokenVBLImmunity = 59;
+    removeTokenVBLImmunity = 60;
+    setMapVBLImmunity = 61;
+    toggleMapVBLImmunity = 62;
+    clearTokenVBLImmunity = 63;
 }
 
 message AssetTransferHeaderDto {
