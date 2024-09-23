@@ -37,7 +37,7 @@ public class DarknessRenderer {
   }
 
   public void render(Graphics2D g2d, PlayerView view) {
-    if (!view.isGMView()) {
+    if (view.isGMView()) {
       return;
     }
     final Area darkness = zoneView.getIllumination(view).getDarkenedArea();
