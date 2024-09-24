@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+        os: [windows-latest, ubuntu-latest, macOS-13]
         java: [ '21' ]
         distribution: ['temurin']
       fail-fast: false
@@ -160,7 +160,7 @@ jobs:
       #   /_/ /_/ /_/ \__,_/ \___/ \____//____/
       #
     - name: Copy Mac OS Release Files
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macOS-13'
       run: |
         cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
         cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
@@ -168,7 +168,7 @@ jobs:
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macOS-13'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -179,7 +179,7 @@ jobs:
     - name: Upload Mac PKG Release Asset
       id: upload-release-asset-pkg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macOS-13'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
