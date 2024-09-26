@@ -1573,9 +1573,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   /** Stop the drag of the token, if any is being dragged. */
   private void stopTokenDrag() {
     Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
-    if (tool instanceof PointerTool) {
-      PointerTool pointer = (PointerTool) tool;
-      if (pointer.isDraggingToken()) pointer.stopTokenDrag();
+    if (tool instanceof PointerTool pointer) {
+      pointer.stopTokenDrag();
     }
   }
 
