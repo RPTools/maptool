@@ -212,6 +212,7 @@ public class AppMenuBar extends JMenuBar {
 
     menu.addSeparator();
 
+    menu.add(new JMenuItem(AppActions.CAMPAIGN_FOOTPRINTS));
     menu.add(new JMenuItem(AppActions.CAMPAIGN_PROPERTIES));
     if (!AppUtil.MAC_OS_X) menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
 
