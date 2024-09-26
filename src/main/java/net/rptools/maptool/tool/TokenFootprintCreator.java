@@ -34,8 +34,8 @@ public class TokenFootprintCreator {
     Point[] pa = new Point[size * size];
 
     int indx = 0;
-    for (int y = 0; y < size; y++) {
-      for (int x = 0; x < size; x++) {
+    for (int y = -Math.floorDiv(size, 2); y < Math.ceilDiv(size, 2); y++) {
+      for (int x = -Math.floorDiv(size, 2); x < Math.ceilDiv(size, 2); x++) {
         pa[indx] = new Point(x, y);
         indx++;
       }
