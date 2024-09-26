@@ -1297,6 +1297,12 @@ public class Token implements Cloneable {
   }
 
   /**
+   * Returns whether the token is constrained to a pre-defined grid size.
+   *
+   * <p>If {@code false}, this implies the token is either natively sized or free sized. If {@code
+   * true}, the token is sized according to one of the grid's pre-defined sizes, and has a
+   * meaningful footprint.
+   *
    * @return Returns the snapScale.
    */
   public boolean isSnapToScale() {
@@ -1576,29 +1582,67 @@ public class Token implements Cloneable {
   }
 
   /**
-   * Returns the drag offset of the token.
+   * Return the drag anchor of the token.
    *
-   * @param zone the zone where the token is dragged
-   * @return a point representing the offset
+   * <p>The drag anchor is the point relative to which a drag should be applied. For snap-to-grid
+   * tokens, this will affect which cell they land in. For non-snap-to-grid tokens, this will effect
+   * where the path line is drawn.
+   *
+   * @param zone The zone where the token is being dragged.
+   * @return The drag anchor of the token.
    */
-  public Point getDragOffset(Zone zone) {
+  public ZonePoint getDragAnchor(Zone zone) {
     Grid grid = zone.getGrid();
-    int offsetX, offsetY;
+    int dragAnchorX, dragAnchorY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale() || getLayer().isTokenLayer()) {
+      if (!getLayer().isStampLayer() || !getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
-        offsetX = getX() + (int) centerOffset.x;
-        offsetY = getY() + (int) centerOffset.y;
+        dragAnchorX = getX() + (int) centerOffset.x;
+        dragAnchorY = getY() + (int) centerOffset.y;
       } else {
+        // Anchor at the layout center.
         Rectangle tokenBounds = getBounds(zone);
-        offsetX = tokenBounds.x + tokenBounds.width / 2;
-        offsetY = tokenBounds.y + tokenBounds.height / 2;
+        dragAnchorX = tokenBounds.x + tokenBounds.width / 2 - anchorX;
+        dragAnchorY = tokenBounds.y + tokenBounds.height / 2 - anchorY;
       }
     } else {
-      offsetX = getX();
-      offsetY = getY();
+      dragAnchorX = getX() + anchorX;
+      dragAnchorY = getY() + anchorY;
     }
-    return new Point(offsetX, offsetY);
+
+    return new ZonePoint(dragAnchorX, dragAnchorY);
+  }
+
+  /**
+   * Updates the token's position so its anchor is located at {@code newDragAnchorPosition}.
+   *
+   * @param zone The zone in which the token is moving.
+   * @param newDragAnchorPosition The new position that the anchor should be located at.
+   */
+  public void moveDragAnchorTo(Zone zone, ZonePoint newDragAnchorPosition) {
+    var anchor = getDragAnchor(zone);
+    var offsetX = anchor.x - getX();
+    var offsetY = anchor.y - getY();
+
+    setX(newDragAnchorPosition.x - offsetX);
+    setY(newDragAnchorPosition.y - offsetY);
+  }
+
+  /**
+   * Like {@link #getDragAnchor(Zone)}, but assume the token is in cell {@code cellPoint}.
+   *
+   * @param zone The zone that the token lives in.
+   * @param cellPoint The cell in which the token should pretend to be located.
+   * @return The drag anchor the token would have if located at {@code cellPoint}.
+   */
+  public ZonePoint getDragAnchorAsIfLocatedInCell(Zone zone, CellPoint cellPoint) {
+    ZonePoint anchor = getDragAnchor(zone);
+    ZonePoint nearestGridCellVertex = zone.getGrid().convert(zone.getGrid().convert(anchor));
+    ZonePoint targetCellVertex = zone.getGrid().convert(cellPoint);
+
+    return new ZonePoint(
+        targetCellVertex.x + (anchor.x - nearestGridCellVertex.x),
+        targetCellVertex.y + (anchor.y - nearestGridCellVertex.y));
   }
 
   /**
