@@ -330,7 +330,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.10.1'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.11.0'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
@@ -394,11 +394,11 @@ dependencies {
     implementation 'com.thoughtworks.xstream:xstream:1.4.20'
 
     // themes
-    implementation 'com.formdev:flatlaf:3.3'
-    implementation 'com.formdev:flatlaf-intellij-themes:3.3'
+    implementation 'com.formdev:flatlaf:3.4.1'
+    implementation 'com.formdev:flatlaf-intellij-themes:3.4.1'
     implementation 'com.formdev:flatlaf-extras:3.4.1'
     implementation 'com.github.weisj:jsvg:1.4.0'
-    implementation 'com.formdev:flatlaf-jide-oss:3.3'
+    implementation 'com.formdev:flatlaf-jide-oss:3.4.1'
 
     // JS support for macros
     implementation group: 'org.graalvm.js', name: 'js', version: '21.2.0'

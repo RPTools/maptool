@@ -27,7 +27,8 @@ public class DebugRenderer {
 
   public DebugRenderer(RenderHelper renderHelper) {
     this.renderHelper = renderHelper;
-    palette = new Color[] {Color.red, Color.green, Color.blue};
+    palette =
+        new Color[] {Color.red, Color.green, Color.blue, Color.magenta, Color.orange, Color.yellow};
   }
 
   public void renderShapes(Graphics2D g2d, Iterable<Shape> shapes) {
