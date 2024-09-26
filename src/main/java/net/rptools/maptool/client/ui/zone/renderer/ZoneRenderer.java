@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
@@ -330,25 +331,29 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     repaintDebouncer.dispatch(); // Jamz: Seems to have no affect?
   }
 
-  public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint point) {
+  public @Nullable ZonePoint getKeyTokenDragAnchorPosition(GUID keyToken) {
+    SelectionSet set = selectionSetMap.get(keyToken);
+    if (set == null) {
+      return null;
+    }
+    return set.getKeyTokenDragAnchorPosition();
+  }
+
+  public boolean hasMoveSelectionSetMoved(GUID keyToken, ZonePoint dragAnchorPosition) {
     SelectionSet set = selectionSetMap.get(keyToken);
     if (set == null) {
       return false;
     }
-    Token token = zone.getToken(keyToken);
-    int x = point.x - token.getX();
-    int y = point.y - token.getY();
 
-    return set.offsetX != x || set.offsetY != y;
+    return !set.getKeyTokenDragAnchorPosition().equals(dragAnchorPosition);
   }
 
-  public void updateMoveSelectionSet(GUID keyToken, ZonePoint offset) {
+  public void updateMoveSelectionSet(GUID keyToken, ZonePoint latestPoint) {
     SelectionSet set = selectionSetMap.get(keyToken);
     if (set == null) {
       return;
     }
-    Token token = zone.getToken(keyToken);
-    set.setOffset(offset.x - token.getX(), offset.y - token.getY());
+    set.update(latestPoint);
     repaintDebouncer.dispatch(); // Jamz: may cause flicker when using AI
   }
 
@@ -441,14 +446,15 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
               var tokenPath = path.derive(zone.getGrid(), keyToken, token);
               token.setLastPath(tokenPath);
 
+              // This is the last *anchor* point.
               var lastPoint = tokenPath.getWayPointList().getLast();
               var endPoint =
                   switch (lastPoint) {
-                    case CellPoint cp -> zone.getGrid().convert(cp);
+                    case CellPoint cp -> token.getDragAnchorAsIfLocatedInCell(zone, cp);
                     case ZonePoint zp -> zp;
                   };
-              token.setX(endPoint.x);
-              token.setY(endPoint.y);
+              token.moveDragAnchorTo(zone, endPoint);
+              log.info("Token end pos: {}, {}", token.getX(), token.getY());
 
               flush(token);
               MapTool.serverCommand().putToken(zone.getId(), token);
@@ -1141,7 +1147,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     }
     timer.stop("lightSourceIconOverlay.paintOverlay");
 
-    debugRenderer.renderShapes(g2d, Arrays.asList(shape, shape2));
+    debugRenderer.renderShapes(g2d, Arrays.asList(shape, shape2, shape3, shape4));
   }
 
   private void delayRendering(ItemRenderer renderer) {
@@ -1828,6 +1834,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
   private Shape shape;
   private Shape shape2;
+  private Shape shape3;
+  private Shape shape4;
 
   public void setShape(Shape shape) {
     if (shape == null) {
@@ -1835,6 +1843,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     }
 
     this.shape = shape;
+    this.repaintDebouncer.dispatch();
   }
 
   public void setShape2(Shape shape) {
@@ -1843,6 +1852,25 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     }
 
     this.shape2 = shape;
+    this.repaintDebouncer.dispatch();
+  }
+
+  public void setShape3(Shape shape) {
+    if (shape == null) {
+      return;
+    }
+
+    this.shape3 = shape;
+    this.repaintDebouncer.dispatch();
+  }
+
+  public void setShape4(Shape shape) {
+    if (shape == null) {
+      return;
+    }
+
+    this.shape4 = shape;
+    this.repaintDebouncer.dispatch();
   }
 
   public void showBlockedMoves(

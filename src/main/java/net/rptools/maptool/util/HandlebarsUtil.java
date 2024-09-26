@@ -16,6 +16,8 @@ package net.rptools.maptool.util;
 
 import com.github.jknack.handlebars.Context;
 import com.github.jknack.handlebars.Handlebars;
+import com.github.jknack.handlebars.Helper;
+import com.github.jknack.handlebars.Options;
 import com.github.jknack.handlebars.Template;
 import com.github.jknack.handlebars.context.JavaBeanValueResolver;
 import com.github.jknack.handlebars.helper.AssignHelper;
@@ -29,8 +31,10 @@ import com.github.jknack.handlebars.io.URLTemplateLoader;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
+import java.util.Base64;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,6 +99,29 @@ public class HandlebarsUtil<T> {
     }
   }
 
+  private static enum MapToolHelpers implements Helper<Object> {
+    /**
+     * Turns the textual form of the value into a base64-encoded string. For example:
+     *
+     * <pre>
+     * &lt;script type="application/json;base64" id="jsonProperty"&gt;
+     *   {{ base64Encode properties[0].value }}
+     * &lt;/script&gt;
+     * &lt;script type="application/javascript"&gt;
+     * const jsonProperty = JSON.parse(atob(document.getElementById("jsonProperty").innerText));
+     * &lt;/script&gt;
+     * </pre>
+     */
+    base64Encode {
+      @Override
+      public Object apply(final Object context, final Options options) {
+        byte[] message = context.toString().getBytes(StandardCharsets.UTF_8);
+
+        return new Handlebars.SafeString(Base64.getUrlEncoder().encodeToString(message));
+      }
+    }
+  }
+
   /**
    * Creates a new instance of the utility class.
    *
@@ -111,6 +138,7 @@ public class HandlebarsUtil<T> {
       NumberHelper.register(handlebars);
       handlebars.registerHelper(AssignHelper.NAME, AssignHelper.INSTANCE);
       handlebars.registerHelper(IncludeHelper.NAME, IncludeHelper.INSTANCE);
+      Arrays.stream(MapToolHelpers.values()).forEach(h -> handlebars.registerHelper(h.name(), h));
 
       template = handlebars.compileInline(stringTemplate);
     } catch (IOException e) {
