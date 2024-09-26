@@ -174,6 +174,24 @@ public final class Illumination {
   }
 
   /**
+   * Look up a disjoint obscured lumens level based on the lumens strength.
+   *
+   * <p>This is useful for rendering individual lights, so that the light can be constrained to the
+   * area that is actually illuminated by the light and not by any stronger light.
+   *
+   * <p>See {@link #getDisjointObscuredLumensLevels()} for more information.
+   *
+   * @param lumensStrength The strength of lumens to find.
+   * @return The {#link LumensLevel} of strength {@code lumensStrength}. If no level exists for it,
+   *     an empty optional is returned.
+   */
+  public Optional<LumensLevel> getDisjointObscuredLumensLevel(int lumensStrength) {
+    return getDisjointObscuredLumensLevels().stream()
+        .filter(level -> level.lumensStrength() == lumensStrength)
+        .findFirst();
+  }
+
+  /**
    * Get the disjoint obscured lumens levels.
    *
    * <p>Each lumens level in the result will have areas that do not intersect any other areas in any
