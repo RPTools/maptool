@@ -729,7 +729,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearGMAurasOnlyAction extends AbstractAction {
     public ClearGMAurasOnlyAction() {
-      super("token.popup.menu.auras.clearGM");
+      super(I18N.getText("token.popup.menu.auras.clearGM"));
     }
 
     public void actionPerformed(ActionEvent e) {
