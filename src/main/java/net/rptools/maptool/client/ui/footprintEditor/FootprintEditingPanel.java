@@ -29,7 +29,6 @@ import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.player.Player;
@@ -55,14 +54,13 @@ public class FootprintEditingPanel extends JPanel {
   private static volatile Grid currentGrid;
   private BufferedImage cellHighlight;
   ZoneRenderer renderer;
-  ZoneWalker walker;
   Zone zone;
   static volatile Scale zoneScale;
   static volatile float tokenScale = 1;
   TokenFootprint footprint = FootprintManager.getGlobalDefaultFootprint();
 
   public FootprintEditingPanel() {
-    log.info("new FootprintEditingPanel");
+    log.debug("new FootprintEditingPanel");
     this.setFocusable(true);
     this.setEnabled(true);
     this.setBorder(BorderFactory.createLoweredBevelBorder());
@@ -103,7 +101,7 @@ public class FootprintEditingPanel extends JPanel {
   }
 
   public Set<CellPoint> getCellSet() {
-    log.info("getCellSet");
+    log.debug("getCellSet");
     return cellSet;
   }
 
@@ -114,7 +112,7 @@ public class FootprintEditingPanel extends JPanel {
 
   public void setTokenFootprint(
       String gridTypeName, TokenFootprint tokenFootprint, Set<CellPoint> cells) {
-    log.info("setTokenFootprint - " + gridTypeName + " : " + tokenFootprint + " : " + cells);
+    log.debug("setTokenFootprint - " + gridTypeName + " : " + tokenFootprint + " : " + cells);
     if (gridTypeName != null) {
       setGrid(gridTypeName);
     }
@@ -124,8 +122,6 @@ public class FootprintEditingPanel extends JPanel {
     if (cells != null) {
       setCellSet(cells);
     }
-    walker = currentGrid.createZoneWalker();
-    walker.setWaypoints(ORIGIN, ORIGIN);
     repaint();
   }
 
@@ -144,7 +140,7 @@ public class FootprintEditingPanel extends JPanel {
   }
 
   public void setGrid(String gridName) {
-    log.info("setGrid: " + gridName);
+    log.debug("setGrid: " + gridName);
     Grid tmpGrid;
     switch (gridName) {
       case "Vertical Hex" -> tmpGrid = HV;
@@ -161,15 +157,12 @@ public class FootprintEditingPanel extends JPanel {
     currentGrid = tmpGrid;
     cellHighlight = currentGrid.getCellHighlight();
     zone.setGrid(currentGrid);
-
-    walker = currentGrid.createZoneWalker();
-    walker.setWaypoints(ORIGIN, ORIGIN);
     renderer.flush();
     renderer.setScale(0.7f);
     new MapToolEventBus().getMainEventBus().post(new GridChanged(zone));
 
     repaint();
-    log.info("grid changed");
+    log.debug("grid changed");
   }
 
   void modifyFootprintCells(CellPoint cp) {
@@ -178,16 +171,11 @@ public class FootprintEditingPanel extends JPanel {
     }
     if (cellSet.contains(cp)) {
       cellSet.remove(cp);
-      walker = currentGrid.createZoneWalker();
-      walker.setWaypoints(ORIGIN, ORIGIN);
-      log.info("modifyFootprintCells: - remove " + cp);
+      log.debug("modifyFootprintCells: - remove " + cp);
     } else {
-      log.info("modifyFootprintCells: - add " + cp);
+      log.debug("modifyFootprintCells: - add " + cp);
       cellSet.add(cp);
-      walker.addWaypoints(cp);
     }
-
-    cellSet.addAll(walker.getPath().getCellPath());
     footprint =
         new TokenFootprint(footprint.getName(), FootPrintToolbox.cellSetToPointArray(cellSet));
     repaint();
@@ -243,7 +231,7 @@ public class FootprintEditingPanel extends JPanel {
       zp = FootPrintToolbox.zonePointFromCellCentre(currentGrid.getCellCenter(p));
       renderer.highlightCell(g, zp, cellHighlight, tokenScale);
     }
-    log.info("renderFootprint - cellSet: " + cellSet.toString());
+    log.debug("renderFootprint - cellSet: " + cellSet.toString());
     cellCentre = currentGrid.getCellCenter(ORIGIN);
     zp = new ZonePoint((int) cellCentre.getX(), (int) cellCentre.getY());
     renderer.highlightCell(g, zp, ORIGIN_MARKER, tokenScale / 3f);

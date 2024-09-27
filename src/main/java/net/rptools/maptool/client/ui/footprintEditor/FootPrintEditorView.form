@@ -464,9 +464,9 @@
                         </constraints>
                         <properties>
                           <defaultCapable value="false"/>
-                          <label value=""/>
+                          <label value="Sort"/>
                           <name value="listOrderButton"/>
-                          <text value=""/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="initPanel.sort"/>
                         </properties>
                         <clientProperties>
                           <hideActionText class="java.lang.Boolean" value="false"/>
