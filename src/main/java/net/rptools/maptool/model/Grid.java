@@ -411,6 +411,7 @@ public abstract class Grid implements Cloneable {
     }
     int visionDistance = zone.getTokenVisionInPixels();
     double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
+    int tokenFacing = token.getFacingInDegrees() + 90;
 
     if (scaleWithToken) {
       double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
@@ -453,7 +454,7 @@ public abstract class Grid implements Cloneable {
         visibleArea =
             new Area(
                 AffineTransform.getRotateInstance(
-                        Math.toRadians(offsetAngle) - Math.toRadians(token.getFacing()))
+                        Math.toRadians(offsetAngle) + Math.toRadians(tokenFacing))
                     .createTransformedShape(visibleShape));
         break;
       case CONE:
@@ -475,7 +476,7 @@ public abstract class Grid implements Cloneable {
         // Rotate
         tempvisibleArea =
             tempvisibleArea.createTransformedArea(
-                AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
+                AffineTransform.getRotateInstance(Math.toRadians(tokenFacing)));
 
         Rectangle footprint = token.getFootprint(this).getBounds(this);
         footprint.x = -footprint.width / 2;

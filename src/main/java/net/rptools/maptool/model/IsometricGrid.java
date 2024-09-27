@@ -281,6 +281,7 @@ public class IsometricGrid extends Grid {
     int visionDistance = getZone().getTokenVisionInPixels();
     double visionRange =
         (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
+    int tokenFacing = token.getFacingInDegrees() + 90;
 
     if (scaleWithToken) {
       Rectangle footprint = token.getFootprint(this).getBounds(this);
@@ -311,7 +312,7 @@ public class IsometricGrid extends Grid {
         Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         // new angle, corrected for isometric view
-        double theta = Math.toRadians(offsetAngle) + Math.toRadians(token.getFacing());
+        double theta = Math.toRadians(offsetAngle) - Math.toRadians(tokenFacing);
         Point2D angleVector = new Point2D.Double(Math.cos(theta), Math.sin(theta));
         AffineTransform at = new AffineTransform();
         at.rotate(Math.PI / 4);
@@ -331,17 +332,13 @@ public class IsometricGrid extends Grid {
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         // Get the cone, use degreesFromIso to convert the facing from isometric to plan
 
-        // Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange,
-        // visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle *
-        // 1.0), arcAngle,
-        // Arc2D.PIE));
         Arc2D cone =
             new Arc2D.Double(
                 -visionRange * 2,
                 -visionRange,
                 visionRange * 4,
                 visionRange * 2,
-                token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0),
+                -tokenFacing - (arcAngle / 2.0) + (offsetAngle * 1.0),
                 arcAngle,
                 Arc2D.PIE);
         GeneralPath path = new GeneralPath();
