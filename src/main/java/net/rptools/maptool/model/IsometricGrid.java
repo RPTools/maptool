@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
@@ -267,7 +268,7 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public Area getShapedArea(
+  public @Nonnull Area getShapedArea(
       ShapeType shape,
       Token token,
       double range,
@@ -281,38 +282,32 @@ public class IsometricGrid extends Grid {
     int visionDistance = getZone().getTokenVisionInPixels();
     double visionRange =
         (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
-    int tokenFacing = token.getFacingInDegrees() + 90;
+    int tokenFacingAngle = token.getFacingInDegrees() + 90;
+    Rectangle footprint = token.getFootprint(this).getBounds(this);
 
     if (scaleWithToken) {
-      Rectangle footprint = token.getFootprint(this).getBounds(this);
       visionRange += footprint.getHeight() / 2;
-      System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
-      System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
     }
-    // System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
-    // System.out.println("token.getWidth() " + token.getWidth());
 
     Area visibleArea = new Area();
     switch (shape) {
-      case CIRCLE:
+      case CIRCLE -> {
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange * 2, -visionRange, visionRange *
-        // 4, visionRange * 2));
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
-        break;
-      case SQUARE:
-        int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
+      }
+      case SQUARE -> {
+        int[] x = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
+        int[] y = {(int) -visionRange, 0, (int) visionRange, 0};
         visibleArea = new Area(new Polygon(x, y, 4));
-        break;
-      case BEAM:
+      }
+      case BEAM -> {
         var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         // new angle, corrected for isometric view
-        double theta = Math.toRadians(offsetAngle) - Math.toRadians(tokenFacing);
+        double theta = Math.toRadians(offsetAngle - tokenFacingAngle);
         Point2D angleVector = new Point2D.Double(Math.cos(theta), Math.sin(theta));
         AffineTransform at = new AffineTransform();
         at.rotate(Math.PI / 4);
@@ -325,9 +320,8 @@ public class IsometricGrid extends Grid {
             new Area(
                 AffineTransform.getRotateInstance(theta + Math.toRadians(45))
                     .createTransformedShape(visibleShape));
-
-        break;
-      case CONE:
+      }
+      case CONE -> {
         // Rotate the vision range by 45 degrees for isometric view
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         // Get the cone, use degreesFromIso to convert the facing from isometric to plan
@@ -338,18 +332,13 @@ public class IsometricGrid extends Grid {
                 -visionRange,
                 visionRange * 4,
                 visionRange * 2,
-                -tokenFacing - (arcAngle / 2.0) + (offsetAngle * 1.0),
+                (offsetAngle - tokenFacingAngle) - (arcAngle / 2.0),
                 arcAngle,
                 Arc2D.PIE);
         GeneralPath path = new GeneralPath();
         path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
         Area tempvisibleArea = new Area(path);
 
-        // Get the cell footprint
-        Rectangle footprint =
-            token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
-        footprint.x = -footprint.width / 2;
-        footprint.y = -footprint.height / 2;
         // convert the cell footprint to an area
         Area cellShape = createCellShape(footprint.height);
         // convert the area to isometric view
@@ -359,14 +348,14 @@ public class IsometricGrid extends Grid {
         // join cell footprint and cone to create viewable area
         visibleArea.add(cellShape);
         visibleArea.add(tempvisibleArea);
-        break;
-      default:
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2,
-        // visionRange * 2));
+      }
+      default -> {
+        log.error("Unhandled shape {}; treating as a circle", shape);
+        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-        break;
+                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
+      }
     }
     return visibleArea;
   }

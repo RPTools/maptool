@@ -875,7 +875,9 @@ public class Token implements Cloneable {
 
   /**
    * This returns the rotation of the facing of the token from the default facing of down or -90.
-   * Positive for CW and negative for CCW.
+   *
+   * <p>Positive for CW and negative for CCW. The range is currently from -270° (inclusive) to +90°
+   * (exclusive), but callers should not rely on this.
    *
    * @return angle in degrees
    */
