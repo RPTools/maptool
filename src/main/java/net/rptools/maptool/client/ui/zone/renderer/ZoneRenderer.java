@@ -1496,7 +1496,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
         if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
           at.rotate(
-              Math.toRadians(-token.getFacing() - 90),
+              Math.toRadians(token.getFacingInDegrees()),
               scaledWidth / 2 - token.getAnchor().x * scale - offsetx,
               scaledHeight / 2
                   - token.getAnchor().y * scale
@@ -2191,7 +2191,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         double sy = scaledHeight / 2 + y - (token.getAnchor().y * scale);
         tokenBounds.transform(
             AffineTransform.getRotateInstance(
-                Math.toRadians(-token.getFacing() - 90), sx, sy)); // facing
+                Math.toRadians(token.getFacingInDegrees()), sx, sy)); // facing
         // defaults
         // to
         // down,
@@ -2394,7 +2394,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         // (token.getAnchor().y * scale) - offsety);
 
         at.rotate(
-            Math.toRadians(-token.getFacing() - 90),
+            Math.toRadians(token.getFacingInDegrees()),
             location.scaledWidth / 2 - (token.getAnchor().x * scale) - offsetx,
             location.scaledHeight / 2 - (token.getAnchor().y * scale) - offsety);
         // facing defaults to down, or -90 degrees
@@ -2502,9 +2502,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         Token.TokenShape tokenType = token.getShape();
         switch (tokenType) {
           case FIGURE:
-            if (token.getHasImageTable()
-                && token.hasFacing()
-                && AppPreferences.getForceFacingArrow() == false) {
+            if (token.getHasImageTable() && AppPreferences.getForceFacingArrow() == false) {
               break;
             }
             Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
@@ -2719,7 +2717,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
           // Rotated
           clippedG.translate(sp.x, sp.y);
           clippedG.rotate(
-              Math.toRadians(-token.getFacing() - 90),
+              Math.toRadians(token.getFacingInDegrees()),
               width / 2 - (token.getAnchor().x * scale),
               height / 2 - (token.getAnchor().y * scale)); // facing defaults to down, or -90
           // degrees
@@ -3376,7 +3374,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
           MapTool.getCampaign().getLookupTableMap().get(token.getImageTableName());
       if (lookupTable != null) {
         try {
-          LookupEntry result = lookupTable.getLookup(token.getFacing().toString());
+          LookupEntry result = lookupTable.getLookup(Integer.toString(token.getFacing()));
           if (result != null) {
             image = ImageManager.getImage(result.getImageId(), this);
           }

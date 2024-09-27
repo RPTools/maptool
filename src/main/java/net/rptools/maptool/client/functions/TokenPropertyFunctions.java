@@ -642,7 +642,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
     if (functionName.equalsIgnoreCase("getTokenFacing")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
-      if (token.getFacing() == null) {
+      if (!token.hasFacing()) {
         return ""; // XXX Should be -1 instead of a string?
       }
       return BigDecimal.valueOf(token.getFacing());

@@ -693,7 +693,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
       for (GUID tokenGUID : selectedTokenSet) {
         Token token = renderer.getZone().getToken(tokenGUID);
-        token.setFacing(null);
+        token.removeFacing();
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
       }
       renderer.repaint();

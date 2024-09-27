@@ -72,7 +72,7 @@ public class FacingTool extends DefaultTool {
                 if (token == null) {
                   continue;
                 }
-                token.setFacing(null);
+                token.removeFacing();
                 renderer.flush(token);
               }
               // Go back to the pointer tool

@@ -40,7 +40,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Objects;
 import java.util.Set;
 import javax.annotation.Nullable;
 import javax.swing.AbstractAction;
@@ -1046,7 +1045,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
             // untested when anchor != (0,0)
             // rotate the resize image with the stamp.
-            double theta = Math.toRadians(-token.getFacing() - 90);
+            double theta = Math.toRadians(token.getFacingInDegrees());
             double anchorX =
                 -scaledWidth / 2 + resizeImg.getWidth() - (token.getAnchor().x * scale);
             double anchorY =
@@ -1303,7 +1302,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       // theta is the rotation angle clockwise from the positive x-axis to compensate for the +ve
       // y-axis pointing downwards in zone space and an unrotated token has facing of -90.
       // theta == 0 => token has default rotation.
-      int theta = -Objects.requireNonNullElse(tokenBeingResized.getFacing(), -90) - 90;
+      int theta = tokenBeingResized.getFacingInDegrees();
       double radians = Math.toRadians(theta);
       this.down = new Vector2(-Math.sin(radians), Math.cos(radians));
       this.right = new Vector2(Math.cos(radians), Math.sin(radians));

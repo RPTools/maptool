@@ -406,9 +406,6 @@ public abstract class Grid implements Cloneable {
                     -visionRange, -visionRange, visionRange * 2, visionRange * 2));
         break;
       case BEAM:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
         // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
         var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
         Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
@@ -421,10 +418,6 @@ public abstract class Grid implements Cloneable {
                     .createTransformedShape(visibleShape));
         break;
       case CONE:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
-
         Arc2D cone =
             new Arc2D.Double(
                 -visionRange,
