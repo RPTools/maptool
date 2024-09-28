@@ -78,27 +78,12 @@ public class SquareGrid extends Grid {
           return true;
         }
       };
+
   // @formatter:on
-
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
-
-  public SquareGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
 
   @Override
   public Point2D.Double getCenterOffset() {
     return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
-  }
-
-  public SquareGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
   }
 
   @Override
@@ -151,15 +136,17 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
+  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
     if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
+      return new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
+    } else if (faceVertices) {
+      // && !faceEdges
+      return new int[] {-135, -45, 45, 135};
+    } else if (faceEdges) {
+      // && !faceVertices
+      return new int[] {-90, 0, 90, 180};
     } else {
-      FACING_ANGLES = new int[] {90};
+      return new int[] {90};
     }
   }
 
@@ -267,11 +254,6 @@ public class SquareGrid extends Grid {
   @Override
   public double getCellWidth() {
     return getSize();
-  }
-
-  @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
   }
 
   @Override

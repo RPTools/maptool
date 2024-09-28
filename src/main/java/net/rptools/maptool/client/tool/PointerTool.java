@@ -1100,7 +1100,11 @@ public class PointerTool extends DefaultTool {
       if (freeRotate) {
         facing += direction * 5;
       } else {
-        int[] facingArray = renderer.getZone().getGrid().getFacingAngles();
+        int[] facingArray =
+            renderer
+                .getZone()
+                .getGrid()
+                .getFacingAngles(AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
         int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
 
         facingIndex += direction;

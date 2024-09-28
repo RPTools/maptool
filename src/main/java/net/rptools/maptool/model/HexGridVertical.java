@@ -28,7 +28,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -50,33 +49,14 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  * @formatter:on
  */
 public class HexGridVertical extends HexGrid {
-
-  private static final int[] ALL_ANGLES =
-      new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.x) % 2 == 1 && Math.abs(offsetPoint.x) % 2 == 0) {
           offsetPoint.y++;
         }
       };
-  private static int[]
-      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static List<TokenFootprint> footprintList;
   private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
-
-  public HexGridVertical() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public HexGridVertical(boolean faceEdges, boolean faceVertices) {
-    super();
-    setFacings(faceEdges, faceVertices);
-  }
 
   @Override
   protected synchronized Map<Integer, Area> getGridShapeCache() {
@@ -101,26 +81,16 @@ public class HexGridVertical extends HexGrid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
+  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
     if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-120, -60, 0, 60, 120, 180};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-150, -90, -30, 30, 90, 150};
+      return new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+    } else if (faceVertices) {
+      return new int[] {-120, -60, 0, 60, 120, 180};
+    } else if (faceEdges) {
+      return new int[] {-150, -90, -30, 30, 90, 150};
     } else {
-      FACING_ANGLES = new int[] {90};
+      return new int[] {90};
     }
-  }
-
-  @Override
-  public int[] getFacingAngles() {
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-    return FACING_ANGLES;
   }
 
   /*

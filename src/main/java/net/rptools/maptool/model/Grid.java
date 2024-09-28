@@ -112,7 +112,7 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
-   * Set the facing options for tokens/objects on a grid. Each grid type can providing facings to
+   * Get the facing options for tokens/objects on a grid. Each grid type can providing facings to
    * the edges, the vertices, both, or neither.
    *
    * <p>If both are false, tokens on that grid will not be able to rotate with the mouse and
@@ -121,13 +121,7 @@ public abstract class Grid implements Cloneable {
    * @param faceEdges - Tokens can face edges.
    * @param faceVertices - Tokens can face vertices.
    */
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    // Handle it in the individual grid types
-  }
-
-  public int[] getFacingAngles() {
-    return null;
-  }
+  public abstract int[] getFacingAngles(boolean faceEdges, boolean faceVertices);
 
   /**
    * Return the Point (double precision) for pixel center of Cell

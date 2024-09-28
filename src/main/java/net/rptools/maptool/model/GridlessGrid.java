@@ -57,9 +57,8 @@ public class GridlessGrid extends Grid {
           return false;
         }
       };
-  // @formatter:on
 
-  private static final int[] FACING_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
+  // @formatter:on
 
   @Override
   public List<TokenFootprint> getFootprints() {
@@ -74,8 +73,8 @@ public class GridlessGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
+  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
+    return new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
   }
 
   @Override

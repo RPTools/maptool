@@ -105,10 +105,6 @@ public abstract class HexGrid extends Grid {
    */
   protected transient double edgeLength;
 
-  public HexGrid() {
-    super();
-  }
-
   @Override
   public boolean isHex() {
     return true;

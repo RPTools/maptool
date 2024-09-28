@@ -101,7 +101,11 @@ public class FacingTool extends DefaultTool {
     int degrees = (int) Math.toDegrees(angle);
 
     if (!SwingUtil.isControlDown(e)) {
-      int[] facingAngles = renderer.getZone().getGrid().getFacingAngles();
+      int[] facingAngles =
+          renderer
+              .getZone()
+              .getGrid()
+              .getFacingAngles(AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
       degrees = facingAngles[TokenUtil.getIndexNearestTo(facingAngles, degrees)];
     }
     Area visibleArea = null;

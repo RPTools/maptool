@@ -559,24 +559,16 @@ public class MapPropertiesDialog extends JDialog {
   private Grid createZoneGrid() {
     Grid grid = null;
     if (getHexHorizontalRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.HEX_HORI, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.HEX_HORI);
     }
     if (getHexVerticalRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.HEX_VERT, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.HEX_VERT);
     }
     if (getSquareRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.SQUARE, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.SQUARE);
     }
     if (getIsometricRadio().isSelected()) {
-      grid =
-          GridFactory.createGrid(
-              GridFactory.ISOMETRIC, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+      grid = GridFactory.createGrid(GridFactory.ISOMETRIC);
     }
     if (getNoGridRadio().isSelected()) {
       grid = GridFactory.createGrid(GridFactory.NONE);

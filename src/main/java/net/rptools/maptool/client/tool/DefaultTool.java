@@ -20,6 +20,7 @@ import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -379,7 +380,10 @@ public abstract class DefaultTool extends Tool
             facing += e.getWheelRotation() > 0 ? 5 : -5;
           }
         } else {
-          int[] facingArray = getZone().getGrid().getFacingAngles();
+          int[] facingArray =
+              getZone()
+                  .getGrid()
+                  .getFacingAngles(AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
           int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
 
           facingIndex += e.getWheelRotation() > 0 ? 1 : -1;

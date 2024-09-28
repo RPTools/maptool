@@ -29,7 +29,6 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -49,38 +48,14 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
  * @formatter:on
  */
 public class HexGridHorizontal extends HexGrid {
-
-  private static final int[] ALL_ANGLES =
-      new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static final OffsetTranslator OFFSET_TRANSLATOR =
       (originPoint, offsetPoint) -> {
         if (Math.abs(originPoint.y) % 2 == 1 && Math.abs(offsetPoint.y) % 2 == 0) {
           offsetPoint.x++;
         }
       };
-  /*
-   * Facings are set when a new map is created with a particular grid and these facings affect all maps with the same grid. Other maps with different grids will remain the same.
-   *
-   * Facings are set when maps are loaded to the current preferences.
-   */
-  private static int[]
-      FACING_ANGLES; // = new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
   private static List<TokenFootprint> footprintList;
   private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
-
-  public HexGridHorizontal() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public HexGridHorizontal(boolean faceEdges, boolean faceVertices) {
-    super();
-    setFacings(faceEdges, faceVertices);
-  }
 
   @Override
   public boolean isHexHorizontal() {
@@ -92,22 +67,17 @@ public class HexGridHorizontal extends HexGrid {
     return gridShapeCache;
   }
 
-  /**
-   * Set available facings based on the passed parameters.
-   *
-   * @param faceEdges - Tokens can face cell faces if true.
-   * @param faceVertices - Tokens can face cell vertices if true.
-   */
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
+  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
+    // TODO Distorted hexes surely require distorted facing angles.
     if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-150, -90, -30, 30, 90, 150};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-120, -60, 0, 60, 120, 180};
+      return new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
+    } else if (faceVertices) {
+      return new int[] {-150, -90, -30, 30, 90, 150};
+    } else if (faceEdges) {
+      return new int[] {-120, -60, 0, 60, 120, 180};
     } else {
-      FACING_ANGLES = new int[] {90};
+      return new int[] {90};
     }
   }
 
@@ -126,16 +96,6 @@ public class HexGridHorizontal extends HexGrid {
     } else {
       return Math.max(Math.abs(dx), Math.abs(dy));
     }
-  }
-
-  @Override
-  public int[] getFacingAngles() {
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-    return FACING_ANGLES;
   }
 
   /*
