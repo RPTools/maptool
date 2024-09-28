@@ -33,7 +33,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.ViewMovementKey;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.util.TokenUtil;
 
 /** */
 public abstract class DefaultTool extends Tool
@@ -380,20 +379,15 @@ public abstract class DefaultTool extends Tool
             facing += e.getWheelRotation() > 0 ? 5 : -5;
           }
         } else {
-          int[] facingArray =
-              getZone()
+          facing =
+              renderer
+                  .getZone()
                   .getGrid()
-                  .getFacingAngles(AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
-          int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
-
-          facingIndex += e.getWheelRotation() > 0 ? 1 : -1;
-          if (facingIndex < 0) {
-            facingIndex = facingArray.length - 1;
-          }
-          if (facingIndex == facingArray.length) {
-            facingIndex = 0;
-          }
-          facing = facingArray[facingIndex];
+                  .nextFacing(
+                      facing,
+                      AppPreferences.getFaceEdge(),
+                      AppPreferences.getFaceVertex(),
+                      e.getWheelRotation() <= 0);
         }
 
         token.setFacing(facing);

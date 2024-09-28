@@ -41,6 +41,7 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
+import net.rptools.maptool.util.TokenUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -112,6 +113,35 @@ public abstract class Grid implements Cloneable {
   }
 
   /**
+   * Get the next standard facing in the given direction.
+   *
+   * @param facing The current facing.
+   * @param faceEdges Whether to snap facing to edges.
+   * @param faceVertices
+   * @param clockwise
+   * @return
+   */
+  public int nextFacing(int facing, boolean faceEdges, boolean faceVertices, boolean clockwise) {
+    int[] facingArray = getFacingAngles(faceEdges, faceVertices);
+    int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
+
+    facingIndex += clockwise ? -1 : 1;
+    if (facingIndex < 0) {
+      facingIndex = facingArray.length - 1;
+    }
+    if (facingIndex == facingArray.length) {
+      facingIndex = 0;
+    }
+    return facingArray[facingIndex];
+  }
+
+  public int nearestFacing(int facing, boolean faceEdges, boolean faceVertices) {
+    int[] facingArray = getFacingAngles(faceEdges, faceVertices);
+    // TODO Much chance of overflow here.
+    return facingArray[TokenUtil.getIndexNearestTo(facingArray, facing)];
+  }
+
+  /**
    * Get the facing options for tokens/objects on a grid. Each grid type can providing facings to
    * the edges, the vertices, both, or neither.
    *
@@ -121,7 +151,7 @@ public abstract class Grid implements Cloneable {
    * @param faceEdges - Tokens can face edges.
    * @param faceVertices - Tokens can face vertices.
    */
-  public abstract int[] getFacingAngles(boolean faceEdges, boolean faceVertices);
+  protected abstract int[] getFacingAngles(boolean faceEdges, boolean faceVertices);
 
   /**
    * Return the Point (double precision) for pixel center of Cell

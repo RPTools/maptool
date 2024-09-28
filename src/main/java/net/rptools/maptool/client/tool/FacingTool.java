@@ -29,7 +29,6 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.TokenUtil;
 
 /** */
 public class FacingTool extends DefaultTool {
@@ -101,12 +100,11 @@ public class FacingTool extends DefaultTool {
     int degrees = (int) Math.toDegrees(angle);
 
     if (!SwingUtil.isControlDown(e)) {
-      int[] facingAngles =
+      degrees =
           renderer
               .getZone()
               .getGrid()
-              .getFacingAngles(AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
-      degrees = facingAngles[TokenUtil.getIndexNearestTo(facingAngles, degrees)];
+              .nearestFacing(degrees, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
     }
     Area visibleArea = null;
     Set<GUID> remoteSelected = new HashSet<GUID>();
