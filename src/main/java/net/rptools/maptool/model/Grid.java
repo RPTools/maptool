@@ -65,7 +65,7 @@ public abstract class Grid implements Cloneable {
 
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   protected transient Map<KeyStroke, Action> movementKeys = null;
   private transient Zone zone;

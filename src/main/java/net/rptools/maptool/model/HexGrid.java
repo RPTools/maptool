@@ -73,7 +73,8 @@ public abstract class HexGrid extends Grid {
           return false;
         }
       };
-  protected static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_HEX);
+  protected static final BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_HEX);
 
   @Override
   public Point2D.Double getCenterOffset() {

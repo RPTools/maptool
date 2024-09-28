@@ -50,8 +50,6 @@ public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
   private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
-  private static BufferedImage pathHighlightAlt =
-      RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
 
   private static List<TokenFootprint> footprintList;
 

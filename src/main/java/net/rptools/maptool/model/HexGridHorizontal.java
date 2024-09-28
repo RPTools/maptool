@@ -55,7 +55,7 @@ public class HexGridHorizontal extends HexGrid {
         }
       };
   private static List<TokenFootprint> footprintList;
-  private static Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
+  private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   @Override
   public boolean isHexHorizontal() {
