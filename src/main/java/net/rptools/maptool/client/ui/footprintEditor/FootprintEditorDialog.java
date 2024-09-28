@@ -29,7 +29,6 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.CellPoint;
-import net.rptools.maptool.model.FootprintManager;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.TokenFootprint;
 import net.rptools.maptool.util.FootPrintToolbox;
@@ -85,7 +84,7 @@ public class FootprintEditorDialog extends JDialog {
   final boolean oldShowGrid = AppState.isShowGrid();
   private ComboBoxManager comboBoxManager;
   String currentGridType;
-  private FPManager fpManager;
+  private FootprintManager fpManager;
   private final ChangeTracking changeTrack = new ChangeTracking();
   Changes changes;
   private static final CellPoint ZERO_POINT = new CellPoint(0, 0);
@@ -103,7 +102,7 @@ public class FootprintEditorDialog extends JDialog {
     connectControls();
     initRadioButtons();
 
-    fpManager = new FPManager();
+    fpManager = new FootprintManager();
     comboBoxManager = new ComboBoxManager();
 
     editor = new FootprintEditingPanel();
@@ -125,37 +124,73 @@ public class FootprintEditorDialog extends JDialog {
    *   <li>link escape key to cancel action
    *   <li>link +/- pgUp/pgDown to editor zoom level
    */
-  // spotless:off
   private void addMiscellaneousListeners() {
     log.debug("addMiscellaneousListeners");
     // reset grid visibility
-    this.addWindowListener(new WindowAdapter() {
-        public void windowClosing(WindowEvent e) { AppState.setShowGrid(oldShowGrid);}});
+    this.addWindowListener(
+        new WindowAdapter() {
+          public void windowClosing(WindowEvent e) {
+            AppState.setShowGrid(oldShowGrid);
+          }
+        });
     // Escape key
-    formPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+    formPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-    formPanel.getActionMap().put("cancel", new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {cancel();}});
+    formPanel
+        .getActionMap()
+        .put(
+            "cancel",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                cancel();
+              }
+            });
 
     formPanel
         .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_DOWN, 0), "zoomOut");
-    formPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+    formPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_MINUS, 0), "zoomOut");
-    formPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+    formPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_PAGE_UP, 0), "zoomIn");
-    formPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+    formPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_PLUS, 0), "zoomIn");
-    formPanel.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+    formPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
         .put(KeyStroke.getKeyStroke(KeyEvent.VK_EQUALS, 0), "zoomReset");
-    formPanel.getActionMap().put("zoomOut", new AbstractAction() {
-        public void actionPerformed(ActionEvent e) { editor.zoomOut();}});
-    formPanel.getActionMap().put("zoomIn", new AbstractAction() {
-        public void actionPerformed(ActionEvent e) { editor.zoomIn(); }});
-    formPanel.getActionMap().put("zoomReset", new AbstractAction() {
-        public void actionPerformed(ActionEvent e) {editor.zoomReset();}});
+    formPanel
+        .getActionMap()
+        .put(
+            "zoomOut",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                editor.zoomOut();
+              }
+            });
+    formPanel
+        .getActionMap()
+        .put(
+            "zoomIn",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                editor.zoomIn();
+              }
+            });
+    formPanel
+        .getActionMap()
+        .put(
+            "zoomReset",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                editor.zoomReset();
+              }
+            });
   }
-// spotless:on
+
   /** connect variables to their associated controls */
   private void connectControls() {
     log.debug("connectControls");
@@ -231,13 +266,12 @@ public class FootprintEditorDialog extends JDialog {
 
     // form buttons
     okButton = (JButton) formPanel.getButton("okButton");
-    cancelButton = (JButton) formPanel.getButton("okButton");
+    cancelButton = (JButton) formPanel.getButton("cancelButton");
 
     okButton.addActionListener(e -> okay());
     cancelButton.addActionListener(e -> cancel());
   }
 
-  // spotless: on
   /**
    * set up the radio buttons:
    *
@@ -416,7 +450,11 @@ public class FootprintEditorDialog extends JDialog {
    *   <li>etc.
    * </ul>
    */
-  private class FPManager extends FootprintManager {
+  private class FootprintManager {
+    private static final Logger FPM_LOG = LoggerFactory.getLogger(FootprintManager.class);
+    private static final Map<String, List<TokenFootprint>> CAMPAIGN_FOOTPRINTS =
+        FootPrintToolbox.getCampaignFootprints();
+    protected static String currentGridType = AppPreferences.getDefaultGridType();
     protected TokenFootprint currentFootprint;
     protected List<TokenFootprint> currentGridFootprintList = new LinkedList<>();
     protected Map<String, List<TokenFootprint>> gridMapToFootprintList = new HashMap<>();
@@ -424,28 +462,40 @@ public class FootprintEditorDialog extends JDialog {
     protected Map<TokenFootprint, TokenFootprint> originalsMap = new HashMap<>();
     protected TokenFootprint originalFootprint;
 
-    public FPManager() {
-      super(false);
-      log.debug("new FPManager");
+    public FootprintManager() {
+      FPM_LOG.debug("new FPManager");
       addAllFootprintsFromCampaign();
       if (currentFootprint == null) {
-        currentFootprint = FootprintManager.getGlobalDefaultFootprint();
+        currentFootprint = FootPrintToolbox.getGlobalDefaultFootprint();
       }
       originalFootprint = currentFootprint;
     }
 
+    List<TokenFootprint> getCurrentGridFootprintList() {
+      return currentGridFootprintList;
+    }
+
+    public static Map<String, List<TokenFootprint>> getCampaignFootprints() {
+      return CAMPAIGN_FOOTPRINTS;
+    }
+
+    TokenFootprint getGridDefaultFootprint(String gridType) {
+      return gridDefaultFootprint.get(FootPrintToolbox.lookupGridType(gridType));
+    }
+
+    /** Copies all footprints to local map sets originals and current instances to defaults */
     private void addAllFootprintsFromCampaign() {
-      for (String gridType : campaignFootprints.keySet()) {
+      for (String gridType : CAMPAIGN_FOOTPRINTS.keySet()) {
         List<TokenFootprint> gridList = new LinkedList<>();
-        for (TokenFootprint fp : campaignFootprints.get(gridType)) {
+        for (TokenFootprint fp : CAMPAIGN_FOOTPRINTS.get(gridType)) {
           changeTrack.put(fp, new Changes(fp));
           originalsMap.put(fp, fp);
           gridList.add(fp);
           if (fp.isDefault()) {
             gridDefaultFootprint.put(gridType, fp);
-          }
-          if (currentGridType.equalsIgnoreCase(gridType)) {
-            currentFootprint = fp;
+            if (currentGridType.equalsIgnoreCase(gridType)) {
+              currentFootprint = fp;
+            }
           }
         }
         gridMapToFootprintList.put(gridType, gridList);
@@ -463,7 +513,7 @@ public class FootprintEditorDialog extends JDialog {
      */
     private void selectionChanged(
         TokenFootprint toFootprint, TokenFootprint fromFootprint, Changes changeUpdate) {
-      log.debug(
+      FPM_LOG.debug(
           "selectionChanged - "
               + FootPrintToolbox.stringifyFootprint(toFootprint)
               + " : "
@@ -479,26 +529,153 @@ public class FootprintEditorDialog extends JDialog {
       if (changes != null) {
         nameField.setText(
             changes.getName().isBlank() || changes.getName().isEmpty()
-                ? ((TokenFootprint) footprintCombo.getSelectedItem()).getLocalizedName()
+                ? ((TokenFootprint) Objects.requireNonNull(footprintCombo.getSelectedItem()))
+                    .getLocalizedName()
                 : changes.getName());
         scaleSpinner.setValue(changes.getScale());
         editor.setTokenFootprint(currentGridType, toFootprint, changes.getCells());
       } else {
-        nameField.setText(((TokenFootprint) footprintCombo.getSelectedItem()).getLocalizedName());
+        nameField.setText(
+            ((TokenFootprint) Objects.requireNonNull(footprintCombo.getSelectedItem())).getName());
         editor.setTokenFootprint(currentGridType, toFootprint, null);
       }
-      log.debug(
+      FPM_LOG.debug(
           "Selection isDefault: " + getGridDefaultFootprint(currentGridType).equals(toFootprint));
       defaultCheckbox.setSelected(getGridDefaultFootprint(currentGridType).equals(toFootprint));
       setCurrentFootprint(toFootprint);
     }
 
-    TokenFootprint getGridDefaultFootprint(String gridType) {
-      return gridDefaultFootprint.get(gridType.equals("Isometric") ? "Square" : gridType);
+    public void changeCurrentGridType(String gridType) {
+      FPM_LOG.debug("changeCurrentGridType");
+      // store the old
+      gridMapToFootprintList.put(currentGridType, getCurrentGridFootprintList());
+      // replace with the new
+      currentGridType = gridType;
+      currentGridFootprintList = gridMapToFootprintList.get(currentGridType);
+      // update the ui
+      comboBoxManager.setVisibleComboBox();
+      selectionChanged((TokenFootprint) footprintCombo.getSelectedItem(), null, null);
     }
 
-    List<TokenFootprint> getCurrentGridFootprintList() {
-      return currentGridFootprintList;
+    private void setScale(double s) {
+      FPM_LOG.debug("setScale: " + s);
+      if (currentFootprint.getScale() != s) {
+        changeTrack.addChange(currentFootprint, "scale", s);
+      }
+      editor.setScale(s);
+      // TODO: check validity and update editor
+    }
+
+    private void setCurrentFootprint(TokenFootprint footprint) {
+      FPM_LOG.debug("setCurrentFootprint - " + footprint.toString());
+      currentFootprint = footprint;
+      boolean exists = originalsMap.containsKey(footprint);
+      revertButton.setEnabled(exists);
+      if (exists) {
+        originalFootprint = originalsMap.get(footprint);
+      } else {
+        originalFootprint = null;
+      }
+    }
+
+    public void setCurrentFootprintName() {
+      FPM_LOG.debug("setCurrentFootprintName");
+      String name = nameField.getText();
+      changeTrack.addChange(currentFootprint, "name", name);
+      currentFootprint.setLocalizedName(name);
+    }
+
+    void setAsDefault(boolean value) {
+      if (value) {
+        gridDefaultFootprint.replace(currentGridType, currentFootprint);
+      } else {
+        gridDefaultFootprint.replace(currentGridType, currentGridFootprintList.getFirst());
+      }
+    }
+
+    public TokenFootprint buildNewFootprint(TokenFootprint footprint) {
+      changes = changeTrack.getChanges(footprint);
+      String name = newName();
+      return FootPrintToolbox.createTokenFootprint(
+          currentGridType,
+          name,
+          getGridDefaultFootprint(currentGridType).equals(footprint),
+          changes.getScale(),
+          true,
+          name,
+          changes.getCells());
+    }
+
+    void FPMReplace(TokenFootprint fp1, TokenFootprint fp2) {
+      if (getCurrentGridFootprintList().contains(fp1)) {
+        int idx = currentGridFootprintList.indexOf(fp1);
+        currentGridFootprintList.remove(idx);
+        currentGridFootprintList.add(idx, fp2);
+        changeTrack.remove(fp1);
+        changeTrack.put(fp2, new Changes(fp2));
+        comboBoxManager.comboReplace(fp1, fp2);
+      }
+    }
+
+    public TokenFootprint buildNewFootprint() {
+      FPM_LOG.debug("buildNewFootprint");
+      changeTrack.addChange(currentFootprint, "name", nameField.getText());
+      changeTrack.addChange(
+          currentFootprint,
+          "scale",
+          ((SpinnerNumberModel) scaleSpinner.getModel()).getNumber().doubleValue());
+      changeTrack.addChange(currentFootprint, "cells", editor.getCellSet());
+      return buildNewFootprint(currentFootprint);
+    }
+
+    /** returns "new_footprint" with as many underscores as necessary to make it unique */
+    String newName() {
+      List<TokenFootprint> useList = getCurrentGridFootprintList();
+      String text = "new_footprint";
+      boolean test;
+      do {
+        test = useList.stream().map(TokenFootprint::getName).toList().contains(text);
+        if (!test) {
+          test = useList.stream().map(TokenFootprint::getLocalizedName).toList().contains(text);
+        }
+        text = test ? text + "_" : text;
+      } while (test);
+      return text;
+    }
+
+    void addFootprint() {
+      FPM_LOG.debug("addFootprint");
+      TokenFootprint newFp = buildNewFootprint();
+      changeTrack.put(newFp, new Changes(newFp));
+      currentGridFootprintList.add(newFp);
+      setCurrentFootprint(newFp);
+      setAsDefault(defaultCheckbox.isSelected());
+      comboBoxManager.addToComboBox(newFp);
+    }
+
+    void deleteFootprint() {
+      FPM_LOG.debug("deleteFootprint");
+      if (defaultCheckbox.isSelected()) {
+        setAsDefault(false);
+      }
+      currentGridFootprintList.remove(currentFootprint);
+      changeTrack.remove(currentFootprint);
+      comboBoxManager.removeFootprint(currentFootprint);
+    }
+
+    void revertFootprint() {
+      FPM_LOG.debug("revertFootprint");
+      if (originalFootprint != null) {
+        currentFootprint = originalFootprint;
+        changeTrack.remove(currentFootprint);
+        changes = new Changes(originalFootprint);
+        changeTrack.put(originalFootprint, changes);
+
+        setAsDefault(originalFootprint.isDefault());
+        scaleSpinner.setValue(changes.getScale());
+        nameField.setText(changes.getName());
+        editor.setTokenFootprint(currentGridType, originalFootprint, null);
+      }
     }
 
     /**
@@ -521,135 +698,8 @@ public class FootprintEditorDialog extends JDialog {
           || !fp.getLocalizedName().equals(fp.getLocalizedName());
     }
 
-    void writeUpdate(TokenFootprint fp, String gridType) {
-      log.debug("writeUpdate - " + gridType + fp);
-      writeFootprintToCampaign(fp, gridType);
-    }
-
-    void writeUpdates() {
-      writeAllFootprintsToCampaign(gridMapToFootprintList);
-    }
-
-    private void setScale(double s) {
-      log.debug("setScale: " + s);
-      if (currentFootprint.getScale() != s) {
-        changeTrack.addChange(currentFootprint, "scale", s);
-      }
-      editor.setScale(s);
-      // TODO: check validity and update editor
-    }
-
-    @Override
-    public void changeCurrentGridType(String gridType) {
-      log.debug("setCurrentGridFootprints");
-      // store the old
-      gridMapToFootprintList.put(currentGridType, getCurrentGridFootprintList());
-      // replace with the new
-      currentGridType = gridType;
-      currentGridFootprintList = gridMapToFootprintList.get(currentGridType);
-      // update the ui
-      comboBoxManager.setVisibleComboBox();
-      selectionChanged((TokenFootprint) footprintCombo.getSelectedItem(), null, null);
-    }
-
-    private void setCurrentFootprint(TokenFootprint footprint) {
-      log.debug("setCurrentFootprint - " + footprint.toString());
-      currentFootprint = footprint;
-      boolean exists = originalsMap.containsKey(footprint);
-      revertButton.setEnabled(exists);
-      if (exists) {
-        originalFootprint = originalsMap.get(footprint);
-      } else {
-        originalFootprint = null;
-      }
-    }
-
-    void FPMReplace(TokenFootprint fp1, TokenFootprint fp2) {
-      if (getCurrentGridFootprintList().contains(fp1)) {
-        int idx = currentGridFootprintList.indexOf(fp1);
-        currentGridFootprintList.remove(idx);
-        currentGridFootprintList.add(idx, fp2);
-        changeTrack.remove(fp1);
-        changeTrack.put(fp2, new Changes(fp2));
-        comboBoxManager.comboReplace(fp1, fp2);
-      }
-    }
-
-    public void setCurrentFootprintName() {
-      log.debug("setCurrentFootprintName");
-      String name = nameField.getText();
-      changeTrack.addChange(currentFootprint, "name", name);
-      currentFootprint.setLocalizedName(name);
-    }
-
-    public TokenFootprint buildNewFootprint(TokenFootprint footprint) {
-      changes = changeTrack.getChanges(footprint);
-      String name = newName(changes.getName());
-      return createTokenFootprint(
-          currentGridType,
-          name,
-          getGridDefaultFootprint(currentGridType).equals(footprint),
-          changes.getScale(),
-          true,
-          name,
-          changes.getCells());
-    }
-
-    public TokenFootprint buildNewFootprint() {
-      log.debug("buildNewFootprint");
-      changeTrack.addChange(currentFootprint, "name", nameField.getText());
-      changeTrack.addChange(
-          currentFootprint,
-          "scale",
-          ((SpinnerNumberModel) scaleSpinner.getModel()).getNumber().doubleValue());
-      changeTrack.addChange(currentFootprint, "cells", editor.getCellSet());
-      return buildNewFootprint(currentFootprint);
-    }
-
-    void setAsDefault(boolean value) {
-      if (value) {
-        gridDefaultFootprint.replace(currentGridType, currentFootprint);
-      } else {
-        gridDefaultFootprint.replace(currentGridType, currentGridFootprintList.getFirst());
-      }
-    }
-
-    void addFootprint() {
-      log.debug("addFootprint");
-      TokenFootprint newFp = buildNewFootprint();
-      changeTrack.put(newFp, new Changes(newFp));
-      currentGridFootprintList.add(newFp);
-      setCurrentFootprint(newFp);
-      setAsDefault(defaultCheckbox.isSelected());
-      comboBoxManager.addToComboBox(newFp);
-    }
-
-    void deleteFootprint() {
-      log.debug("deleteFootprint");
-      if (defaultCheckbox.isSelected()) {
-        setAsDefault(false);
-      }
-      currentGridFootprintList.remove(currentFootprint);
-      changeTrack.remove(currentFootprint);
-      comboBoxManager.remove(currentFootprint);
-    }
-
-    String newName(String text) {
-      List<TokenFootprint> useList = getCurrentGridFootprintList();
-      text = text.isEmpty() ? "new_footprint" : text;
-      boolean test;
-      do {
-        test = useList.stream().map(TokenFootprint::getName).toList().contains(text);
-        if (!test) {
-          test = useList.stream().map(TokenFootprint::getLocalizedName).toList().contains(text);
-        }
-        text = test ? text + "_" : text;
-      } while (test);
-      return text;
-    }
-
     void saveFootprint() {
-      log.debug("saveFootprint");
+      FPM_LOG.debug("saveFootprint");
       if (hasChanged(currentFootprint)) {
         TokenFootprint newFP = buildNewFootprint(currentFootprint);
         FPMReplace(currentFootprint, newFP);
@@ -657,37 +707,31 @@ public class FootprintEditorDialog extends JDialog {
       }
     }
 
-    void revertFootprint() {
-      log.debug("revertFootprint");
-      if (originalFootprint != null) {
-        currentFootprint = originalFootprint;
-        changeTrack.remove(currentFootprint);
-        changes = new Changes(originalFootprint);
-        changeTrack.put(originalFootprint, changes);
-
-        setAsDefault(originalFootprint.isDefault());
-        scaleSpinner.setValue(changes.getScale());
-        nameField.setText(changes.getName());
-        editor.setTokenFootprint(currentGridType, originalFootprint, null);
-      }
-    }
-
     public void reorderList() {
-      log.debug("reorderList");
-      log.debug("list out - " + currentGridFootprintList);
+      FPM_LOG.debug("reorderList");
+      FPM_LOG.debug("list out - " + currentGridFootprintList);
       ListSortingDialog sortingDialog =
           new ListSortingDialog(
               MapTool.getFrame(),
               currentGridFootprintList.stream().map(o -> (Object) o).collect(Collectors.toList()));
 
       List<Object> sortedList = sortingDialog.showDialog();
-      log.debug("list in - " + sortedList);
+      FPM_LOG.debug("list in - " + sortedList);
       if (sortedList != null) {
         currentGridFootprintList =
             sortedList.stream().map(o -> (TokenFootprint) o).collect(Collectors.toList());
       }
       comboBoxManager.replaceComboBox(
           comboBoxManager.createComboBox(currentGridType, currentGridFootprintList));
+    }
+
+    void writeUpdate(TokenFootprint fp, String gridType) {
+      FPM_LOG.info("writeUpdate - " + gridType + fp);
+      FootPrintToolbox.writeFootprintToCampaign(fp, gridType);
+    }
+
+    void writeUpdates() {
+      FootPrintToolbox.writeAllFootprintsToCampaign(gridMapToFootprintList);
     }
   }
 
@@ -711,7 +755,7 @@ public class FootprintEditorDialog extends JDialog {
     JComboBox<TokenFootprint> createComboBox(String gridType, List<TokenFootprint> footprints) {
       log.debug("createComboBox - " + gridType + " - " + footprints);
       JComboBox<TokenFootprint> combo = new JComboBox<>();
-      String useGrid = gridType.equalsIgnoreCase("Isometric") ? "Square" : gridType;
+      String useGrid = FootPrintToolbox.lookupGridType(gridType);
       combo.setName(useGrid + "Combo");
       MutableComboBoxModel<TokenFootprint> comboModel = new DefaultComboBoxModel<>();
       for (TokenFootprint footprint : footprints) {
@@ -756,19 +800,14 @@ public class FootprintEditorDialog extends JDialog {
     private void setVisibleComboBox() {
       log.debug("setVisibleComboBox");
       lastSelectedFootprint = null;
-      String useGrid = currentGridType.equalsIgnoreCase("Isometric") ? "Square" : currentGridType;
-
-      CardLayout cl = (CardLayout) (comboBoxPanel.getLayout());
+      String useGrid = FootPrintToolbox.lookupGridType(currentGridType);
+      // comboBoxPanel uses a card layout - it was set to just show the appropriate combo box
+      // but I couldn't get it to work with replaced combo boxes so I just set the visibility
+      // instead.
       for (Component comp : comboBoxPanel.getComponents()) {
         if ((useGrid + "Combo").equalsIgnoreCase(comp.getName())) {
           comp.setVisible(true);
-          cl.show(comboBoxPanel, useGrid + "Combo");
           footprintCombo = (JComboBox<TokenFootprint>) comp;
-          String s = "";
-          for (int i = 0; i < footprintCombo.getItemCount(); i++) {
-            s += " " + footprintCombo.getModel().getElementAt(i);
-          }
-          log.debug(s);
         } else {
           comp.setVisible(false);
         }
@@ -776,7 +815,7 @@ public class FootprintEditorDialog extends JDialog {
       footprintCombo.requestFocus();
     }
 
-    void remove(TokenFootprint footprint) {
+    void removeFootprint(TokenFootprint footprint) {
       if (footprintCombo.getModel().getSize() > 1) {
         MutableComboBoxModel<TokenFootprint> model =
             (MutableComboBoxModel<TokenFootprint>) footprintCombo.getModel();
@@ -851,7 +890,6 @@ public class FootprintEditorDialog extends JDialog {
     }
   }
 
-  // spotless:off
   private void createZoomButtons() {
     layeredPane = this.getLayeredPane();
     JPanel buttonHolder = new JPanel();
@@ -896,12 +934,12 @@ public class FootprintEditorDialog extends JDialog {
       SwingUtil.centerOver(this, MapTool.getFrame());
     }
     super.setVisible(b);
-    editor.requestFocusInWindow();
   }
 
   @Override
   public void dispose() {
     AppState.setShowGrid(oldShowGrid);
+    MapTool.getFrame().getCurrentZoneRenderer().repaint();
     super.dispose();
   }
 }

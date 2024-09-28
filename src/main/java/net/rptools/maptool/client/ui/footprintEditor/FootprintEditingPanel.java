@@ -57,7 +57,7 @@ public class FootprintEditingPanel extends JPanel {
   Zone zone;
   static volatile Scale zoneScale;
   static volatile float tokenScale = 1;
-  TokenFootprint footprint = FootprintManager.getGlobalDefaultFootprint();
+  TokenFootprint footprint = FootPrintToolbox.getGlobalDefaultFootprint();
 
   public FootprintEditingPanel() {
     log.debug("new FootprintEditingPanel");
@@ -118,7 +118,7 @@ public class FootprintEditingPanel extends JPanel {
     }
     setTokenFootprint(tokenFootprint);
     setScale(tokenFootprint.getScale());
-    this.footprint.addOffsetTranslator(FootprintManager.createOffsetTranslator(gridTypeName));
+    this.footprint.addOffsetTranslator(FootPrintToolbox.createOffsetTranslator(gridTypeName));
     if (cells != null) {
       setCellSet(cells);
     }
