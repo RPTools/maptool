@@ -21,7 +21,7 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -172,16 +172,12 @@ public class HexGridVertical extends HexGrid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList =
-            loadFootprints(
-                "net/rptools/maptool/model/hexGridVertFootprints.xml", getOffsetTranslator());
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load Hex Grid footprints", ioe);
-      }
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Vertical Hex")) {
+      return campaignFootprints.get("Vertical Hex");
     }
-    return footprintList;
+    return new ArrayList<>();
   }
 
   @Override

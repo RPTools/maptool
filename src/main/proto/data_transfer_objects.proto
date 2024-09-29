@@ -133,6 +133,12 @@ message CampaignPropertiesDto {
   repeated SightTypeDto sight_types = 13;
   map<string, StatSheetPropertiesDto> token_type_stat_sheet = 14;
   google.protobuf.StringValue default_token_property_type = 15;
+  map<string, FootprintListDto> gridFootprints = 16;
+}
+
+message FootprintListDto {
+ string gridName = 1;
+ map<string, TokenFootPrintDto> footprintList = 2;
 }
 
 message SightTypeDto {
@@ -710,4 +716,5 @@ message TokenFootPrintDto {
   bool is_default = 4;;
   double scale = 5;
   bool localize_name = 6;
+  string localized_name = 7;
 }

@@ -17,16 +17,8 @@ package net.rptools.maptool.model;
 import com.google.protobuf.StringValue;
 import java.awt.Color;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.Map.Entry;
-import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
@@ -50,8 +42,10 @@ import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
+import net.rptools.maptool.server.proto.FootprintListDto;
 import net.rptools.maptool.server.proto.LightSourceListDto;
 import net.rptools.maptool.server.proto.TokenPropertyListDto;
+import net.rptools.maptool.tool.TokenFootprintCreator;
 
 public class CampaignProperties {
 
@@ -76,6 +70,8 @@ public class CampaignProperties {
   private Map<String, BooleanTokenOverlay> tokenStates = new LinkedHashMap<>();
   private Map<String, BarTokenOverlay> tokenBars = new LinkedHashMap<>();
   private Map<String, String> characterSheets = new HashMap<>();
+
+  private Map<String, List<TokenFootprint>> gridFootprints = new HashMap<>();
 
   /** Flag indicating that owners have special permissions */
   private boolean initiativeOwnerPermissions = AppPreferences.getInitOwnerPermissions();
@@ -144,6 +140,10 @@ public class CampaignProperties {
       characterSheets.put(type, properties.characterSheets.get(type));
     }
     defaultTokenPropertyType = properties.defaultTokenPropertyType;
+    if (properties.gridFootprints != null) {
+      gridFootprints.clear();
+      gridFootprints.putAll(properties.gridFootprints);
+    }
   }
 
   public void mergeInto(CampaignProperties properties) {
@@ -163,6 +163,11 @@ public class CampaignProperties {
     properties.tokenStates.putAll(tokenStates);
     properties.tokenBars.putAll(tokenBars);
     properties.defaultTokenPropertyType = defaultTokenPropertyType;
+    if (properties.gridFootprints != null) {
+      properties.gridFootprints.putAll(gridFootprints);
+    } else {
+      properties.gridFootprints = new HashMap<>(gridFootprints);
+    }
   }
 
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
@@ -271,6 +276,7 @@ public class CampaignProperties {
     initTokenStatesMap();
     initTokenBarsMap();
     initCharacterSheetsMap();
+    initTokenFootprints();
   }
 
   private void initLightSourcesMap() {
@@ -350,6 +356,31 @@ public class CampaignProperties {
     list.add(new TokenProperty("Description", "Des"));
 
     tokenTypeMap.put(getDefaultTokenPropertyType(), list);
+  }
+
+  public void resetTokenFootprints() {
+    initTokenFootprints(true);
+  }
+
+  private void initTokenFootprints() {
+    initTokenFootprints(false);
+  }
+
+  private void initTokenFootprints(boolean reset) {
+    if (!gridFootprints.isEmpty() && !reset) {
+      return;
+    } else if (!gridFootprints.isEmpty()) {
+      gridFootprints.clear();
+    }
+    // Potential for importing defaults from app preferences instead.
+
+    var squareFP = TokenFootprintCreator.makeSquare();
+
+    setGridFootprints("Horizontal Hex", TokenFootprintCreator.makeHorizHex());
+    setGridFootprints("Vertical Hex", TokenFootprintCreator.makeVertHex());
+    setGridFootprints("None", TokenFootprintCreator.makeGridless());
+    setGridFootprints("Square", new ArrayList<>(squareFP));
+    setGridFootprints("Isometric", new ArrayList<>(squareFP));
   }
 
   private void initTokenStatesMap() {
@@ -465,6 +496,53 @@ public class CampaignProperties {
     this.characterSheets.putAll(characterSheets);
   }
 
+  public Map<String, List<TokenFootprint>> getGridFootprints() {
+    return gridFootprints;
+  }
+
+  public void setGridFootprints(String gridType, List<TokenFootprint> footprintList) {
+    gridFootprints.put(gridType, footprintList);
+  }
+
+  public void setGridFootprint(String footprintName, String gridType, TokenFootprint newPrint) {
+    if (!gridFootprints.containsKey(gridType)) {
+      gridFootprints.put(gridType, new ArrayList<TokenFootprint>());
+    }
+    List<TokenFootprint> allFootprints = new ArrayList(gridFootprints.get(gridType));
+    if (!allFootprints.isEmpty()) {
+      for (var i = 0; i < allFootprints.size(); i++) {
+        String testName = allFootprints.get(i).getName();
+        if (Objects.equals(testName, footprintName)) {
+          allFootprints.set(i, newPrint);
+          setGridFootprints(gridType, allFootprints);
+          return;
+        }
+      }
+    }
+    allFootprints.add(newPrint);
+    setGridFootprints(gridType, allFootprints);
+  }
+
+  public void removeGridFootprint(String gridtype, String name) {
+    if (!gridFootprints.containsKey(gridtype) || gridFootprints.get(gridtype).isEmpty()) {
+      return;
+    } else {
+      List<TokenFootprint> allFootprints = new ArrayList(gridFootprints.get(gridtype));
+      int removeIndex = -1;
+      for (var i = 0; i < allFootprints.size(); i++) {
+        String testName = allFootprints.get(i).getName();
+        if (Objects.equals(testName, name)) {
+          removeIndex = i;
+          break;
+        }
+      }
+      if (removeIndex != -1) {
+        allFootprints.remove(removeIndex);
+        setGridFootprints(gridtype, allFootprints);
+      }
+    }
+  }
+
   protected Object readResolve() {
     if (tokenTypeMap == null) {
       tokenTypeMap = new HashMap<>();
@@ -571,6 +649,18 @@ public class CampaignProperties {
     } else {
       props.defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
     }
+    dto.getGridFootprints()
+        .forEach(
+            (k, v) -> {
+              List<TokenFootprint> newList = new ArrayList<>();
+              v.getFootprintList()
+                  .forEach(
+                      (ik, iv) -> {
+                        TokenFootprint newPrint = TokenFootprint.fromDto(iv);
+                        newList.add(newPrint);
+                      });
+              props.gridFootprints.put(k, newList);
+            });
 
     return props;
   }
@@ -618,6 +708,15 @@ public class CampaignProperties {
     dto.addAllSightTypes(
         sightTypeMap.values().stream().map(SightType::toDto).collect(Collectors.toList()));
     dto.setDefaultTokenPropertyType(StringValue.of(defaultTokenPropertyType));
+    gridFootprints.forEach(
+        (k, v) -> {
+          var subDTO = FootprintListDto.newBuilder();
+          v.forEach(
+              (f) -> {
+                subDTO.putFootprintList(f.getName(), f.toDto());
+              });
+          dto.putGridFootprints(k, subDTO.build());
+        });
     return dto.build();
   }
 }

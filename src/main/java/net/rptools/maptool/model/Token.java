@@ -1314,6 +1314,10 @@ public class Token implements Cloneable {
    */
   public void setSnapToScale(boolean snapScale) {
     this.snapToScale = snapScale;
+    if (!snapScale) { // Reset to default footprint when set to native size
+      var grid = getZoneRenderer().getZone().getGrid();
+      setFootprint(grid, grid.getDefaultFootprint());
+    }
   }
 
   public void setVisible(boolean visible) {

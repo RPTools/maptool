@@ -55,6 +55,7 @@ import net.rptools.maptool.client.ui.connections.ClientConnectionPanel;
 import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialog;
 import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
+import net.rptools.maptool.client.ui.footprintEditor.FootprintEditorDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.io.*;
 import net.rptools.maptool.client.ui.io.FTPTransferObject.Direction;
@@ -3011,6 +3012,23 @@ public class AppActions {
     }
   }
 
+  public static final Action CAMPAIGN_FOOTPRINTS =
+      new DefaultClientAction() {
+        {
+          init("action.campaignFootprints");
+        }
+
+        @Override
+        public boolean isAvailable() {
+          return MapTool.getPlayer().isGM();
+        }
+
+        @Override
+        protected void executeAction() {
+          FootprintEditorDialog dialog = new FootprintEditorDialog(MapTool.getFrame());
+          dialog.setVisible(true);
+        }
+      };
   public static final Action CAMPAIGN_PROPERTIES =
       new DefaultClientAction() {
         {

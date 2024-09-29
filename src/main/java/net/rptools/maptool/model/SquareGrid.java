@@ -24,7 +24,7 @@ import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -52,8 +52,6 @@ public class SquareGrid extends Grid {
   private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
   private static BufferedImage pathHighlightAlt =
       RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
-
-  private static List<TokenFootprint> footprintList;
 
   // @formatter:off
   private static final GridCapabilities CAPABILITIES =
@@ -222,14 +220,12 @@ public class SquareGrid extends Grid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
-      }
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Square")) {
+      return campaignFootprints.get("Square");
     }
-    return footprintList;
+    return new ArrayList<>();
   }
 
   @Override

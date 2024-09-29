@@ -105,6 +105,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               TestFunctions.getInstance(),
               TextLabelFunctions.getInstance(),
               TokenSpeechNameFunction.getInstance(),
+              FootprintFunctions.getInstance(),
               new MarkDownFunctions(),
               new PlayerFunctions(),
               new LibraryFunctions(),

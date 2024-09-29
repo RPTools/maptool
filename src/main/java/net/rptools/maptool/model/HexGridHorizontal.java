@@ -22,7 +22,7 @@ import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
 import java.awt.image.AffineTransformOp;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -185,16 +185,12 @@ public class HexGridHorizontal extends HexGrid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList =
-            loadFootprints(
-                "net/rptools/maptool/model/hexGridHorizFootprints.xml", getOffsetTranslator());
-      } catch (IOException ioe) {
-        MapTool.showError("Could not load Hex Grid footprints", ioe);
-      }
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Horizontal Hex")) {
+      return campaignFootprints.get("Horizontal Hex");
     }
-    return footprintList;
+    return new ArrayList<>();
   }
 
   @Override
