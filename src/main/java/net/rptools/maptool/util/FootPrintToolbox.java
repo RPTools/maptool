@@ -27,6 +27,9 @@ import net.rptools.maptool.tool.TokenFootprintCreator;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * Collection of static methods useful for dealing with token footprints
+ */
 public class FootPrintToolbox {
   protected static final String DEFAULT_GRID_TYPE = AppPreferences.getDefaultGridType();
   private static final Logger log = LoggerFactory.getLogger(FootPrintToolbox.class);
@@ -168,6 +171,17 @@ public class FootPrintToolbox {
     return cellList;
   }
 
+  /**
+   *  Convenience constructor for TokenFootprint that allows creation with all writable fields and the grid type.
+   * @param gridTypeName  Grid type cell points is relevant to
+   * @param name          Name
+   * @param isDefault     Default footprint to use
+   * @param scale         cell size
+   * @param localiseName  Should name be localised
+   * @param localisedName The localised name (string key?)
+   * @param cellPoints    Set of points relative to 0,0 that make up the footprint
+   * @return new TokenFootprint
+   */
   public static TokenFootprint createTokenFootprint(
           String gridTypeName,
           String name,
