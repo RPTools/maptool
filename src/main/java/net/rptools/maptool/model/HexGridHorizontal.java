@@ -67,18 +67,27 @@ public class HexGridHorizontal extends HexGrid {
     return gridShapeCache;
   }
 
-  @Override
-  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
     // TODO Distorted hexes surely require distorted facing angles.
-    if (faceEdges && faceVertices) {
-      return new int[] {-150, -120, -90, -60, -30, 0, 30, 60, 90, 120, 150, 180};
-    } else if (faceVertices) {
-      return new int[] {-150, -90, -30, 30, 90, 150};
-    } else if (faceEdges) {
-      return new int[] {-120, -60, 0, 60, 120, 180};
-    } else {
-      return new int[] {90};
+
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
     }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 30 : 60;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (!faceEdges && faceVertices) ? 30 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override

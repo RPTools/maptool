@@ -1,8 +1,8 @@
 faceEdges,faceVertices,facing,expected
 
-false,false,-179,-135
-false,false,-178,-135
-false,false,-158,-135
+false,false,-179,180
+false,false,-178,180
+false,false,-158,180
 false,false,-157,-135
 false,false,-156,-135
 false,false,-136,-135
@@ -64,9 +64,9 @@ false,false,160,180
 false,false,179,180
 false,false,180,180
 
-true,false,-179,-135
-true,false,-178,-135
-true,false,-158,-135
+true,false,-179,180
+true,false,-178,180
+true,false,-158,180
 true,false,-157,-135
 true,false,-156,-135
 true,false,-136,-135
@@ -128,9 +128,9 @@ true,false,160,180
 true,false,179,180
 true,false,180,180
 
-false,true,-179,-135
-false,true,-178,-135
-false,true,-158,-135
+false,true,-179,180
+false,true,-178,180
+false,true,-158,180
 false,true,-157,-135
 false,true,-156,-135
 false,true,-136,-135
@@ -192,9 +192,9 @@ false,true,160,180
 false,true,179,180
 false,true,180,180
 
-true,true,-179,-135
-true,true,-178,-135
-true,true,-158,-135
+true,true,-179,180
+true,true,-178,180
+true,true,-158,180
 true,true,-157,-135
 true,true,-156,-135
 true,true,-136,-135

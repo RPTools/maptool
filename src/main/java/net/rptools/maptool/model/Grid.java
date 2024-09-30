@@ -41,7 +41,6 @@ import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.model.zones.GridChanged;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.util.GraphicsUtil;
-import net.rptools.maptool.util.TokenUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -121,37 +120,53 @@ public abstract class Grid implements Cloneable {
    * @param clockwise
    * @return
    */
-  public int nextFacing(int facing, boolean faceEdges, boolean faceVertices, boolean clockwise) {
-    int[] facingArray = getFacingAngles(faceEdges, faceVertices);
-    int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
+  public final int nextFacing(
+      int facing, boolean faceEdges, boolean faceVertices, boolean clockwise) {
+    // Work in range (0, 360] as it is easier for implementations.
+    // Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
 
-    facingIndex += clockwise ? -1 : 1;
-    if (facingIndex < 0) {
-      facingIndex = facingArray.length - 1;
-    }
-    if (facingIndex == facingArray.length) {
-      facingIndex = 0;
-    }
-    return facingArray[facingIndex];
+    int nextFacing = snapFacingInternal(facing, faceEdges, faceVertices, clockwise ? -1 : 1);
+
+    return normalizeFacing(nextFacing);
   }
 
-  public int nearestFacing(int facing, boolean faceEdges, boolean faceVertices) {
-    int[] facingArray = getFacingAngles(faceEdges, faceVertices);
-    // TODO Much chance of overflow here.
-    return facingArray[TokenUtil.getIndexNearestTo(facingArray, facing)];
+  public final int nearestFacing(int facing, boolean faceEdges, boolean faceVertices) {
+    // Work in range (0, 360] as it is easier for implementations.
+    // Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    int nearestFacing = snapFacingInternal(facing, faceEdges, faceVertices, 0);
+
+    return normalizeFacing(nearestFacing);
   }
 
   /**
-   * Get the facing options for tokens/objects on a grid. Each grid type can providing facings to
-   * the edges, the vertices, both, or neither.
+   * Snaps a facing to the nearest edges or vertex, then optionally jumps to an adjacent one.
    *
-   * <p>If both are false, tokens on that grid will not be able to rotate with the mouse and
-   * keyboard controls for setting facing.
-   *
-   * @param faceEdges - Tokens can face edges.
-   * @param faceVertices - Tokens can face vertices.
+   * @param facing The original facing. Must be set in the range 0 < facing <= 360.
+   * @param faceEdges If {@code true}, allow snapping the facing to the nearest edge.
+   * @param faceVertices If {@code true}, allow snapping the facing to the nearest vertex.
+   * @param addedSteps The number of edges or vertices to advance after snapping (depends on values
+   *     of {@code faceEdges} and {@code faceVertices}.
+   * @return The snapped facing. Can be any integer.
    */
-  protected abstract int[] getFacingAngles(boolean faceEdges, boolean faceVertices);
+  protected abstract int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps);
+
+  /**
+   * Return an equivalent facing in the range (-180, 180].
+   *
+   * @param facing
+   * @return
+   */
+  private int normalizeFacing(int facing) {
+    facing = Math.floorMod(facing, 360);
+    if (facing > 180) {
+      facing -= 360;
+    }
+    return facing;
+  }
 
   /**
    * Return the Point (double precision) for pixel center of Cell

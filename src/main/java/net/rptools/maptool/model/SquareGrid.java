@@ -134,18 +134,25 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      return new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-    } else if (faceVertices) {
-      // && !faceEdges
-      return new int[] {-135, -45, 45, 135};
-    } else if (faceEdges) {
-      // && !faceVertices
-      return new int[] {-90, 0, 90, 180};
-    } else {
-      return new int[] {90};
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
     }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (!faceEdges && faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override

@@ -73,8 +73,20 @@ public class GridlessGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles(boolean faceEdges, boolean faceVertices) {
-    return new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = 45;
+    /* The position of the first standard facing CCW from zero. */
+    int base = 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override

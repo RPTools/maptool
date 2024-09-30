@@ -52,10 +52,10 @@ true,false,151,150
 true,false,179,150
 true,false,180,150
 
-false,true,-179,-120
-false,true,-178,-120
-false,true,-151,-120
-false,true,-150,-120
+false,true,-179,180
+false,true,-178,180
+false,true,-151,180
+false,true,-150,180
 false,true,-149,-120
 false,true,-121,-120
 false,true,-120,-120
@@ -90,10 +90,10 @@ false,true,151,180
 false,true,179,180
 false,true,180,180
 
-true,true,-179,-150
-true,true,-178,-150
-true,true,-166,-150
-true,true,-165,-150
+true,true,-179,180
+true,true,-178,180
+true,true,-166,180
+true,true,-165,180
 true,true,-164,-150
 true,true,-151,-150
 true,true,-150,-150

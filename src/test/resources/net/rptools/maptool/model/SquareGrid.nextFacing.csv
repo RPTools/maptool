@@ -128,10 +128,10 @@ false,false,true,160,90
 false,false,true,179,90
 false,false,true,180,90
 
-true,false,false,-179,0
-true,false,false,-178,0
-true,false,false,-136,0
-true,false,false,-135,0
+true,false,false,-179,-90
+true,false,false,-178,-90
+true,false,false,-136,-90
+true,false,false,-135,-90
 true,false,false,-134,0
 true,false,false,-133,0
 true,false,false,-132,0
@@ -153,10 +153,10 @@ true,false,false,138,-90
 true,false,false,179,-90
 true,false,false,180,-90
 
-true,false,true,-179,180
-true,false,true,-178,180
-true,false,true,-136,180
-true,false,true,-135,180
+true,false,true,-179,90
+true,false,true,-178,90
+true,false,true,-136,90
+true,false,true,-135,90
 true,false,true,-134,180
 true,false,true,-133,180
 true,false,true,-132,180
@@ -251,9 +251,9 @@ false,true,true,136,45
 false,true,true,179,45
 false,true,true,180,45
 
-true,true,false,-179,-90
-true,true,false,-178,-90
-true,true,false,-158,-90
+true,true,false,-179,-135
+true,true,false,-178,-135
+true,true,false,-158,-135
 true,true,false,-157,-90
 true,true,false,-156,-90
 true,true,false,-136,-90
@@ -315,9 +315,9 @@ true,true,false,160,-135
 true,true,false,179,-135
 true,true,false,180,-135
 
-true,true,true,-179,180
-true,true,true,-178,180
-true,true,true,-158,180
+true,true,true,-179,135
+true,true,true,-178,135
+true,true,true,-158,135
 true,true,true,-157,180
 true,true,true,-156,180
 true,true,true,-136,180
