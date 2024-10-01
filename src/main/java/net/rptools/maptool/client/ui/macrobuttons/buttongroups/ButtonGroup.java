@@ -128,8 +128,8 @@ public class ButtonGroup extends AbstractButtonGroup {
       MacroButtonProperties oldMacroProps = new MacroButtonProperties(tempProperties);
 
       // stops players from moving macros into/from the Campaign/GM panels
-      // debounce first, ignore moves that change nothing
-      if (tempProperties.getGroup().equals(getMacroGroup())) {
+      // debounce first, ignore moves to the same group in the same panel
+      if (tempProperties.getGroup().equals(getMacroGroup()) && data.panelClass.equals(panelClass)) {
         event.dropComplete(false);
       } else if (!MapTool.getPlayer().isGM()
           && (panelClass.equals("CampaignPanel")
