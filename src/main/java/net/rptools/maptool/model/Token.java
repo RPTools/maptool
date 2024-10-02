@@ -848,12 +848,16 @@ public class Token implements Cloneable {
     return facing != null;
   }
 
-  public void setFacing(Integer facing) {
-    while (facing != null && (facing > 180 || facing < -179)) {
+  public void setFacing(int facing) {
+    while (facing > 180 || facing < -179) {
       facing += facing > 180 ? -360 : 0;
       facing += facing < -179 ? 360 : 0;
     }
     this.facing = facing;
+  }
+
+  public void removeFacing() {
+    this.facing = null;
   }
 
   /**
@@ -864,8 +868,9 @@ public class Token implements Cloneable {
    *
    * @return null or angle in degrees
    */
-  public Integer getFacing() {
-    return facing;
+  public int getFacing() {
+    // -90° is natural alignment. TODO This should really be a per grid setting
+    return facing == null ? -90 : facing;
   }
 
   /**
@@ -874,24 +879,8 @@ public class Token implements Cloneable {
    *
    * @return angle in degrees
    */
-  public Integer getFacingInDegrees() {
-    if (facing == null) {
-      return 0;
-    } else {
-      return -(facing + 90);
-    }
-  }
-
-  public Integer getFacingInRealDegrees() {
-    if (facing == null) {
-      return 270;
-    }
-
-    if (facing >= 0) {
-      return facing;
-    } else {
-      return facing + 360;
-    }
+  public int getFacingInDegrees() {
+    return -getFacing() - 90;
   }
 
   public boolean getHasSight() {
@@ -2728,7 +2717,7 @@ public class Token implements Cloneable {
         setFacing(parameters.get(0).getIntValue());
         break;
       case removeFacing:
-        setFacing(null);
+        removeFacing();
         break;
       case clearAllOwners:
         clearAllOwners();

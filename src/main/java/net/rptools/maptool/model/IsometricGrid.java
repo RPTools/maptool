@@ -307,9 +307,6 @@ public class IsometricGrid extends Grid {
         visibleArea = new Area(new Polygon(x, y, 4));
         break;
       case BEAM:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
         var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
@@ -330,9 +327,6 @@ public class IsometricGrid extends Grid {
 
         break;
       case CONE:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
         // Rotate the vision range by 45 degrees for isometric view
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         // Get the cone, use degreesFromIso to convert the facing from isometric to plan

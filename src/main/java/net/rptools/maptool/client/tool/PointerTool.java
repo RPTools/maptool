@@ -1091,11 +1091,8 @@ public class PointerTool extends DefaultTool {
       if (!AppUtil.playerOwns(token)) {
         continue;
       }
-      Integer facing = token.getFacing();
-      // TODO: this should really be a per grid setting
-      if (facing == null) {
-        facing = -90; // natural alignment
-      }
+
+      int facing = token.getFacing();
       if (freeRotate) {
         facing += direction * 5;
       } else {

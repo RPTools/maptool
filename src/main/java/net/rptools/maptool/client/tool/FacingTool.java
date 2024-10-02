@@ -71,7 +71,7 @@ public class FacingTool extends DefaultTool {
                 if (token == null) {
                   continue;
                 }
-                token.setFacing(null);
+                token.removeFacing();
                 renderer.flush(token);
               }
               // Go back to the pointer tool
@@ -129,15 +129,6 @@ public class FacingTool extends DefaultTool {
       }
       token.setFacing(degrees);
 
-      // Old Logic
-      // if (renderer.getZone().hasFog()
-      //        && ((AppPreferences.getAutoRevealVisionOnGMMovement() &&
-      // MapTool.getPlayer().isGM()))
-      //    || MapTool.getServerPolicy().isAutoRevealOnMovement()) {
-      //  visibleArea = renderer.getZoneView().getVisibleArea(token);
-      //  remoteSelected.add(token.getId());
-      //  renderer.getZone().exposeArea(visibleArea, token);
-      // }
       boolean revealFog = false;
       if (renderer.getZone().hasFog()) {
         if (ownerReveal && token.isOwner(name)) revealFog = true;
@@ -170,8 +161,14 @@ public class FacingTool extends DefaultTool {
       if (token == null) {
         continue;
       }
-      // Send the facing to other players
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, token.getFacing());
+
+      // Send the facing (or lack thereof) to other players
+      if (!token.hasFacing()) {
+        MapTool.serverCommand().updateTokenProperty(token, Token.Update.removeFacing);
+      } else {
+        MapTool.serverCommand()
+            .updateTokenProperty(token, Token.Update.setFacing, token.getFacing());
+      }
     }
     // Go back to the pointer tool
     resetTool();
