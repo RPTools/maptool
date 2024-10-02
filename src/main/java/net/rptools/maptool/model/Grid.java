@@ -411,9 +411,12 @@ public abstract class Grid implements Cloneable {
     }
     int visionDistance = zone.getTokenVisionInPixels();
     double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
+    /* Token facing as an angle. 0° points to the right and clockwise is positive. */
+    int tokenFacingAngle = token.getFacingInDegrees() + 90;
+    Rectangle footprint = token.getFootprint(this).getBounds(this);
 
     if (scaleWithToken) {
-      double footprintWidth = token.getFootprint(this).getBounds(this).getWidth() / 2;
+      double footprintWidth = footprint.getWidth() / 2;
 
       // Test for gridless maps
       var cellShape = getCellShape();
@@ -423,85 +426,76 @@ public abstract class Grid implements Cloneable {
       } else {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
         // which Hex type you choose
-        double footprintHeight = token.getFootprint(this).getBounds(this).getHeight() / 2;
+        double footprintHeight = footprint.getHeight() / 2;
         visionRange += Math.min(footprintWidth, footprintHeight);
       }
     }
 
-    Area visibleArea = new Area();
+    Area visibleArea;
     switch (shape) {
-      case CIRCLE:
+      case CIRCLE -> {
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-        break;
-      case GRID:
+      }
+      case GRID -> {
         visibleArea = getGridArea(token, range, scaleWithToken, visionRange);
-        break;
-      case SQUARE:
+      }
+      case SQUARE -> {
         visibleArea =
             new Area(
                 new Rectangle2D.Double(
                     -visionRange, -visionRange, visionRange * 2, visionRange * 2));
-        break;
-      case BEAM:
+      }
+      case BEAM -> {
         // Make at least 1 pixel on each side, so it's at least visible at 100% zoom.
         var pixelWidth = Math.max(2, width * getSize() / zone.getUnitsPerCell());
         Shape lineShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
-        Shape visibleShape = new GeneralPath(lineShape);
 
         visibleArea =
             new Area(
-                AffineTransform.getRotateInstance(
-                        Math.toRadians(offsetAngle) - Math.toRadians(token.getFacing()))
-                    .createTransformedShape(visibleShape));
-        break;
-      case CONE:
+                AffineTransform.getRotateInstance(Math.toRadians(offsetAngle + tokenFacingAngle))
+                    .createTransformedShape(lineShape));
+      }
+      case CONE -> {
         Arc2D cone =
             new Arc2D.Double(
                 -visionRange,
                 -visionRange,
                 visionRange * 2,
                 visionRange * 2,
-                360.0 - (arcAngle / 2.0) + (offsetAngle * 1.0),
+                (offsetAngle - tokenFacingAngle) - arcAngle / 2.,
                 arcAngle,
                 Arc2D.PIE);
 
         // Flatten the cone to remove 'curves'
         GeneralPath path = new GeneralPath();
         path.append(cone.getPathIterator(null, 1), false);
-        Area tempvisibleArea = new Area(path);
+        visibleArea = new Area(path);
 
-        // Rotate
-        tempvisibleArea =
-            tempvisibleArea.createTransformedArea(
-                AffineTransform.getRotateInstance(-Math.toRadians(token.getFacing())));
-
-        Rectangle footprint = token.getFootprint(this).getBounds(this);
-        footprint.x = -footprint.width / 2;
-        footprint.y = -footprint.height / 2;
-
-        visibleArea.add(new Area(footprint));
-        visibleArea.add(tempvisibleArea);
-        break;
-      case HEX:
-        footprint = token.getFootprint(this).getBounds(this);
+        var footprintPart = new Rectangle(footprint);
+        footprintPart.x = -footprintPart.width / 2;
+        footprintPart.y = -footprintPart.height / 2;
+        visibleArea.add(new Area(footprintPart));
+      }
+      case HEX -> {
         double x = footprint.getCenterX();
         double y = footprint.getCenterY();
 
-        double footprintWidth = token.getFootprint(this).getBounds(this).getWidth();
-        double footprintHeight = token.getFootprint(this).getBounds(this).getHeight();
+        double footprintWidth = footprint.getWidth();
+        double footprintHeight = footprint.getHeight();
         double adjustment = Math.min(footprintWidth, footprintHeight);
         x -= adjustment / 2;
         y -= adjustment / 2;
 
         visibleArea = createHex(x, y, visionRange, 0);
-        break;
-      default:
+      }
+      default -> {
+        log.error("Unhandled shape {}; treating as a circle", shape);
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange, -visionRange, visionRange * 2, visionRange * 2, CIRCLE_SEGMENTS);
-        break;
+      }
     }
 
     return visibleArea;
