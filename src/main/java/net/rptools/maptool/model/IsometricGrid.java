@@ -39,31 +39,9 @@ import net.rptools.maptool.server.proto.IsometricGridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
-  /**
-   * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at
-   * approx 30 degrees. However rather than being true isometric, each cell is twice as wide as
-   * high. This makes converting images significantly easier for end-users.
-   */
-  private static final int ISO_ANGLE = 27;
-
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight =
+  private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
-
-  public IsometricGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public IsometricGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
-  }
 
   public boolean isIsometric() {
     return true;
@@ -102,32 +80,6 @@ public class IsometricGrid extends Grid {
     return getSize() / 2;
   }
 
-  public static double degreesFromIso(double facing) {
-    /**
-     * Given a facing from an isometric map turn it into plan map equivalent i.e. 27 degree converts
-     * to 45 degree
-     */
-    double newFacing = facing;
-    if (Math.cos(facing) != 0) {
-      double v1 = Math.sin(Math.toRadians(newFacing)) * 2;
-      double v2 = Math.cos(Math.toRadians(newFacing));
-      double v3 = Math.toDegrees(Math.atan(v1 / v2));
-      if (facing > 90 || facing < -90) v3 = 180 + v3;
-      newFacing = Math.floor(v3);
-    }
-    return newFacing;
-  }
-
-  public static double degreesToIso(double facing) {
-    /**
-     * Given a facing from a plan map turn it into isometric map equivalent i.e 45 degree converts
-     * to 30 degree
-     */
-    double iso = Math.asin((Math.sin(facing) / 2) / Math.cos(facing));
-    System.out.println("in=" + facing + " out=" + iso);
-    return iso;
-  }
-
   @Override
   public BufferedImage getCellHighlight() {
     return pathHighlight;
@@ -139,8 +91,25 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
+    }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (faceEdges && !faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -294,19 +263,6 @@ public class IsometricGrid extends Grid {
       for (KeyStroke key : movementKeys.keySet()) {
         actionMap.remove(key);
       }
-    }
-  }
-
-  @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else {
-      FACING_ANGLES = new int[] {90};
     }
   }
 
