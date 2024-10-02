@@ -18,13 +18,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import javax.swing.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
+import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -61,6 +62,7 @@ public class MacroFunctions extends AbstractFunction {
         "setMacroProps",
         "getMacros",
         "getMacroProps",
+        "getMacroHotkeys",
         "getMacroIndexes",
         "getMacroIndices",
         "getMacroName",
@@ -218,7 +220,13 @@ public class MacroFunctions extends AbstractFunction {
 
     } else if (functionName.equalsIgnoreCase("getMacroButtonIndex")) {
       return BigDecimal.valueOf(MapTool.getParser().getMacroButtonIndex());
-
+    } else if (functionName.equalsIgnoreCase("getMacroHotkeys")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      String delim = "json";
+      if (!parameters.isEmpty()) {
+        delim = parameters.getFirst().toString();
+      }
+      return getMacroHotkeys(delim);
     } else if (functionName.equalsIgnoreCase("getMacroGroup")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       String group = parameters.get(0).toString();
@@ -250,6 +258,30 @@ public class MacroFunctions extends AbstractFunction {
     }
     /* code should never happen, hopefully ;) */
     throw new ParserException(I18N.getText(KEY_UNKNOWN_MACRO, functionName));
+  }
+
+  private Object getMacroHotkeys(String delim) {
+    Map<KeyStroke, MacroButton> keyStrokeMap = MacroButtonHotKeyManager.getKeyStrokeMap();
+    JsonObject keyMacroObject = new JsonObject();
+
+    for (KeyStroke ks : keyStrokeMap.keySet()) {
+      MacroButton btn = keyStrokeMap.get(ks);
+      String address = btn.getProperties().getLabel() + "@";
+      switch (btn.getPanelClass()) {
+        case "GlobalPanel", "globalpanel" -> address += "global";
+        case "CampaignPanel", "campaignpanel" -> address += "campaign";
+        case "GmPanel", "gmpanel" -> address += "gm";
+        default -> address += btn.getToken().getName();
+      }
+      keyMacroObject.addProperty(ks.toString(), address);
+    }
+    if (delim.equalsIgnoreCase("json")) {
+      return keyMacroObject;
+    } else {
+      return JSONMacroFunctions.getInstance()
+          .getJsonObjectFunctions()
+          .toStringProp(keyMacroObject, delim);
+    }
   }
 
   /**
