@@ -2601,7 +2601,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
        * non-rotated token bounds to avoid odd size changes
        */
       Token tmpToken = new Token(token);
-      tmpToken.setFacing(null);
+      tmpToken.setFacing(270);
       Rectangle tmpBounds = tmpToken.getBounds(this.zone);
 
       // Unless it is isometric, make it square to avoid distortion
