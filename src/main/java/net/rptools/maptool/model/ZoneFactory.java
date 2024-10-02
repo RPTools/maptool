@@ -63,11 +63,7 @@ public class ZoneFactory {
     zone.setTokenVisionDistance(AppPreferences.getDefaultVisionDistance());
     zone.setVisionType(AppPreferences.getDefaultVisionType());
 
-    zone.setGrid(
-        GridFactory.createGrid(
-            AppPreferences.getDefaultGridType(),
-            AppPreferences.getFaceEdge(),
-            AppPreferences.getFaceVertex()));
+    zone.setGrid(GridFactory.createGrid(AppPreferences.getDefaultGridType()));
     zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
     zone.getGrid().setSize(AppPreferences.getDefaultGridSize());
     zone.getGrid().setOffset(0, 0);

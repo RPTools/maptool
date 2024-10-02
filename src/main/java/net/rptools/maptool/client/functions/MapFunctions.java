@@ -230,9 +230,7 @@ public class MapFunctions extends AbstractFunction {
             gridConfig.has("type")
                 ? gridConfig.getAsJsonPrimitive("type").getAsString()
                 : AppPreferences.getDefaultGridType();
-        final var grid =
-            GridFactory.createGrid(
-                gridType, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+        final var grid = GridFactory.createGrid(gridType);
 
         final var gridColor =
             gridConfig.has("color")

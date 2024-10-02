@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -55,7 +54,6 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -824,12 +822,10 @@ public class PreferencesDialog extends JDialog {
     facingFaceEdges.addActionListener(
         e -> {
           AppPreferences.setFaceEdge(facingFaceEdges.isSelected());
-          updateFacings();
         });
     facingFaceVertices.addActionListener(
         e -> {
           AppPreferences.setFaceVertex(facingFaceVertices.isSelected());
-          updateFacings();
         });
 
     toolTipInlineRolls.addActionListener(
@@ -1524,24 +1520,6 @@ public class PreferencesDialog extends JDialog {
       themeChanged = false;
     }
     super.setVisible(b);
-  }
-
-  /**
-   * Used by the ActionListeners of the facing checkboxes to update the facings for all of the
-   * current zones. Redundant to go through all zones because all zones using the same grid type
-   * share facings but it doesn't hurt anything and avoids having to track what grid types are being
-   * used.
-   */
-  private void updateFacings() {
-    // List<Zone> zlist = MapTool.getServer().getCampaign().getZones(); // generated NPE
-    // http://forums.rptools.net/viewtopic.php?f=3&t=17334
-    List<Zone> zlist = MapTool.getCampaign().getZones();
-    boolean faceEdges = AppPreferences.getFaceEdge();
-    boolean faceVertices = AppPreferences.getFaceVertex();
-    for (Zone z : zlist) {
-      Grid g = z.getGrid();
-      g.setFacings(faceEdges, faceVertices);
-    }
   }
 
   /**

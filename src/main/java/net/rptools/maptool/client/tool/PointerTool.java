@@ -58,7 +58,6 @@ import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.TokenUtil;
 import org.apache.commons.lang.StringUtils;
 
 /**
@@ -1092,26 +1091,20 @@ public class PointerTool extends DefaultTool {
       if (!AppUtil.playerOwns(token)) {
         continue;
       }
-      Integer facing = token.getFacing();
-      // TODO: this should really be a per grid setting
-      if (facing == null) {
-        facing = -90; // natural alignment
-      }
+
+      int facing = token.getFacing();
       if (freeRotate) {
         facing += direction * 5;
       } else {
-        int[] facingArray = renderer.getZone().getGrid().getFacingAngles();
-        int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
-
-        facingIndex += direction;
-
-        if (facingIndex < 0) {
-          facingIndex = facingArray.length - 1;
-        }
-        if (facingIndex == facingArray.length) {
-          facingIndex = 0;
-        }
-        facing = facingArray[facingIndex];
+        facing =
+            renderer
+                .getZone()
+                .getGrid()
+                .nextFacing(
+                    facing,
+                    AppPreferences.getFaceEdge(),
+                    AppPreferences.getFaceVertex(),
+                    direction < 0);
       }
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
     }
