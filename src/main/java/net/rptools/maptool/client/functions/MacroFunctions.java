@@ -355,12 +355,16 @@ public class MacroFunctions extends AbstractFunction {
         mbp.setAutoExecute(boolVal(value));
       } else if ("color".equalsIgnoreCase(key)) {
         mbp.setColorKey(value);
+      } else if ("displayHotkey".equalsIgnoreCase(key)) {
+        mbp.setDisplayHotKey(boolVal(value));
       } else if ("fontColor".equalsIgnoreCase(key)) {
         mbp.setFontColorKey(value);
       } else if ("fontSize".equalsIgnoreCase(key)) {
         mbp.setFontSize(value);
       } else if ("group".equalsIgnoreCase(key)) {
         mbp.setGroup(value);
+      } else if ("hotkey".equalsIgnoreCase(key)) {
+        mbp.setHotKey(value);
       } else if ("includeLabel".equalsIgnoreCase(key)) {
         mbp.setIncludeLabel(boolVal(value));
       } else if ("sortBy".equalsIgnoreCase(key)) {
@@ -1046,20 +1050,22 @@ public class MacroFunctions extends AbstractFunction {
    */
   private String macroButtonPropertiesToString(MacroButtonProperties mbp, String delim) {
     StringBuilder sb = new StringBuilder();
+    sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
     sb.append("autoExecute=").append(mbp.getAutoExecute()).append(delim);
     sb.append("color=").append(mbp.getColorKey()).append(delim);
+    sb.append("displayHotkey=").append(mbp.getDisplayHotKey()).append(delim);
     sb.append("fontColor=").append(mbp.getFontColorKey()).append(delim);
+    sb.append("fontSize=").append(mbp.getFontSize()).append(delim);
     sb.append("group=").append(mbp.getGroup()).append(delim);
+    sb.append("hotkey=").append(mbp.getHotKey()).append(delim);
     sb.append("includeLabel=").append(mbp.getIncludeLabel()).append(delim);
-    sb.append("sortBy=").append(mbp.getSortby()).append(delim);
     sb.append("index=").append(mbp.getIndex()).append(delim);
     sb.append("label=").append(mbp.getLabel()).append(delim);
-    sb.append("fontSize=").append(mbp.getFontSize()).append(delim);
+    sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
     sb.append("minWidth=").append(mbp.getMinWidth()).append(delim);
     sb.append("playerEditable=").append(mbp.getAllowPlayerEdits()).append(delim);
-    sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
+    sb.append("sortBy=").append(mbp.getSortby()).append(delim);
     sb.append("tooltip=").append(mbp.getToolTip()).append(delim);
-    sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
     return sb.toString();
   }
 
@@ -1091,12 +1097,16 @@ public class MacroFunctions extends AbstractFunction {
           mbp.setAutoExecute(boolVal(value));
         } else if ("color".equalsIgnoreCase(key)) {
           mbp.setColorKey(value);
+        } else if ("displayHotkey".equalsIgnoreCase(key)) {
+          mbp.setDisplayHotKey(boolVal(value));
         } else if ("fontColor".equalsIgnoreCase(key)) {
           mbp.setFontColorKey(value);
         } else if ("fontSize".equalsIgnoreCase(key)) {
           mbp.setFontSize(value);
         } else if ("group".equalsIgnoreCase(key)) {
           mbp.setGroup(value);
+        } else if ("hotkey".equalsIgnoreCase(key)) {
+          mbp.setHotKey(value);
         } else if ("includeLabel".equalsIgnoreCase(key)) {
           mbp.setIncludeLabel(boolVal(value));
         } else if ("sortBy".equalsIgnoreCase(key)) {
@@ -1184,21 +1194,23 @@ public class MacroFunctions extends AbstractFunction {
    */
   private JsonObject macroButtonPropertiesToJSON(MacroButtonProperties mbp) {
     JsonObject props = new JsonObject();
+    props.addProperty("applyToSelected", mbp.getApplyToTokens());
     props.addProperty("autoExecute", mbp.getAutoExecute());
     props.addProperty("color", mbp.getColorKey());
+    props.addProperty("displayHotkey", mbp.getDisplayHotKey());
+    props.addProperty("command", mbp.getCommand());
     props.addProperty("fontColor", mbp.getFontColorKey());
+    props.addProperty("fontSize", mbp.getFontSize());
     props.addProperty("group", mbp.getGroup());
+    props.addProperty("hotkey", mbp.getHotKey());
     props.addProperty("includeLabel", mbp.getIncludeLabel());
-    props.addProperty("sortBy", mbp.getSortby());
     props.addProperty("index", mbp.getIndex());
     props.addProperty("label", mbp.getLabel());
-    props.addProperty("fontSize", mbp.getFontSize());
     props.addProperty("minWidth", mbp.getMinWidth());
-    props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
-    props.addProperty("command", mbp.getCommand());
     props.addProperty("maxWidth", mbp.getMaxWidth());
+    props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
+    props.addProperty("sortBy", mbp.getSortby());
     props.addProperty("tooltip", mbp.getToolTip());
-    props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
     JsonArray compare = new JsonArray();
     if (mbp.getCompareGroup()) compare.add("group");
