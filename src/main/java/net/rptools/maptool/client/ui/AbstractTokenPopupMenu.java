@@ -120,24 +120,33 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   protected JMenu createLightSourceMenu() {
     JMenu menu = new JMenu(I18N.getText("panel.MapExplorer.View.LIGHT_SOURCES"));
 
-    if (tokenUnderMouse.hasLightSources()) {
-      menu.add(new ClearLightAction());
+    boolean hasAnyLights = false;
+    boolean hasLights = false;
+    boolean hasAuras = false;
+    boolean hasGmAuras = false;
+    boolean hasOwnerOnlyAuras = false;
 
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      for (GUID tokenGUID : selectedTokenSet) {
-        Token token = renderer.getZone().getToken(tokenGUID);
-        if (token.hasLightSourceType(LightSource.Type.NORMAL)) {
-          menu.add(new ClearLightsOnlyAction());
-        }
-        if (token.hasLightSourceType(LightSource.Type.AURA)) {
-          menu.add(new ClearAurasOnlyAction());
-        }
-        if (token.hasGMAuras()) {
-          menu.add(new ClearGMAurasOnlyAction());
-        }
-        if (token.hasOwnerOnlyAuras()) {
-          menu.add(new ClearOwnerAurasOnlyAction());
-        }
+    for (GUID tokenGUID : selectedTokenSet) {
+      Token token = renderer.getZone().getToken(tokenGUID);
+      hasAnyLights |= token.hasLightSources();
+      hasLights |= token.hasLightSourceType(LightSource.Type.NORMAL);
+      hasAuras |= token.hasLightSourceType(LightSource.Type.AURA);
+      hasGmAuras |= token.hasGMAuras();
+      hasOwnerOnlyAuras |= token.hasOwnerOnlyAuras();
+    }
+    if (hasAnyLights) {
+      menu.add(new ClearLightAction());
+      if (hasLights) {
+        menu.add(new ClearLightsOnlyAction());
+      }
+      if (hasAuras) {
+        menu.add(new ClearAurasOnlyAction());
+      }
+      if (hasGmAuras) {
+        menu.add(new ClearGMAurasOnlyAction());
+      }
+      if (hasOwnerOnlyAuras) {
+        menu.add(new ClearOwnerAurasOnlyAction());
       }
       menu.addSeparator();
     }
@@ -729,7 +738,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ClearGMAurasOnlyAction extends AbstractAction {
     public ClearGMAurasOnlyAction() {
-      super("token.popup.menu.auras.clearGM");
+      super(I18N.getText("token.popup.menu.auras.clearGM"));
     }
 
     public void actionPerformed(ActionEvent e) {
