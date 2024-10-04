@@ -82,9 +82,11 @@ public class MacroButtonHotKeyManager {
   private static Map<KeyStroke, MacroButton> buttonsByKeyStroke =
       new HashMap<KeyStroke, MacroButton>();
   private MacroButton macroButton;
-  public static boolean isHotkeyAssigned(String hotkey){
+
+  public static boolean isHotkeyAssigned(String hotkey) {
     return buttonsByKeyStroke.containsKey(hotkey);
   }
+
   public MacroButtonHotKeyManager(MacroButton macroButton) {
     this.macroButton = macroButton;
   }

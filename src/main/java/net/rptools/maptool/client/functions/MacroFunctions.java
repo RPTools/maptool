@@ -396,7 +396,7 @@ public class MacroFunctions extends AbstractFunction {
       } else if ("group".equalsIgnoreCase(key)) {
         mbp.setGroup(value);
       } else if ("hotkey".equalsIgnoreCase(key)) {
-        if(MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
+        if (MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
           value = MacroButtonHotKeyManager.HOTKEYS[0];
         }
         mbp.setHotKey(value);
@@ -1141,7 +1141,7 @@ public class MacroFunctions extends AbstractFunction {
         } else if ("group".equalsIgnoreCase(key)) {
           mbp.setGroup(value);
         } else if ("hotkey".equalsIgnoreCase(key)) {
-          if(MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
+          if (MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
             value = MacroButtonHotKeyManager.HOTKEYS[0];
           }
           mbp.setHotKey(value);
