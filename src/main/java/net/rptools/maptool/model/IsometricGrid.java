@@ -37,7 +37,6 @@ import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.IsometricGridDto;
-import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
   private static List<TokenFootprint> footprintList;
@@ -268,96 +267,40 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public @Nonnull Area getShapedArea(
+  protected int getTokenFacingAngleRelativeToGridAxis(Token token) {
+    return -(token.getFacing() + 45);
+  }
+
+  @Override
+  protected @Nonnull Area getShapedAreaWithoutFootprint(
       ShapeType shape,
-      Token token,
-      double range,
+      int tokenFacingAngle,
+      double visionRange,
       double width,
       double arcAngle,
-      int offsetAngle,
-      boolean scaleWithToken) {
-    if (shape == null) {
-      shape = ShapeType.CIRCLE;
-    }
-    int visionDistance = getZone().getTokenVisionInPixels();
-    double visionRange =
-        (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
-    int tokenFacingAngle = token.getFacingInDegrees() + 90;
-    Rectangle footprint = token.getFootprint(this).getBounds(this);
+      int offsetAngle) {
+    var orthoShape =
+        super.getShapedAreaWithoutFootprint(
+            shape, tokenFacingAngle, visionRange, width, arcAngle, offsetAngle);
 
-    if (scaleWithToken) {
-      visionRange += footprint.getHeight() / 2;
-    }
+    AffineTransform at = new AffineTransform();
+    var sqrt2 = Math.sqrt(2);
+    at.scale(sqrt2, sqrt2 / 2);
+    at.rotate(Math.PI / 4);
+    orthoShape.transform(at);
 
-    Area visibleArea = new Area();
-    switch (shape) {
-      case CIRCLE -> {
-        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        visibleArea =
-            GraphicsUtil.createLineSegmentEllipse(
-                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
-      }
-      case SQUARE -> {
-        int[] x = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int[] y = {(int) -visionRange, 0, (int) visionRange, 0};
-        visibleArea = new Area(new Polygon(x, y, 4));
-      }
-      case BEAM -> {
-        var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
-        Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
+    return orthoShape;
+  }
 
-        // new angle, corrected for isometric view
-        double theta = Math.toRadians(offsetAngle - tokenFacingAngle);
-        Point2D angleVector = new Point2D.Double(Math.cos(theta), Math.sin(theta));
-        AffineTransform at = new AffineTransform();
-        at.rotate(Math.PI / 4);
-        at.scale(1.0, 0.5);
-        at.deltaTransform(angleVector, angleVector);
-
-        theta = -Math.atan2(angleVector.getY(), angleVector.getX());
-
-        visibleArea =
-            new Area(
-                AffineTransform.getRotateInstance(theta + Math.toRadians(45))
-                    .createTransformedShape(visibleShape));
-      }
-      case CONE -> {
-        // Rotate the vision range by 45 degrees for isometric view
-        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        // Get the cone, use degreesFromIso to convert the facing from isometric to plan
-
-        Arc2D cone =
-            new Arc2D.Double(
-                -visionRange * 2,
-                -visionRange,
-                visionRange * 4,
-                visionRange * 2,
-                (offsetAngle - tokenFacingAngle) - (arcAngle / 2.0),
-                arcAngle,
-                Arc2D.PIE);
-        GeneralPath path = new GeneralPath();
-        path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
-        Area tempvisibleArea = new Area(path);
-
-        // convert the cell footprint to an area
-        Area cellShape = createCellShape(footprint.height);
-        // convert the area to isometric view
-        AffineTransform mtx = new AffineTransform();
-        mtx.translate(-footprint.width / 2, -footprint.height / 2);
-        cellShape.transform(mtx);
-        // join cell footprint and cone to create viewable area
-        visibleArea.add(cellShape);
-        visibleArea.add(tempvisibleArea);
-      }
-      default -> {
-        log.error("Unhandled shape {}; treating as a circle", shape);
-        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        visibleArea =
-            GraphicsUtil.createLineSegmentEllipse(
-                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
-      }
-    }
-    return visibleArea;
+  @Override
+  protected @Nonnull Area getFootprintShapedAreaForCone(Rectangle footprint) {
+    // convert the cell footprint to an area
+    Area cellShape = createCellShape(footprint.height);
+    // convert the area to isometric view
+    AffineTransform mtx = new AffineTransform();
+    mtx.translate(-footprint.width / 2, -footprint.height / 2);
+    cellShape.transform(mtx);
+    return cellShape;
   }
 
   @Override
