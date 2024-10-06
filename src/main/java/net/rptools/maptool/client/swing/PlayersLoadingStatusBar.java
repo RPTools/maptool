@@ -56,14 +56,22 @@ public class PlayersLoadingStatusBar extends JLabel {
         new StringBuilder(I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total));
 
     for (Player player : players) {
-      var zone =
-          player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+      String text;
+      if (player.isGM()) {
+        // Don't display zone information.
+        text = player.toString();
+      } else {
+        var zone =
+            player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+        text =
+            I18N.getText(
+                player.getLoaded()
+                    ? "connections.playerIsInZone"
+                    : "connections.playerIsLoadingZone",
+                player.toString(),
+                zone == null ? null : zone.getDisplayName());
+      }
 
-      var text =
-          I18N.getText(
-              player.getLoaded() ? "connections.playerIsInZone" : "connections.playerIsLoadingZone",
-              player.toString(),
-              zone == null ? null : zone.getDisplayName());
       sb.append("\n");
       sb.append(text);
     }

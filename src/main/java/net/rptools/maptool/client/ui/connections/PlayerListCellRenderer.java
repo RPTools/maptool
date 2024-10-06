@@ -26,16 +26,24 @@ public class PlayerListCellRenderer extends DefaultListCellRenderer {
   public Component getListCellRendererComponent(
       JList<?> list, Object value, int index, boolean isSelected, boolean hasFocus) {
     if (value instanceof Player player) {
-      var zone =
-          player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
-
-      String text =
-          I18N.getText(
-              player.getLoaded() ? "connections.playerIsInZone" : "connections.playerIsLoadingZone",
-              player.toString(),
-              zone == null ? null : zone.getDisplayName());
+      String text;
+      if (player.isGM()) {
+        // Don't display zone information.
+        text = player.toString();
+      } else {
+        var zone =
+            player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+        text =
+            I18N.getText(
+                player.getLoaded()
+                    ? "connections.playerIsInZone"
+                    : "connections.playerIsLoadingZone",
+                player.toString(),
+                zone == null ? null : zone.getDisplayName());
+      }
       return super.getListCellRendererComponent(list, text, index, isSelected, hasFocus);
     }
+
     return super.getListCellRendererComponent(list, value, index, isSelected, hasFocus);
   }
 }
