@@ -41,30 +41,21 @@ public class PlayersLoadingStatusBar extends JLabel {
     loadingIcon = RessourceManager.getSmallIcon(Icons.STATUSBAR_PLAYERS_LOADING);
   }
 
+  private final ArrayList<Player> players = new ArrayList<>();
+
   public PlayersLoadingStatusBar() {
     refreshCount();
     new MapToolEventBus().getMainEventBus().register(this);
   }
 
   private void refreshCount() {
-    var localPlayer = MapTool.getPlayer();
-    var players = new ArrayList<>(MapTool.getPlayerList());
-    players.remove(localPlayer);
-
     var total = players.size();
     var loaded = players.stream().filter(x -> x.getLoaded()).count();
 
     var sb =
         new StringBuilder(I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total));
 
-    var self = MapTool.getPlayer();
-
     for (Player player : players) {
-      // The Player in the list is a seperate entity to the one from MapTool.getPlayer()
-      // So it doesn't have the correct status data.
-      if (player.getName().equals(self.getName())) {
-        player = self;
-      }
       var zone =
           player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
 
@@ -108,6 +99,11 @@ public class PlayersLoadingStatusBar extends JLabel {
 
   @Subscribe
   private void onPlayerConnected(PlayerConnected event) {
+    if (event.isLocal()) {
+      return;
+    }
+    players.add(event.player());
+
     refreshCount();
   }
 
@@ -118,11 +114,13 @@ public class PlayersLoadingStatusBar extends JLabel {
 
   @Subscribe
   private void onPlayerDisconnected(PlayerDisconnected event) {
+    players.remove(event.player());
     refreshCount();
   }
 
   @Subscribe
   private void onServerDisconnected(ServerDisconnected event) {
+    players.clear();
     refreshCount();
   }
 }
