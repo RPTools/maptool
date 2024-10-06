@@ -16,6 +16,7 @@ package net.rptools.maptool.client.swing;
 
 import com.google.common.eventbus.Subscribe;
 import java.awt.Dimension;
+import java.util.ArrayList;
 import javax.swing.Icon;
 import javax.swing.JLabel;
 import net.rptools.maptool.client.MapTool;
@@ -46,7 +47,10 @@ public class PlayersLoadingStatusBar extends JLabel {
   }
 
   private void refreshCount() {
-    var players = MapTool.getPlayerList();
+    var localPlayer = MapTool.getPlayer();
+    var players = new ArrayList<>(MapTool.getPlayerList());
+    players.remove(localPlayer);
+
     var total = players.size();
     var loaded = players.stream().filter(x -> x.getLoaded()).count();
 
