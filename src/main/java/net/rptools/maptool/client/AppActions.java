@@ -2600,7 +2600,7 @@ public class AppActions {
         ImageManager.flush(); // Clear out the old campaign's images
 
         AppState.setCampaignFile(campaignFile);
-        AppPreferences.setLoadDir(campaignFile.getParentFile());
+        AppPreferences.loadDirectory.set(campaignFile.getParentFile());
         AppMenuBar.getMruManager().addMRUCampaign(campaignFile);
         campaign.campaign.setName(AppState.getCampaignName()); // Update campaign name
 
@@ -2792,7 +2792,7 @@ public class AppActions {
     }
     doSaveCampaign(campaignFile, onSuccess);
     AppState.setCampaignFile(campaignFile);
-    AppPreferences.setSaveDir(campaignFile.getParentFile());
+    AppPreferences.saveDirectory.set(campaignFile.getParentFile());
     AppMenuBar.getMruManager().addMRUCampaign(AppState.getCampaignFile());
     if (MapTool.isHostingServer() || MapTool.isPersonalServer()) {
       MapTool.serverCommand().setCampaignName(AppState.getCampaignName());
@@ -2846,7 +2846,7 @@ public class AppActions {
                   }
                 }
                 PersistenceUtil.saveMap(zr.getZone(), mapFile);
-                AppPreferences.setSaveMapDir(mapFile.getParentFile());
+                AppPreferences.mapSaveDirectory.set(mapFile.getParentFile());
                 MapTool.showInformation("msg.info.mapSaved");
               } catch (IOException ioe) {
                 MapTool.showError("msg.error.failedSaveMap", ioe);
@@ -2973,7 +2973,7 @@ public class AppActions {
 
       try {
         PersistedMap map = get();
-        AppPreferences.setLoadDir(mapFile.getParentFile());
+        AppPreferences.loadDirectory.set(mapFile.getParentFile());
         if ((map.zone.getExposedArea() != null && !map.zone.getExposedArea().isEmpty())
             || (map.zone.getExposedAreaMetaData() != null
                 && !map.zone.getExposedAreaMetaData().isEmpty())) {

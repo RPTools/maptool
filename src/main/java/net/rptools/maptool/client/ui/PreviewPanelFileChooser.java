@@ -41,7 +41,7 @@ public class PreviewPanelFileChooser extends JFileChooser {
       new ThumbnailManager(AppUtil.getAppHome("previewPanelThumbs"), new Dimension(150, 150));
 
   public PreviewPanelFileChooser() {
-    this.setCurrentDirectory(AppPreferences.getLoadDir());
+    this.setCurrentDirectory(AppPreferences.loadDirectory.get());
     this.setAccessory(getPreviewWrapperPanel());
     this.addPropertyChangeListener(
         PreviewPanelFileChooser.SELECTED_FILE_CHANGED_PROPERTY, new FileSystemSelectionHandler());

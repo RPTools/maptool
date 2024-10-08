@@ -79,7 +79,7 @@ public class RESTfulFunctions extends AbstractFunction {
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
     }
 
-    if (!AppPreferences.getAllowExternalMacroAccess()) {
+    if (!AppPreferences.allowExternalMacroAccess.get()) {
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
     }
 
@@ -282,7 +282,7 @@ public class RESTfulFunctions extends AbstractFunction {
    * @throws ParserException
    */
   private BigDecimal launchSyrinscape(String baseURL) throws ParserException {
-    if (!AppPreferences.getSyrinscapeActive()) {
+    if (!AppPreferences.syrinscapeActive.get()) {
       return BigDecimal.ZERO;
     }
 

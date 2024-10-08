@@ -77,7 +77,7 @@ public class UPnPUtil {
               InternetGatewayDevice[] thisNI;
               thisNI =
                   InternetGatewayDevice.getDevices(
-                      AppPreferences.getUpnpDiscoveryTimeout(),
+                      AppPreferences.upnpDiscoveryTimeout.get(),
                       Discovery.DEFAULT_TTL,
                       Discovery.DEFAULT_MX,
                       ni);

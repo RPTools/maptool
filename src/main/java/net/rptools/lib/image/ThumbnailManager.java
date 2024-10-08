@@ -79,7 +79,7 @@ public class ThumbnailManager {
         new BufferedImage(imgSize.width, imgSize.height, ImageUtil.pickBestTransparency(image));
 
     Graphics2D g = thumbnailImage.createGraphics();
-    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+    AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, imgSize.width, imgSize.height, null);
     g.dispose();
 

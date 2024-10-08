@@ -328,29 +328,29 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initIsometricRadio() {
-    getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.getDefaultGridType()));
+    getIsometricRadio().setSelected(GridFactory.isIsometric(AppPreferences.defaultGridType.get()));
     getIsometricIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC));
   }
 
   private void initHexHoriRadio() {
     getHexHorizontalRadio()
-        .setSelected(GridFactory.isHexHorizontal(AppPreferences.getDefaultGridType()));
+        .setSelected(GridFactory.isHexHorizontal(AppPreferences.defaultGridType.get()));
     getHexHorizontalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_HORIZONTAL));
   }
 
   private void initHexVertRadio() {
     getHexVerticalRadio()
-        .setSelected(GridFactory.isHexVertical(AppPreferences.getDefaultGridType()));
+        .setSelected(GridFactory.isHexVertical(AppPreferences.defaultGridType.get()));
     getHexVerticalIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL));
   }
 
   private void initSquareRadio() {
-    getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.getDefaultGridType()));
+    getSquareRadio().setSelected(GridFactory.isSquare(AppPreferences.defaultGridType.get()));
     getSquareIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_SQUARE));
   }
 
   private void initNoGridRadio() {
-    getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.getDefaultGridType()));
+    getNoGridRadio().setSelected(GridFactory.isNone(AppPreferences.defaultGridType.get()));
     getNoGridIcon().setIcon(RessourceManager.getSmallIcon(Icons.GRID_NONE));
   }
 
@@ -508,7 +508,7 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initPixelsPerCellTextField() {
-    getPixelsPerCellTextField().setText(Integer.toString(AppPreferences.getDefaultGridSize()));
+    getPixelsPerCellTextField().setText(Integer.toString(AppPreferences.defaultGridSize.get()));
   }
 
   public JTextField getDefaultVisionTextField() {
@@ -517,7 +517,7 @@ public class MapPropertiesDialog extends JDialog {
 
   private void initDefaultVisionTextField() {
     this.getDefaultVisionTextField()
-        .setText(Integer.toString(AppPreferences.getDefaultVisionDistance()));
+        .setText(Integer.toString(AppPreferences.defaultVisionDistance.get()));
   }
 
   private void initVisionTypeCombo() {
@@ -525,7 +525,7 @@ public class MapPropertiesDialog extends JDialog {
     for (Zone.VisionType vt : Zone.VisionType.values()) {
       model.addElement(vt);
     }
-    model.setSelectedItem(AppPreferences.getDefaultVisionType());
+    model.setSelectedItem(AppPreferences.defaultVisionType.get());
     getVisionTypeCombo().setModel(model);
   }
 

@@ -50,8 +50,8 @@ public class AppState {
   private static PropertyChangeSupport changeSupport = new PropertyChangeSupport(AppState.class);
 
   static {
-    showLumensOverlay = AppPreferences.getLumensOverlayShowByDefault();
-    showLights = AppPreferences.getLightsShowByDefault();
+    showLumensOverlay = AppPreferences.lumensOverlayShowByDefault.get();
+    showLights = AppPreferences.lightsShowByDefault.get();
   }
 
   public static void addPropertyChangeListener(PropertyChangeListener listener) {

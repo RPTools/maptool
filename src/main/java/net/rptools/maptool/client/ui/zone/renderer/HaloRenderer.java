@@ -40,7 +40,7 @@ public class HaloRenderer {
   // Render Halos
   public void renderHalo(Graphics2D g2d, Token token, TokenLocation location) {
     if (token.hasHalo()) {
-      g2d.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+      g2d.setStroke(new BasicStroke(AppPreferences.haloLineWidth.get()));
       g2d.setColor(token.getHaloColor());
       g2d.draw(location.bounds);
     }

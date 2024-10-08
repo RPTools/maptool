@@ -501,7 +501,7 @@ public class RessourceManager {
 
   private static ImageIcon getIcon(Icons icon, int width, int height) {
     var iconPaths = classicIcons;
-    switch (AppPreferences.getIconTheme()) {
+    switch (AppPreferences.iconTheme.get()) {
       case ROD_TAKEHARA -> iconPaths = rodIcons;
     }
 

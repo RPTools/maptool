@@ -24,12 +24,12 @@ public class AI_UseVblTool extends DefaultTool {
   public AI_UseVblTool() {
     // Server policy is not available yet but that's ok, we have it saved as a preference which
     // is OK at this stage of initialization.
-    setSelected(AppPreferences.getVblBlocksMove());
+    setSelected(AppPreferences.pathfindingBlockedByVbl.get());
   }
 
   @Override
   public void actionPerformed(ActionEvent e) {
-    AppPreferences.setVblBlocksMove(isSelected());
+    AppPreferences.pathfindingBlockedByVbl.set(isSelected());
 
     var client = MapTool.getClient();
     var policy = client.getServerPolicy();
@@ -57,7 +57,7 @@ public class AI_UseVblTool extends DefaultTool {
 
   @Override
   public boolean isAvailable() {
-    return MapTool.getPlayer().isGM() && AppPreferences.isUsingAstarPathfinding();
+    return MapTool.getPlayer().isGM() && AppPreferences.pathfindingEnabled.get();
   }
 
   @Override

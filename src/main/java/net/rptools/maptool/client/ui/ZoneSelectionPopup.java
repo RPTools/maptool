@@ -54,7 +54,7 @@ public class ZoneSelectionPopup extends JScrollPopupMenu {
         rendererList.removeIf(renderer -> !renderer.getZone().isVisible());
       }
 
-      if (AppPreferences.getMapSortType().equals(AppPreferences.MapSortType.GMNAME))
+      if (AppPreferences.mapSortType.get().equals(AppPreferences.MapSortType.GMNAME))
         rendererList.sort(
             (o1, o2) -> {
               String name1 = o1.getZone().getName();

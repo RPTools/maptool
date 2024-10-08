@@ -75,7 +75,7 @@ public abstract class Grid implements Cloneable {
   private int size;
 
   public Grid() {
-    setSize(AppPreferences.getDefaultGridSize());
+    setSize(AppPreferences.defaultGridSize.get());
   }
 
   public Grid(Grid grid) {
@@ -936,7 +936,7 @@ public abstract class Grid implements Cloneable {
    */
   protected WalkerMetric getCurrentMetric() {
     return MapTool.isPersonalServer()
-        ? AppPreferences.getMovementMetric()
+        ? AppPreferences.movementMetric.get()
         : MapTool.getServerPolicy().getMovementMetric();
   }
 

@@ -332,8 +332,8 @@ public abstract class DefaultTool extends Tool
                   .getGrid()
                   .nextFacing(
                       facing,
-                      AppPreferences.getFaceEdge(),
-                      AppPreferences.getFaceVertex(),
+                      AppPreferences.faceEdge.get(),
+                      AppPreferences.faceVertex.get(),
                       e.getWheelRotation() <= 0);
         }
 
