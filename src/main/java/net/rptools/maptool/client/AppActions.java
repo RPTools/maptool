@@ -1195,7 +1195,7 @@ public class AppActions {
             MapTool.showError("msg.error.mustSelectRootGroup");
             return;
           }
-          AppPreferences.removeAssetRoot(dir.getPath());
+          AppStatePersisted.removeAssetRoot(dir.getPath());
           assetPanel.removeAssetRoot(dir);
         }
       };

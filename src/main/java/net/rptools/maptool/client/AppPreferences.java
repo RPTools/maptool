@@ -19,11 +19,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
@@ -35,15 +30,8 @@ import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/** The AppPreferences class is used for managing the preferences of the application. */
+/** Manages and persists user preferences for the application. */
 public class AppPreferences {
-
-  /**
-   * The log variable represents a logger object used for logging messages in the AppPreferences
-   * class. It is a private static final variable of type Logger. The logger object is obtained
-   * using the getLogger method from the LogManager class, specifying the AppPreferences class as
-   * the logging context.
-   */
   private static final Logger log = LogManager.getLogger(AppPreferences.class);
 
   /**
@@ -56,7 +44,8 @@ public class AppPreferences {
    *
    * <p>This variable is used to access and modify user preferences throughout the application.
    */
-  private static Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+  private static final Preferences prefs =
+      Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
 
   /** Holds the render quality preference setting for the application. */
   private static RenderQuality renderQuality;
@@ -113,16 +102,10 @@ public class AppPreferences {
    */
   private static final String KEY_ADD_ON_LOAD_DIR = "addOnLoadDir";
 
-  /** Represents the key used to access the most recently used campaigns for the menu option. */
-  private static final String KEY_MRU_CAMPAIGNS = "mruCampaigns";
-
   /** Represents the key used to load the most recent campaign on launch. Defaults to false */
   private static final String KEY_LOAD_MRU_CAMPAIGN_AT_START = "loadMRUCampaignAtStart";
 
   private static final boolean DEFAULT_LOAD_MRU_CAMPAIGN_AT_START = false;
-
-  /** Represents the key used to save the paint textures to the preferences. */
-  private static final String KEY_SAVED_PAINT_TEXTURES = "savedTextures";
 
   /**
    * Represents the key used to determine if the user should be prompted to save the campaign on
@@ -308,13 +291,6 @@ public class AppPreferences {
 
   private static final String ICON_THEME = "iconTheme";
   private static final String DEFAULT_ICON_THEME = RessourceManager.ROD_TAKEHARA;
-
-  // When hill VBL was introduced, older versions of MapTool were unable to read the new topology
-  // modes. So we use a different preference key than in the past so older versions would not
-  // unexpectedly break.
-  private static final String KEY_TOPOLOGY_TYPES = "topologyTypes";
-  private static final String KEY_OLD_TOPOLOGY_DRAWING_MODE = "topologyDrawingMode";
-  private static final String DEFAULT_TOPOLOGY_TYPE = "VBL";
 
   private static final String KEY_WEB_END_POINT_PORT = "webEndPointPort";
   private static final int DEFAULT_WEB_END_POINT = 654555;
@@ -1407,125 +1383,6 @@ public class AppPreferences {
     prefs.put(KEY_ADD_ON_LOAD_DIR, file.toString());
   }
 
-  public static void addAssetRoot(File root) {
-    String list = prefs.get(KEY_ASSET_ROOTS, "");
-    if (!list.isEmpty()) {
-      // Add the new one and then remove all duplicates.
-      list += ";" + root.getPath();
-      String[] roots = list.split(";");
-      StringBuilder result = new StringBuilder(list.length() + root.getPath().length() + 10);
-      Set<String> rootList = new HashSet<String>(roots.length);
-
-      // This loop ensures that each path only appears once. If there are currently
-      // duplicates in the list, only the first one is kept.
-      for (String r : roots) {
-        if (!rootList.contains(r)) {
-          result.append(';').append(r);
-          rootList.add(r);
-        }
-      }
-      list = result.substring(1);
-    } else {
-      list += root.getPath();
-    }
-    prefs.put(KEY_ASSET_ROOTS, list);
-  }
-
-  public static Set<File> getAssetRoots() {
-    String list = prefs.get(KEY_ASSET_ROOTS, "");
-    String[] roots = list.split(";"); // FJE Probably should be File.path_separator ...
-
-    Set<File> rootList = new HashSet<File>();
-    for (String root : roots) {
-      File file = new File(root);
-
-      // LATER: Should this actually remove it from the pref list ?
-      if (!file.exists()) {
-        continue;
-      }
-      rootList.add(file);
-    }
-    return rootList;
-  }
-
-  public static void removeAssetRoot(File root) {
-    String list = prefs.get(KEY_ASSET_ROOTS, "");
-    if (!list.isEmpty()) {
-      // Add the new one and then remove all duplicates.
-      String[] roots = list.split(";");
-      StringBuilder result = new StringBuilder(list.length());
-      Set<String> rootList = new HashSet<String>(roots.length);
-      String rootPath = root.getPath();
-
-      // This loop ensures that each path only appears once. If there are
-      // duplicates in the list, only the first one is kept.
-      for (String r : roots) {
-        if (!r.equals(rootPath) && !rootList.contains(r)) {
-          result.append(';').append(r);
-          rootList.add(r);
-        }
-      }
-      list = result.substring(result.length() > 0 ? 1 : 0);
-      prefs.put(KEY_ASSET_ROOTS, list);
-    }
-  }
-
-  public static void setMruCampaigns(List<File> mruCampaigns) {
-    StringBuilder combined = new StringBuilder();
-    for (File file : mruCampaigns) {
-      String path = null;
-      try {
-        path = file.getCanonicalPath();
-      } catch (IOException e) {
-        // Probably pretty rare, but we want to know about it
-        log.info("unexpected during file.getCanonicalPath()", e); // $NON-NLS-1$
-        path = file.getPath();
-      }
-      // It's important that '%3A' is done last. Note that the pathSeparator may not be a colon on
-      // the current platform, but it doesn't matter since it will be reconverted when read back in
-      // again.
-      // THink of the '%3A' as a symbol of the separator, not an encoding of the character.
-      combined.append(path.replaceAll("%", "%25").replaceAll(File.pathSeparator, "%3A"));
-      combined.append(File.pathSeparator);
-    }
-    prefs.put(KEY_MRU_CAMPAIGNS, combined.toString());
-  }
-
-  public static List<File> getMruCampaigns() {
-    List<File> mruCampaigns = new ArrayList<File>();
-    String combined = prefs.get(KEY_MRU_CAMPAIGNS, null);
-    if (combined != null) {
-      // It's important that '%3A' is done first
-      combined = combined.replaceAll("%3A", File.pathSeparator).replaceAll("%25", "%");
-      String[] all = combined.split(File.pathSeparator);
-      for (String s : all) {
-        mruCampaigns.add(new File(s));
-      }
-    }
-    return mruCampaigns;
-  }
-
-  public static void setSavedPaintTextures(List<File> savedTextures) {
-    StringBuilder combined = new StringBuilder();
-    for (File savedTexture : savedTextures) {
-      combined.append(savedTexture.getPath());
-      combined.append(File.pathSeparator);
-    }
-    prefs.put(KEY_SAVED_PAINT_TEXTURES, combined.toString());
-  }
-
-  public static List<File> getSavedPaintTextures() {
-    List<File> savedTextures = new ArrayList<File>();
-    String combined = prefs.get(KEY_SAVED_PAINT_TEXTURES, null);
-    if (combined != null) {
-      String[] all = combined.split(File.pathSeparator);
-      for (String s : all) {
-        savedTextures.add(new File(s));
-      }
-    }
-    return savedTextures;
-  }
-
   private static final String INIT_SHOW_TOKENS = "initShowTokens";
   private static final boolean DEFAULT_INIT_SHOW_TOKENS = true;
 
@@ -1655,27 +1512,6 @@ public class AppPreferences {
     prefs.put(ICON_THEME, theme);
   }
 
-  public static Zone.TopologyTypeSet getTopologyTypes() {
-    try {
-      String typeNames = prefs.get(KEY_TOPOLOGY_TYPES, "");
-      if ("".equals(typeNames)) {
-        // Fallback to the key used prior to the introduction of various VBL types.
-        String oldDrawingMode = prefs.get(KEY_OLD_TOPOLOGY_DRAWING_MODE, DEFAULT_TOPOLOGY_TYPE);
-        return switch (oldDrawingMode) {
-          default -> new Zone.TopologyTypeSet(Zone.TopologyType.WALL_VBL);
-          case "VBL" -> new Zone.TopologyTypeSet(Zone.TopologyType.WALL_VBL);
-          case "MBL" -> new Zone.TopologyTypeSet(Zone.TopologyType.MBL);
-          case "COMBINED" -> new Zone.TopologyTypeSet(
-              Zone.TopologyType.WALL_VBL, Zone.TopologyType.MBL);
-        };
-      } else {
-        return Zone.TopologyTypeSet.valueOf(typeNames);
-      }
-    } catch (Exception exc) {
-      return new Zone.TopologyTypeSet(Zone.TopologyType.WALL_VBL);
-    }
-  }
-
   public static void setWebEndPointPort(int value) {
     prefs.putInt(KEY_WEB_END_POINT_PORT, value);
   }
@@ -1699,19 +1535,6 @@ public class AppPreferences {
     @Override
     public String toString() {
       return displayName;
-    }
-  }
-
-  /**
-   * Sets the topology mode preference.
-   *
-   * @param types the topology types. A value of null resets to default.
-   */
-  public static void setTopologyTypes(Zone.TopologyTypeSet types) {
-    if (types == null) {
-      prefs.remove(KEY_TOPOLOGY_TYPES);
-    } else {
-      prefs.put(KEY_TOPOLOGY_TYPES, types.toString());
     }
   }
 

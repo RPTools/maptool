@@ -1131,7 +1131,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void restorePreferences() {
-    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    Set<File> assetRootList = AppStatePersisted.getAssetRoots();
     for (File file : assetRootList) {
       addAssetRoot(file);
     }

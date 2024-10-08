@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -1376,7 +1376,7 @@ public class Zone {
 
   public TopologyTypeSet getTopologyTypes() {
     if (topologyTypes == null) {
-      topologyTypes = AppPreferences.getTopologyTypes();
+      topologyTypes = AppStatePersisted.getTopologyTypes();
     }
 
     return topologyTypes;

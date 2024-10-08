@@ -21,7 +21,7 @@ import javax.swing.JToggleButton;
 import javax.swing.JToolBar;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
-import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -49,7 +49,7 @@ public class TopologyModeSelectionPanel extends JToolBar {
 
     modeButtons = new EnumMap<>(Zone.TopologyType.class);
 
-    var initiallySelectedTypes = AppPreferences.getTopologyTypes();
+    var initiallySelectedTypes = AppStatePersisted.getTopologyTypes();
     createAndAddModeButton(
         Zone.TopologyType.WALL_VBL,
         Icons.TOOLBAR_TOPOLOGY_TYPE_VBL_ON,
@@ -120,9 +120,9 @@ public class TopologyModeSelectionPanel extends JToolBar {
   }
 
   public void setMode(Zone.TopologyTypeSet topologyTypes) {
-    AppPreferences.setTopologyTypes(topologyTypes);
+    AppStatePersisted.setTopologyTypes(topologyTypes);
     if (topologyTypes == null) {
-      topologyTypes = AppPreferences.getTopologyTypes();
+      topologyTypes = AppStatePersisted.getTopologyTypes();
     }
 
     for (final var entry : modeButtons.entrySet()) {

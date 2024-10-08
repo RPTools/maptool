@@ -674,7 +674,7 @@ public class MapTool {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // Set the Topology drawing mode to the last mode used for convenience
       // Should only be one zone, but let's cover our bases.
-      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppPreferences.getTopologyTypes()));
+      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppStatePersisted.getTopologyTypes()));
 
       // Stop the pre-init client/server.
       disconnect();
@@ -1278,7 +1278,7 @@ public class MapTool {
       // alternately load MRU campaign if preference set
       else if (AppPreferences.getLoadMRUCampaignAtStart()) {
         try {
-          campaignFile = AppPreferences.getMruCampaigns().getFirst();
+          campaignFile = AppStatePersisted.getMruCampaigns().getFirst();
           if (campaignFile.exists()) {
             AppActions.loadCampaign(campaignFile);
           }

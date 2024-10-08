@@ -185,7 +185,7 @@ public class MapPropertiesDialog extends JDialog {
     // Color picker
     paintChooser = new PaintChooser();
     AssetPanelModel model = new AssetPanelModel();
-    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    Set<File> assetRootList = AppStatePersisted.getAssetRoots();
     for (File file : assetRootList) {
       model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
     }
@@ -669,7 +669,7 @@ public class MapPropertiesDialog extends JDialog {
 
     private JComponent createImageExplorerPanel() {
       AssetPanelModel model = new AssetPanelModel();
-      Set<File> assetRootList = AppPreferences.getAssetRoots();
+      Set<File> assetRootList = AppStatePersisted.getAssetRoots();
       for (File file : assetRootList) {
         model.addRootGroup(new AssetDirectory(file, AppConstants.IMAGE_FILE_FILTER));
       }
