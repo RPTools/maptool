@@ -19,7 +19,13 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.io.File;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.function.Consumer;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.prefs.Preferences;
+import javax.annotation.Nullable;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
@@ -1786,5 +1792,269 @@ public class AppPreferences {
    */
   public static void setShowMapLabelBorder(boolean show) {
     prefs.putBoolean(KEY_MAP_LABEL_SHOW_BORDER, show);
+  }
+
+  private interface Type<T> {
+    void set(Preferences node, String key, T value);
+
+    T get(Preferences node, String key, Supplier<T> defaultValue);
+  }
+
+  public static final class Preference<T> {
+    private final String key;
+    private final Supplier<T> defaultValue;
+    private final Type<T> type;
+
+    private Predicate<T> validator = value -> true;
+    private boolean cachingEnabled = false;
+    private @Nullable T cachedValue;
+
+    private final List<Consumer<T>> onChangeHandlers = new CopyOnWriteArrayList<>();
+
+    private Preference(String key, T defaultValue, Type<T> type) {
+      this.key = key;
+      this.defaultValue = () -> defaultValue;
+      this.type = type;
+    }
+
+    private Preference(String key, Supplier<T> defaultValue, Type<T> type) {
+      this.key = key;
+      this.defaultValue = defaultValue;
+      this.type = type;
+    }
+
+    public String name() {
+      return key;
+    }
+
+    /**
+     * Loads and validates the value of the preference.
+     *
+     * <p>If validation is unsuccessful, clears the preference and returns it the default value.
+     *
+     * @return The value of the preference.
+     */
+    public T get() {
+      if (cachingEnabled && cachedValue != null) {
+        return cachedValue;
+      }
+
+      var value = type.get(prefs, key, defaultValue);
+      if (!validator.test(value)) {
+        log.warn("Value read from preference {} did not pass validation: {}", name(), value);
+        value = getDefault();
+        remove();
+      }
+
+      cachedValue = value;
+      return value;
+    }
+
+    /**
+     * Validates and stores the value of the preference.
+     *
+     * <p>If validation is unsuccessful, stores the default value instead.
+     *
+     * @param value The value to set.
+     */
+    public void set(T value) {
+      if (!validator.test(value)) {
+        log.warn("Value written to preference {} did not pass validation: {}", name(), value);
+        value = getDefault();
+      }
+
+      type.set(prefs, key, value);
+      cachedValue = value;
+
+      for (var handler : onChangeHandlers) {
+        handler.accept(value);
+      }
+    }
+
+    public void remove() {
+      prefs.remove(key);
+      cachedValue = getDefault();
+
+      for (var handler : onChangeHandlers) {
+        handler.accept(cachedValue);
+      }
+    }
+
+    public T getDefault() {
+      return defaultValue.get();
+    }
+
+    public Preference<T> cacheIt() {
+      this.cachingEnabled = true;
+      return this;
+    }
+
+    public Preference<T> validateIt(Predicate<T> predicate) {
+      validator = predicate;
+      return this;
+    }
+
+    public void onChange(Consumer<T> handler) {
+      onChangeHandlers.add(handler);
+    }
+  }
+
+  private static final class BooleanType implements Type<Boolean> {
+    public static Preference<Boolean> create(String key, boolean defaultValue) {
+      return new Preference<>(key, defaultValue, new BooleanType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, Boolean value) {
+      prefs.putBoolean(key, value);
+    }
+
+    @Override
+    public Boolean get(Preferences prefs, String key, Supplier<Boolean> defaultValue) {
+      return prefs.getBoolean(key, defaultValue.get());
+    }
+  }
+
+  private static final class IntegerType implements Type<Integer> {
+    public static Preference<Integer> create(String key, int defaultValue) {
+      return new Preference<>(key, defaultValue, new IntegerType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, Integer value) {
+      prefs.putInt(key, value);
+    }
+
+    @Override
+    public Integer get(Preferences prefs, String key, Supplier<Integer> defaultValue) {
+      return prefs.getInt(key, defaultValue.get());
+    }
+  }
+
+  private static final class ByteType implements Type<Integer> {
+    public static Preference<Integer> create(String key, int defaultValue) {
+      return new Preference<>(key, defaultValue, new ByteType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, Integer value) {
+      prefs.putInt(key, range0to255(value));
+    }
+
+    @Override
+    public Integer get(Preferences prefs, String key, Supplier<Integer> defaultValue) {
+      return range0to255(prefs.getInt(key, defaultValue.get()));
+    }
+
+    private static int range0to255(int value) {
+      return Math.clamp(value, 0, 255);
+    }
+  }
+
+  private static final class DoubleType implements Type<Double> {
+    public static Preference<Double> create(String key, double defaultValue) {
+      return new Preference<>(key, defaultValue, new DoubleType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, Double value) {
+      prefs.putDouble(key, value);
+    }
+
+    @Override
+    public Double get(Preferences prefs, String key, Supplier<Double> defaultValue) {
+      return prefs.getDouble(key, defaultValue.get());
+    }
+  }
+
+  private static final class StringType implements Type<String> {
+    public static Preference<String> create(String key, String defaultValue) {
+      return new Preference<>(key, defaultValue, new StringType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, String value) {
+      prefs.put(key, value);
+    }
+
+    @Override
+    public String get(Preferences prefs, String key, Supplier<String> defaultValue) {
+      return prefs.get(key, defaultValue.get());
+    }
+  }
+
+  private static final class FileType implements Type<File> {
+    public static Preference<File> create(String key, Supplier<File> defaultValue) {
+      return new Preference<>(key, defaultValue, new FileType());
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, File value) {
+      prefs.put(key, value.toString());
+    }
+
+    @Override
+    public File get(Preferences prefs, String key, Supplier<File> defaultValue) {
+      String filePath = prefs.get(key, null);
+      if (filePath != null) {
+        return new File(filePath);
+      }
+
+      return defaultValue.get();
+    }
+  }
+
+  private static final class EnumType<T extends Enum<T>> implements Type<T> {
+    public static <T extends Enum<T>> Preference<T> create(
+        Class<T> class_, String key, T defaultValue) {
+      return new Preference<>(key, defaultValue, new EnumType<>(class_));
+    }
+
+    private final Class<T> class_;
+
+    public EnumType(Class<T> class_) {
+      this.class_ = class_;
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, T value) {
+      prefs.put(key, value.name());
+    }
+
+    @Override
+    public T get(Preferences prefs, String key, Supplier<T> defaultValue) {
+      var stored = prefs.get(key, null);
+      if (stored == null) {
+        return defaultValue.get();
+      }
+
+      try {
+        return Enum.valueOf(class_, stored);
+      } catch (Exception e) {
+        return defaultValue.get();
+      }
+    }
+  }
+
+  private static final class ColorType implements Type<Color> {
+    public static Preference<Color> create(String key, Color defaultValue, boolean hasAlpha) {
+      return new Preference<>(key, defaultValue, new ColorType(hasAlpha));
+    }
+
+    private final boolean hasAlpha;
+
+    public ColorType(boolean hasAlpha) {
+      this.hasAlpha = hasAlpha;
+    }
+
+    @Override
+    public void set(Preferences prefs, String key, Color value) {
+      prefs.putInt(key, value.getRGB());
+    }
+
+    @Override
+    public Color get(Preferences prefs, String key, Supplier<Color> defaultValue) {
+      return new Color(prefs.getInt(key, defaultValue.get().getRGB()), hasAlpha);
+    }
   }
 }
