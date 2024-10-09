@@ -53,7 +53,7 @@ public class TooltipView extends InlineView {
 
       if (href.startsWith("macro:")) {
         boolean isInsideChat = mlToolTips;
-        boolean allowToolTipToShow = !AppPreferences.getSuppressToolTipsForMacroLinks();
+        boolean allowToolTipToShow = !AppPreferences.suppressToolTipsForMacroLinks.get();
         if (isInsideChat && allowToolTipToShow) {
           return MacroLinkFunction.getInstance().macroLinkToolTip(href);
         }

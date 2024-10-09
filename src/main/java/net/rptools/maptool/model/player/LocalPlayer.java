@@ -28,7 +28,7 @@ public class LocalPlayer extends Player {
   private CipherUtil.Key password;
 
   public LocalPlayer() throws NoSuchAlgorithmException, InvalidKeySpecException {
-    this(AppPreferences.getDefaultUserName(), Role.GM, "");
+    this(AppPreferences.defaultUserName.get(), Role.GM, "");
   }
 
   public LocalPlayer(String name, Role role, String plainTextPassword)

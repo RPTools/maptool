@@ -381,7 +381,7 @@ public class TokenBarController
         } // endif
         ((JScrollPane) formPanel.getComponent("tokenBarImagesScroll"))
             .scrollRectToVisible(imageList.getCellBounds(imageSelected, imageSelected));
-        AppPreferences.setLoadDir(imageFile.getParentFile());
+        AppPreferences.loadDirectory.set(imageFile.getParentFile());
         changedUpdate(null);
       } // endif
 
@@ -399,7 +399,7 @@ public class TokenBarController
         imageModel.set(
             imageSelected,
             TokenStatesController.loadAsssetFile(imageFile.getAbsolutePath(), formPanel));
-        AppPreferences.setLoadDir(imageFile.getParentFile());
+        AppPreferences.loadDirectory.set(imageFile.getParentFile());
       } // endif
 
       // Delete an image in the list

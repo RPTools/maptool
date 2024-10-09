@@ -260,9 +260,9 @@ public class ImagePanel extends JComponent
                 Dimension dim = constrainSize(image, gridSize);
                 var savedRenderingHints = g.getRenderingHints();
                 if (dim.width < image.getWidth(null) || dim.height < image.getHeight(null)) {
-                  AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+                  AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
                 } else if (dim.width > image.getWidth(null) || dim.height > image.getHeight(null)) {
-                  AppPreferences.getRenderQuality().setRenderingHints(g);
+                  AppPreferences.renderQuality.get().setRenderingHints(g);
                 }
                 g.drawImage(
                     image,

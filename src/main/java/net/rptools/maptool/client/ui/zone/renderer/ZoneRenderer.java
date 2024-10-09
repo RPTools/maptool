@@ -185,7 +185,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     this.fogRenderer = new FogRenderer(renderHelper, zone, zoneView);
     this.visionOverlayRenderer = new VisionOverlayRenderer(renderHelper, zone, zoneView);
     this.debugRenderer = new DebugRenderer(renderHelper);
-    repaintDebouncer = new DebounceExecutor(1000 / AppPreferences.getFrameRateCap(), this::repaint);
+    repaintDebouncer =
+        new DebounceExecutor(1000 / AppPreferences.frameRateCap.get(), this::repaint);
 
     setFocusable(true);
     selectionModel = new SelectionModel(zone);
@@ -786,7 +787,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             if (MapTool.getFrame().areFullScreenToolsShown()) {
               noteVPos += 40;
             }
-            if (!AppPreferences.getMapVisibilityWarning() && (!zone.isVisible() && pl.isGMView())) {
+            if (!AppPreferences.mapVisibilityWarning.get()
+                && (!zone.isVisible() && pl.isGMView())) {
               GraphicsUtil.drawBoxedString(
                   bufferG2d, I18N.getText("zone.map_not_visible"), getSize().width / 2, noteVPos);
               noteVPos += 20;
@@ -1268,7 +1270,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     }
     if (drawBackground) {
       Graphics2D bbg = backbuffer.createGraphics();
-      AppPreferences.getRenderQuality().setRenderingHints(bbg);
+      AppPreferences.renderQuality.get().setRenderingHints(bbg);
 
       // Background texture
       Paint paint =
@@ -2097,7 +2099,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       Area visibleArea = new Area(g.getClipBounds());
       visibleArea.intersect(visibleScreenArea);
       clippedG.setClip(new GeneralPath(visibleArea));
-      AppPreferences.getRenderQuality().setRenderingHints(clippedG);
+      AppPreferences.renderQuality.get().setRenderingHints(clippedG);
     }
     timer.stop("createClip");
 
@@ -2300,7 +2302,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         tokenG = (Graphics2D) clippedG.create();
       } else {
         tokenG = (Graphics2D) g.create();
-        AppPreferences.getRenderQuality().setRenderingHints(tokenG);
+        AppPreferences.renderQuality.get().setRenderingHints(tokenG);
       }
 
       // Previous path
@@ -2502,7 +2504,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         Token.TokenShape tokenType = token.getShape();
         switch (tokenType) {
           case FIGURE:
-            if (token.getHasImageTable() && AppPreferences.getForceFacingArrow() == false) {
+            if (token.getHasImageTable() && !AppPreferences.forceFacingArrow.get()) {
               break;
             }
             Shape arrow = getFigureFacingArrow(token.getFacing(), footprintBounds.width / 2);
@@ -2526,7 +2528,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
             tokenG.translate(-fx, -fy);
             break;
           case TOP_DOWN:
-            if (AppPreferences.getForceFacingArrow() == false) {
+            if (!AppPreferences.forceFacingArrow.get()) {
               break;
             }
           case CIRCLE:
@@ -2833,7 +2835,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     // Stacks
     // TODO: find a cleaner way to indicate token layer
     if (!tokenList.isEmpty() && tokenList.get(0).getLayer().isTokenLayer()) {
-      boolean hideTSI = AppPreferences.getHideTokenStackIndicator();
+      boolean hideTSI = AppPreferences.hideTokenStackIndicator.get();
       if (tokenStackMap != null
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
@@ -3224,7 +3226,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
       // Get the snap to grid value for the current prefs and abilities
       token.setSnapToGrid(
-          gridCaps.isSnapToGridSupported() && AppPreferences.getTokensStartSnapToGrid());
+          gridCaps.isSnapToGridSupported() && AppPreferences.tokensStartSnapToGrid.get());
       if (token.isSnapToGrid()) {
         zp = zone.getGrid().convert(zone.getGrid().convert(zp));
       }
@@ -3257,17 +3259,17 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       switch (getActiveLayer()) {
         case TOKEN:
           // Players can't drop invisible tokens
-          token.setVisible(!isGM || AppPreferences.getNewTokensVisible());
-          if (AppPreferences.getTokensStartFreesize()) {
+          token.setVisible(!isGM || AppPreferences.newTokensVisible.get());
+          if (AppPreferences.tokensStartFreesize.get()) {
             token.setSnapToScale(false);
           }
           break;
         case BACKGROUND:
           token.setShape(Token.TokenShape.TOP_DOWN);
 
-          token.setSnapToScale(!AppPreferences.getBackgroundsStartFreesize());
-          token.setSnapToGrid(AppPreferences.getBackgroundsStartSnapToGrid());
-          token.setVisible(AppPreferences.getNewBackgroundsVisible());
+          token.setSnapToScale(!AppPreferences.backgroundsStartFreesize.get());
+          token.setSnapToGrid(AppPreferences.backgroundsStartSnapToGrid.get());
+          token.setVisible(AppPreferences.newBackgroundsVisible.get());
 
           // Center on drop point
           if (!token.isSnapToScale() && !token.isSnapToGrid()) {
@@ -3278,9 +3280,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         case OBJECT:
           token.setShape(Token.TokenShape.TOP_DOWN);
 
-          token.setSnapToScale(!AppPreferences.getObjectsStartFreesize());
-          token.setSnapToGrid(AppPreferences.getObjectsStartSnapToGrid());
-          token.setVisible(AppPreferences.getNewObjectsVisible());
+          token.setSnapToScale(!AppPreferences.objectsStartFreesize.get());
+          token.setSnapToGrid(AppPreferences.objectsStartSnapToGrid.get());
+          token.setVisible(AppPreferences.newObjectsVisible.get());
 
           // Center on drop point
           if (!token.isSnapToScale() && !token.isSnapToGrid()) {
@@ -3305,7 +3307,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         token.setName(MapToolUtil.nextTokenId(zone, token, tokenNameUsed != null));
 
         if (getActiveLayer() == Zone.Layer.TOKEN) {
-          if (AppPreferences.getShowDialogOnNewToken() || showDialog) {
+          if (AppPreferences.showDialogOnNewToken.get() || showDialog) {
             NewTokenDialog dialog = new NewTokenDialog(token, dropPoint.x, dropPoint.y);
             dialog.showDialog();
             if (!dialog.isSuccess()) {

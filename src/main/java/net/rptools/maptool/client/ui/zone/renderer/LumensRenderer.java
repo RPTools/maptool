@@ -59,7 +59,7 @@ public class LumensRenderer {
 
   private void renderWorld(Graphics2D worldG, PlayerView view) {
     var timer = CodeTimer.get();
-    var overlayOpacity = AppPreferences.getLumensOverlayOpacity() / 255.0f;
+    var overlayOpacity = AppPreferences.lumensOverlayOpacity.get() / 255.0f;
 
     var visibleArea = zoneView.getVisibleArea(view);
     final var disjointLumensLevels = zoneView.getDisjointObscuredLumensLevels(view);
@@ -116,7 +116,7 @@ public class LumensRenderer {
     }
 
     // Now draw borders around each region if configured.
-    final var borderThickness = AppPreferences.getLumensOverlayBorderThickness();
+    final var borderThickness = AppPreferences.lumensOverlayBorderThickness.get();
     if (borderThickness > 0) {
       worldG.setStroke(
           new BasicStroke((float) borderThickness, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));

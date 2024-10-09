@@ -202,7 +202,7 @@ public class MacroButtonPrefs {
               String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
               boolean allowPlayerEdits =
                   buttonPref.getBoolean(
-                      PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
+                      PREF_ALLOW_PLAYER_EDITS, AppPreferences.allowPlayerMacroEditsDefault.get());
               String toolTip = buttonPref.get(PREF_TOOLTIP, "");
               boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);
 
@@ -245,7 +245,7 @@ public class MacroButtonPrefs {
         String maxWidth = buttonPref.get(PREF_MAX_WIDTH, "");
         boolean allowPlayerEdits =
             buttonPref.getBoolean(
-                PREF_ALLOW_PLAYER_EDITS, AppPreferences.getAllowPlayerMacroEditsDefault());
+                PREF_ALLOW_PLAYER_EDITS, AppPreferences.allowPlayerMacroEditsDefault.get());
         String hotKey = buttonPref.get(PREF_HOTKEY_KEY, MacroButtonHotKeyManager.HOTKEYS[0]);
         String toolTip = buttonPref.get(PREF_TOOLTIP, "");
         boolean displayHotKey = buttonPref.getBoolean(PREF_DISPLAY_HOT_KEY, true);

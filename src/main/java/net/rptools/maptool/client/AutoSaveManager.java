@@ -65,7 +65,7 @@ public class AutoSaveManager {
   private boolean executeAndContinue() {
 
     int interval =
-        AppPreferences.getAutoSaveIncrement()
+        AppPreferences.autoSaveIncrement.get()
             * 1000
             * (DeveloperOptions.Toggle.AutoSaveMeasuredInSeconds.isEnabled() ? 1 : 60);
 

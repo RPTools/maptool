@@ -137,7 +137,7 @@ public class MessageUtil {
 
     sb.append("<table class='ava-msg'><tr valign='top'>");
 
-    if (AppPreferences.getShowAvatarInChat()) {
+    if (AppPreferences.showAvatarInChat.get()) {
       if (token == null && MapTool.getFrame().getCommandPanel().isImpersonating()) {
         GUID guid = MapTool.getFrame().getCommandPanel().getIdentityGUID();
         if (guid != null)

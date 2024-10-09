@@ -105,11 +105,11 @@ public class MRUCampaignManager {
   }
 
   private void saveMruCampaignList() {
-    AppPreferences.setMruCampaigns(mruCampaigns);
+    AppStatePersisted.setMruCampaigns(mruCampaigns);
   }
 
   private void loadMruCampaignList() {
-    mruCampaigns = AppPreferences.getMruCampaigns();
+    mruCampaigns = AppStatePersisted.getMruCampaigns();
     addMRUsToMenu();
   }
 }

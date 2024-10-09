@@ -44,7 +44,7 @@ public class IsTrustedFunction extends AbstractFunction {
     if (functionName.equalsIgnoreCase("isTrusted")) {
       return MapTool.getParser().isMacroTrusted() ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if (functionName.equalsIgnoreCase("isExternalMacroAccessAllowed")) {
-      return AppPreferences.getAllowExternalMacroAccess() ? BigDecimal.ONE : BigDecimal.ZERO;
+      return AppPreferences.allowExternalMacroAccess.get() ? BigDecimal.ONE : BigDecimal.ZERO;
     } else if ("isGM".equalsIgnoreCase(functionName)) {
       if (parameters.isEmpty())
         return MapTool.getPlayer().isGM() ? BigDecimal.ONE : BigDecimal.ZERO;

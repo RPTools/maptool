@@ -104,7 +104,8 @@ public class FacingTool extends DefaultTool {
           renderer
               .getZone()
               .getGrid()
-              .nearestFacing(degrees, AppPreferences.getFaceEdge(), AppPreferences.getFaceVertex());
+              .nearestFacing(
+                  degrees, AppPreferences.faceEdge.get(), AppPreferences.faceVertex.get());
     }
     Area visibleArea = null;
     Set<GUID> remoteSelected = new HashSet<GUID>();
@@ -116,7 +117,7 @@ public class FacingTool extends DefaultTool {
     boolean noOwnerReveal; // if true, reveal FoW if token has no owners.
     if (MapTool.isPersonalServer()) {
       ownerReveal =
-          hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
+          hasOwnerReveal = noOwnerReveal = AppPreferences.autoRevealVisionOnGMMovement.get();
     } else {
       ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
       hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();

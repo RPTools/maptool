@@ -39,20 +39,20 @@ public class FlatImageLabelFactory {
 
   /** Creates a new instance of the FlatImageLabelFactory class. */
   public FlatImageLabelFactory() {
-    var npcBackground = AppPreferences.getNPCMapLabelBG();
-    var npcForeground = AppPreferences.getNPCMapLabelFG();
-    var npcBorder = AppPreferences.getNPCMapLabelBorder();
-    var pcBackground = AppPreferences.getPCMapLabelBG();
-    var pcForeground = AppPreferences.getPCMapLabelFG();
-    var pcBorder = AppPreferences.getPCMapLabelBorder();
-    var nonVisBackground = AppPreferences.getNonVisMapLabelBG();
-    var nonVisForeground = AppPreferences.getNonVisMapLabelFG();
-    var nonVisBorder = AppPreferences.getNonVisMapLabelBorder();
-    int fontSize = AppPreferences.getMapLabelFontSize();
+    var npcBackground = AppPreferences.npcMapLabelBackground.get();
+    var npcForeground = AppPreferences.npcMapLabelForeground.get();
+    var npcBorder = AppPreferences.npcMapLabelBorder.get();
+    var pcBackground = AppPreferences.pcMapLabelBackground.get();
+    var pcForeground = AppPreferences.pcMapLabelForeground.get();
+    var pcBorder = AppPreferences.pcMapLabelBorder.get();
+    var nonVisBackground = AppPreferences.nonVisibleTokenMapLabelBackground.get();
+    var nonVisForeground = AppPreferences.nonVisibleTokenMapLabelForeground.get();
+    var nonVisBorder = AppPreferences.nonVisibleTokenMapLabelBorder.get();
+    int fontSize = AppPreferences.mapLabelFontSize.get();
     var font = AppStyle.labelFont.deriveFont(AppStyle.labelFont.getStyle(), fontSize);
-    boolean showBorder = AppPreferences.getShowMapLabelBorder();
-    int borderWidth = showBorder ? AppPreferences.getMapLabelBorderWidth() : 0;
-    int borderArc = AppPreferences.getMapLabelBorderArc();
+    boolean showBorder = AppPreferences.mapLabelShowBorder.get();
+    int borderWidth = showBorder ? AppPreferences.mapLabelBorderWidth.get() : 0;
+    int borderArc = AppPreferences.mapLabelBorderArc.get();
 
     npcImageLabel =
         new FlatImageLabel(

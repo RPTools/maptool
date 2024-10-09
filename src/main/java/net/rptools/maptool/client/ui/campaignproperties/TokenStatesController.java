@@ -345,7 +345,7 @@ public class TokenStatesController
             || !imageFile.exists()
             || !imageFile.canRead()) return;
         formPanel.getTextComponent(IMAGE).setText(imageFile.getPath());
-        AppPreferences.setLoadDir(imageFile.getParentFile());
+        AppPreferences.loadDirectory.set(imageFile.getParentFile());
       } // endif
 
       // Change the enabled data components.

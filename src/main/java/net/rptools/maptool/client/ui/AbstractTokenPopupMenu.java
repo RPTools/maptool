@@ -664,7 +664,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         }
       }
       if (saveDirectory != null) {
-        AppPreferences.setTokenSaveDir(saveDirectory);
+        AppPreferences.tokenSaveDirectory.set(saveDirectory);
       }
     }
   }

@@ -167,7 +167,7 @@ public class AssetViewerDialog extends JDialog {
       SwingUtil.constrainTo(imgSize, size.width, size.height);
 
       Object oldHint = g2d.getRenderingHint(RenderingHints.KEY_RENDERING);
-      AppPreferences.getRenderQuality().setShrinkRenderingHints(g2d);
+      AppPreferences.renderQuality.get().setShrinkRenderingHints(g2d);
       g.drawImage(image, 0, 0, imgSize.width, imgSize.height, this);
       g2d.setRenderingHint(RenderingHints.KEY_RENDERING, oldHint);
 

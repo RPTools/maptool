@@ -161,7 +161,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
    */
   @Override
   String getCSSRule() {
-    return String.format(CSS_BODY, AppPreferences.getFontSize())
+    return String.format(CSS_BODY, AppPreferences.fontSize.get())
         + CSS_SPAN
         + CSS_DIV
         + CSS_POINTERMAP;
