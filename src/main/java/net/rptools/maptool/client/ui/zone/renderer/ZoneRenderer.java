@@ -2596,22 +2596,40 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       timer.stop("tokenlist-8");
 
       timer.start("tokenlist-9");
-      // Set up the graphics so that the overlay can just be painted.
+      /**
+       * Paint States and Bars Set up the graphics so that the overlay can just be painted. Use
+       * non-rotated token bounds to avoid odd size changes
+       */
+      Token tmpToken = new Token(token);
+      tmpToken.setFacing(270);
+      Rectangle tmpBounds = tmpToken.getBounds(this.zone);
+
+      // Unless it is isometric, make it square to avoid distortion
+      double maxDim = Math.max(tmpBounds.getWidth(), tmpBounds.getHeight());
+      // scale it to the view
+      maxDim *= this.getScale();
+      Rectangle bounds;
+      if (zone.getGrid().isIsometric()) {
+        bounds =
+            new Rectangle(
+                0,
+                0,
+                (int) (tmpBounds.getWidth() * this.getScale()),
+                (int) (tmpBounds.getHeight() * this.getScale()));
+      } else {
+        bounds = new Rectangle(0, 0, (int) maxDim, (int) maxDim);
+      }
+
+      // calculate the drawing region from the token centre.
       Graphics2D locg =
           (Graphics2D)
               tokenG.create(
-                  (int) tokenBounds.getBounds().getX(),
-                  (int) tokenBounds.getBounds().getY(),
-                  (int) tokenBounds.getBounds().getWidth(),
-                  (int) tokenBounds.getBounds().getHeight());
-      Rectangle bounds =
-          new Rectangle(
-              0,
-              0,
-              (int) tokenBounds.getBounds().getWidth(),
-              (int) tokenBounds.getBounds().getHeight());
+                  (int) Math.floor(tokenBounds.getBounds().getCenterX() - bounds.getWidth() / 2.0),
+                  (int) Math.floor(tokenBounds.getBounds().getCenterY() - bounds.getHeight() / 2.0),
+                  bounds.width,
+                  bounds.height);
 
-      // Check each of the set values
+      // Check each of the set values and draw
       for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
         Object stateValue = token.getState(state);
         AbstractTokenOverlay overlay = MapTool.getCampaign().getTokenStatesMap().get(state);

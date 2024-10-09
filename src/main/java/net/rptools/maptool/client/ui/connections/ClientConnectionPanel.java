@@ -111,6 +111,10 @@ public class ClientConnectionPanel extends JPanel {
 
   @Subscribe
   private void onPlayerConnected(PlayerConnected event) {
+    if (event.isLocal()) {
+      return;
+    }
+
     listModel.addElement(event.player());
   }
 

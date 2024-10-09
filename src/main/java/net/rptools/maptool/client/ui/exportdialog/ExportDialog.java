@@ -19,7 +19,9 @@ import java.awt.GridLayout;
 import java.awt.Image;
 import java.awt.Rectangle;
 import java.awt.Transparency;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
@@ -33,11 +35,7 @@ import javax.annotation.Nullable;
 import javax.imageio.ImageIO;
 import javax.imageio.ImageWriter;
 import javax.imageio.event.IIOWriteProgressListener;
-import javax.swing.JButton;
-import javax.swing.JDialog;
-import javax.swing.JFileChooser;
-import javax.swing.JLabel;
-import javax.swing.JToggleButton;
+import javax.swing.*;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
@@ -64,6 +62,13 @@ import org.apache.logging.log4j.Logger;
  * the 'board' image/tile. The file can be saved to disk or sent to an FTP location.
  */
 public class ExportDialog extends JDialog implements IIOWriteProgressListener {
+  public enum Status {
+    OK,
+    CANCEL
+  }
+
+  private ExportDialog.Status status;
+
   //
   // Dialog/ UI related vars
   //
@@ -426,6 +431,20 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     interactPanel.getButton("exportButton").addActionListener(evt -> exportButtonAction());
     interactPanel.getButton("cancelButton").addActionListener(evt -> dispose());
     interactPanel.getButton("browseButton").addActionListener(evt -> browseButtonAction());
+
+    // Escape key
+    interactPanel
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
+    interactPanel
+        .getActionMap()
+        .put(
+            "cancel",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                cancel();
+              }
+            });
   }
 
   @Override
@@ -448,6 +467,11 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
     }
     super.setVisible(b);
+  }
+
+  private void cancel() {
+    status = ExportDialog.Status.CANCEL;
+    setVisible(false);
   }
 
   //
