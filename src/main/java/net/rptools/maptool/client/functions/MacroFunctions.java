@@ -18,13 +18,14 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
+import javax.swing.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
+import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButton;
 import net.rptools.maptool.client.ui.macrobuttons.panels.AbstractMacroPanel;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
@@ -61,6 +62,7 @@ public class MacroFunctions extends AbstractFunction {
         "setMacroProps",
         "getMacros",
         "getMacroProps",
+        "getMacroHotkeys",
         "getMacroIndexes",
         "getMacroIndices",
         "getMacroName",
@@ -218,7 +220,13 @@ public class MacroFunctions extends AbstractFunction {
 
     } else if (functionName.equalsIgnoreCase("getMacroButtonIndex")) {
       return BigDecimal.valueOf(MapTool.getParser().getMacroButtonIndex());
-
+    } else if (functionName.equalsIgnoreCase("getMacroHotkeys")) {
+      FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+      String delim = "json";
+      if (!parameters.isEmpty()) {
+        delim = parameters.getFirst().toString();
+      }
+      return getMacroHotkeys(delim);
     } else if (functionName.equalsIgnoreCase("getMacroGroup")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 4);
       String group = parameters.get(0).toString();
@@ -250,6 +258,30 @@ public class MacroFunctions extends AbstractFunction {
     }
     /* code should never happen, hopefully ;) */
     throw new ParserException(I18N.getText(KEY_UNKNOWN_MACRO, functionName));
+  }
+
+  private Object getMacroHotkeys(String delim) {
+    Map<KeyStroke, MacroButton> keyStrokeMap = MacroButtonHotKeyManager.getKeyStrokeMap();
+    JsonObject keyMacroObject = new JsonObject();
+
+    for (KeyStroke ks : keyStrokeMap.keySet()) {
+      MacroButton btn = keyStrokeMap.get(ks);
+      String address = btn.getProperties().getLabel() + "@";
+      switch (btn.getPanelClass()) {
+        case "GlobalPanel", "globalpanel" -> address += "global";
+        case "CampaignPanel", "campaignpanel" -> address += "campaign";
+        case "GmPanel", "gmpanel" -> address += "gm";
+        default -> address += btn.getToken().getName();
+      }
+      keyMacroObject.addProperty(ks.toString(), address);
+    }
+    if (delim.equalsIgnoreCase("json")) {
+      return keyMacroObject;
+    } else {
+      return JSONMacroFunctions.getInstance()
+          .getJsonObjectFunctions()
+          .toStringProp(keyMacroObject, delim);
+    }
   }
 
   /**
@@ -355,12 +387,19 @@ public class MacroFunctions extends AbstractFunction {
         mbp.setAutoExecute(boolVal(value));
       } else if ("color".equalsIgnoreCase(key)) {
         mbp.setColorKey(value);
+      } else if ("displayHotkey".equalsIgnoreCase(key)) {
+        mbp.setDisplayHotKey(boolVal(value));
       } else if ("fontColor".equalsIgnoreCase(key)) {
         mbp.setFontColorKey(value);
       } else if ("fontSize".equalsIgnoreCase(key)) {
         mbp.setFontSize(value);
       } else if ("group".equalsIgnoreCase(key)) {
         mbp.setGroup(value);
+      } else if ("hotkey".equalsIgnoreCase(key)) {
+        if (MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
+          value = MacroButtonHotKeyManager.HOTKEYS[0];
+        }
+        mbp.setHotKey(value);
       } else if ("includeLabel".equalsIgnoreCase(key)) {
         mbp.setIncludeLabel(boolVal(value));
       } else if ("sortBy".equalsIgnoreCase(key)) {
@@ -904,6 +943,7 @@ public class MacroFunctions extends AbstractFunction {
       }
       AbstractMacroPanel macroPanel =
           gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+      MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
       macroPanel.reset();
       return "Removed macro button "
           + label
@@ -931,6 +971,7 @@ public class MacroFunctions extends AbstractFunction {
 
     String label = mbp.getLabel();
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+    MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
     return "Removed macro button " + label + "(index = " + index + ") from " + token.getName();
   }
 
@@ -1046,20 +1087,22 @@ public class MacroFunctions extends AbstractFunction {
    */
   private String macroButtonPropertiesToString(MacroButtonProperties mbp, String delim) {
     StringBuilder sb = new StringBuilder();
+    sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
     sb.append("autoExecute=").append(mbp.getAutoExecute()).append(delim);
     sb.append("color=").append(mbp.getColorKey()).append(delim);
+    sb.append("displayHotkey=").append(mbp.getDisplayHotKey()).append(delim);
     sb.append("fontColor=").append(mbp.getFontColorKey()).append(delim);
+    sb.append("fontSize=").append(mbp.getFontSize()).append(delim);
     sb.append("group=").append(mbp.getGroup()).append(delim);
+    sb.append("hotkey=").append(mbp.getHotKey()).append(delim);
     sb.append("includeLabel=").append(mbp.getIncludeLabel()).append(delim);
-    sb.append("sortBy=").append(mbp.getSortby()).append(delim);
     sb.append("index=").append(mbp.getIndex()).append(delim);
     sb.append("label=").append(mbp.getLabel()).append(delim);
-    sb.append("fontSize=").append(mbp.getFontSize()).append(delim);
+    sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
     sb.append("minWidth=").append(mbp.getMinWidth()).append(delim);
     sb.append("playerEditable=").append(mbp.getAllowPlayerEdits()).append(delim);
-    sb.append("maxWidth=").append(mbp.getMaxWidth()).append(delim);
+    sb.append("sortBy=").append(mbp.getSortby()).append(delim);
     sb.append("tooltip=").append(mbp.getToolTip()).append(delim);
-    sb.append("applyToSelected=").append(mbp.getApplyToTokens()).append(delim);
     return sb.toString();
   }
 
@@ -1091,12 +1134,19 @@ public class MacroFunctions extends AbstractFunction {
           mbp.setAutoExecute(boolVal(value));
         } else if ("color".equalsIgnoreCase(key)) {
           mbp.setColorKey(value);
+        } else if ("displayHotkey".equalsIgnoreCase(key)) {
+          mbp.setDisplayHotKey(boolVal(value));
         } else if ("fontColor".equalsIgnoreCase(key)) {
           mbp.setFontColorKey(value);
         } else if ("fontSize".equalsIgnoreCase(key)) {
           mbp.setFontSize(value);
         } else if ("group".equalsIgnoreCase(key)) {
           mbp.setGroup(value);
+        } else if ("hotkey".equalsIgnoreCase(key)) {
+          if (MacroButtonHotKeyManager.isHotkeyAssigned(value)) {
+            value = MacroButtonHotKeyManager.HOTKEYS[0];
+          }
+          mbp.setHotKey(value);
         } else if ("includeLabel".equalsIgnoreCase(key)) {
           mbp.setIncludeLabel(boolVal(value));
         } else if ("sortBy".equalsIgnoreCase(key)) {
@@ -1184,21 +1234,23 @@ public class MacroFunctions extends AbstractFunction {
    */
   private JsonObject macroButtonPropertiesToJSON(MacroButtonProperties mbp) {
     JsonObject props = new JsonObject();
+    props.addProperty("applyToSelected", mbp.getApplyToTokens());
     props.addProperty("autoExecute", mbp.getAutoExecute());
     props.addProperty("color", mbp.getColorKey());
+    props.addProperty("displayHotkey", mbp.getDisplayHotKey());
+    props.addProperty("command", mbp.getCommand());
     props.addProperty("fontColor", mbp.getFontColorKey());
+    props.addProperty("fontSize", mbp.getFontSize());
     props.addProperty("group", mbp.getGroup());
+    props.addProperty("hotkey", mbp.getHotKey());
     props.addProperty("includeLabel", mbp.getIncludeLabel());
-    props.addProperty("sortBy", mbp.getSortby());
     props.addProperty("index", mbp.getIndex());
     props.addProperty("label", mbp.getLabel());
-    props.addProperty("fontSize", mbp.getFontSize());
     props.addProperty("minWidth", mbp.getMinWidth());
-    props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
-    props.addProperty("command", mbp.getCommand());
     props.addProperty("maxWidth", mbp.getMaxWidth());
+    props.addProperty("playerEditable", mbp.getAllowPlayerEdits());
+    props.addProperty("sortBy", mbp.getSortby());
     props.addProperty("tooltip", mbp.getToolTip());
-    props.addProperty("applyToSelected", mbp.getApplyToTokens());
 
     JsonArray compare = new JsonArray();
     if (mbp.getCompareGroup()) compare.add("group");

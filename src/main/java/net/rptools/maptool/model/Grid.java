@@ -454,7 +454,7 @@ public abstract class Grid implements Cloneable {
 
         visibleArea =
             new Area(
-                AffineTransform.getRotateInstance(Math.toRadians(offsetAngle + tokenFacingAngle))
+                AffineTransform.getRotateInstance(Math.toRadians(tokenFacingAngle - offsetAngle))
                     .createTransformedShape(lineShape));
       }
       case CONE -> {
