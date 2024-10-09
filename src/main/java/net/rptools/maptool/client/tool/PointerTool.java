@@ -771,7 +771,7 @@ public class PointerTool extends DefaultTool {
             selectedTokenSet,
             new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
             false);
-        if (AppPreferences.getHideMousePointerWhileDragging()) {
+        if (AppPreferences.hideMousePointerWhileDragging.get()) {
           SwingUtil.hidePointer(renderer);
         }
       }
@@ -1102,8 +1102,8 @@ public class PointerTool extends DefaultTool {
                 .getGrid()
                 .nextFacing(
                     facing,
-                    AppPreferences.getFaceEdge(),
-                    AppPreferences.getFaceVertex(),
+                    AppPreferences.faceEdge.get(),
+                    AppPreferences.faceVertex.get(),
                     direction < 0);
       }
       MapTool.serverCommand().updateTokenProperty(token, Token.Update.setFacing, facing);
@@ -1371,7 +1371,7 @@ public class PointerTool extends DefaultTool {
       Stroke stroke = g.getStroke();
       g.setStroke(new BasicStroke(2));
 
-      if (AppPreferences.getFillSelectionBox()) {
+      if (AppPreferences.fillSelectionBox.get()) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
         g.setPaint(AppStyle.selectionBoxFill);
         g.fillRoundRect(
@@ -1403,8 +1403,9 @@ public class PointerTool extends DefaultTool {
         && tokenDragOp == null
         && AppUtil.tokenIsVisible(
             renderer.getZone(), tokenUnderMouse, new PlayerView(MapTool.getPlayer().getRole()))) {
-      if (AppPreferences.getPortraitSize() > 0
-          && (SwingUtil.isShiftDown(keysDown) == AppPreferences.getShowStatSheetModifier())
+      if (AppPreferences.portraitSize.get() > 0
+          && (SwingUtil.isShiftDown(keysDown)
+              == AppPreferences.showStatSheetRequiresModifierKey.get())
           && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())
           && (tokenOnStatSheet == null
               || !tokenOnStatSheet.equals(tokenUnderMouse)
@@ -1413,7 +1414,7 @@ public class PointerTool extends DefaultTool {
 
         BufferedImage image = null;
         Dimension imgSize = new Dimension(0, 0);
-        if (AppPreferences.getShowPortrait()) {
+        if (AppPreferences.showPortrait.get()) {
           // Portrait
           MD5Key portraitId =
               tokenUnderMouse.getPortraitImage() != null
@@ -1434,7 +1435,7 @@ public class PointerTool extends DefaultTool {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.getPortraitSize());
+          SwingUtil.constrainTo(imgSize, AppPreferences.portraitSize.get());
         }
 
         Dimension statSize = null;
@@ -1454,7 +1455,7 @@ public class PointerTool extends DefaultTool {
         Map<String, String> propertyMap = new LinkedHashMap<String, String>();
         Map<String, Integer> propertyLineCount = new LinkedHashMap<String, Integer>();
         LinkedList<TextLayout> lineLayouts = new LinkedList<TextLayout>();
-        if (AppPreferences.getShowStatSheet()
+        if (AppPreferences.showStatSheet.get()
             && new StatSheetManager().isLegacyStatSheet(tokenUnderMouse.getStatSheet())) {
           CodeTimer.using(
               "statSheet",
@@ -1640,7 +1641,7 @@ public class PointerTool extends DefaultTool {
           }
 
           // Draw the portrait
-          if (AppPreferences.getShowPortrait()) {
+          if (AppPreferences.showPortrait.get()) {
             Rectangle bounds =
                 new Rectangle(lm, height - imgSize.height - bm, imgSize.width, imgSize.height);
 
@@ -1649,7 +1650,7 @@ public class PointerTool extends DefaultTool {
                     panelTexture,
                     new Rectangle(0, 0, panelTexture.getWidth(), panelTexture.getHeight())));
             statsG.fill(bounds);
-            AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+            AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
             statsG.drawImage(image, bounds.x, bounds.y, imgSize.width, imgSize.height, this);
             AppStyle.miniMapBorder.paintAround(statsG, bounds);
             AppStyle.shadowBorder.paintWithin(statsG, bounds);
@@ -1657,7 +1658,7 @@ public class PointerTool extends DefaultTool {
             // Label
             GraphicsUtil.drawBoxedString(
                 statsG, tokenUnderMouse.getName(), bounds.width / 2 + lm, height - 15);
-          } else if (AppPreferences.getShowStatSheet() && statSize != null) {
+          } else if (AppPreferences.showStatSheet.get() && statSize != null) {
             // Label
             Rectangle bounds =
                 new Rectangle(
@@ -1865,7 +1866,7 @@ public class PointerTool extends DefaultTool {
       var grid = renderer.getZone().getGrid();
       if (tokenBeingDragged.isSnapToGrid()
           && grid.getCapabilities().isSnapToGridSupported()
-          && AppPreferences.getTokensSnapWhileDragging()) {
+          && AppPreferences.tokensSnapWhileDragging.get()) {
         // Snap to grid point.
         zonePoint = grid.convert(grid.convert(zonePoint));
 
@@ -1967,7 +1968,7 @@ public class PointerTool extends DefaultTool {
 
       if (MapTool.isPersonalServer()) {
         ownerReveal =
-            hasOwnerReveal = noOwnerReveal = AppPreferences.getAutoRevealVisionOnGMMovement();
+            hasOwnerReveal = noOwnerReveal = AppPreferences.autoRevealVisionOnGMMovement.get();
       } else {
         ownerReveal = MapTool.getServerPolicy().isAutoRevealOnMovement();
         hasOwnerReveal = isGM && MapTool.getServerPolicy().isAutoRevealOnMovement();

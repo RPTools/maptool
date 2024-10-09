@@ -75,7 +75,7 @@ public abstract class Grid implements Cloneable {
   private int size;
 
   public Grid() {
-    setSize(AppPreferences.getDefaultGridSize());
+    setSize(AppPreferences.defaultGridSize.get());
   }
 
   public Grid(Grid grid) {
@@ -479,16 +479,7 @@ public abstract class Grid implements Cloneable {
         visibleArea.add(new Area(footprintPart));
       }
       case HEX -> {
-        double x = footprint.getCenterX();
-        double y = footprint.getCenterY();
-
-        double footprintWidth = footprint.getWidth();
-        double footprintHeight = footprint.getHeight();
-        double adjustment = Math.min(footprintWidth, footprintHeight);
-        x -= adjustment / 2;
-        y -= adjustment / 2;
-
-        visibleArea = createHex(x, y, visionRange, 0);
+        visibleArea = createHex(visionRange);
       }
       default -> {
         log.error("Unhandled shape {}; treating as a circle", shape);
@@ -527,25 +518,19 @@ public abstract class Grid implements Cloneable {
     return distance;
   }
 
-  protected Area createHex(double x, double y, double radius, double rotation) {
-    GeneralPath hexPath = new GeneralPath();
+  protected Area createHex(double inRadius) {
+    double radius = inRadius * 2 / Math.sqrt(3);
 
-    for (int i = 0; i < 6; i++) {
-      if (i == 0) {
-        hexPath.moveTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
-      } else {
-        hexPath.lineTo(
-            x + radius * Math.cos(i * 2 * Math.PI / 6), y + radius * Math.sin(i * 2 * Math.PI / 6));
-      }
-    }
+    var hexPath = new Path2D.Double();
+    hexPath.moveTo(radius, 0);
+    hexPath.lineTo(radius * 0.5, inRadius);
+    hexPath.lineTo(-radius * 0.5, inRadius);
+    hexPath.lineTo(-radius, 0);
+    hexPath.lineTo(-radius * 0.5, -inRadius);
+    hexPath.lineTo(radius * 0.5, -inRadius);
+    hexPath.closePath();
 
-    if (rotation != 0) {
-      AffineTransform atArea = AffineTransform.getRotateInstance(rotation);
-      return new Area(atArea.createTransformedShape(hexPath));
-    } else {
-      return new Area(hexPath);
-    }
+    return new Area(hexPath);
   }
 
   private void fireGridChanged() {
@@ -936,7 +921,7 @@ public abstract class Grid implements Cloneable {
    */
   protected WalkerMetric getCurrentMetric() {
     return MapTool.isPersonalServer()
-        ? AppPreferences.getMovementMetric()
+        ? AppPreferences.movementMetric.get()
         : MapTool.getServerPolicy().getMovementMetric();
   }
 

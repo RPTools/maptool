@@ -308,7 +308,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     private final LinkedMap<String, Long> chatTypingNotificationTimers;
 
     public synchronized void setChatTyper(final String playerName) {
-      if (AppPreferences.getTypingNotificationDuration() == 0) {
+      if (AppPreferences.typingNotificationDurationInSeconds.get() == 0) {
         turnOffUpdates();
         chatTypingNotificationTimers.clear();
       } else {
@@ -357,8 +357,9 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     setFocusTraversalPolicy(new MapToolFocusTraversalPolicy());
 
     setIconImage(RessourceManager.getImage(Images.MAPTOOL_LOGO_MINI));
-    // Notify duration
-    initializeNotifyDuration();
+    chatNotifyDuration = AppPreferences.typingNotificationDurationInSeconds.get();
+    AppPreferences.typingNotificationDurationInSeconds.onChange(
+        value -> chatNotifyDuration = value);
 
     // Components
     glassPane = new GlassPane();
@@ -463,7 +464,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     new WindowPreferences(AppConstants.APP_NAME, "mainFrame", this);
     chatTyperTimers = new ChatNotificationTimers();
     chatTimer = getChatTimer();
-    setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
+    setChatTypingLabelColor(AppPreferences.chatNotificationColor.get());
   }
 
   public ChatNotificationTimers getChatNotificationTimers() {
@@ -853,7 +854,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getLoadPropsFileChooser() {
     if (loadPropsFileChooser == null) {
       loadPropsFileChooser = new JFileChooser();
-      loadPropsFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
+      loadPropsFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
       loadPropsFileChooser.addChoosableFileFilter(propertiesFilter);
       loadPropsFileChooser.setDialogTitle(I18N.getText("msg.title.importProperties"));
     }
@@ -864,7 +865,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getLoadFileChooser() {
     if (loadFileChooser == null) {
       loadFileChooser = new JFileChooser();
-      loadFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
+      loadFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
     }
     return loadFileChooser;
   }
@@ -872,7 +873,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveCmpgnFileChooser() {
     if (saveCmpgnFileChooser == null) {
       saveCmpgnFileChooser = new JFileChooser();
-      saveCmpgnFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      saveCmpgnFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       saveCmpgnFileChooser.addChoosableFileFilter(campaignFilter);
       saveCmpgnFileChooser.setDialogTitle(I18N.getText("msg.title.saveCampaign"));
     }
@@ -883,7 +884,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSavePropsFileChooser() {
     if (savePropsFileChooser == null) {
       savePropsFileChooser = new JFileChooser();
-      savePropsFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      savePropsFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       savePropsFileChooser.addChoosableFileFilter(propertiesFilter);
       savePropsFileChooser.setFileFilter(propertiesFilter);
       savePropsFileChooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
@@ -898,7 +899,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveTokenFileChooser() {
     if (saveTokenFileChooser == null) {
       saveTokenFileChooser = new JFileChooser();
-      saveTokenFileChooser.setCurrentDirectory(AppPreferences.getSaveTokenDir());
+      saveTokenFileChooser.setCurrentDirectory(AppPreferences.tokenSaveDirectory.get());
     }
     return saveTokenFileChooser;
   }
@@ -906,7 +907,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveMapFileChooser() {
     if (saveMapFileChooser == null) {
       saveMapFileChooser = new JFileChooser();
-      saveMapFileChooser.setCurrentDirectory(AppPreferences.getSaveMapDir());
+      saveMapFileChooser.setCurrentDirectory(AppPreferences.mapSaveDirectory.get());
     }
     return saveMapFileChooser;
   }
@@ -914,7 +915,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveFileChooser() {
     if (saveFileChooser == null) {
       saveFileChooser = new JFileChooser();
-      saveFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      saveFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
     }
     return saveFileChooser;
   }
@@ -1085,14 +1086,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     }
   }
 
-  public void setChatNotifyDuration(int duration) {
-    chatNotifyDuration = duration;
-  }
-
-  private void initializeNotifyDuration() {
-    chatNotifyDuration = AppPreferences.getTypingNotificationDuration();
-  }
-
   public JLabel getChatActionLabel() {
     if (chatActionLabel == null) {
       chatActionLabel = new JLabel(RessourceManager.getSmallIcon(Icons.CHAT_NOTIFICATION));
@@ -1136,7 +1129,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   private void restorePreferences() {
-    Set<File> assetRootList = AppPreferences.getAssetRoots();
+    Set<File> assetRootList = AppStatePersisted.getAssetRoots();
     for (File file : assetRootList) {
       addAssetRoot(file);
     }
@@ -1935,7 +1928,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public void closingMaintenance() {
-    if (AppPreferences.getSaveReminder() && MapTool.isCampaignDirty()) {
+    if (AppPreferences.saveReminder.get() && MapTool.isCampaignDirty()) {
       if (MapTool.getPlayer().isGM()) {
         int result =
             MapTool.confirmImpl(
@@ -2139,7 +2132,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveMacroFileChooser() {
     if (saveMacroFileChooser == null) {
       saveMacroFileChooser = new JFileChooser();
-      saveMacroFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      saveMacroFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       saveMacroFileChooser.addChoosableFileFilter(macroFilter);
       saveMacroFileChooser.setDialogTitle(I18N.getText("msg.title.exportMacro"));
     }
@@ -2150,7 +2143,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveMacroSetFileChooser() {
     if (saveMacroSetFileChooser == null) {
       saveMacroSetFileChooser = new JFileChooser();
-      saveMacroSetFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      saveMacroSetFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       saveMacroSetFileChooser.addChoosableFileFilter(macroSetFilter);
       saveMacroSetFileChooser.setDialogTitle(I18N.getText("msg.title.exportMacroSet"));
     }
@@ -2164,7 +2157,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getLoadMacroFileChooser() {
     if (loadMacroFileChooser == null) {
       loadMacroFileChooser = new JFileChooser();
-      loadMacroFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
+      loadMacroFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
       loadMacroFileChooser.addChoosableFileFilter(macroFilter);
       loadMacroFileChooser.setDialogTitle(I18N.getText("msg.title.importMacro"));
     }
@@ -2175,7 +2168,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getLoadMacroSetFileChooser() {
     if (loadMacroSetFileChooser == null) {
       loadMacroSetFileChooser = new JFileChooser();
-      loadMacroSetFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
+      loadMacroSetFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
       loadMacroSetFileChooser.addChoosableFileFilter(macroSetFilter);
       loadMacroSetFileChooser.setDialogTitle(I18N.getText("msg.title.importMacroSet"));
     }
@@ -2191,7 +2184,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getSaveTableFileChooser() {
     if (saveTableFileChooser == null) {
       saveTableFileChooser = new JFileChooser();
-      saveTableFileChooser.setCurrentDirectory(AppPreferences.getSaveDir());
+      saveTableFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       saveTableFileChooser.addChoosableFileFilter(tableFilter);
       saveTableFileChooser.setDialogTitle(I18N.getText("Label.table.export"));
     }
@@ -2205,7 +2198,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public JFileChooser getLoadTableFileChooser() {
     if (loadTableFileChooser == null) {
       loadTableFileChooser = new JFileChooser();
-      loadTableFileChooser.setCurrentDirectory(AppPreferences.getLoadDir());
+      loadTableFileChooser.setCurrentDirectory(AppPreferences.loadDirectory.get());
       loadTableFileChooser.addChoosableFileFilter(tableFilter);
       loadTableFileChooser.setDialogTitle(I18N.getText("Label.table.import"));
     }

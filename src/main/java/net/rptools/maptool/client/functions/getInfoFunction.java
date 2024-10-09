@@ -217,17 +217,19 @@ public class getInfoFunction extends AbstractFunction {
   private JsonObject getClientInfo() {
     JsonObject cinfo = new JsonObject();
 
-    cinfo.addProperty("face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceEdge()));
     cinfo.addProperty(
-        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.getFaceVertex()));
-    cinfo.addProperty("portrait size", AppPreferences.getPortraitSize());
-    cinfo.addProperty("show portrait", AppPreferences.getShowPortrait());
-    cinfo.addProperty("show stat sheet", AppPreferences.getShowStatSheet());
-    cinfo.addProperty("file sync directory", AppPreferences.getFileSyncPath());
-    cinfo.addProperty("show avatar in chat", AppPreferences.getShowAvatarInChat());
+        "face edge", FunctionUtil.getDecimalForBoolean(AppPreferences.faceEdge.get()));
     cinfo.addProperty(
-        "suppress tooltips for macroLinks", AppPreferences.getSuppressToolTipsForMacroLinks());
-    cinfo.addProperty("use tooltips for inline rolls", AppPreferences.getUseToolTipForInlineRoll());
+        "face vertex", FunctionUtil.getDecimalForBoolean(AppPreferences.faceVertex.get()));
+    cinfo.addProperty("portrait size", AppPreferences.portraitSize.get());
+    cinfo.addProperty("show portrait", AppPreferences.showPortrait.get());
+    cinfo.addProperty("show stat sheet", AppPreferences.showStatSheet.get());
+    cinfo.addProperty("file sync directory", AppPreferences.fileSyncPath.get());
+    cinfo.addProperty("show avatar in chat", AppPreferences.showAvatarInChat.get());
+    cinfo.addProperty(
+        "suppress tooltips for macroLinks", AppPreferences.suppressToolTipsForMacroLinks.get());
+    cinfo.addProperty(
+        "use tooltips for inline rolls", AppPreferences.useToolTipForInlineRoll.get());
     cinfo.addProperty("version", MapTool.getVersion());
     cinfo.addProperty(
         "isFullScreen", FunctionUtil.getDecimalForBoolean(MapTool.getFrame().isFullScreen()));

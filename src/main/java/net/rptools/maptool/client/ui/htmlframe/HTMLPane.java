@@ -91,7 +91,7 @@ public class HTMLPane extends JEditorPane {
    * @return the rule for the body tag
    */
   public String getRuleBody() {
-    return String.format(CSS_RULE_BODY, AppPreferences.getFontSize());
+    return String.format(CSS_RULE_BODY, AppPreferences.fontSize.get());
   }
 
   public void addActionListener(ActionListener listener) {

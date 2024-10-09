@@ -291,7 +291,7 @@ public class HeroLabData {
   }
 
   public File getPortfolioFile() {
-    String fileSyncPath = AppPreferences.getFileSyncPath();
+    String fileSyncPath = AppPreferences.fileSyncPath.get();
 
     if (portfolioPath == null || portfolioPath.isEmpty() || fileSyncPath.isEmpty()) {
       return portfolioFile;
@@ -305,10 +305,10 @@ public class HeroLabData {
     this.portfolioFile = portfolioFile;
     lastModified = getPortfolioLastModified();
 
-    if (!AppPreferences.getFileSyncPath().isEmpty()) {
+    if (!AppPreferences.fileSyncPath.get().isEmpty()) {
       try {
         portfolioPath =
-            Paths.get(AppPreferences.getFileSyncPath())
+            Paths.get(AppPreferences.fileSyncPath.get())
                 .relativize(portfolioFile.toPath())
                 .toString();
       } catch (IllegalArgumentException e) {
@@ -316,7 +316,7 @@ public class HeroLabData {
             "Unable to relativize paths for: ["
                 + portfolioFile
                 + "] ["
-                + AppPreferences.getFileSyncPath()
+                + AppPreferences.fileSyncPath.get()
                 + "]");
         portfolioPath = "";
       }

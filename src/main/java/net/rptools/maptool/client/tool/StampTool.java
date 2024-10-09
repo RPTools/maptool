@@ -970,7 +970,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         Stroke stroke = g.getStroke();
         g.setStroke(new BasicStroke(2));
 
-        if (AppPreferences.getFillSelectionBox()) {
+        if (AppPreferences.fillSelectionBox.get()) {
           Composite composite = g.getComposite();
           g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_ATOP, .25f));
           g.setPaint(AppStyle.selectionBoxFill);

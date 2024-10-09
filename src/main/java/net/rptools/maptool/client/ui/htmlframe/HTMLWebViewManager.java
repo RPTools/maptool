@@ -421,7 +421,7 @@ public class HTMLWebViewManager {
   }
 
   String getCSSRule() {
-    return String.format(CSS_BODY, AppPreferences.getFontSize()) + CSS_SPAN + CSS_DIV;
+    return String.format(CSS_BODY, AppPreferences.fontSize.get()) + CSS_SPAN + CSS_DIV;
   }
 
   /**

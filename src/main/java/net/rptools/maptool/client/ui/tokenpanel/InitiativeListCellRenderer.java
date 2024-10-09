@@ -349,7 +349,7 @@ public class InitiativeListCellRenderer extends JPanel
         Graphics2D g2d = (Graphics2D) g;
         Stroke oldStroke = g2d.getStroke();
         Color oldColor = g.getColor();
-        g2d.setStroke(new BasicStroke(AppPreferences.getHaloLineWidth()));
+        g2d.setStroke(new BasicStroke(AppPreferences.haloLineWidth.get()));
         g.setColor(token.getHaloColor());
         g2d.draw(new Rectangle2D.Double(x, y, ICON_SIZE, ICON_SIZE));
         g2d.setStroke(oldStroke);

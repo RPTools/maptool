@@ -155,7 +155,7 @@ public class ImageUtil {
     Graphics2D g = null;
     try {
       g = compImg.createGraphics();
-      AppPreferences.getRenderQuality().setRenderingHints(g);
+      AppPreferences.renderQuality.get().setRenderingHints(g);
       g.drawImage(img, 0, 0, width, height, null);
     } finally {
       if (g != null) {
@@ -442,7 +442,7 @@ public class ImageUtil {
    */
   public static BufferedImage scaleBufferedImage(BufferedImage image, int width, int height) {
     ResampleOp resampleOp =
-        new ResampleOp(width, height, AppPreferences.getRenderQuality().getResampleOpFilter());
+        new ResampleOp(width, height, AppPreferences.renderQuality.get().getResampleOpFilter());
     return resampleOp.filter(image, null);
   }
 }

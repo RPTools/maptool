@@ -78,10 +78,11 @@ public class CampaignProperties {
   private Map<String, String> characterSheets = new HashMap<>();
 
   /** Flag indicating that owners have special permissions */
-  private boolean initiativeOwnerPermissions = AppPreferences.getInitOwnerPermissions();
+  private boolean initiativeOwnerPermissions =
+      AppPreferences.initiativePanelAllowsOwnerPermissions.get();
 
   /** Flag indicating that owners can only move tokens when they have initiative */
-  private boolean initiativeMovementLock = AppPreferences.getInitLockMovement();
+  private boolean initiativeMovementLock = AppPreferences.initiativeMovementLocked.get();
 
   /** Whether the default initiative sort order is reversed */
   private boolean initiativeUseReverseSort = false;

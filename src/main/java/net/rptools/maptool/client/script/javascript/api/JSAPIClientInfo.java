@@ -31,22 +31,22 @@ public class JSAPIClientInfo implements MapToolJSAPIInterface {
 
   @HostAccess.Export
   public boolean faceEdge() {
-    return AppPreferences.getFaceEdge();
+    return AppPreferences.faceEdge.get();
   }
 
   @HostAccess.Export
   public boolean faceVertex() {
-    return AppPreferences.getFaceVertex();
+    return AppPreferences.faceVertex.get();
   }
 
   @HostAccess.Export
   public int portraitSize() {
-    return AppPreferences.getPortraitSize();
+    return AppPreferences.portraitSize.get();
   }
 
   @HostAccess.Export
   public boolean showStatSheet() {
-    return AppPreferences.getShowStatSheet();
+    return AppPreferences.showStatSheet.get();
   }
 
   @HostAccess.Export

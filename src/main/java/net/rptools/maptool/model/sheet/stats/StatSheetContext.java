@@ -187,7 +187,7 @@ public class StatSheetContext {
     notesType = AppUtil.playerOwns(token) ? token.getNotesType() : null;
     speechName = token.getSpeechName();
 
-    if (AppPreferences.getShowPortrait()) {
+    if (AppPreferences.showPortrait.get()) {
       imageAsset = token.getImageAssetId();
       portraitAsset = token.getPortraitImage();
     } else {
@@ -238,7 +238,7 @@ public class StatSheetContext {
       var image = ImageManager.getImage(token.getImageAssetId());
       dim = new Dimension(image.getWidth(), image.getHeight());
     }
-    SwingUtil.constrainTo(dim, AppPreferences.getPortraitSize());
+    SwingUtil.constrainTo(dim, AppPreferences.portraitSize.get());
     portraitWidth = dim.width;
     portraitHeight = dim.height;
 
