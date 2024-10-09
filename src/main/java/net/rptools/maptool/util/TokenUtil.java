@@ -26,19 +26,6 @@ import org.apache.logging.log4j.Logger;
 public class TokenUtil {
   private static final Logger log = LogManager.getLogger(TokenUtil.class);
 
-  public static int getIndexNearestTo(int[] array, int value) {
-    int delta = -1;
-    int closest = -1;
-    for (int i = 0; i < array.length; i++) {
-      int currDelta = Math.abs(value - array[i]);
-      if (delta < 0 || currDelta < delta) {
-        closest = i;
-        delta = currDelta;
-      }
-    }
-    return closest;
-  }
-
   public static Token.TokenShape guessTokenType(Image image) {
     if (image instanceof BufferedImage) {
       return guessTokenType((BufferedImage) image);
