@@ -943,6 +943,7 @@ public class MacroFunctions extends AbstractFunction {
       }
       AbstractMacroPanel macroPanel =
           gmPanel ? MapTool.getFrame().getGmPanel() : MapTool.getFrame().getCampaignPanel();
+      MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
       macroPanel.reset();
       return "Removed macro button "
           + label
@@ -970,6 +971,7 @@ public class MacroFunctions extends AbstractFunction {
 
     String label = mbp.getLabel();
     MapTool.serverCommand().updateTokenProperty(token, Token.Update.deleteMacro, index);
+    MapTool.getFrame().updateKeyStrokes(); // ensure hotkeys are updated
     return "Removed macro button " + label + "(index = " + index + ") from " + token.getName();
   }
 
