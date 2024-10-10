@@ -314,7 +314,8 @@ public class AddOnLibrariesDialogView extends JDialog {
           } catch (IOException ex) {
             // do nothing
           }
-          AppPreferences.externalAddOnLibrariesEnabled.set(enableExternalAddOnCheckBox.isSelected());
+          AppPreferences.externalAddOnLibrariesEnabled.set(
+              enableExternalAddOnCheckBox.isSelected());
         });
 
     browseButton.addActionListener(
