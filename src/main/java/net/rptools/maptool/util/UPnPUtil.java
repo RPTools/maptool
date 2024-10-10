@@ -14,26 +14,19 @@
  */
 package net.rptools.maptool.util;
 
-import java.awt.BorderLayout;
-import java.awt.Dimension;
-import java.awt.Font;
 import java.io.IOException;
 import java.net.Inet4Address;
 import java.net.InterfaceAddress;
 import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.SwingConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.sbbi.upnp.Discovery;
 import net.sbbi.upnp.impls.InternetGatewayDevice;
 import net.sbbi.upnp.messages.ActionResponse;
@@ -48,34 +41,6 @@ public class UPnPUtil {
   private static final Logger log = LogManager.getLogger(UPnPUtil.class);
   private static Map<InternetGatewayDevice, NetworkInterface> igds;
   private static List<InternetGatewayDevice> mappings;
-  private static JDialog dialog = null;
-  private static JPanel panel = new JPanel(new BorderLayout());
-  private static Font labelFont = new Font("Dialog", Font.BOLD, 14);
-  private static JLabel label = new JLabel("", SwingConstants.CENTER);
-
-  private static void showMessage(String device, String msg) {
-    if (dialog == null) {
-      dialog = new JDialog(MapTool.getFrame());
-      dialog.setContentPane(panel);
-      panel.add(label, BorderLayout.CENTER);
-      label.setFont(labelFont);
-    }
-    if (device == null) {
-      dialog.setVisible(false);
-    } else {
-      dialog.setTitle("Scanning device " + device);
-      label.setText(msg);
-
-      Dimension d = label.getMinimumSize();
-      d.width += 50;
-      d.height += 50;
-      label.setPreferredSize(d);
-
-      dialog.pack();
-      SwingUtil.centerOver(dialog, MapTool.getFrame());
-      dialog.setVisible(true);
-    }
-  }
 
   public static boolean findIGDs() {
     igds = new HashMap<InternetGatewayDevice, NetworkInterface>();
@@ -84,20 +49,38 @@ public class UPnPUtil {
       while (e.hasMoreElements()) {
         NetworkInterface ni = e.nextElement();
         try {
-          if (ni.isUp() && !ni.isLoopback() && !ni.isVirtual()) {
+          var addresses = Collections.list(ni.getInetAddresses());
+          if (addresses.isEmpty()) {
+            log.info("UPnP:  Rejecting interface '{}' as it has no addresses", ni.getDisplayName());
+          } else if (ni.isLoopback()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is a loopback",
+                ni.getDisplayName(),
+                addresses);
+          } else if (ni.isVirtual()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is virtual",
+                ni.getDisplayName(),
+                addresses);
+          } else if (!ni.isUp()) {
+            log.info(
+                "UPnP:  Rejecting interface '{}' [{}] as it is not up",
+                ni.getDisplayName(),
+                addresses);
+          } else {
             int found = 0;
             try {
-              log.info("UPnP:  Trying interface {}", ni.getDisplayName());
+              log.info(
+                  "UPnP:  Looking for gateway devices on interface '{}' [{}]",
+                  ni.getDisplayName(),
+                  addresses);
               InternetGatewayDevice[] thisNI;
-              showMessage(
-                  ni.getDisplayName(), "Looking for gateway devices on " + ni.getDisplayName());
               thisNI =
                   InternetGatewayDevice.getDevices(
-                      AppPreferences.getUpnpDiscoveryTimeout(),
+                      AppPreferences.upnpDiscoveryTimeout.get(),
                       Discovery.DEFAULT_TTL,
                       Discovery.DEFAULT_MX,
                       ni);
-              showMessage(null, null);
               if (thisNI != null) {
                 for (InternetGatewayDevice igd : thisNI) {
                   found++;
@@ -116,7 +99,6 @@ public class UPnPUtil {
                 }
               }
             } catch (IOException ex) {
-              showMessage(null, null);
               // some IO Exception occurred during communication with device
               log.warn("While searching for internet gateway devices", ex);
             }

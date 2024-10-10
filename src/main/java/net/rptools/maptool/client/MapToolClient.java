@@ -211,7 +211,9 @@ public class MapToolClient {
   public void addPlayer(Player player) {
     if (!playerList.contains(player)) {
       playerList.add(player);
-      new MapToolEventBus().getMainEventBus().post(new PlayerConnected(player));
+      new MapToolEventBus()
+          .getMainEventBus()
+          .post(new PlayerConnected(player, this.player.equals(player)));
       playerDatabase.playerSignedIn(player);
 
       playerList.sort((arg0, arg1) -> arg0.getName().compareToIgnoreCase(arg1.getName()));

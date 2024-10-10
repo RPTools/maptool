@@ -44,14 +44,14 @@ public class ChatTypingNotification extends JPanel {
   @Override
   protected void paintComponent(Graphics g) {
     // System.out.println("Chat panel is painting itself...");
-    if (AppPreferences.getTypingNotificationDuration() == 0) {
+    if (AppPreferences.typingNotificationDurationInSeconds.get() == 0) {
       return;
     }
     LinkedMap chatTypers = MapTool.getFrame().getChatNotificationTimers().getChatTypers();
     if (chatTypers == null || chatTypers.isEmpty()) {
       return;
     }
-    boolean showBackground = AppPreferences.getChatNotificationShowBackground();
+    boolean showBackground = AppPreferences.chatNotificationBackground.get();
 
     Graphics2D statsG = (Graphics2D) g.create();
 

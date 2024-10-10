@@ -300,10 +300,15 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
                   finalizeCellEditing();
                   JTable propertiesTable = getTokenPropertiesTable();
                   var model = getTokenPropertiesTableModel();
-                  model.addProperty();
+                  // selected row is -1 for no selection causing property to be appended to list
+                  // instead of inserted
+                  int selectedRow = propertiesTable.getSelectedRow();
+                  model.addProperty(selectedRow);
                   int count = model.getRowCount();
                   propertiesTable.scrollRectToVisible(
-                      propertiesTable.getCellRect(count - 1, 0, true));
+                      propertiesTable.getCellRect(
+                          selectedRow == -1 ? count - 1 : selectedRow, 0, true));
+                  propertiesTable.repaint();
                 }));
     button.setEnabled(false);
   }

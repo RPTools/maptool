@@ -43,14 +43,14 @@ public class ServerPolicy {
   private boolean hidemapselectui;
   private boolean disablePlayerAssetPanel;
 
-  private boolean useAstarPathfinding = AppPreferences.isUsingAstarPathfinding();
-  private boolean vblBlocksMove = AppPreferences.getVblBlocksMove();
+  private boolean useAstarPathfinding = AppPreferences.pathfindingEnabled.get();
+  private boolean vblBlocksMove = AppPreferences.pathfindingBlockedByVbl.get();
 
   public ServerPolicy() {
     // Default tool tip usage for inline rolls to user preferences.
-    useToolTipsForDefaultRollFormat = AppPreferences.getUseToolTipForInlineRoll();
+    useToolTipsForDefaultRollFormat = AppPreferences.useToolTipForInlineRoll.get();
     // Default movement metric from preferences
-    movementMetric = AppPreferences.getMovementMetric();
+    movementMetric = AppPreferences.movementMetric.get();
   }
 
   public ServerPolicy(ServerPolicy other) {
@@ -290,7 +290,7 @@ public class ServerPolicy {
         getDisablePlayerAssetPanel() ? BigDecimal.ONE : BigDecimal.ZERO);
 
     WalkerMetric metric =
-        MapTool.isPersonalServer() ? AppPreferences.getMovementMetric() : getMovementMetric();
+        MapTool.isPersonalServer() ? AppPreferences.movementMetric.get() : getMovementMetric();
     sinfo.addProperty("movement metric", metric.name());
 
     sinfo.addProperty("using ai", isUsingAstarPathfinding() ? BigDecimal.ONE : BigDecimal.ZERO);

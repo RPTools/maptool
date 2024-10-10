@@ -307,7 +307,7 @@ public class TokenLocationFunctions extends AbstractFunction {
         if (wmetric == null && grid.useMetric())
           wmetric =
               MapTool.isPersonalServer()
-                  ? AppPreferences.getMovementMetric()
+                  ? AppPreferences.movementMetric.get()
                   : MapTool.getServerPolicy().getMovementMetric();
         // explicitly find difference without walkers
         double curDist;

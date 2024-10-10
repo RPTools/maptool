@@ -179,7 +179,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
             e -> {
               success = true;
               if (!getShowDialogCheckbox().isSelected()) {
-                AppPreferences.setShowDialogOnNewToken(false);
+                AppPreferences.showDialogOnNewToken.set(false);
               }
               if (getNameTextField().getText().equals("")) {
                 MapTool.showError(I18N.getText("msg.error.emptyTokenName"));

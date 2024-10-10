@@ -39,8 +39,8 @@ public class StatSheetListener {
    */
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
-    if (AppPreferences.getShowStatSheet()
-        && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
+    if (AppPreferences.showStatSheet.get()
+        && AppPreferences.showStatSheetRequiresModifierKey.get() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
       if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
         /*

@@ -50,8 +50,6 @@ public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
   private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
-  private static BufferedImage pathHighlightAlt =
-      RessourceManager.getImage(Images.GRID_BORDER_SQUARE_RED);
 
   private static List<TokenFootprint> footprintList;
 
@@ -78,27 +76,12 @@ public class SquareGrid extends Grid {
           return true;
         }
       };
+
   // @formatter:on
-
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
-
-  public SquareGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
 
   @Override
   public Point2D.Double getCenterOffset() {
     return new Point2D.Double(getCellWidth() / 2, getCellHeight() / 2);
-  }
-
-  public SquareGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
   }
 
   @Override
@@ -151,16 +134,25 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
-    } else {
-      FACING_ANGLES = new int[] {90};
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
     }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (!faceEdges && faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -270,11 +262,6 @@ public class SquareGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
-  }
-
-  @Override
   public Point2D.Double getCellCenter(CellPoint cell) {
     // square have their xy at their top left
     ZonePoint zonePoint = convert(cell);
@@ -303,7 +290,7 @@ public class SquareGrid extends Grid {
   public ZoneWalker createZoneWalker() {
     WalkerMetric metric =
         MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
+            ? AppPreferences.movementMetric.get()
             : MapTool.getServerPolicy().getMovementMetric();
     return new AStarSquareEuclideanWalker(getZone(), metric);
   }

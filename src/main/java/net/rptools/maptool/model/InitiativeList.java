@@ -79,7 +79,7 @@ public class InitiativeList implements Serializable {
   private boolean fullUpdate;
 
   /** Hide all of the NPC's from the players. */
-  private boolean hideNPC = AppPreferences.getInitHideNpcs();
+  private boolean hideNPC = AppPreferences.initiativePanelHidesNpcs.get();
 
   /*---------------------------------------------------------------------------------------------
    * Class Variables

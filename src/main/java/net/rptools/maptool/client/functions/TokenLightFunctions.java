@@ -187,6 +187,7 @@ public class TokenLightFunctions extends AbstractFunction {
             return true;
           }
         }
+        return false;
       }
     }
     if (lightSourcesMap.containsKey(category)) {

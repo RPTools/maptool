@@ -917,7 +917,7 @@ public class ClientMessageHandler implements MessageHandler {
           if (renderer == null) {
             return;
           }
-          if (AppPreferences.getFitGMView()) {
+          if (AppPreferences.fitGmView.get()) {
             renderer.enforceView(x, y, scale, gmWidth, gmHeight);
           } else {
             renderer.setScale(scale);

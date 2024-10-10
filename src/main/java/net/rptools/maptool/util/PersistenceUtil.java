@@ -660,7 +660,7 @@ public class PersistenceUtil {
 
     BufferedImage thumb = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
     Graphics2D g = thumb.createGraphics();
-    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+    AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 
@@ -672,7 +672,7 @@ public class PersistenceUtil {
             Math.min(image.getHeight(), MapTool.getThumbnailSize().height));
     BufferedImage thumbLarge = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
     g = thumbLarge.createGraphics();
-    AppPreferences.getRenderQuality().setShrinkRenderingHints(g);
+    AppPreferences.renderQuality.get().setShrinkRenderingHints(g);
     g.drawImage(image, 0, 0, sz.width, sz.height, null);
     g.dispose();
 

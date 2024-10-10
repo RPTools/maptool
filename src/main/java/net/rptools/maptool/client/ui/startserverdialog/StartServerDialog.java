@@ -143,7 +143,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
     movementMetricModel.addElement(WalkerMetric.ONE_ONE_ONE);
     movementMetricModel.addElement(WalkerMetric.MANHATTAN);
     movementMetricModel.addElement(WalkerMetric.NO_DIAGONALS);
-    movementMetricModel.setSelectedItem(AppPreferences.getMovementMetric());
+    movementMetricModel.setSelectedItem(AppPreferences.movementMetric.get());
 
     movementMetricCombo.setModel(movementMetricModel);
     movementMetricCombo.addItemListener(

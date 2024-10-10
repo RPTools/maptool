@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
@@ -39,31 +40,9 @@ import net.rptools.maptool.server.proto.IsometricGridDto;
 import net.rptools.maptool.util.GraphicsUtil;
 
 public class IsometricGrid extends Grid {
-  /**
-   * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at
-   * approx 30 degrees. However rather than being true isometric, each cell is twice as wide as
-   * high. This makes converting images significantly easier for end-users.
-   */
-  private static final int ISO_ANGLE = 27;
-
-  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
-  private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
-  private static BufferedImage pathHighlight =
+  private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
-
-  public IsometricGrid() {
-    super();
-    if (FACING_ANGLES == null) {
-      boolean faceEdges = AppPreferences.getFaceEdge();
-      boolean faceVertices = AppPreferences.getFaceVertex();
-      setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  public IsometricGrid(boolean faceEdges, boolean faceVertices) {
-    setFacings(faceEdges, faceVertices);
-  }
 
   public boolean isIsometric() {
     return true;
@@ -102,32 +81,6 @@ public class IsometricGrid extends Grid {
     return getSize() / 2;
   }
 
-  public static double degreesFromIso(double facing) {
-    /**
-     * Given a facing from an isometric map turn it into plan map equivalent i.e. 27 degree converts
-     * to 45 degree
-     */
-    double newFacing = facing;
-    if (Math.cos(facing) != 0) {
-      double v1 = Math.sin(Math.toRadians(newFacing)) * 2;
-      double v2 = Math.cos(Math.toRadians(newFacing));
-      double v3 = Math.toDegrees(Math.atan(v1 / v2));
-      if (facing > 90 || facing < -90) v3 = 180 + v3;
-      newFacing = Math.floor(v3);
-    }
-    return newFacing;
-  }
-
-  public static double degreesToIso(double facing) {
-    /**
-     * Given a facing from a plan map turn it into isometric map equivalent i.e 45 degree converts
-     * to 30 degree
-     */
-    double iso = Math.asin((Math.sin(facing) / 2) / Math.cos(facing));
-    System.out.println("in=" + facing + " out=" + iso);
-    return iso;
-  }
-
   @Override
   public BufferedImage getCellHighlight() {
     return pathHighlight;
@@ -139,8 +92,25 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public int[] getFacingAngles() {
-    return FACING_ANGLES;
+  protected int snapFacingInternal(
+      int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
+    if (!faceEdges && !faceVertices) {
+      // Facing not support. Return a default answer.
+      return 90;
+    }
+
+    // Work in range (0, 360], it's easier. Will convert back to (-180,180] at the end.
+    facing = Math.floorMod(facing - 1, 360) + 1;
+
+    /* The number of degrees between each standard facing. */
+    int step = (faceEdges && faceVertices) ? 45 : 90;
+    /* The position of the first standard facing CCW from zero. */
+    int base = (faceEdges && !faceVertices) ? 45 : 0;
+    /* A modification applied to facing to get the nearest answer, not a modulo/int div answer. */
+    int diff = (step - 1) / 2;
+
+    int stepsFromBase = Math.floorDiv(facing + diff - base, step) + addedSteps;
+    return stepsFromBase * step + base;
   }
 
   @Override
@@ -230,7 +200,7 @@ public class IsometricGrid extends Grid {
   public ZoneWalker createZoneWalker() {
     WalkerMetric metric =
         MapTool.isPersonalServer()
-            ? AppPreferences.getMovementMetric()
+            ? AppPreferences.movementMetric.get()
             : MapTool.getServerPolicy().getMovementMetric();
     return new AStarSquareEuclideanWalker(getZone(), metric);
   }
@@ -298,20 +268,7 @@ public class IsometricGrid extends Grid {
   }
 
   @Override
-  public void setFacings(boolean faceEdges, boolean faceVertices) {
-    if (faceEdges && faceVertices) {
-      FACING_ANGLES = ALL_ANGLES;
-    } else if (!faceEdges && faceVertices) {
-      FACING_ANGLES = new int[] {-90, 0, 90, 180};
-    } else if (faceEdges && !faceVertices) {
-      FACING_ANGLES = new int[] {-135, -45, 45, 135};
-    } else {
-      FACING_ANGLES = new int[] {90};
-    }
-  }
-
-  @Override
-  public Area getShapedArea(
+  public @Nonnull Area getShapedArea(
       ShapeType shape,
       Token token,
       double range,
@@ -325,40 +282,32 @@ public class IsometricGrid extends Grid {
     int visionDistance = getZone().getTokenVisionInPixels();
     double visionRange =
         (range == 0) ? visionDistance : range * getSize() / getZone().getUnitsPerCell();
+    int tokenFacingAngle = token.getFacingInDegrees() + 90;
+    Rectangle footprint = token.getFootprint(this).getBounds(this);
 
     if (scaleWithToken) {
-      Rectangle footprint = token.getFootprint(this).getBounds(this);
       visionRange += footprint.getHeight() / 2;
-      System.out.println(token.getName() + " footprint.getWidth() " + footprint.getWidth());
-      System.out.println(token.getName() + " footprint.getHeight() " + footprint.getHeight());
     }
-    // System.out.println("this.getDefaultFootprint() " + this.getDefaultFootprint());
-    // System.out.println("token.getWidth() " + token.getWidth());
 
     Area visibleArea = new Area();
     switch (shape) {
-      case CIRCLE:
+      case CIRCLE -> {
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange * 2, -visionRange, visionRange *
-        // 4, visionRange * 2));
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
-        break;
-      case SQUARE:
-        int x[] = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
-        int y[] = {(int) -visionRange, 0, (int) visionRange, 0};
+      }
+      case SQUARE -> {
+        int[] x = {0, (int) visionRange * 2, 0, (int) -visionRange * 2};
+        int[] y = {(int) -visionRange, 0, (int) visionRange, 0};
         visibleArea = new Area(new Polygon(x, y, 4));
-        break;
-      case BEAM:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
+      }
+      case BEAM -> {
         var pixelWidth = Math.max(2, width * getSize() / getZone().getUnitsPerCell());
         Shape visibleShape = new Rectangle2D.Double(0, -pixelWidth / 2, visionRange, pixelWidth);
 
         // new angle, corrected for isometric view
-        double theta = Math.toRadians(offsetAngle) + Math.toRadians(token.getFacing());
+        double theta = Math.toRadians(offsetAngle - tokenFacingAngle);
         Point2D angleVector = new Point2D.Double(Math.cos(theta), Math.sin(theta));
         AffineTransform at = new AffineTransform();
         at.rotate(Math.PI / 4);
@@ -371,38 +320,25 @@ public class IsometricGrid extends Grid {
             new Area(
                 AffineTransform.getRotateInstance(theta + Math.toRadians(45))
                     .createTransformedShape(visibleShape));
-
-        break;
-      case CONE:
-        if (token.getFacing() == null) {
-          token.setFacing(0);
-        }
+      }
+      case CONE -> {
         // Rotate the vision range by 45 degrees for isometric view
         visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         // Get the cone, use degreesFromIso to convert the facing from isometric to plan
 
-        // Area tempvisibleArea = new Area(new Arc2D.Double(-visionRange * 2, -visionRange,
-        // visionRange * 4, visionRange * 2, token.getFacing() - (arcAngle / 2.0) + (offsetAngle *
-        // 1.0), arcAngle,
-        // Arc2D.PIE));
         Arc2D cone =
             new Arc2D.Double(
                 -visionRange * 2,
                 -visionRange,
                 visionRange * 4,
                 visionRange * 2,
-                token.getFacing() - (arcAngle / 2.0) + (offsetAngle * 1.0),
+                (offsetAngle - tokenFacingAngle) - (arcAngle / 2.0),
                 arcAngle,
                 Arc2D.PIE);
         GeneralPath path = new GeneralPath();
         path.append(cone.getPathIterator(null, 1), false); // Flatten the cone to remove 'curves'
         Area tempvisibleArea = new Area(path);
 
-        // Get the cell footprint
-        Rectangle footprint =
-            token.getFootprint(getZone().getGrid()).getBounds(getZone().getGrid());
-        footprint.x = -footprint.width / 2;
-        footprint.y = -footprint.height / 2;
         // convert the cell footprint to an area
         Area cellShape = createCellShape(footprint.height);
         // convert the area to isometric view
@@ -412,14 +348,14 @@ public class IsometricGrid extends Grid {
         // join cell footprint and cone to create viewable area
         visibleArea.add(cellShape);
         visibleArea.add(tempvisibleArea);
-        break;
-      default:
-        // visibleArea = new Area(new Ellipse2D.Double(-visionRange, -visionRange, visionRange * 2,
-        // visionRange * 2));
+      }
+      default -> {
+        log.error("Unhandled shape {}; treating as a circle", shape);
+        visionRange = (float) Math.sin(Math.toRadians(45)) * visionRange;
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
-                -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-        break;
+                -visionRange * 2, -visionRange, visionRange * 2, visionRange, CIRCLE_SEGMENTS);
+      }
     }
     return visibleArea;
   }

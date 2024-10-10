@@ -86,7 +86,7 @@ public class VisionOverlayRenderer {
     worldG.draw(currentTokenVisionArea);
 
     Color visionColor = token.getVisionOverlayColor();
-    if (visionColor == null && AppPreferences.getUseHaloColorOnVisionOverlay()) {
+    if (visionColor == null && AppPreferences.useHaloColorOnVisionOverlay.get()) {
       visionColor = token.getHaloColor();
     }
     if (visionColor != null) {
@@ -95,7 +95,7 @@ public class VisionOverlayRenderer {
               visionColor.getRed(),
               visionColor.getGreen(),
               visionColor.getBlue(),
-              AppPreferences.getHaloOverlayOpacity()));
+              AppPreferences.haloOverlayOpacity.get()));
       worldG.fill(currentTokenVisionArea);
     }
   }

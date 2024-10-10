@@ -75,22 +75,22 @@ public class InitiativePanel extends JPanel
   private final JList<TokenInitiative> displayList;
 
   /** Flag indicating that token images are shown in the list. */
-  private boolean showTokens = AppPreferences.getInitShowTokens();
+  private boolean showTokens = AppPreferences.initiativePanelShowsTokenImage.get();
 
   /**
    * Flag indicating that token states are shown in the list. Only valid if {@link #showTokens} is
    * <code>true</code>.
    */
-  private boolean showTokenStates = AppPreferences.getInitShowTokenStates();
+  private boolean showTokenStates = AppPreferences.initiativePanelShowsTokenState.get();
 
   /** Flag indicating that initiative state is shown in the list. */
-  private boolean showInitState = AppPreferences.getInitShowInitiative();
+  private boolean showInitState = AppPreferences.initiativePanelShowsInitiative.get();
 
   /**
    * Flag indicating that two lines are used for initiative stated. It is only valid if {@link
    * #showInitState} is <code>true</code>.
    */
-  private boolean initStateSecondLine = AppPreferences.getInitShow2ndLine();
+  private boolean initStateSecondLine = AppPreferences.initiativePanelShowsInitiativeOnLine2.get();
 
   /** The zone data being displayed. */
   private Zone zone;
@@ -592,7 +592,8 @@ public class InitiativePanel extends JPanel
       String s = I18N.getText("initPanel.displayMessage", t.getName());
       if (InitiativeListModel.isTokenVisible(t, list.isHideNPC())
           && t.getType() != Type.NPC
-          && AppPreferences.isShowInitGainMessage()) MapTool.addMessage(TextMessage.say(null, s));
+          && AppPreferences.showInitiativeGainedMessage.get())
+        MapTool.addMessage(TextMessage.say(null, s));
       displayList.ensureIndexIsVisible(model.getDisplayIndex(list.getCurrent()));
       NEXT_ACTION.setEnabled(
           !isInitPanelButtonsDisabled() && hasOwnerPermission(list.getCurrentToken()));
@@ -672,7 +673,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowTokens(showTokens);
+          AppPreferences.initiativePanelShowsTokenImage.set(showTokens);
         }
       };
 
@@ -685,7 +686,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowTokenStates(showTokenStates);
+          AppPreferences.initiativePanelShowsTokenState.set(showTokenStates);
         }
       };
 
@@ -698,7 +699,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShowInitiative(showInitState);
+          AppPreferences.initiativePanelShowsInitiative.set(showInitState);
         }
       };
 
@@ -711,7 +712,7 @@ public class InitiativePanel extends JPanel
           displayList.setCellRenderer(
               new InitiativeListCellRenderer(
                   InitiativePanel.this)); // Regenerates the size of each row.
-          AppPreferences.setInitShow2ndLine(initStateSecondLine);
+          AppPreferences.initiativePanelShowsInitiativeOnLine2.set(initStateSecondLine);
         }
       };
 

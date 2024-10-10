@@ -166,14 +166,14 @@ public class MessagePanel extends JPanel {
             + "; color: "
             + fgColour
             + " ; font-family: sans-serif; font-size: "
-            + AppPreferences.getFontSize()
+            + AppPreferences.fontSize.get()
             + "pt}";
 
     style.addRule(mainCss);
     style.addRule("div {margin-bottom: 5px}");
     style.addRule(".roll {background:#efefef}");
     setTrustedMacroPrefixColors(
-        AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+        AppPreferences.trustedPrefixForeground.get(), AppPreferences.trustedPrefixBackground.get());
     var css = MessageUtil.getMessageCss();
     style.addRule(css);
     repaint();

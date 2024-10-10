@@ -57,19 +57,15 @@ public class ZoneFactory {
     zone.setBackgroundPaint(new DrawableTexturePaint(defaultImageId));
     zone.setFogPaint(new DrawableColorPaint(Color.black));
 
-    zone.setVisible(AppPreferences.getNewMapsVisible());
-    zone.setHasFog(AppPreferences.getNewMapsHaveFOW());
-    zone.setUnitsPerCell(AppPreferences.getDefaultUnitsPerCell());
-    zone.setTokenVisionDistance(AppPreferences.getDefaultVisionDistance());
-    zone.setVisionType(AppPreferences.getDefaultVisionType());
+    zone.setVisible(AppPreferences.newMapsVisible.get());
+    zone.setHasFog(AppPreferences.newMapsHaveFow.get());
+    zone.setUnitsPerCell(AppPreferences.defaultUnitsPerCell.get());
+    zone.setTokenVisionDistance(AppPreferences.defaultVisionDistance.get());
+    zone.setVisionType(AppPreferences.defaultVisionType.get());
 
-    zone.setGrid(
-        GridFactory.createGrid(
-            AppPreferences.getDefaultGridType(),
-            AppPreferences.getFaceEdge(),
-            AppPreferences.getFaceVertex()));
-    zone.setGridColor(AppPreferences.getDefaultGridColor().getRGB());
-    zone.getGrid().setSize(AppPreferences.getDefaultGridSize());
+    zone.setGrid(GridFactory.createGrid(AppPreferences.defaultGridType.get()));
+    zone.setGridColor(AppPreferences.defaultGridColor.get().getRGB());
+    zone.getGrid().setSize(AppPreferences.defaultGridSize.get());
     zone.getGrid().setOffset(0, 0);
 
     return zone;

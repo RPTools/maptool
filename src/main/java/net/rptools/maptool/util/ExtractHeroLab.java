@@ -104,7 +104,7 @@ public final class ExtractHeroLab {
   private File validatePortfolioFile(File heroLabPortfolio) {
     // If unable to find file, prompt user to point to new location or fail
     if (!heroLabPortfolio.exists()) {
-      JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
+      JFileChooser fileChooser = new JFileChooser(AppPreferences.fileSyncPath.get());
       fileChooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
       FileNameExtensionFilter filter = new FileNameExtensionFilter("Hero Lab Portfolio", "por");
       fileChooser.setFileFilter(filter);

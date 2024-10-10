@@ -29,7 +29,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
@@ -55,7 +54,6 @@ import net.rptools.maptool.client.ui.theme.ThemeSupport.ThemeDetails;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -705,30 +703,30 @@ public class PreferencesDialog extends JDialog {
     startupInfoLabel = panel.getLabel("startupInfoLabel");
 
     pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
-    pcTokenLabelFG.setColor(AppPreferences.getPCMapLabelFG());
+    pcTokenLabelFG.setColor(AppPreferences.pcMapLabelForeground.get());
     pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
-    pcTokenLabelBG.setColor(AppPreferences.getPCMapLabelBG());
+    pcTokenLabelBG.setColor(AppPreferences.pcMapLabelBackground.get());
     pcTokenLabelBorderColor = (ColorWell) panel.getComponent("pcTokenLabelBorder");
-    pcTokenLabelBorderColor.setColor(AppPreferences.getPCMapLabelBorder());
+    pcTokenLabelBorderColor.setColor(AppPreferences.pcMapLabelBorder.get());
     npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
-    npcTokenLabelFG.setColor(AppPreferences.getNPCMapLabelFG());
+    npcTokenLabelFG.setColor(AppPreferences.npcMapLabelForeground.get());
     npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
-    npcTokenLabelBG.setColor(AppPreferences.getNPCMapLabelBG());
+    npcTokenLabelBG.setColor(AppPreferences.npcMapLabelBackground.get());
     npcTokenLabelBorderColor = (ColorWell) panel.getComponent("npcTokenLabelBorder");
-    npcTokenLabelBorderColor.setColor(AppPreferences.getNPCMapLabelBorder());
+    npcTokenLabelBorderColor.setColor(AppPreferences.npcMapLabelBorder.get());
     nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
-    nonVisTokenLabelFG.setColor(AppPreferences.getNonVisMapLabelFG());
+    nonVisTokenLabelFG.setColor(AppPreferences.nonVisibleTokenMapLabelForeground.get());
     nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
-    nonVisTokenLabelBG.setColor(AppPreferences.getNonVisMapLabelBG());
+    nonVisTokenLabelBG.setColor(AppPreferences.nonVisibleTokenMapLabelBackground.get());
     nonVisTokenLabelBorderColor = (ColorWell) panel.getComponent("nonVisTokenLabelBorder");
-    nonVisTokenLabelBorderColor.setColor(AppPreferences.getNonVisMapLabelBorder());
+    nonVisTokenLabelBorderColor.setColor(AppPreferences.nonVisibleTokenMapLabelBorder.get());
 
     labelFontSizeSpinner = (JSpinner) panel.getComponent("labelFontSizeSpinner");
-    labelFontSizeSpinner.setValue(AppPreferences.getMapLabelFontSize());
+    labelFontSizeSpinner.setValue(AppPreferences.mapLabelFontSize.get());
     labelBorderWidthSpinner = (JSpinner) panel.getComponent("labelBorderWidthSpinner");
-    labelBorderWidthSpinner.setValue(AppPreferences.getMapLabelBorderWidth());
+    labelBorderWidthSpinner.setValue(AppPreferences.mapLabelBorderWidth.get());
     labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
-    labelBorderArcSpinner.setValue(AppPreferences.getMapLabelBorderArc());
+    labelBorderArcSpinner.setValue(AppPreferences.mapLabelBorderArc.get());
     showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
     showLabelBorderCheckBox.addActionListener(
         e -> {
@@ -738,18 +736,18 @@ public class PreferencesDialog extends JDialog {
             nonVisTokenLabelBorderColor.setVisible(true); // Disabling a color well does not work
             labelBorderWidthSpinner.setEnabled(true);
             labelBorderArcSpinner.setEnabled(true);
-            AppPreferences.setShowMapLabelBorder(true);
+            AppPreferences.mapLabelShowBorder.set(true);
           } else {
             pcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
             npcTokenLabelBorderColor.setVisible(false); // Disabling a color well does not work
             nonVisTokenLabelBorderColor.setVisible(false); // Disabling a color well does not  work
             labelBorderWidthSpinner.setEnabled(false);
             labelBorderArcSpinner.setEnabled(false);
-            AppPreferences.setShowMapLabelBorder(false);
+            AppPreferences.mapLabelShowBorder.set(false);
           }
         });
 
-    boolean showBorder = AppPreferences.getShowMapLabelBorder();
+    boolean showBorder = AppPreferences.mapLabelShowBorder.get();
     showLabelBorderCheckBox.setSelected(showBorder);
     if (showBorder) {
       pcTokenLabelBorderColor.setVisible(true);
@@ -823,21 +821,19 @@ public class PreferencesDialog extends JDialog {
     // And keep it updated
     facingFaceEdges.addActionListener(
         e -> {
-          AppPreferences.setFaceEdge(facingFaceEdges.isSelected());
-          updateFacings();
+          AppPreferences.faceEdge.set(facingFaceEdges.isSelected());
         });
     facingFaceVertices.addActionListener(
         e -> {
-          AppPreferences.setFaceVertex(facingFaceVertices.isSelected());
-          updateFacings();
+          AppPreferences.faceVertex.set(facingFaceVertices.isSelected());
         });
 
     toolTipInlineRolls.addActionListener(
-        e -> AppPreferences.setUseToolTipForInlineRoll(toolTipInlineRolls.isSelected()));
+        e -> AppPreferences.useToolTipForInlineRoll.set(toolTipInlineRolls.isSelected()));
 
     suppressToolTipsMacroLinks.addActionListener(
         e ->
-            AppPreferences.setSuppressToolTipsForMacroLinks(
+            AppPreferences.suppressToolTipsForMacroLinks.set(
                 suppressToolTipsMacroLinks.isSelected()));
 
     toolTipInitialDelay
@@ -846,7 +842,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(toolTipInitialDelay) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setToolTipInitialDelay(value);
+                AppPreferences.toolTipInitialDelay.set(value);
                 ToolTipManager.sharedInstance().setInitialDelay(value);
               }
 
@@ -861,7 +857,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(toolTipDismissDelay) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setToolTipDismissDelay(value);
+                AppPreferences.toolTipDismissDelay.set(value);
                 ToolTipManager.sharedInstance().setDismissDelay(value);
               }
 
@@ -873,39 +869,43 @@ public class PreferencesDialog extends JDialog {
 
     chatNotificationColor.addActionListener(
         e -> {
-          AppPreferences.setChatNotificationColor(chatNotificationColor.getColor());
-          MapTool.getFrame().setChatTypingLabelColor(AppPreferences.getChatNotificationColor());
+          AppPreferences.chatNotificationColor.set(chatNotificationColor.getColor());
+          MapTool.getFrame().setChatTypingLabelColor(AppPreferences.chatNotificationColor.get());
         });
 
     trustedOutputForeground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixFG(trustedOutputForeground.getColor());
+          AppPreferences.trustedPrefixForeground.set(trustedOutputForeground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
-                  AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+                  AppPreferences.trustedPrefixForeground.get(),
+                  AppPreferences.trustedPrefixBackground.get());
         });
     trustedOutputBackground.addActionListener(
         e -> {
-          AppPreferences.setTrustedPrefixBG(trustedOutputBackground.getColor());
+          AppPreferences.trustedPrefixBackground.set(trustedOutputBackground.getColor());
           MapTool.getFrame()
               .getCommandPanel()
               .setTrustedMacroPrefixColors(
-                  AppPreferences.getTrustedPrefixFG(), AppPreferences.getTrustedPrefixBG());
+                  AppPreferences.trustedPrefixForeground.get(),
+                  AppPreferences.trustedPrefixBackground.get());
         });
 
     chatAutosaveTime.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setChatAutosaveTime(value);
+            if (value >= 0) {
+              AppPreferences.chatAutoSaveTimeInMinutes.set(value);
+            }
           }
         });
     typingNotificationDuration.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setTypingNotificationDuration(value);
+            AppPreferences.typingNotificationDurationInSeconds.set(value);
           }
         });
 
@@ -918,32 +918,32 @@ public class PreferencesDialog extends JDialog {
               if (saveFile.indexOf(".") < 0) {
                 saveFile.append(".html");
               }
-              AppPreferences.setChatFilenameFormat(saveFile.toString());
+              AppPreferences.chatFilenameFormat.set(saveFile.toString());
             }
           }
         });
 
     allowPlayerMacroEditsDefault.addActionListener(
         e ->
-            AppPreferences.setAllowPlayerMacroEditsDefault(
+            AppPreferences.allowPlayerMacroEditsDefault.set(
                 allowPlayerMacroEditsDefault.isSelected()));
 
     showAvatarInChat.addActionListener(
-        e -> AppPreferences.setShowAvatarInChat(showAvatarInChat.isSelected()));
+        e -> AppPreferences.showAvatarInChat.set(showAvatarInChat.isSelected()));
     saveReminderCheckBox.addActionListener(
-        e -> AppPreferences.setSaveReminder(saveReminderCheckBox.isSelected()));
+        e -> AppPreferences.saveReminder.set(saveReminderCheckBox.isSelected()));
     fillSelectionCheckBox.addActionListener(
-        e -> AppPreferences.setFillSelectionBox(fillSelectionCheckBox.isSelected()));
+        e -> AppPreferences.fillSelectionBox.set(fillSelectionCheckBox.isSelected()));
     frameRateCapTextField
         .getDocument()
         .addDocumentListener(
             new DocumentListenerProxy<Integer>(frameRateCapTextField) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setFrameRateCap(value);
+                AppPreferences.frameRateCap.set(value);
 
                 // AppPreferences may have rejected the value, so read it back.
-                final var cap = AppPreferences.getFrameRateCap();
+                final var cap = AppPreferences.frameRateCap.get();
                 for (final var renderer : MapTool.getFrame().getZoneRenderers()) {
                   renderer.setFrameRateCap(cap);
                 }
@@ -960,10 +960,10 @@ public class PreferencesDialog extends JDialog {
             });
 
     renderPerformanceComboBox.setModel(
-        getLocalizedModel(renderPerformanceComboItems, AppPreferences.getRenderQuality().name()));
+        getLocalizedModel(renderPerformanceComboItems, AppPreferences.renderQuality.get().name()));
     renderPerformanceComboBox.addItemListener(
         e -> {
-          AppPreferences.setRenderQuality(
+          AppPreferences.renderQuality.set(
               RenderQuality.valueOf(
                   ((LocalizedComboItem) renderPerformanceComboBox.getSelectedItem()).getValue()));
         });
@@ -974,69 +974,71 @@ public class PreferencesDialog extends JDialog {
           public void focusLost(FocusEvent e) {
             if (!e.isTemporary()) {
               StringBuilder userName = new StringBuilder(defaultUsername.getText());
-              AppPreferences.setDefaultUserName(userName.toString());
+              AppPreferences.defaultUserName.set(userName.toString());
             }
           }
         });
 
     loadMRUcheckbox.addActionListener(
-        e -> AppPreferences.setLoadMRUCampaignAtStart(loadMRUcheckbox.isSelected()));
+        e -> AppPreferences.loadMruCampaignAtStart.set(loadMRUcheckbox.isSelected()));
     allowExternalMacroAccessCheckBox.addActionListener(
         e ->
-            AppPreferences.setAllowExternalMacroAccess(
+            AppPreferences.allowExternalMacroAccess.set(
                 allowExternalMacroAccessCheckBox.isSelected()));
     showDialogOnNewToken.addActionListener(
-        e -> AppPreferences.setShowDialogOnNewToken(showDialogOnNewToken.isSelected()));
+        e -> AppPreferences.showDialogOnNewToken.set(showDialogOnNewToken.isSelected()));
     autoSaveSpinner.addChangeListener(
         ce -> {
           int newInterval = (Integer) autoSaveSpinner.getValue();
-          AppPreferences.setAutoSaveIncrement(newInterval);
+          AppPreferences.autoSaveIncrement.set(newInterval);
         });
     newMapsHaveFOWCheckBox.addActionListener(
-        e -> AppPreferences.setNewMapsHaveFOW(newMapsHaveFOWCheckBox.isSelected()));
+        e -> AppPreferences.newMapsHaveFow.set(newMapsHaveFOWCheckBox.isSelected()));
     tokensPopupWarningWhenDeletedCheckBox.addActionListener(
         e ->
-            AppPreferences.setTokensWarnWhenDeleted(
+            AppPreferences.tokensWarnWhenDeleted.set(
                 tokensPopupWarningWhenDeletedCheckBox.isSelected()));
     tokensStartSnapToGridCheckBox.addActionListener(
-        e -> AppPreferences.setTokensStartSnapToGrid(tokensStartSnapToGridCheckBox.isSelected()));
+        e -> AppPreferences.tokensStartSnapToGrid.set(tokensStartSnapToGridCheckBox.isSelected()));
     tokensSnapWhileDraggingCheckBox.addActionListener(
         e ->
-            AppPreferences.setTokensSnapWhileDragging(
+            AppPreferences.tokensSnapWhileDragging.set(
                 tokensSnapWhileDraggingCheckBox.isSelected()));
     hideMousePointerWhileDraggingCheckBox.addActionListener(
         e ->
-            AppPreferences.setHideMousePointerWhileDragging(
+            AppPreferences.hideMousePointerWhileDragging.set(
                 hideMousePointerWhileDraggingCheckBox.isSelected()));
     hideTokenStackIndicatorCheckBox.addActionListener(
         e ->
-            AppPreferences.setHideTokenStackIndicator(
+            AppPreferences.hideTokenStackIndicator.set(
                 hideTokenStackIndicatorCheckBox.isSelected()));
     newMapsVisibleCheckBox.addActionListener(
-        e -> AppPreferences.setNewMapsVisible(newMapsVisibleCheckBox.isSelected()));
+        e -> AppPreferences.newMapsVisible.set(newMapsVisibleCheckBox.isSelected()));
     newTokensVisibleCheckBox.addActionListener(
-        e -> AppPreferences.setNewTokensVisible(newTokensVisibleCheckBox.isSelected()));
+        e -> AppPreferences.newTokensVisible.set(newTokensVisibleCheckBox.isSelected()));
     stampsStartFreeSizeCheckBox.addActionListener(
-        e -> AppPreferences.setObjectsStartFreesize(stampsStartFreeSizeCheckBox.isSelected()));
+        e -> AppPreferences.objectsStartFreesize.set(stampsStartFreeSizeCheckBox.isSelected()));
     tokensStartFreeSizeCheckBox.addActionListener(
-        e -> AppPreferences.setTokensStartFreesize(tokensStartFreeSizeCheckBox.isSelected()));
+        e -> AppPreferences.tokensStartFreesize.set(tokensStartFreeSizeCheckBox.isSelected()));
     stampsStartSnapToGridCheckBox.addActionListener(
-        e -> AppPreferences.setObjectsStartSnapToGrid(stampsStartSnapToGridCheckBox.isSelected()));
+        e -> AppPreferences.objectsStartSnapToGrid.set(stampsStartSnapToGridCheckBox.isSelected()));
     showStatSheetCheckBox.addActionListener(
-        e -> AppPreferences.setShowStatSheet(showStatSheetCheckBox.isSelected()));
+        e -> AppPreferences.showStatSheet.set(showStatSheetCheckBox.isSelected()));
     showPortraitCheckBox.addActionListener(
-        e -> AppPreferences.setShowPortrait(showPortraitCheckBox.isSelected()));
+        e -> AppPreferences.showPortrait.set(showPortraitCheckBox.isSelected()));
     showStatSheetModifierCheckBox.addActionListener(
-        e -> AppPreferences.setShowStatSheetModifier(showStatSheetModifierCheckBox.isSelected()));
+        e ->
+            AppPreferences.showStatSheetRequiresModifierKey.set(
+                showStatSheetModifierCheckBox.isSelected()));
     forceFacingArrowCheckBox.addActionListener(
-        e -> AppPreferences.setForceFacingArrow(forceFacingArrowCheckBox.isSelected()));
+        e -> AppPreferences.forceFacingArrow.set(forceFacingArrowCheckBox.isSelected()));
     backgroundsStartFreeSizeCheckBox.addActionListener(
         e ->
-            AppPreferences.setBackgroundsStartFreesize(
+            AppPreferences.backgroundsStartFreesize.set(
                 backgroundsStartFreeSizeCheckBox.isSelected()));
     backgroundsStartSnapToGridCheckBox.addActionListener(
         e ->
-            AppPreferences.setBackgroundsStartSnapToGrid(
+            AppPreferences.backgroundsStartSnapToGrid.set(
                 backgroundsStartSnapToGridCheckBox.isSelected()));
     defaultGridSizeTextField
         .getDocument()
@@ -1044,7 +1046,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(defaultGridSizeTextField) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setDefaultGridSize(value);
+                AppPreferences.defaultGridSize.set(value);
               }
 
               @Override
@@ -1059,7 +1061,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Double>(defaultUnitsPerCellTextField) {
               @Override
               protected void storeNumericValue(Double value) {
-                AppPreferences.setDefaultUnitsPerCell(value);
+                AppPreferences.defaultUnitsPerCell.set(value);
               }
 
               @Override
@@ -1073,7 +1075,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(defaultVisionDistanceTextField) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setDefaultVisionDistance(value);
+                AppPreferences.defaultVisionDistance.set(value);
               }
 
               @Override
@@ -1087,7 +1089,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(statsheetPortraitSize) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setPortraitSize(value);
+                AppPreferences.portraitSize.set(value);
               }
 
               @Override
@@ -1096,7 +1098,7 @@ public class PreferencesDialog extends JDialog {
               }
             });
     haloLineWidthSpinner.addChangeListener(
-        ce -> AppPreferences.setHaloLineWidth((Integer) haloLineWidthSpinner.getValue()));
+        ce -> AppPreferences.haloLineWidth.set((Integer) haloLineWidthSpinner.getValue()));
 
     // Overlay opacity options in AppPreferences, with
     // error checking to ensure values are within the acceptable range
@@ -1105,7 +1107,7 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setHaloOverlayOpacity(value);
+            AppPreferences.haloOverlayOpacity.set(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1113,7 +1115,7 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setAuraOverlayOpacity(value);
+            AppPreferences.auraOverlayOpacity.set(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1121,7 +1123,7 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setLightOverlayOpacity(value);
+            AppPreferences.lightOverlayOpacity.set(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1129,7 +1131,7 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setLumensOverlayOpacity(value);
+            AppPreferences.lumensOverlayOpacity.set(value);
             MapTool.getFrame().refresh();
           }
         });
@@ -1137,42 +1139,46 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setLumensOverlayBorderThickness(value);
+            AppPreferences.lumensOverlayBorderThickness.set(value);
             MapTool.getFrame().refresh();
           }
         });
     lumensOverlayShowByDefaultCheckBox.addActionListener(
         e ->
-            AppPreferences.setLumensOverlayShowByDefault(
+            AppPreferences.lumensOverlayShowByDefault.set(
                 lumensOverlayShowByDefaultCheckBox.isSelected()));
     lightsShowByDefaultCheckBox.addActionListener(
-        e -> AppPreferences.setLightsShowByDefault(lightsShowByDefaultCheckBox.isSelected()));
+        e -> AppPreferences.lightsShowByDefault.set(lightsShowByDefaultCheckBox.isSelected()));
     fogOverlayOpacitySpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setFogOverlayOpacity(value);
+            AppPreferences.fogOverlayOpacity.set(value);
+
+            // FIXME Force ModelChange event to flush fog from zone :(
+            Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+            zone.setHasFog(zone.hasFog());
             MapTool.getFrame().refresh();
           }
         });
     useHaloColorAsVisionOverlayCheckBox.addActionListener(
         e ->
-            AppPreferences.setUseHaloColorOnVisionOverlay(
+            AppPreferences.useHaloColorOnVisionOverlay.set(
                 useHaloColorAsVisionOverlayCheckBox.isSelected()));
     autoRevealVisionOnGMMoveCheckBox.addActionListener(
         e ->
-            AppPreferences.setAutoRevealVisionOnGMMovement(
+            AppPreferences.autoRevealVisionOnGMMovement.set(
                 autoRevealVisionOnGMMoveCheckBox.isSelected()));
     showSmiliesCheckBox.addActionListener(
-        e -> AppPreferences.setShowSmilies(showSmiliesCheckBox.isSelected()));
+        e -> AppPreferences.showSmilies.set(showSmiliesCheckBox.isSelected()));
     playSystemSoundCheckBox.addActionListener(
-        e -> AppPreferences.setPlaySystemSounds(playSystemSoundCheckBox.isSelected()));
+        e -> AppPreferences.playSystemSounds.set(playSystemSoundCheckBox.isSelected()));
     mapVisibilityWarning.addActionListener(
-        e -> AppPreferences.setMapVisibilityWarning(mapVisibilityWarning.isSelected()));
+        e -> AppPreferences.mapVisibilityWarning.set(mapVisibilityWarning.isSelected()));
 
     playStreamsCheckBox.addActionListener(
         e -> {
-          AppPreferences.setPlayStreams(playStreamsCheckBox.isSelected());
+          AppPreferences.playStreams.set(playStreamsCheckBox.isSelected());
           if (!playStreamsCheckBox.isSelected()) {
             MediaPlayerAdapter.stopStream("*", true, 0);
           }
@@ -1180,11 +1186,11 @@ public class PreferencesDialog extends JDialog {
 
     playSystemSoundOnlyWhenNotFocusedCheckBox.addActionListener(
         e ->
-            AppPreferences.setPlaySystemSoundsOnlyWhenNotFocused(
+            AppPreferences.playSystemSoundsOnlyWhenNotFocused.set(
                 playSystemSoundOnlyWhenNotFocusedCheckBox.isSelected()));
 
     syrinscapeActiveCheckBox.addActionListener(
-        e -> AppPreferences.setSyrinscapeActive(syrinscapeActiveCheckBox.isSelected()));
+        e -> AppPreferences.syrinscapeActive.set(syrinscapeActiveCheckBox.isSelected()));
 
     fontSizeTextField
         .getDocument()
@@ -1192,7 +1198,7 @@ public class PreferencesDialog extends JDialog {
             new DocumentListenerProxy<Integer>(fontSizeTextField) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setFontSize(value);
+                AppPreferences.fontSize.set(value);
               }
 
               @Override
@@ -1203,62 +1209,62 @@ public class PreferencesDialog extends JDialog {
 
     npcTokenLabelBG.addActionListener(
         e -> {
-          AppPreferences.setNPCMapLabelBG(npcTokenLabelBG.getColor());
+          AppPreferences.npcMapLabelBackground.set(npcTokenLabelBG.getColor());
         });
 
     npcTokenLabelFG.addActionListener(
         e -> {
-          AppPreferences.setNPCMapLabelFG(npcTokenLabelFG.getColor());
+          AppPreferences.npcMapLabelForeground.set(npcTokenLabelFG.getColor());
         });
 
     pcTokenLabelBG.addActionListener(
         e -> {
-          AppPreferences.setPCMapLabelBG(pcTokenLabelBG.getColor());
+          AppPreferences.pcMapLabelBackground.set(pcTokenLabelBG.getColor());
         });
 
     pcTokenLabelFG.addActionListener(
         e -> {
-          AppPreferences.setPCMapLabelFG(pcTokenLabelFG.getColor());
+          AppPreferences.pcMapLabelForeground.set(pcTokenLabelFG.getColor());
         });
 
     nonVisTokenLabelBG.addActionListener(
         e -> {
-          AppPreferences.setNonVisMapLabelBG(nonVisTokenLabelBG.getColor());
+          AppPreferences.nonVisibleTokenMapLabelBackground.set(nonVisTokenLabelBG.getColor());
         });
 
     nonVisTokenLabelFG.addActionListener(
         e -> {
-          AppPreferences.setNonVisMapLabelFG(nonVisTokenLabelFG.getColor());
+          AppPreferences.nonVisibleTokenMapLabelForeground.set(nonVisTokenLabelFG.getColor());
         });
 
     labelFontSizeSpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setMapLabelFontSize(Math.max(value, 0));
+            AppPreferences.mapLabelFontSize.set(Math.max(value, 0));
           }
         });
 
     pcTokenLabelBorderColor.addActionListener(
         e -> {
-          AppPreferences.setPCMapLabelBorder(pcTokenLabelBorderColor.getColor());
+          AppPreferences.pcMapLabelBorder.set(pcTokenLabelBorderColor.getColor());
         });
 
     npcTokenLabelBorderColor.addActionListener(
         e -> {
-          AppPreferences.setNPCMapLabelBorder(npcTokenLabelBorderColor.getColor());
+          AppPreferences.npcMapLabelBorder.set(npcTokenLabelBorderColor.getColor());
         });
 
     nonVisTokenLabelBorderColor.addActionListener(
         e -> {
-          AppPreferences.setNonVisMapLabelBorder(nonVisTokenLabelBorderColor.getColor());
+          AppPreferences.nonVisibleTokenMapLabelBorder.set(nonVisTokenLabelBorderColor.getColor());
         });
 
     labelBorderWidthSpinner.addChangeListener(
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setMapLabelBorderWidth(Math.max(value, 0));
+            AppPreferences.mapLabelBorderWidth.set(Math.max(value, 0));
           }
         });
 
@@ -1266,25 +1272,28 @@ public class PreferencesDialog extends JDialog {
         new ChangeListenerProxy() {
           @Override
           protected void storeSpinnerValue(int value) {
-            AppPreferences.setMapLabelBorderArc(Math.max(value, 0));
+            AppPreferences.mapLabelBorderArc.set(Math.max(value, 0));
           }
         });
 
-    fitGMView.addActionListener(e -> AppPreferences.setFitGMView(fitGMView.isSelected()));
-    hideNPCs.addActionListener(e -> AppPreferences.setInitHideNpcs(hideNPCs.isSelected()));
+    fitGMView.addActionListener(e -> AppPreferences.fitGmView.set(fitGMView.isSelected()));
+    hideNPCs.addActionListener(
+        e -> AppPreferences.initiativePanelHidesNpcs.set(hideNPCs.isSelected()));
     ownerPermissions.addActionListener(
-        e -> AppPreferences.setInitOwnerPermissions(ownerPermissions.isSelected()));
+        e ->
+            AppPreferences.initiativePanelAllowsOwnerPermissions.set(
+                ownerPermissions.isSelected()));
     lockMovement.addActionListener(
-        e -> AppPreferences.setInitLockMovement(lockMovement.isSelected()));
+        e -> AppPreferences.initiativeMovementLocked.set(lockMovement.isSelected()));
     showInitGainMessage.addActionListener(
-        e -> AppPreferences.setShowInitGainMessage(showInitGainMessage.isSelected()));
+        e -> AppPreferences.showInitiativeGainedMessage.set(showInitGainMessage.isSelected()));
     upnpDiscoveryTimeoutTextField
         .getDocument()
         .addDocumentListener(
             new DocumentListenerProxy<Integer>(upnpDiscoveryTimeoutTextField) {
               @Override
               protected void storeNumericValue(Integer value) {
-                AppPreferences.setUpnpDiscoveryTimeout(value);
+                AppPreferences.upnpDiscoveryTimeout.set(value);
               }
 
               @Override
@@ -1294,7 +1303,7 @@ public class PreferencesDialog extends JDialog {
             });
     fileSyncPathButton.addActionListener(
         e -> {
-          JFileChooser fileChooser = new JFileChooser(AppPreferences.getFileSyncPath());
+          JFileChooser fileChooser = new JFileChooser(AppPreferences.fileSyncPath.get());
           fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
           int returnVal = fileChooser.showOpenDialog(null);
 
@@ -1306,7 +1315,7 @@ public class PreferencesDialog extends JDialog {
             fileSyncPath.setCaretPosition(0);
 
             // Save to preferences
-            AppPreferences.setFileSyncPath(selectedPath);
+            AppPreferences.fileSyncPath.set(selectedPath);
           }
         });
     jvmXmxTextField.addFocusListener(
@@ -1399,55 +1408,56 @@ public class PreferencesDialog extends JDialog {
 
     chatNotificationShowBackground.addActionListener(
         e ->
-            AppPreferences.setChatNotificationShowBackground(
+            AppPreferences.chatNotificationBackground.set(
                 chatNotificationShowBackground.isSelected()));
 
     defaultGridTypeCombo.setModel(
-        getLocalizedModel(defaultGridTypeComboItems, AppPreferences.getDefaultGridType()));
+        getLocalizedModel(defaultGridTypeComboItems, AppPreferences.defaultGridType.get()));
     defaultGridTypeCombo.addItemListener(
         e ->
-            AppPreferences.setDefaultGridType(
+            AppPreferences.defaultGridType.set(
                 ((LocalizedComboItem) (defaultGridTypeCombo.getSelectedItem())).getValue()));
 
     duplicateTokenCombo.setModel(
-        getLocalizedModel(duplicateTokenComboItems, AppPreferences.getDuplicateTokenNumber()));
+        getLocalizedModel(duplicateTokenComboItems, AppPreferences.duplicateTokenNumber.get()));
     duplicateTokenCombo.addItemListener(
         e ->
-            AppPreferences.setDuplicateTokenNumber(
+            AppPreferences.duplicateTokenNumber.set(
                 ((LocalizedComboItem) (duplicateTokenCombo.getSelectedItem())).getValue()));
 
     showNumberingCombo.setModel(
-        getLocalizedModel(showNumberingComboItems, AppPreferences.getTokenNumberDisplay()));
+        getLocalizedModel(showNumberingComboItems, AppPreferences.tokenNumberDisplay.get()));
     showNumberingCombo.addItemListener(
         e ->
-            AppPreferences.setTokenNumberDisplay(
+            AppPreferences.tokenNumberDisplay.set(
                 ((LocalizedComboItem) showNumberingCombo.getSelectedItem()).getValue()));
 
     tokenNamingCombo.setModel(
-        getLocalizedModel(tokenNamingComboItems, AppPreferences.getNewTokenNaming()));
+        getLocalizedModel(tokenNamingComboItems, AppPreferences.newTokenNaming.get()));
     tokenNamingCombo.addItemListener(
         e ->
-            AppPreferences.setNewTokenNaming(
+            AppPreferences.newTokenNaming.set(
                 ((LocalizedComboItem) (tokenNamingCombo.getSelectedItem())).getValue()));
 
     movementMetricCombo.setModel(new DefaultComboBoxModel<>(movementMetricComboItems));
-    movementMetricCombo.setSelectedItem(AppPreferences.getMovementMetric());
+    movementMetricCombo.setSelectedItem(AppPreferences.movementMetric.get());
     movementMetricCombo.addItemListener(
         e ->
-            AppPreferences.setMovementMetric((WalkerMetric) movementMetricCombo.getSelectedItem()));
+            AppPreferences.movementMetric.set(
+                (WalkerMetric) movementMetricCombo.getSelectedItem()));
 
     visionTypeCombo.setModel(new DefaultComboBoxModel<>(Zone.VisionType.values()));
-    visionTypeCombo.setSelectedItem(AppPreferences.getDefaultVisionType());
+    visionTypeCombo.setSelectedItem(AppPreferences.defaultVisionType.get());
     visionTypeCombo.addItemListener(
         e ->
-            AppPreferences.setDefaultVisionType(
+            AppPreferences.defaultVisionType.set(
                 (Zone.VisionType) visionTypeCombo.getSelectedItem()));
 
     mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
-    mapSortType.setSelectedItem(AppPreferences.getMapSortType());
+    mapSortType.setSelectedItem(AppPreferences.mapSortType.get());
     mapSortType.addItemListener(
         e ->
-            AppPreferences.setMapSortType(
+            AppPreferences.mapSortType.set(
                 (AppPreferences.MapSortType) mapSortType.getSelectedItem()));
 
     macroEditorThemeCombo.setModel(new DefaultComboBoxModel<>());
@@ -1459,22 +1469,22 @@ public class PreferencesDialog extends JDialog {
               p ->
                   macroEditorThemeCombo.addItem(
                       FilenameUtils.removeExtension(p.getFileName().toString())));
-      macroEditorThemeCombo.setSelectedItem(AppPreferences.getDefaultMacroEditorTheme());
+      macroEditorThemeCombo.setSelectedItem(AppPreferences.defaultMacroEditorTheme.get());
     } catch (IOException ioe) {
       log.warn("Unable to list macro editor themes.", ioe);
       macroEditorThemeCombo.addItem("Default");
     }
     macroEditorThemeCombo.addItemListener(
         e ->
-            AppPreferences.setDefaultMacroEditorTheme(
+            AppPreferences.defaultMacroEditorTheme.set(
                 (String) macroEditorThemeCombo.getSelectedItem()));
 
     iconThemeCombo.setModel(new DefaultComboBoxModel<>());
     iconThemeCombo.addItem(RessourceManager.CLASSIC);
     iconThemeCombo.addItem(RessourceManager.ROD_TAKEHARA);
-    iconThemeCombo.setSelectedItem(AppPreferences.getIconTheme());
+    iconThemeCombo.setSelectedItem(AppPreferences.iconTheme.get());
     iconThemeCombo.addItemListener(
-        e -> AppPreferences.setIconTheme((String) iconThemeCombo.getSelectedItem()));
+        e -> AppPreferences.iconTheme.set((String) iconThemeCombo.getSelectedItem()));
 
     themeFilterCombo.setModel(getLocalizedModel(themeFilterComboItems, "All"));
     themeFilterCombo.addItemListener(
@@ -1527,114 +1537,98 @@ public class PreferencesDialog extends JDialog {
   }
 
   /**
-   * Used by the ActionListeners of the facing checkboxes to update the facings for all of the
-   * current zones. Redundant to go through all zones because all zones using the same grid type
-   * share facings but it doesn't hurt anything and avoids having to track what grid types are being
-   * used.
-   */
-  private void updateFacings() {
-    // List<Zone> zlist = MapTool.getServer().getCampaign().getZones(); // generated NPE
-    // http://forums.rptools.net/viewtopic.php?f=3&t=17334
-    List<Zone> zlist = MapTool.getCampaign().getZones();
-    boolean faceEdges = AppPreferences.getFaceEdge();
-    boolean faceVertices = AppPreferences.getFaceVertex();
-    for (Zone z : zlist) {
-      Grid g = z.getGrid();
-      g.setFacings(faceEdges, faceVertices);
-    }
-  }
-
-  /**
    * Initializes and sets the initial state of various user preferences in the application. This
    * method is called during the initialization process.
    */
   private void setInitialState() {
-    showDialogOnNewToken.setSelected(AppPreferences.getShowDialogOnNewToken());
-    saveReminderCheckBox.setSelected(AppPreferences.getSaveReminder());
-    fillSelectionCheckBox.setSelected(AppPreferences.getFillSelectionBox());
-    frameRateCapTextField.setText(Integer.toString(AppPreferences.getFrameRateCap()));
-    defaultUsername.setText(AppPreferences.getDefaultUserName());
+    showDialogOnNewToken.setSelected(AppPreferences.showDialogOnNewToken.get());
+    saveReminderCheckBox.setSelected(AppPreferences.saveReminder.get());
+    fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());
+    frameRateCapTextField.setText(Integer.toString(AppPreferences.frameRateCap.get()));
+    defaultUsername.setText(AppPreferences.defaultUserName.get());
     // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
-    autoSaveSpinner.setValue(AppPreferences.getAutoSaveIncrement());
-    loadMRUcheckbox.setSelected(AppPreferences.getLoadMRUCampaignAtStart());
-    newMapsHaveFOWCheckBox.setSelected(AppPreferences.getNewMapsHaveFOW());
-    tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.getTokensWarnWhenDeleted());
-    tokensStartSnapToGridCheckBox.setSelected(AppPreferences.getTokensStartSnapToGrid());
-    tokensSnapWhileDraggingCheckBox.setSelected(AppPreferences.getTokensSnapWhileDragging());
+    autoSaveSpinner.setValue(AppPreferences.autoSaveIncrement.get());
+    loadMRUcheckbox.setSelected(AppPreferences.loadMruCampaignAtStart.get());
+    newMapsHaveFOWCheckBox.setSelected(AppPreferences.newMapsHaveFow.get());
+    tokensPopupWarningWhenDeletedCheckBox.setSelected(AppPreferences.tokensWarnWhenDeleted.get());
+    tokensStartSnapToGridCheckBox.setSelected(AppPreferences.tokensStartSnapToGrid.get());
+    tokensSnapWhileDraggingCheckBox.setSelected(AppPreferences.tokensSnapWhileDragging.get());
     hideMousePointerWhileDraggingCheckBox.setSelected(
-        AppPreferences.getHideMousePointerWhileDragging());
-    hideTokenStackIndicatorCheckBox.setSelected(AppPreferences.getHideTokenStackIndicator());
-    newMapsVisibleCheckBox.setSelected(AppPreferences.getNewMapsVisible());
-    newTokensVisibleCheckBox.setSelected(AppPreferences.getNewTokensVisible());
-    stampsStartFreeSizeCheckBox.setSelected(AppPreferences.getObjectsStartFreesize());
-    tokensStartFreeSizeCheckBox.setSelected(AppPreferences.getTokensStartFreesize());
-    stampsStartSnapToGridCheckBox.setSelected(AppPreferences.getObjectsStartSnapToGrid());
-    backgroundsStartFreeSizeCheckBox.setSelected(AppPreferences.getBackgroundsStartFreesize());
-    showStatSheetCheckBox.setSelected(AppPreferences.getShowStatSheet());
-    showPortraitCheckBox.setSelected(AppPreferences.getShowPortrait());
-    showStatSheetModifierCheckBox.setSelected(AppPreferences.getShowStatSheetModifier());
-    forceFacingArrowCheckBox.setSelected(AppPreferences.getForceFacingArrow());
-    backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.getBackgroundsStartSnapToGrid());
-    defaultGridSizeTextField.setText(Integer.toString(AppPreferences.getDefaultGridSize()));
+        AppPreferences.hideMousePointerWhileDragging.get());
+    hideTokenStackIndicatorCheckBox.setSelected(AppPreferences.hideTokenStackIndicator.get());
+    newMapsVisibleCheckBox.setSelected(AppPreferences.newMapsVisible.get());
+    newTokensVisibleCheckBox.setSelected(AppPreferences.newTokensVisible.get());
+    stampsStartFreeSizeCheckBox.setSelected(AppPreferences.objectsStartFreesize.get());
+    tokensStartFreeSizeCheckBox.setSelected(AppPreferences.tokensStartFreesize.get());
+    stampsStartSnapToGridCheckBox.setSelected(AppPreferences.objectsStartSnapToGrid.get());
+    backgroundsStartFreeSizeCheckBox.setSelected(AppPreferences.backgroundsStartFreesize.get());
+    showStatSheetCheckBox.setSelected(AppPreferences.showStatSheet.get());
+    showPortraitCheckBox.setSelected(AppPreferences.showPortrait.get());
+    showStatSheetModifierCheckBox.setSelected(
+        AppPreferences.showStatSheetRequiresModifierKey.get());
+    forceFacingArrowCheckBox.setSelected(AppPreferences.forceFacingArrow.get());
+    backgroundsStartSnapToGridCheckBox.setSelected(AppPreferences.backgroundsStartSnapToGrid.get());
+    defaultGridSizeTextField.setText(Integer.toString(AppPreferences.defaultGridSize.get()));
     // Localizes units per cell, using the proper separator. Fixes #507.
     defaultUnitsPerCellTextField.setText(
-        StringUtil.formatDecimal(AppPreferences.getDefaultUnitsPerCell(), 1));
+        StringUtil.formatDecimal(AppPreferences.defaultUnitsPerCell.get(), 1));
     defaultVisionDistanceTextField.setText(
-        Integer.toString(AppPreferences.getDefaultVisionDistance()));
-    statsheetPortraitSize.setText(Integer.toString(AppPreferences.getPortraitSize()));
-    fontSizeTextField.setText(Integer.toString(AppPreferences.getFontSize()));
-    haloLineWidthSpinner.setValue(AppPreferences.getHaloLineWidth());
-    mapVisibilityWarning.setSelected(AppPreferences.getMapVisibilityWarning());
+        Integer.toString(AppPreferences.defaultVisionDistance.get()));
+    statsheetPortraitSize.setText(Integer.toString(AppPreferences.portraitSize.get()));
+    fontSizeTextField.setText(Integer.toString(AppPreferences.fontSize.get()));
+    haloLineWidthSpinner.setValue(AppPreferences.haloLineWidth.get());
+    mapVisibilityWarning.setSelected(AppPreferences.mapVisibilityWarning.get());
 
     haloOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getHaloOverlayOpacity(), 0, 255, 1));
+        new SpinnerNumberModel(AppPreferences.haloOverlayOpacity.get().intValue(), 0, 255, 1));
     auraOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getAuraOverlayOpacity(), 0, 255, 1));
+        new SpinnerNumberModel(AppPreferences.auraOverlayOpacity.get().intValue(), 0, 255, 1));
     lightOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getLightOverlayOpacity(), 0, 255, 1));
+        new SpinnerNumberModel(AppPreferences.lightOverlayOpacity.get().intValue(), 0, 255, 1));
     lumensOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getLumensOverlayOpacity(), 0, 255, 1));
+        new SpinnerNumberModel(AppPreferences.lumensOverlayOpacity.get().intValue(), 0, 255, 1));
     lumensOverlayBorderThicknessSpinner.setModel(
         new SpinnerNumberModel(
-            AppPreferences.getLumensOverlayBorderThickness(), 0, Integer.MAX_VALUE, 1));
-    lumensOverlayShowByDefaultCheckBox.setSelected(AppPreferences.getLumensOverlayShowByDefault());
-    lightsShowByDefaultCheckBox.setSelected(AppPreferences.getLightsShowByDefault());
+            AppPreferences.lumensOverlayBorderThickness.get().intValue(), 0, Integer.MAX_VALUE, 1));
+    lumensOverlayShowByDefaultCheckBox.setSelected(AppPreferences.lumensOverlayShowByDefault.get());
+    lightsShowByDefaultCheckBox.setSelected(AppPreferences.lightsShowByDefault.get());
     fogOverlayOpacitySpinner.setModel(
-        new SpinnerNumberModel(AppPreferences.getFogOverlayOpacity(), 0, 255, 1));
+        new SpinnerNumberModel(AppPreferences.fogOverlayOpacity.get().intValue(), 0, 255, 1));
 
     useHaloColorAsVisionOverlayCheckBox.setSelected(
-        AppPreferences.getUseHaloColorOnVisionOverlay());
-    autoRevealVisionOnGMMoveCheckBox.setSelected(AppPreferences.getAutoRevealVisionOnGMMovement());
-    showSmiliesCheckBox.setSelected(AppPreferences.getShowSmilies());
-    playSystemSoundCheckBox.setSelected(AppPreferences.getPlaySystemSounds());
-    playStreamsCheckBox.setSelected(AppPreferences.getPlayStreams());
+        AppPreferences.useHaloColorOnVisionOverlay.get());
+    autoRevealVisionOnGMMoveCheckBox.setSelected(AppPreferences.autoRevealVisionOnGMMovement.get());
+    showSmiliesCheckBox.setSelected(AppPreferences.showSmilies.get());
+    playSystemSoundCheckBox.setSelected(AppPreferences.playSystemSounds.get());
+    playStreamsCheckBox.setSelected(AppPreferences.playStreams.get());
     playSystemSoundOnlyWhenNotFocusedCheckBox.setSelected(
-        AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused());
-    syrinscapeActiveCheckBox.setSelected(AppPreferences.getSyrinscapeActive());
-    showAvatarInChat.setSelected(AppPreferences.getShowAvatarInChat());
-    allowPlayerMacroEditsDefault.setSelected(AppPreferences.getAllowPlayerMacroEditsDefault());
-    toolTipInlineRolls.setSelected(AppPreferences.getUseToolTipForInlineRoll());
-    suppressToolTipsMacroLinks.setSelected(AppPreferences.getSuppressToolTipsForMacroLinks());
-    trustedOutputForeground.setColor(AppPreferences.getTrustedPrefixFG());
-    trustedOutputBackground.setColor(AppPreferences.getTrustedPrefixBG());
-    toolTipInitialDelay.setText(Integer.toString(AppPreferences.getToolTipInitialDelay()));
-    toolTipDismissDelay.setText(Integer.toString(AppPreferences.getToolTipDismissDelay()));
-    facingFaceEdges.setSelected(AppPreferences.getFaceEdge());
-    facingFaceVertices.setSelected(AppPreferences.getFaceVertex());
+        AppPreferences.playSystemSoundsOnlyWhenNotFocused.get());
+    syrinscapeActiveCheckBox.setSelected(AppPreferences.syrinscapeActive.get());
+    showAvatarInChat.setSelected(AppPreferences.showAvatarInChat.get());
+    allowPlayerMacroEditsDefault.setSelected(AppPreferences.allowPlayerMacroEditsDefault.get());
+    toolTipInlineRolls.setSelected(AppPreferences.useToolTipForInlineRoll.get());
+    suppressToolTipsMacroLinks.setSelected(AppPreferences.suppressToolTipsForMacroLinks.get());
+    trustedOutputForeground.setColor(AppPreferences.trustedPrefixForeground.get());
+    trustedOutputBackground.setColor(AppPreferences.trustedPrefixBackground.get());
+    toolTipInitialDelay.setText(Integer.toString(AppPreferences.toolTipInitialDelay.get()));
+    toolTipDismissDelay.setText(Integer.toString(AppPreferences.toolTipDismissDelay.get()));
+    facingFaceEdges.setSelected(AppPreferences.faceEdge.get());
+    facingFaceVertices.setSelected(AppPreferences.faceVertex.get());
 
     chatAutosaveTime.setModel(
-        new SpinnerNumberModel(AppPreferences.getChatAutosaveTime(), 0, 24 * 60, 1));
-    chatFilenameFormat.setText(AppPreferences.getChatFilenameFormat());
+        new SpinnerNumberModel(
+            AppPreferences.chatAutoSaveTimeInMinutes.get().intValue(), 0, 24 * 60, 1));
+    chatFilenameFormat.setText(AppPreferences.chatFilenameFormat.get());
 
-    fitGMView.setSelected(AppPreferences.getFitGMView());
-    hideNPCs.setSelected(AppPreferences.getInitHideNpcs());
-    ownerPermissions.setSelected(AppPreferences.getInitOwnerPermissions());
-    lockMovement.setSelected(AppPreferences.getInitLockMovement());
-    showInitGainMessage.setSelected(AppPreferences.isShowInitGainMessage());
+    fitGMView.setSelected(AppPreferences.fitGmView.get());
+    hideNPCs.setSelected(AppPreferences.initiativePanelHidesNpcs.get());
+    ownerPermissions.setSelected(AppPreferences.initiativePanelAllowsOwnerPermissions.get());
+    lockMovement.setSelected(AppPreferences.initiativeMovementLocked.get());
+    showInitGainMessage.setSelected(AppPreferences.showInitiativeGainedMessage.get());
     upnpDiscoveryTimeoutTextField.setText(
-        Integer.toString(AppPreferences.getUpnpDiscoveryTimeout()));
-    allowExternalMacroAccessCheckBox.setSelected(AppPreferences.getAllowExternalMacroAccess());
-    fileSyncPath.setText(AppPreferences.getFileSyncPath());
+        Integer.toString(AppPreferences.upnpDiscoveryTimeout.get()));
+    allowExternalMacroAccessCheckBox.setSelected(AppPreferences.allowExternalMacroAccess.get());
+    fileSyncPath.setText(AppPreferences.fileSyncPath.get());
 
     // get JVM User Defaults/User override preferences
     if (!UserJvmOptions.loadAppCfg()) {
@@ -1659,7 +1653,7 @@ public class PreferencesDialog extends JDialog {
       }
     }
 
-    Integer rawVal = AppPreferences.getTypingNotificationDuration();
+    Integer rawVal = AppPreferences.typingNotificationDurationInSeconds.get();
     Integer typingVal = null;
     if (rawVal != null
         && rawVal > 99) { // backward compatibility -- used to be stored in ms, now in seconds
@@ -1673,14 +1667,15 @@ public class PreferencesDialog extends JDialog {
       }
     }
     int value = Math.abs((typingVal == null || typingVal > rawVal) ? rawVal : typingVal);
-    AppPreferences.setTypingNotificationDuration(value);
+    AppPreferences.typingNotificationDurationInSeconds.set(value);
 
     SpinnerNumberModel typingDurationModel =
-        new SpinnerNumberModel((int) AppPreferences.getTypingNotificationDuration(), 0, 99, 1);
+        new SpinnerNumberModel(
+            (int) AppPreferences.typingNotificationDurationInSeconds.get(), 0, 99, 1);
     typingNotificationDuration.setModel(typingDurationModel);
 
-    chatNotificationColor.setColor(AppPreferences.getChatNotificationColor());
-    chatNotificationShowBackground.setSelected(AppPreferences.getChatNotificationShowBackground());
+    chatNotificationColor.setColor(AppPreferences.chatNotificationColor.get());
+    chatNotificationShowBackground.setSelected(AppPreferences.chatNotificationBackground.get());
 
     CompletableFuture<CipherUtil.Key> keys = new PublicPrivateKeyStore().getKeys();
 
