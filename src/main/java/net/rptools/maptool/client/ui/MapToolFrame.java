@@ -36,6 +36,7 @@ import javax.swing.*;
 import javax.swing.Timer;
 import javax.swing.border.BevelBorder;
 import javax.swing.filechooser.FileFilter;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
@@ -885,6 +886,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       savePropsFileChooser = new JFileChooser();
       savePropsFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
       savePropsFileChooser.addChoosableFileFilter(propertiesFilter);
+      savePropsFileChooser.setFileFilter(propertiesFilter);
+      savePropsFileChooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
+      savePropsFileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt"));
+      savePropsFileChooser.setFileFilter(savePropsFileChooser.getChoosableFileFilters()[0]);
       savePropsFileChooser.setDialogTitle(I18N.getText("msg.title.exportProperties"));
     }
     savePropsFileChooser.setAcceptAllFileFilterUsed(true);
