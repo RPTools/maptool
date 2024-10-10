@@ -39,8 +39,8 @@ public class StatSheetListener {
    */
   @Subscribe
   public void onHoverEnter(TokenHoverEnter event) {
-    if (AppPreferences.getShowStatSheet()
-        && AppPreferences.getShowStatSheetModifier() == event.shiftDown()) {
+    if (AppPreferences.showStatSheet.get()
+        && AppPreferences.showStatSheetRequiresModifierKey.get() == event.shiftDown()) {
       var ssManager = new StatSheetManager();
       if (statSheet == null && !ssManager.isLegacyStatSheet(event.token().getStatSheet())) {
         /*
@@ -49,13 +49,18 @@ public class StatSheetListener {
          */
         MapTool.getFrame().hideControlPanel();
         statSheet = new StatSheet();
-        var ss = event.token().getStatSheet();
+        var ssProperties = event.token().getStatSheet();
+        var ssId = ssProperties.id();
+        var ssRecord = ssManager.getStatSheet(ssId);
         var token = event.token();
         if (MapTool.getPlayer().isGM()
             || AppUtil.playerOwns(token)
             || token.getType() != Type.NPC) {
           statSheet.setContent(
-              event.token(), ssManager.getStatSheetContent(ss.id()), ss.location());
+              event.token(),
+              ssManager.getStatSheetContent(ssId),
+              ssRecord.entry(),
+              ssProperties.location());
         }
       }
     }

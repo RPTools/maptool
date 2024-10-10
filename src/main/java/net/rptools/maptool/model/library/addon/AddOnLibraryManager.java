@@ -214,11 +214,11 @@ public class AddOnLibraryManager {
   /** Initializes the add-on library manager. */
   public void init() {
     externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
-    String path = AppPreferences.getExternalAddOnLibrariesPath();
+    String path = AppPreferences.externalAddOnLibrariesPath.get();
 
     try {
       externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
-      externalAddOnLibraryManager.setEnabled(AppPreferences.getExternalLibraryManagerEnabled());
+      externalAddOnLibraryManager.setEnabled(AppPreferences.externalAddOnLibrariesEnabled.get());
       externalAddOnLibraryManager.init();
     } catch (IOException e) {
       MapTool.showError("Error setting external library path", e);

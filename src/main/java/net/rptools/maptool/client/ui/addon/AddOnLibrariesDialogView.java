@@ -314,7 +314,7 @@ public class AddOnLibrariesDialogView extends JDialog {
           } catch (IOException ex) {
             // do nothing
           }
-          AppPreferences.setExternalLibraryManagerEnabled(enableExternalAddOnCheckBox.isSelected());
+          AppPreferences.externalAddOnLibrariesEnabled.set(enableExternalAddOnCheckBox.isSelected());
         });
 
     browseButton.addActionListener(
@@ -325,7 +325,7 @@ public class AddOnLibrariesDialogView extends JDialog {
           chooser.showOpenDialog(MapTool.getFrame());
           if (chooser.getSelectedFile() != null) {
             directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
-            AppPreferences.setExternalAddOnLibrariesPath(
+            AppPreferences.externalAddOnLibrariesPath.set(
                 chooser.getSelectedFile().getAbsolutePath());
           }
         });
@@ -358,7 +358,7 @@ public class AddOnLibrariesDialogView extends JDialog {
 
     LibraryManager libraryManager = new LibraryManager();
     enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
-    directoryTextField.setText(AppPreferences.getExternalAddOnLibrariesPath());
+    directoryTextField.setText(AppPreferences.externalAddOnLibrariesPath.get());
     setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
     if (enableExternalAddOnCheckBox.isSelected()) {
       refreshLibraries();

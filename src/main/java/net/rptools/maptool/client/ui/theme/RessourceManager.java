@@ -244,7 +244,6 @@ public class RessourceManager {
           put(Images.GRID_BORDER_HEX, IMAGE_DIR + "hexBorder.png");
           put(Images.GRID_BORDER_ISOMETRIC, IMAGE_DIR + "isoBorder.png");
           put(Images.GRID_BORDER_SQUARE, IMAGE_DIR + "whiteBorder.png");
-          put(Images.GRID_BORDER_SQUARE_RED, IMAGE_DIR + "grid-square-red.png");
           put(Images.HEROLABS_PORTRAIT, IMAGE_DIR + "powered_by_hero_lab_small.png");
           put(Images.HEROLABS_TOKEN, IMAGE_DIR + "hero-lab-token.png");
           put(Images.LIGHT_SOURCE, IMAGE_DIR + "lightbulb.png");
@@ -502,7 +501,7 @@ public class RessourceManager {
 
   private static ImageIcon getIcon(Icons icon, int width, int height) {
     var iconPaths = classicIcons;
-    switch (AppPreferences.getIconTheme()) {
+    switch (AppPreferences.iconTheme.get()) {
       case ROD_TAKEHARA -> iconPaths = rodIcons;
     }
 

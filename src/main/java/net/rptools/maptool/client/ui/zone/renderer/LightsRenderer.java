@@ -55,7 +55,7 @@ public class LightsRenderer {
       }
 
       final var lightBlending =
-          AlphaComposite.SrcOver.derive(AppPreferences.getAuraOverlayOpacity() / 255.0f);
+          AlphaComposite.SrcOver.derive(AppPreferences.auraOverlayOpacity.get() / 255.0f);
       final var overlayFillColor = new Color(0, 0, 0, 0);
 
       renderHelper.bufferedRender(
@@ -83,7 +83,7 @@ public class LightsRenderer {
       final var overlayBlending =
           switch (zone.getLightingStyle()) {
             case OVERTOP -> AlphaComposite.SrcOver.derive(
-                AppPreferences.getLightOverlayOpacity() / 255.f);
+                AppPreferences.lightOverlayOpacity.get() / 255.f);
             case ENVIRONMENTAL -> LightingComposite.OverlaidLights;
           };
       final var overlayFillColor =

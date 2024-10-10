@@ -1565,7 +1565,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Set the color style via Theme
     try {
       File themeFile =
-          new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+          new File(AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
       Theme theme = Theme.load(new FileInputStream(themeFile));
       theme.apply(xmlStatblockRSyntaxTextArea);
 
@@ -1587,7 +1587,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     // Set the color style via Theme
     try {
       File themeFile =
-          new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+          new File(AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
       Theme theme = Theme.load(new FileInputStream(themeFile));
       theme.apply(textStatblockRSyntaxTextArea);
 
@@ -1896,7 +1896,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // Set the color style via Theme
       try {
         File themeFile =
-            new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+            new File(
+                AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
         Theme theme = Theme.load(new FileInputStream(themeFile));
         theme.apply(j);
 
@@ -1964,7 +1965,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       // Set the color style via Theme
       try {
         File themeFile =
-            new File(AppConstants.THEMES_DIR, AppPreferences.getDefaultMacroEditorTheme() + ".xml");
+            new File(
+                AppConstants.THEMES_DIR, AppPreferences.defaultMacroEditorTheme.get() + ".xml");
         Theme theme = Theme.load(new FileInputStream(themeFile));
         theme.apply(this);
 

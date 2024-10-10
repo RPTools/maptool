@@ -14,7 +14,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [windows-latest, ubuntu-latest, macOS-latest]
+        os: [windows-latest, ubuntu-latest, macOS-13]
         java: [ '21' ]
         distribution: ['temurin']
       fail-fast: false
@@ -68,11 +68,11 @@ jobs:
       #   | |/ |/ // // / / // /_/ // /_/ /| |/ |/ /(__  )
       #   |__/|__//_//_/ /_/ \__,_/ \____/ |__/|__//____/
       #
-    - name: Copy Windows Release Files
+    - name: Rename Windows Release Files
       if: matrix.os == 'windows-latest'
       run: |
-        cp releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
-        cp releases/MapTool*.msi releases/MapTool-${{ github.event.release.tag_name }}.msi
+        mv releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
+        mv releases/MapTool*.msi releases/MapTool-${{ github.event.release.tag_name }}.msi
       continue-on-error: true
     - name: Upload Windows EXE Release Asset
       id: upload-release-asset-exe
@@ -113,12 +113,12 @@ jobs:
       #    / /___ / // / / // /_/ /_>  <
       #   /_____//_//_/ /_/ \__,_//_/|_|
       #
-    - name: Copy Linux Release Files
+    - name: Rename Linux Release Files
       if: matrix.os == 'ubuntu-latest'
       run: |
-        cp releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
-        cp releases/maptool*_amd64.deb releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
-        cp package/archlinux/maptool/maptool-*-x86_64.pkg.tar.zst releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+        mv -n releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
+        mv -n releases/maptool*_amd64.deb releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
+        mv -n package/archlinux/maptool/maptool-*-x86_64.pkg.tar.zst releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
       continue-on-error: true
     - name: Upload Linux RPM Release Asset
       id: upload-release-asset-rpm
@@ -159,16 +159,16 @@ jobs:
       #    / / / / / // /_/ // /__ / /_/ /___/ /
       #   /_/ /_/ /_/ \__,_/ \___/ \____//____/
       #
-    - name: Copy Mac OS Release Files
-      if: matrix.os == 'macOS-latest'
+    - name: Rename Mac OS Release Files
+      if: matrix.os == 'macOS-13'
       run: |
-        cp releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
-        cp releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
+        mv releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
+        mv releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
       continue-on-error: true
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macOS-13'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
@@ -179,7 +179,7 @@ jobs:
     - name: Upload Mac PKG Release Asset
       id: upload-release-asset-pkg
       uses: actions/upload-release-asset@v1
-      if: matrix.os == 'macOS-latest'
+      if: matrix.os == 'macOS-13'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:

@@ -145,7 +145,7 @@ public class MapTool {
   // Set it to 500 (from 100) for now to support larger asset window previews
   // TODO: Add preferences option as well as add auto-purge after x days preferences
   private static final Dimension THUMBNAIL_SIZE =
-      new Dimension(AppPreferences.getThumbnailSize(), AppPreferences.getThumbnailSize());
+      new Dimension(AppPreferences.thumbnailSize.get(), AppPreferences.thumbnailSize.get());
 
   private static ThumbnailManager thumbnailManager;
   private static String version = "DEVELOPMENT";
@@ -168,6 +168,7 @@ public class MapTool {
   private static TaskBarFlasher taskbarFlasher;
   private static MapToolLineParser parser = new MapToolLineParser();
   private static String lastWhisperer;
+  private static ChatAutoSave chatAutoSave;
 
   // Jamz: To support new command line parameters for multi-monitor support & enhanced PrintStream
   private static boolean debug = false;
@@ -394,7 +395,7 @@ public class MapTool {
    * @return true if the token should be deleted.
    */
   public static boolean confirmTokenDelete() {
-    if (!AppPreferences.getTokensWarnWhenDeleted()) {
+    if (!AppPreferences.tokensWarnWhenDeleted.get()) {
       return true;
     }
 
@@ -404,7 +405,7 @@ public class MapTool {
     // "Yes, don't show again" Button
     if (val == 2) {
       showInformation("msg.confirm.deleteToken.removed");
-      AppPreferences.setTokensWarnWhenDeleted(false);
+      AppPreferences.tokensWarnWhenDeleted.set(false);
     }
     // Any version of 'Yes' returns true, false otherwise
     return val == JOptionPane.YES_OPTION || val == 2;
@@ -418,7 +419,7 @@ public class MapTool {
    * @return <code>true</code> if the user clicks either Yes button, <code>falsee</code> otherwise.
    */
   public static boolean confirmDrawDelete() {
-    if (!AppPreferences.getDrawWarnWhenDeleted()) {
+    if (!AppPreferences.drawingsWarnWhenDeleted.get()) {
       return true;
     }
 
@@ -428,7 +429,7 @@ public class MapTool {
     // "Yes, don't show again" Button
     if (val == JOptionPane.CANCEL_OPTION) {
       showInformation("msg.confirm.deleteDraw.removed");
-      AppPreferences.setDrawWarnWhenDeleted(false);
+      AppPreferences.drawingsWarnWhenDeleted.set(false);
     }
     // Any version of 'Yes' returns true, otherwise false
     return val == JOptionPane.YES_OPTION || val == JOptionPane.CANCEL_OPTION;
@@ -530,8 +531,8 @@ public class MapTool {
    * @param eventId the eventId of the sound.
    */
   public static void playSound(String eventId) {
-    if (AppPreferences.getPlaySystemSounds()) {
-      if (AppPreferences.getPlaySystemSoundsOnlyWhenNotFocused() && isInFocus()) {
+    if (AppPreferences.playSystemSounds.get()) {
+      if (AppPreferences.playSystemSoundsOnlyWhenNotFocused.get() && isInFocus()) {
         return;
       }
       SoundManager.playSoundEvent(eventId);
@@ -674,7 +675,7 @@ public class MapTool {
       Campaign cmpgn = CampaignFactory.createBasicCampaign();
       // Set the Topology drawing mode to the last mode used for convenience
       // Should only be one zone, but let's cover our bases.
-      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppPreferences.getTopologyTypes()));
+      cmpgn.getZones().forEach(zone -> zone.setTopologyTypes(AppStatePersisted.getTopologyTypes()));
 
       // Stop the pre-init client/server.
       disconnect();
@@ -686,9 +687,12 @@ public class MapTool {
     }
     AppActions.updateActions();
 
-    ToolTipManager.sharedInstance().setInitialDelay(AppPreferences.getToolTipInitialDelay());
-    ToolTipManager.sharedInstance().setDismissDelay(AppPreferences.getToolTipDismissDelay());
-    ChatAutoSave.changeTimeout(AppPreferences.getChatAutosaveTime());
+    ToolTipManager.sharedInstance().setInitialDelay(AppPreferences.toolTipInitialDelay.get());
+    ToolTipManager.sharedInstance().setDismissDelay(AppPreferences.toolTipDismissDelay.get());
+
+    chatAutoSave = new ChatAutoSave();
+    chatAutoSave.setTimeout(AppPreferences.chatAutoSaveTimeInMinutes.get());
+    AppPreferences.chatAutoSaveTimeInMinutes.onChange(chatAutoSave::setTimeout);
 
     // TODO: make this more formal when we switch to mina
     new ServerHeartBeatThread().start();
@@ -1276,9 +1280,9 @@ public class MapTool {
         }
       }
       // alternately load MRU campaign if preference set
-      else if (AppPreferences.getLoadMRUCampaignAtStart()) {
+      else if (AppPreferences.loadMruCampaignAtStart.get()) {
         try {
-          campaignFile = AppPreferences.getMruCampaigns().getFirst();
+          campaignFile = AppStatePersisted.getMruCampaigns().getFirst();
           if (campaignFile.exists()) {
             AppActions.loadCampaign(campaignFile);
           }
@@ -1354,7 +1358,7 @@ public class MapTool {
 
   public static boolean useToolTipsForUnformatedRolls() {
     if (isPersonalServer() || getServerPolicy() == null) {
-      return AppPreferences.getUseToolTipForInlineRoll();
+      return AppPreferences.useToolTipForInlineRoll.get();
     } else {
       return getServerPolicy().getUseToolTipsForDefaultRollFormat();
     }
@@ -1653,7 +1657,7 @@ public class MapTool {
     factory.registerProtocol("lib", new LibraryURLStreamHandler());
 
     // Syrinscape Protocols
-    if (AppPreferences.getSyrinscapeActive()) {
+    if (AppPreferences.syrinscapeActive.get()) {
       factory.registerProtocol("syrinscape-fantasy", new SyrinscapeURLStreamHandler());
       factory.registerProtocol("syrinscape-sci-fi", new SyrinscapeURLStreamHandler());
       factory.registerProtocol("syrinscape-boardgame", new SyrinscapeURLStreamHandler());

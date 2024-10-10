@@ -295,7 +295,7 @@ public class CommandPanel extends JPanel {
     // Resize on demand
     if (commandTextArea != null) {
       commandTextArea.setFont(
-          commandTextArea.getFont().deriveFont((float) AppPreferences.getFontSize()));
+          commandTextArea.getFont().deriveFont((float) AppPreferences.fontSize.get()));
       doLayout();
     }
 
@@ -606,7 +606,7 @@ public class CommandPanel extends JPanel {
           };
       commandTextArea.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
       commandTextArea.setPreferredSize(new Dimension(50, 40)); // XXX should be resizable
-      commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.getFontSize()));
+      commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.fontSize.get()));
       if (!ThemeSupport.shouldUseThemeColorsForChat()) {
         commandTextArea.setBackground(Color.WHITE);
         commandTextArea.setForeground(Color.BLACK);
@@ -837,7 +837,7 @@ public class CommandPanel extends JPanel {
     private static final long serialVersionUID = -9006587537198176935L;
 
     // Set the Color from the saved chat color from AppPreferences
-    private Color color = AppPreferences.getChatColor();
+    private Color color = AppPreferences.chatColor.get();
 
     public TextColorWell() {
       setMinimumSize(new Dimension(15, 15));
@@ -862,7 +862,7 @@ public class CommandPanel extends JPanel {
     public void setColor(Color newColor) {
       color = newColor;
       repaint();
-      AppPreferences.setChatColor(color); // Set the Chat Color in AppPreferences
+      AppPreferences.chatColor.set(color); // Set the Chat Color in AppPreferences
     }
 
     public Color getColor() {
@@ -919,7 +919,7 @@ public class CommandPanel extends JPanel {
       Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
       SwingUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
 
-      AppPreferences.getRenderQuality().setShrinkRenderingHints((Graphics2D) g);
+      AppPreferences.renderQuality.get().setShrinkRenderingHints((Graphics2D) g);
       g.drawImage(
           image,
           (size.width - imgSize.width) / 2,

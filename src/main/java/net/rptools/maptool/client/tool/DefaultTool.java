@@ -16,10 +16,10 @@ package net.rptools.maptool.client.tool;
 
 import java.awt.dnd.DragSource;
 import java.awt.event.*;
-import java.awt.geom.AffineTransform;
 import java.util.Map;
 import java.util.Set;
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -32,7 +32,6 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.ViewMovementKey;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.util.TokenUtil;
 
 /** */
 public abstract class DefaultTool extends Tool
@@ -322,74 +321,20 @@ public abstract class DefaultTool extends Tool
         if (!AppUtil.playerOwns(token)) {
           continue;
         }
-        Integer facing = token.getFacing();
-        if (facing == null) {
-          facing = -90; // natural alignment
-        }
+
+        int facing = token.getFacing();
         if (SwingUtil.isControlDown(e)) {
-          // Modify on the fly the rotation point
-          if (e.isAltDown()) {
-            int x = token.getX();
-            int y = token.getY();
-            int w = token.getWidth();
-            int h = token.getHeight();
-
-            double xc = x + w / 2;
-            double yc = y + h / 2;
-
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
-            token.setFacing(facing);
-            int a = token.getFacingInDegrees();
-            double r = Math.toRadians(a);
-
-            System.out.println("Angle: " + a);
-            System.out.println("Origin x,y: " + x + ", " + y);
-            System.out.println("Origin bounds: " + token.getBounds(renderer.getZone()));
-            // System.out.println("Anchor x,y: " + token.getAnchor().x + ", " +
-            // token.getAnchor().y);
-
-            // x = (int) ((x + w) - w * Math.cos(r));
-            // y = (int) (y - w * Math.sin(r));
-
-            // double x1 = (x - xc) * Math.cos(r) - (y - yc) * Math.sin(r) + xc;
-            // double y1 = (y - yc) * Math.cos(r) + (x - xc) * Math.sin(r) + yc;
-
-            // x = (int) (x * Math.cos(r) - y * Math.sin(r));
-            // y = (int) (y * Math.cos(r) + x * Math.sin(r));
-
-            AffineTransform at = new AffineTransform();
-            at.translate(x, y);
-            at.rotate(r, x + w, y);
-
-            x = (int) at.getTranslateX();
-            y = (int) at.getTranslateY();
-
-            // token.setX(x);
-            // token.setY(y);
-            // renderer.flush(token);
-            // MapTool.serverCommand().putToken(getZone().getId(), token);
-
-            // token.setX(0);
-            // token.setY(0);
-
-            System.out.println("New x,y: " + x + ", " + y);
-            System.out.println("New bounds: " + token.getBounds(renderer.getZone()).toString());
-
-          } else {
-            facing += e.getWheelRotation() > 0 ? 5 : -5;
-          }
+          facing += e.getWheelRotation() > 0 ? 5 : -5;
         } else {
-          int[] facingArray = getZone().getGrid().getFacingAngles();
-          int facingIndex = TokenUtil.getIndexNearestTo(facingArray, facing);
-
-          facingIndex += e.getWheelRotation() > 0 ? 1 : -1;
-          if (facingIndex < 0) {
-            facingIndex = facingArray.length - 1;
-          }
-          if (facingIndex == facingArray.length) {
-            facingIndex = 0;
-          }
-          facing = facingArray[facingIndex];
+          facing =
+              renderer
+                  .getZone()
+                  .getGrid()
+                  .nextFacing(
+                      facing,
+                      AppPreferences.faceEdge.get(),
+                      AppPreferences.faceVertex.get(),
+                      e.getWheelRotation() <= 0);
         }
 
         token.setFacing(facing);

@@ -17,11 +17,13 @@ package net.rptools.maptool.client.ui.campaignproperties;
 import static org.apache.commons.text.WordUtils.capitalize;
 import static org.apache.commons.text.WordUtils.uncapitalize;
 
+import com.google.protobuf.util.JsonFormat;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collections;
@@ -47,6 +49,7 @@ import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.SightType;
+import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.util.LightSyntax;
 import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.SightSyntax;
@@ -171,7 +174,7 @@ public class CampaignPropertiesDialog extends JDialog {
     button.addActionListener(
         e -> {
           String newRepo = getNewServerTextField().getText();
-          if (newRepo == null || newRepo.length() == 0) {
+          if (newRepo == null || newRepo.isEmpty()) {
             return;
           }
           // TODO: Check for uniqueness
@@ -415,6 +418,7 @@ public class CampaignPropertiesDialog extends JDialog {
               // END HACK
 
               JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
+
               boolean tryAgain = true;
               while (tryAgain) {
                 if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
@@ -440,8 +444,21 @@ public class CampaignPropertiesDialog extends JDialog {
                 }
               }
               try {
-                PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
-                MapTool.showInformation("Properties Saved.");
+                if (selectedFile.getName().endsWith(".mtprops")) {
+                  PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
+                  MapTool.showInformation("Properties Saved.");
+                } else {
+                  MapTool.showMessage(
+                      "CampaignPropertiesDialog.export.message",
+                      "msg.title.exportProperties",
+                      JOptionPane.INFORMATION_MESSAGE);
+                  CampaignPropertiesDto campaignPropertiesDto =
+                      MapTool.getCampaign().getCampaignProperties().toDto();
+                  try (FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile())) {
+                    fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
+                  }
+                }
+
               } catch (IOException ioe) {
                 MapTool.showError("Could not save properties: ", ioe);
               }

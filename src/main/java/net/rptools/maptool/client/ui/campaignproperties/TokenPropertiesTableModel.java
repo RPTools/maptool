@@ -142,7 +142,7 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
   }
 
   /** Adds a new token property, with a generated name. */
-  public void addProperty() {
+  public void addProperty(int selectedRow) {
     var properties = tokenTypeMap.get(tokenType);
 
     // First find a unique name, there are so few entries we don't have to worry
@@ -160,7 +160,12 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
 
       if (free) {
         var prop = new TokenProperty(newName);
-        properties.add(prop);
+        // append if there is no selection, otherwise insert at selectedRow
+        if (selectedRow == -1) {
+          properties.add(prop);
+        } else {
+          properties.add(selectedRow, prop);
+        }
         break;
       }
       seq++;

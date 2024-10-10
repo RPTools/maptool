@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.AppStatePersisted;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -61,6 +61,7 @@ import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensChanged;
 import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.TopologyChanged;
+import net.rptools.maptool.model.zones.ZoneLightingChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.DrawnElementListDto;
 import net.rptools.maptool.server.proto.TopologyTypeDto;
@@ -515,6 +516,7 @@ public class Zone {
 
   public void setLightingStyle(LightingStyle lightingStyle) {
     this.lightingStyle = lightingStyle;
+    new MapToolEventBus().getMainEventBus().post(new ZoneLightingChanged(this));
   }
 
   public TokenSelection getTokenSelection() {
@@ -1374,7 +1376,7 @@ public class Zone {
 
   public TopologyTypeSet getTopologyTypes() {
     if (topologyTypes == null) {
-      topologyTypes = AppPreferences.getTopologyTypes();
+      topologyTypes = AppStatePersisted.getTopologyTypes();
     }
 
     return topologyTypes;

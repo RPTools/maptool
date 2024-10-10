@@ -149,7 +149,7 @@ public class CreateNewAddonDialog extends JDialog {
           if (chooser.getSelectedFile() != null) {
             var path = chooser.getSelectedFile().getAbsolutePath();
             parentDirectoryTextField.setText(path);
-            AppPreferences.setCreateAddOnParentDir(path);
+            AppPreferences.createAddOnParentDir.set(path);
           }
         });
 
@@ -193,7 +193,7 @@ public class CreateNewAddonDialog extends JDialog {
     versionTextField.setText("0.0.1");
     shortDescTextBox.setText(I18N.getText("library.dialog.addon.create.shortDesc"));
     descriptionTextPane.setText(I18N.getText("library.dialog.addon.create.longDesc"));
-    parentDirectoryTextField.setText(AppPreferences.getCreateAddOnParentDir());
+    parentDirectoryTextField.setText(AppPreferences.createAddOnParentDir.get());
   }
 
   /** Validates the input fields. */

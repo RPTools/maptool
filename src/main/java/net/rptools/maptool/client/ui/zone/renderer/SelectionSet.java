@@ -39,13 +39,12 @@ public class SelectionSet {
   private final Token token;
 
   private Path<ZonePoint> gridlessPath;
-  private ZonePoint currentGridlessPoint;
 
-  /** Pixel distance (x) from keyToken's origin. */
-  int offsetX;
+  /** The initial location of the key token's drag anchor. */
+  private final ZonePoint startPoint;
 
-  /** Pixel distance (y) from keyToken's origin. */
-  int offsetY;
+  /** The current location of the key token's drag anchor. */
+  private final ZonePoint currentPoint;
 
   private RenderPathWorker renderPathTask;
   private ExecutorService renderPathThreadPool = Executors.newSingleThreadExecutor();
@@ -64,10 +63,14 @@ public class SelectionSet {
 
     token = renderer.zone.getToken(tokenGUID);
 
+    var anchorPoint = token.getDragAnchor(renderer.zone);
+
+    startPoint = new ZonePoint(anchorPoint);
+    currentPoint = new ZonePoint(anchorPoint);
+
     if (token.isSnapToGrid() && renderer.zone.getGrid().getCapabilities().isSnapToGridSupported()) {
       if (renderer.zone.getGrid().getCapabilities().isPathingSupported()) {
-        CellPoint tokenPoint =
-            renderer.zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+        CellPoint tokenPoint = renderer.zone.getGrid().convert(currentPoint);
 
         walker = renderer.zone.getGrid().createZoneWalker();
         walker.setFootprint(token.getFootprint(renderer.zone.getGrid()));
@@ -75,10 +78,12 @@ public class SelectionSet {
       }
     } else {
       gridlessPath = new Path<>();
-
-      currentGridlessPoint = new ZonePoint(token.getX(), token.getY());
-      gridlessPath.appendWaypoint(currentGridlessPoint);
+      gridlessPath.appendWaypoint(currentPoint);
     }
+  }
+
+  public ZonePoint getKeyTokenDragAnchorPosition() {
+    return currentPoint;
   }
 
   /**
@@ -86,7 +91,7 @@ public class SelectionSet {
    */
   public @Nonnull Path<ZonePoint> getGridlessPath() {
     var result = gridlessPath.copy();
-    result.appendWaypoint(currentGridlessPoint);
+    result.appendWaypoint(currentPoint);
     return result;
   }
 
@@ -123,13 +128,12 @@ public class SelectionSet {
     }
   }
 
-  public void setOffset(int x, int y) {
-    offsetX = x;
-    offsetY = y;
+  public void update(ZonePoint newAnchorPosition) {
+    currentPoint.x = newAnchorPosition.x;
+    currentPoint.y = newAnchorPosition.y;
 
-    ZonePoint zp = new ZonePoint(token.getX() + x, token.getY() + y);
     if (renderer.zone.getGrid().getCapabilities().isPathingSupported() && token.isSnapToGrid()) {
-      CellPoint point = renderer.zone.getGrid().convert(zp);
+      CellPoint point = renderer.zone.getGrid().convert(currentPoint);
       // walker.replaceLastWaypoint(point, restrictMovement); // OLD WAY
 
       // New way threaded, off the swing UI thread...
@@ -156,9 +160,6 @@ public class SelectionSet {
               token.getTransformedTopology(Zone.TopologyType.MBL),
               renderer);
       renderPathThreadPool.execute(renderPathTask);
-    } else {
-      currentGridlessPoint.x = zp.x;
-      currentGridlessPoint.y = zp.y;
     }
   }
 
@@ -189,7 +190,7 @@ public class SelectionSet {
       if (cp == null) {
         // log.info("cellpoint is null! FIXME! You have Walker class updating outside of
         // thread..."); // Why not save last waypoint to this class?
-        cp = renderer.zone.getGrid().convert(new ZonePoint(token.getX(), token.getY()));
+        cp = renderer.zone.getGrid().convert(token.getDragAnchor(renderer.zone));
         // log.info("So I set it to: " + cp);
       }
 
@@ -202,11 +203,11 @@ public class SelectionSet {
   }
 
   public int getOffsetX() {
-    return offsetX;
+    return currentPoint.x - startPoint.x;
   }
 
   public int getOffsetY() {
-    return offsetY;
+    return currentPoint.y - startPoint.y;
   }
 
   public String getPlayerId() {

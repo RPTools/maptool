@@ -100,7 +100,7 @@ public class FogRenderer {
     timer.start("renderFog-softFow");
     if (!softFogArea.isEmpty()) {
       worldG.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC));
-      worldG.setColor(new Color(0, 0, 0, AppPreferences.getFogOverlayOpacity()));
+      worldG.setColor(new Color(0, 0, 0, AppPreferences.fogOverlayOpacity.get()));
       worldG.fill(softFogArea);
     }
     timer.stop("renderFog-softFow");

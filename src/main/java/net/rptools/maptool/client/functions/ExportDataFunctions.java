@@ -57,7 +57,7 @@ public class ExportDataFunctions extends AbstractFunction {
     if (!MapTool.getParser().isMacroTrusted())
       throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
 
-    if (!AppPreferences.getAllowExternalMacroAccess())
+    if (!AppPreferences.allowExternalMacroAccess.get())
       throw new ParserException(I18N.getText("macro.function.general.accessDenied", functionName));
 
     // New function to save data to an external file.
