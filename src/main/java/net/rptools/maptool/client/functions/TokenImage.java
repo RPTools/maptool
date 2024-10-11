@@ -182,28 +182,28 @@ public class TokenImage extends AbstractFunction {
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
       if (imageName.isEmpty() || imageString.isEmpty()) {
-          throw new ParserException(
-              I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+        throw new ParserException(
+                I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else if(imageString.length() > 8) {
-          byte[] imageBytes = Base64.decode(imageString);
-          String imageCheck;
-          try {
-            imageCheck = new String(imageBytes, 0, 4);
-          } catch (Exception e) {
-            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
-          }
-          if (imageCheck.equals(FILE_HEADER_WEBP) || imageCheck.equals(FILE_HEADER_JPG) || imageCheck.equals(FILE_HEADER_PNG)) {
-            Asset asset = Asset.createImageAsset(imageName, imageBytes);
-            AssetManager.putAsset(asset);
-            assetId.append(asset.getMD5Key().toString());
-            return assetId;
-          } else {
-            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
-          }
-        } else {
-          throw new ParserException(
-              I18N.getText("macro.function.general.wrongParamType", functionName));
+        byte[] imageBytes = Base64.decode(imageString);
+        String imageCheck;
+        try {
+          imageCheck = new String(imageBytes, 0, 4);
+        } catch (Exception e) {
+          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
         }
+        if (imageCheck.equals(FILE_HEADER_WEBP) || imageCheck.equals(FILE_HEADER_JPG) || imageCheck.equals(FILE_HEADER_PNG)) {
+          Asset asset = Asset.createImageAsset(imageName, imageBytes);
+          AssetManager.putAsset(asset);
+          assetId.append(asset.getMD5Key().toString());
+          return assetId;
+        } else {
+          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+        }
+      } else {
+        throw new ParserException(
+                I18N.getText("macro.function.general.wrongParamType", functionName));
+      }
     }
 
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
