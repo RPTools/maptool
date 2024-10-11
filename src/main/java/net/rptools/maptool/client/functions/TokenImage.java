@@ -58,22 +58,25 @@ public class TokenImage extends AbstractFunction {
   public static final String SET_IMAGE = "setImage";
   public static final String SET_PORTRAIT = "setTokenPortrait";
   public static final String SET_HANDOUT = "setTokenHandout";
+  public static final String FILE_HEADER_WEBP = "RIFF";
+  public static final String FILE_HEADER_JPG = "ÿØÿà";
+  public static final String FILE_HEADER_PNG = "‰PNG";
 
   private TokenImage() {
     super(
-        0,
-        3,
-        "getTokenImage",
-        "getTokenPortrait",
-        "getTokenHandout",
-        "setTokenImage",
-        "setTokenPortrait",
-        "setTokenHandout",
-        "getImage",
-        "setTokenOpacity",
-        "getAssetProperties",
-        "getTokenOpacity",
-        "createAsset");
+            0,
+            3,
+            "getTokenImage",
+            "getTokenPortrait",
+            "getTokenHandout",
+            "setTokenImage",
+            "setTokenPortrait",
+            "setTokenHandout",
+            "getImage",
+            "setTokenOpacity",
+            "getAssetProperties",
+            "getTokenOpacity",
+            "createAsset");
   }
 
   /**
@@ -87,8 +90,8 @@ public class TokenImage extends AbstractFunction {
 
   @Override
   public Object childEvaluate(
-      Parser parser, VariableResolver resolver, String functionName, List<Object> args)
-      throws ParserException {
+          Parser parser, VariableResolver resolver, String functionName, List<Object> args)
+          throws ParserException {
     Token token;
 
     if (functionName.equalsIgnoreCase("setTokenOpacity")) {
@@ -158,8 +161,8 @@ public class TokenImage extends AbstractFunction {
         properties.addProperty("name", asset.getName());
 
         Image img =
-            ImageManager.getImageAndWait(
-                asset.getMD5Key()); // wait until loaded, so width/height are correct
+                ImageManager.getImageAndWait(
+                        asset.getMD5Key()); // wait until loaded, so width/height are correct
         String status = "loaded";
         if (img == ImageManager.BROKEN_IMAGE) {
           status = "broken";
@@ -178,26 +181,28 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
-      if (imageName == "" || imageString == "") {
+      if (imageName.isEmpty() || imageString.isEmpty()) {
         throw new ParserException(
-            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
-      } else {
-        if (imageString.length() > 8) {
-          byte[] imageBytes = Base64.decode(imageString);
-          String imageCheck = new String(imageBytes, 0, 4);
-          /* header check for: webp || jpg || png */
-          if (imageCheck.equals("RIFF") || imageCheck.equals("ÿØÿà") || imageCheck.equals("‰PNG")) {
-            Asset asset = Asset.createImageAsset(imageName, imageBytes);
-            AssetManager.putAsset(asset);
-            assetId.append(asset.getMD5Key().toString());
-            return assetId;
-          } else {
-            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
-          }
-        } else {
-          throw new ParserException(
-              I18N.getText("macro.function.general.wrongParamType", functionName));
+                I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+      } else if(imageString.length() > 8) {
+        byte[] imageBytes = Base64.decode(imageString);
+        String imageCheck;
+        try {
+          imageCheck = new String(imageBytes, 0, 4);
+        } catch (Exception e) {
+          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
         }
+        if (imageCheck.equals(FILE_HEADER_WEBP) || imageCheck.equals(FILE_HEADER_JPG) || imageCheck.equals(FILE_HEADER_PNG)) {
+          Asset asset = Asset.createImageAsset(imageName, imageBytes);
+          AssetManager.putAsset(asset);
+          assetId.append(asset.getMD5Key().toString());
+          return assetId;
+        } else {
+          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+        }
+      } else {
+        throw new ParserException(
+                I18N.getText("macro.function.general.wrongParamType", functionName));
       }
     }
 
@@ -241,18 +246,18 @@ public class TokenImage extends AbstractFunction {
       }
       assetId.append(token.getImageAssetId().toString());
     } else if ("getTokenHandout"
-        .equalsIgnoreCase(functionName)) { // getTokenHandout, or different capitalization
+            .equalsIgnoreCase(functionName)) { // getTokenHandout, or different capitalization
       if (token.getCharsheetImage() == null) {
         return "";
       }
       assetId.append(token.getCharsheetImage().toString());
     } else {
       throw new ParserException(
-          I18N.getText("macro.function.general.unknownFunction", functionName));
+              I18N.getText("macro.function.general.unknownFunction", functionName));
     }
 
     if (indexSize >= 0
-        && !"".equals(args.get(indexSize).toString())) { // if size parameter entered and not ""
+            && !"".equals(args.get(indexSize).toString())) { // if size parameter entered and not ""
       if (args.get(indexSize) instanceof BigDecimal) {
         assetId.append("-");
         BigDecimal size = (BigDecimal) args.get(indexSize);
@@ -261,11 +266,11 @@ public class TokenImage extends AbstractFunction {
         assetId.append(i);
       } else {
         throw new ParserException(
-            I18N.getText(
-                "macro.function.general.argumentTypeInvalid",
-                functionName,
-                indexSize + 1,
-                args.get(indexSize).toString()));
+                I18N.getText(
+                        "macro.function.general.argumentTypeInvalid",
+                        functionName,
+                        indexSize + 1,
+                        args.get(indexSize).toString()));
       }
     }
 
@@ -291,7 +296,7 @@ public class TokenImage extends AbstractFunction {
       Token imageToken = findImageToken(assetName, functionName);
       if (imageToken == null) {
         throw new ParserException(
-            I18N.getText("macro.function.general.unknownToken", functionName, assetName));
+                I18N.getText("macro.function.general.unknownToken", functionName, assetName));
       }
       assetId = imageToken.getImageAssetId().toString();
     } else {
@@ -302,7 +307,7 @@ public class TokenImage extends AbstractFunction {
     }
     if (assetId == null) {
       throw new ParserException(
-          I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
+              I18N.getText("macro.function.general.argumentTypeInvalid", functionName, 1, assetName));
     } else {
       return new MD5Key(assetId);
     }
@@ -311,7 +316,7 @@ public class TokenImage extends AbstractFunction {
   private static void setImage(Token token, String assetName) throws ParserException {
     MD5Key md5key = getMD5Key(assetName, SET_IMAGE);
     MapTool.serverCommand()
-        .updateTokenProperty(token, Token.Update.setImageAsset, (String) null, md5key.toString());
+            .updateTokenProperty(token, Token.Update.setImageAsset, (String) null, md5key.toString());
   }
 
   private static void setPortrait(Token token, String assetName) throws ParserException {
@@ -330,7 +335,7 @@ public class TokenImage extends AbstractFunction {
       List<ZoneRenderer> zrenderers = MapTool.getFrame().getZoneRenderers();
       for (ZoneRenderer zr : zrenderers) {
         List<Token> tokenList =
-            zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(name));
+                zr.getZone().getTokensFiltered(t -> t.getName().equalsIgnoreCase(name));
         for (Token token : tokenList) {
           // If we are not the GM and the token is not visible to players then we don't
           // let them get functions from it.
