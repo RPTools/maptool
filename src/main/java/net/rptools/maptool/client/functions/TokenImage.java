@@ -57,7 +57,10 @@ public class TokenImage extends AbstractFunction {
 
   public static final String SET_IMAGE = "setImage";
   public static final String SET_PORTRAIT = "setTokenPortrait";
-  public static final String SET_HANDOUT = "setTokenHandout";
+  public static final String SET_HANDOUT = "setTokenHandout";  
+  public static final String FILE_HEADER_WEBP = "RIFF";
+  public static final String FILE_HEADER_JPG = "ÿØÿà";
+  public static final String FILE_HEADER_PNG = "‰PNG";
 
   private TokenImage() {
     super(
@@ -178,15 +181,18 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
-      if (imageName == "" || imageString == "") {
-        throw new ParserException(
-            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
-      } else {
-        if (imageString.length() > 8) {
+      if (imageName.isEmpty() || imageString.isEmpty()) {
+          throw new ParserException(
+              I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+      } else if(imageString.length() > 8) {
           byte[] imageBytes = Base64.decode(imageString);
-          String imageCheck = new String(imageBytes, 0, 4);
-          /* header check for: webp || jpg || png */
-          if (imageCheck.equals("RIFF") || imageCheck.equals("ÿØÿà") || imageCheck.equals("‰PNG")) {
+          String imageCheck;
+          try {
+            imageCheck = new String(imageBytes, 0, 4);
+          } catch (Exception e) {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+          if (imageCheck.equals(FILE_HEADER_WEBP) || imageCheck.equals(FILE_HEADER_JPG) || imageCheck.equals(FILE_HEADER_PNG)) {
             Asset asset = Asset.createImageAsset(imageName, imageBytes);
             AssetManager.putAsset(asset);
             assetId.append(asset.getMD5Key().toString());
@@ -198,7 +204,6 @@ public class TokenImage extends AbstractFunction {
           throw new ParserException(
               I18N.getText("macro.function.general.wrongParamType", functionName));
         }
-      }
     }
 
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
