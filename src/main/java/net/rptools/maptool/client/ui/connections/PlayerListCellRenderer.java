@@ -26,11 +26,11 @@ public class PlayerListCellRenderer extends DefaultListCellRenderer {
   public Component getListCellRendererComponent(
       JList<?> list, Object value, int index, boolean isSelected, boolean hasFocus) {
     if (value instanceof Player player) {
+      // GMs can see everyone's zone, players can only see each other's.
+      var showZone = MapTool.getPlayer().isGM() || !player.isGM();
+
       String text;
-      if (player.isGM()) {
-        // Don't display zone information.
-        text = player.toString();
-      } else {
+      if (showZone) {
         var zone =
             player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
         text =
@@ -40,6 +40,8 @@ public class PlayerListCellRenderer extends DefaultListCellRenderer {
                     : "connections.playerIsLoadingZone",
                 player.toString(),
                 zone == null ? null : zone.getDisplayName());
+      } else {
+        text = player.toString();
       }
       return super.getListCellRendererComponent(list, text, index, isSelected, hasFocus);
     }
