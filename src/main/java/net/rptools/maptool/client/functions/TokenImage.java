@@ -181,9 +181,9 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
       String imageString = args.get(1).toString();
-     if (imageName.isEmpty() || imageString.isEmpty()) {
+      if (imageName.isEmpty() || imageString.isEmpty()) {
         throw new ParserException(
-            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+                I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else if (imageString.length() > 8) {
         byte[] imageBytes = Base64.decode(imageString);
         String imageCheck;
@@ -193,8 +193,8 @@ public class TokenImage extends AbstractFunction {
           throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
         }
         if (imageCheck.equals(FILE_HEADER_WEBP)
-            || imageCheck.equals(FILE_HEADER_JPG)
-            || imageCheck.equals(FILE_HEADER_PNG)) {
+                || imageCheck.equals(FILE_HEADER_JPG)
+                || imageCheck.equals(FILE_HEADER_PNG)) {
           Asset asset = Asset.createImageAsset(imageName, imageBytes);
           AssetManager.putAsset(asset);
           assetId.append(asset.getMD5Key().toString());
@@ -204,7 +204,7 @@ public class TokenImage extends AbstractFunction {
         }
       } else {
         throw new ParserException(
-            I18N.getText("macro.function.general.wrongParamType", functionName));
+                I18N.getText("macro.function.general.wrongParamType", functionName));
       }
     }
 
