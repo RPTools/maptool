@@ -451,8 +451,7 @@ public class CampaignPropertiesDialog extends JDialog {
                   MapTool.showMessage(
                       "CampaignPropertiesDialog.export.message",
                       "msg.title.exportProperties",
-                      JOptionPane.INFORMATION_MESSAGE,
-                      null);
+                      JOptionPane.INFORMATION_MESSAGE);
                   CampaignPropertiesDto campaignPropertiesDto =
                       MapTool.getCampaign().getCampaignProperties().toDto();
                   FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile());
