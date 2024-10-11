@@ -17,8 +17,15 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonObject;
 import com.jidesoft.utils.Base64;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -185,23 +192,41 @@ public class TokenImage extends AbstractFunction {
         throw new ParserException(
             I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else if (imageString.length() > 8) {
-        byte[] imageBytes = Base64.decode(imageString);
-        String imageCheck;
-        try {
-          imageCheck = new String(imageBytes, 0, 4);
-        } catch (Exception e) {
-          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
-        }
-        if (imageCheck.equals(FILE_HEADER_WEBP)
-            || imageCheck.equals(FILE_HEADER_JPG)
-            || imageCheck.equals(FILE_HEADER_PNG)) {
-          Asset asset = Asset.createImageAsset(imageName, imageBytes);
-          AssetManager.putAsset(asset);
-          assetId.append(asset.getMD5Key().toString());
-          return assetId;
+        Asset asset;
+        if (imageString.toLowerCase().startsWith("https://")
+            && (imageString.toLowerCase().endsWith(".jpg")
+                || imageString.toLowerCase().endsWith(".png")
+                || imageString.toLowerCase().endsWith(".webp"))) {
+          try {
+            URI uri = new URI(imageString);
+            URL url = uri.toURL();
+            BufferedImage imageRAW = ImageIO.read(url);
+            asset = Asset.createImageAsset(imageName, imageRAW);
+          } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+            throw new ParserException(
+                I18N.getText("macro.function.input.illegalArgumentType", imageString));
+          } catch (IOException e1) {
+            throw new ParserException(I18N.getText("macro.function.html5.invalidURI", imageString));
+          }
         } else {
-          throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          byte[] imageBytes = Base64.decode(imageString);
+          String imageCheck;
+          try {
+            imageCheck = new String(imageBytes, 0, 4);
+          } catch (Exception e) {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+          if (imageCheck.equals(FILE_HEADER_WEBP)
+              || imageCheck.equals(FILE_HEADER_JPG)
+              || imageCheck.equals(FILE_HEADER_PNG)) {
+            asset = Asset.createImageAsset(imageName, imageBytes);
+          } else {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
         }
+        AssetManager.putAsset(asset);
+        assetId.append(asset.getMD5Key().toString());
+        return assetId;
       } else {
         throw new ParserException(
             I18N.getText("macro.function.general.wrongParamType", functionName));
