@@ -56,14 +56,24 @@ public class PlayersLoadingStatusBar extends JLabel {
         new StringBuilder(I18N.getText("ConnectionStatusPanel.playersLoadedZone", loaded, total));
 
     for (Player player : players) {
-      var zone =
-          player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+      // GMs can see everyone's zone, players can only see each other's.
+      var showZone = MapTool.getPlayer().isGM() || !player.isGM();
 
-      var text =
-          I18N.getText(
-              player.getLoaded() ? "connections.playerIsInZone" : "connections.playerIsLoadingZone",
-              player.toString(),
-              zone == null ? null : zone.getDisplayName());
+      String text;
+      if (showZone) {
+        var zone =
+            player.getZoneId() == null ? null : MapTool.getCampaign().getZone(player.getZoneId());
+        text =
+            I18N.getText(
+                player.getLoaded()
+                    ? "connections.playerIsInZone"
+                    : "connections.playerIsLoadingZone",
+                player.toString(),
+                zone == null ? null : zone.getDisplayName());
+      } else {
+        text = player.toString();
+      }
+
       sb.append("\n");
       sb.append(text);
     }
