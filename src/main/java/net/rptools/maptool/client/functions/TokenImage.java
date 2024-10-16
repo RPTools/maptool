@@ -15,9 +15,17 @@
 package net.rptools.maptool.client.functions;
 
 import com.google.gson.JsonObject;
+import com.jidesoft.utils.Base64;
 import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.MalformedURLException;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.List;
+import javax.imageio.ImageIO;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -57,6 +65,9 @@ public class TokenImage extends AbstractFunction {
   public static final String SET_IMAGE = "setImage";
   public static final String SET_PORTRAIT = "setTokenPortrait";
   public static final String SET_HANDOUT = "setTokenHandout";
+  public static final String FILE_HEADER_WEBP = "RIFF";
+  public static final String FILE_HEADER_JPG = "ÿØÿà";
+  public static final String FILE_HEADER_PNG = "‰PNG";
 
   private TokenImage() {
     super(
@@ -71,7 +82,8 @@ public class TokenImage extends AbstractFunction {
         "getImage",
         "setTokenOpacity",
         "getAssetProperties",
-        "getTokenOpacity");
+        "getTokenOpacity",
+        "createAsset");
   }
 
   /**
@@ -171,6 +183,56 @@ public class TokenImage extends AbstractFunction {
       }
     }
 
+    StringBuilder assetId = new StringBuilder("asset://");
+    if (functionName.equalsIgnoreCase("createAsset")) {
+      FunctionUtil.checkNumberParam(functionName, args, 2, 2);
+      String imageName = args.get(0).toString();
+      String imageString = args.get(1).toString();
+      if (imageName.isEmpty() || imageString.isEmpty()) {
+        throw new ParserException(
+            I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
+      } else if (imageString.length() > 8) {
+        Asset asset;
+        if (imageString.toLowerCase().startsWith("https://")
+            && (imageString.toLowerCase().endsWith(".jpg")
+                || imageString.toLowerCase().endsWith(".png")
+                || imageString.toLowerCase().endsWith(".webp"))) {
+          try {
+            URI uri = new URI(imageString);
+            URL url = uri.toURL();
+            BufferedImage imageRAW = ImageIO.read(url);
+            asset = Asset.createImageAsset(imageName, imageRAW);
+          } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+            throw new ParserException(
+                I18N.getText("macro.function.input.illegalArgumentType", imageString));
+          } catch (IOException e1) {
+            throw new ParserException(I18N.getText("macro.function.html5.invalidURI", imageString));
+          }
+        } else {
+          byte[] imageBytes = Base64.decode(imageString);
+          String imageCheck;
+          try {
+            imageCheck = new String(imageBytes, 0, 4);
+          } catch (Exception e) {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+          if (imageCheck.equals(FILE_HEADER_WEBP)
+              || imageCheck.equals(FILE_HEADER_JPG)
+              || imageCheck.equals(FILE_HEADER_PNG)) {
+            asset = Asset.createImageAsset(imageName, imageBytes);
+          } else {
+            throw new ParserException(I18N.getText("dragdrop.unsupportedType", functionName));
+          }
+        }
+        AssetManager.putAsset(asset);
+        assetId.append(asset.getMD5Key().toString());
+        return assetId;
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.general.wrongParamType", functionName));
+      }
+    }
+
     /* getImage, getTokenImage, getTokenPortrait, or getTokenHandout */
     int indexSize = -1; // by default, no size added to asset id
     if (functionName.equalsIgnoreCase("getImage")) {
@@ -195,7 +257,6 @@ public class TokenImage extends AbstractFunction {
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
     }
 
-    StringBuilder assetId = new StringBuilder("asset://");
     if (functionName.equalsIgnoreCase("getTokenImage")) {
       if (token.getImageAssetId() == null) {
         return "";
