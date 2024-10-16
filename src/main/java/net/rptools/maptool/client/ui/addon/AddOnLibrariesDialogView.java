@@ -16,8 +16,6 @@ package net.rptools.maptool.client.ui.addon;
 
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -27,6 +25,7 @@ import java.net.URI;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import javax.swing.JButton;
+import javax.swing.JCheckBox;
 import javax.swing.JComponent;
 import javax.swing.JDialog;
 import javax.swing.JFileChooser;
@@ -34,51 +33,154 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.JTextPane;
 import javax.swing.KeyStroke;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import net.rptools.maptool.client.AppActions.MapPreviewFileChooser;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.JLabelHyperLinkListener;
 import net.rptools.maptool.client.ui.ViewAssetDialog;
+import net.rptools.maptool.client.ui.addon.creator.MTLibCreator;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import net.rptools.maptool.model.library.addon.ExternalLibraryInfo;
 
 /** Dialog for managing add-on libraries. */
 public class AddOnLibrariesDialogView extends JDialog {
 
-  private JPanel contentPane;
+  /** Removes an add-on library. */
   private JButton buttonRemove;
+
+  /** Closes the dialog. */
   private JButton buttonClose;
+
+  /** The tabbed pane for the dialog. */
   private JTabbedPane tabbedPane;
+
+  /** Table containing the imported add-ons */
   private JTable addOnLibraryTable;
+
+  /** The text pane for the add-on description. */
   private JTextPane addOnDescriptionTextPane;
+
+  /** Adds an add-on library. */
   private JButton buttonAdd;
+
+  /** The name of the selected add-on. */
   private JLabel addOnNameLabel;
+
+  /** The version of the selected add-on. */
   private JLabel addOnVersionLabel;
+
+  /** The authors of the selected add-on. */
   private JLabel addOnAuthorsLabel;
+
+  /** The namespace of the selected add-on. */
   private JLabel addOnNamespaceLabel;
+
+  /** The short description of the selected add-on. */
   private JLabel addOnShortDescLabel;
+
+  /** The website of the selected add-on. */
   private JLabel addOnWebsiteLabel;
+
+  /** The git URL of the selected add-on. */
   private JLabel addOnGitUrlLabel;
+
+  /** The license of the selected add-on. */
   private JLabel addOnLicenseLabel;
+
+  /** The button for viewing the README file of the selected add-on. */
   private JButton viewReadMeFileButton;
+
+  /** The button for viewing the license file of the selected add-on. */
   private JButton viewLicenseFileButton;
+
+  /** The button for copying the theme CSS. */
   private JButton copyThemeCSS;
+
+  /** The button for copying the stat sheet theme. */
   private JButton copyStatSheetThemeButton;
 
+  /** The checkbox for enabling external add-ons. */
+  private JCheckBox enableExternalAddOnCheckBox;
+
+  /** The table for external add-ons. */
+  private JTable externalAddonTable;
+
+  /** The button for creating an add-on skeleton. */
+  private JButton createAddonSkeletonButton;
+
+  /** The text field for the add-on development directory. */
+  private JTextField directoryTextField;
+
+  /** The button for browsing to select the add-on development directory. */
+  private JButton browseButton;
+
+  /** The content pane for the dialog. */
+  private JPanel contentPane;
+
+  /** Creates a .mtlib (zip) file for the selected add-on. */
+  private JButton createMTLibButton;
+
+  /** The information for the selected add-on. */
   private LibraryInfo selectedAddOn;
+
+  /** The model for the external add-on libraries table. */
+  private final ExternalAddOnLibrariesTableModel externalAddOnLibrariesTableModel;
+
+  /** The model for the add-on libraries table. */
+  private final AddOnLibrariesTableModel addOnLibrariesTableModel;
+
+  /** The currently selected external add-on. */
+  private ExternalLibraryInfo selectedExternalAddon;
 
   /** Creates a new instance of the dialog. */
   public AddOnLibrariesDialogView() {
     setContentPane(contentPane);
     setModal(true);
     getRootPane().setDefaultButton(buttonClose);
-    addOnLibraryTable.setModel(new AddOnLibrariesTableModel());
+
+    var eventBus = new MapToolEventBus().getMainEventBus();
+
+    addOnLibrariesTableModel = new AddOnLibrariesTableModel();
+    eventBus.register(addOnLibrariesTableModel);
+
+    addOnLibraryTable.setModel(addOnLibrariesTableModel);
     addOnLibraryTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+
+    externalAddOnLibrariesTableModel = new ExternalAddOnLibrariesTableModel();
+    externalAddonTable.setModel(externalAddOnLibrariesTableModel);
+    eventBus.register(externalAddOnLibrariesTableModel);
+
+    externalAddonTable.setSelectionMode(javax.swing.ListSelectionModel.SINGLE_SELECTION);
+    externalAddonTable.setDefaultRenderer(
+        ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
+    externalAddonTable.setDefaultEditor(
+        ExternalLibraryInfo.class, new ExternalAddOnImportCellEditor());
+    externalAddonTable
+        .getSelectionModel()
+        .addListSelectionListener(
+            e -> {
+              int selectedRow = externalAddonTable.getSelectedRow();
+              if (selectedRow == -1) {
+                createMTLibButton.setEnabled(false);
+                selectedExternalAddon = null;
+              } else {
+                createMTLibButton.setEnabled(true);
+                selectedExternalAddon =
+                    (ExternalLibraryInfo)
+                        externalAddOnLibrariesTableModel.getValueAt(selectedRow, 6);
+              }
+            });
 
     buttonRemove.setEnabled(false);
     addOnLibraryTable
@@ -130,11 +232,7 @@ public class AddOnLibrariesDialogView extends JDialog {
 
     // call onClose() on ESCAPE
     contentPane.registerKeyboardAction(
-        new ActionListener() {
-          public void actionPerformed(ActionEvent e) {
-            onClose();
-          }
-        },
+        e -> onClose(),
         KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0),
         JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT);
 
@@ -169,42 +267,128 @@ public class AddOnLibrariesDialogView extends JDialog {
         });
 
     copyThemeCSS.addActionListener(
-        e -> {
-          new LibraryManager()
-              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
-              .ifPresent(
-                  library -> {
-                    URI uri = URI.create(AppConstants.MT_THEME_CSS);
-                    String themeCss = null;
-                    try {
-                      themeCss = library.readAsString(uri.toURL()).get();
-                    } catch (InterruptedException | ExecutionException | IOException ex) {
-                      throw new RuntimeException(ex);
-                    }
-                    Toolkit.getDefaultToolkit()
-                        .getSystemClipboard()
-                        .setContents(new StringSelection(themeCss), null);
-                  });
-        });
+        e ->
+            new LibraryManager()
+                .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+                .ifPresent(
+                    library -> {
+                      URI uri = URI.create(AppConstants.MT_THEME_CSS);
+                      String themeCss = null;
+                      try {
+                        themeCss = library.readAsString(uri.toURL()).get();
+                      } catch (InterruptedException | ExecutionException | IOException ex) {
+                        throw new RuntimeException(ex);
+                      }
+                      Toolkit.getDefaultToolkit()
+                          .getSystemClipboard()
+                          .setContents(new StringSelection(themeCss), null);
+                    }));
 
     copyStatSheetThemeButton.addActionListener(
+        e ->
+            new LibraryManager()
+                .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
+                .ifPresent(
+                    library -> {
+                      URI uri = URI.create(AppConstants.MT_THEME_STAT_SHEET_CSS);
+                      String themeCss = null;
+                      try {
+                        themeCss = library.readAsString(uri.toURL()).get();
+                      } catch (InterruptedException | ExecutionException | IOException ex) {
+                        throw new RuntimeException(ex);
+                      }
+                      Toolkit.getDefaultToolkit()
+                          .getSystemClipboard()
+                          .setContents(new StringSelection(themeCss), null);
+                    }));
+
+    createAddonSkeletonButton.addActionListener(e -> createAddonSkeleton());
+
+    enableExternalAddOnCheckBox.addActionListener(
         e -> {
-          new LibraryManager()
-              .getLibrary(AppConstants.MT_BUILTIN_ADD_ON_NAMESPACE)
-              .ifPresent(
-                  library -> {
-                    URI uri = URI.create(AppConstants.MT_THEME_STAT_SHEET_CSS);
-                    String themeCss = null;
-                    try {
-                      themeCss = library.readAsString(uri.toURL()).get();
-                    } catch (InterruptedException | ExecutionException | IOException ex) {
-                      throw new RuntimeException(ex);
-                    }
-                    Toolkit.getDefaultToolkit()
-                        .getSystemClipboard()
-                        .setContents(new StringSelection(themeCss), null);
-                  });
+          setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
+          directoryTextField.setEnabled(enableExternalAddOnCheckBox.isSelected());
+          try {
+            new LibraryManager()
+                .setExternalLibrariesEnabled(enableExternalAddOnCheckBox.isSelected());
+          } catch (IOException ex) {
+            // do nothing
+          }
+          AppPreferences.externalAddOnLibrariesEnabled.set(
+              enableExternalAddOnCheckBox.isSelected());
         });
+
+    browseButton.addActionListener(
+        e -> {
+          JFileChooser chooser = new JFileChooser();
+          chooser.setDialogTitle(I18N.getText("library.dialog.import.title"));
+          chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+          chooser.showOpenDialog(MapTool.getFrame());
+          if (chooser.getSelectedFile() != null) {
+            directoryTextField.setText(chooser.getSelectedFile().getAbsolutePath());
+            AppPreferences.externalAddOnLibrariesPath.set(
+                chooser.getSelectedFile().getAbsolutePath());
+          }
+        });
+
+    createMTLibButton.addActionListener(
+        e -> {
+          if (selectedExternalAddon == null) {
+            return;
+          }
+
+          var fileChooser = new JFileChooser();
+          fileChooser.setFileFilter(
+              new FileNameExtensionFilter(
+                  I18N.getText("library.dialog.addon.fileFilter"), "mtlib"));
+          if (fileChooser.showSaveDialog(MapTool.getFrame()) == JFileChooser.APPROVE_OPTION) {
+            var outputPath = fileChooser.getSelectedFile().toPath();
+            if (!outputPath.toString().endsWith(".mtlib")) {
+              outputPath = outputPath.resolveSibling(outputPath.getFileName() + ".mtlib");
+            }
+            var creator =
+                new MTLibCreator(
+                    selectedExternalAddon.backingDirectory(),
+                    outputPath.getParent(),
+                    outputPath.getFileName().toString());
+            creator.create();
+          }
+        });
+
+    createMTLibButton.setEnabled(false);
+
+    LibraryManager libraryManager = new LibraryManager();
+    enableExternalAddOnCheckBox.setSelected(libraryManager.externalLibrariesEnabled());
+    directoryTextField.setText(AppPreferences.externalAddOnLibrariesPath.get());
+    setExternalAddOnControlsEnabled(enableExternalAddOnCheckBox.isSelected());
+    if (enableExternalAddOnCheckBox.isSelected()) {
+      refreshLibraries();
+    }
+    pack();
+  }
+
+  /** Refreshes the external add-on libraries table information. */
+  private void refreshLibraries() {
+    var model = (ExternalAddOnLibrariesTableModel) externalAddonTable.getModel();
+    model.refresh();
+  }
+
+  /**
+   * Sets the enabled state of the external add-on controls.
+   *
+   * @param selected the state to set.
+   */
+  private void setExternalAddOnControlsEnabled(boolean selected) {
+    externalAddonTable.setEnabled(selected);
+    browseButton.setEnabled(selected);
+  }
+
+  /** Creates a new add-on skeleton. */
+  private void createAddonSkeleton() {
+    var dialog = new CreateNewAddonDialog();
+    dialog.pack();
+    SwingUtil.centerOver(dialog, MapTool.getFrame());
+    dialog.setVisible(true);
   }
 
   /**
@@ -246,6 +430,9 @@ public class AddOnLibrariesDialogView extends JDialog {
   /** Closes the dialog. */
   private void onClose() {
     dispose();
+    var eventBus = new MapToolEventBus().getMainEventBus();
+    eventBus.unregister(externalAddOnLibrariesTableModel);
+    eventBus.unregister(addOnLibrariesTableModel);
   }
 
   /** Add an add-on library to the library manager. */
@@ -275,6 +462,11 @@ public class AddOnLibrariesDialogView extends JDialog {
     }
   }
 
+  /**
+   * Views the license file for the given library.
+   *
+   * @param libInfo the library to view the license file for.
+   */
   private void viewLicenseFile(LibraryInfo libInfo) {
     Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
     lib.ifPresent(
@@ -284,9 +476,20 @@ public class AddOnLibrariesDialogView extends JDialog {
                 .thenAccept(
                     a ->
                         a.ifPresent(
-                            asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
+                            asset ->
+                                new ViewAssetDialog(
+                                        asset,
+                                        I18N.getText("library.dialog.addon.license"),
+                                        640,
+                                        480)
+                                    .showModal())));
   }
 
+  /**
+   * Views the README file for the given library.
+   *
+   * @param libInfo the library to view the README file for.
+   */
   private void viewReadMeFile(LibraryInfo libInfo) {
     Optional<Library> lib = new LibraryManager().getLibrary(libInfo.namespace());
     lib.ifPresent(
@@ -296,13 +499,12 @@ public class AddOnLibrariesDialogView extends JDialog {
                 .thenAccept(
                     a ->
                         a.ifPresent(
-                            asset -> new ViewAssetDialog(asset, "License", 640, 480).showModal())));
-  }
-
-  public static void main(String[] args) {
-    AddOnLibrariesDialogView dialog = new AddOnLibrariesDialogView();
-    dialog.pack();
-    dialog.setVisible(true);
-    System.exit(0);
+                            asset ->
+                                new ViewAssetDialog(
+                                        asset,
+                                        I18N.getText("library.dialog.addon.readme"),
+                                        640,
+                                        480)
+                                    .showModal())));
   }
 }
