@@ -387,59 +387,63 @@ public abstract class Grid implements Cloneable {
     fireGridChanged();
   }
 
+  // region Light shapes
+
   /**
-   * Called by SightType and Light class to return a vision area based upon a specified distance
+   * Get the grid-relative angle of the token based on its facing.
    *
-   * @param shape CIRCLE, GRID, SQUARE, CONE or LINE
-   * @param token Used to position the shape and to provide footprint
-   * @param range As specified in the vision or light definition
-   * @param arcAngle Only used by cone
-   * @param offsetAngle Arc distance from facing, only used by cone
-   * @param scaleWithToken used to increase the area based on token footprint
-   * @return Area
+   * <p>This is used to rotate cones and beams according to the on-grid angle. The result is the
+   * number of clockwise degrees measured from the positive x-axis of the grid.
+   *
+   * <p>This method exists because {@link net.rptools.maptool.model.Token#getFacing()} is a measure
+   * of the on-screen angle of the token's facing, i.e., how many degrees from the positive x-axis
+   * of the screen. For most grids this is the same as measuring the number of degress from the
+   * positive x-axis of the grid, which is what is should be.
+   *
+   * <p>Things are different for isometric grids. Since they are rotated, the on-screen facing does
+   * not agree with the on-grid facing - there is a 45° offset. When building shapes, we need the
+   * on-grid facing, not the on-screen facing. This method allows isometric grids to override the
+   * default behaviour so that an on-grid facing is provided.
+   *
+   * @param token The token whose facing needs to be determined.
+   * @return The direction the token is facing, in clockwise degrees from the positive x-axis of the
+   *     grid.
    */
-  public @Nonnull Area getShapedArea(
+  protected int getTokenFacingAngleRelativeToGridAxis(Token token) {
+    return -token.getFacing();
+  }
+
+  /**
+   * Get the main area for a given light shape type.
+   *
+   * <p>This method expressly does not add in the footprint bit that cone lights are expected to
+   * have. This part cannot be freely transformed, so it is done separately in {@link
+   * #getFootprintShapedAreaForCone(java.awt.Rectangle)}.
+   *
+   * @param shape The shape. Can be any shape except {@link
+   *     net.rptools.maptool.model.ShapeType#GRID}.
+   * @param tokenFacingAngle The angle on-screen that the token is facing. Used for cones and beams
+   *     to provide the main axis of the shape.
+   * @param visionRange The range to which the token can see. Determines the size of the shape.
+   * @param width For beams, the width of the beam. Otherwise, ignored.
+   * @param arcAngle For cones, the internal angle of the point of the cone. Otherwise, ignored.
+   * @param offsetAngle For cones and beams, an offset to apply relative to the token facing.
+   *     Otherwise, ignored.
+   * @return The area of the light.
+   */
+  protected @Nonnull Area getShapedAreaWithoutFootprint(
       ShapeType shape,
-      Token token,
-      double range,
+      int tokenFacingAngle,
+      double visionRange,
       double width,
       double arcAngle,
-      int offsetAngle,
-      boolean scaleWithToken) {
-    if (shape == null) {
-      shape = ShapeType.CIRCLE;
-    }
-    int visionDistance = zone.getTokenVisionInPixels();
-    double visionRange = (range == 0) ? visionDistance : range * getSize() / zone.getUnitsPerCell();
-    /* Token facing as an angle. 0° points to the right and clockwise is positive. */
-    int tokenFacingAngle = token.getFacingInDegrees() + 90;
-    Rectangle footprint = token.getFootprint(this).getBounds(this);
-
-    if (scaleWithToken) {
-      double footprintWidth = footprint.getWidth() / 2;
-
-      // Test for gridless maps
-      var cellShape = getCellShape();
-      if (cellShape == null) {
-        double tokenBoundsWidth = token.getBounds(getZone()).getWidth() / 2;
-        visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
-      } else {
-        // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
-        // which Hex type you choose
-        double footprintHeight = footprint.getHeight() / 2;
-        visionRange += Math.min(footprintWidth, footprintHeight);
-      }
-    }
-
+      int offsetAngle) {
     Area visibleArea;
     switch (shape) {
       case CIRCLE -> {
         visibleArea =
             GraphicsUtil.createLineSegmentEllipse(
                 -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
-      }
-      case GRID -> {
-        visibleArea = getGridArea(token, range, scaleWithToken, visionRange);
       }
       case SQUARE -> {
         visibleArea =
@@ -472,14 +476,13 @@ public abstract class Grid implements Cloneable {
         GeneralPath path = new GeneralPath();
         path.append(cone.getPathIterator(null, 1), false);
         visibleArea = new Area(path);
-
-        var footprintPart = new Rectangle(footprint);
-        footprintPart.x = -footprintPart.width / 2;
-        footprintPart.y = -footprintPart.height / 2;
-        visibleArea.add(new Area(footprintPart));
       }
       case HEX -> {
         visibleArea = createHex(visionRange);
+      }
+      case GRID -> {
+        log.error("Shape {} should not be handled here. Returning empty area.", shape);
+        visibleArea = new Area();
       }
       default -> {
         log.error("Unhandled shape {}; treating as a circle", shape);
@@ -491,6 +494,75 @@ public abstract class Grid implements Cloneable {
 
     return visibleArea;
   }
+
+  protected @Nonnull Area getFootprintShapedAreaForCone(Rectangle footprint) {
+    var footprintPart = new Rectangle(footprint);
+    footprintPart.x = -footprintPart.width / 2;
+    footprintPart.y = -footprintPart.height / 2;
+    return new Area(footprintPart);
+  }
+
+  /**
+   * Called by SightType and Light class to return a vision area based upon a specified distance
+   *
+   * @param shape The shape of the light. Can be any {@link net.rptools.maptool.model.ShapeType}
+   * @param token Used to position the shape and to provide footprint
+   * @param range How far the shape should extends from the origin. If {@code 0}, the zone's vision
+   *     range is used.
+   * @param arcAngle Only used by cone
+   * @param offsetAngle Arc distance from facing, only used by cone
+   * @param scaleWithToken used to increase the area based on token footprint
+   * @return Area
+   */
+  public @Nonnull Area getShapedArea(
+      ShapeType shape,
+      Token token,
+      double range,
+      double width,
+      double arcAngle,
+      int offsetAngle,
+      boolean scaleWithToken) {
+    if (range == 0) {
+      range = zone.getTokenVisionDistance();
+    }
+    double visionRange = range * getSize() / zone.getUnitsPerCell();
+
+    Rectangle footprint = token.getFootprint(this).getBounds(this);
+
+    if (scaleWithToken) {
+      double footprintWidth = footprint.getWidth() / 2;
+
+      // Test for gridless maps
+      var cellShape = getCellShape();
+      if (cellShape == null) {
+        double tokenBoundsWidth = token.getBounds(zone).getWidth() / 2;
+        visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
+      } else {
+        // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
+        // which Hex type you choose
+        double footprintHeight = footprint.getHeight() / 2;
+        visionRange += Math.min(footprintWidth, footprintHeight);
+      }
+    }
+
+    // Grid shape is unique in that it is deliberately "unnatural". So handle it separately.
+    if (shape == ShapeType.GRID) {
+      return getGridArea(token, range, scaleWithToken, visionRange);
+    }
+
+    var facingAngle = getTokenFacingAngleRelativeToGridAxis(token);
+    var visibleArea =
+        getShapedAreaWithoutFootprint(
+            shape, facingAngle, visionRange, width, arcAngle, offsetAngle);
+    if (shape == ShapeType.CONE) {
+      // Cones are unique in that they add the token footprint to the shape.
+      visibleArea.add(getFootprintShapedAreaForCone(footprint));
+    }
+
+    return visibleArea;
+  }
+
+  // endregion
 
   /**
    * Return the cell distance between two cells. Does not take into account terrain or VBL.
@@ -777,7 +849,7 @@ public abstract class Grid implements Cloneable {
 
     if (range > 0) {
       final Stopwatch stopwatch = Stopwatch.createStarted();
-      final int gridRadius = (int) (range / getZone().getUnitsPerCell());
+      final int gridRadius = (int) (range / zone.getUnitsPerCell());
 
       if (scaleWithToken) {
         visibleArea = getScaledGridArea(token, gridRadius);
