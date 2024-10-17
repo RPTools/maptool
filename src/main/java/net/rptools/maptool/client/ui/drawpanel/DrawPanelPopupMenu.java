@@ -292,7 +292,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         Shape s = a;
         Pen newPen = new Pen(elementUnderMouse.getPen());
         if (elementUnderMouse.getDrawable() instanceof LineSegment) newPen = invertPen(newPen);
-        DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
+        DrawnElement de = new DrawnElement(new ShapeDrawable(s, true), newPen);
         de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
         MapTool.serverCommand().draw(renderer.getZone().getId(), newPen, de.getDrawable());
         MapTool.getFrame().updateDrawTree();

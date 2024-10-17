@@ -44,10 +44,6 @@ public class ShapeDrawable extends AbstractDrawing {
     this.useAntiAliasing = useAntiAliasing;
   }
 
-  public ShapeDrawable(Shape shape) {
-    this(shape, true);
-  }
-
   public ShapeDrawable(ShapeDrawable other) {
     super(other);
     this.useAntiAliasing = other.useAntiAliasing;

@@ -264,12 +264,33 @@ public class ToolbarPanel extends JToolBar {
     panel
         .add(DeleteDrawingTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DELETE));
-    panel.add(FreehandTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
-    panel.add(LineTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
-    panel.add(RectangleTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
-    panel.add(OvalTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
+
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.line.instructions", "tool.line.tooltip", new PolyLineStrategy(false)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.rect.tooltip", new RectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
+    panel
+        .addTool(
+            new DrawingTool<>("tool.oval.instructions", "tool.oval.tooltip", new OvalStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
     panel.add(TextTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
-    panel.add(DiamondTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.isorectangle.tooltip", new IsoRectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+
     return panel;
   }
 
