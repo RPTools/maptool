@@ -600,8 +600,8 @@ public class AddOnLibrary implements Library {
                                     if (mtScriptEventNameMap.containsKey(FIRST_INIT_EVENT)) {
                                       callMTSFunction(mtScriptEventNameMap.get(FIRST_INIT_EVENT))
                                           .join();
-                                      data.setNeedsToBeInitialized(false).join();
                                     }
+                                    data.setNeedsToBeInitialized(false).join();
                                   }
                                   if (jsEventNameMap.containsKey(INIT_EVENT)) {
                                     runJS(jsEventNameMap.get(INIT_EVENT));
