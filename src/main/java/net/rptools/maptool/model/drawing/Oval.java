@@ -82,6 +82,7 @@ public class Oval extends Rectangle {
     var dto =
         OvalDrawableDto.newBuilder()
             .setId(getId().toString())
+            .setLayer(getLayer().name())
             .setStartPoint(Mapper.map(getStartPoint()))
             .setEndPoint(Mapper.map(getEndPoint()));
 
