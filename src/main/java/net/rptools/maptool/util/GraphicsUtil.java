@@ -29,6 +29,7 @@ import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -304,6 +305,11 @@ public class GraphicsUtil {
 
   public static Area createLineSegmentEllipse(
       double x1, double y1, double x2, double y2, int steps) {
+    return new Area(createLineSegmentEllipsePath(x1, y1, x2, y2, steps));
+  }
+
+  public static Path2D createLineSegmentEllipsePath(
+      double x1, double y1, double x2, double y2, int steps) {
     double x = Math.min(x1, x2);
     double y = Math.min(y1, y2);
 
@@ -322,21 +328,20 @@ public class GraphicsUtil {
     double a = w / 2;
     double b = h / 2;
 
-    boolean firstMove = true;
     for (double t = -Math.PI; t <= Math.PI; t += (2 * Math.PI / steps)) {
+      // TODO Why do we accept double inputs, but round/cast to int here?
       int px = (int) Math.round(x + a * Math.cos(t));
       int py = (int) Math.round(y + b * Math.sin(t));
 
-      if (firstMove) {
+      if (path.getCurrentPoint() == null) {
         path.moveTo(px, py);
-        firstMove = false;
       } else {
         path.lineTo(px, py);
       }
     }
 
     path.closePath();
-    return new Area(path);
+    return path;
   }
 
   public static void renderSoftClipping(Graphics2D g, Shape shape, int width, double initialAlpha) {
