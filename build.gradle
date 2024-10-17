@@ -454,7 +454,7 @@ dependencies {
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'
 
     // Apache Tika Parsers for determining file type
-    implementation 'org.apache.tika:tika-core:2.9.1'
+    implementation 'org.apache.tika:tika-core:2.9.2'
 
     // Noise Generator
     implementation 'com.github.cwisniew:NoiseLib:1.0.0' // The most recent version, 1.0.0 is build for a later java version: major version 55 is newer than 54, the highest major version supported by this compiler
