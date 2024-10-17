@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.AffineTransform;
+import java.awt.geom.Line2D;
 import java.awt.geom.PathIterator;
 import java.text.NumberFormat;
 import javax.swing.AbstractAction;
@@ -48,6 +49,34 @@ public class ToolHelper {
           AppActions.deleteTokens(renderer.getZone(), renderer.getSelectedTokenSet());
         }
       };
+
+  public static void drawIsoRectangleMeasurement(
+      ZoneRenderer renderer, Graphics2D g, ScreenPoint north, ScreenPoint west, ScreenPoint east) {
+    if (g != null) {
+      g.setColor(Color.white);
+      g.setStroke(new BasicStroke(3));
+      g.draw(new Line2D.Double(north.x, north.y - 20, north.x, north.y - 10));
+      g.draw(new Line2D.Double(north.x, north.y - 15, east.x, east.y - 15));
+      g.draw(new Line2D.Double(east.x, east.y - 20, east.x, east.y - 10));
+      g.draw(new Line2D.Double(north.x, north.y - 15, west.x, west.y - 15));
+      g.draw(new Line2D.Double(west.x, west.y - 20, west.x, west.y - 10));
+
+      g.setColor(Color.black);
+      g.setStroke(new BasicStroke(1));
+      // Same points, but in thin black.
+      g.draw(new Line2D.Double(north.x, north.y - 20, north.x, north.y - 10));
+      g.draw(new Line2D.Double(north.x, north.y - 15, east.x, east.y - 15));
+      g.draw(new Line2D.Double(east.x, east.y - 20, east.x, east.y - 10));
+      g.draw(new Line2D.Double(north.x, north.y - 15, west.x, west.y - 15));
+      g.draw(new Line2D.Double(west.x, west.y - 20, west.x, west.y - 10));
+
+      String displayString =
+          NumberFormat.getInstance().format(isometricDistance(renderer, north, east));
+      GraphicsUtil.drawBoxedString(g, displayString, (int) (north.x + 25), (int) (north.y - 25));
+      displayString = NumberFormat.getInstance().format(isometricDistance(renderer, north, west));
+      GraphicsUtil.drawBoxedString(g, displayString, (int) (north.x - 25), (int) (north.y - 25));
+    }
+  }
 
   public static void drawDiamondMeasurement(ZoneRenderer renderer, Graphics2D g, Shape diamond) {
     double[] north = null;
