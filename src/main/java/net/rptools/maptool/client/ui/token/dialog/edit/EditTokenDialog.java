@@ -120,6 +120,9 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
+
+  private Set<String> tokenVBLImmunity;
+  private Set<String> availableTokens = new HashSet<String>();
   private AutoGenerateTopologySwingWorker autoGenerateTopologySwingWorker =
       new AutoGenerateTopologySwingWorker(false, Color.BLACK);
 
@@ -494,6 +497,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           getVisibleOnlyToOwnerLabel().setEnabled(selected);
         };
     getVisibleCheckBox().addActionListener(tokenVisibleActionListener);
+
+    // Init VBL Immunity Tab
+    if (MapTool.getPlayer().isGM()) {
+      initVBLImmunityTab(token);
+    } else {
+      getVBLImmunityTab().setEnabled(false);
+    }
 
     // Character Sheets
     // controller = null;
@@ -898,6 +908,13 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     token.setHeroLabData(heroLabData);
 
+    // Update VBL Immunity
+    token.setMapVBLImmunity("wall", getWallVBLImmunityCB().isSelected());
+    token.setMapVBLImmunity("hill", getHillVBLImmunityCB().isSelected());
+    token.setMapVBLImmunity("pit", getPitVBLImmunityCB().isSelected());
+    token.setMapVBLImmunity("cover", getCoverVBLImmunityCB().isSelected());
+    token.setTokenVBLImmunity(tokenVBLImmunity);
+
     // URI Access
     token.setAllowURIAccess(getAllowURLAccess().isEnabled() && getAllowURLAccess().isSelected());
     // OTHER
@@ -1085,6 +1102,42 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
   public JToggleButton getMblToggle() {
     return (JToggleButton) getComponent("mblToggle");
+  }
+
+  public JTabbedPane getVBLImmunityTab() {
+    return (JTabbedPane) getComponent("vblImmunityTab");
+  }
+
+  public JCheckBox getWallVBLImmunityCB() {
+    return (JCheckBox) getComponent("wallImmunityCB");
+  }
+
+  public JCheckBox getCoverVBLImmunityCB() {
+    return (JCheckBox) getComponent("coverImmunityCB");
+  }
+
+  public JCheckBox getHillVBLImmunityCB() {
+    return (JCheckBox) getComponent("hillImmunityCB");
+  }
+
+  public JCheckBox getPitVBLImmunityCB() {
+    return (JCheckBox) getComponent("pitImmunityCB");
+  }
+
+  public JList getTokenVBLImmunityList() {
+    return (JList) getComponent("tokenVBLImmunityList");
+  }
+
+  public JList getAvailableTokenList() {
+    return (JList) getComponent("availableTokenList");
+  }
+
+  public JButton getAddTokenVBLImmunityButton() {
+    return (JButton) getComponent("addTokenVBLImmunityButton");
+  }
+
+  public JButton getRemoveTokenVBLImmunityButton() {
+    return (JButton) getComponent("removeTokenVBLImmunityButton");
   }
 
   public JButton getAutoGenerateTopologyButton() {
@@ -1730,6 +1783,84 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
           SearchEngine.find(textStatblockRSyntaxTextArea, context).wasFound();
         });
+  }
+
+  public void initVBLImmunityTab(Token thisToken) {
+
+    ((JCheckBox) getWallVBLImmunityCB()).setSelected(thisToken.getMapVBLImmunity().get("wall"));
+    ((JCheckBox) getCoverVBLImmunityCB()).setSelected(thisToken.getMapVBLImmunity().get("cover"));
+    ((JCheckBox) getHillVBLImmunityCB()).setSelected(thisToken.getMapVBLImmunity().get("hill"));
+    ((JCheckBox) getPitVBLImmunityCB()).setSelected(thisToken.getMapVBLImmunity().get("pit"));
+
+    tokenVBLImmunity = thisToken.getTokenVBLImmunity();
+    Object[] tokenVBLImmunitiesID = tokenVBLImmunity.toArray();
+    ArrayList<String> activeListEntries = new ArrayList<>();
+    ArrayList<String> inActiveListEntries = new ArrayList<>();
+    var mapZone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
+
+    JList tokenVBLImmunityList = new JList(new DefaultListModel());
+    JList availableTokenList = new JList(new DefaultListModel());
+
+    List<Token> tokenList = mapZone.getAllTokens();
+    for (Token v : tokenList) {
+      if (!tokenVBLImmunity.contains(v.getId().toString()) && v.getId() != thisToken.getId()) {
+        availableTokens.add(v.getId().toString());
+        String newEntry = v.getName();
+        if (v.getGMName() != null) {
+          newEntry += " (" + v.getGMName() + ")";
+        }
+        inActiveListEntries.add(newEntry);
+        ((DefaultListModel) availableTokenList.getModel()).addElement(newEntry);
+      }
+    }
+
+    for (var r = 0; r < tokenVBLImmunitiesID.length; r++) {
+      String v = (String) tokenVBLImmunitiesID[r];
+      Token t = mapZone.getToken(GUID.valueOf(v));
+      String newEntry = t.getName();
+      if (MapTool.getPlayer().isGM() && t.getGMName() != null) {
+        newEntry += " (" + t.getGMName() + ")";
+      }
+      activeListEntries.add(newEntry);
+      ((DefaultListModel) tokenVBLImmunityList.getModel()).addElement(newEntry);
+    }
+
+    tokenVBLImmunityList.setName("tokenVBLImmunityList");
+    availableTokenList.setName("availableTokenList");
+    tokenVBLImmunityList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    availableTokenList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+    tokenVBLImmunityList.setLayoutOrientation(JList.VERTICAL);
+    availableTokenList.setLayoutOrientation(JList.VERTICAL);
+
+    getAddTokenVBLImmunityButton()
+        .addActionListener(
+            e -> {
+              int removeIndex = getAvailableTokenList().getSelectedIndex();
+              Object selectedObject = getAvailableTokenList().getSelectedValue();
+              if (removeIndex > -1) {
+                tokenVBLImmunity.add((String) availableTokens.toArray()[removeIndex]);
+                availableTokens.remove(availableTokens.toArray()[removeIndex]);
+                ((DefaultListModel) getAvailableTokenList().getModel()).remove(removeIndex);
+                ((DefaultListModel) getTokenVBLImmunityList().getModel())
+                    .addElement(selectedObject);
+              }
+            });
+
+    getRemoveTokenVBLImmunityButton()
+        .addActionListener(
+            e -> {
+              int removeIndex = getTokenVBLImmunityList().getSelectedIndex();
+              Object selectedObject = getTokenVBLImmunityList().getSelectedValue();
+              if (removeIndex > -1) {
+                availableTokens.add((String) tokenVBLImmunity.toArray()[removeIndex]);
+                tokenVBLImmunity.remove(tokenVBLImmunity.toArray()[removeIndex]);
+                ((DefaultListModel) getTokenVBLImmunityList().getModel()).remove(removeIndex);
+                ((DefaultListModel) getAvailableTokenList().getModel()).addElement(selectedObject);
+              }
+            });
+
+    replaceComponent("vblImmunityActivePanel", "tokenVBLImmunityList", tokenVBLImmunityList);
+    replaceComponent("vblImmunityAvailablePanel", "availableTokenList", availableTokenList);
   }
 
   private static class SpeechTableModel extends KeyValueTableModel {

@@ -240,23 +240,40 @@ public class ZoneView {
    * @param topologyType The type of topology tree to get.
    * @return the area of the topology.
    */
-  public synchronized Area getTopology(Zone.TopologyType topologyType) {
+  public synchronized Area getTopology(
+      Zone.TopologyType topologyType,
+      Set<Zone.TopologyType> excludeTypes,
+      Set<String> excludeTokens) {
     var topology = topologyAreas.get(topologyType);
 
-    if (topology == null) {
+    if (topology == null
+        || (!excludeTypes.isEmpty() && excludeTypes.contains(topologyType))
+        || !excludeTokens.isEmpty()) {
       log.debug("ZoneView topology area for {} is null, generating...", topologyType.name());
 
-      topology = new Area(zone.getTopology(topologyType));
+      if (excludeTypes.contains(topologyType)) {
+        topology = new Area();
+      } else {
+        topology = new Area(zone.getTopology(topologyType));
+      }
       List<Token> topologyTokens =
           MapTool.getFrame().getCurrentZoneRenderer().getZone().getTokensWithTopology(topologyType);
       for (Token topologyToken : topologyTokens) {
-        topology.add(topologyToken.getTransformedTopology(topologyType));
+        if (!excludeTokens.contains(topologyToken.getId().toString())) {
+          topology.add(topologyToken.getTransformedTopology(topologyType));
+        }
       }
 
-      topologyAreas.put(topologyType, topology);
+      if (excludeTypes.isEmpty() && excludeTokens.isEmpty()) {
+        topologyAreas.put(topologyType, topology);
+      }
     }
 
     return topology;
+  }
+
+  public synchronized Area getTopology(Zone.TopologyType topologyType) {
+    return getTopology(topologyType, new HashSet<Zone.TopologyType>(), new HashSet<String>());
   }
 
   /**
@@ -271,19 +288,30 @@ public class ZoneView {
    * @param topologyType The type of topology tree to get.
    * @return the AreaTree (topology tree).
    */
-  private synchronized AreaTree getTopologyTree(Zone.TopologyType topologyType) {
+  private synchronized AreaTree getTopologyTree(
+      Zone.TopologyType topologyType,
+      Set<Zone.TopologyType> excludeTypes,
+      Set<String> excludeTokens) {
     var topologyTree = topologyTrees.get(topologyType);
 
-    if (topologyTree == null) {
+    if (topologyTree == null
+        || (!excludeTypes.isEmpty() && excludeTypes.contains(topologyType))
+        || !excludeTokens.isEmpty()) {
       log.debug("ZoneView topology tree for {} is null, generating...", topologyType.name());
 
-      var topology = getTopology(topologyType);
+      var topology = getTopology(topologyType, excludeTypes, excludeTokens);
 
       topologyTree = new AreaTree(topology);
-      topologyTrees.put(topologyType, topologyTree);
+      if (excludeTypes.isEmpty() && excludeTokens.isEmpty()) {
+        topologyTrees.put(topologyType, topologyTree);
+      }
     }
 
     return topologyTree;
+  }
+
+  private synchronized AreaTree getTopologyTree(Zone.TopologyType topologyType) {
+    return getTopologyTree(topologyType, new HashSet<Zone.TopologyType>(), new HashSet<String>());
   }
 
   private IlluminationModel getIlluminationModel(IlluminationKey illuminationKey) {
@@ -591,14 +619,37 @@ public class ZoneView {
       Point p = FogUtil.calculateVisionCenter(token, zone);
       Area visibleArea = sight.getVisionShape(token, zone);
       visibleArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
+      Set<Zone.TopologyType> excludeTypes = new HashSet<Zone.TopologyType>();
+      token
+          .getMapVBLImmunity()
+          .forEach(
+              (key, value) -> {
+                if (value) {
+                  switch (key) {
+                    case "wall":
+                      excludeTypes.add(Zone.TopologyType.WALL_VBL);
+                      break;
+                    case "hill":
+                      excludeTypes.add(Zone.TopologyType.HILL_VBL);
+                      break;
+                    case "pit":
+                      excludeTypes.add(Zone.TopologyType.PIT_VBL);
+                      break;
+                    case "cover":
+                      excludeTypes.add(Zone.TopologyType.COVER_VBL);
+                      break;
+                  }
+                }
+              });
+      Set<String> excludeTokens = token.getTokenVBLImmunity();
       tokenVisibleArea =
           FogUtil.calculateVisibility(
               p,
               visibleArea,
-              getTopologyTree(Zone.TopologyType.WALL_VBL),
-              getTopologyTree(Zone.TopologyType.HILL_VBL),
-              getTopologyTree(Zone.TopologyType.PIT_VBL),
-              getTopologyTree(Zone.TopologyType.COVER_VBL));
+              getTopologyTree(Zone.TopologyType.WALL_VBL, excludeTypes, excludeTokens),
+              getTopologyTree(Zone.TopologyType.HILL_VBL, excludeTypes, excludeTokens),
+              getTopologyTree(Zone.TopologyType.PIT_VBL, excludeTypes, excludeTokens),
+              getTopologyTree(Zone.TopologyType.COVER_VBL, excludeTypes, excludeTokens));
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 

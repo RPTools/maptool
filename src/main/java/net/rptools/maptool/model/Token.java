@@ -220,7 +220,13 @@ public class Token implements Cloneable {
     flipY,
     flipIso,
     setSpeechName,
-    removeFacing
+    removeFacing,
+    setTokenVBLImmunity,
+    addTokenVBLImmunity,
+    removeTokenVBLImmunity,
+    toggleMapVBLImmunity,
+    setMapVBLImmunity,
+    clearTokenVBLImmunity
   }
 
   public static final Comparator<Token> NAME_COMPARATOR =
@@ -270,6 +276,10 @@ public class Token implements Cloneable {
   private Area pitVbl;
   private Area coverVbl;
   private Area mbl;
+
+  private Map<String, Boolean> mapVBLImmunity = new HashMap<>();
+
+  private Set<String> tokenVBLImmunity = new HashSet<>();
 
   private String name = "";
   private Set<String> ownerList = new HashSet<>();
@@ -2211,6 +2221,50 @@ public class Token implements Cloneable {
     sizeScale = scale;
   }
 
+  public void setTokenVBLImmunity(Set<String> immunityData) {
+    tokenVBLImmunity = immunityData;
+  }
+
+  public void clearTokenVBLImmunity() {
+    tokenVBLImmunity.clear();
+  }
+
+  public void addTokenVBLImmunity(String tokenID) {
+    tokenVBLImmunity.add(tokenID);
+  }
+
+  public void removeTokenVBLImmunity(String tokenID) {
+    tokenVBLImmunity.remove(tokenID);
+  }
+
+  public Set<String> getTokenVBLImmunity() {
+    return tokenVBLImmunity;
+  }
+
+  public void setMapVBLImmunity(String key, Boolean value) {
+    mapVBLImmunity.put(key, value);
+  }
+
+  public HashMap<String, Boolean> getMapVBLImmunity() {
+    if (!mapVBLImmunity.containsKey("wall")) {
+      mapVBLImmunity.put("wall", false);
+    }
+    if (!mapVBLImmunity.containsKey("hill")) {
+      mapVBLImmunity.put("hill", false);
+    }
+    if (!mapVBLImmunity.containsKey("pit")) {
+      mapVBLImmunity.put("pit", false);
+    }
+    if (!mapVBLImmunity.containsKey("cover")) {
+      mapVBLImmunity.put("cover", false);
+    }
+    return new HashMap<String, Boolean>(mapVBLImmunity);
+  }
+
+  public void toggleMapVBLImmunity(String key) {
+    mapVBLImmunity.put(key, !mapVBLImmunity.get(key));
+  }
+
   /**
    * Convert the token into a hash map. This is used to ship all of the properties for the token to
    * other apps that do need access to the <code>Token</code> class.
@@ -2900,6 +2954,25 @@ public class Token implements Cloneable {
       case flipIso:
         setFlippedIso(!isFlippedIso());
         break;
+      case setTokenVBLImmunity:
+        setTokenVBLImmunity(
+            new HashSet<String>(List.of(parameters.get(0).getStringValue().split(", "))));
+        break;
+      case addTokenVBLImmunity:
+        addTokenVBLImmunity(parameters.get(0).getStringValue());
+        break;
+      case removeTokenVBLImmunity:
+        removeTokenVBLImmunity(parameters.get(0).getStringValue());
+        break;
+      case setMapVBLImmunity:
+        setMapVBLImmunity(parameters.get(0).getStringValue(), parameters.get(1).getBoolValue());
+        break;
+      case toggleMapVBLImmunity:
+        toggleMapVBLImmunity(parameters.get(0).getStringValue());
+        break;
+      case clearTokenVBLImmunity:
+        clearTokenVBLImmunity();
+        break;
     }
     if (lightChanged) {
       getZoneRenderer().flushLight(); // flush lights if it changed
@@ -2994,6 +3067,17 @@ public class Token implements Cloneable {
     token.gmName = dto.hasGmName() ? dto.getGmName().getValue() : "";
     token.notesType = dto.getNotesType();
     token.gmNotesType = dto.getGmNotesType();
+
+    dto.getTokenVblImmunityList()
+        .forEach(
+            (value) -> {
+              token.tokenVBLImmunity.add(value);
+            });
+    dto.getMapVblImmunityMap()
+        .forEach(
+            (key, value) -> {
+              token.setMapVBLImmunity(key, value);
+            });
 
     dto.getStateMap()
         .forEach(
@@ -3152,6 +3236,10 @@ public class Token implements Cloneable {
     if (statSheet != null) {
       dto.setStatSheetProperties(StatSheetProperties.toDto(statSheet));
     }
+
+    dto.putAllMapVblImmunity(getMapVBLImmunity());
+    dto.addAllTokenVblImmunity(getTokenVBLImmunity());
+
     return dto.build();
   }
 

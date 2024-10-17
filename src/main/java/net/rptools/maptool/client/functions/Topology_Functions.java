@@ -26,6 +26,7 @@ import java.awt.geom.Path2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.function.BiConsumer;
 import net.rptools.maptool.client.MapTool;
@@ -163,7 +164,15 @@ public class Topology_Functions extends AbstractFunction {
         "transferHillVBL",
         "transferPitVBL",
         "transferCoverVBL",
-        "transferMBL");
+        "transferMBL",
+        "setTokenVBLImmunity",
+        "addTokenVBLImmunity",
+        "removeTokenVBLImmunity",
+        "getTokenVBLImmunity",
+        "setMapVBLImmunity",
+        "toggleMapVBLImmunity",
+        "getMapVBLImmunity",
+        "clearTokenVBLImmunity");
   }
 
   public static Topology_Functions getInstance() {
@@ -214,6 +223,16 @@ public class Topology_Functions extends AbstractFunction {
         || functionName.equalsIgnoreCase("transferCoverVBL")
         || functionName.equalsIgnoreCase("transferMBL")) {
       childEvaluateTransferTopology(resolver, functionName, parameters);
+    } else if (functionName.equalsIgnoreCase("setTokenVBLImmunity")
+        || functionName.equalsIgnoreCase("addTokenVBLImmunity")
+        || functionName.equalsIgnoreCase("removeTokenVBLImmunity")
+        || functionName.equalsIgnoreCase("setMapVBLImmunity")
+        || functionName.equalsIgnoreCase("toggleMapVBLImmunity")
+        || functionName.equalsIgnoreCase("clearTokenVBLImmunity")) {
+      childEvaluateSetTopologyImmunity(resolver, functionName, parameters);
+    } else if (functionName.equalsIgnoreCase("getTokenVBLImmunity")
+        || functionName.equalsIgnoreCase("getMapVBLImmunity")) {
+      return childEvaluateGetTopologyImmunity(resolver, functionName, parameters).toString();
     } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
@@ -608,6 +627,122 @@ public class Topology_Functions extends AbstractFunction {
         TokenVBL.renderTopology(renderer, topology, true, topologyType);
       }
     }
+  }
+
+  public void childEvaluateSetTopologyImmunity(
+      VariableResolver resolver, String functionName, List<Object> parameters)
+      throws ParserException {
+
+    if (parameters.size() > 3) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+    }
+
+    if (parameters.isEmpty()) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+    }
+
+    if (!MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
+
+    Token token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+    if (token == null) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+    }
+
+    if (functionName.equalsIgnoreCase("setTokenVBLImmunity")) {
+      JsonArray setList =
+          net.rptools.maptool.util.FunctionUtil.paramAsJsonArray(functionName, parameters, 1);
+      HashSet<String> newSet = new HashSet<String>();
+      for (JsonElement entry : setList) {
+        newSet.add(entry.getAsString());
+      }
+      token.setTokenVBLImmunity(newSet);
+      MapTool.serverCommand()
+          .updateTokenProperty(
+              token, Token.Update.setTokenVBLImmunity, newSet.toString().replaceAll("^\\[|]$", ""));
+    } else if (functionName.equalsIgnoreCase("addTokenVBLImmunity")) {
+      token.addTokenVBLImmunity(parameters.get(1).toString());
+      MapTool.serverCommand()
+          .updateTokenProperty(
+              token, Token.Update.addTokenVBLImmunity, parameters.get(1).toString());
+    } else if (functionName.equalsIgnoreCase("removeTokenVBLImmunity")) {
+      token.removeTokenVBLImmunity(parameters.get(1).toString());
+      MapTool.serverCommand()
+          .updateTokenProperty(
+              token, Token.Update.removeTokenVBLImmunity, parameters.get(1).toString());
+    } else if (functionName.equalsIgnoreCase("setMapVBLImmunity")) {
+      token.setMapVBLImmunity(
+          parameters.get(1).toString(), BigDecimal.ONE.equals(parameters.get(2)));
+      MapTool.serverCommand()
+          .updateTokenProperty(
+              token,
+              Token.Update.setMapVBLImmunity,
+              parameters.get(1).toString(),
+              BigDecimal.ONE.equals(parameters.get(2)));
+    } else if (functionName.equalsIgnoreCase("toggleMapVBLImmunity")) {
+      token.toggleMapVBLImmunity(parameters.get(1).toString());
+      MapTool.serverCommand()
+          .updateTokenProperty(
+              token, Token.Update.toggleMapVBLImmunity, parameters.get(1).toString());
+    } else if (functionName.equalsIgnoreCase("clearTokenVBLImmunity")) {
+      token.clearTokenVBLImmunity();
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.clearTokenVBLImmunity);
+    }
+  }
+
+  public JsonArray childEvaluateGetTopologyImmunity(
+      VariableResolver resolver, String functionName, List<Object> parameters)
+      throws ParserException {
+
+    if (parameters.size() > 3) {
+      throw new ParserException(
+          I18N.getText("macro.function.general.tooManyParam", functionName, 1, parameters.size()));
+    }
+
+    if (parameters.isEmpty()) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.notEnoughParam", functionName, 1, parameters.size()));
+    }
+
+    if (!MapTool.getParser().isMacroTrusted()) {
+      throw new ParserException(I18N.getText("macro.function.general.noPerm", functionName));
+    }
+
+    Token token = FindTokenFunctions.findToken(parameters.get(0).toString(), null);
+    if (token == null) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.unknownToken", functionName, parameters.get(0).toString()));
+    }
+
+    JsonArray returnValue = new JsonArray();
+
+    if (functionName.equalsIgnoreCase("getTokenVBLImmunity")) {
+      token
+          .getTokenVBLImmunity()
+          .forEach(
+              (value) -> {
+                returnValue.add(value);
+              });
+    } else if (functionName.equalsIgnoreCase("getMapVBLImmunity")) {
+      token
+          .getMapVBLImmunity()
+          .forEach(
+              (key, value) -> {
+                if (value) {
+                  returnValue.add(key);
+                }
+              });
+    }
+
+    return returnValue;
   }
 
   /**

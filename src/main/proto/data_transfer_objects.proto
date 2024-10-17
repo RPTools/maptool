@@ -364,6 +364,8 @@ message TokenDto {
   string notes_type = 68;
   string gm_notes_type = 69;
   StatSheetPropertiesDto stat_sheet_properties = 70;
+  map<string, bool> map_vbl_immunity = 72;
+  repeated string token_vbl_immunity = 73;
 }
 
 message PathDto {
@@ -656,6 +658,12 @@ enum TokenUpdateDto {
     flipIso = 55;
     setSpeechName = 56;
     removeFacing = 57;
+    setTokenVBLImmunity = 58;
+    addTokenVBLImmunity = 59;
+    removeTokenVBLImmunity = 60;
+    setMapVBLImmunity = 61;
+    toggleMapVBLImmunity = 62;
+    clearTokenVBLImmunity = 63;
 }
 
 message AssetTransferHeaderDto {
