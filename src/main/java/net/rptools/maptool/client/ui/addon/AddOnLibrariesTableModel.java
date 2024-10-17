@@ -14,46 +14,30 @@
  */
 package net.rptools.maptool.client.ui.addon;
 
-import com.google.common.eventbus.Subscribe;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.table.AbstractTableModel;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.LibraryInfo;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.LibraryType;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * The AddOnLibrariesTableModel class is a table model for displaying add-on libraries in the a
- * JTable.
- */
 public class AddOnLibrariesTableModel extends AbstractTableModel {
-
-  /** The logger. */
   private static final Logger log = LogManager.getLogger(AddOnLibrariesDialogController.class);
 
-  /** The list of add-on libraries. */
   private final List<LibraryInfo> addons = new ArrayList<>();
 
-  /** The AddOnLibrariesTableModel constructor. */
   public AddOnLibrariesTableModel() {
     try {
       addons.addAll(new LibraryManager().getLibraries(LibraryType.ADD_ON));
     } catch (ExecutionException | InterruptedException e) {
-      log.error(I18N.getText("library.dialog.error.displayingAddons"), e);
+      log.error("Error displaying add-on libraries", e);
     }
   }
 
-  /**
-   * Get the add-on library at the specified row of the table.
-   *
-   * @param row the row.
-   * @return the add-on library.
-   */
   public LibraryInfo getAddOn(int row) {
     return addons.get(row);
   }
@@ -100,25 +84,5 @@ public class AddOnLibrariesTableModel extends AbstractTableModel {
       log.error("Error displaying add-on libraries", e);
     }
     super.fireTableDataChanged();
-  }
-
-  /**
-   * Handle the AddOnsUpdatedEvent event by firing a table data changed event.
-   *
-   * @param event the AddOnsUpdatedEvent event.
-   */
-  @Subscribe
-  public void handleAddOnsUpdatedEvent(AddOnsAddedEvent event) {
-    fireTableDataChanged();
-  }
-
-  /**
-   * Handle the AddOnsRemovedEvent event by firing a table data changed event.
-   *
-   * @param event the AddOnsRemovedEvent event.
-   */
-  @Subscribe
-  public void handleAddOnsRemovedEvent(AddOnsAddedEvent event) {
-    fireTableDataChanged();
   }
 }
