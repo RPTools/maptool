@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.model.library.addon;
 
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -25,8 +23,6 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
-import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.library.AddOnsAddedEvent;
 import net.rptools.maptool.model.library.AddOnsRemovedEvent;
@@ -43,9 +39,6 @@ public class AddOnLibraryManager {
 
   /** The add-on libraries that are registered. */
   private final Map<String, AddOnLibrary> namespaceLibraryMap = new ConcurrentHashMap<>();
-
-  /** The external add-on library manager. */
-  private ExternalAddOnLibraryManager externalAddOnLibraryManager;
 
   /**
    * Is there a add-on library that would handle this path. This just checks the protocol and
@@ -90,16 +83,6 @@ public class AddOnLibraryManager {
     new MapToolEventBus()
         .getMainEventBus()
         .post(new AddOnsAddedEvent(Set.of(library.getLibraryInfo().join())));
-  }
-
-  /**
-   * Checks to see if the specified namespace is registered.
-   *
-   * @param namespace the namespace to check.
-   * @return {@code true} if the namespace is registered.
-   */
-  public boolean isNamespaceRegistered(String namespace) {
-    return namespaceLibraryMap.containsKey(namespace.toLowerCase());
   }
 
   /**
@@ -188,7 +171,7 @@ public class AddOnLibraryManager {
             .map(CompletableFuture::join)
             .collect(Collectors.toSet());
 
-    if (!libs.isEmpty()) {
+    if (libs.size() > 0) {
       new MapToolEventBus().getMainEventBus().post(new AddOnsRemovedEvent(libs));
       for (var library : namespaceLibraryMap.values()) {
         library.cleanup();
@@ -209,106 +192,5 @@ public class AddOnLibraryManager {
             namespaceLibraryMap.values().stream()
                 .filter(l -> l.getLegacyEvents().contains(eventName))
                 .collect(Collectors.toSet()));
-  }
-
-  /** Initializes the add-on library manager. */
-  public void init() {
-    externalAddOnLibraryManager = new ExternalAddOnLibraryManager(this);
-    String path = AppPreferences.externalAddOnLibrariesPath.get();
-
-    try {
-      externalAddOnLibraryManager.setExternalLibraryPath(Path.of(path));
-      externalAddOnLibraryManager.setEnabled(AppPreferences.externalAddOnLibrariesEnabled.get());
-      externalAddOnLibraryManager.init();
-    } catch (IOException e) {
-      MapTool.showError("Error setting external library path", e);
-      try {
-        externalAddOnLibraryManager.setEnabled(false);
-      } catch (IOException ex) {
-        // Do nothing as it shouldn't happen, but if it does there is no action we can take
-      }
-    }
-  }
-
-  /**
-   * Replaces the add-on library with a newer version.
-   *
-   * @param library the library to replace the existing library with.
-   */
-  public void replaceLibrary(AddOnLibrary library) {
-    library
-        .getNamespace()
-        .thenAccept(
-            namespace -> {
-              deregisterLibrary(namespace);
-              registerLibrary(library);
-            });
-  }
-
-  /**
-   * Returns the information of external add-on libraries that are registered.
-   *
-   * @return the information of external add-on libraries that are registered.
-   */
-  public List<ExternalLibraryInfo> getExternalAddOnLibraries() {
-    return externalAddOnLibraryManager.getLibraries();
-  }
-
-  /**
-   * Returns if external add-on libraries are enabled.
-   *
-   * @return if external add-on libraries are enabled.
-   */
-  public boolean externalLibrariesEnabled() {
-    return externalAddOnLibraryManager.isEnabled();
-  }
-
-  /**
-   * Sets if external add-on libraries are enabled.
-   *
-   * @param enabled if external add-on libraries are enabled.
-   * @throws IOException if an I/O error occurs.
-   */
-  public void setExternalLibrariesEnabled(boolean enabled) throws IOException {
-    externalAddOnLibraryManager.setEnabled(enabled);
-  }
-
-  /**
-   * Returns the path to the external add-on libraries.
-   *
-   * @return the path to the external add-on libraries.
-   */
-  public Path getExternalLibraryPath() {
-    return externalAddOnLibraryManager.getExternalLibraryPath();
-  }
-
-  /**
-   * Sets the path to the external add-on libraries.
-   *
-   * @param path the path to the external add-on libraries.
-   * @throws IOException if an I/O error occurs.
-   */
-  public void setExternalLibraryPath(Path path) throws IOException {
-    externalAddOnLibraryManager.setExternalLibraryPath(path);
-  }
-
-  /**
-   * Registers the add-on library as an external library.
-   *
-   * @param path The path to the library.
-   * @throws IOException if an I/O error occurs.
-   */
-  public void registerExternalLibrary(Path path) throws IOException {
-    externalAddOnLibraryManager.registerExternalAddOnLibrary(path);
-  }
-
-  /**
-   * Makes the external library with the given namespace available to MapTool. Importing an existing
-   * library will replace the existing library.
-   *
-   * @param namespace The namespace of the library.
-   */
-  public void importFromExternal(String namespace) throws IOException {
-    externalAddOnLibraryManager.importLibrary(namespace);
   }
 }
