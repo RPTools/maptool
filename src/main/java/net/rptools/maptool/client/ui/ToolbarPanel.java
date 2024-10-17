@@ -469,9 +469,8 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private class OptionPanel extends JToolBar {
-
-    private Class<? extends Tool> firstTool;
-    private Class<? extends Tool> currentTool;
+    private Tool firstTool;
+    private Tool currentTool;
 
     public OptionPanel() {
       setFloatable(false);
@@ -481,18 +480,28 @@ public class ToolbarPanel extends JToolBar {
     }
 
     public Tool add(Class<? extends Tool> toolClass) {
-      if (firstTool == null) {
-        firstTool = toolClass;
-      }
       final Tool tool = toolbox.createTool(toolClass);
+      setupTool(tool);
+      return tool;
+    }
+
+    public Tool addTool(Tool tool) {
+      toolbox.addTool(tool);
+      setupTool(tool);
+      return tool;
+    }
+
+    private void setupTool(Tool tool) {
+      if (firstTool == null) {
+        firstTool = tool;
+      }
       tool.addActionListener(
           e -> {
             if (tool.isSelected()) {
-              currentTool = tool.getClass();
+              currentTool = tool;
             }
           });
       add(tool);
-      return tool;
     }
 
     protected void activate() {
