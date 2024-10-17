@@ -28,10 +28,8 @@ import java.util.List;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
-import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
-import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Token;
@@ -44,11 +42,10 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 /** Tool for drawing freehand lines. */
-public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOverlay {
+public abstract class AbstractDrawingTool extends AbstractDrawingLikeTool implements ZoneOverlay {
 
   private static final long serialVersionUID = 9121558405484986225L;
 
-  private boolean isEraser;
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
 
@@ -146,14 +143,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     super.detachFrom(renderer);
   }
 
-  protected void setIsEraser(boolean eraser) {
-    isEraser = eraser;
-  }
-
-  protected boolean isEraser() {
-    return isEraser;
-  }
-
   protected boolean isBackgroundFill(MouseEvent e) {
     boolean defaultValue = MapTool.getFrame().getColorPicker().isFillBackgroundSelected();
     return defaultValue;
@@ -177,17 +166,9 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     return defaultValue;
   }
 
-  protected boolean isSnapToCenter(MouseEvent e) {
-    boolean defaultValue = false;
-    if (e.isAltDown()) {
-      defaultValue = true;
-    }
-    return defaultValue;
-  }
-
   protected Pen getPen() {
     Pen pen = new Pen(MapTool.getFrame().getPen());
-    pen.setEraser(isEraser);
+    pen.setEraser(isEraser());
 
     ColorPicker picker = MapTool.getFrame().getColorPicker();
     if (picker.isFillForegroundSelected()) {
@@ -203,19 +184,6 @@ public abstract class AbstractDrawingTool extends DefaultTool implements ZoneOve
     pen.setSquareCap(picker.isSquareCapSelected());
     pen.setThickness(picker.getStrokeWidth());
     return pen;
-  }
-
-  protected ZonePoint getPoint(MouseEvent e) {
-    ScreenPoint sp = new ScreenPoint(e.getX(), e.getY());
-    ZonePoint zp = sp.convertToZoneRnd(renderer);
-    if (isSnapToCenter(e) && this instanceof AbstractLineTool) {
-      // Only line tools will snap to center as the Alt key for rectangle, diamond and oval
-      // is used for expand from center.
-      zp = renderer.getCellCenterAt(sp);
-    } else if (isSnapToGrid(e)) {
-      zp = renderer.getZone().getNearestVertex(zp);
-    }
-    return zp;
   }
 
   protected Area getTokenTopology(Zone.TopologyType topologyType) {
