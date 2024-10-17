@@ -48,9 +48,6 @@ public interface Drawable {
   static Drawable fromDto(DrawableDto drawableDto) {
     return switch (drawableDto.getDrawableTypeCase()) {
       case SHAPE_DRAWABLE -> ShapeDrawable.fromDto(drawableDto.getShapeDrawable());
-      case RECTANGLE_DRAWABLE -> Rectangle.fromDto(drawableDto.getRectangleDrawable());
-      case OVAL_DRAWABLE -> Oval.fromDto(drawableDto.getOvalDrawable());
-      case CROSS_DRAWABLE -> Cross.fromDto(drawableDto.getCrossDrawable());
       case DRAWN_LABEL -> DrawnLabel.fromDto(drawableDto.getDrawnLabel());
       case LINE_SEGMENT -> LineSegment.fromDto(drawableDto.getLineSegment());
       case DRAWABLES_GROUP -> DrawablesGroup.fromDto(drawableDto.getDrawablesGroup());

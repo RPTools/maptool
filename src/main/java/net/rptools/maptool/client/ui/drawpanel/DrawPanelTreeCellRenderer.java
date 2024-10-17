@@ -51,28 +51,20 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
     String text = "";
     this.row = row;
-    if (value instanceof DrawnElement) {
-      String key = "panel.DrawExplorer.Unknown.Shape";
-      DrawnElement de = (DrawnElement) value;
+    if (value instanceof DrawnElement de) {
       text = de.getDrawable().toString();
       if (de.getDrawable() instanceof DrawablesGroup) {
         text = I18N.getString("panel.DrawExplorer.group");
-      } else if (de.getDrawable() instanceof ShapeDrawable) {
-        ShapeDrawable sd = (ShapeDrawable) de.getDrawable();
-        key =
-            String.format(
-                "panel.DrawExplorer.%s.%s",
-                sd.getClass().getSimpleName(), sd.getShape().getClass().getSimpleName());
+      } else if (de.getDrawable() instanceof ShapeDrawable sd) {
+        var key = String.format("panel.DrawExplorer.ShapeDrawable.%s", sd.getShapeTypeName());
         text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
-      } else if (de.getDrawable() instanceof LineSegment) {
-        LineSegment ls = (LineSegment) de.getDrawable();
-        key = String.format("panel.DrawExplorer.%s.Line", ls.getClass().getSimpleName());
+      } else if (de.getDrawable() instanceof LineSegment ls) {
+        var key = "panel.DrawExplorer.LineSegment.Line";
         text = I18N.getText(key, ls.getPoints().size(), de.getPen().getThickness());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
-      } else if (de.getDrawable() instanceof AbstractTemplate) {
-        AbstractTemplate at = (AbstractTemplate) de.getDrawable();
-        key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
+      } else if (de.getDrawable() instanceof AbstractTemplate at) {
+        var key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
         text = I18N.getText(key, at.getRadius());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
       }
@@ -116,7 +108,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       case "panel.DrawExplorer.ShapeDrawable.Polygon":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_POLYGON_DRAW);
-      case "panel.DrawExplorer.ShapeDrawable.Float":
+      case "panel.DrawExplorer.ShapeDrawable.Oval":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ELLIPSE_DRAW);
       case "panel.DrawExplorer.ShapeDrawable.Rectangle":

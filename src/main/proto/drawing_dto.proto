@@ -36,9 +36,6 @@ message PenDto {
 message DrawableDto {
   oneof drawable_type {
     ShapeDrawableDto shape_drawable = 1;
-    RectangleDrawableDto rectangle_drawable = 2;
-    OvalDrawableDto oval_drawable = 3;
-    CrossDrawableDto cross_drawable = 4;
     DrawnLabelDto drawn_label = 5;
     LineSegmentDrawableDto line_segment = 6;
     DrawablesGroupDto drawables_group = 7;
@@ -155,31 +152,6 @@ message DrawnLabelDto {
   string text = 5;
   string font = 6;
 }
-
-message RectangleDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
-message OvalDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
-message CrossDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
 
 message ShapeDrawableDto {
   string id = 1;
