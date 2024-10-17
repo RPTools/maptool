@@ -19,7 +19,7 @@ dependencies {
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
     // webrtc
-    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.6'
+    implementation group: 'org.java-websocket', name: 'Java-WebSocket', version: '1.5.7'
     // Needs to be API since WebRTCConnection implements PeerConnectionObserver and RTCDataChannelObserver.
     implementation 'dev.onvoid.webrtc:webrtc-java:0.8.0'
     if (osdetector.os.is('windows'))
