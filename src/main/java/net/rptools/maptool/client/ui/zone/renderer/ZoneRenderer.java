@@ -48,10 +48,7 @@ import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.StampTool;
 import net.rptools.maptool.client.tool.Tool;
-import net.rptools.maptool.client.tool.drawing.FreehandExposeTool;
-import net.rptools.maptool.client.tool.drawing.OvalExposeTool;
-import net.rptools.maptool.client.tool.drawing.PolygonExposeTool;
-import net.rptools.maptool.client.tool.drawing.RectangleExposeTool;
+import net.rptools.maptool.client.tool.drawing.ExposeTool;
 import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.Images;
@@ -2723,12 +2720,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         }
         if (useIF && token.getLayer().supportsVision() && zoneView.isUsingVision()) {
           Tool tool = MapTool.getFrame().getToolbox().getSelectedTool();
-          if (tool
-                  instanceof
-                  RectangleExposeTool // XXX Change to use marker interface such as ExposeTool?
-              || tool instanceof OvalExposeTool
-              || tool instanceof FreehandExposeTool
-              || tool instanceof PolygonExposeTool) {
+          if (tool instanceof ExposeTool<?>) {
             selectedBorder = RessourceManager.getBorder(Borders.FOW_TOOLS);
           }
         }

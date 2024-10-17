@@ -322,21 +322,37 @@ public class ToolbarPanel extends JToolBar {
             }
           }
         };
+
     panel
-        .add(RectangleExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions", "tool.rectexpose.tooltip", new RectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX));
     panel
-        .add(OvalExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.ovalexpose.instructions", "tool.ovalexpose.tooltip", new OvalStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL));
     panel
-        .add(PolygonExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.polyexpose.instructions",
+                "tool.polyexpose.tooltip",
+                new PolyLineStrategy(false)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON));
     panel
-        .add(FreehandExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND));
     panel
-        .add(DiamondExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions",
+                "tool.isorectangleexpose.tooltip",
+                new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND));
+
     return panel;
   }
 
