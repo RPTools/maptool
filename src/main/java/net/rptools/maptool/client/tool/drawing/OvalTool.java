@@ -66,7 +66,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
       paintTransformed(
           g,
           renderer,
-          new ShapeDrawable(new Ellipse2D.Float(oval.x, oval.y, oval.width, oval.height)),
+          new ShapeDrawable(new Ellipse2D.Double(oval.x, oval.y, oval.width, oval.height)),
           pen);
 
       ToolHelper.drawBoxedMeasurement(
@@ -101,7 +101,7 @@ public class OvalTool extends AbstractDrawingTool implements MouseMotionListener
 
         completeDrawable(
             getPen(),
-            new ShapeDrawable(new Ellipse2D.Float(oval.x, oval.y, oval.width, oval.height), true));
+            new ShapeDrawable(new Ellipse2D.Double(oval.x, oval.y, oval.width, oval.height), true));
         oval = null;
       }
 

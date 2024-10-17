@@ -195,16 +195,21 @@ message ShapeDto {
     AreaDto area = 2;
     PolygonDto polygon = 3;
     EllipseDto ellipse = 4;
+    PathShapeDto path = 5;
   }
 }
 
-message AreaDto {
+message PathShapeDto {
   enum WindingRule {
     EVEN_ODD = 0;
     NON_ZERO = 1;
   }
   WindingRule winding = 1;
   repeated SegmentDto segments = 2;
+}
+
+message AreaDto {
+  PathShapeDto path = 1;
 }
 
 message SegmentDto {
@@ -262,10 +267,10 @@ message RectangleDto {
 }
 
 message EllipseDto {
-  float x = 1;
-  float y = 2;
-  float width = 3;
-  float height = 4;
+  double x = 1;
+  double y = 2;
+  double width = 3;
+  double height = 4;
 }
 
 message DrawablePaintDto {
