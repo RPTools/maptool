@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.sheet.stats;
 import java.io.IOException;
 import java.net.URL;
 import javafx.application.Platform;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
@@ -50,14 +51,14 @@ public class StatSheet {
             var overlay =
                 MapTool.getFrame()
                     .getOverlayPanel()
-                    .getOverlay("MapTool Internal Map Under Pointer Overlay");
+                    .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
             if (overlay != null) {
               overlay.updateContents(output, true);
             } else {
               MapTool.getFrame()
                   .getOverlayPanel()
                   .showOverlay(
-                      "MapTool Internal Map Under Pointer Overlay",
+                      AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME,
                       Integer.MAX_VALUE,
                       output,
                       null);
@@ -75,7 +76,7 @@ public class StatSheet {
           var overlay =
               MapTool.getFrame()
                   .getOverlayPanel()
-                  .getOverlay("MapTool Internal Map Under Pointer Overlay");
+                  .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
           if (overlay != null) {
             overlay.updateContents("", true);
           }
