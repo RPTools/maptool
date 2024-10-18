@@ -17,11 +17,8 @@ package net.rptools.maptool.client.tool;
 import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Shape;
 import java.awt.event.ActionEvent;
-import java.awt.geom.AffineTransform;
 import java.awt.geom.Line2D;
-import java.awt.geom.PathIterator;
 import java.text.NumberFormat;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
@@ -75,72 +72,6 @@ public class ToolHelper {
       GraphicsUtil.drawBoxedString(g, displayString, (int) (north.x + 25), (int) (north.y - 25));
       displayString = NumberFormat.getInstance().format(isometricDistance(renderer, north, west));
       GraphicsUtil.drawBoxedString(g, displayString, (int) (north.x - 25), (int) (north.y - 25));
-    }
-  }
-
-  public static void drawDiamondMeasurement(ZoneRenderer renderer, Graphics2D g, Shape diamond) {
-    double[] north = null;
-    double[] west = null;
-    double[] east = null;
-    PathIterator path = diamond.getPathIterator(getPaintTransform(renderer));
-    while (!path.isDone()) {
-      double[] coords = new double[2];
-      int segType = path.currentSegment(coords);
-      if (segType != PathIterator.SEG_CLOSE) {
-        if (north == null) {
-          north = coords;
-        }
-        if (west == null) {
-          west = coords;
-        }
-        if (east == null) {
-          east = coords;
-        }
-        if (coords[1] < north[1]) {
-          north = coords;
-        }
-        if (coords[0] < west[0]) {
-          west = coords;
-        }
-        if (coords[0] > east[0]) {
-          east = coords;
-        }
-      }
-      path.next();
-    }
-    // Measure
-    int nx = (int) north[0];
-    int ny = (int) north[1];
-    int ex = (int) east[0];
-    int ey = (int) east[1];
-    int wx = (int) west[0];
-    int wy = (int) west[1];
-    if (g != null) {
-      g.setColor(Color.white);
-      g.setStroke(new BasicStroke(3));
-      g.drawLine(nx, ny - 20, nx, ny - 10);
-      g.drawLine(nx, ny - 15, ex, ey - 15);
-      g.drawLine(ex, ey - 20, ex, ey - 10);
-      g.drawLine(nx, ny - 15, wx, wy - 15);
-      g.drawLine(wx, wy - 20, wx, wy - 10);
-      g.setColor(Color.black);
-      g.setStroke(new BasicStroke(1));
-      g.drawLine(nx, ny - 20, nx, ny - 10);
-      g.drawLine(nx, ny - 15, ex, ey - 15);
-      g.drawLine(ex, ey - 20, ex, ey - 10);
-      g.drawLine(nx, ny - 15, wx, wy - 15);
-      g.drawLine(wx, wy - 20, wx, wy - 10);
-      // g.setPaintMode();
-      String displayString =
-          NumberFormat.getInstance()
-              .format(
-                  isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(ex, ey)));
-      GraphicsUtil.drawBoxedString(g, displayString, nx + 25, ny - 25);
-      displayString =
-          NumberFormat.getInstance()
-              .format(
-                  isometricDistance(renderer, new ScreenPoint(nx, ny), new ScreenPoint(wx, wy)));
-      GraphicsUtil.drawBoxedString(g, displayString, nx - 25, ny - 25);
     }
   }
 
@@ -243,15 +174,7 @@ public class ToolHelper {
 
   private static double isometricDistance(ZoneRenderer renderer, ScreenPoint p1, ScreenPoint p2) {
     double b = p2.y - p1.y;
-    // return b;
     return 2 * b * renderer.getZone().getUnitsPerCell() / renderer.getScaledGridSize();
-  }
-
-  protected static AffineTransform getPaintTransform(ZoneRenderer renderer) {
-    AffineTransform transform = new AffineTransform();
-    transform.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
-    transform.scale(renderer.getScale(), renderer.getScale());
-    return transform;
   }
 
   protected static AbstractAction getDeleteTokenAction() {

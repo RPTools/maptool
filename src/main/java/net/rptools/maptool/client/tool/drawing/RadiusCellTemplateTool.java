@@ -42,7 +42,7 @@ import net.rptools.maptool.model.drawing.RadiusCellTemplate;
  *
  * @author naciron
  */
-public class RadiusCellTemplateTool extends AbstractDrawingTool implements MouseMotionListener {
+public class RadiusCellTemplateTool extends AbstractTemplateTool implements MouseMotionListener {
   /*---------------------------------------------------------------------------------------------
    * Instance Variables
    *-------------------------------------------------------------------------------------------*/
@@ -337,7 +337,7 @@ public class RadiusCellTemplateTool extends AbstractDrawingTool implements Mouse
   /**
    * It is OK to modify the pen returned by this method
    *
-   * @see net.rptools.maptool.client.tool.drawing.AbstractDrawingTool#getPen()
+   * @see AbstractTemplateTool#getPen()
    */
   @Override
   protected Pen getPen() {

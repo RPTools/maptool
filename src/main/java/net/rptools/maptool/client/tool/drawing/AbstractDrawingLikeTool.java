@@ -14,11 +14,14 @@
  */
 package net.rptools.maptool.client.tool.drawing;
 
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
+import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
+import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.ZonePoint;
 
 public abstract class AbstractDrawingLikeTool extends DefaultTool implements ZoneOverlay {
@@ -59,5 +62,40 @@ public abstract class AbstractDrawingLikeTool extends DefaultTool implements Zon
       zp = renderer.getZone().getNearestVertex(zp);
     }
     return zp;
+  }
+
+  /** Draws the shape measurement as part of the overlay. */
+  protected void drawMeasurementOverlay(
+      ZoneRenderer renderer, Graphics2D g, Measurement measurement) {
+    switch (measurement) {
+      case null -> {}
+      case Measurement.Rectangular rectangular -> {
+        var rectangle = rectangular.bounds();
+        ToolHelper.drawBoxedMeasurement(
+            renderer,
+            g,
+            ScreenPoint.fromZonePoint(renderer, rectangle.getX(), rectangle.getY()),
+            ScreenPoint.fromZonePoint(renderer, rectangle.getMaxX(), rectangle.getMaxY()));
+      }
+      case Measurement.LineSegment lineSegment -> {
+        var p1 =
+            ScreenPoint.fromZonePoint(renderer, lineSegment.p1().getX(), lineSegment.p1().getY());
+        var p2 =
+            ScreenPoint.fromZonePoint(renderer, lineSegment.p2().getX(), lineSegment.p2().getY());
+        ToolHelper.drawMeasurement(renderer, g, p1, p2);
+      }
+      case Measurement.IsoRectangular isoRectangular -> {
+        var north =
+            ScreenPoint.fromZonePoint(
+                renderer, isoRectangular.north().getX(), isoRectangular.north().getY());
+        var west =
+            ScreenPoint.fromZonePoint(
+                renderer, isoRectangular.west().getX(), isoRectangular.west().getY());
+        var east =
+            ScreenPoint.fromZonePoint(
+                renderer, isoRectangular.east().getX(), isoRectangular.east().getY());
+        ToolHelper.drawIsoRectangleMeasurement(renderer, g, north, west, east);
+      }
+    }
   }
 }

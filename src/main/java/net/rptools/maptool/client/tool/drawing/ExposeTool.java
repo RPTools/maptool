@@ -24,8 +24,6 @@ import java.util.Set;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ScreenPoint;
-import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
@@ -130,39 +128,7 @@ public final class ExposeTool<StateT> extends AbstractDrawingLikeTool {
         g2.draw(result.shape());
 
         // Measurements
-        var measurement = result.measurement();
-        switch (measurement) {
-          case null -> {}
-          case Measurement.Rectangular rectangular -> {
-            var rectangle = rectangular.bounds();
-            ToolHelper.drawBoxedMeasurement(
-                renderer,
-                g,
-                ScreenPoint.fromZonePoint(renderer, rectangle.getX(), rectangle.getY()),
-                ScreenPoint.fromZonePoint(renderer, rectangle.getMaxX(), rectangle.getMaxY()));
-          }
-          case Measurement.LineSegment lineSegment -> {
-            var p1 =
-                ScreenPoint.fromZonePoint(
-                    renderer, lineSegment.p1().getX(), lineSegment.p1().getY());
-            var p2 =
-                ScreenPoint.fromZonePoint(
-                    renderer, lineSegment.p2().getX(), lineSegment.p2().getY());
-            ToolHelper.drawMeasurement(renderer, g, p1, p2);
-          }
-          case Measurement.IsoRectangular isoRectangular -> {
-            var north =
-                ScreenPoint.fromZonePoint(
-                    renderer, isoRectangular.north().getX(), isoRectangular.north().getY());
-            var west =
-                ScreenPoint.fromZonePoint(
-                    renderer, isoRectangular.west().getX(), isoRectangular.west().getY());
-            var east =
-                ScreenPoint.fromZonePoint(
-                    renderer, isoRectangular.east().getX(), isoRectangular.east().getY());
-            ToolHelper.drawIsoRectangleMeasurement(renderer, g, north, west, east);
-          }
-        }
+        drawMeasurementOverlay(renderer, g, result.measurement());
       }
     }
 
