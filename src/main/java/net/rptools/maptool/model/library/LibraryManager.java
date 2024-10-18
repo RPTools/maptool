@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.model.library;
 
-import java.io.IOException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -28,7 +26,11 @@ import java.util.stream.Collectors;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.events.MapToolEventBus;
-import net.rptools.maptool.model.library.addon.*;
+import net.rptools.maptool.model.library.addon.AddOnLibrary;
+import net.rptools.maptool.model.library.addon.AddOnLibraryData;
+import net.rptools.maptool.model.library.addon.AddOnLibraryManager;
+import net.rptools.maptool.model.library.addon.AddOnSlashCommandManager;
+import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.library.builtin.BuiltInLibraryManager;
 import net.rptools.maptool.model.library.proto.AddOnLibraryListDto;
 import net.rptools.maptool.model.library.token.LibraryTokenManager;
@@ -72,61 +74,10 @@ public class LibraryManager {
   private static final AddOnSlashCommandManager addOnSlashCommandManager =
       new AddOnSlashCommandManager();
 
-  /**
-   * Initializes the library manager. This method should be called after instantiation of the
-   * library manager.
-   */
   public static void init() {
     libraryTokenManager.init();
     builtInLibraryManager.loadBuiltIns();
-    addOnLibraryManager.init();
     new MapToolEventBus().getMainEventBus().register(addOnSlashCommandManager);
-  }
-
-  /**
-   * Returns the list of external add-on libraries.
-   *
-   * @return the list of external add-on libraries.
-   */
-  public List<ExternalLibraryInfo> getExternalAddOnLibraries() {
-    return addOnLibraryManager.getExternalAddOnLibraries();
-  }
-
-  /**
-   * Returns if external add-on libraries are enabled.
-   *
-   * @return if external add-on libraries are enabled.
-   */
-  public boolean externalLibrariesEnabled() {
-    return addOnLibraryManager.externalLibrariesEnabled();
-  }
-
-  /**
-   * Sets if external add-on libraries are enabled.
-   *
-   * @param enabled if external add-on libraries are enabled.
-   */
-  public void setExternalLibrariesEnabled(boolean enabled) throws IOException {
-    addOnLibraryManager.setExternalLibrariesEnabled(enabled);
-  }
-
-  /**
-   * Returns the path to the external add-on libraries.
-   *
-   * @return the path to the external add-on libraries.
-   */
-  public Path getEternalLibraryPath() {
-    return addOnLibraryManager.getExternalLibraryPath();
-  }
-
-  /**
-   * Sets the path to the external add-on libraries.
-   *
-   * @param path the path to the external add-on libraries.
-   * @throws IOException if an error occurs while setting the path.
-   */
-  public void setExternalLibraryPath(Path path) throws IOException {
-    addOnLibraryManager.setExternalLibraryPath(path);
   }
 
   /**
@@ -210,7 +161,7 @@ public class LibraryManager {
   /**
    * Register and add-on library.
    *
-   * @param addOn the Add-On to register.
+   * @param addOn the Add On to register.
    */
   public boolean registerAddOnLibrary(AddOnLibrary addOn) {
     try {
@@ -226,8 +177,7 @@ public class LibraryManager {
   }
 
   /**
-   * Deregister the add-on in library associated with the specified namespace. This will deregister
-   * the add-on if it is external.
+   * Deregister the add-on in library associated with the specified namespace.
    *
    * @param namespace the namespace to deregister.
    */
@@ -239,7 +189,7 @@ public class LibraryManager {
   }
 
   /**
-   * Register an add-on in library, replacing any existing library.
+   * Register a add-on in library, replacing any existing library.
    *
    * @param addOnLibrary the add-on in library to register.
    */
@@ -256,30 +206,6 @@ public class LibraryManager {
       return false;
     }
     return true;
-  }
-
-  /**
-   * Register an add-on as an external add-on. This will <em>not</em> make the add-on available to
-   * MapTool. To make the add-on available to MapTool, use {@link #importFromExternal(String)}
-   *
-   * @param path The path of the add-on to register.
-   * @throws IOException if an error occurs while registering the add-on.
-   */
-  public void registerExternalAddOnLibrary(Path path) throws IOException {
-    addOnLibraryManager.registerExternalLibrary(path);
-  }
-
-  /**
-   * Import an add-on from an external source. This will make the add-on available to MapTool.
-   * Importing an updated version of an add-on will replace the existing add-on.
-   *
-   * @param namespace The namespace of the add-on to import.
-   */
-  public void importFromExternal(String namespace) throws IOException {
-    if (addOnLibraryManager.namespaceRegistered(namespace)) {
-      addOnLibraryManager.deregisterLibrary(namespace);
-    }
-    addOnLibraryManager.importFromExternal(namespace);
   }
 
   /**
@@ -415,7 +341,6 @@ public class LibraryManager {
    * initialization next time they are added.
    */
   public void removeAddOnLibraries() {
-
     for (var lib : addOnLibraryManager.getLibraries()) {
       lib.getLibraryData()
           .thenAccept(

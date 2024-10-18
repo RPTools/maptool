@@ -21,11 +21,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.util.Objects;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 import net.rptools.maptool.client.AppUtil;
 
 /**
@@ -202,39 +197,5 @@ public class FileUtil {
 
   public static File cleanFileName(String fileName, String extension) {
     return cleanFileName(null, fileName, extension);
-  }
-
-  /**
-   * Uses {@link Files#list(Path)} to recursively list all paths from a directory. The result
-   * <b>includes</b> directories.
-   *
-   * @param dir The directory to list recursively.
-   * @return A stream with all files.
-   * @throws IOException if an I/O error occurs while opening the directory, or any of its recursive
-   *     children.
-   */
-  public static Stream<Path> listRecursively(Path dir) throws IOException {
-    try (var pathStream = Files.list(dir)) {
-      var list = pathStream.collect(Collectors.toSet());
-      try {
-        return Stream.concat(
-            list.stream(),
-            list.stream()
-                .flatMap(
-                    p -> {
-                      if (Files.isDirectory(p))
-                        try {
-                          return listRecursively(p).map(p::resolve);
-                        } catch (IOException e) {
-                          throw new RuntimeException(e);
-                        }
-                      return null;
-                    })
-                .filter(Objects::nonNull));
-      } catch (RuntimeException e) {
-        // This is to bypass an uncaught exception in the above lambda that calls in place.
-        throw (IOException) e.getCause();
-      }
-    }
   }
 }

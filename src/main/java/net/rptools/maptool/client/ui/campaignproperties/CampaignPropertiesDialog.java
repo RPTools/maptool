@@ -454,9 +454,8 @@ public class CampaignPropertiesDialog extends JDialog {
                       JOptionPane.INFORMATION_MESSAGE);
                   CampaignPropertiesDto campaignPropertiesDto =
                       MapTool.getCampaign().getCampaignProperties().toDto();
-                  try (FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile())) {
-                    fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
-                  }
+                  FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile());
+                  fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
                 }
 
               } catch (IOException ioe) {

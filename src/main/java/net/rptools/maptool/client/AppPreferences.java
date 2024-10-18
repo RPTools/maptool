@@ -393,15 +393,6 @@ public class AppPreferences {
 
   public static final Preference<String> iconTheme = StringType.create("iconTheme", "Rod Takehara");
 
-  public static final Preference<String> externalAddOnLibrariesPath =
-      StringType.create("externalAddOnLibrariesPath", null);
-
-  public static final Preference<Boolean> externalAddOnLibrariesEnabled =
-      BooleanType.create("externalAddOnLibrariesEnabled", false);
-
-  public static final Preference<String> createAddOnParentDir =
-      StringType.create("createAddOnParentDir", System.getProperty("user.home"));
-
   static {
     // Used to be stored as separate components but now is one color. Add if not already there.
     if (prefs.get("trustedPrefixFG", null) == null) {

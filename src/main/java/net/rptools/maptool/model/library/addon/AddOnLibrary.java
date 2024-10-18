@@ -19,7 +19,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -68,10 +67,10 @@ import org.javatuples.Pair;
 public class AddOnLibrary implements Library {
 
   /** The name of the event for first time initialization. */
-  public static final String FIRST_INIT_EVENT = "onFirstInit";
+  private static final String FIRST_INIT_EVENT = "onFirstInit";
 
   /** The name of the event for initialization. */
-  public static final String INIT_EVENT = "onInit";
+  private static final String INIT_EVENT = "onInit";
 
   /** The prefix for the name of the JavaScript context for this addon. */
   private static final String JS_CONTEXT_PREFIX = "addon:";
@@ -80,13 +79,13 @@ public class AddOnLibrary implements Library {
   private record MTScript(String path, boolean autoExecute, String description, MD5Key md5Key) {}
 
   /** The directory where the files exposed URI are stored. */
-  public static final String URL_PUBLIC_DIR = "public/";
+  private static final String URL_PUBLIC_DIR = "public/";
 
   /** The directory where MT MacroScripts are stored. */
-  public static final String MTSCRIPT_DIR = "mtscript/";
+  private static final String MTSCRIPT_DIR = "mtscript/";
 
   /** The directory where public MT MacroScripts are stored. */
-  public static final String MTSCRIPT_PUBLIC_DIR = "public/";
+  private static final String MTSCRIPT_PUBLIC_DIR = "public/";
 
   /** Logger instance for this class. */
   private static final Logger logger = LogManager.getLogger(AddOnLibrary.class);
@@ -161,12 +160,6 @@ public class AddOnLibrary implements Library {
   private final LibraryInfo libraryInfo;
 
   /**
-   * The directory that the library is in for development mode, or null if the add-on is not in
-   * development mode.
-   */
-  private final Path backingDirectory;
-
-  /**
    * Class used to represent Drop In Libraries.
    *
    * @param dto The Drop In Libraries Data Transfer Object.
@@ -174,8 +167,6 @@ public class AddOnLibrary implements Library {
    * @param eventsDto The MTScript Events Data Transfer Object.
    * @param slashCommandsDto The Slash Commands Data Transfer Object.
    * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Type}s.
-   * @param backingDirectory The directory that the library is in for development mode, or null if
-   *     the add-on is not in development mode.
    */
   private AddOnLibrary(
       MD5Key libraryAssetKey,
@@ -184,8 +175,7 @@ public class AddOnLibrary implements Library {
       AddOnLibraryEventsDto eventsDto,
       AddOnStatSheetsDto statSheetsDto,
       AddonSlashCommandsDto slashCommandsDto,
-      Map<String, Pair<MD5Key, Type>> pathAssetMap,
-      Path backingDirectory) {
+      Map<String, Pair<MD5Key, Type>> pathAssetMap) {
     Objects.requireNonNull(dto, I18N.getText("library.error.invalidDefinition"));
     name = Objects.requireNonNull(dto.getName(), I18N.getText("library.error.emptyName"));
     version =
@@ -268,8 +258,6 @@ public class AddOnLibrary implements Library {
 
     jsContextName = JS_CONTEXT_PREFIX + namespace;
 
-    this.backingDirectory = backingDirectory;
-
     libraryInfo =
         new LibraryInfo(
             name,
@@ -319,47 +307,7 @@ public class AddOnLibrary implements Library {
       Map<String, Pair<MD5Key, Type>> pathAssetMap) {
 
     return new AddOnLibrary(
-        libraryAssetKey,
-        dto,
-        mtsDto,
-        eventsDto,
-        statSheetsDto,
-        slashCommandsDto,
-        pathAssetMap,
-        null);
-  }
-
-  /**
-   * Creates a new Drop In Library from the given {@link AddOnLibraryDto}, {@link
-   * MTScriptPropertiesDto}, and file path assets map.
-   *
-   * @param dto The Drop In Libraries Data Transfer Object.
-   * @param mtsDto The MTScript Properties Data Transfer Object.
-   * @param eventsDto The Events Data Transfer Object.
-   * @param slashCommandsDto The Slash Commands Data Transfer Object.
-   * @param pathAssetMap mapping of paths in the library to {@link MD5Key}s and {@link Asset.Type}s.
-   * @param backingDirectory The directory that the library is in for development mode, or null if
-   *     the add-on is not in development mode.
-   * @return the new Add on library.
-   */
-  public static AddOnLibrary fromDto(
-      MD5Key libraryAssetKey,
-      AddOnLibraryDto dto,
-      MTScriptPropertiesDto mtsDto,
-      AddOnLibraryEventsDto eventsDto,
-      AddOnStatSheetsDto statSheetsDto,
-      AddonSlashCommandsDto slashCommandsDto,
-      Map<String, Pair<MD5Key, Asset.Type>> pathAssetMap,
-      Path backingDirectory) {
-    return new AddOnLibrary(
-        libraryAssetKey,
-        dto,
-        mtsDto,
-        eventsDto,
-        statSheetsDto,
-        slashCommandsDto,
-        pathAssetMap,
-        backingDirectory);
+        libraryAssetKey, dto, mtsDto, eventsDto, statSheetsDto, slashCommandsDto, pathAssetMap);
   }
 
   @Override
@@ -729,12 +677,6 @@ public class AddOnLibrary implements Library {
         .join();
   }
 
-  /**
-   * Returns the DataValue for the specified path in the add-on library.
-   *
-   * @param path the path to the file to read.
-   * @return the DataValue for the specified path in the add-on library.
-   */
   CompletableFuture<DataValue> readFile(String path) {
     return CompletableFuture.supplyAsync(
         () -> {
@@ -746,25 +688,5 @@ public class AddOnLibrary implements Library {
           Asset asset = AssetManager.getAsset(val.getValue0());
           return DataValueFactory.fromAsset(filePath, asset);
         });
-  }
-
-  /**
-   * Returns if the add-on library is in development mode or not.
-   *
-   * @return <code>true</code> if the add-on library is in development mode, <code>false</code>
-   *     otherwise.
-   */
-  public boolean isInDevelopmentMode() {
-    return backingDirectory != null;
-  }
-
-  /**
-   * Returns the directory that the library is in for development mode, or null if the add-on is not
-   * in development mode.
-   *
-   * @return the directory for the add-on.
-   */
-  public Path getBackingDirectory() {
-    return backingDirectory;
   }
 }
