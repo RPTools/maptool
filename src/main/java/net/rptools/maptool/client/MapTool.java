@@ -107,9 +107,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
-import net.rptools.maptool.util.MessageUtil;
-import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UserJvmOptions;
+import net.rptools.maptool.util.*;
 import net.rptools.parser.ParserException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -928,6 +926,16 @@ public class MapTool {
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
+    Platform.runLater(
+        () -> {
+          MapTool.getFrame()
+              .getOverlayPanel()
+              .showOverlay(
+                  AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME,
+                  Integer.MAX_VALUE,
+                  "",
+                  null);
+        });
   }
 
   public static AssetTransferManager getAssetTransferManager() {
