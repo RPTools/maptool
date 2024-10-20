@@ -44,16 +44,16 @@ public class Toolbox {
     return currentTool;
   }
 
-  public Tool getTool(Class<? extends Tool> toolClass) {
-    return toolMap.get(toolClass);
+  @SuppressWarnings("unchecked")
+  public <T extends Tool> T getTool(Class<? extends T> toolClass) {
+    return (T) toolMap.get(toolClass);
   }
 
-  public Tool createTool(Class<? extends Tool> toolClass) {
-    Tool tool;
+  public <T extends Tool> T createTool(Class<T> toolClass) {
+    T tool;
     try {
-      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor();
+      Constructor<T> constructor = toolClass.getDeclaredConstructor();
       tool = constructor.newInstance();
-      // tool = constructor.newInstance((Object) null);
 
       addTool(tool);
       toolMap.put(toolClass, tool);
