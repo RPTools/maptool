@@ -31,7 +31,9 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.MapToolEventQueue;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.Tool;
@@ -115,6 +117,20 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   public ConcurrentSkipListSet<HTMLOverlayManager> getOverlays() {
     return overlays.clone();
+  }
+
+  public HTMLOverlayManager init() {
+    MapToolEventQueue.invokeLater(
+        () -> {
+          MapTool.getFrame()
+              .getOverlayPanel()
+              .showOverlay(
+                  AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME,
+                  Integer.MAX_VALUE,
+                  "",
+                  null);
+        });
+    return null;
   }
 
   /**

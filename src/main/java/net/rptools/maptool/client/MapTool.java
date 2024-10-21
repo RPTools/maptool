@@ -107,9 +107,7 @@ import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
 import net.rptools.maptool.server.ServerPolicy;
 import net.rptools.maptool.transfer.AssetTransferManager;
-import net.rptools.maptool.util.MessageUtil;
-import net.rptools.maptool.util.StringUtil;
-import net.rptools.maptool.util.UserJvmOptions;
+import net.rptools.maptool.util.*;
 import net.rptools.parser.ParserException;
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -693,6 +691,7 @@ public class MapTool {
     chatAutoSave = new ChatAutoSave();
     chatAutoSave.setTimeout(AppPreferences.chatAutoSaveTimeInMinutes.get());
     AppPreferences.chatAutoSaveTimeInMinutes.onChange(chatAutoSave::setTimeout);
+    MapTool.getFrame().getOverlayPanel().init();
 
     // TODO: make this more formal when we switch to mina
     new ServerHeartBeatThread().start();
@@ -927,6 +926,7 @@ public class MapTool {
     AssetManager.updateRepositoryList();
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
+    MapTool.getFrame().getOverlayPanel().init();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
   }
 
