@@ -44,23 +44,20 @@ public class Toolbox {
     return currentTool;
   }
 
-  public Tool getTool(Class<? extends Tool> toolClass) {
-    return toolMap.get(toolClass);
+  @SuppressWarnings("unchecked")
+  public <T extends Tool> T getTool(Class<? extends T> toolClass) {
+    return (T) toolMap.get(toolClass);
   }
 
-  public Tool createTool(Class<? extends Tool> toolClass) {
-    Tool tool;
+  public <T extends Tool> T createTool(Class<T> toolClass) {
+    T tool;
     try {
-      Constructor<? extends Tool> constructor = toolClass.getDeclaredConstructor();
+      Constructor<T> constructor = toolClass.getDeclaredConstructor();
       tool = constructor.newInstance();
-      // tool = constructor.newInstance((Object) null);
 
-      if (tool.hasGroup()) {
-        buttonGroup.add(tool);
-      }
-
+      addTool(tool);
       toolMap.put(toolClass, tool);
-      tool.setToolbox(this);
+
       return tool;
     } catch (InstantiationException e) {
       MapTool.showError(I18N.getText("msg.error.toolCannotInstantiate", toolClass.getName()), e);
@@ -76,28 +73,35 @@ public class Toolbox {
     return null;
   }
 
+  /**
+   * Add {@code tool} to the toolbox.
+   *
+   * <p>This tool will not be registered by its class, so methods like {@link #getTool(Class)} will
+   * not be able to find it.
+   *
+   * @param tool The tool to add.
+   */
+  public void addTool(Tool tool) {
+    if (tool.hasGroup()) {
+      buttonGroup.add(tool);
+    }
+    tool.setToolbox(this);
+  }
+
   public void setTargetRenderer(final ZoneRenderer renderer) {
     // Need to be synchronous with the timing of the invokes within this method
     EventQueue.invokeLater(
         () -> {
-          final Tool oldTool = currentTool;
-
           // Disconnect the current tool from the current renderer
-          setSelectedTool((Tool) null);
-
-          // Update the renderer
-          EventQueue.invokeLater(() -> currentRenderer = renderer);
-          // Attach the old tool to the new renderer
-          setSelectedTool(oldTool);
+          detach();
+          currentRenderer = renderer;
+          attach();
         });
   }
 
   public void setSelectedTool(Class<? extends Tool> toolClass) {
     Tool tool = toolMap.get(toolClass);
-    if (tool != null && tool.isAvailable()) {
-      tool.setSelected(true);
-      setSelectedTool(tool);
-    }
+    setSelectedTool(tool);
   }
 
   public void setSelectedTool(final Tool tool) {
@@ -106,35 +110,54 @@ public class Toolbox {
           if (tool == currentTool) {
             return;
           }
-          if (currentTool != null && currentRenderer != null) {
-            currentTool.removeListeners(currentRenderer);
-            // currentTool.addGridBasedKeys(currentRenderer, false);
-            currentTool.detachFrom(currentRenderer);
 
-            if (currentTool instanceof ZoneOverlay) {
-              currentRenderer.removeOverlay((ZoneOverlay) currentTool);
-            }
-          }
-          // Update
-          currentTool = tool;
-
-          if (currentTool != null) {
-            if (currentRenderer != null) {
-              // We have a renderer at this point so we can figure out the grid type and add its
-              // keystrokes
-              // to the PointerTool.
-              // currentTool.addGridBasedKeys(currentRenderer, true);
-              currentTool.addListeners(currentRenderer);
-              currentTool.attachTo(currentRenderer);
-
-              if (currentTool instanceof ZoneOverlay) {
-                currentRenderer.addOverlay((ZoneOverlay) currentTool);
-              }
-            }
-            if (MapTool.getFrame() != null) {
-              MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
-            }
+          detach();
+          var accepted = makeCurrent(tool);
+          if (accepted) {
+            attach();
           }
         });
+  }
+
+  private void attach() {
+    if (currentTool != null) {
+      if (currentRenderer != null) {
+        // We have a renderer at this point so we can figure out the grid type and add its
+        // keystrokes to the PointerTool.
+        // currentTool.addGridBasedKeys(currentRenderer, true);
+        currentTool.addListeners(currentRenderer);
+        currentTool.attachTo(currentRenderer);
+
+        if (currentTool instanceof ZoneOverlay) {
+          currentRenderer.addOverlay((ZoneOverlay) currentTool);
+        }
+      }
+    }
+  }
+
+  private void detach() {
+    if (currentTool != null && currentRenderer != null) {
+      currentTool.removeListeners(currentRenderer);
+      // currentTool.addGridBasedKeys(currentRenderer, false);
+      currentTool.detachFrom(currentRenderer);
+
+      if (currentTool instanceof ZoneOverlay) {
+        currentRenderer.removeOverlay((ZoneOverlay) currentTool);
+      }
+    }
+  }
+
+  private boolean makeCurrent(Tool tool) {
+    if (tool == null || !tool.isAvailable()) {
+      return false;
+    }
+
+    currentTool = tool;
+    tool.setSelected(true);
+    if (MapTool.getFrame() != null) {
+      MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
+    }
+
+    return true;
   }
 }

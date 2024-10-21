@@ -21,7 +21,10 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.geom.Area;
 import java.awt.geom.GeneralPath;
+import java.awt.geom.Path2D;
+import java.awt.geom.PathIterator;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import javax.annotation.Nonnull;
@@ -63,6 +66,28 @@ public class LineSegment extends AbstractDrawing {
     }
   }
 
+  public LineSegment(float width, boolean squareCap, Path2D path) {
+    this.width = width;
+    this.squareCap = squareCap;
+
+    // Assume an unbroken line string.
+    double[] coordinates = new double[6];
+    for (var it = path.getPathIterator(null); !it.isDone(); it.next()) {
+      var type = it.currentSegment(coordinates);
+      // type will be SEG_MOVETO or SEG_LINETO or SEG_CLOSE. The first two mean the same to
+      // us, while the latter ends the line.
+      if (type == PathIterator.SEG_CLOSE) {
+        // Should not be possible to be empty, but can't hurt to check.
+        if (!points.isEmpty()) {
+          addPoint(points.getFirst());
+        }
+        break;
+      } else {
+        addPoint((int) coordinates[0], (int) coordinates[1]);
+      }
+    }
+  }
+
   @Override
   public Drawable copy() {
     return new LineSegment(this);
@@ -78,16 +103,31 @@ public class LineSegment extends AbstractDrawing {
   }
 
   /**
-   * Manipulate the points by calling {@link #getPoints} and then adding {@link Point} objects to
-   * the returned {@link List}.
+   * Add a point to the line.
    *
+   * @param x
+   * @param y
+   */
+  public void addPoint(int x, int y) {
+    area = null;
+    points.add(new Point(x, y));
+  }
+
+  /**
+   * Add a point to the line.
+   *
+   * @param point
+   * @see #addPoint(int, int)
+   */
+  public void addPoint(Point point) {
+    addPoint(point.x, point.y);
+  }
+
+  /**
    * @return the list of point
    */
   public List<Point> getPoints() {
-    // This is really, really ugly, but we need to flush the area on any change to the shape
-    // and typically the reason for calling this method is to change the list
-    area = null;
-    return points;
+    return Collections.unmodifiableList(points);
   }
 
   @Override
@@ -108,14 +148,14 @@ public class LineSegment extends AbstractDrawing {
 
     if (getName() != null) dto.setName(StringValue.of(getName()));
 
-    getPoints().forEach(p -> dto.addPoints(Mapper.map(p)));
+    points.forEach(p -> dto.addPoints(Mapper.map(p)));
     return DrawableDto.newBuilder().setLineSegment(dto).build();
   }
 
   public static LineSegment fromDto(LineSegmentDrawableDto dto) {
     var id = GUID.valueOf(dto.getId());
     var drawable = new LineSegment(id, dto.getWidth(), dto.getSquareCap());
-    var points = drawable.getPoints();
+    var points = drawable.points;
     var pointDtos = dto.getPointsList();
     pointDtos.forEach(p -> points.add(Mapper.map(p)));
     if (dto.hasName()) {

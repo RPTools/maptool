@@ -36,9 +36,6 @@ message PenDto {
 message DrawableDto {
   oneof drawable_type {
     ShapeDrawableDto shape_drawable = 1;
-    RectangleDrawableDto rectangle_drawable = 2;
-    OvalDrawableDto oval_drawable = 3;
-    CrossDrawableDto cross_drawable = 4;
     DrawnLabelDto drawn_label = 5;
     LineSegmentDrawableDto line_segment = 6;
     DrawablesGroupDto drawables_group = 7;
@@ -156,31 +153,6 @@ message DrawnLabelDto {
   string font = 6;
 }
 
-message RectangleDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
-message OvalDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
-message CrossDrawableDto {
-  string id = 1;
-  string layer = 2;
-  google.protobuf.StringValue name = 3;
-  IntPointDto start_point = 4;
-  IntPointDto end_point = 5;
-}
-
-
 message ShapeDrawableDto {
   string id = 1;
   string layer = 2;
@@ -195,16 +167,21 @@ message ShapeDto {
     AreaDto area = 2;
     PolygonDto polygon = 3;
     EllipseDto ellipse = 4;
+    PathShapeDto path = 5;
   }
 }
 
-message AreaDto {
+message PathShapeDto {
   enum WindingRule {
     EVEN_ODD = 0;
     NON_ZERO = 1;
   }
   WindingRule winding = 1;
   repeated SegmentDto segments = 2;
+}
+
+message AreaDto {
+  PathShapeDto path = 1;
 }
 
 message SegmentDto {
@@ -262,10 +239,10 @@ message RectangleDto {
 }
 
 message EllipseDto {
-  float x = 1;
-  float y = 2;
-  float width = 3;
-  float height = 4;
+  double x = 1;
+  double y = 2;
+  double width = 3;
+  double height = 4;
 }
 
 message DrawablePaintDto {

@@ -264,12 +264,33 @@ public class ToolbarPanel extends JToolBar {
     panel
         .add(DeleteDrawingTool.class)
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DELETE));
-    panel.add(FreehandTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
-    panel.add(LineTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
-    panel.add(RectangleTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
-    panel.add(OvalTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
+
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_FREEHAND));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.line.instructions", "tool.line.tooltip", new PolyLineStrategy(false)))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_LINE));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.rect.tooltip", new RectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_BOX));
+    panel
+        .addTool(
+            new DrawingTool<>("tool.oval.instructions", "tool.oval.tooltip", new OvalStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_OVAL));
     panel.add(TextTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_TEXT));
-    panel.add(DiamondTool.class).setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+    panel
+        .addTool(
+            new DrawingTool<>(
+                "tool.rect.instructions", "tool.isorectangle.tooltip", new IsoRectangleStrategy()))
+        .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_DRAW_DIAMOND));
+
     return panel;
   }
 
@@ -322,52 +343,116 @@ public class ToolbarPanel extends JToolBar {
             }
           }
         };
+
     panel
-        .add(RectangleExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions", "tool.rectexpose.tooltip", new RectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_BOX));
     panel
-        .add(OvalExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.ovalexpose.instructions", "tool.ovalexpose.tooltip", new OvalStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_OVAL));
     panel
-        .add(PolygonExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.polyexpose.instructions",
+                "tool.polyexpose.tooltip",
+                new PolyLineStrategy(false)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_POLYGON));
     panel
-        .add(FreehandExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.freehand.instructions", "tool.freehand.tooltip", new PolyLineStrategy(true)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_FREEHAND));
     panel
-        .add(DiamondExposeTool.class)
+        .addTool(
+            new ExposeTool<>(
+                "tool.rectexpose.instructions",
+                "tool.isorectangleexpose.tooltip",
+                new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_FOG_EXPOSE_DIAMOND));
+
     return panel;
   }
 
   private OptionPanel createTopologyPanel() {
     OptionPanel panel = new OptionPanel();
+
     panel
-        .add(RectangleTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.recttopology.instructions",
+                "tool.recttopology.tooltip",
+                true,
+                new RectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX));
     panel
-        .add(HollowRectangleTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.recttopology.instructions",
+                "tool.recttopologyhollow.tooltip",
+                false,
+                new RectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_BOX_HOLLOW));
     panel
-        .add(OvalTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.ovaltopology.instructions",
+                "tool.ovaltopology.tooltip",
+                true,
+                // 10 steps to keep number of topology vertices reasonable.
+                new OvalStrategy(10)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL));
     panel
-        .add(HollowOvalTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.ovaltopology.instructions",
+                "tool.ovaltopologyhollow.tooltip",
+                false,
+                // 10 steps to keep number of topology vertices reasonable.
+                new OvalStrategy(10)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_OVAL_HOLLOW));
     panel
-        .add(PolygonTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.poly.instructions",
+                "tool.polytopo.tooltip",
+                true,
+                new PolyLineStrategy(false)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYGON));
     panel
-        .add(PolyLineTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.poly.instructions",
+                "tool.polylinetopo.tooltip",
+                false,
+                new PolyLineStrategy(false)))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_POLYLINE));
     panel
-        .add(CrossTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.crosstopology.instructions",
+                "tool.crosstopology.tooltip",
+                false,
+                new CrossStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_CROSS));
     panel
-        .add(DiamondTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.isorectangletopology.instructions",
+                "tool.isorectangletopology.tooltip",
+                true,
+                new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND));
     panel
-        .add(HollowDiamondTopologyTool.class)
+        .addTool(
+            new TopologyTool<>(
+                "tool.isorectangletopology.instructions",
+                "tool.isorectangletopologyhollow.tooltip",
+                false,
+                new IsoRectangleStrategy()))
         .setIcon(RessourceManager.getBigIcon(Icons.TOOLBAR_TOPOLOGY_DIAMOND_HOLLOW));
 
     // Add with separator to separate mode button group from shape button group.
@@ -469,9 +554,8 @@ public class ToolbarPanel extends JToolBar {
   }
 
   private class OptionPanel extends JToolBar {
-
-    private Class<? extends Tool> firstTool;
-    private Class<? extends Tool> currentTool;
+    private Tool firstTool;
+    private Tool currentTool;
 
     public OptionPanel() {
       setFloatable(false);
@@ -481,18 +565,28 @@ public class ToolbarPanel extends JToolBar {
     }
 
     public Tool add(Class<? extends Tool> toolClass) {
-      if (firstTool == null) {
-        firstTool = toolClass;
-      }
       final Tool tool = toolbox.createTool(toolClass);
+      setupTool(tool);
+      return tool;
+    }
+
+    public Tool addTool(Tool tool) {
+      toolbox.addTool(tool);
+      setupTool(tool);
+      return tool;
+    }
+
+    private void setupTool(Tool tool) {
+      if (firstTool == null) {
+        firstTool = tool;
+      }
       tool.addActionListener(
           e -> {
             if (tool.isSelected()) {
-              currentTool = tool.getClass();
+              currentTool = tool;
             }
           });
       add(tool);
-      return tool;
     }
 
     protected void activate() {

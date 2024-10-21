@@ -17,6 +17,7 @@ package net.rptools.maptool.client.functions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import java.awt.Point;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.PathIterator;
 import java.math.BigDecimal;
 import java.util.List;
@@ -274,13 +275,8 @@ public class DrawingFunctions extends AbstractFunction {
   private String getDrawbleType(AbstractDrawing d) {
     if (d instanceof LineSegment) {
       return "Line";
-    } else if (d instanceof ShapeDrawable) {
-      String shape = ((ShapeDrawable) d).getShape().getClass().getSimpleName();
-      if ("Float".equalsIgnoreCase(shape)) {
-        return "Oval";
-      } else {
-        return shape;
-      }
+    } else if (d instanceof ShapeDrawable sd) {
+      return sd.getShapeTypeName();
     } else if (d instanceof DrawablesGroup) {
       return "Group";
     } else {
@@ -299,14 +295,15 @@ public class DrawingFunctions extends AbstractFunction {
         pinfo.add(info);
       }
       return pinfo;
-    } else if (d instanceof ShapeDrawable) {
-      String shape = ((ShapeDrawable) d).getShape().getClass().getSimpleName();
-      if ("Float".equalsIgnoreCase(shape)) {
+    } else if (d instanceof ShapeDrawable sd) {
+      var shape = sd.getShape();
+      if (shape instanceof Ellipse2D) {
+        // We don't support converting ellipses to path.
         return new JsonArray();
       } else {
         // Convert shape into path
         JsonArray pinfo = new JsonArray();
-        final PathIterator pathIter = ((ShapeDrawable) d).getShape().getPathIterator(null);
+        final PathIterator pathIter = shape.getPathIterator(null);
         float[] coords = new float[6];
         JsonObject lastinfo = new JsonObject();
         while (!pathIter.isDone()) {

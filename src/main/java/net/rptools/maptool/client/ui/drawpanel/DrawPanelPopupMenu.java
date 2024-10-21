@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Shape;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -292,7 +293,7 @@ public class DrawPanelPopupMenu extends JPopupMenu {
         Shape s = a;
         Pen newPen = new Pen(elementUnderMouse.getPen());
         if (elementUnderMouse.getDrawable() instanceof LineSegment) newPen = invertPen(newPen);
-        DrawnElement de = new DrawnElement(new ShapeDrawable(s), newPen);
+        DrawnElement de = new DrawnElement(new ShapeDrawable(s, true), newPen);
         de.getDrawable().setLayer(elementUnderMouse.getDrawable().getLayer());
         MapTool.serverCommand().draw(renderer.getZone().getId(), newPen, de.getDrawable());
         MapTool.getFrame().updateDrawTree();
@@ -536,11 +537,14 @@ public class DrawPanelPopupMenu extends JPopupMenu {
    * @return boolean
    */
   private boolean hasPath(DrawnElement drawnElement) {
-    if (drawnElement == null) return false;
-    if (drawnElement.getDrawable() instanceof LineSegment) return true;
-    if (drawnElement.getDrawable() instanceof ShapeDrawable) {
-      ShapeDrawable sd = (ShapeDrawable) drawnElement.getDrawable();
-      return "Float".equalsIgnoreCase(sd.getShape().getClass().getSimpleName()) == false;
+    if (drawnElement == null) {
+      return false;
+    }
+    if (drawnElement.getDrawable() instanceof LineSegment) {
+      return true;
+    }
+    if (drawnElement.getDrawable() instanceof ShapeDrawable sd) {
+      return !(sd.getShape() instanceof Ellipse2D);
     }
     return false;
   }

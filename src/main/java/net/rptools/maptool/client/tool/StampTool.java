@@ -648,7 +648,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
               return;
             }
             Toolbox toolbox = MapTool.getFrame().getToolbox();
-            FacingTool tool = (FacingTool) toolbox.getTool(FacingTool.class);
+            FacingTool tool = toolbox.getTool(FacingTool.class);
             tool.init(
                 renderer.getZone().getToken(renderer.getSelectedTokenSet().iterator().next()),
                 renderer.getSelectedTokenSet());
