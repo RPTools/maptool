@@ -691,6 +691,7 @@ public class MapTool {
     chatAutoSave = new ChatAutoSave();
     chatAutoSave.setTimeout(AppPreferences.chatAutoSaveTimeInMinutes.get());
     AppPreferences.chatAutoSaveTimeInMinutes.onChange(chatAutoSave::setTimeout);
+    MapTool.getFrame().getOverlayPanel().init();
 
     // TODO: make this more formal when we switch to mina
     new ServerHeartBeatThread().start();
@@ -926,16 +927,6 @@ public class MapTool {
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
-    Platform.runLater(
-        () -> {
-          MapTool.getFrame()
-              .getOverlayPanel()
-              .showOverlay(
-                  AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME,
-                  Integer.MAX_VALUE,
-                  "",
-                  null);
-        });
   }
 
   public static AssetTransferManager getAssetTransferManager() {
