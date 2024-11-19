@@ -7,7 +7,7 @@ jobs:
   copy-labels:
     permissions:
       contents: read
-      issues: write
+      issues: read
       pull-requests: write
     runs-on: ubuntu-latest
     name: Copy labels from linked issues
