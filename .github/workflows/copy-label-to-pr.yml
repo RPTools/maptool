@@ -1,6 +1,6 @@
 name: Copy Labels to PR
 on:
-  pull_request:
+  pull_request_target:
     types: [opened, synchronize]
 
 jobs:
@@ -16,7 +16,6 @@ jobs:
         uses: michalvankodev/copy-issue-labels@v1.3.0
         with:
           repo-token: ${{ secrets.GITHUB_TOKEN }}
-          issue-number: ${{ github.event.inputs.issue }}
           labels-to-include: |
             bug
             build-configuration
