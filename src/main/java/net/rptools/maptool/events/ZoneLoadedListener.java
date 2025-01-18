@@ -30,6 +30,7 @@ import org.apache.log4j.Logger;
 public class ZoneLoadedListener {
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
   public static final String ON_CHANGE_MAP_CALLBACK = "onChangeMap";
+  public String priorMapID = "";
 
   public ZoneLoadedListener() {
     new MapToolEventBus().getMainEventBus().register(this);
@@ -49,9 +50,10 @@ public class ZoneLoadedListener {
           EventMacroUtil.callEventHandler(
               ON_CHANGE_MAP_CALLBACK,
               libraryNamespace,
-              currentZR.getZone().getId().toString(),
+              currentZR.getZone().getId().toString() + priorMapID,
               null,
               Collections.emptyMap());
+          priorMapID = ", " + currentZR.getZone().getId().toString();
         } catch (InterruptedException | ExecutionException e) {
           LOGGER.error(I18N.getText("library.error.notFound"), e);
           throw new AssertionError("Error retrieving library namespace");
