@@ -53,7 +53,6 @@ public class ZoneLoadedListener {
               currentZR.getZone().getId().toString() + priorMapID,
               null,
               Collections.emptyMap());
-          priorMapID = ", " + currentZR.getZone().getId().toString();
         } catch (InterruptedException | ExecutionException e) {
           LOGGER.error(I18N.getText("library.error.notFound"), e);
           throw new AssertionError("Error retrieving library namespace");
@@ -62,5 +61,6 @@ public class ZoneLoadedListener {
     } catch (InterruptedException | ExecutionException e) {
       LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
     }
+    priorMapID = ", " + currentZR.getZone().getId().toString();
   }
 }
