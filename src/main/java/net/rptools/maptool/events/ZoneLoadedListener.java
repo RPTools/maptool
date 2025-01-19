@@ -16,6 +16,7 @@ package net.rptools.maptool.events;
 
 import com.google.common.eventbus.Subscribe;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneLoaded;
@@ -30,7 +31,8 @@ import org.apache.log4j.Logger;
 public class ZoneLoadedListener {
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
   public static final String ON_CHANGE_MAP_CALLBACK = "onChangeMap";
-  public String priorMapID = "";
+  public String priorMapID =
+      MapTool.getFrame().getCurrentZoneRenderer().getZone().getId().toString();
 
   public ZoneLoadedListener() {
     new MapToolEventBus().getMainEventBus().register(this);
@@ -39,6 +41,12 @@ public class ZoneLoadedListener {
   @Subscribe
   public void OnChangedMap(ZoneLoaded event) {
     ZoneRenderer currentZR = MapTool.getFrame().getCurrentZoneRenderer();
+    String oCMoutput = currentZR.getZone().getId().toString();
+    for (ZoneRenderer zr : MapTool.getFrame().getZoneRenderers()) {
+      if (Objects.equals(zr.getZone().getId().toString(), priorMapID)) {
+        oCMoutput = oCMoutput + ", " + priorMapID;
+      }
+    }
     try {
       var libs = new LibraryManager().getLegacyEventTargets(ON_CHANGE_MAP_CALLBACK).get();
       if (libs.isEmpty()) {
@@ -50,7 +58,7 @@ public class ZoneLoadedListener {
           EventMacroUtil.callEventHandler(
               ON_CHANGE_MAP_CALLBACK,
               libraryNamespace,
-              currentZR.getZone().getId().toString() + priorMapID,
+              oCMoutput,
               null,
               Collections.emptyMap());
         } catch (InterruptedException | ExecutionException e) {
@@ -61,6 +69,6 @@ public class ZoneLoadedListener {
     } catch (InterruptedException | ExecutionException e) {
       LOGGER.error(I18N.getText("library.error.retrievingEventHandler"), e);
     }
-    priorMapID = ", " + currentZR.getZone().getId().toString();
+    priorMapID = currentZR.getZone().getId().toString();
   }
 }
