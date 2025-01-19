@@ -37,6 +37,7 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
@@ -260,6 +261,10 @@ public class ServerMessageHandler implements MessageHandler {
         }
         case SET_WALL_TOPOLOGY_MSG -> {
           handle(msg.getSetWallTopologyMsg());
+          sendToClients(id, msg);
+        }
+        case UPDATE_WALL_DATA_MSG -> {
+          handle(msg.getUpdateWallDataMsg());
           sendToClients(id, msg);
         }
 
@@ -715,8 +720,28 @@ public class ServerMessageHandler implements MessageHandler {
         () -> {
           var zoneId = new GUID(setWallTopologyMsg.getZoneGuid());
           var zone = server.getCampaign().getZone(zoneId);
+          if (zone == null) {
+            log.warn("Failed to find zone with id {}", zoneId);
+            return;
+          }
+
           var topology = WallTopology.fromDto(setWallTopologyMsg.getTopology());
           zone.replaceWalls(topology);
+        });
+  }
+
+  private void handle(UpdateWallDataMsg updateWallDataMsg) {
+    EventQueue.invokeLater(
+        () -> {
+          var zoneId = new GUID(updateWallDataMsg.getZoneGuid());
+          var zone = server.getCampaign().getZone(zoneId);
+          if (zone == null) {
+            log.warn("Failed to find zone with id {}", zoneId);
+            return;
+          }
+          var wall = Wall.fromDto(updateWallDataMsg.getWall());
+
+          zone.updateWall(wall);
         });
   }
 

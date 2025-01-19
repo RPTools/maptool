@@ -25,7 +25,12 @@ import com.thoughtworks.xstream.io.HierarchicalStreamWriter;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.topology.Vertex;
+import net.rptools.maptool.model.topology.VisibilityType;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -49,8 +54,16 @@ import org.apache.logging.log4j.Logger;
  *   </vertex>
  * </vertices>
  * <walls>
- *   <wall from="8A647D10EE1B4AFA8BEF4B93AEFB624D" to="E3A964F13221428582E491AB3D3D3764"/>
- *   <wall from="E3A964F13221428582E491AB3D3D3764" to="C510571E42C74080AF34EC00D47FCF97"/>
+ *   <wall from="8A647D10EE1B4AFA8BEF4B93AEFB624D" to="E3A964F13221428582E491AB3D3D3764">
+ *     <direction>Left</direction>
+ *     <movementDirection>Disabled</movementDirection>
+ *     <sightDirection>SameDirection</sightDirection>
+ *     <lightDirection>ReverseDirection</lightDirection>
+ *     <auraDirection>ForceBoth</auraDirection>
+ *   </wall>
+ *   <wall from="E3A964F13221428582E491AB3D3D3764" to="C510571E42C74080AF34EC00D47FCF97">
+ *     ..
+ *   </wall>
  * </walls>
  * ...
  * }</pre>
@@ -75,16 +88,13 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
 
     walls
         .getVertices()
-        .sorted(Comparator.comparingInt(WallTopology.Vertex::getZIndex))
-        .map(
-            vertex ->
-                new VertexRepresentation(
-                    vertex.id(), vertex.getPosition().getX(), vertex.getPosition().getY()))
+        .sorted(Comparator.comparingInt(Vertex::zIndex))
+        .map(VertexRepresentation::new)
         .forEach(representation.vertices::add);
     walls
         .getWalls()
-        .sorted(Comparator.comparingInt(WallTopology.Wall::getZIndex))
-        .map(wall -> new WallRepresentation(wall.from().id(), wall.to().id()))
+        .sorted(Comparator.comparingInt(walls::getZIndex))
+        .map(WallRepresentation::new)
         .forEach(representation.walls::add);
 
     context.convertAnother(representation);
@@ -98,7 +108,7 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
     for (var vertexRepresentation : representation.vertices) {
       try {
         var vertex = walls.createVertex(new GUID(vertexRepresentation.id));
-        vertex.setPosition(vertexRepresentation.x, vertexRepresentation.y);
+        vertex.position(vertexRepresentation.x, vertexRepresentation.y);
       } catch (WallTopology.GraphException e) {
         log.error(
             "A vertex with ID {} is already defined; skipping this one",
@@ -108,7 +118,28 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
     }
     for (var wallRepresentation : representation.walls) {
       try {
-        walls.createWall(new GUID(wallRepresentation.from), new GUID(wallRepresentation.to));
+        var fromId = new GUID(wallRepresentation.from);
+        var toId = new GUID(wallRepresentation.to);
+        // Direction and modifiers weren't available originally.
+        var direction =
+            Objects.requireNonNullElse(wallRepresentation.direction, Wall.Direction.Both);
+        var movementModifier =
+            Objects.requireNonNullElse(
+                wallRepresentation.movementDirection, Wall.MovementDirectionModifier.ForceBoth);
+        var directionModifiers =
+            Map.of(
+                VisibilityType.Sight,
+                Objects.requireNonNullElse(
+                    wallRepresentation.sightDirection, Wall.DirectionModifier.SameDirection),
+                VisibilityType.Light,
+                Objects.requireNonNullElse(
+                    wallRepresentation.lightDirection, Wall.DirectionModifier.SameDirection),
+                VisibilityType.Aura,
+                Objects.requireNonNullElse(
+                    wallRepresentation.auraDirection, Wall.DirectionModifier.SameDirection));
+
+        var wall = new Wall(fromId, toId, direction, movementModifier, directionModifiers);
+        walls.addWall(wall);
       } catch (WallTopology.GraphException e) {
         log.error(
             "A wall with vertices ({}, {}) is already defined; skipping this one",
@@ -136,10 +167,10 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
     @XStreamAsAttribute public final double x;
     @XStreamAsAttribute public final double y;
 
-    public VertexRepresentation(GUID id, double x, double y) {
-      this.id = id.toString();
-      this.x = x;
-      this.y = y;
+    public VertexRepresentation(Vertex vertex) {
+      this.id = vertex.id().toString();
+      this.x = vertex.position().getX();
+      this.y = vertex.position().getY();
     }
   }
 
@@ -147,10 +178,20 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
   private static final class WallRepresentation {
     @XStreamAsAttribute public final String from;
     @XStreamAsAttribute public final String to;
+    public final Wall.Direction direction;
+    public final Wall.MovementDirectionModifier movementDirection;
+    public final Wall.DirectionModifier sightDirection;
+    public final Wall.DirectionModifier lightDirection;
+    public final Wall.DirectionModifier auraDirection;
 
-    public WallRepresentation(GUID from, GUID to) {
-      this.from = from.toString();
-      this.to = to.toString();
+    public WallRepresentation(Wall wall) {
+      this.from = wall.from().toString();
+      this.to = wall.to().toString();
+      this.direction = wall.direction();
+      this.movementDirection = wall.movementModifier();
+      this.sightDirection = wall.directionModifier(VisibilityType.Sight);
+      this.lightDirection = wall.directionModifier(VisibilityType.Light);
+      this.auraDirection = wall.directionModifier(VisibilityType.Aura);
     }
   }
 

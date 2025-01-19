@@ -62,7 +62,16 @@ public class MovementBlockingTopology {
     this.preparedMasks = PreparedGeometryFactory.prepare(maskUnion);
 
     var wallGeometries =
-        walls.getWalls().map(wall -> wall.asSegment().toGeometry(factory)).toList();
+        walls
+            .getWalls()
+            .filter(
+                wall ->
+                    switch (wall.movementModifier()) {
+                      case ForceBoth -> true;
+                      case Disabled -> false;
+                    })
+            .map(wall -> walls.asLineSegment(wall).toGeometry(factory))
+            .toList();
     var wallUnion = new UnaryUnionOp(wallGeometries, factory).union();
     // wallUnion should be Lineal, which works well with prepared geometry.
     this.preparedWalls = PreparedGeometryFactory.prepare(wallUnion);

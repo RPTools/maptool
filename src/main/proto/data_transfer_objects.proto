@@ -716,14 +716,41 @@ message TokenFootPrintDto {
 
 // region WallTopology graph
 
+enum WallDirection {
+  Both = 0;
+  Left = 1;
+  Right = 2;
+}
+
+enum TopologyMovementDirectionModifier {
+  MovementForceBoth = 0;
+  MovementDisabled = 1;
+}
+
+enum TopologyDirectionModifier {
+  SameDirection = 0;
+  ReverseDirection = 1;
+  ForceBoth = 2;
+  Disabled = 3;
+}
+
 message VertexDto {
   string id = 1;
   DoublePointDto position = 2;
 }
 
+message WallDataDto {
+  WallDirection direction = 1;
+  TopologyMovementDirectionModifier movementDirectionModifier = 2;
+  TopologyDirectionModifier sightDirectionModifier = 3;
+  TopologyDirectionModifier lightDirectionModifier = 4;
+  TopologyDirectionModifier auraDirectionModifier = 5;
+}
+
 message WallDto {
   string from = 1;
   string to = 2;
+  WallDataDto data = 3;
 }
 
 message WallTopologyDto {
@@ -731,4 +758,4 @@ message WallTopologyDto {
   repeated WallDto walls = 2;
 }
 
-// ednregion
+// endregion
