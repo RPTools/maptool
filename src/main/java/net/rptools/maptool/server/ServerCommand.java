@@ -30,6 +30,7 @@ import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 
 public interface ServerCommand {
@@ -44,6 +45,8 @@ public interface ServerCommand {
   void setFoW(GUID zoneGUID, Area area, Set<GUID> selectedToks);
 
   void replaceWalls(Zone zone, WallTopology walls);
+
+  void updateWall(Zone zone, Wall wall);
 
   default void updateMaskTopology(
       Zone zone, Area area, boolean erase, Set<Zone.TopologyType> topologyTypes) {
