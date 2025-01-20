@@ -23,9 +23,9 @@ import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import net.rptools.lib.GeometryUtil;
+import net.rptools.maptool.model.topology.Vertex;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
-import net.rptools.maptool.model.topology.WallTopology.Vertex;
-import net.rptools.maptool.model.topology.WallTopology.Wall;
 import org.locationtech.jts.geom.Envelope;
 import org.locationtech.jts.geom.LineSegment;
 
@@ -50,6 +50,15 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     updateShape();
   }
 
+  public void bringToFront(Vertex vertex) {
+    this.walls.bringToFront(vertex);
+  }
+
+  public void bringToFront(Wall wall) {
+    this.walls.bringToFront(this.walls.getFrom(wall));
+    this.walls.bringToFront(this.walls.getTo(wall));
+  }
+
   @Override
   public List<WallTopologyRig.MovableVertex> getHandlesWithin(Rectangle2D bounds) {
     var envelope =
@@ -62,11 +71,11 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
         .getVertices()
         .forEach(
             vertex -> {
-              if (envelope.contains(GeometryUtil.point2DToCoordinate(vertex.getPosition()))) {
+              if (envelope.contains(GeometryUtil.point2DToCoordinate(vertex.position()))) {
                 results.add(new WallTopologyRig.MovableVertex(this, walls, vertex));
               }
             });
-    results.sort(Comparator.comparingInt(vertex -> vertex.getSource().getZIndex()));
+    results.sort(Comparator.comparingInt(vertex -> vertex.getSource().zIndex()));
     return results;
   }
 
@@ -81,15 +90,16 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
         .getWalls()
         .forEach(
             wall -> {
+              var movableWall = new WallTopologyRig.MovableWall(this, walls, wall);
               var wallEnvelope =
                   new Envelope(
-                      GeometryUtil.point2DToCoordinate(wall.from().getPosition()),
-                      GeometryUtil.point2DToCoordinate(wall.to().getPosition()));
+                      GeometryUtil.point2DToCoordinate(movableWall.getFrom().getPosition()),
+                      GeometryUtil.point2DToCoordinate(movableWall.getTo().getPosition()));
               if (wallEnvelope.intersects(envelope)) {
-                results.add(new WallTopologyRig.MovableWall(this, walls, wall));
+                results.add(movableWall);
               }
             });
-    results.sort(Comparator.comparingInt(wall -> wall.getSource().getZIndex()));
+    results.sort(Comparator.comparingInt(wall -> walls.getZIndex(wall.getSource())));
     return results;
   }
 
@@ -151,7 +161,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
         continue;
       }
 
-      var segment = wall.getSource().asSegment();
+      var segment = walls.asLineSegment(wall.getSource());
       var factor = segment.projectionFactor(coordinate);
       if (factor < 0 || factor > 1) {
         // Lies outside this segment.
@@ -168,21 +178,30 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     return Optional.empty();
   }
 
-  public WallTopologyRig.MovableVertex addDegenerateWall(Point2D point) {
-    var newWall = walls.brandNewWall();
-    newWall.from().setPosition(point);
-    newWall.to().setPosition(point);
+  public WallTopologyRig.MovableWall addDegenerateWall(Point2D point) {
+    var newWall = new MovableWall(this, walls, walls.brandNewWall());
+
+    newWall.getFrom().moveTo(point);
+    newWall.getTo().moveTo(point);
 
     updateShape();
 
-    return new WallTopologyRig.MovableVertex(this, walls, newWall.to());
+    return newWall;
   }
 
-  public WallTopologyRig.MovableVertex addControlPoint(Vertex connectTo, Point2D point) {
-    var newWall = walls.newWallStartingAt(connectTo);
-    newWall.to().setPosition(point);
+  /**
+   * Creates a new wall connected to an existing vertex.
+   *
+   * @param connectTo The vertex to connect the new wall to.
+   * @param point The position of the new vertex to create.
+   * @return The newly created wall. The starting point of the wall will be {@code connectTo} and
+   *     the ending point will be a new vertex with its position set to {@code point}.
+   */
+  public WallTopologyRig.MovableWall addConnectedWall(Vertex connectTo, Point2D point) {
+    var newWall = new MovableWall(this, walls, walls.newWallStartingAt(connectTo));
+    newWall.getTo().moveTo(point);
     updateShape();
-    return new WallTopologyRig.MovableVertex(this, walls, newWall.to());
+    return newWall;
   }
 
   /**
@@ -224,7 +243,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
    */
   public Point2D getSplitPoint(Movable<Wall> wall, Point2D reference) {
     var coordinate = GeometryUtil.point2DToCoordinate(reference);
-    var segment = wall.getSource().asSegment();
+    var segment = walls.asLineSegment(wall.getSource());
     var fraction = segment.segmentFraction(coordinate);
     var projection = segment.pointAlong(fraction);
     return GeometryUtil.coordinateToPoint2D(projection);
@@ -237,10 +256,10 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
    * @param reference A point close to the wall.
    * @return The new handle created as part of the split.
    */
-  public Handle<Vertex> splitAt(Movable<Wall> wall, Point2D reference) {
+  public MovableVertex splitAt(Movable<Wall> wall, Point2D reference) {
     var projection = getSplitPoint(wall, reference);
     var newVertex = walls.splitWall(wall.getSource());
-    newVertex.setPosition(projection);
+    newVertex.position(projection);
     return new WallTopologyRig.MovableVertex(this, walls, newVertex);
   }
 
@@ -254,7 +273,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
       this.parentRig = parentRig;
       this.walls = walls;
       this.source = source;
-      this.originalSegment = source.asSegment();
+      this.originalSegment = walls.asLineSegment(source);
     }
 
     @Override
@@ -267,12 +286,16 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
       return source;
     }
 
+    public LineSegment asLineSegment() {
+      return this.walls.asLineSegment(source);
+    }
+
     public MovableVertex getFrom() {
-      return new MovableVertex(parentRig, walls, source.from());
+      return new MovableVertex(parentRig, walls, walls.getFrom(source));
     }
 
     public MovableVertex getTo() {
-      return new MovableVertex(parentRig, walls, source.to());
+      return new MovableVertex(parentRig, walls, walls.getTo(source));
     }
 
     @Override
@@ -285,8 +308,8 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     public boolean isForSameElement(Movable<?> other) {
       return other instanceof WallTopologyRig.MovableWall movableWall
           && this.getParentRig() == movableWall.getParentRig()
-          && this.source.from().id().equals(movableWall.source.from().id())
-          && this.source.to().id().equals(movableWall.source.to().id());
+          && this.source.from().equals(movableWall.source.from())
+          && this.source.to().equals(movableWall.source.to());
     }
 
     @Override
@@ -308,19 +331,19 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
 
       if ((fromOffsetX * fromOffsetX + fromOffsetY * fromOffsetY)
           < (toOffsetX * toOffsetX + toOffsetY * toOffsetY)) {
-        source.from().setPosition(snappedFrom.getX(), snappedFrom.getY());
-        source
-            .to()
-            .setPosition(
-                snappedFrom.getX() + (originalSegment.p1.x - originalSegment.p0.x),
-                snappedFrom.getY() + (originalSegment.p1.y - originalSegment.p0.y));
+        getFrom().moveTo(new Point2D.Double(snappedFrom.getX(), snappedFrom.getY()));
+        getTo()
+            .moveTo(
+                new Point2D.Double(
+                    snappedFrom.getX() + (originalSegment.p1.x - originalSegment.p0.x),
+                    snappedFrom.getY() + (originalSegment.p1.y - originalSegment.p0.y)));
       } else {
-        source.to().setPosition(snappedTo.getX(), snappedTo.getY());
-        source
-            .from()
-            .setPosition(
-                snappedTo.getX() + (originalSegment.p0.x - originalSegment.p1.x),
-                snappedTo.getY() + (originalSegment.p0.y - originalSegment.p1.y));
+        getTo().moveTo(new Point2D.Double(snappedTo.getX(), snappedTo.getY()));
+        getFrom()
+            .moveTo(
+                new Point2D.Double(
+                    snappedTo.getX() + (originalSegment.p0.x - originalSegment.p1.x),
+                    snappedTo.getY() + (originalSegment.p0.y - originalSegment.p1.y)));
       }
 
       parentRig.updateShape();
@@ -328,7 +351,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
 
     @Override
     public void applyMove() {
-      originalSegment.setCoordinates(source.asSegment());
+      originalSegment.setCoordinates(walls.asLineSegment(source));
     }
   }
 
@@ -343,7 +366,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
       this.parentRig = parentRig;
       this.walls = walls;
       this.source = source;
-      this.originalPosition = this.source.getPosition();
+      this.originalPosition = this.source.position();
     }
 
     @Override
@@ -358,7 +381,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
 
     @Override
     public Point2D getPosition() {
-      return source.getPosition();
+      return source.position();
     }
 
     @Override
@@ -376,7 +399,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
 
     @Override
     public void moveTo(Point2D point) {
-      source.setPosition(point.getX(), point.getY());
+      source.position(point.getX(), point.getY());
       parentRig.updateShape();
     }
 
@@ -392,7 +415,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
 
     @Override
     public void applyMove() {
-      originalPosition.setLocation(source.getPosition());
+      originalPosition.setLocation(source.position());
     }
   }
 }

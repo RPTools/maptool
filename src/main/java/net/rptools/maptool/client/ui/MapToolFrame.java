@@ -65,6 +65,7 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.ZoomStatusBar;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
 import net.rptools.maptool.client.swing.preference.WindowPreferences;
+import net.rptools.maptool.client.swing.walls.WallConfigurationController;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.Toolbox;
@@ -148,6 +149,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   private final CommandPanel commandPanel;
   private final AboutDialog aboutDialog;
   private final ColorPicker colorPicker;
+  private final WallConfigurationController wallConfigurationController;
   private final Toolbox toolbox;
   private final ToolbarPanel toolbarPanel;
   private final ZoneMiniMapPanel zoneMiniMapPanel;
@@ -375,6 +377,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
         new TextureChooserPanel(
             colorPicker.getPaintChooser(), assetPanel.getModel(), "imageExplorerTextureChooser");
     colorPicker.getPaintChooser().addPaintChooser(textureChooserPanel);
+
+    wallConfigurationController = new WallConfigurationController();
 
     String credits = "";
     String version = "";
@@ -1117,6 +1121,10 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
   public ColorPicker getColorPicker() {
     return colorPicker;
+  }
+
+  public WallConfigurationController getWallConfigurationController() {
+    return wallConfigurationController;
   }
 
   public void showAboutDialog() {

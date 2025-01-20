@@ -21,6 +21,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
@@ -67,6 +68,7 @@ public class MapToolServer {
     Stopped
   }
 
+  @Nonnull private final String serviceIdentifier;
   private final Server server;
   private final MessageHandler messageHandler;
   private final Router router;
@@ -97,6 +99,7 @@ public class MapToolServer {
       boolean useUPnP,
       ServerPolicy policy,
       ServerSidePlayerDatabase playerDb) {
+    this.serviceIdentifier = id;
     this.config = config;
     this.useUPnP = useUPnP;
     this.policy = new ServerPolicy(policy);
@@ -202,6 +205,19 @@ public class MapToolServer {
 
   public int getPort() {
     return config == null ? -1 : config.getPort();
+  }
+
+  /**
+   * Get the ID that this server responds to service announcement requests with.
+   *
+   * @return The identifier or null if it's not being announced.
+   */
+  @Nullable
+  public String getServiceIdentifier() {
+    if (announcer == null) {
+      return null;
+    }
+    return serviceIdentifier;
   }
 
   private void connectionAdded(Connection conn) {

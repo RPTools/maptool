@@ -90,5 +90,6 @@ message Message {
     UpdatePlayerStatusMsg update_player_status_msg = 74;
     SetCampaignLandingMapMsg set_campaign_landing_map_msg = 75;
     SetWallTopologyMsg set_wall_topology_msg = 76;
+    UpdateWallDataMsg update_wall_data_msg = 77;
   }
 }

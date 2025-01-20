@@ -37,6 +37,7 @@ import net.rptools.maptool.model.gamedata.proto.GameDataDto;
 import net.rptools.maptool.model.gamedata.proto.GameDataValueDto;
 import net.rptools.maptool.model.library.addon.TransferableAddOnLibrary;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.ServerCommand;
@@ -422,6 +423,14 @@ public class ServerCommandClientImpl implements ServerCommand {
             .setZoneGuid(zone.getId().toString())
             .setTopology(walls.toDto());
     makeServerCall(Message.newBuilder().setSetWallTopologyMsg(msg).build());
+  }
+
+  public void updateWall(Zone zone, Wall wall) {
+    var msg =
+        UpdateWallDataMsg.newBuilder().setZoneGuid(zone.getId().toString()).setWall(wall.toDto());
+
+    zone.updateWall(wall);
+    makeServerCall(Message.newBuilder().setUpdateWallDataMsg(msg).build());
   }
 
   @Override

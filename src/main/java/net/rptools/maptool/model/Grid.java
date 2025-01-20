@@ -537,10 +537,8 @@ public abstract class Grid implements Cloneable {
       double arcAngle,
       int offsetAngle,
       boolean scaleWithToken) {
-    if (range == 0) {
-      range = zone.getTokenVisionDistance();
-    }
-    double visionRange = range * getSize() / zone.getUnitsPerCell();
+    double visionRange =
+        ((range == 0) ? zone.getTokenVisionDistance() : range) * getSize() / zone.getUnitsPerCell();
 
     Rectangle footprint = token.getFootprint(this).getBounds(this);
 
@@ -852,7 +850,8 @@ public abstract class Grid implements Cloneable {
    * Returns an Area with a given radius that is shaped and aligned to the current grid
    *
    * @param token token which to center the grid area on
-   * @param range range in units grid area extends out to
+   * @param range range in units grid area extends out to. if set to {@code 0}, the result will be a
+   *     circular area extending out to {@code visionRange}.
    * @param scaleWithToken whether grid area should expand by the size of the token
    * @param visionRange token's vision in pixels
    * @return the {@link Area} conforming to the current grid layout
