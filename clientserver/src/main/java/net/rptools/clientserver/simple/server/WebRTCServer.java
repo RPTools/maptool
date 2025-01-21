@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCServer extends AbstractServer {
+public final class WebRTCServer extends AbstractServer implements Server {
   private static final Logger log = LogManager.getLogger(WebRTCServer.class);
 
   public interface Listener {

@@ -39,6 +39,7 @@ import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
@@ -70,6 +71,7 @@ import net.rptools.maptool.client.ui.AppMenuBar;
 import net.rptools.maptool.client.ui.ConnectionStatusPanel;
 import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.OSXAdapter;
+import net.rptools.maptool.client.ui.connecttoserverdialog.ConnectToServerDialogPreferences;
 import net.rptools.maptool.client.ui.logger.LogConsoleFrame;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetListener;
 import net.rptools.maptool.client.ui.theme.Icons;
@@ -157,7 +159,7 @@ public class MapTool {
   private static MapToolFrame clientFrame;
   private static NoteFrame profilingNoteFrame;
   private static LogConsoleFrame logConsoleFrame;
-  private static MapToolServer server;
+  @Nullable private static MapToolServer server;
   private static MapToolClient client;
 
   private static BackupManager backupManager;
@@ -177,6 +179,7 @@ public class MapTool {
   private static int windowX = -1;
   private static int windowY = -1;
   private static String loadCampaignOnStartPath = "";
+  @Nullable private static RemoteServerConfig remoteServerConfig = null;
 
   static {
     try {
@@ -185,7 +188,7 @@ public class MapTool {
       var campaign = CampaignFactory.createBasicCampaign();
       var policy = new ServerPolicy();
 
-      server = new MapToolServer("", new Campaign(campaign), null, false, policy, playerDB);
+      server = new MapToolServer(null, new Campaign(campaign), null, false, policy, playerDB);
       client = new MapToolClient(server, campaign, playerDB.getPlayer(), connections.clientSide());
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
@@ -1158,7 +1161,7 @@ public class MapTool {
         player);
   }
 
-  private static void setUpClient(MapToolClient client) {
+  private static void setUpClient(@Nonnull MapToolClient client) {
     MapTool.getFrame().getCommandPanel().clearAllIdentities();
 
     MapToolConnection clientConn = client.getConnection();
@@ -1174,7 +1177,9 @@ public class MapTool {
   }
 
   public static void connectToRemoteServer(
-      ServerConfig config, LocalPlayer player, HandshakeCompletionObserver onCompleted)
+      @Nonnull RemoteServerConfig config,
+      @Nonnull LocalPlayer player,
+      @Nonnull HandshakeCompletionObserver onCompleted)
       throws IOException {
     if (server != null && server.getState() == MapToolServer.State.Started) {
       log.error("A local server is still running.", new Exception());
@@ -1350,6 +1355,11 @@ public class MapTool {
           .append("</p>");
 
       showWarning(message.toString());
+    }
+
+    if (remoteServerConfig != null) {
+      var prefs = new ConnectToServerDialogPreferences();
+      AppActions.connectToServer(prefs.getUsername(), prefs.getPassword(), remoteServerConfig);
     }
   }
 
@@ -1528,6 +1538,22 @@ public class MapTool {
     Platform.setImplicitExit(false); // necessary to use JavaFX later
   }
 
+  private static void parsePositionalArg(@Nonnull String arg) {
+    ServerAddress serverAddress;
+    try {
+      serverAddress = ServerAddress.parse(arg);
+    } catch (URISyntaxException | IllegalArgumentException e) {
+      log.info("Overriding -F option with extra argument");
+      loadCampaignOnStartPath = arg;
+      return;
+    }
+
+    remoteServerConfig = serverAddress.findServer();
+    if (remoteServerConfig == null) {
+      MapTool.showError(I18N.getText("ServerDialog.error.serverNotFound", arg));
+    }
+  }
+
   public static void main(String[] args) {
     log.info("********************************************************************************");
     log.info("**                                                                            **");
@@ -1636,8 +1662,11 @@ public class MapTool {
     log.info("MapTool vendor: " + vendor);
 
     if (cmd.getArgs().length != 0) {
-      log.info("Overriding -F option with extra argument");
-      loadCampaignOnStartPath = cmd.getArgs()[0];
+      try {
+        parsePositionalArg(cmd.getArgs()[0]);
+      } catch (Error e) {
+        MapTool.showWarning("Error parsing the command line", e);
+      }
     }
     if (!loadCampaignOnStartPath.isEmpty()) {
       log.info("Loading initial campaign: " + loadCampaignOnStartPath);

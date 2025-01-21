@@ -22,6 +22,8 @@ import java.net.UnknownHostException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
@@ -36,32 +38,25 @@ import javax.swing.SwingWorker;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
-import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
-import net.rptools.maptool.client.MapToolRegistry.SeverConnectionDetails;
+import net.rptools.maptool.client.MapToolServiceFinder;
+import net.rptools.maptool.client.RemoteServerConfig;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
-import net.tsc.servicediscovery.AnnouncementListener;
-import net.tsc.servicediscovery.ServiceFinder;
 import yasb.Binder;
 
 /**
  * @author trevor
  */
 public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>
-    implements AnnouncementListener {
-  private static ServiceFinder finder;
+    implements MapToolServiceFinder.MapToolAnnouncementListener {
+  private static MapToolServiceFinder finder = MapToolServiceFinder.getInstance();
 
-  static {
-    finder = new ServiceFinder(AppConstants.SERVICE_GROUP);
-  }
-
-  private boolean accepted;
   private GenericDialog dialog;
-  private SeverConnectionDetails connectionDetails = new SeverConnectionDetails();
+  private RemoteServerConfig connectionDetails = null;
 
   /** This is the default constructor */
   public ConnectToServerDialog() {
@@ -75,16 +70,15 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     Binder.setFormat(getPortTextField(), new DecimalFormat("####"));
   }
 
-  public int getPort() {
-    return connectionDetails.port;
-  }
-
-  public String getServer() {
-    return connectionDetails.address;
-  }
-
-  public boolean getUseWebRTC() {
-    return connectionDetails.webrtc;
+  /**
+   * Get the result from this dialog
+   *
+   * @return null if cancelled, otherwise the server address with other parameters stored in
+   *     preferences
+   */
+  @Nullable
+  public RemoteServerConfig getResult() {
+    return connectionDetails;
   }
 
   public void showDialog() {
@@ -124,7 +118,6 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   public void unbind() {
     // Shutting down
     finder.removeAnnouncementListener(this);
-    finder.dispose();
 
     super.unbind();
   }
@@ -137,17 +130,12 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     getCancelButton()
         .addActionListener(
             e -> {
-              accepted = false;
               dialog.closeDialog();
             });
   }
 
   public void initOKButton() {
     getOKButton().addActionListener(e -> handleOK());
-  }
-
-  public boolean accepted() {
-    return accepted;
   }
 
   public void initLocalServerList() {
@@ -284,17 +272,15 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     }
     getUsernameTextField().setText(username);
 
-    String externalAddress = "Unknown";
+    InetAddress externalAddress = null;
     try {
       externalAddress = MapToolRegistry.getInstance().getAddress();
-      if (externalAddress == null || externalAddress.length() == 0) {
-        externalAddress = "Unknown";
-      }
     } catch (Exception e) {
       // Oh well, might not be connected
     }
     // System.out.println("External address is: " + externalAddress);
 
+    RemoteServerConfig connectionDetails;
     JComponent selectedPanel = (JComponent) getTabPane().getSelectedComponent();
     if (SwingUtil.hasComponent(selectedPanel, "lanPanel")) {
       if (getLocalServerList().getSelectedIndex() < 0) {
@@ -303,10 +289,8 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       }
       // OK
       ServerInfo info = (ServerInfo) getLocalServerList().getSelectedValue();
-      connectionDetails.port = info.port;
-      connectionDetails.address = info.address.getHostAddress();
-    }
-    if (SwingUtil.hasComponent(selectedPanel, "directPanel")) {
+      connectionDetails = info.config;
+    } else if (SwingUtil.hasComponent(selectedPanel, "directPanel")) {
       // TODO: put these into a validation method
       if (getPortTextField().getText().length() == 0) {
         MapTool.showError("ServerDialog.error.port");
@@ -328,10 +312,8 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       getHostTextField().setText(host);
 
       // OK
-      connectionDetails.port = portTemp;
-      connectionDetails.address = host;
-    }
-    if (SwingUtil.hasComponent(selectedPanel, "rptoolsPanel")) {
+      connectionDetails = new RemoteServerConfig.Socket(host, portTemp);
+    } else if (SwingUtil.hasComponent(selectedPanel, "rptoolsPanel")) {
       String serverName = getServerNameTextField().getText().trim();
       if (serverName.length() == 0) {
         MapTool.showError("ServerDialog.error.server");
@@ -340,17 +322,19 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       getServerNameTextField().setText(serverName);
 
       // Do the lookup
-      SeverConnectionDetails serverInfo = MapToolRegistry.getInstance().findInstance(serverName);
-      if (serverInfo == null || serverInfo.address == null || serverInfo.address.length() == 0) {
+      var serverInfo = MapToolRegistry.getInstance().findInstance(serverName);
+      if (serverInfo == null) {
         MapTool.showError(I18N.getText("ServerDialog.error.serverNotFound", serverName));
         return;
       }
       connectionDetails = serverInfo;
+    } else {
+      throw new AssertionError("Expected rptools, LAN or direct panel to be selected");
     }
     try {
-      InetAddress server = InetAddress.getByName(connectionDetails.address);
-      InetAddress extAddress = InetAddress.getByName(externalAddress);
-      if (extAddress != null && extAddress.equals(server) && !connectionDetails.webrtc) {
+      if (externalAddress != null
+          && connectionDetails instanceof RemoteServerConfig.Socket(String hostName, int port)
+          && externalAddress.equals(InetAddress.getByName(hostName))) {
         boolean yes =
             MapTool.confirm(
                 "ConnectToServerDialog.warning.doNotUseExternalAddress",
@@ -362,7 +346,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       // If an exception occurs, don't bother doing the comparison. But otherwise it's not an error.
     }
     if (commit()) {
-      accepted = true;
+      this.connectionDetails = connectionDetails;
       dialog.closeDialog();
     }
   }
@@ -419,23 +403,21 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   }
 
   // ANNOUNCEMENT LISTENER
-  public void serviceAnnouncement(String type, InetAddress address, int port, byte[] data) {
-    ((DefaultListModel) getLocalServerList().getModel())
-        .addElement(new ServerInfo(new String(data), address, port));
+  public void serviceAnnouncement(@Nonnull String id, @Nonnull RemoteServerConfig.Socket config) {
+    ((DefaultListModel) getLocalServerList().getModel()).addElement(new ServerInfo(id, config));
   }
 
   private static class ServerInfo {
-    String id;
-    InetAddress address;
-    int port;
+    @Nonnull String id;
+    @Nonnull RemoteServerConfig.Socket config;
 
-    public ServerInfo(String id, InetAddress address, int port) {
+    public ServerInfo(@Nonnull String id, @Nonnull RemoteServerConfig.Socket config) {
       this.id = id.trim();
-      this.address = address;
-      this.port = port;
+      this.config = config;
     }
 
     @Override
+    @Nonnull
     public String toString() {
       return id;
     }

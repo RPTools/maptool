@@ -15,6 +15,7 @@
 package net.rptools.clientserver;
 
 import java.awt.EventQueue;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.clientserver.simple.connection.SocketConnection;
@@ -24,6 +25,7 @@ import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.SocketServer;
 import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.RemoteServerConfig;
 import net.rptools.maptool.server.ServerConfig;
 
 public class ConnectionFactory {
@@ -33,22 +35,25 @@ public class ConnectionFactory {
     return instance;
   }
 
-  public Connection createConnection(String id, ServerConfig config) {
-    if (!config.getUseWebRTC()) {
-      return new SocketConnection(id, config.getHostName(), config.getPort());
-    }
-
-    return new WebRTCConnection(
-        id,
-        config.getServerName(),
-        new WebRTCConnection.Listener() {
-          @Override
-          public void onLoginError() {
-            MapTool.showError("Handshake.msg.playerAlreadyConnected");
-          }
-        });
+  @Nonnull
+  public Connection createConnection(@Nonnull String id, @Nonnull RemoteServerConfig config) {
+    return switch (config) {
+      case RemoteServerConfig.Socket(String hostName, int port) ->
+          new SocketConnection(id, hostName, port);
+      case RemoteServerConfig.WebRTC(String serverName) ->
+          new WebRTCConnection(
+              id,
+              serverName,
+              new WebRTCConnection.Listener() {
+                @Override
+                public void onLoginError() {
+                  MapTool.showError("Handshake.msg.playerAlreadyConnected");
+                }
+              });
+    };
   }
 
+  @Nonnull
   public Server createServer(@Nullable ServerConfig config) {
     if (config == null) {
       return new NilServer();

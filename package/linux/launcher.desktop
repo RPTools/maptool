@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=${projectName}
+Comment=${description}
+Exec=/opt/maptool/bin/${projectName}${developerRelease} %u
+Icon=/opt/maptool/lib/${projectName}${developerRelease}.png
+Terminal=false
+Type=Application
+Categories=Game
+MimeType=application/maptool;x-scheme-handler/rptools-maptool+registry;x-scheme-handler/rptools-maptool+lan;x-scheme-handler/rptools-maptool+tcp

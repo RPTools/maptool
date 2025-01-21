@@ -27,10 +27,19 @@ public class LocalPlayer extends Player {
   private final String plainTextPassword;
   private CipherUtil.Key password;
 
+  // Constructor for local only local player with maximum irrevocable permission
   public LocalPlayer() throws NoSuchAlgorithmException, InvalidKeySpecException {
     this(AppPreferences.defaultUserName.get(), Role.GM, "");
   }
 
+  // Constructor for connecting to a server, real role is set after handshake.
+  public LocalPlayer(String name, String plainTextPassword)
+      throws NoSuchAlgorithmException, InvalidKeySpecException {
+    this(name, Role.PLAYER, plainTextPassword);
+  }
+
+  // Constructor for your local player when starting a server,
+  // all parameters are provided.
   public LocalPlayer(String name, Role role, String plainTextPassword)
       throws NoSuchAlgorithmException, InvalidKeySpecException {
     super(name, role, null); // Superclass takes care of plainTextPassword info

@@ -22,18 +22,25 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.net.InetAddress;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import net.rptools.maptool.server.MapToolServer;
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -51,6 +58,7 @@ public class MapToolRegistry {
   private static final String SERVICE_URL = "https://services-mt.rptools.net";
   private static final String REGISTER_SERVER = SERVICE_URL + "/register-server";
   private static final String ACTIVE_SERVERS = SERVICE_URL + "/active-servers";
+  private static final String CLICK_REDIRECT = SERVICE_URL + "/click.html";
   private static final String SERVER_HEARTBEAT = SERVICE_URL + "/server-heartbeat";
   private static final String SERVER_DISCONNECT = SERVICE_URL + "/server-disconnect";
   private static final String SERVER_DETAILS = SERVICE_URL + "/server-details";
@@ -67,12 +75,6 @@ public class MapToolRegistry {
     return instance;
   }
 
-  public static class SeverConnectionDetails {
-    public String address;
-    public int port;
-    public boolean webrtc;
-  }
-
   public enum RegisterResponse {
     OK,
     ERROR,
@@ -81,7 +83,8 @@ public class MapToolRegistry {
 
   private MapToolRegistry() {}
 
-  public SeverConnectionDetails findInstance(String id) {
+  @Nullable
+  public RemoteServerConfig findInstance(@Nonnull String id) {
     OkHttpClient client = new OkHttpClient();
 
     String requestUrl;
@@ -95,7 +98,7 @@ public class MapToolRegistry {
     } catch (Exception e) {
       log.error("Error building request url", e);
       MapTool.showError("msg.error.fetchingRegistryInformation", e);
-      return new SeverConnectionDetails();
+      return null;
     }
 
     Request request = new Request.Builder().url(requestUrl).build();
@@ -107,31 +110,30 @@ public class MapToolRegistry {
       var responseString = response.body().string();
       if (responseString.isEmpty()) {
         MapTool.showError("msg.error.fetchingRegistryInformation");
-        return new SeverConnectionDetails();
+        return null;
       }
 
       JsonObject json = JsonParser.parseString(responseString).getAsJsonObject();
-      SeverConnectionDetails details = new SeverConnectionDetails();
-
-      details.address = json.getAsJsonPrimitive("address").getAsString();
-      details.port = json.getAsJsonPrimitive("port").getAsInt();
-
       // currently the webrtc property is sent as int. In the future this will
       // change to boolean. So we check what the type is. Can be removed when
       // we get it as boolean.
       var webrtcProperty = json.getAsJsonPrimitive("webrtc");
-      if (webrtcProperty.isBoolean()) {
-        details.webrtc = webrtcProperty.getAsBoolean();
-      } else {
-        details.webrtc = webrtcProperty.getAsInt() > 0;
+      boolean hasWebrtc =
+          webrtcProperty.isBoolean()
+              ? webrtcProperty.getAsBoolean()
+              : webrtcProperty.getAsInt() > 0;
+      if (hasWebrtc) {
+        return new RemoteServerConfig.WebRTC(id);
       }
 
-      return details;
+      return new RemoteServerConfig.Socket(
+          json.getAsJsonPrimitive("address").getAsString(),
+          json.getAsJsonPrimitive("port").getAsInt());
 
     } catch (Exception e) {
       log.error("Error fetching instance from server registry", e);
       MapTool.showError("msg.error.fetchingRegistryInformation", e);
-      return new SeverConnectionDetails();
+      return null;
     }
   }
 
@@ -158,7 +160,8 @@ public class MapToolRegistry {
     JsonObject body = new JsonObject();
     body.addProperty("name", id);
     body.addProperty("port", port);
-    body.addProperty("address", getAddress());
+    var address = getAddress();
+    body.addProperty("address", address == null ? "" : address.getHostName());
     body.addProperty("webrtc", webrtc);
     if (MapTool.isDevelopment()) {
       body.addProperty("version", "Dev");
@@ -231,7 +234,8 @@ public class MapToolRegistry {
     JsonObject body = new JsonObject();
     body.addProperty("id", serverRegistrationId);
     body.addProperty("clientId", MapTool.getClientId());
-    body.addProperty("address", getAddress());
+    var address = getAddress();
+    body.addProperty("address", address == null ? "" : address.getHostName());
     body.addProperty("number_players", MapTool.getPlayerList().size());
     body.addProperty("number_maps", MapTool.getCampaign().getZones().size());
 
@@ -264,22 +268,24 @@ public class MapToolRegistry {
   /**
    * Get the external IP address of this MapTool instance.
    *
-   * @return The external IP, or the empty string if none could be determined.
+   * @return The external IP, or null if none could be determined.
    */
-  public String getAddress() {
+  @Nullable
+  public InetAddress getAddress() {
     try {
       return this.getAddressAsync().get(30, TimeUnit.SECONDS);
     } catch (Exception e) {
-      return "";
+      return null;
     }
   }
 
   /**
    * Asynchronously get the external IP address of this MapTool instance.
    *
-   * @return A future that resolves to the external IP address.
+   * @return A future that resolves to the external IP address or null if none could be determined.
    */
-  public Future<String> getAddressAsync() {
+  @Nonnull
+  public CompletableFuture<InetAddress> getAddressAsync() {
     List<String> ipCheckURLs;
     try (InputStream ipCheckList =
         getClass().getResourceAsStream("/net/rptools/maptool/client/network/ip-check.txt")) {
@@ -292,30 +298,48 @@ public class MapToolRegistry {
     } catch (IOException e) {
       throw new AssertionError("Unable to read ip-check list.", e); // Shouldn't happen
     }
-
-    final CompletableFuture<String> externalIpFuture = new CompletableFuture<>();
-    final ExecutorService executor = Executors.newCachedThreadPool();
+    var ipCheckTasks = new ArrayList<Callable<InetAddress>>();
     for (String urlString : ipCheckURLs) {
-      executor.execute(
+      ipCheckTasks.add(
           () -> {
-            try {
-              URL url = new URL(urlString);
+            URL url = new URL(urlString);
 
-              try (BufferedReader reader =
-                  new BufferedReader(new InputStreamReader(url.openStream()))) {
-                String ip = reader.readLine();
-                if (ip != null && !ip.isEmpty()) {
-                  externalIpFuture.complete(ip);
-                  // A result has been found. No need to continue running tasks.
-                  executor.shutdownNow();
-                }
-              }
-            } catch (Exception t) {
-              // Ignore. Hopefully another request succeeds.
+            try (BufferedReader reader =
+                new BufferedReader(new InputStreamReader(url.openStream()))) {
+              String ip = reader.readLine();
+              // null or invalid ip deliberately unhandled so this task fails
+              // and invokeAny only returns the first valid ip
+              return InetAddress.getByName(ip);
             }
           });
     }
 
-    return externalIpFuture;
+    return CompletableFuture.supplyAsync(
+        () -> {
+          try {
+            return ForkJoinPool.commonPool().invokeAny(ipCheckTasks);
+          } catch (ExecutionException | InterruptedException ignore) {
+            return null;
+          }
+        });
+  }
+
+  /** Get a link to the registry server that will redirect to the given MapTool URI. */
+  @Nonnull
+  public URI getRedirectURL(@Nonnull URI uri) {
+    String queryString;
+    try {
+      queryString = "?uri=" + URLEncoder.encode(uri.toString(), "UTF-8");
+    } catch (UnsupportedEncodingException e) {
+      throw new AssertionError("UTF-8 should be a supported encoding", e);
+    }
+
+    try {
+      return new URI(MapToolRegistry.CLICK_REDIRECT + queryString);
+    } catch (URISyntaxException e) {
+      throw new AssertionError(
+          "Scheme and path are given and the path is absolute and the authority is parseable as a server-based authority so this should be infallible",
+          e);
+    }
   }
 }

@@ -20,21 +20,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Random;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.clientserver.ConnectionFactory;
 import net.rptools.clientserver.simple.DisconnectHandler;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.clientserver.simple.server.NilServer;
 import net.rptools.clientserver.simple.server.Router;
 import net.rptools.clientserver.simple.server.Server;
 import net.rptools.clientserver.simple.server.ServerObserver;
+import net.rptools.clientserver.simple.server.SocketServer;
+import net.rptools.clientserver.simple.server.WebRTCServer;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolRegistry;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
-import net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialog;
 import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
@@ -49,6 +53,7 @@ import net.rptools.maptool.server.proto.SetCampaignMsg;
 import net.rptools.maptool.server.proto.UpdateAssetTransferMsg;
 import net.rptools.maptool.transfer.AssetProducer;
 import net.rptools.maptool.transfer.AssetTransferManager;
+import net.rptools.maptool.util.NetUtil;
 import net.rptools.maptool.util.UPnPUtil;
 import net.tsc.servicediscovery.ServiceAnnouncer;
 import org.apache.logging.log4j.LogManager;
@@ -67,7 +72,8 @@ public class MapToolServer {
     Stopped
   }
 
-  private final Server server;
+  @Nonnull private final String serviceIdentifier;
+  @Nonnull private final Server server;
   private final MessageHandler messageHandler;
   private final Router router;
   private final ServerConfig config;
@@ -81,7 +87,7 @@ public class MapToolServer {
   private final AssetProducerThread assetProducerThread;
 
   private final boolean useUPnP;
-  private final ServiceAnnouncer announcer;
+  @Nullable private ServiceAnnouncer announcer;
   private Campaign campaign;
   private ServerPolicy policy;
   private HeartbeatThread heartbeatThread;
@@ -91,21 +97,17 @@ public class MapToolServer {
   private State currentState;
 
   public MapToolServer(
-      String id,
+      @Nullable String id,
       Campaign campaign,
       @Nullable ServerConfig config,
       boolean useUPnP,
       ServerPolicy policy,
       ServerSidePlayerDatabase playerDb) {
+    this.serviceIdentifier = id;
     this.config = config;
     this.useUPnP = useUPnP;
     this.policy = new ServerPolicy(policy);
     this.playerDatabase = playerDb;
-
-    this.announcer =
-        config == null
-            ? null
-            : new ServiceAnnouncer(id, config.getPort(), AppConstants.SERVICE_GROUP);
 
     server = ConnectionFactory.getInstance().createServer(this.config);
     messageHandler = new ServerMessageHandler(this);
@@ -201,7 +203,24 @@ public class MapToolServer {
   }
 
   public int getPort() {
-    return config == null ? -1 : config.getPort();
+    return switch (server) {
+      case NilServer s -> -1;
+      case SocketServer s -> s.getPort();
+      case WebRTCServer s -> -1;
+    };
+  }
+
+  /**
+   * Get the ID that this server responds to service announcement requests with.
+   *
+   * @return The identifier or null if it's not being announced.
+   */
+  @Nullable
+  public String getServiceIdentifier() {
+    if (announcer == null) {
+      return null;
+    }
+    return serviceIdentifier;
   }
 
   private void connectionAdded(Connection conn) {
@@ -337,6 +356,26 @@ public class MapToolServer {
       return;
     }
 
+    if (announcer != null) {
+      announcer.stop();
+      announcer = null;
+    }
+
+    // Unregister ourselves
+    if (config != null && config.isServerRegistered()) {
+      try {
+        MapToolRegistry.getInstance().unregisterInstance();
+      } catch (Throwable t) {
+        MapTool.showError("While unregistering server instance", t);
+      }
+    }
+
+    // Close UPnP port mapping if used
+    int port;
+    if (useUPnP && (port = getPort()) != -1) {
+      UPnPUtil.closePort(port);
+    }
+
     server.close();
     for (var connection : router.removeAll()) {
       connection.removeDisconnectHandler(onConnectionDisconnected);
@@ -350,25 +389,6 @@ public class MapToolServer {
     }
     if (assetProducerThread != null) {
       assetProducerThread.shutdown();
-    }
-
-    if (announcer != null) {
-      announcer.stop();
-    }
-
-    // Unregister ourselves
-    if (config != null && config.isServerRegistered()) {
-      try {
-        MapToolRegistry.getInstance().unregisterInstance();
-      } catch (Throwable t) {
-        MapTool.showError("While unregistering server instance", t);
-      }
-    }
-
-    // Close UPnP port mapping if used
-    if (useUPnP && config != null) {
-      int port = config.getPort();
-      UPnPUtil.closePort(port);
     }
   }
 
@@ -389,12 +409,13 @@ public class MapToolServer {
     }
 
     // Use UPnP to open port in router
-    if (useUPnP && config != null) {
+    int port = getPort();
+    if (useUPnP && port != -1) {
       MapTool.getFrame()
           .showFilledGlassPane(
               new StaticMessageDialog(I18N.getText("msg.info.server.upnp.discovering")));
       try {
-        UPnPUtil.openPort(config.getPort());
+        UPnPUtil.openPort(port);
       } finally {
         MapTool.getFrame().hideGlassPane();
       }
@@ -405,11 +426,11 @@ public class MapToolServer {
       try {
         MapToolRegistry.RegisterResponse result =
             MapToolRegistry.getInstance()
-                .registerInstance(config.getServerName(), config.getPort(), config.getUseWebRTC());
+                .registerInstance(config.getServerName(), port, config.getUseWebRTC());
         if (result == MapToolRegistry.RegisterResponse.NAME_EXISTS) {
           MapTool.showError("msg.error.alreadyRegistered");
         } else {
-          heartbeatThread = new HeartbeatThread(config.getPort());
+          heartbeatThread = new HeartbeatThread(port);
           heartbeatThread.start();
         }
         // TODO: I don't like this
@@ -418,7 +439,8 @@ public class MapToolServer {
       }
     }
 
-    if (announcer != null) {
+    if (serviceIdentifier != null && port != -1) {
+      announcer = new ServiceAnnouncer(serviceIdentifier, port, AppConstants.SERVICE_GROUP);
       announcer.start();
     }
 
@@ -468,7 +490,12 @@ public class MapToolServer {
     public void run() {
       int WARNING_TIME = 2; // number of heartbeats before popup warning
       int errors = 0;
-      String IP_addr = ConnectionInfoDialog.getExternalAddress();
+      String IP_addr;
+      try {
+        IP_addr = NetUtil.formatAddress(NetUtil.getInstance().getExternalAddress().get());
+      } catch (ExecutionException | InterruptedException | NullPointerException e) {
+        IP_addr = "Unknown";
+      }
 
       while (!stop) {
         try {

@@ -12,13 +12,12 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.clientserver.simple.server;
+package net.rptools.maptool.client;
 
-/** A server implementation that never receives connections */
-public final class NilServer extends AbstractServer implements Server {
-  @Override
-  public void start() {}
+import javax.annotation.Nonnull;
 
-  @Override
-  public void close() {}
+public sealed interface RemoteServerConfig {
+  record Socket(@Nonnull String hostName, int port) implements RemoteServerConfig {}
+
+  record WebRTC(@Nonnull String serverName) implements RemoteServerConfig {}
 }

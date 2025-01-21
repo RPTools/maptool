@@ -35,6 +35,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import javax.annotation.Nonnull;
 import javax.crypto.NoSuchPaddingException;
 import javax.swing.*;
 import javax.swing.text.BadLocationException;
@@ -2209,7 +2210,7 @@ public class AppActions {
                 StartServerDialogPreferences serverProps =
                     new StartServerDialogPreferences(); // data retrieved from
                 // Preferences.userRoot()
-                if (serverProps.getPort() == 0 || serverProps.getPort() > 65535) {
+                if (serverProps.getPort() > 65535) {
                   MapTool.showError("ServerDialog.error.port.outOfRange");
                   return;
                 }
@@ -2349,6 +2350,66 @@ public class AppActions {
         }
       };
 
+  public static void connectToServer(
+      @Nonnull String username, @Nonnull String password, @Nonnull RemoteServerConfig config) {
+    LOAD_MAP.setSeenWarning(false);
+
+    MapTool.disconnect();
+    MapTool.stopServer();
+
+    // Install a temporary gimped campaign until we get the one from the server
+    final Campaign oldCampaign = MapTool.getCampaign();
+    MapTool.setCampaign(new Campaign(), null);
+
+    // connecting
+    MapTool.getFrame().getConnectionStatusPanel().setStatus(ConnectionStatusPanel.Status.connected);
+
+    // Show the user something interesting while we're connecting. Look below for the corresponding
+    // hideGlassPane
+    StaticMessageDialog progressDialog =
+        new StaticMessageDialog(I18N.getText("msg.info.connecting"));
+    MapTool.getFrame().showFilledGlassPane(progressDialog);
+
+    boolean failed = false;
+    try {
+      MapTool.connectToRemoteServer(
+          config,
+          new LocalPlayer(username, password),
+          (success) -> {
+            EventQueue.invokeLater(
+                () -> {
+                  MapTool.getFrame().hideGlassPane();
+                  if (success) {
+                    // Show the user something interesting until we've got the campaign
+                    // Look in ClientMethodHandler.setCampaign() for the corresponding
+                    // hideGlassPane
+                    MapTool.getFrame()
+                        .showFilledGlassPane(
+                            new StaticMessageDialog(I18N.getText("msg.info.campaignLoading")));
+                  }
+                });
+          });
+
+    } catch (UnknownHostException e1) {
+      MapTool.showError("msg.error.unknownHost", e1);
+      failed = true;
+    } catch (IOException e1) {
+      MapTool.showError("msg.error.failedLoadCampaign", e1);
+      failed = true;
+    } catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
+      MapTool.showError("msg.error.initializeCrypto", e1);
+      failed = true;
+    }
+    if (failed) {
+      MapTool.getFrame().hideGlassPane();
+      try {
+        MapTool.startPersonalServer(oldCampaign);
+      } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
+        MapTool.showError("msg.error.failedStartPersonalServer", e);
+      }
+    }
+  }
+
   public static final Action CONNECT_TO_SERVER =
       new ClientAction() {
         {
@@ -2366,89 +2427,17 @@ public class AppActions {
 
           final ConnectToServerDialog dialog = new ConnectToServerDialog();
           dialog.showDialog();
-          if (!dialog.accepted()) {
+          var config = dialog.getResult();
+          if (config == null) {
             return;
           }
+          ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
 
-          LOAD_MAP.setSeenWarning(false);
+          var username = prefs.getUsername();
+          var password =
+              prefs.getUsePublicKey() ? new PasswordGenerator().getPassword() : prefs.getPassword();
 
-          MapTool.disconnect();
-          MapTool.stopServer();
-
-          // Install a temporary gimped campaign until we get the one from the
-          // server
-          final Campaign oldCampaign = MapTool.getCampaign();
-          MapTool.setCampaign(new Campaign(), null);
-
-          // connecting
-          MapTool.getFrame()
-              .getConnectionStatusPanel()
-              .setStatus(ConnectionStatusPanel.Status.connected);
-
-          // Show the user something interesting while we're connecting. Look below for the
-          // corresponding hideGlassPane
-          StaticMessageDialog progressDialog =
-              new StaticMessageDialog(I18N.getText("msg.info.connecting"));
-          MapTool.getFrame().showFilledGlassPane(progressDialog);
-
-          runBackground(
-              () -> {
-                boolean failed = false;
-                try {
-                  ConnectToServerDialogPreferences prefs = new ConnectToServerDialogPreferences();
-                  ServerConfig config =
-                      new ServerConfig(
-                          prefs.getUsername(),
-                          "",
-                          "",
-                          dialog.getPort(),
-                          prefs.getServerName(),
-                          dialog.getServer(),
-                          false,
-                          dialog.getUseWebRTC());
-
-                  String password =
-                      prefs.getUsePublicKey()
-                          ? new PasswordGenerator().getPassword()
-                          : prefs.getPassword();
-                  MapTool.connectToRemoteServer(
-                      config,
-                      new LocalPlayer(prefs.getUsername(), prefs.getRole(), password),
-                      (success) -> {
-                        EventQueue.invokeLater(
-                            () -> {
-                              MapTool.getFrame().hideGlassPane();
-                              if (success) {
-                                // Show the user something interesting until we've got the campaign
-                                // Look in ClientMethodHandler.setCampaign() for the corresponding
-                                // hideGlassPane
-                                MapTool.getFrame()
-                                    .showFilledGlassPane(
-                                        new StaticMessageDialog(
-                                            I18N.getText("msg.info.campaignLoading")));
-                              }
-                            });
-                      });
-
-                } catch (UnknownHostException e1) {
-                  MapTool.showError("msg.error.unknownHost", e1);
-                  failed = true;
-                } catch (IOException e1) {
-                  MapTool.showError("msg.error.failedLoadCampaign", e1);
-                  failed = true;
-                } catch (NoSuchAlgorithmException | InvalidKeySpecException e1) {
-                  MapTool.showError("msg.error.initializeCrypto", e1);
-                  failed = true;
-                }
-                if (failed) {
-                  MapTool.getFrame().hideGlassPane();
-                  try {
-                    MapTool.startPersonalServer(oldCampaign);
-                  } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
-                    MapTool.showError("msg.error.failedStartPersonalServer", e);
-                  }
-                }
-              });
+          runBackground(() -> connectToServer(username, password, config));
         }
       };
 
