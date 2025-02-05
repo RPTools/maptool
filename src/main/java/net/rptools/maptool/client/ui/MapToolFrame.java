@@ -884,19 +884,116 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     return saveCmpgnFileChooser;
   }
 
-  public JFileChooser getSavePropsFileChooser() {
+  public JFileChooser getSaveCampaignPropsFileChooser() {
     if (savePropsFileChooser == null) {
       savePropsFileChooser = new JFileChooser();
       savePropsFileChooser.setCurrentDirectory(AppPreferences.saveDirectory.get());
+      savePropsFileChooser.setSelectedFile(
+          new File(propertiesFilter.getDescription() + ".mtprops"));
       savePropsFileChooser.addChoosableFileFilter(propertiesFilter);
       savePropsFileChooser.setFileFilter(propertiesFilter);
       savePropsFileChooser.setFileFilter(new FileNameExtensionFilter("JSON", "json"));
-      savePropsFileChooser.setFileFilter(new FileNameExtensionFilter("Text", "txt"));
+      savePropsFileChooser.setFileFilter(
+          new FileNameExtensionFilter(I18N.getText("file.ext.text"), "txt"));
       savePropsFileChooser.setFileFilter(savePropsFileChooser.getChoosableFileFilters()[0]);
       savePropsFileChooser.setDialogTitle(I18N.getText("msg.title.exportProperties"));
+
+      String[] extensions =
+          new String[] {"json", "txt", ((MTFileFilter) propertiesFilter).extensions[0]};
+      JTextField textField = SwingUtil.getFilenameTextField(savePropsFileChooser);
+
+      // file type/extension change listener
+      savePropsFileChooser.addPropertyChangeListener(
+          JFileChooser.FILE_FILTER_CHANGED_PROPERTY,
+          evt -> {
+            File file = savePropsFileChooser.getSelectedFile();
+            String fName;
+            FileFilter fNew = (FileFilter) evt.getNewValue();
+
+            // using file name or name in text field
+            if (file == null) {
+              assert textField != null;
+              fName = textField.getText();
+              if (fName.isEmpty()) {
+                return;
+              }
+            } else if (fNew.accept(file)) {
+              // extension matches file, no further action
+              return;
+            } else {
+              fName = file.getName();
+            }
+            // just to stop accruing lots of extensions, remove them all
+            fName = removeExtensions(fName, extensions);
+
+            // add new extension to file name
+            if (fNew instanceof MTFileFilter) {
+              fName = String.format("%s.%s", fName, ((MTFileFilter) fNew).extensions[0]);
+            } else if (fNew instanceof FileNameExtensionFilter) {
+              fName =
+                  String.format(
+                      "%s.%s", fName, ((FileNameExtensionFilter) fNew).getExtensions()[0]);
+            }
+            // set with new file
+            if (file == null) {
+              savePropsFileChooser.setSelectedFile(new File(fName));
+            } else {
+              savePropsFileChooser.setSelectedFile(new File(file.getParentFile(), fName));
+            }
+            // update the text field
+            assert textField != null;
+            textField.setText(fName);
+          });
+
+      // the save action
+      savePropsFileChooser.addActionListener(
+          e -> {
+            if (e.getActionCommand().equals(JFileChooser.APPROVE_SELECTION)) {
+              File file = savePropsFileChooser.getSelectedFile();
+              if (file == null) {
+                return; // d'uh
+              }
+              FileFilter filter = savePropsFileChooser.getFileFilter();
+              String fileName = file.getName();
+              boolean isAcceptAll = savePropsFileChooser.getAcceptAllFileFilter().equals(filter);
+              if (!isAcceptAll && filter.accept(file)) {
+                // extension matches filter and not "accept all"
+                return;
+              } else {
+                // clean the file name of extensions
+                fileName = removeExtensions(fileName, extensions);
+              }
+              // set the file with new extension appended
+              if (filter instanceof MTFileFilter || isAcceptAll) {
+                savePropsFileChooser.setSelectedFile(
+                    new File(
+                        savePropsFileChooser.getSelectedFile().getParentFile(),
+                        String.format(
+                            "%s.%s", fileName, ((MTFileFilter) propertiesFilter).extensions[0])));
+              } else if (filter instanceof FileNameExtensionFilter) {
+                savePropsFileChooser.setSelectedFile(
+                    new File(
+                        savePropsFileChooser.getSelectedFile().getParentFile(),
+                        String.format(
+                            "%s.%s",
+                            fileName, ((FileNameExtensionFilter) filter).getExtensions()[0])));
+              }
+            }
+          });
     }
+    System.out.println(Arrays.toString(savePropsFileChooser.getComponents()));
     savePropsFileChooser.setAcceptAllFileFilterUsed(true);
     return savePropsFileChooser;
+  }
+
+  private String removeExtensions(String fileName, String... extensions) {
+    for (String extension : extensions) {
+      String replaceThis = "." + extension;
+      while (fileName.contains(replaceThis)) {
+        fileName = fileName.replace(replaceThis, "");
+      }
+    }
+    return fileName;
   }
 
   public JFileChooser getSaveTokenFileChooser() {

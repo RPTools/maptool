@@ -373,4 +373,16 @@ public class SwingUtil {
         });
     return button;
   }
+
+  public static JTextField getFilenameTextField(Container cont) {
+    for (Component c : cont.getComponents()) {
+      if (c instanceof JTextField) {
+        return (JTextField) c;
+      } else if (c instanceof Container) {
+        JTextField textField = getFilenameTextField(((Container) c));
+        if (textField != null) return textField;
+      }
+    }
+    return null;
+  }
 }

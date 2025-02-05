@@ -417,7 +417,7 @@ public class CampaignPropertiesDialog extends JDialog {
               copyUIToCampaign();
               // END HACK
 
-              JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
+              JFileChooser chooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 
               boolean tryAgain = true;
               while (tryAgain) {
