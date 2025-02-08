@@ -63,11 +63,6 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
   }
 
   @Override
-  public boolean isAvailable() {
-    return MapTool.getPlayer().isGM();
-  }
-
-  @Override
   protected boolean isLinearTool() {
     return strategy.isLinear();
   }

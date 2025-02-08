@@ -15,20 +15,17 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.protobuf.StringValue;
-import java.awt.Graphics2D;
-import java.awt.Polygon;
+import java.awt.*;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.Ellipse2D;
-import java.awt.geom.RectangularShape;
+import java.awt.geom.*;
 import javax.annotation.Nonnull;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.drawing.DrawableDto;
 import net.rptools.maptool.server.proto.drawing.ShapeDrawableDto;
+import org.apache.batik.ext.awt.geom.ExtendedGeneralPath;
+import org.apache.batik.ext.awt.geom.Polygon2D;
 
 /** An rectangle */
 public class ShapeDrawable extends AbstractDrawing {
@@ -51,10 +48,27 @@ public class ShapeDrawable extends AbstractDrawing {
     this.useAntiAliasing = other.useAntiAliasing;
     this.shape =
         switch (other.shape) {
-          // Covers Rectangle, Ellipse2D, etc.
-          case RectangularShape r -> (Shape) r.clone();
-          case Polygon p -> new Polygon(p.xpoints, p.ypoints, p.npoints);
           case Area a -> new Area(a);
+          case CubicCurve2D cc ->
+              new CubicCurve2D.Double(
+                  cc.getX1(),
+                  cc.getY1(),
+                  cc.getCtrlX1(),
+                  cc.getCtrlY1(),
+                  cc.getCtrlX2(),
+                  cc.getCtrlY2(),
+                  cc.getX2(),
+                  cc.getY2());
+          case ExtendedGeneralPath egp -> new ExtendedGeneralPath_Double(egp);
+          case Line2D ln -> new Line2D.Double(ln.getX1(), ln.getY1(), ln.getX2(), ln.getY2());
+          case Path2D path -> new ExtendedGeneralPath_Double(path);
+          case Polygon p -> new Polygon(p.xpoints, p.ypoints, p.npoints);
+          case Polygon2D p -> new Polygon2D(p.xpoints, p.ypoints, p.npoints);
+          case RectangularShape r ->
+              (Shape) r.clone(); // Arc2D, Ellipse2D, Rectangle2D, RoundRectangle2D
+          case QuadCurve2D qc ->
+              new QuadCurve2D.Double(
+                  qc.getX1(), qc.getY1(), qc.getCtrlX(), qc.getCtrlY(), qc.getX2(), qc.getY2());
           default -> other.shape; // Assume anything else cannot be copied but is also okay.
         };
   }
@@ -75,9 +89,18 @@ public class ShapeDrawable extends AbstractDrawing {
    */
   public String getShapeTypeName() {
     return switch (shape) {
-      case Rectangle ignored -> "Rectangle";
+      case Arc2D ignored -> "Arc";
+      case CubicCurve2D ignored -> "CubicCurve";
       case Ellipse2D ignored -> "Oval";
+      case QuadCurve2D ignored -> "QuadCurve";
+      case Rectangle ignored -> "Rectangle";
+      case Rectangle2D ignored -> "Rectangle";
+      case RoundRectangle2D ignored -> "RoundRectangle";
+      case Line2D ignored -> "Line";
+      case Path2D ignored -> "Path";
+      case ExtendedGeneralPath ignored -> "Path";
       case Polygon ignored -> "Polygon";
+      case Polygon2D ignored -> "Polygon";
       case Area ignored -> "Area";
       default -> "Unknown";
     };
@@ -151,6 +174,19 @@ public class ShapeDrawable extends AbstractDrawing {
         RenderingHints.KEY_ANTIALIASING,
         useAntiAliasing ? RenderingHints.VALUE_ANTIALIAS_ON : RenderingHints.VALUE_ANTIALIAS_OFF);
     return oldAA;
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder(super.toString());
+    sb.append("antiAliasing=").append(getUseAntiAliasing()).append(";");
+    sb.append("shapeType=").append(getShapeTypeName()).append(";");
+    sb.append("bounds=\"");
+    sb.append("x=").append(getBounds().x).append(";");
+    sb.append("y=").append(getBounds().y).append(";");
+    sb.append("width=").append(getBounds().width).append(";");
+    sb.append("height=").append(getBounds().height).append("\";");
+    return sb.toString();
   }
 
   private void restoreAA(Graphics2D g, Object oldAA) {

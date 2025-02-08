@@ -186,7 +186,7 @@ public class getInfoFunction extends AbstractFunction {
       final var backgroundPaint = zone.getBackgroundPaint();
       String background = null;
       if (backgroundPaint instanceof DrawableColorPaint dcp) {
-        background = String.format("#%h", zone.getGridColor());
+        background = String.format("#%h", dcp.getColor());
       } else if (backgroundPaint instanceof DrawableTexturePaint dtp) {
         background = "asset://" + dtp.getAssetId().toString();
       }
@@ -196,7 +196,7 @@ public class getInfoFunction extends AbstractFunction {
       final var fogPaint = zone.getFogPaint();
       String fog = null;
       if (fogPaint instanceof DrawableColorPaint dcp) {
-        fog = String.format("#%h", zone.getGridColor());
+        fog = String.format("#%h", dcp.getColor());
       } else if (fogPaint instanceof DrawableTexturePaint dtp) {
         fog = "asset://" + dtp.getAssetId().toString();
       }

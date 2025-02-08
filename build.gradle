@@ -19,7 +19,7 @@ plugins {
     id "java"
     id "org.ajoberstar.grgit" version "5.2.1"
     id 'org.openjfx.javafxplugin' version '0.0.13'
-    id 'org.beryx.runtime' version '1.13.0'
+    id 'org.beryx.runtime' version '1.13.1'
     id "com.google.protobuf" version "0.9.4"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
 
@@ -284,7 +284,6 @@ runtime {
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
                     '--win-dir-chooser',
-                    '--win-per-user-install',
                     '--win-shortcut',
                     '--win-menu',
                     '--win-menu-group', vendor,
@@ -350,7 +349,7 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-core', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.12.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.11.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.12.0'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
@@ -363,13 +362,13 @@ dependencies {
     implementation group: 'io.sentry', name: 'sentry-log4j2', version: '1.7.29'
 
     // parsing of configuration data
-    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.10.1'
+    implementation group: 'org.apache.commons', name: 'commons-configuration2', version: '2.11.0'
     // Specialized collections: ReferenceMap, LinkedMap.
     implementation 'org.apache.commons:commons-collections4:4.4'
     // Various file utilities
     implementation 'commons-io:commons-io:2.15.1'
     // ftp client
-    implementation 'commons-net:commons-net:3.10.0'
+    implementation 'commons-net:commons-net:3.11.1'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.6.0'
 
@@ -411,7 +410,7 @@ dependencies {
     implementation 'de.muntjak.tinylookandfeel:tinylaf-nocp:1.4.0'
 
     // serialize to and from xml
-    implementation 'com.thoughtworks.xstream:xstream:1.4.20'
+    implementation 'com.thoughtworks.xstream:xstream:1.4.21'
 
     // themes
     implementation 'com.formdev:flatlaf:3.5.4'
@@ -442,7 +441,7 @@ dependencies {
     implementation "com.fifesoft:languagesupport:3.3.0"
 
     // For simple xml work in Hero Lab integration
-    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.29.0'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
+    implementation group: 'com.jcabi', name: 'jcabi-xml', version: '0.33.5'				// https://mvnrepository.com/artifact/com.jcabi/jcabi-xml
 
     // For some math functions used in the A* Pathfinding
     // https://locationtech.github.io/jts/jts-features.html
@@ -468,7 +467,7 @@ dependencies {
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 
     // For mocking features during unit tests
-    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.10.0'
+    testImplementation group: 'org.mockito', name: 'mockito-core', version: '5.15.2'
 
     // flexmark markdown parsing / conversion
     implementation 'com.vladsch.flexmark:flexmark-all:0.64.8'

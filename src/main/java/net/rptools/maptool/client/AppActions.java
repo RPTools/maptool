@@ -1657,11 +1657,11 @@ public class AppActions {
 
         @Override
         protected void executeAction() {
-
           if (MapTool.getFrame().getCurrentZoneRenderer().getZone().getMapAssetId() != null) {
             MapTool.getFrame().getToolbox().setSelectedTool(BoardTool.class);
           } else {
-            MapTool.showInformation(I18N.getText("action.error.noMapBoard"));
+            MapTool.showInformation(
+                I18N.getText("action.error.noMapBoard", I18N.getText("action.editMap")));
           }
         }
       };

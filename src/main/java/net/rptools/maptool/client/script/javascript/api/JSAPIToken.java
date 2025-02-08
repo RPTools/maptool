@@ -23,7 +23,6 @@ import net.rptools.maptool.client.script.javascript.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.TokenProperty;
 import net.rptools.maptool.model.Zone;
 import net.rptools.parser.ParserException;
 import org.graalvm.polyglot.HostAccess;
@@ -140,33 +139,34 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   public String getProperty(String name) {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
-    if (trusted || token.isOwner(playerId)) {
-      Object val = this.token.getProperty(name);
-      // Fall back to the property type's default value
-      // since it's not useful to return nulls and require
-      // javascript to have to handle defaults when getInfo isn't even bound,
-      // especially when the value gets unset if it matches the default.
-      // Evaluation is not performed automatically, use getEvaluatedProperty for that.
-      if (val == null) {
-        List<TokenProperty> propertyList =
-            MapTool.getCampaign()
-                .getCampaignProperties()
-                .getTokenPropertyList(this.token.getPropertyType());
-        if (propertyList != null) {
-          for (TokenProperty property : propertyList) {
-            if (name.equalsIgnoreCase(property.getName())) {
-              val = property.getDefaultValue();
-              break;
-            }
-          }
-        }
-      }
-      if (val == null) {
-        return null;
-      }
-      return "" + val;
+    if (!trusted && !token.isOwner(playerId)) {
+      return null;
     }
-    return null;
+
+    Object val = this.token.getProperty(name);
+    // Fall back to the property type's default value
+    // since it's not useful to return nulls and require
+    // javascript to have to handle defaults when getInfo isn't even bound,
+    // especially when the value gets unset if it matches the default.
+    // Evaluation is not performed automatically, use getEvaluatedProperty for that.
+    if (val == null) {
+      val = this.token.getPropertyDefault(name);
+    }
+    if (val == null) {
+      return null;
+    }
+    return "" + val;
+  }
+
+  @HostAccess.Export
+  public String getPropertyDefault(String name) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (!trusted && !token.isOwner(playerId)) {
+      return null;
+    }
+
+    return this.token.getPropertyDefault(name);
   }
 
   @HostAccess.Export
@@ -181,6 +181,22 @@ public class JSAPIToken implements MapToolJSAPIInterface {
   }
 
   @HostAccess.Export
+  public String getEvaluatedPropertyDefault(String name) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (!trusted && !token.isOwner(playerId)) {
+      return null;
+    }
+
+    var res = this.token.getPropertyDefault(name);
+    if (res == null) {
+      return null;
+    }
+
+    return "" + this.token.evaluateProperty(null, name, res);
+  }
+
+  @HostAccess.Export
   public void setProperty(String name, Object value) {
     boolean trusted = JSScriptEngine.inTrustedContext();
     String playerId = MapTool.getPlayer().getName();
@@ -189,6 +205,19 @@ public class JSAPIToken implements MapToolJSAPIInterface {
       MapTool.serverCommand()
           .updateTokenProperty(token, Token.Update.setProperty, name, value.toString());
     }
+  }
+
+  @HostAccess.Export
+  public boolean resetProperty(String name) {
+    boolean trusted = JSScriptEngine.inTrustedContext();
+    String playerId = MapTool.getPlayer().getName();
+    if (!trusted && !token.isOwner(playerId)) {
+      return false;
+    }
+
+    this.token.resetProperty(name);
+    MapTool.serverCommand().updateTokenProperty(token, Token.Update.resetProperty, name);
+    return true;
   }
 
   @HostAccess.Export

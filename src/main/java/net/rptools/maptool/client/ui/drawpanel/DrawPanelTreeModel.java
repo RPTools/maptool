@@ -207,17 +207,16 @@ public class DrawPanelTreeModel implements TreeModel {
         }
 
         View v = View.getByLayer(layer);
-        var drawableList = zone.getDrawnElements(layer);
-        if (drawableList.size() > 0) {
-          // Reverse the list so that the element drawn last, is shown at the top of the tree
-          // Be careful to clone the list so you don't damage the map
-          List<DrawnElement> reverseList = new ArrayList<DrawnElement>(drawableList);
-          // Players can only see _templates_ on player layers.
-          if (!MapTool.getPlayer().isGM()) {
-            reverseList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
-          }
-          Collections.reverse(reverseList);
-          viewMap.put(v, reverseList);
+
+        var drawableList = new ArrayList<DrawnElement>(zone.getDrawnElements(layer));
+        // Players can only see _templates_ on player layers.
+        if (!MapTool.getPlayer().isGM()) {
+          drawableList.removeIf(de -> !(de.getDrawable() instanceof AbstractTemplate));
+        }
+        if (!drawableList.isEmpty()) {
+          // Reverse the list so that the element drawn last is shown at the top of the tree.
+          Collections.reverse(drawableList);
+          viewMap.put(v, drawableList);
           currentViewList.add(v);
         }
       }

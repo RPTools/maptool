@@ -71,8 +71,10 @@ jobs:
     - name: Rename Windows Release Files
       if: matrix.os == 'windows-latest'
       run: |
-        mv releases/MapTool*.exe releases/MapTool-${{ github.event.release.tag_name }}.exe
-        mv releases/MapTool*.msi releases/MapTool-${{ github.event.release.tag_name }}.msi
+        mkdir releases/renamed/
+        cp releases/MapTool*.exe releases/renamed/MapTool-${{ github.event.release.tag_name }}.exe
+        cp releases/MapTool*.msi releases/renamed/MapTool-${{ github.event.release.tag_name }}.msi
+        cp releases/MapTool*.jar releases/renamed/MapTool-${{ github.event.release.tag_name }}.jar
       continue-on-error: true
     - name: Upload Windows EXE Release Asset
       id: upload-release-asset-exe
@@ -82,7 +84,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.exe
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.exe
         asset_name: MapTool-${{ github.event.release.tag_name }}.exe
         asset_content_type: application/octet-stream
     - name: Upload Windows MSI Release Asset
@@ -93,7 +95,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.msi
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.msi
         asset_name: MapTool-${{ github.event.release.tag_name }}.msi
         asset_content_type: application/octet-stream
     - name: Upload Uber Jar Release Asset
@@ -104,7 +106,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.jar
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.jar
         asset_name: MapTool-${{ github.event.release.tag_name }}.jar
         asset_content_type: application/octet-stream
       #       __     _
@@ -116,9 +118,10 @@ jobs:
     - name: Rename Linux Release Files
       if: matrix.os == 'ubuntu-latest'
       run: |
-        mv -n releases/maptool*.x86_64.rpm releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
-        mv -n releases/maptool*_amd64.deb releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
-        mv -n package/archlinux/maptool/maptool-*-x86_64.pkg.tar.zst releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+        mkdir releases/renamed/
+        cp releases/maptool*.x86_64.rpm releases/renamed/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
+        cp releases/maptool*_amd64.deb releases/renamed/maptool_${{ github.event.release.tag_name }}_amd64.deb
+        find package/archlinux/maptool/ -maxdepth 1 -type f -name 'maptool-*-x86_64.pkg.tar.zst' -not -name '*debug*' -exec cp {} releases/renamed/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst \;
       continue-on-error: true
     - name: Upload Linux RPM Release Asset
       id: upload-release-asset-rpm
@@ -128,7 +131,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
+        asset_path: releases/renamed/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
         asset_name: maptool-${{ github.event.release.tag_name }}-x86_64.rpm
         asset_content_type: application/octet-stream
     - name: Upload Linux DEB Release Asset
@@ -139,7 +142,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/maptool_${{ github.event.release.tag_name }}_amd64.deb
+        asset_path: releases/renamed/maptool_${{ github.event.release.tag_name }}_amd64.deb
         asset_name: maptool_${{ github.event.release.tag_name }}-amd64.deb
         asset_content_type: application/octet-stream
     - name: Upload ArchLinux Release Asset
@@ -150,7 +153,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
+        asset_path: releases/renamed/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
         asset_name: maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
         asset_content_type: application/octet-stream
       #                               ____  _____
@@ -162,8 +165,9 @@ jobs:
     - name: Rename Mac OS Release Files
       if: matrix.os == 'macOS-13'
       run: |
-        mv releases/MapTool*.dmg releases/MapTool-${{ github.event.release.tag_name }}.dmg
-        mv releases/MapTool*.pkg releases/MapTool-${{ github.event.release.tag_name }}.pkg
+        mkdir releases/renamed/
+        cp releases/MapTool*.dmg releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
+        cp releases/MapTool*.pkg releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
       continue-on-error: true
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
@@ -173,7 +177,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.dmg
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
         asset_name: MapTool-${{ github.event.release.tag_name }}.dmg
         asset_content_type: application/octet-stream
     - name: Upload Mac PKG Release Asset
@@ -184,6 +188,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ github.event.release.upload_url }}
-        asset_path: releases/MapTool-${{ github.event.release.tag_name }}.pkg
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
         asset_name: MapTool-${{ github.event.release.tag_name }}.pkg
         asset_content_type: application/octet-stream

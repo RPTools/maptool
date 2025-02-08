@@ -16,31 +16,13 @@ package net.rptools.lib.io;
 
 import com.google.common.io.CharStreams;
 import com.thoughtworks.xstream.XStream;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.LineNumberReader;
-import java.io.OutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Reader;
-import java.io.StringReader;
+import com.thoughtworks.xstream.security.ExplicitTypePermission;
+import java.io.*;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.zip.Deflater;
 import java.util.zip.ZipEntry;
@@ -55,6 +37,8 @@ import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
+import org.apache.batik.ext.awt.geom.ExtendedGeneralPath;
+import org.apache.batik.ext.awt.geom.Polygon2D;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -551,6 +535,9 @@ public class PackedFile implements AutoCloseable {
     try (r) {
       xstream
           .ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields
+      xstream.addPermission(
+          new ExplicitTypePermission(new Class[] {ExtendedGeneralPath.class, Polygon2D.class}));
+
       // added.
       var obj = xstream.fromXML(r);
       return obj;

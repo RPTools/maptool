@@ -39,6 +39,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ForkJoinPool;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppUtil;
@@ -90,7 +91,7 @@ public class AssetManager {
   /** Used to load assets from storage */
   private static AssetLoader assetLoader = new AssetLoader();
 
-  private static ExecutorService assetLoaderThreadPool = Executors.newFixedThreadPool(1);
+  private static ExecutorService assetLoaderThreadPool = ForkJoinPool.commonPool();
   private static ExecutorService assetWriterThreadPool = Executors.newFixedThreadPool(1);
 
   static {
