@@ -417,15 +417,15 @@ public class CampaignPropertiesDialog extends JDialog {
               copyUIToCampaign();
               // END HACK
 
-              JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
+              JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 
               boolean tryAgain = true;
               while (tryAgain) {
-                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
                   return;
                 }
                 var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                var saveDir = fileChooser.getSelectedFile().toPath().getParent().toAbsolutePath();
                 if (saveDir.startsWith(installDir)) {
                   MapTool.showWarning("msg.warning.savePropToInstallDir");
                 } else {
@@ -433,7 +433,7 @@ public class CampaignPropertiesDialog extends JDialog {
                 }
               }
 
-              File selectedFile = chooser.getSelectedFile();
+              File selectedFile = fileChooser.getSelectedFile();
               if (selectedFile.exists()) {
                 if (selectedFile.getName().endsWith(".rpgame")) {
                   if (!MapTool.confirm("Import into game settings file?")) {
@@ -445,7 +445,7 @@ public class CampaignPropertiesDialog extends JDialog {
               }
               try {
                 if (selectedFile.getName().endsWith(".mtprops")) {
-                  PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
+                  PersistenceUtil.saveCampaignProperties(campaign, fileChooser.getSelectedFile());
                   MapTool.showInformation("Properties Saved.");
                 } else {
                   MapTool.showMessage(
@@ -454,8 +454,9 @@ public class CampaignPropertiesDialog extends JDialog {
                       JOptionPane.INFORMATION_MESSAGE);
                   CampaignPropertiesDto campaignPropertiesDto =
                       MapTool.getCampaign().getCampaignProperties().toDto();
-                  FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile());
+                  FileOutputStream fos = new FileOutputStream(fileChooser.getSelectedFile());
                   fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
+                  fos.close();
                 }
 
               } catch (IOException ioe) {

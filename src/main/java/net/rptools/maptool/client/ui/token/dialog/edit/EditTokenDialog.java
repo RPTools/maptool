@@ -463,6 +463,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
+      xmlStatblockRSyntaxTextArea.setUseFocusableTips(false);
       xmlStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
       xmlStatblockRSyntaxTextArea.setCaretPosition(0);
 
@@ -1605,6 +1606,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         "xmlStatblockPanel", "xmlStatblockRTextScrollPane", xmlStatblockRTextScrollPane);
 
     // Setup the TEXT panel
+    textStatblockRSyntaxTextArea.setUseFocusableTips(false);
     textStatblockRSyntaxTextArea.setEditable(false);
     textStatblockRSyntaxTextArea.setLineWrap(true);
     textStatblockRSyntaxTextArea.setWrapStyleWord(true);
@@ -1972,6 +1974,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     protected RSyntaxTextArea createTextArea() {
       RSyntaxTextArea textArea = new RSyntaxTextArea();
+      textArea.setUseFocusableTips(false);
       textArea.setAnimateBracketMatching(true);
       textArea.setBracketMatchingEnabled(true);
       textArea.setLineWrap(false);

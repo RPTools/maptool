@@ -18,7 +18,7 @@ plugins {
     id "base"
     id "java"
     id "org.ajoberstar.grgit" version "5.2.1"
-    id 'org.openjfx.javafxplugin' version '0.0.13'
+    id 'org.openjfx.javafxplugin' version '0.0.14'
     id 'org.beryx.runtime' version '1.13.1'
     id "com.google.protobuf" version "0.9.4"
     id 'com.github.johnrengelman.shadow' version '8.1.1'
@@ -55,7 +55,6 @@ application {
     }
 }
 def appSemVer = ""
-def winUpgradeUUID = UUID.randomUUID().toString();
 
 configurations {
     forms.extendsFrom implementation
@@ -279,7 +278,9 @@ runtime {
         ]
 
         if (osdetector.os.is('windows')) {
+            def winUpgradeUUID = "74d934b9-5fb5-433e-aca4-c6f14bd9aa6b"
             println "Setting Windows installer options with upgrade uuid = " + winUpgradeUUID
+            targetPlatformName = "win"
             resourceDir = file('package/windows')
             imageOptions += ['--icon', 'package/windows/' + project.name + developerRelease + '.ico']
             installerOptions += [
@@ -296,6 +297,7 @@ runtime {
 
         if (osdetector.os.is('osx')) {
             println "Setting MacOS installer options"
+            targetPlatformName = "mac"
             imageOptions += ['--icon', 'package/macosx/' + project.name + developerRelease + '.icns']
             installerOptions += [
                     '--mac-package-name', project.name + developerRelease
@@ -308,6 +310,7 @@ runtime {
 
         if (osdetector.os.is('linux')) {
             println "Setting Linux installer options"
+            targetPlatformName = "linux"
             resourceDir = file('package/linux')
             imageOptions += ['--icon', 'package/linux/' + project.name + developerRelease + '.png']
             installerOptions += [
@@ -331,6 +334,22 @@ runtime {
             }
         }
     }
+}
+
+def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
+    // Really we depend on the app-image produce by the jpackageImage task, but for some reason it
+    // is defined as an output of the jpackage task. As a result, Gradle will get mad at us if we
+    // say we depend directly on jpackageImage.
+    dependsOn tasks.jpackage
+
+    def extension = ''
+    if (osdetector.os.is('osx')) {
+        extension = '.app'
+    }
+
+    from "${jpackageImage.jpackageData.imageOutputDirOrDefault}${File.separator}${jpackageImage.jpackageData.imageNameOrDefault}${extension}"
+    destinationDirectory = jpackageImage.jpackageData.installerOutputDir
+    archiveFileName = project.name + "-" + appSemVer + "-" + jpackageImage.jpackageData.targetPlatformName + "${extension}.zip"
 }
 
 // In this section you declare the dependencies for your production and test code
@@ -435,7 +454,7 @@ dependencies {
     implementation 'com.github.gotson:webp-imageio:0.2.2' // webp support https://search.maven.org/artifact/com.github.gotson/webp-imageio/0.2.2/jar
 
     // For syntax highlighting in macro editor
-    implementation "com.fifesoft:rsyntaxtextarea:3.4.0"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
+    implementation "com.fifesoft:rsyntaxtextarea:3.5.3"		// https://mvnrepository.com/artifact/com.fifesoft/rsyntaxtextarea
     implementation "com.fifesoft:rstaui:3.3.1"				// https://mvnrepository.com/artifact/com.fifesoft/rstaui
     implementation "com.fifesoft:autocomplete:3.3.1"		// https://mvnrepository.com/artifact/com.fifesoft/autocomplete
     implementation "com.fifesoft:languagesupport:3.3.0"
@@ -498,7 +517,7 @@ dependencies {
     implementation 'com.miglayout:miglayout-swing:11.3'
 
     implementation 'com.github.jknack:handlebars:4.3.1'
-    implementation 'com.github.jknack:handlebars-helpers:4.3.1'
+    implementation 'com.github.jknack:handlebars-helpers:4.4.0'
 
     implementation 'org.jgrapht:jgrapht-core:1.5.2'
 

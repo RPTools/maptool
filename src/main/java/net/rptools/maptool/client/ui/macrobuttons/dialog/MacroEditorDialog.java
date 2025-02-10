@@ -470,6 +470,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     getToolTipTextField().setTabSize(2);
 
     // Macro Editor setup
+    macroEditorRSyntaxTextArea.setUseFocusableTips(false);
     macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
     macroEditorRSyntaxTextArea.setInsertPairedCharacters(false);
     macroEditorRSyntaxTextArea.setEditable(true);

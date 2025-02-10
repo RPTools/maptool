@@ -33,16 +33,14 @@ jobs:
         distribution: 'temurin'
         java-version: ${{ matrix.java }}
     - name: Cache Gradle
-      uses: actions/cache@v3
-      # Cache only seems to work on ubuntu right now...
-      if: matrix.os == 'ubuntu-latest'
+      uses: actions/cache@v4
       with:
         path: ~/.gradle/caches
         key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
         restore-keys: |
           ${{ runner.os }}-gradle-
     - name: Build with Gradle
-      run: ./gradlew jpackage
+      run: ./gradlew jpackage zipJpackageImage
     - name: Copy the RPM to the location required to build the ArchLinux package
       if: matrix.os == 'ubuntu-latest'
       run: cp releases/maptool-*.rpm package/archlinux/maptool/maptool.rpm
@@ -75,6 +73,7 @@ jobs:
         cp releases/MapTool*.exe releases/renamed/MapTool-${{ github.event.release.tag_name }}.exe
         cp releases/MapTool*.msi releases/renamed/MapTool-${{ github.event.release.tag_name }}.msi
         cp releases/MapTool*.jar releases/renamed/MapTool-${{ github.event.release.tag_name }}.jar
+        cp releases/MapTool*-win.zip releases/renamed/MapTool-${{ github.event.release.tag_name }}-win.zip
       continue-on-error: true
     - name: Upload Windows EXE Release Asset
       id: upload-release-asset-exe
@@ -97,6 +96,17 @@ jobs:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.msi
         asset_name: MapTool-${{ github.event.release.tag_name }}.msi
+        asset_content_type: application/octet-stream
+    - name: Upload Windows Image Release Asset
+      id: upload-release-asset-windows-image
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'windows-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-win.zip
+        asset_name: MapTool-${{ github.event.release.tag_name }}-win.zip
         asset_content_type: application/octet-stream
     - name: Upload Uber Jar Release Asset
       id: upload-release-asset-jar
@@ -122,6 +132,7 @@ jobs:
         cp releases/maptool*.x86_64.rpm releases/renamed/maptool-${{ github.event.release.tag_name }}.x86_64.rpm
         cp releases/maptool*_amd64.deb releases/renamed/maptool_${{ github.event.release.tag_name }}_amd64.deb
         find package/archlinux/maptool/ -maxdepth 1 -type f -name 'maptool-*-x86_64.pkg.tar.zst' -not -name '*debug*' -exec cp {} releases/renamed/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst \;
+        cp releases/MapTool*-linux.zip releases/renamed/MapTool-${{ github.event.release.tag_name }}-linux.zip
       continue-on-error: true
     - name: Upload Linux RPM Release Asset
       id: upload-release-asset-rpm
@@ -156,6 +167,17 @@ jobs:
         asset_path: releases/renamed/maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
         asset_name: maptool-${{ github.event.release.tag_name }}-x86_64.pkg.tar.zst
         asset_content_type: application/octet-stream
+    - name: Upload Linux Image Release Asset
+      id: upload-release-asset-linux-image
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'ubuntu-latest'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-linux.zip
+        asset_name: MapTool-${{ github.event.release.tag_name }}-linux.zip
+        asset_content_type: application/octet-stream
       #                               ____  _____
       #      ____ ___   ____ _ _____ / __ \/ ___/
       #     / __ `__ \ / __ `// ___// / / /\__ \
@@ -168,6 +190,7 @@ jobs:
         mkdir releases/renamed/
         cp releases/MapTool*.dmg releases/renamed/MapTool-${{ github.event.release.tag_name }}.dmg
         cp releases/MapTool*.pkg releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
+        cp releases/MapTool*-mac.app.zip releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac.app.zip
       continue-on-error: true
     - name: Upload Mac DMG Release Asset
       id: upload-release-asset-dmg
@@ -190,4 +213,15 @@ jobs:
         upload_url: ${{ github.event.release.upload_url }}
         asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}.pkg
         asset_name: MapTool-${{ github.event.release.tag_name }}.pkg
+        asset_content_type: application/octet-stream
+    - name: Upload Mac Image Release Asset
+      id: upload-release-asset-mac-image
+      uses: actions/upload-release-asset@v1
+      if: matrix.os == 'macOS-13'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: releases/renamed/MapTool-${{ github.event.release.tag_name }}-mac.app.zip
+        asset_name: MapTool-${{ github.event.release.tag_name }}-mac.app.zip
         asset_content_type: application/octet-stream
