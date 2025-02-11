@@ -443,11 +443,7 @@ public class StringFunctions extends AbstractFunction {
     }
     m.appendTail(sb);
 
-    if (args == null) {
-      return sb.toString();
-    }
-
-    Object[] argArray = args.toArray();
+    Object[] argArray = args != null ? args.toArray() : new Object[] {};
 
     // Change all integers in BigDecimal to BigIntegers so formating specifiers work correctly.
     for (int i = 0; i < argArray.length; i++) {
