@@ -15,6 +15,7 @@
 package net.rptools.clientserver;
 
 import java.awt.EventQueue;
+import java.net.Socket;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
@@ -39,7 +40,7 @@ public class ConnectionFactory {
   public Connection createConnection(@Nonnull String id, @Nonnull RemoteServerConfig config) {
     return switch (config) {
       case RemoteServerConfig.Socket(String hostName, int port) ->
-          new SocketConnection(id, hostName, port);
+          new SocketConnection(id, () -> new Socket(hostName, port));
       case RemoteServerConfig.WebRTC(String serverName) ->
           new WebRTCConnection(
               id,
