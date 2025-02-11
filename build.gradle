@@ -369,8 +369,8 @@ dependencies {
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-jpeg', version: '3.12.0'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-core
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-psd', version: '3.10.1'	// https://mvnrepository.com/artifact/com.twelvemonkeys.imageio/imageio-psd
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tiff', version: '3.12.0'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.10.1'
-    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.10.1'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-batik', version: '3.12.0'
+    implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-tga', version: '3.12.0'
     implementation group: 'com.twelvemonkeys.imageio', name: 'imageio-bmp', version: '3.10.1'
     // For Twelvemonkey SVG
     implementation 'org.apache.xmlgraphics:batik-all:1.17'
@@ -478,11 +478,11 @@ dependencies {
     // 'test.useTestNG()' to your build script.
     //testCompile 'junit:junit:4.12'
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
     implementation group: 'com.google.code.gson', name: 'gson', version: '2.10.1'		// https://mvnrepository.com/artifact/com.google.code.gson/gson
 
-    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.10.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.10.2'
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.11.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.11.4'
     testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.10.2'
 
     // For mocking features during unit tests
