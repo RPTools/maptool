@@ -17,6 +17,8 @@ package net.rptools.maptool.client;
 import javax.annotation.Nonnull;
 
 public sealed interface RemoteServerConfig {
+  record SSLSocket(@Nonnull String hostName, int port) implements RemoteServerConfig {}
+
   record Socket(@Nonnull String hostName, int port) implements RemoteServerConfig {}
 
   record WebRTC(@Nonnull String serverName) implements RemoteServerConfig {}
