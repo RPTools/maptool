@@ -174,3 +174,14 @@ or while running from git
 ```
 ./gradlew run --args=rptools-maptool+tcp://${localips[0]}:51231
 ```
+
+## 5. Connecting to a SSL enabled MapTool server directly
+
+With the certificate installed in the system certificate store
+the second `TCP-LISTEN` socat tunnel can be omitted
+and the new `rptools-maptool+tcps://` scheme used
+to connect from the command-line to port 51232.
+
+```
+./gradlew run --args=rptools-maptool+tcps://${localips[0]}:51232
+```
