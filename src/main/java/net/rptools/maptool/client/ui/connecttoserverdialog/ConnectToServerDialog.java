@@ -260,6 +260,15 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     return (JCheckBox) getComponent("@usePublicKey");
   }
 
+  @Nonnull
+  public JCheckBox getUseSSLCheckBox() {
+    if (getComponent("@useSSL") instanceof JCheckBox checkBox) {
+      return checkBox;
+    } else {
+      throw new AssertionError("Connect to server dialog should have a JCheckBox named @useSSL");
+    }
+  }
+
   private void handleOK() {
     String username = getUsernameTextField().getText().trim();
     if (username.length() == 0) {
@@ -311,8 +320,14 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       }
       getHostTextField().setText(host);
 
+      boolean useSSL = getUseSSLCheckBox().isSelected();
+
       // OK
-      connectionDetails = new RemoteServerConfig.Socket(host, portTemp);
+      if (useSSL) {
+        connectionDetails = new RemoteServerConfig.SSLSocket(host, portTemp);
+      } else {
+        connectionDetails = new RemoteServerConfig.Socket(host, portTemp);
+      }
     } else if (SwingUtil.hasComponent(selectedPanel, "rptoolsPanel")) {
       String serverName = getServerNameTextField().getText().trim();
       if (serverName.length() == 0) {
