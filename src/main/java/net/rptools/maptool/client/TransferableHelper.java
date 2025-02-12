@@ -628,7 +628,7 @@ public class TransferableHelper extends TransferHandler {
             if (MapTool.getPlayer().isGM()) {
               try {
                 var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+                new LibraryManager().reregisterAddOnLibrary(addOnLibrary, true);
                 SwingUtilities.invokeLater(
                     () -> {
                       MapTool.showInformation(

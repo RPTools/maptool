@@ -339,7 +339,7 @@ public class AddOnLibrariesDialogController extends AbstractSwingJavaFXDialogCon
                 }
                 libraryManager.deregisterAddOnLibrary(namespace);
               }
-              libraryManager.reregisterAddOnLibrary(addOnLibrary);
+              libraryManager.reregisterAddOnLibrary(addOnLibrary, true);
             } catch (IOException | InterruptedException | ExecutionException e) {
               MapTool.showError("library.import.ioError", e);
             }

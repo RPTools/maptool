@@ -852,7 +852,10 @@ public class PersistenceUtil {
         AssetManager.putAsset(asset);
       }
       AddOnLibrary addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-      libraryManager.registerAddOnLibrary(addOnLibrary);
+      // Addons explicitly not initialized here (see AppActions MapTool.setCampaign)
+      // because the campaign is not loaded yet and addon init scripts
+      // need access to campaign state.
+      libraryManager.registerAddOnLibrary(addOnLibrary, false);
     }
   }
 

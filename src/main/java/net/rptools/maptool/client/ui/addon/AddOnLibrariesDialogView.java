@@ -267,7 +267,7 @@ public class AddOnLibrariesDialogView extends JDialog {
           }
           libraryManager.deregisterAddOnLibrary(namespace);
         }
-        libraryManager.reregisterAddOnLibrary(addOnLibrary);
+        libraryManager.reregisterAddOnLibrary(addOnLibrary, true);
       } catch (IOException | InterruptedException | ExecutionException e) {
         MapTool.showError("library.import.ioError", e);
       }

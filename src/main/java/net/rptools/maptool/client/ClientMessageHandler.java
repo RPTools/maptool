@@ -498,7 +498,7 @@ public class ClientMessageHandler implements MessageHandler {
             Asset asset = AssetManager.getAsset(a);
             try {
               var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-              new LibraryManager().reregisterAddOnLibrary(addOnLibrary);
+              new LibraryManager().reregisterAddOnLibrary(addOnLibrary, true);
             } catch (IOException e) {
               SwingUtilities.invokeLater(
                   () ->
@@ -658,6 +658,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Campaign campaign = Campaign.fromDto(msg.getCampaign());
+          // NOTE: Addons are initialized in here
           MapTool.setCampaign(campaign, null);
 
           // Hide the "Connecting" overlay

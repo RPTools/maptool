@@ -371,7 +371,9 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
                 Asset asset = AssetManager.getAsset(a);
                 try {
                   var addOnLibrary = new AddOnLibraryImporter().importFromAsset(asset);
-                  libraryManager.reregisterAddOnLibrary(addOnLibrary);
+                  // Library explicitly not initialized here because scripts need
+                  // content from the campaign that has yet to be loaded.
+                  libraryManager.reregisterAddOnLibrary(addOnLibrary, false);
                 } catch (IOException e) {
                   SwingUtilities.invokeLater(
                       () -> {

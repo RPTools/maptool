@@ -71,7 +71,7 @@ public class AddOnLibraryManager {
    * @param library The add-on library to register.
    * @throws IllegalStateException if there is already a add-on library with the same namespace.
    */
-  public void registerLibrary(AddOnLibrary library) {
+  public void registerLibrary(AddOnLibrary library, boolean initialize) {
     String namespace = library.getNamespace().join().toLowerCase();
 
     var registeredLib = namespaceLibraryMap.computeIfAbsent(namespace, k -> library);
@@ -79,10 +79,19 @@ public class AddOnLibraryManager {
       throw new IllegalStateException("Library is already registered");
     }
 
-    library.initialize();
+    if (initialize) {
+      library.initialize();
+    }
     new MapToolEventBus()
         .getMainEventBus()
         .post(new AddOnsAddedEvent(Set.of(library.getLibraryInfo().join())));
+  }
+
+  /** initializes all libraries. */
+  public void initializeLibraries() {
+    for (var library : namespaceLibraryMap.values()) {
+      library.initialize();
+    }
   }
 
   /**

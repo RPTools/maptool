@@ -2635,6 +2635,7 @@ public class AppActions {
 
         MapTool.serverCommand().setCampaign(campaign.campaign);
 
+        // NOTE: Addons are initialized in here
         MapTool.setCampaign(campaign.campaign, campaign.currentZoneId);
         ZoneRenderer current = MapTool.getFrame().getCurrentZoneRenderer();
         if (current != null) {

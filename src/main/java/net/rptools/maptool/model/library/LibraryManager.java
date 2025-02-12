@@ -163,9 +163,9 @@ public class LibraryManager {
    *
    * @param addOn the Add On to register.
    */
-  public boolean registerAddOnLibrary(AddOnLibrary addOn) {
+  public boolean registerAddOnLibrary(AddOnLibrary addOn, boolean initialize) {
     try {
-      addOnLibraryManager.registerLibrary(addOn);
+      addOnLibraryManager.registerLibrary(addOn, initialize);
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand().addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOn)));
       }
@@ -193,10 +193,10 @@ public class LibraryManager {
    *
    * @param addOnLibrary the add-on in library to register.
    */
-  public boolean reregisterAddOnLibrary(AddOnLibrary addOnLibrary) {
+  public boolean reregisterAddOnLibrary(AddOnLibrary addOnLibrary, boolean initialize) {
     try {
       addOnLibraryManager.deregisterLibrary(addOnLibrary.getNamespace().get());
-      addOnLibraryManager.registerLibrary(addOnLibrary);
+      addOnLibraryManager.registerLibrary(addOnLibrary, initialize);
       if (MapTool.isHostingServer()) {
         MapTool.serverCommand()
             .addAddOnLibrary(List.of(new TransferableAddOnLibrary(addOnLibrary)));
@@ -296,6 +296,11 @@ public class LibraryManager {
    */
   public CompletableFuture<AddOnLibraryListDto> addOnLibrariesToDto() {
     return addOnLibraryManager.toDto();
+  }
+
+  /** initializes all add-on libraries. */
+  public void initializeAddOnLibraries() {
+    addOnLibraryManager.initializeLibraries();
   }
 
   /** de-registers all libraries from the library manager. */

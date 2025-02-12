@@ -957,6 +957,7 @@ public class MapTool {
     MapTool.getFrame().getCampaignPanel().reset();
     MapTool.getFrame().getGmPanel().reset();
     UserDefinedMacroFunctions.getInstance().handleCampaignLoadMacroEvent();
+    new LibraryManager().initializeAddOnLibraries();
   }
 
   public static AssetTransferManager getAssetTransferManager() {
