@@ -7,7 +7,7 @@ jide = "3.7.9"
 flatlaf = "3.5.4"
 handlebars = "4.4.0"
 jai-imageio = "1.4.0"
-graalvm-js = "21.2.0"
+graalvm-js = "24.1.2"
 pdfbox = "3.0.0"
 
 [libraries]
