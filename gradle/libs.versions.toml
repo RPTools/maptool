@@ -179,7 +179,7 @@ jai-imageio = [ "jai-imageio-core", "jai-imageio-jpeg" ]
 graalvm-js  = [ "graalvm-js", "graalvm-js-scriptengine" ]
 
 [plugins]
-grgit = { id = "org.ajoberstar.grgit", version = "5.2.1" }
+grgit = { id = "org.ajoberstar.grgit", version = "5.3.0" }
 javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
 jpackage-runtime = { id = "org.beryx.runtime", version = "1.13.1" }
 protobuf = { id = "com.google.protobuf", version = "0.9.4" }
