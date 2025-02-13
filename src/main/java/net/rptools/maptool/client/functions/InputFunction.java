@@ -45,7 +45,7 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 // @formatter:off
 // Jamz: Had to remove <pre> tags and add formatter:off due to Spotless 3.x error, still not fixed

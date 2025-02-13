@@ -29,8 +29,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import org.apache.commons.lang.WordUtils;
 import org.apache.commons.lang3.math.NumberUtils;
+import org.apache.commons.lang3.text.WordUtils;
 
 public class StringFunctions extends AbstractFunction {
   private int matchNo = 0;
@@ -230,11 +230,7 @@ public class StringFunctions extends AbstractFunction {
       }
       if (functionName.equalsIgnoreCase("strformat")) {
         int size = parameters.size();
-        if (size > 1) {
-          return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
-        } else {
-          return format(parameters.get(0).toString(), resolver, null);
-        }
+        return format(parameters.get(0).toString(), resolver, parameters.subList(1, size));
       }
       if (functionName.equalsIgnoreCase("matches")) {
         if (parameters.size() < 2) {
@@ -442,10 +438,6 @@ public class StringFunctions extends AbstractFunction {
       }
     }
     m.appendTail(sb);
-
-    if (args == null) {
-      return sb.toString();
-    }
 
     Object[] argArray = args.toArray();
 

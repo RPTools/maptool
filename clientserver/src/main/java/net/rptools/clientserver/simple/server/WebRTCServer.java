@@ -105,7 +105,7 @@ public final class WebRTCServer extends AbstractServer implements Server {
       @Override
       public void onError(Exception ex) {
         lastError = "WebSocket error: " + ex.toString() + "\n";
-        log.error("S " + lastError);
+        log.error("S " + lastError, ex);
         // onClose will be called after this method
       }
     };
@@ -147,7 +147,7 @@ public final class WebRTCServer extends AbstractServer implements Server {
     try {
       fireClientConnect(connection);
     } catch (Exception e) {
-      log.error(e);
+      log.error("Unexpected error while handling new data channel", e);
     }
   }
 

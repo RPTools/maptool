@@ -17,7 +17,7 @@ package net.rptools.maptool.model;
 import java.io.Serializable;
 import java.util.HexFormat;
 import java.util.UUID;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /** Global unique identificator object. */

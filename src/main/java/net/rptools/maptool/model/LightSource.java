@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.server.proto.LightSourceDto;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * Represents a light source that can be attached to tokens.

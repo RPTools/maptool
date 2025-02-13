@@ -390,6 +390,7 @@ dependencies {
     implementation 'commons-net:commons-net:3.11.1'
     // commandline parsing
     implementation 'commons-cli:commons-cli:1.6.0'
+    implementation 'org.apache.commons:commons-lang3:3.17.0'
 
     // needed for preference dialog at runtime
     implementation 'commons-beanutils:commons-beanutils:1.9.4'
@@ -409,9 +410,6 @@ dependencies {
     implementation group: 'com.jidesoft', name: 'jide-grids', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-properties', version: '3.7.9'
     implementation group: 'com.jidesoft', name: 'jide-shortcut', version: '3.7.9'
-
-    // old json lib only used for one macro function. Use gson instead
-    implementation 'net.sf.json-lib:json-lib:2.4:jdk15'
 
     // utils for handling reflection
     implementation 'org.reflections:reflections:0.10.2'
