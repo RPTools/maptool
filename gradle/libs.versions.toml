@@ -33,7 +33,7 @@ apache-commons-compress      = { group = "org.apache.commons",          name = "
 zstd                         = { group = "com.github.luben",            name = "zstd-jni",                version = "1.5.5-11"        }
 # Protobuf
 protobuf-grpc                = { group = "io.grpc",                     name = "grpc-protobuf",           version = "1.61.1"          }
-protobuf-java-util           = { group = "com.google.protobuf",         name = "protobuf-java-util",      version = "4.29.1"          }
+protobuf-java-util           = { group = "com.google.protobuf",         name = "protobuf-java-util",      version = "4.29.3"          }
 # find running instances in LAN
 servicediscovery             = { group = "net.tsc.servicediscovery",    name = "servicediscovery",        version = "1.0.b5"          }
 # UPNP. Maybe replace with jupnp
