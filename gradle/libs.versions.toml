@@ -74,7 +74,7 @@ jide-properties              = { group = "com.jidesoft",                name = "
 jide-shortcut                = { group = "com.jidesoft",                name = "jide-shortcut",           version.ref = "jide"        }
 
 # Syntax highlighting in macro editor
-fifesoft-rsyntaxtexxtarea    = { group = "com.fifesoft",                name = "rsyntaxtextarea",         version = "3.5.3"           }
+fifesoft-rsyntaxtexxtarea    = { group = "com.fifesoft",                name = "rsyntaxtextarea",         version = "3.5.4"           }
 fifesoft-rstaui              = { group = "com.fifesoft",                name = "rstaui",                  version = "3.3.1"           }
 fifesoft-autocomplete        = { group = "com.fifesoft",                name = "autocomplete",            version = "3.3.1"           }
 fifesoft-languagesupport     = { group = "com.fifesoft",                name = "languagesupport",         version = "3.3.0"           }
