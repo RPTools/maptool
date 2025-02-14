@@ -33,7 +33,7 @@ webrtc                       = { group = "dev.onvoid.webrtc",           name = "
 apache-commons-compress      = { group = "org.apache.commons",          name = "commons-compress",        version = "1.27.1"          }
 zstd                         = { group = "com.github.luben",            name = "zstd-jni",                version = "1.5.5-11"        }
 # Protobuf
-protobuf-grpc                = { group = "io.grpc",                     name = "grpc-protobuf",           version = "1.61.1"          }
+protobuf-grpc                = { group = "io.grpc",                     name = "grpc-protobuf",           version = "1.70.0"          }
 protobuf-java                = { group = "com.google.protobuf",         name = "protobuf-java-util",      version.ref = "protoc"      }
 protobuf-protoc              = { group = "com.google.protobuf",         name = "protoc",                  version.ref = "protoc"      }
 # find running instances in LAN
