@@ -25,8 +25,11 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.SwingUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ThumbnailManager {
+  private static final Logger log = LogManager.getLogger(ThumbnailManager.class);
   private final File thumbnailLocation;
   private final Dimension thumbnailSize;
 
@@ -95,8 +98,7 @@ public class ThumbnailManager {
         FileUtils.cleanDirectory(thumbnailLocation);
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while clearing thumbnail cache", e);
     }
   }
 

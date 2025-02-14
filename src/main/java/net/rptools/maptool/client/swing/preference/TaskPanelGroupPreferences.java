@@ -23,9 +23,12 @@ import java.util.List;
 import java.util.prefs.Preferences;
 import net.rptools.maptool.client.swing.TaskPanel;
 import net.rptools.maptool.client.swing.TaskPanelGroup;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TaskPanelGroupPreferences implements PropertyChangeListener {
 
+  private static final Logger log = LogManager.getLogger(TaskPanelGroupPreferences.class);
   private TaskPanelGroup group;
 
   private Preferences prefs;
@@ -103,7 +106,7 @@ public class TaskPanelGroupPreferences implements PropertyChangeListener {
         }
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while restoring panel state", e);
     } finally {
       restoringState = false;
     }
@@ -129,7 +132,7 @@ public class TaskPanelGroupPreferences implements PropertyChangeListener {
         taskPanel.setState(TaskPanel.State.valueOf(state));
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while restoring panel states", e);
     } finally {
       restoringState = false;
     }

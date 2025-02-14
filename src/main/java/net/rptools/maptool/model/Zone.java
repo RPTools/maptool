@@ -1538,8 +1538,6 @@ public class Zone {
    */
   @Deprecated
   public void putTokens(List<Token> tokens) {
-    // System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
-
     Collection<Token> values = tokenMap.values();
 
     List<Token> addedTokens = new LinkedList<Token>(tokens);
@@ -1791,15 +1789,9 @@ public class Zone {
   public List<Token> getOwnedTokensWithSight(Player p) {
     return getTokensFiltered(
         t -> {
-          // System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
-          // System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" +
-          // AppUtil.playerOwns(t));
-          // return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
-
           if (tokenSelection == null) {
             tokenSelection = TokenSelection.ALL;
           }
-          // System.out.println("TokenSelection: " + tokenSelection);
           switch (tokenSelection) {
             case ALL: // Show FoW for ANY Token I own
               return t.getHasSight() && AppUtil.playerOwns(t);

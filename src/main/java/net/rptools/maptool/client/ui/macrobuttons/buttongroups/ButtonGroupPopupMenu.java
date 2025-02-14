@@ -314,7 +314,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 }
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
@@ -622,7 +621,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                     buttonsInGroup(token.getMacroList(true), macroGroup), selectedFile);
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });
@@ -757,7 +755,6 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
                 PersistenceUtil.saveMacroSet(token.getMacroList(true), selectedFile);
               }
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportSetFail", ioe));
             }
           });

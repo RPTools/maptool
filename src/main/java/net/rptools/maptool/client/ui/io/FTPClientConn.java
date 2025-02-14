@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author crash
@@ -26,6 +28,7 @@ import java.net.URL;
 class FTPClientConn {
   private static final String PROTOCOL = "ftp://";
   private static final String TYPE_IMAGE = ";type=i";
+  private static final Logger log = LogManager.getLogger(FTPClientConn.class);
   public final String host;
   public final String user;
   protected final String password;
@@ -65,16 +68,11 @@ class FTPClientConn {
       myftp = new FTPCommand(host);
       myftp.login(user, password);
       result = myftp.mkdir(dir);
-      // System.err.print("Response from mkdir() is " + myftp.getResponseString());
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while creating directory", e);
     } finally {
       if (myftp != null) {
-        try {
-          myftp.closeServer();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        myftp.closeServer();
       }
     }
     return result;
@@ -100,14 +98,10 @@ class FTPClientConn {
       myftp.login(user, password);
       result = myftp.remove(filename);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while deleting file", e);
     } finally {
       if (myftp != null) {
-        try {
-          myftp.closeServer();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        myftp.closeServer();
       }
     }
     return result;

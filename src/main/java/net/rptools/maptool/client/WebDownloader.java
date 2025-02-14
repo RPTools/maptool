@@ -59,11 +59,4 @@ public class WebDownloader {
       return new String(out.toByteArray());
     }
   }
-
-  public static void main(String[] args) throws Exception {
-    WebDownloader downloader =
-        new WebDownloader(new URL("http://library.rptools.net/1.3/listArtPacks"));
-    String result = downloader.read();
-    System.out.println(result);
-  }
 }

@@ -570,14 +570,6 @@ public class PersistenceUtil {
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
 
-        // for (Entry<String, Map<GUID, LightSource>> entry :
-        // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-        // for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-        // System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() +
-        // " :: " + entryLs.getValue().getLumens());
-        // }
-        // }
-
         return persistedCampaign;
       }
     } catch (OutOfMemoryError oom) {
@@ -965,9 +957,6 @@ public class PersistenceUtil {
 
       String extension = asset.getExtension();
       byte[] assetData = asset.getData();
-      // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
-      // assetData.length);
-
       pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
       pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image
     }
@@ -1320,8 +1309,7 @@ public class PersistenceUtil {
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while saving token image", e);
     }
   }
 }

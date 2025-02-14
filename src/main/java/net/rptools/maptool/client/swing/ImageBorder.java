@@ -20,11 +20,14 @@ import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.swing.border.Border;
 import net.rptools.lib.image.ImageUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author trevor
  */
 public class ImageBorder implements Border {
+  private static final Logger log = LogManager.getLogger(ImageBorder.class);
   private BufferedImage topRight;
   private BufferedImage top;
   private BufferedImage topLeft;
@@ -55,7 +58,7 @@ public class ImageBorder implements Border {
       rightMargin = max(topRight.getWidth(), right.getWidth(), bottomRight.getWidth());
       leftMargin = max(topLeft.getWidth(), left.getWidth(), bottomLeft.getWidth());
     } catch (IOException ioe) {
-      ioe.printStackTrace();
+      log.error("Faile to load component images for ImageBorder", ioe);
     }
   }
 

@@ -370,7 +370,6 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     }
 
     if (tokenMoved) {
-      // System.err.println(newVals + " @ (" + x + ", " + y + ")");
       ZonePoint zp = TokenLocationFunctions.getZonePoint(x, y, useDistance);
       token.setX(zp.x);
       token.setY(zp.y);

@@ -112,8 +112,7 @@ public class AssetManager {
         FileUtils.cleanDirectory(cacheDir);
       }
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while clearing cache", e);
     }
   }
 
@@ -356,7 +355,7 @@ public class AssetManager {
           putInPersistentCache(asset);
         } catch (IOException ioe) {
           // Log, but continue as if we didn't have a link
-          ioe.printStackTrace();
+          log.error("Error while creating asset from link", ioe);
         }
       }
     }
@@ -627,7 +626,7 @@ public class AssetManager {
 
     } catch (IOException ioe) {
       // Just so we know, but fall through to return null
-      ioe.printStackTrace();
+      log.error("Error while loading local reference file", ioe);
     }
 
     // Guess we don't have one
@@ -818,7 +817,7 @@ public class AssetManager {
           rememberLocalImageReference(file);
         }
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        log.error("Error while searching for image", ioe);
       }
     }
     // Done
@@ -851,7 +850,6 @@ public class AssetManager {
       assetLoader.storeIndexFile(repo, index);
     } catch (IOException e) {
       log.error("Couldn't save updated index to local repository cache", e);
-      e.printStackTrace();
     }
     return index;
   }

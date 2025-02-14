@@ -576,8 +576,8 @@ public class Token implements Cloneable {
         sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
       }
     } catch (Exception e) {
+      log.error("Error while defaulting sight type", e);
       sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
-      e.printStackTrace();
     }
   }
 
@@ -2408,7 +2408,7 @@ public class Token implements Cloneable {
         AssetManager.putAsset(asset);
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while creating asset", e);
     }
     return asset;
   }

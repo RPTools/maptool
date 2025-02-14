@@ -61,9 +61,12 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.util.FileUtil;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   private static final long serialVersionUID = -3741870412603226747L;
+  private static final Logger log = LogManager.getLogger(AbstractTokenPopupMenu.class);
 
   private final ZoneRenderer renderer;
   private final Token tokenUnderMouse;
@@ -553,11 +556,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
                   && showSaveDialog) {
                 if (chooser.getFileFilter() != tokenFilter) {
                   File newFileName = new File(chooser.getCurrentDirectory(), tokenNameGM);
-                  System.out.println("newFileName 1: " + newFileName);
                   chooser.setSelectedFile(newFileName);
                 } else {
                   File newFileName = new File(chooser.getCurrentDirectory(), tokenName);
-                  System.out.println("newFileName 1: " + newFileName);
                   chooser.setSelectedFile(newFileName);
                 }
               }
@@ -668,8 +669,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
           }
           saveDirectory = tokenSaveFile.getParentFile();
         } catch (IOException ioe) {
-          ioe.printStackTrace();
-          MapTool.showError("Could not save token: " + ioe);
+          MapTool.showError("Could not save token", ioe);
         }
       }
       if (saveDirectory != null) {

@@ -478,7 +478,6 @@ public class PointerTool extends DefaultTool {
   @Override
   public void mouseReleased(MouseEvent e) {
     mouseButtonDown = false;
-    // System.out.println("mouseReleased " + e.toString());
 
     if (isShowingTokenStackPopup) {
       if (tokenStackPanel.contains(e.getX(), e.getY())) {

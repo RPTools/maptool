@@ -140,7 +140,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       }
       return new Image[] {rptokenDecorationImage};
     } catch (IOException | NullPointerException | IndexOutOfBoundsException e) {
-      e.printStackTrace();
+      log.error("Error while checking if this is a HeroLab token", e);
     }
     return null;
   }
@@ -166,7 +166,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       // TRANSFERING_IMAGE.
       // We could write logic using the progress bar but most likely this panel will get an update
       // with JavaFX soon(tm)...
-      e.printStackTrace();
+      log.error("Error while getting image from file list", e);
     }
 
     return image != null ? image : ImageManager.TRANSFERING_IMAGE;
@@ -262,8 +262,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
                 + I18N.getText("panel.Asset.Mouseover.size", fileSize)
                 + "</html>";
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while checking image dimensions", e);
       }
     }
 
@@ -281,7 +280,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     } catch (NullPointerException e) {
       // This can occasionally happen during PDF extraction as it's multi-threaded and the fileList
       // is getting updated after each page is extracted...
-      e.printStackTrace();
+      log.error("Error while get file caption", e);
     }
 
     return "";
@@ -346,8 +345,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
           extractThreadPool.awaitTermination(1, TimeUnit.MINUTES);
         }
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while canceling PDF extraction", e);
       }
     }
   }
@@ -369,10 +367,9 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
       try {
         extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
-
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while initializing PDF extractor", e);
+        // TODO We'll get an NPE too immediately below...
       }
 
       pageCount = extractor.getPageCount();
@@ -399,8 +396,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
           dir = new PdfAsDirectory(extractor.getTempDir(), AppConstants.IMAGE_FILE_FILTER);
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while creating image extraction task", e);
       }
 
       return null;
@@ -437,8 +433,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       try {
         fileList.addAll(extractor.extractPage(pageNumber));
       } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while extracting images", e);
       } finally {
         extractor.close();
         updatePdfProgress(pageNumber, null);
@@ -466,8 +461,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     try {
       fileList.addAll(dir.getFiles());
     } catch (FileNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while listing files for cleanup", e);
     }
     fileListCleanup();
   }

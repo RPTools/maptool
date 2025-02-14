@@ -390,7 +390,7 @@ public class AppUtil {
 
       return FileUtils.byteCountToDisplaySize(visitor.totalSize) + " ";
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while calculating disk usage", e);
     }
     return null;
   }

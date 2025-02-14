@@ -23,9 +23,12 @@ import javax.swing.text.*;
 import javax.swing.text.html.HTML;
 import javax.swing.text.html.HTMLDocument;
 import javax.swing.text.html.StyleSheet;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class HTMLPanelRenderer extends JTextPane {
   private static final long serialVersionUID = -7535450508528232780L;
+  private static final Logger log = LogManager.getLogger(HTMLPanelRenderer.class);
 
   private final CellRendererPane rendererPane = new CellRendererPane();
   private final StyleSheet styleSheet;
@@ -100,7 +103,7 @@ public class HTMLPanelRenderer extends JTextPane {
           java.net.URI uri = new java.net.URI(href);
           desktop.browse(uri);
         } catch (Exception ev) {
-          System.err.println(ev.getMessage());
+          log.error("Unexpected error browsing link {}", href, ev);
         }
       }
     }

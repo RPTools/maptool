@@ -46,6 +46,8 @@ import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.GoToDialog;
 import org.fife.rsta.ui.search.FindDialog;
@@ -74,6 +76,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   public static final String DEFAULT_COLOR_NAME = "default";
 
   private static final long serialVersionUID = 8228617911117087993L;
+  private static final Logger log = LogManager.getLogger(MacroEditorDialog.class);
   private final AbeillePanel panel;
   MacroButton button;
   MacroButtonProperties properties;
@@ -501,7 +504,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
 
       macroEditorRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading macro editor theme", e);
     }
 
     // Listen for changes in the text
@@ -719,8 +722,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
           macroEditorRSyntaxTextArea.setCaretPosition(
               macroEditorRSyntaxTextArea.getLineStartOffset(line - 1));
         } catch (BadLocationException ble) { // Never happens
+          log.error("Error while setting cursor to start of line", ble);
           UIManager.getLookAndFeel().provideErrorFeedback(macroEditorRSyntaxTextArea);
-          ble.printStackTrace();
         }
       }
     }

@@ -33,8 +33,12 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Zone;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AppMenuBar extends JMenuBar {
+  private static final Logger log = LogManager.getLogger(AppMenuBar.class);
+
   /** The manager of the Most Recently Used campaigns. */
   private static MRUCampaignManager mruManager;
 
@@ -299,7 +303,7 @@ public class AppMenuBar extends JMenuBar {
       try {
         AppSetup.installDefaultTokens();
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        log.error("Error while install default assets", ioe);
         menu.add(new JMenuItem(I18N.getText("msg.error.loadingQuickMaps")));
         return menu;
       }

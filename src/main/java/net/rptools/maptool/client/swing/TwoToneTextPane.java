@@ -47,6 +47,8 @@ import javax.swing.text.TabExpander;
 import javax.swing.text.Utilities;
 import javax.swing.text.View;
 import javax.swing.text.ViewFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Extension to <code>JTextPane</code> that supports 2 tone text.
@@ -66,6 +68,8 @@ public class TwoToneTextPane extends JTextPane {
 
   /** Pattern used to parse text strings for a style */
   private static final Pattern TEXT_PATTERN = Pattern.compile("\\$\\{\\s*(\\w*)\\s*\\}");
+
+  private static final Logger log = LogManager.getLogger(TwoToneTextPane.class);
 
   /*---------------------------------------------------------------------------------------------
    * Constructors
@@ -171,7 +175,7 @@ public class TwoToneTextPane extends JTextPane {
       // Add the last of the text
       doc.insertString(doc.getLength(), text.substring(textStart), null);
     } catch (BadLocationException e) {
-      e.printStackTrace();
+      log.error("Unexpected error while parsing", e);
       throw new IllegalStateException(
           "This should not happen since I always use the document to "
               + "determine the location to write. It might be due to synchronization problems though",

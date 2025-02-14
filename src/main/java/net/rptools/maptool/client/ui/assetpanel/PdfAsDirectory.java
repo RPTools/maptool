@@ -31,10 +31,14 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
+// TODO So much of this is also in AssetDirectory. Consolidate them.
 public class PdfAsDirectory extends Directory {
 
   public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
+  private static final Logger log = LogManager.getLogger(PdfAsDirectory.class);
 
   private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 
@@ -128,15 +132,14 @@ public class PdfAsDirectory extends Directory {
         if (imageFile.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
           thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
         } else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
-          // Jamz: Added to mark all PDF assets with proper image, TODO: Move image asset to proper
-          // location
-          System.out.println("PDF Thumb: " + imageFile.getAbsolutePath());
+          // Jamz: Added to mark all PDF assets with proper image,
+          // TODO: Move image asset to proper location
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
         } else {
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
         }
       } catch (Throwable t) {
-        t.printStackTrace();
+        log.error("Error while getting image thumbnail", t);
         thumbnail = INVALID_IMAGE;
       }
       return thumbnail;

@@ -278,7 +278,6 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
     } catch (Exception e) {
       // Oh well, might not be connected
     }
-    // System.out.println("External address is: " + externalAddress);
 
     RemoteServerConfig connectionDetails;
     JComponent selectedPanel = (JComponent) getTabPane().getSelectedComponent();

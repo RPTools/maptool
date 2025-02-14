@@ -228,7 +228,6 @@ public class FogUtil {
             MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
           }
         }
-        // System.out.println("2. Token: " + token.getGMName() + " - ID: " + token.getId());
         renderer.flush(token);
       } else {
         renderer.flush(token);
@@ -342,15 +341,11 @@ public class FogUtil {
 
     for (Token token : tokList) tokenSet.add(token.getId());
 
-    // System.out.println("tokList: " + tokList.toString());
-
     /*
      * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
      * Role.GM;
      *
      * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
-     *
-     * //System.out.println("token: " + token.getName() + ", owner: " + owner);
      *
      * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
      */
@@ -365,7 +360,6 @@ public class FogUtil {
    * @param renderer the ZoneRenderer of the map.
    */
   public static void restoreFoW(final ZoneRenderer renderer) {
-    // System.out.println("Zone ID: " + renderer.getZone().getId());
     clearExposedArea(renderer.getZone(), false);
   }
 

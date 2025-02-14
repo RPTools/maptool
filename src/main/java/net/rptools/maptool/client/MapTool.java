@@ -1418,7 +1418,8 @@ public class MapTool {
         try {
           Thread.sleep(20000);
         } catch (InterruptedException e) {
-          e.printStackTrace();
+          log.warn("Heartbeat thread interrupted", e);
+          // TODO Doesn't this mean we should shutdown?
         }
 
         ServerCommand command = client.getServerCommand();

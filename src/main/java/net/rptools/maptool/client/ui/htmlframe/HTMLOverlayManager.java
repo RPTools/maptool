@@ -184,7 +184,7 @@ public class HTMLOverlayManager extends HTMLWebViewManager implements HTMLPanelC
       WebPage page = (WebPage) getPageHandle.invokeExact(getWebEngine());
       page.setBackgroundColor(rgb);
     } catch (Throwable throwable) {
-      throwable.printStackTrace();
+      log.error("Error while setting page background color", throwable);
     }
   }
 

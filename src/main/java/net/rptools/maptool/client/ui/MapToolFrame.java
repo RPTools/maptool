@@ -390,7 +390,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       logo = RessourceManager.getImage(Images.MAPTOOL_LOGO);
     } catch (Exception ioe) {
       log.error(I18N.getText("msg.error.credits"), ioe);
-      ioe.printStackTrace();
     }
     aboutDialog = new AboutDialog(this, logo, credits);
     aboutDialog.setSize(354, 400);
@@ -493,9 +492,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
           .setPreferencesHandler(
               arg0 -> ((ClientAction) AppActions.SHOW_PREFERENCES).execute(null));
     } catch (Exception e) {
-      String msg = "Error while configuring Desktop interaction";
-      log.error(msg, e);
-      System.err.println(msg);
+      log.error("Error while configuring Desktop interaction", e);
     }
   }
 

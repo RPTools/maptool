@@ -397,13 +397,10 @@ public class GraphicsUtil {
 
       double bottomAngle = (angle + delta / 2) % 360;
       double topAngle = bottomAngle + 180;
-      // System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
 
       bottomList.add(getPointAtVector(points[i], bottomAngle, width));
       topList.add(getPointAtVector(points[i], topAngle, width));
     }
-    // System.out.println(bottomList);
-    // System.out.println(topList);
     Collections.reverse(topList);
 
     GeneralPath path = new GeneralPath();
@@ -424,9 +421,6 @@ public class GraphicsUtil {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
 
-    // System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " +
-    // Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " +
-    // Math.toRadians(angle));
     return new Point2D.Double(x, y);
   }
 
@@ -435,8 +429,6 @@ public class GraphicsUtil {
         new Point2D[] {
           new Point(20, 20), new Point(50, 50), new Point(80, 20), new Point(100, 100)
         };
-    // final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20,
-    // 100), new Point(50,75)};
     final Area line = createLine(10, points);
 
     JFrame f = new JFrame();
@@ -462,6 +454,5 @@ public class GraphicsUtil {
         };
     f.add(p);
     f.setVisible(true);
-    // System.out.println(area.equals(area2));
   }
 }

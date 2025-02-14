@@ -1248,7 +1248,7 @@ public class AppActions {
             chatBox.select(start, start + enterText.length());
             chatBox.requestFocusInWindow();
           } catch (BadLocationException e1) {
-            // e1.printStackTrace();
+            log.error("Error while getting whisper text", e1);
           }
         }
       };
@@ -3153,7 +3153,8 @@ public class AppActions {
         // But don't use up any extra memory
         AssetManager.removeAsset(asset.getMD5Key());
       } catch (IOException ioe) {
-        ioe.printStackTrace();
+        log.error("Error while building Quick Map action", ioe);
+        // TODO Now assetId will be null. We should handle this properly.
       }
       getActionList().add(this);
     }
@@ -3465,7 +3466,6 @@ public class AppActions {
     @Override
     public final void actionPerformed(ActionEvent e) {
       execute(e);
-      // System.out.println(getValue(Action.NAME));
       updateActions();
     }
 

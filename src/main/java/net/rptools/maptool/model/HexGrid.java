@@ -148,7 +148,6 @@ public abstract class HexGrid extends Grid {
     zp.x -= w / 2;
     zp.y -= h / 2;
 
-    // System.out.println(new Rectangle(zp.x, zp.y, w, h));
     return new Rectangle(zp.x, zp.y, w, h);
   }
 

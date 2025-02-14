@@ -1597,7 +1597,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       xmlStatblockRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading XML syntax theme", e);
     }
 
     RTextScrollPane xmlStatblockRTextScrollPane = new RTextScrollPane(xmlStatblockRSyntaxTextArea);
@@ -1620,7 +1620,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       textStatblockRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading test syntax theme", e);
     }
 
     RTextScrollPane textStatblockRTextScrollPane =
@@ -1930,7 +1930,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
         j.revalidate();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while loading multiline property editor theme", e);
       }
       JScrollPane localJScrollPane = new RTextScrollPane(j);
       localJScrollPane.setVerticalScrollBarPolicy(22);
@@ -2000,7 +2000,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
         revalidate();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while loading theme", e);
       }
     }
 
@@ -2097,7 +2097,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 175);
         label.setIcon(finalImage);
       } catch (Exception e) {
-        e.printStackTrace();
+        log.error("Error while loading hero lab image", e);
       }
       label.setIconTextGap(10);
       label.setHorizontalTextPosition(JLabel.LEFT);

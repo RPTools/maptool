@@ -376,7 +376,6 @@ public class MacroButtonPopupMenu extends JPopupMenu {
               PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
               MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
             }
           });

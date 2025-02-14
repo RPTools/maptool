@@ -303,7 +303,6 @@ public class TokenStatesController
           model.addElement(overlay);
           getNames().add(overlay.getName());
           selected = model.size() - 1;
-          System.out.println("selected = " + selected);
         } else {
           // model.addElement(overlay);
           // Jamz: Lets insert the new state at the current index instead of at the bottom, we'll

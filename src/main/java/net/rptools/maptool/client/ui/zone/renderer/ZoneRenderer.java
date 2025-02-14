@@ -2228,7 +2228,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       }
       // Markers
       timer.start("renderTokens:Markers");
-      // System.out.println("Token " + token.getName() + " is a marker? " + token.isMarker());
       if (token.isMarker() && canSeeMarker(token)) {
         markerLocationList.add(location);
       }
@@ -2237,13 +2236,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       // Stacking check
       if (calculateStacks) {
         timer.start("tokenStack");
-        // System.out.println(token.getName() + " - " + location.boundsCache);
-
         Set<Token> tokenStackSet = null;
         for (TokenLocation currLocation : getTokenLocations(Zone.Layer.TOKEN)) {
           // Are we covering anyone ?
-          // System.out.println("\t" + currLocation.token.getName() + " - " +
-          // location.boundsCache.contains(currLocation.boundsCache));
           if (location.boundsCache.contains(currLocation.boundsCache)) {
             if (tokenStackSet == null) {
               tokenStackSet = new HashSet<Token>();
@@ -3628,11 +3623,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   public Cursor createCustomCursor(String resource, String tokenName) {
     Cursor c = null;
     try {
-      // Dimension d = Toolkit.getDefaultToolkit().getBestCursorSize(16, 16); // On OSX returns any
-      // size up to 1/2
-      // of (screen width, screen height)
-      // System.out.println("Best cursor size: " + d);
-
       BufferedImage img = ImageIO.read(MapTool.class.getResourceAsStream(resource));
       Font font = AppStyle.labelFont;
       Graphics2D z = (Graphics2D) this.getGraphics();
@@ -3644,8 +3634,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       // Now create a larger BufferedImage that will hold both the existing cursor and a token name
 
       // Use the larger of the image width or string width, and the height of the image + the height
-      // of the string
-      // to represent the bounding box of the 'arrow+tokenName'
+      // of the string to represent the bounding box of the 'arrow+tokenName'
       Rectangle bounds =
           new Rectangle(Math.max(img.getWidth(), textbox.width), img.getHeight() + textbox.height);
       BufferedImage cursor =

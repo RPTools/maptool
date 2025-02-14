@@ -127,7 +127,6 @@ public class GenericDialog extends JDialog {
       GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
   ActionListener resizeListener =
       e -> {
-        System.out.println(e);
         if (e.getActionCommand().equals("maximise")) {
           setBounds(screenBounds);
           swapResizeButtons();

@@ -91,12 +91,4 @@ public class RemoteFileDownloader {
     }
     return tempFile;
   }
-
-  public static void main(String[] args) throws Exception {
-    RemoteFileDownloader downloader =
-        new RemoteFileDownloader(new URL("http://library.rptools.net/torstan.zip"));
-
-    File tempFile = downloader.read();
-    System.out.println(tempFile + " - " + tempFile.length());
-  }
 }

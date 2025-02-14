@@ -27,6 +27,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.ImageBorder;
 import org.javatuples.Triplet;
 
+// TODO Rename to ResourceManager
 public class RessourceManager {
   private static final String IMAGE_DIR = "net/rptools/maptool/client/image/";
   private static final String ICON_DIR = "net/rptools/maptool/client/icons/";
@@ -574,7 +575,6 @@ public class RessourceManager {
   public static void main(String[] args) {
     // checkMissingFiles();
     checkMissingIcons(classicIcons, rodIcons);
-    // for (var img : Set.of(images.values())) System.out.println(img);
   }
 
   private static void checkMissingIcons(

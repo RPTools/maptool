@@ -229,7 +229,6 @@ public class FTPClient {
         is = (ByteArrayInputStream) data.local;
       } else if (data.local instanceof InputStream) {
         is = (InputStream) data.local;
-        // System.err.println("is.available() = " + is.available());
       } else if (data.local instanceof String) {
         File file = new File((String) data.local);
         try {
@@ -266,16 +265,12 @@ public class FTPClient {
       /*
        * In this situation, "data.remote" is the OutputStream.
        */
-      // try {
       if (data.remoteDir != null) {
         cconn.mkdir(data.remoteDir.getPath());
         os = cconn.openUploadStream(data.remoteDir.getPath(), data.remote);
-      } else os = cconn.openUploadStream(data.remote);
-      // } catch (IOException e) {
-      // File file = new File(data.remoteDir, data.remote);
-      // log.error("Attempting to FTP_PUT local asset " + file.getPath());
-      // e.printStackTrace();
-      // }
+      } else {
+        os = cconn.openUploadStream(data.remote);
+      }
     } else {
       /*
        * In this situation, "data.local" is the OutputStream.
@@ -330,14 +325,14 @@ public class FTPClient {
         try {
           is.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error("Error while closing input stream", e);
         }
       }
       if (os != null) {
         try {
           os.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error("Error while closing output stream", e);
         }
       }
       uploadDone(data, false);

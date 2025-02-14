@@ -68,9 +68,12 @@ import net.rptools.maptool.model.library.token.LibTokenConverter;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.FunctionUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private static final long serialVersionUID = -622385975780832588L;
+  private static final Logger log = LogManager.getLogger(TokenPopupMenu.class);
 
   public TokenPopupMenu(
       Set<GUID> selectedTokenSet, int x, int y, ZoneRenderer renderer, Token tokenUnderMouse) {
@@ -449,7 +452,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         haloMenu.add(item);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while building halo color selection menu");
     }
     return haloMenu;
   }

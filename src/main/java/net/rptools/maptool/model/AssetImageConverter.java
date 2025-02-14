@@ -22,7 +22,6 @@ public class AssetImageConverter extends EncodedByteArrayConverter {
   @Override
   public void marshal(Object source, HierarchicalStreamWriter writer, MarshallingContext context) {
     // Ignore the image when creating 1.3.b65+ campaigns with assets...
-    // System.out.println(context.toString()); // uncomment to set a breakpoint
   }
 
   // @formatter:off

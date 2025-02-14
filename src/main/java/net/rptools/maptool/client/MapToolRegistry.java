@@ -151,7 +151,7 @@ public class MapToolRegistry {
       }
       return servers;
     } catch (IOException | NullPointerException e) {
-      e.printStackTrace(); // TODO:
+      log.error("Error while getting server list", e);
       return List.of(); // Return empty list
     }
   }

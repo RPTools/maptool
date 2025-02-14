@@ -269,7 +269,6 @@ public class SwingUtil {
     int x = flipHorizontal ? view.width - (rect.x + rect.width) : rect.x;
     int y = flipVertical ? view.height - (rect.y + rect.height) : rect.y;
 
-    // System.out.println(rect + " - " + new Rectangle(x, y, rect.width, rect.height));
     return new Rectangle(x, y, rect.width, rect.height);
   }
 

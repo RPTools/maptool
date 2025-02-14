@@ -385,7 +385,6 @@ public class FileUtil {
         String path = file.getAbsolutePath();
         file.getParentFile().mkdirs();
 
-        // System.out.println("Writing file: " + path);
         try (InputStream is = zipFile.getInputStream(entry);
             OutputStream os = new BufferedOutputStream(new FileOutputStream(path))) {
           IOUtils.copy(is, os);

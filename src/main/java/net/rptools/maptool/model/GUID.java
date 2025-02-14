@@ -166,13 +166,6 @@ public class GUID implements Serializable, Comparable<GUID> {
     return arg.length() != GUID.GUID_LENGTH * 2;
   }
 
-  public static void main(String[] args) {
-    for (int i = 0; i < 10; i++) {
-      GUID guid = new GUID();
-      System.out.println("insert into sys_guids values ('" + guid.toString() + "');");
-    }
-  }
-
   public int compareTo(@NotNull GUID o) {
     if (o != this) {
       for (int i = 0; i < GUID_LENGTH; i++) {
