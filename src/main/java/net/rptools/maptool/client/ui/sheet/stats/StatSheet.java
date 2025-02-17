@@ -54,6 +54,7 @@ public class StatSheet {
                     .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
             if (overlay != null) {
               overlay.updateContents(output, true);
+              overlay.setVisible(true);
             } else {
               MapTool.getFrame()
                   .getOverlayPanel()
@@ -79,6 +80,7 @@ public class StatSheet {
                   .getOverlayPanel()
                   .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
           if (overlay != null) {
+            overlay.setVisible(false);
             overlay.updateContents("", true);
           }
         });

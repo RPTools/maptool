@@ -504,7 +504,7 @@ public class TransferableHelper extends TransferHandler {
    * @param t Transferable to check
    * @return a list of all DataFlavor objects that succeeded
    */
-  // TODO The result is always ignored, this method is just used for informational logging now.
+  // The result is always ignored, this method is just used for informational logging now.
   private static List<DataFlavor> whichOnesWork(Transferable t) {
     List<DataFlavor> worked = new ArrayList<DataFlavor>();
 
@@ -529,14 +529,8 @@ public class TransferableHelper extends TransferHandler {
         }
       }
     }
-    // if (MapTool.MAC_OS_X)
-    // setOnOff(old);
     return worked;
   }
-
-  // private static void setOnOff(PrintStream old) {
-  // System.setOut(old);
-  // }
 
   private static final Class<?> validTypes[] = {
     java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class,
@@ -549,12 +543,9 @@ public class TransferableHelper extends TransferHandler {
   @Override
   public boolean importData(JComponent comp, Transferable t) {
     if (tokens != null) {
-      // tokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
       tokens = null;
     }
     if (configureTokens != null) {
-      // configureTokens.clear(); // will not help with memory cleanup and we may see unmodifiable
-      // lists here
       configureTokens = null;
     }
     if (log.isInfoEnabled()) whichOnesWork(t);
@@ -563,7 +554,6 @@ public class TransferableHelper extends TransferHandler {
     if (assets != null) {
       tokens = new ArrayList<Token>(assets.size());
       configureTokens = new ArrayList<Boolean>(assets.size());
-      // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
         if (working instanceof Asset asset) {
           if (asset.getType() == Type.MTLIB) {
@@ -587,14 +577,12 @@ public class TransferableHelper extends TransferHandler {
             }
           } else {
             Token token = new Token(asset.getName(), asset.getMD5Key());
-            // token.setName(MapToolUtil.nextTokenId(zone, token));
             tokens.add(token);
             // A token from an image asset needs additional configuration.
             configureTokens.add(true);
           }
         } else if (working instanceof Token) {
           Token token = new Token((Token) working);
-          // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an .rptok file is already fully configured.
           configureTokens.add(false);

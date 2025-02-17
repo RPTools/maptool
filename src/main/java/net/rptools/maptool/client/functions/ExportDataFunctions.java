@@ -107,8 +107,6 @@ public class ExportDataFunctions extends AbstractFunction {
       String envName = parameters.get(0).toString();
       String value = System.getenv(envName);
 
-      // System.out.format("%s=%s%n", envName, value);
-      // System.out.format("%s is not assigned.%n", envName);
       return Objects.requireNonNullElse(value, "");
     }
 

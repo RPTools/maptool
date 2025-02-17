@@ -100,7 +100,7 @@ public class AppStatePersisted {
 
   public static Set<File> getAssetRoots() {
     String list = prefs.get(KEY_ASSET_ROOTS, "");
-    String[] roots = list.split(";"); // FJE Probably should be File.path_separator ...
+    String[] roots = list.split(";");
 
     var rootList = new HashSet<File>();
     for (String root : roots) {

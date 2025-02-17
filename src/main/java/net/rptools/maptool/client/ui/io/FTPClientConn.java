@@ -56,7 +56,6 @@ class FTPClientConn {
    * <p>Note that the directory separator may be "/" locally and in URLs, but FTP servers are not
    * required to support it. This means that we really should be starting at the top of the tree and
    * issuing <code>cd()</code> calls for the entire pathname, creating any that fail along the way.
-   * Too much work for now. FIXME
    *
    * @param dir the full pathname to the directory to create
    * @return success or failure
@@ -85,7 +84,6 @@ class FTPClientConn {
    * <p>Note that the directory separator may be "/" locally and in URLs, but FTP servers are not
    * required to support it. This means that we really should be starting at the top of the tree and
    * issuing <code>cd()</code> calls for the entire pathname, creating any that fail along the way.
-   * Too much work for now. FIXME
    *
    * @param filename the full pathname to the file to remove
    * @return success or failure

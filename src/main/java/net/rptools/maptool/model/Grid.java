@@ -228,8 +228,6 @@ public abstract class Grid implements Cloneable {
   @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
-    // Grid newGrid = (Grid) super.clone();
-    // return newGrid;
   }
 
   /**

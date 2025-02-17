@@ -680,7 +680,6 @@ public abstract class HexGrid extends Grid {
      * @return a {@link Shape} representing one slice of the 6-slice pie </div>
      */
     public Shape getFogAreaToCheck(int dir) {
-      // pieSlices = null; // debugging -- forces the following IF statement to always be true
       if (pieSlices == null) {
         double[][] coords = {
           {0, 0, -114, 0, -57, -100}, // NW

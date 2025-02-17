@@ -39,6 +39,7 @@ import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 
 public class LightSyntax {
+
   private static final int DEFAULT_LUMENS = 100;
 
   public Map<GUID, LightSource> parseLights(String text, Iterable<LightSource> original) {
@@ -163,7 +164,6 @@ public class LightSyntax {
       for (Light light : lightSource.getLightList()) {
         final var parameters = new HashMap<>();
 
-        // TODO: This HAS to change, the lights need to be auto describing, this hard wiring sucks
         if (lightSource.getType() == LightSource.Type.AURA) {
           parameters.put("GM", light.isGM());
           parameters.put("OWNER", light.isOwnerOnly());
@@ -256,7 +256,7 @@ public class LightSyntax {
     List<Light> lights = new ArrayList<>();
     // endregion
     // region Individual light properties
-    ShapeType shape = ShapeType.CIRCLE; // TODO: Make a preference for default shape
+    ShapeType shape = ShapeType.CIRCLE;
     double width = 0;
     double arc = 0;
     double offset = 0;
@@ -323,7 +323,6 @@ public class LightSyntax {
         String key = arg.substring(0, split);
         String value = arg.substring(split + 1);
 
-        // TODO: Make this a generic map to pass instead of 'arc'
         if ("arc".equalsIgnoreCase(key)) {
           try {
             arc = StringUtil.parseDecimal(value);

@@ -289,7 +289,6 @@ public final class WallTopology implements Topology {
   public void removeWall(Wall wall) {
     var removedWall = graph.removeEdge(wall.from(), wall.to());
     if (removedWall != null) {
-      // TODO More efficient would be to just check the specific vertices of the edge.
       removeDanglingVertices();
     }
   }

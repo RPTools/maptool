@@ -52,7 +52,6 @@ public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
     @Override
     protected URLConnection openConnection(URL u) {
 
-      // TODO: This should really figure out the exact type
       return new ImageURLConnection(u);
     }
   }

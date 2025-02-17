@@ -138,7 +138,6 @@ public class ProgressBarList extends JDialog implements ChangeListener {
         // New FTO that's not being shown yet...
         bar = new JProgressBar();
         bar.setStringPainted(true);
-        // bar.setString(fto.remoteDir + fto.remote);
         bar.setMaximum(fto.maximumPosition);
         bars.put(fto, bar);
         progressBars.add(bar);

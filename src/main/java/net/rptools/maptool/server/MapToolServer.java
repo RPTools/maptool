@@ -63,6 +63,7 @@ import org.apache.logging.log4j.Logger;
  * @author drice
  */
 public class MapToolServer {
+
   private static final Logger log = LogManager.getLogger(MapToolServer.class);
   private static final int ASSET_CHUNK_SIZE = 5 * 1024;
 
@@ -433,7 +434,6 @@ public class MapToolServer {
           heartbeatThread = new HeartbeatThread(port);
           heartbeatThread.start();
         }
-        // TODO: I don't like this
       } catch (Exception e) {
         MapTool.showError("msg.error.failedCannotRegisterServer", e);
       }
@@ -473,6 +473,7 @@ public class MapToolServer {
   }
 
   private class HeartbeatThread extends Thread {
+
     private static final Random random = new Random();
 
     private final int port;
@@ -561,9 +562,10 @@ public class MapToolServer {
     }
   }
 
-  ////
+  /// /
   // CLASSES
   private class AssetProducerThread extends Thread {
+
     private final AtomicBoolean stop = new AtomicBoolean(false);
 
     public AssetProducerThread() {

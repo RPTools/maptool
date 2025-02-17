@@ -219,9 +219,6 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // Evaluates the content of the json
     JsonObject newVals = JSONMacroFunctions.getInstance().jsonEvaluate(vals, res).getAsJsonObject();
 
-    // FJE Should we remove the keys as we process them? We could then warn the user
-    // if there are still keys in the hash at the end...
-
     // Update the Token Name.
     if (newVals.has("name")) {
       if (newVals.get("name").getAsString().equals("")) {
@@ -378,12 +375,10 @@ public class TokenCopyDeleteFunctions extends AbstractFunction {
     // Facing
     if (newVals.has("facing")) {
       token.setFacing(newVals.get("facing").getAsInt());
-      // MapTool.getFrame().getCurrentZoneRenderer().flushLight(); // FJE Already part of
-      // copyToken()
     }
 
     // Size
-    if (newVals.has("size")) { // FJE ... && token.isSnapToScale()) {
+    if (newVals.has("size")) {
       String size = newVals.get("size").getAsString();
       if (size.equalsIgnoreCase("native") || size.equalsIgnoreCase("free")) {
         token.setSnapToScale(false);

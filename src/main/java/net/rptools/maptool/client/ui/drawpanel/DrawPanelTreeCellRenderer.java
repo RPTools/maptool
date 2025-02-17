@@ -62,8 +62,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
     } else if (value instanceof DrawPanelTreeModel.View) {
       DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
       text = view.getLayer().toString();
-    } else {
-      // setLeafIcon(null);
     }
 
     super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);

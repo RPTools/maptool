@@ -54,8 +54,6 @@ public class ChatAutoSave {
             log.debug("Chat log autosave countdown complete from {}", timeout); // $NON-NLS-1$
             if (chatlog == null) {
               String filename = AppPreferences.chatFilenameFormat.get();
-              // FJE Ugly kludge to replace older default entry with newer default
-              // TODO This is going into 1.3.b77 so remove it in 3-4 builds
               if ("chatlog.html".equals(filename)) { // $NON-NLS-1$
                 AppPreferences.chatFilenameFormat.remove();
                 filename = AppPreferences.chatFilenameFormat.get();

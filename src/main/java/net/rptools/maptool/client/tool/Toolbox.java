@@ -135,7 +135,6 @@ public class Toolbox {
       if (currentRenderer != null) {
         // We have a renderer at this point so we can figure out the grid type and add its
         // keystrokes to the PointerTool.
-        // currentTool.addGridBasedKeys(currentRenderer, true);
         currentTool.addListeners(currentRenderer);
         currentTool.attachTo(currentRenderer);
 
@@ -149,7 +148,6 @@ public class Toolbox {
   private void detach() {
     if (currentTool != null && currentRenderer != null) {
       currentTool.removeListeners(currentRenderer);
-      // currentTool.addGridBasedKeys(currentRenderer, false);
       currentTool.detachFrom(currentRenderer);
 
       if (currentTool instanceof ZoneOverlay) {

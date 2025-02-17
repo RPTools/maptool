@@ -658,7 +658,6 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
   }
 
   public static String[] getFontColors() {
-    // return (String[]) HTMLColors.toArray();
     String[] array = MapToolUtil.getColorNames().toArray(new String[0]);
     return array;
   }
@@ -819,7 +818,6 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     toolTip = "";
   }
 
-  // TODO: may have to rewrite hashcode and equals to only take index into account
   @Override
   public boolean equals(Object o) {
     if (this == o) {

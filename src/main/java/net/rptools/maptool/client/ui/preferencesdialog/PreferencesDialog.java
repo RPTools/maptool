@@ -306,7 +306,6 @@ public class PreferencesDialog extends JDialog {
   /** Text field for the default username when not logged into a server. */
   private final JTextField defaultUsername;
 
-  // private final JCheckBox initEnableServerSyncCheckBox;
   /** Checkbox for if non-player characters should be hidden when creating a new map. */
   private final JCheckBox hideNPCs;
 
@@ -1155,7 +1154,6 @@ public class PreferencesDialog extends JDialog {
           protected void storeSpinnerValue(int value) {
             AppPreferences.fogOverlayOpacity.set(value);
 
-            // FIXME Force ModelChange event to flush fog from zone :(
             Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
             zone.setHasFog(zone.hasFog());
             MapTool.getFrame().refresh();
@@ -1546,7 +1544,6 @@ public class PreferencesDialog extends JDialog {
     fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());
     frameRateCapTextField.setText(Integer.toString(AppPreferences.frameRateCap.get()));
     defaultUsername.setText(AppPreferences.defaultUserName.get());
-    // initEnableServerSyncCheckBox.setSelected(AppPreferences.getInitEnableServerSync());
     autoSaveSpinner.setValue(AppPreferences.autoSaveIncrement.get());
     loadMRUcheckbox.setSelected(AppPreferences.loadMruCampaignAtStart.get());
     newMapsHaveFOWCheckBox.setSelected(AppPreferences.newMapsHaveFow.get());

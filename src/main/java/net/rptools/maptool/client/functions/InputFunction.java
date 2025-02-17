@@ -1032,7 +1032,6 @@ public class InputFunction extends AbstractFunction {
     InputPanel ip = new InputPanel(varSpecs);
 
     // Calculate the height
-    // TODO: remove this workaround
     int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
     int maxHeight = screenHeight * 3 / 4;
     Dimension ipPreferredDim = ip.getPreferredSize();
@@ -1182,9 +1181,6 @@ public class InputFunction extends AbstractFunction {
     }
 
     return BigDecimal.ONE; // success
-
-    // for debugging:
-    // return debugOutput(varSpecs);
   }
 
   /**

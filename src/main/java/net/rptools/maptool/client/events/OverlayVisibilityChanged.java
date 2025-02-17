@@ -12,8 +12,8 @@
  * <http://www.gnu.org/licenses/> and specifically the Affero license
  * text at <http://www.gnu.org/licenses/agpl.html>.
  */
-package net.rptools.maptool.model.tokens;
+package net.rptools.maptool.client.events;
 
-import net.rptools.maptool.model.Token;
+import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 
-public record TokenPanelChanged(Token token) {}
+public record OverlayVisibilityChanged(HTMLOverlayManager overlay, boolean isVisible) {}

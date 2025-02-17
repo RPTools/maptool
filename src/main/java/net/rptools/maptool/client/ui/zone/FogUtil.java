@@ -341,15 +341,6 @@ public class FogUtil {
 
     for (Token token : tokList) tokenSet.add(token.getId());
 
-    /*
-     * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
-     * Role.GM;
-     *
-     * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
-     *
-     * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
-     */
-
     renderer.getZone().clearExposedArea(tokenSet);
     exposeVisibleArea(renderer, tokenSet, true);
   }
@@ -459,9 +450,7 @@ public class FogUtil {
   }
 
   /**
-   * Find the center point of a vision TODO: This is a horrible horrible method. the API is just
-   * plain disgusting. But it'll work to consolidate all the places this has to be done until we can
-   * encapsulate it into the vision itself.
+   * Find the center point of a vision
    *
    * @param token the token to get the vision center of.
    * @param zone the Zone where the token is.

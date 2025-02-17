@@ -34,7 +34,6 @@ import net.rptools.maptool.util.PersistenceUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// TODO So much of this is also in AssetDirectory. Consolidate them.
 public class PdfAsDirectory extends Directory {
 
   public static final String PROPERTY_IMAGE_LOADED = "imageLoaded";
@@ -84,7 +83,6 @@ public class PdfAsDirectory extends Directory {
         try {
           return future.get() != INVALID_IMAGE ? future.get() : null;
         } catch (InterruptedException | ExecutionException e) {
-          // TODO: need to indicate a broken image
           return null;
         }
       }
@@ -115,6 +113,7 @@ public class PdfAsDirectory extends Directory {
   }
 
   private class ImageLoader implements Callable<Image> {
+
     private final File imageFile;
 
     public ImageLoader(File imageFile) {
@@ -132,8 +131,6 @@ public class PdfAsDirectory extends Directory {
         if (imageFile.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
           thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
         } else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
-          // Jamz: Added to mark all PDF assets with proper image,
-          // TODO: Move image asset to proper location
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
         } else {
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);

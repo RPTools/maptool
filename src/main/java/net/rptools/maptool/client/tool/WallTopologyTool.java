@@ -522,11 +522,6 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
       result.quadTo(-0.75 * halfHeight, 0, -halfHeight, -halfHeight);
       result.closePath();
 
-      //      result.moveTo(-halfHeight, -halfHeight);
-      //      result.lineTo(0, 0);
-      //      result.lineTo(-halfHeight, halfHeight);
-      //      result.lineTo(-0.75 * halfHeight, 0);
-      //      result.closePath();
       return result;
     }
   }
@@ -564,7 +559,6 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
           // Grabbed blank space. Start a new wall, unless the delete modifier is held.
           if (!SwingUtil.isShiftDown(event)) {
             var newWall = rig.addDegenerateWall(snapMode.snap(point));
-            // TODO Why do we pass the snapped position rather than the original mouse point?
             tool.setWallPropertiesFromConfigPanel(newWall.getSource());
             tool.setSelectedWall(newWall.getSource());
             tool.changeToolMode(
@@ -602,7 +596,6 @@ public class WallTopologyTool extends DefaultTool implements ZoneOverlay {
 
     @Override
     public Paint getHandleFill(Handle<Vertex> handle) {
-      // TODO Blue if alt is down.
       if (currentElement != null && currentElement.isForSameElement(handle)) {
         return Color.green;
       }

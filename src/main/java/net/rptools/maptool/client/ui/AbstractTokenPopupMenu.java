@@ -424,7 +424,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
 
   public class ResetSizeAction extends AbstractAction {
     public ResetSizeAction() {
-      // putValue(Action.NAME, tokenUnderMouse.isStamp() ? "Free Size" : "Native Size");
       putValue(Action.NAME, I18N.getText("token.popup.menu.size.reset"));
     }
 
@@ -535,8 +534,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         if (token.getGMName() == null) tokenNameGM = tokenName;
         else if (token.getGMName().trim().isEmpty()) tokenNameGM = tokenName;
         else tokenNameGM = token.getGMName();
-
-        // chooser.setCurrentDirectory(AppPreferences.getSaveDir());
 
         final JFileChooser chooser = MapTool.getFrame().getSaveTokenFileChooser();
         final File defaultFile =
@@ -932,7 +929,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         MapTool.getFrame().updateTokenTree();
         MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
 
-        // TODO: Need a better way of indicating local changes
         renderer.getZone().putToken(token);
       }
       renderer.repaint();

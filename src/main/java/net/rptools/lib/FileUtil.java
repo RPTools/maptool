@@ -153,10 +153,6 @@ public class FileUtil {
     String file = url.getFile();
     try {
       file = url.toURI().getPath();
-      // int beginning = file.lastIndexOf(File.separatorChar); // Don't need to strip the path since
-      // the File()
-      // constructor will take care of that
-      // file = file.substring(beginning < 0 ? 0 : beginning + 1);
     } catch (URISyntaxException e) {
       // If the conversion doesn't work, ignore it and use the original file name.
     }

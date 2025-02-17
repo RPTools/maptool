@@ -168,7 +168,6 @@ public class MacroButton extends JButton implements MouseListener {
     String newMinWidth = properties.getMinWidth();
     if (newMinWidth != null && !newMinWidth.equals("")) {
       return " width:" + newMinWidth + ";";
-      // return " min-width:"+newMinWidth+";";
     }
     return "";
   }

@@ -93,7 +93,6 @@ public class GenericDialog extends JDialog {
   }
 
   public void closeDialog() {
-    // XXX Doesn't do anything useful and breaks OpenJDK: setVisible(false);
     dispose();
   }
 

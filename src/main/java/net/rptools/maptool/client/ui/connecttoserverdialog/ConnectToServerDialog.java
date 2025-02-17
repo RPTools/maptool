@@ -53,6 +53,7 @@ import yasb.Binder;
  */
 public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPreferences>
     implements MapToolServiceFinder.MapToolAnnouncementListener {
+
   private static MapToolServiceFinder finder = MapToolServiceFinder.getInstance();
 
   private GenericDialog dialog;
@@ -201,7 +202,9 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
                   JTable rem = getRemoteServerTable();
                   getServerNameTextField()
                       .setText(rem.getModel().getValueAt(rem.getSelectedRow(), 0).toString());
-                  if (e.getClickCount() == 2) handleOK();
+                  if (e.getClickCount() == 2) {
+                    handleOK();
+                  }
                 }
               }
             });
@@ -290,7 +293,6 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       ServerInfo info = (ServerInfo) getLocalServerList().getSelectedValue();
       connectionDetails = info.config;
     } else if (SwingUtil.hasComponent(selectedPanel, "directPanel")) {
-      // TODO: put these into a validation method
       if (getPortTextField().getText().length() == 0) {
         MapTool.showError("ServerDialog.error.port");
         return;
@@ -339,7 +341,9 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
                 "ConnectToServerDialog.warning.doNotUseExternalAddress",
                 I18N.getString("menu.file"),
                 I18N.getString("action.showConnectionInfo"));
-        if (!yes) return;
+        if (!yes) {
+          return;
+        }
       }
     } catch (UnknownHostException e) {
       // If an exception occurs, don't bother doing the comparison. But otherwise it's not an error.
@@ -360,6 +364,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   }
 
   private static class RemoteServerTableModel extends AbstractTableModel {
+
     private final List<String[]> data;
 
     public RemoteServerTableModel(List<String> encodedData) {
@@ -407,6 +412,7 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
   }
 
   private static class ServerInfo {
+
     @Nonnull String id;
     @Nonnull RemoteServerConfig.Socket config;
 

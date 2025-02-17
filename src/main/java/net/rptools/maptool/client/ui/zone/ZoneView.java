@@ -47,6 +47,7 @@ import org.apache.logging.log4j.Logger;
 
 /** Responsible for calculating lights and vision. */
 public class ZoneView {
+
   /**
    * Represents the important aspects of a sight for the purposes of calculating illumination.
    *
@@ -550,7 +551,6 @@ public class ZoneView {
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
-    // TODO Instead of a defensive copy, we could include a very stern warning to not modify.
     return new Area(tokenVisibleArea);
   }
 
@@ -581,8 +581,6 @@ public class ZoneView {
 
     tokenVisionCache.put(token.getId(), litArea);
 
-    // log.info("getVisibleArea: \t\t" + stopwatch);
-
     return litArea;
   }
 
@@ -606,10 +604,6 @@ public class ZoneView {
                 if ((!token.isVisible()) && !view2.isGMView()) {
                   continue;
                 }
-                // TODO This playerOwns check is not view-reactive. Specifically it always
-                //  returns true for GMs, even if !view2.isGMView(). Somehow want to check against
-                //  MapTool.getServerPolicy().useStrictTokenManagement() but not
-                //  MapTool.getPlayer().isGM().
                 if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                   continue;
                 }
@@ -772,7 +766,6 @@ public class ZoneView {
     }
     tokenVisibleAreaCache.remove(token.getId());
 
-    // TODO Split logic for light and sight, since the sight portion is entirely duplicated.
     final var modelsWithToken =
         illuminationModels.values().stream()
             .filter(model -> model.hasToken(token.getId()))
@@ -784,11 +777,9 @@ public class ZoneView {
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
-      // TODO Could we instead only clear those views that include the token?
       drawableLights.clear();
     } else if (token.getHasSight()) {
       contributedPersonalLightsByToken.remove(token.getId());
-      // TODO Could we instead only clear those views that include the token?
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
@@ -839,12 +830,11 @@ public class ZoneView {
   private boolean flushExistingTokens(List<Token> tokens) {
     boolean tokenChangedTopology = false;
     for (Token token : tokens) {
-      if (token.hasAnyMaskTopology()) tokenChangedTopology = true;
+      if (token.hasAnyMaskTopology()) {
+        tokenChangedTopology = true;
+      }
       flush(token);
     }
-    // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
-    // cleared on another token, changes aren't pushed to client?
-    // tokenVisionCache.clear();
     return tokenChangedTopology;
   }
 

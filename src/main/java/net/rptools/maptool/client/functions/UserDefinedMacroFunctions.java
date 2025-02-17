@@ -139,8 +139,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
     } finally {
       currentFunction.pop();
     }
-    // resolver.setVariable("macro.return", newResolver
-    // .getVariable("macro.return"));
 
     if (funcDef.ignoreOutput) {
       return resolver.getVariable("macro.return");
@@ -201,7 +199,6 @@ public class UserDefinedMacroFunctions implements Function, AdditionalFunctionDe
       FunctionRedefinition fr = new FunctionRedefinition();
       fr.function = parser.getFunction(name);
       fr.functionName = name;
-      // fr.description = "<html>This is a test doc!</html>";
 
       if (isFunctionDefined(name)) {
         // If it is already defined as what this then do nothing...

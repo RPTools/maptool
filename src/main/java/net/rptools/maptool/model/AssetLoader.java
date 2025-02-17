@@ -288,7 +288,6 @@ public class AssetLoader {
           MD5Key sum = new MD5Key(data);
           if (!sum.equals(id)) {
             // Bad file
-            // TODO: Does this mean it's time to update our cache of the index.gz?
             // (See hasCurrentIndexFile() for the comment there.)
             log.warn("Downloaded invalid file from: {}", path);
 

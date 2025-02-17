@@ -52,19 +52,12 @@ public class MRUCampaignManager {
    * @param newCampaign the campaign to add to the most recently used list.
    */
   public void addMRUCampaign(File newCampaign) {
-    // FIXME (this coupling is too tight; change the calling function to avoid this call entirely)
     // don't add the autosave recovery file until it is resaved
     if (newCampaign == AutoSaveManager.AUTOSAVE_FILE) return;
 
     if (mruCampaigns.isEmpty()) {
       mruCampaigns.add(newCampaign);
     } else {
-      // This code would be much simpler, but too late in the 1.3 cycle for this change.
-      // LinkedList<File> newMruList = new LinkedList<File>(mruCampaigns);
-      // newMruList.removeFirstOccurrence(newCampaign);
-      // newMruList.addFirst(newCampaign);
-      // while (newMruList.size() > DEFAULT_MAX_MRU)
-      // newMruList.removeLast();
       ArrayList<File> newMruList = new ArrayList<File>(DEFAULT_MAX_MRU + 1);
       newMruList.add(newCampaign);
       for (File next : mruCampaigns) {

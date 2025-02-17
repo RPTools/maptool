@@ -143,7 +143,6 @@ public class MapTool {
 
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
-  // TODO: Add preferences option as well as add auto-purge after x days preferences
   private static final Dimension THUMBNAIL_SIZE =
       new Dimension(AppPreferences.thumbnailSize.get(), AppPreferences.thumbnailSize.get());
 
@@ -364,11 +363,7 @@ public class MapTool {
    * @return <code>true</code> if the user clicks the OK button, <code>false</code> otherwise
    */
   public static boolean confirm(String message, Object... params) {
-    // String msg = I18N.getText(message, params);
-    // log.debug(message);
     String title = I18N.getText("msg.title.messageDialogConfirm");
-    // return JOptionPane.showConfirmDialog(clientFrame, msg, title, JOptionPane.OK_OPTION) ==
-    // JOptionPane.OK_OPTION;
     return confirmImpl(title, JOptionPane.OK_OPTION, message, params) == JOptionPane.OK_OPTION;
   }
 
@@ -545,13 +540,9 @@ public class MapTool {
   }
 
   public static boolean isInFocus() {
-    // TODO: This should probably also check owned windows
     return getFrame().isFocused();
   }
 
-  // TODO: This method is redundant now. It should be rolled into the
-  // TODO: ExportDialog screenshot method. But until that has proven stable
-  // TODO: for a while, I don't want to mess with this. (version 1.3b70 is most recent)
   public static BufferedImage takeMapScreenShot(final PlayerView view) {
     final ZoneRenderer renderer = clientFrame.getCurrentZoneRenderer();
     if (renderer == null) {
@@ -695,9 +686,6 @@ public class MapTool {
     chatAutoSave = new ChatAutoSave();
     chatAutoSave.setTimeout(AppPreferences.chatAutoSaveTimeInMinutes.get());
     AppPreferences.chatAutoSaveTimeInMinutes.onChange(chatAutoSave::setTimeout);
-
-    // TODO: make this more formal when we switch to mina
-    new ServerHeartBeatThread().start();
   }
 
   public static NoteFrame getProfilingNoteFrame() {
@@ -1372,7 +1360,6 @@ public class MapTool {
    * @return {@code true} if the campaign file has changed, otherwise {@code false}.
    */
   public static boolean isCampaignDirty() {
-    // TODO: This is a very naive check, but it's better than nothing
     if (getCampaign().getZones().size() == 1) {
       Zone singleZone = MapTool.getCampaign().getZones().get(0);
       if (ZoneFactory.DEFAULT_MAP_NAME.equals(singleZone.getName()) && singleZone.isEmpty()) {
@@ -1402,30 +1389,6 @@ public class MapTool {
 
   public static String getClientId() {
     return clientId;
-  }
-
-  private static class ServerHeartBeatThread extends Thread {
-    public ServerHeartBeatThread() {
-      super("MapTool.ServerHeartBeatThread");
-    }
-
-    @Override
-    public void run() {
-
-      // This should always run, so we should be able to safely
-      // loop forever
-      while (true) {
-        try {
-          Thread.sleep(20000);
-        } catch (InterruptedException e) {
-          log.warn("Heartbeat thread interrupted", e);
-          // TODO Doesn't this mean we should shutdown?
-        }
-
-        ServerCommand command = client.getServerCommand();
-        command.heartbeat(getPlayer().getName());
-      }
-    }
   }
 
   /**
@@ -1732,13 +1695,9 @@ public class MapTool {
       // That is, please don't move these lines around unless you test the result on windows
       // and mac
       if (AppUtil.MAC_OS_X) {
-        // UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
-
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
       } else {
-        // UIManager.setLookAndFeel(AppUtil.LOOK_AND_FEEL_NAME);
         menuBar = new AppMenuBar();
       }
 
@@ -1815,6 +1774,5 @@ public class MapTool {
                 EventQueue.invokeLater(MapTool::postInitialize);
               });
         });
-    // new Thread(new HeapSpy()).start();
   }
 }

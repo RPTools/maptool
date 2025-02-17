@@ -403,18 +403,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     statusPanel.addPanel(getZoomStatusBar());
     statusPanel.addPanel(getPlayersLoadingStatusBar());
     statusPanel.addPanel(MemoryStatusBar.getInstance());
-    // statusPanel.addPanel(progressBar);
     statusPanel.addPanel(connectionStatusPanel);
     statusPanel.addPanel(activityMonitor);
     statusPanel.addPanel(new SpacerStatusBar(25));
 
     zoneMiniMapPanel = new ZoneMiniMapPanel();
-    // zoneMiniMapPanel.setSize(100, 100);
 
     zoneRendererPanel = new JPanel(new PositionalLayout(5));
     zoneRendererPanel.setBackground(Color.black);
-    // zoneRendererPanel.add(zoneMiniMapPanel, PositionalLayout.Position.SE);
-    // zoneRendererPanel.add(getChatTypingLabel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatTypingPanel(), PositionalLayout.Position.NW);
     zoneRendererPanel.add(getChatActionLabel(), PositionalLayout.Position.SW);
 
@@ -449,7 +445,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     glassPaneComposite.add(dragImageGlassPane, constraints);
 
     setGlassPane(glassPane);
-    // setGlassPane(glassPaneComposite);
 
     glassPaneComposite.setVisible(true);
 
@@ -1148,8 +1143,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     glassPane.removeAll();
     glassPane.setLayout(new GridLayout());
     glassPane.add(component);
-    // glassPane.setActionMap(null);
-    // glassPane.setInputMap(JComponent.WHEN_ANCESTOR_OF_FOCUSED_COMPONENT, null);
     glassPane.setVisible(true);
   }
 
@@ -1162,7 +1155,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
     if (chatTypingPanel == null) {
       chatTypingPanel = new ChatTypingNotification();
       chatTypingPanel.setOpaque(false);
-      chatTypingPanel.setSize(220, 100); // FIXME change to variable width
+      chatTypingPanel.setSize(220, 100);
       chatTypingPanel.setEnabled(true);
       chatTypingPanel.setVisible(false); // Only visible when there are notifications to display
     }
@@ -1366,10 +1359,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     tree.addMouseListener(
         new MouseAdapter() {
-          // TODO: Make this a handler class, not an aic
           @Override
           public void mousePressed(MouseEvent e) {
-            // tree.setSelectionPath(tree.getPathForLocation(e.getX(), e.getY()));
             TreePath path = tree.getPathForLocation(e.getX(), e.getY());
             if (path == null) {
               return;
@@ -1470,19 +1461,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
         new MouseAdapter() {
           @Override
           public void mouseReleased(MouseEvent e) {
-            // TODO use for real popup logic
-            // if (SwingUtilities.isLeftMouseButton(e)) {
-            // if (e.getClickCount() == 2) {
-            //
-            // List<Object> idList = panel.getSelectedIds();
-            // if (idList == null || idList.size() == 0) {
-            // return;
-            // }
-            //
-            // final int index = (Integer) idList.get(0);
-            // createZone(panel.getAsset(index));
-            // }
-            // }
             if (SwingUtilities.isRightMouseButton(e) && MapTool.getPlayer().isGM()) {
               List<Object> idList = panel.getSelectedIds();
               if (idList == null || idList.size() == 0) {
@@ -1606,7 +1584,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   }
 
   public List<ZoneRenderer> getZoneRenderers() {
-    // TODO: This should prob be immutable
     return zoneRendererList;
   }
 
@@ -1689,10 +1666,8 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
       ImageManager.flush(renderer.getZone().getAllAssetIds());
     } else {
       ImageManager.flush();
-      // zoneRendererList.remove(currentRenderer);
     }
     // Handle new renderers
-    // TODO: should this be here ?
     if (renderer != null && !zoneRendererList.contains(renderer)) {
       zoneRendererList.add(renderer);
     }
@@ -2039,9 +2014,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 "msg.confirm.saveCampaign",
                 (Object[]) null);
-        // int result = JOptionPane.showConfirmDialog(MapTool.getFrame(),
-        // I18N.getText("msg.confirm.saveCampaign"), I18N.getText("msg.title.saveCampaign"),
-        // JOptionPane.YES_NO_CANCEL_OPTION);
 
         if (result == JOptionPane.CANCEL_OPTION || result == JOptionPane.CLOSED_OPTION) {
           return;
@@ -2104,8 +2076,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
   public void windowDeactivated(WindowEvent e) {}
 
   // Windows OS defaults F10 to the menu bar, noooooo!! We want for macro buttons.
-  // XXX Shouldn't this keystroke be configurable via the properties file anyway?
-  // XXX Doesn't work for Mac OSX and isn't called in that case.
   private void removeWindowsF10() {
     InputMap imap = menuBar.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW);
     Object action = imap.get(KeyStroke.getKeyStroke("F10"));
@@ -2164,8 +2134,6 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     if (c.getActionMap().keys() != null) {
       for (Object o : c.getActionMap().keys()) {
-        // We're looking for MacroButton here, but we're adding AbstractActions below... Is this
-        // right? XXX
         if (o instanceof MacroButton) {
           log.debug("Removing MacroButton {}", ((MacroButton) o).getButtonText());
           c.getActionMap().remove(o);

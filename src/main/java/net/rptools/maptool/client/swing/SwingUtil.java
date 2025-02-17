@@ -136,7 +136,6 @@ public class SwingUtil {
     int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
     // Jamz: For multiple monitor's, x & y can be negative values...
-    // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
     innerWindow.setLocation(x, y);
   }
 

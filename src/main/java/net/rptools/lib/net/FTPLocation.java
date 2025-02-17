@@ -83,7 +83,6 @@ public class FTPLocation implements Location {
   }
 
   public InputStream getContent() throws IOException {
-    // return composeURL().openConnection().getInputStream();
     return new URL(composeFileLocation()).openConnection().getInputStream();
   }
 

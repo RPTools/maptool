@@ -63,13 +63,11 @@ public class TokenPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       }
 
       // Make a thumbnail of the image
-      // TODO: This could be cached somehow, right now it's quick enough though
       BufferedImage tokenImage = ImageManager.getImage(token.getImageAssetId(), this);
       Dimension dim = new Dimension(tokenImage.getWidth(), tokenImage.getHeight());
       SwingUtil.constrainTo(dim, height);
 
       Graphics2D g = (Graphics2D) image.getGraphics();
-      // TODO: Center the image
       g.setComposite(
           AlphaComposite.getInstance(AlphaComposite.SRC_OVER, deemphasize ? 0.5F : 1.0F));
       g.drawImage(tokenImage, 0, 0, dim.width, dim.height, this);

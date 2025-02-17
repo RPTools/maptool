@@ -88,7 +88,7 @@ public class StrPropFunctions extends AbstractFunction {
     if (delim.equals("")) {
       delimPatt = ";";
     } else {
-      delimPatt = fullyQuoteString(delim); // XXX Why are we not using \\Q...\\E instead?
+      delimPatt = fullyQuoteString(delim);
     }
     // Changed to allow spaces within keys, although spaces on either end of keys or
     // values will be trimmed. http://forums.rptools.net/viewtopic.php?f=3&t=23841
@@ -102,7 +102,6 @@ public class StrPropFunctions extends AbstractFunction {
     Matcher entryMatcher = entryParser.matcher(props);
     while (entryMatcher.find()) {
       if (!lastEntry) {
-        // String entry = entryMatcher.group();
         String entry = entryMatcher.group(1);
         if (entry == null) {
           entry = entryMatcher.group(2);
@@ -112,7 +111,6 @@ public class StrPropFunctions extends AbstractFunction {
           // so this flag will prevent that.
           lastEntry = true;
         }
-        // private static final String keyValuePatt = "([\\w .]+)=(.*)";
         Matcher keyValueMatcher = keyValueParser.matcher(entry);
         if (keyValueMatcher.find()) {
           String propKey = keyValueMatcher.group(1).trim();

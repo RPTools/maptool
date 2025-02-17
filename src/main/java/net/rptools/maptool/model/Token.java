@@ -416,12 +416,6 @@ public class Token implements Cloneable {
     y = token.y;
     z = token.z;
 
-    // These properties shouldn't be transferred, they are more transient and relate to token
-    // history, not to new tokens
-    // lastX = token.lastX;
-    // lastY = token.lastY;
-    // lastPath = token.lastPath;
-
     snapToScale = token.snapToScale;
     width = token.width;
     height = token.height;
@@ -552,10 +546,7 @@ public class Token implements Cloneable {
     lastX = lastY = 0;
     // lightSourceList?
     macroMap = null;
-    // macroPropertiesMap = null;
     ownerList.clear();
-    // propertyMapCI = null;
-    // propertyType = "Basic";
     /**
      * Lee: why shouldn't propertyType be set to what the framework uses? In case of multiple
      * propertyType, give a choice; or incorporate in the Campaign Properties window a marker for
@@ -877,7 +868,7 @@ public class Token implements Cloneable {
    * @return null or angle in degrees
    */
   public int getFacing() {
-    // -90° is natural alignment. TODO This should really be a per grid setting
+    // -90° is natural alignment.
     return facing == null ? -90 : facing;
   }
 
@@ -1584,9 +1575,6 @@ public class Token implements Cloneable {
         // Center it on the footprint
         footprintBounds.x -= (w - footprintBounds.width) / 2;
         footprintBounds.y -= (h - footprintBounds.height) / 2;
-      } else {
-        // footprintBounds.x -= zone.getGrid().getSize()/2;
-        // footprintBounds.y -= zone.getGrid().getSize()/2;
       }
     }
     footprintBounds.width = (int) w; // perhaps make this a double
@@ -1852,16 +1840,6 @@ public class Token implements Cloneable {
   }
 
   public Object getProperty(String key) {
-
-    // // Short name ?
-    // if (value == null) {
-    // for (EditTokenProperty property :
-    // MapTool.getCampaign().getCampaignProperties().getTokenPropertyList(getPropertyType())) {
-    // if (property.getShortName().equals(key)) {
-    // value = getPropertyMap().get(property.getShortName().toUpperCase());
-    // }
-    // }
-    // }
     return getPropertyMap().get(key);
   }
 
@@ -2723,13 +2701,19 @@ public class Token implements Cloneable {
       case setState:
         var state = parameters.get(0).getStringValue();
         var stateValue = parameters.get(1);
-        if (stateValue.hasBoolValue()) setState(state, stateValue.getBoolValue());
-        else setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
+        if (stateValue.hasBoolValue()) {
+          setState(state, stateValue.getBoolValue());
+        } else {
+          setState(state, BigDecimal.valueOf(stateValue.getDoubleValue()));
+        }
         break;
       case setAllStates:
         stateValue = parameters.get(0);
-        if (stateValue.hasBoolValue()) setAllStates(stateValue.getBoolValue());
-        else setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
+        if (stateValue.hasBoolValue()) {
+          setAllStates(stateValue.getBoolValue());
+        } else {
+          setAllStates(BigDecimal.valueOf(stateValue.getDoubleValue()));
+        }
         break;
       case setPropertyType:
         setPropertyType(parameters.get(0).getStringValue());

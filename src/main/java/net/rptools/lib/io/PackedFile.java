@@ -255,7 +255,9 @@ public class PackedFile implements AutoCloseable {
         if (obj instanceof Map<?, ?>) {
           propertyMap = (Map<String, Object>) obj;
           propsLoaded = true;
-        } else log.error("Unexpected class type for property object: " + obj.getClass().getName());
+        } else {
+          log.error("Unexpected class type for property object: " + obj.getClass().getName());
+        }
       } catch (NullPointerException npe) {
         log.error("Problem finding/converting property file", npe);
       }
@@ -330,7 +332,9 @@ public class PackedFile implements AutoCloseable {
               }
             }
             try {
-              if (zFile != null) zFile.close();
+              if (zFile != null) {
+                zFile.close();
+              }
             } catch (IOException e) {
               // ignore close exception
             }
@@ -364,18 +368,24 @@ public class PackedFile implements AutoCloseable {
               FileUtil.copyFile(newFile, file);
               saveTimer.stop("backup newFile");
             }
-            if (backupFile.exists()) backupFile.delete();
+            if (backupFile.exists()) {
+              backupFile.delete();
+            }
             saveTimer.stop("finalize");
 
             dirty = false;
           } finally {
             saveTimer.start("cleanup");
             try {
-              if (zFile != null) zFile.close();
+              if (zFile != null) {
+                zFile.close();
+              }
             } catch (IOException e) {
               // ignore close exception
             }
-            if (newFile.exists()) newFile.delete();
+            if (newFile.exists()) {
+              newFile.delete();
+            }
             IOUtils.closeQuietly(zout);
             saveTimer.stop("cleanup");
           }
@@ -410,7 +420,9 @@ public class PackedFile implements AutoCloseable {
    * @return the <code>File</code> object for the temporary location
    */
   private File putFileImpl(String path) {
-    if (!tmpFile.exists()) tmpFile.getParentFile().mkdirs();
+    if (!tmpFile.exists()) {
+      tmpFile.getParentFile().mkdirs();
+    }
 
     // Have to store it in the exploded area since we can't directly save it to the zip
     File explodedFile = getExplodedFile(path);
@@ -480,8 +492,6 @@ public class PackedFile implements AutoCloseable {
    * Write the data from the given URL to the path in the ZIP file; as the data is presumed binary
    * there is no {@link Charset} conversion.
    *
-   * <p>FIXME Should the MIME type of the InputStream be checked??
-   *
    * @param path location within the ZIP file
    * @param url the url of the binary data to be written
    * @throws IOException If an I/O error occurs
@@ -493,10 +503,14 @@ public class PackedFile implements AutoCloseable {
   }
 
   public boolean hasFile(String path) throws IOException {
-    if (removedFileSet.contains(path)) return false;
+    if (removedFileSet.contains(path)) {
+      return false;
+    }
 
     File explodedFile = getExplodedFile(path);
-    if (explodedFile.exists()) return true;
+    if (explodedFile.exists()) {
+      return true;
+    }
 
     boolean ret = false;
     if (file.exists()) {
@@ -510,7 +524,9 @@ public class PackedFile implements AutoCloseable {
   private ZipFile zFile = null;
 
   private ZipFile getZipFile() throws IOException {
-    if (zFile == null) zFile = new ZipFile(file);
+    if (zFile == null) {
+      zFile = new ZipFile(file);
+    }
     return zFile;
   }
 
@@ -519,22 +535,14 @@ public class PackedFile implements AutoCloseable {
    * via the associated XStream object. (Because the XML is character data, this routine calls
    * {@link #getFileAsReader(String)} to handle character encoding.)
    *
-   * <p><b>TODO:</b> add {@link ModelVersionManager} support
-   *
    * @param path zip file archive path entry
    * @return Object created by translating the XML
    * @throws IOException If an I/O error occurs
    */
   public Object getFileObject(String path) throws IOException {
-    // This next line really should be routed thru the version manager...
-    // Update: a new XStreamConverter was created for the Asset object that
-    // never marshalls the image data, but *does* unmarshall it. This allows
-    // older pre-1.3.b64 campaigns to be loaded but only the newer format
-    // (with a separate image file) works on output.
     LineNumberReader r = getFileAsReader(path);
     try (r) {
-      xstream
-          .ignoreUnknownElements(); // Jamz: Should we use this? This will ignore new classes/fields
+      xstream.ignoreUnknownElements();
       xstream.addPermission(
           new ExplicitTypePermission(new Class[] {ExtendedGeneralPath.class, Polygon2D.class}));
 
@@ -665,8 +673,12 @@ public class PackedFile implements AutoCloseable {
   public LineNumberReader getFileAsReader(String path) throws IOException {
     File explodedFile = getExplodedFile(path);
     if ((!file.exists() && !tmpFile.exists() && !explodedFile.exists())
-        || removedFileSet.contains(path)) throw new FileNotFoundException(path);
-    if (explodedFile.exists()) return new LineNumberReader(FileUtil.getFileAsReader(explodedFile));
+        || removedFileSet.contains(path)) {
+      throw new FileNotFoundException(path);
+    }
+    if (explodedFile.exists()) {
+      return new LineNumberReader(FileUtil.getFileAsReader(explodedFile));
+    }
 
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
@@ -676,12 +688,13 @@ public class PackedFile implements AutoCloseable {
       if (log.isDebugEnabled()) {
         String type;
         type = FileUtil.getContentType(in);
-        if (type == null) type = FileUtil.getContentType(explodedFile);
+        if (type == null) {
+          type = FileUtil.getContentType(explodedFile);
+        }
         log.debug("FileUtil.getContentType() returned " + (type != null ? type : "(null)"));
       }
       return new LineNumberReader(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (IOException ex) {
-      // Don't need to close 'in' since zipFile.close() will do so
       throw ex;
     }
   }
@@ -698,14 +711,20 @@ public class PackedFile implements AutoCloseable {
   public InputStream getFileAsInputStream(String path) throws IOException {
     File explodedFile = getExplodedFile(path);
     if ((!file.exists() && !tmpFile.exists() && !explodedFile.exists())
-        || removedFileSet.contains(path)) throw new FileNotFoundException(path);
-    if (explodedFile.exists()) return FileUtil.getFileAsInputStream(explodedFile);
+        || removedFileSet.contains(path)) {
+      throw new FileNotFoundException(path);
+    }
+    if (explodedFile.exists()) {
+      return FileUtil.getFileAsInputStream(explodedFile);
+    }
 
     ZipEntry entry = new ZipEntry(path);
     ZipFile zipFile = getZipFile();
 
     InputStream in = zipFile.getInputStream(entry);
-    if (in == null) throw new FileNotFoundException(path);
+    if (in == null) {
+      throw new FileNotFoundException(path);
+    }
     String type = FileUtil.getContentType(in);
     log.debug("FileUtil.getContentType() returned {}", type);
     return in;
@@ -720,7 +739,9 @@ public class PackedFile implements AutoCloseable {
       }
       zFile = null;
     }
-    if (tmpFile.exists()) FileUtil.delete(tmpFile);
+    if (tmpFile.exists()) {
+      FileUtil.delete(tmpFile);
+    }
     propertyMap.clear();
     addedFileSet.clear();
     removedFileSet.clear();
@@ -771,15 +792,20 @@ public class PackedFile implements AutoCloseable {
    * @throws IOException invalid zip file.
    */
   public URL getURL(String path) throws IOException {
-    if (!hasFile(path))
+    if (!hasFile(path)) {
       throw new FileNotFoundException("The path '" + path + "' is not in this packed file.");
+    }
     try {
       // Check for exploded first
       File explodedFile = getExplodedFile(path);
-      if (explodedFile.exists()) return explodedFile.toURI().toURL();
+      if (explodedFile.exists()) {
+        return explodedFile.toURI().toURL();
+      }
 
       // Otherwise it is in the zip file.
-      if (!path.startsWith("/")) path = "/" + path;
+      if (!path.startsWith("/")) {
+        path = "/" + path;
+      }
       String url = "jar:" + file.toURI().toURL().toExternalForm() + "!" + path;
       return new URL(url);
     } catch (MalformedURLException e) {

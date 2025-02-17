@@ -416,7 +416,6 @@ public class IsometricGrid extends Grid {
     int nSize = (planArea.getBounds().width + planArea.getBounds().height);
 
     return resize(rotate(planArea), nSize, nSize / 2);
-    // return rotate(planArea);
   }
 
   private static Area rotate(Area planArea) {

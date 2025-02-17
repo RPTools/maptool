@@ -420,11 +420,6 @@ dependencies {
     implementation(libs.rptools.maptool.addons)
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
-
-    testRuntimeOnly(libs.junit.platform.launcher)
-    testRuntimeOnly(libs.junit.engine)
-    testImplementation(libs.bundles.junit)
-    testImplementation(libs.mockito.core)
 }
 
 processResources {
@@ -504,10 +499,6 @@ javadoc {
     options.addStringOption('Xmaxwarns', '2000')
     options.addBooleanOption('html5', true)
     options.tags("note:a:<strong><u>Note:</u></strong>")
-}
-
-test {
-    useJUnitPlatform()
 }
 
 task createWrapper(type: Wrapper) {

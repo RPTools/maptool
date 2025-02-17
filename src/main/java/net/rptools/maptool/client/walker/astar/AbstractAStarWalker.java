@@ -87,8 +87,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
   /**
    * The IDs of all debugging labels, so we can remove them again later. Only access this on the
-   * Swing thread _or else_. TODO Make this per-walker. Unfortunately we create new walkers all the
-   * time for each operation, so that isn't feasible right now.
+   * Swing thread _or else_.
    */
   private static final List<GUID> debugLabels = new ArrayList<>();
 
@@ -97,7 +96,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
 
     // Get tokens on map that may affect movement
     for (Token token : zone.getTokensWithTerrainModifiers()) {
-      // log.info("Token: " + token.getName() + ", " + token.getTerrainModifier());
       Set<CellPoint> cells = token.getOccupiedCells(zone.getGrid());
       for (CellPoint cell : cells) {
         terrainCells
@@ -206,9 +204,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     long timeOut = System.currentTimeMillis();
     double estimatedTimeoutNeeded = 10000;
 
-    // if (start.equals(end))
-    // log.info("NO WORK!");
-
     var startNode = new AStarCellPoint(start, !isInteger(start.distanceTraveledWithoutTerrain));
     openList.add(startNode);
     openSet.put(startNode, startNode);
@@ -274,8 +269,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     if (MapTool.getPlayer().isGM()) {
       estimatedTimeoutNeeded = estimatedTimeoutNeeded / 2;
     }
-
-    // log.info("A* Path timeout estimate: " + estimatedTimeoutNeeded);
 
     Rectangle2D pathfindingBounds = this.getPathfindingBounds(start, goal);
 
@@ -585,14 +578,6 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
     if (goalBounds.isEmpty() || startBounds.isEmpty()) {
       return false;
     }
-
-    // If the goal center point is in vbl, allow to maintain path through vbl (should be GM only?)
-    /*
-    if (vbl.contains(goal.toPoint())) {
-      // Allow GM to move through VBL
-       return !MapTool.getPlayer().isGM();
-    }
-    */
 
     // NEW WAY - use polygon test
     double x1 = startBounds.getCenterX();

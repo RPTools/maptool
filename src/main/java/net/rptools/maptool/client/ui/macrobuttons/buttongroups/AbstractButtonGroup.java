@@ -214,8 +214,6 @@ public abstract class AbstractButtonGroup extends JPanel
     private String label;
     private Rectangle imageBounds;
 
-    // private final int X_OFFSET = 5;
-
     public ThumbnailedBorder(Image image, String label) {
       this.image = image;
       this.label = label;
@@ -224,10 +222,7 @@ public abstract class AbstractButtonGroup extends JPanel
     }
 
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-      // ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING,
-      // RenderingHints.VALUE_RENDER_QUALITY);
 
-      // TODO: change magic numbers to final fields
       // match line color to default titledborder line color
       g.setColor(new Color(165, 163, 151));
 

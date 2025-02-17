@@ -265,7 +265,6 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
    */
   public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, @Nonnull Light light) {
     Area area = light.getArea(token, zone, scaleWithToken);
-    // TODO: This seems horribly inefficient
     // Subtract out the lights that are previously defined
     for (int i = lightList.indexOf(light) - 1; i >= 0; i--) {
       Light lessLight = lightList.get(i);

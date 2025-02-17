@@ -151,8 +151,6 @@ public class EndpointSet {
         // this while iterating later.
         endpoints[i] = null;
 
-        // TODO Somehow increment the main counter.
-        //  duplicateEndpointCount += 1;
       } else {
         // Haven't seen this endpoint yet. Keep it around.
         previous = endpoint;

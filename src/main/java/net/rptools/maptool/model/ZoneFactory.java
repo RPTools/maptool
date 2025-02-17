@@ -42,8 +42,6 @@ public class ZoneFactory {
       return new DrawableTexturePaint(defaultImageId);
     }
 
-    // TODO: I really don't like this being hard wired this way, need to make it a preference or
-    //  something
     File grassImage =
         new File(AppUtil.getAppHome("resource/Default/Textures").getAbsolutePath() + "/Grass.png");
     if (!grassImage.exists()) {

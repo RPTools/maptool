@@ -45,7 +45,6 @@ public class HTMLPanelRenderer extends JTextPane {
     Document document = getDocument();
 
     // Use a little bit of black magic to get our images to display correctly
-    // TODO: Need a way to flush this cache
     HTMLPanelImageCache imageCache = new HTMLPanelImageCache();
     document.putProperty("imageCache", imageCache);
   }

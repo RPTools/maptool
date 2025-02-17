@@ -140,7 +140,6 @@ public class MapToolExpressionParser extends ExpressionParser {
 
     @Override
     public Expression parseExpression(String expression) throws ParserException {
-      // Expression exp = super.parseExpression(expression);
       Expression exp = expressionCache.getIfPresent(expression);
       if (exp == null) {
         exp = super.parseExpression(expression);

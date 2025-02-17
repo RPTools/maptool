@@ -512,9 +512,6 @@ public class Topology_Functions extends AbstractFunction {
 
           break;
         case NONE:
-          // Setting to null causes various token topology updating to be skipped during event
-          // handling. Leaving it as an empty Area fixed that.
-          // tokenTopology = null;
           break;
       }
     }

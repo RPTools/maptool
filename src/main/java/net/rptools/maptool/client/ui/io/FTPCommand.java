@@ -20,9 +20,6 @@ import org.apache.commons.net.ftp.FTPClientConfig;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-// import sun.net.TransferProtocolClient;
-// import sun.net.ftp.FtpClient;
-
 /**
  * This class extends the Apache Commons {@link FTPClient} class to ease future modification.
  *

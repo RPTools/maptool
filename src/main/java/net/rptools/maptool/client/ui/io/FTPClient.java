@@ -49,7 +49,7 @@ public class FTPClient {
   protected FTPClientConn cconn;
 
   protected List<Object> fifoQueue;
-  protected final Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
+  protected final Map<Object, FTPTransferObject> todoMap;
   protected final Map<Object, FTPTransferObject> transferringMap; // Currently in process...
 
   private int numThreads = 1;
@@ -207,8 +207,6 @@ public class FTPClient {
     boolean startAnother = false;
     synchronized (transferringMap) {
       transferringMap.remove(data.local);
-      // TODO Should delete the remote file for uploading, or remove the local
-      // file for downloading.
       if (fifoQueue.isEmpty() == false && transferringMap.size() < numThreads) startAnother = true;
     }
     if (startAnother) startNextTransfer();
@@ -357,7 +355,6 @@ public class FTPClient {
           "campaignItemList.xml", "mockup.jfpr", "standard.mtprops", "updateRepoDialog.xml",
         };
     FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
-    // ftp.setNumberOfThreads(3);
     File dir = new File("testdir");
     for (String s : uploadList) {
       FTPTransferObject fto = new FTPTransferObject(Direction.FTP_PUT, s, dir, s);

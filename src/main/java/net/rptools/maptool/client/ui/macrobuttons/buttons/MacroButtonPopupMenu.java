@@ -123,7 +123,6 @@ public class MacroButtonPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent event) {
-      // TODO: refactor to put tab index from Tab enum
       if (panelClass.equals("GlobalPanel")) {
         new MacroButtonProperties(
             panelClass, MacroButtonPrefs.getNextIndex(), button.getProperties().getGroup());

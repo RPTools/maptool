@@ -265,7 +265,6 @@ public class AbeillePanel<T> extends JPanel {
       try {
         return getValue();
       } catch (Exception e) {
-        // YLogger.logException(e);
         return null;
       }
     }

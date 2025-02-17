@@ -29,7 +29,6 @@ import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 
 public class TokenHaloFunction extends AbstractFunction {
-  // TODO: This is a copy of the array in the {@link TokenPopupMenu} (which is apparently temporary)
   private static final TokenHaloFunction instance = new TokenHaloFunction();
 
   private TokenHaloFunction() {

@@ -339,8 +339,6 @@ public class MapPropertiesDialog extends JDialog {
       // This zone was the landing map but got toggled off.
       campaign.setLandingMapId(null);
     }
-
-    // TODO: Handle grid type changes
   }
 
   private void initIsometricRadio() {
@@ -565,7 +563,6 @@ public class MapPropertiesDialog extends JDialog {
 
   public int getZoneDistancePerCell() {
     try {
-      // TODO: Handle this in validation
       return Integer.parseInt(getDistanceTextField().getText());
     } catch (NumberFormatException nfe) {
       return 0;
@@ -700,10 +697,6 @@ public class MapPropertiesDialog extends JDialog {
             }
             Integer imageIndex = (Integer) selectedList.get(0);
 
-            // if (getBackgroundAsset() != null) {
-            // // Tighten memory usage
-            // ImageManager.flushImage(getBackgroundAsset());
-            // }
             selectedAsset = assetPanel.getAsset(imageIndex);
 
             // Store for later use

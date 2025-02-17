@@ -34,6 +34,7 @@ import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 
 public class SightSyntax {
+
   private static final int DEFAULT_LUMENS = 100;
 
   public List<SightType> parse(String text) {
@@ -91,7 +92,7 @@ public class SightSyntax {
               toBeParsed = arg.substring(1); // Used in the catch block, below
               errmsg = "msg.error.mtprops.sight.multiplier"; // (ditto)
               magnifier = StringUtil.parseDecimal(toBeParsed);
-            } else if (arg.startsWith("r")) { // XXX Why not "r=#" instead of "r#"??
+            } else if (arg.startsWith("r")) {
               toBeParsed = arg.substring(1);
               errmsg = "msg.error.mtprops.sight.range";
 

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -32,10 +33,12 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,6 +74,8 @@ public class HTMLOverlayPanel extends JFXPanel {
 
     Platform.runLater(this::setupScene);
     setVisible(false); // disabled by default
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   /** Setups the scene of the JFXPanel. */
@@ -273,6 +278,11 @@ public class HTMLOverlayPanel extends JFXPanel {
             overlayManager.setValue(frameValue);
           }
         });
+  }
+
+  @Subscribe
+  private void onOverlayVisibilityChanged(OverlayVisibilityChanged event) {
+    Platform.runLater(() -> setVisible(overlays.stream().anyMatch(HTMLOverlayManager::isVisible)));
   }
 
   /** Display the overlays according to their zOrder. */

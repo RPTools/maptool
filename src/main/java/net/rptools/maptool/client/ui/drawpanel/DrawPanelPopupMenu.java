@@ -88,7 +88,6 @@ public class DrawPanelPopupMenu extends JPopupMenu {
     add(new MergeDrawingsAction());
     addGMItem(new JSeparator());
     add(new DeleteDrawingAction(selectedDrawSet));
-    // add(new JSeparator());
     add(new GetPropertiesAction());
     add(new SetPropertiesAction());
     add(new SetDrawingName());

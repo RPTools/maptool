@@ -89,7 +89,6 @@ public class AssetDirectory extends Directory {
         try {
           return future.get() != INVALID_IMAGE ? future.get() : null;
         } catch (InterruptedException | ExecutionException e) {
-          // TODO: need to indicate a broken image
           return null;
         }
       }
@@ -139,12 +138,8 @@ public class AssetDirectory extends Directory {
         if (imageFile.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
           thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
         } else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
-          // Jamz: Added to mark all PDF assets with proper image, TODO: Move image asset to proper
-          // location
           thumbnail = PDF_IMAGE;
         } else if (imageFile.getName().toLowerCase().endsWith(".por")) {
-          // Jamz: Added to mark all Hero Lab assets with proper image, TODO: Move image asset to
-          // proper location
           thumbnail = HERO_LAB_IMAGE;
         } else {
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);

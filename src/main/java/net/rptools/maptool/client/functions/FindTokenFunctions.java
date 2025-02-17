@@ -49,8 +49,8 @@ public class FindTokenFunctions extends AbstractFunction {
     STATE,
     OWNED,
     VISIBLE,
-    PROPERTYTYPE, // 1.5.5
-    LAYER // FJE 1.3b77
+    PROPERTYTYPE,
+    LAYER
   }
 
   // @formatter:on

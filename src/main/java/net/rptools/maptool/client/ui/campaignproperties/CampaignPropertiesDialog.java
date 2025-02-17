@@ -54,7 +54,6 @@ import net.rptools.maptool.util.SightSyntax;
 import org.apache.commons.text.*;
 
 public class CampaignPropertiesDialog extends JDialog {
-  // private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
 
   public enum Status {
     OK,
@@ -74,7 +73,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
     initialize();
 
-    pack(); // FJE
+    pack();
   }
 
   public Status getStatus() {
@@ -142,7 +141,6 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initHelp() {
     /* simple check to see if one of the keys has been translated from English. */
-    // TODO: this should be a proper method instead of a dodgy workaround
     boolean isTranslated =
         MapTool.getLanguage().toLowerCase().startsWith("en")
             || !I18N.getText("sightLight.optionDescription.shape")
@@ -175,22 +173,9 @@ public class CampaignPropertiesDialog extends JDialog {
           if (newRepo == null || newRepo.isEmpty()) {
             return;
           }
-          // TODO: Check for uniqueness
           ((DefaultListModel) getRepositoryList().getModel()).addElement(newRepo);
         });
   }
-
-  //  private void initAddGalleryIndexButton() {
-  //    JButton button = (JButton) formPanel.getButton("addGalleryIndexButton");
-  //    button.addActionListener(
-  //        new ActionListener() {
-  //          public void actionPerformed(ActionEvent e) {
-  //            // TODO: Check for uniqueness
-  //            ((DefaultListModel) getRepositoryList().getModel())
-  //                .addElement("http://www.rptools.net/image-indexes/gallery.rpax.gz");
-  //          }
-  //        });
-  //  }
 
   public void initDeleteRepoButton() {
     JButton button = (JButton) formPanel.getButton("deleteRepoButton");
@@ -397,7 +382,6 @@ public class CampaignPropertiesDialog extends JDialog {
                   () -> {
                     CampaignProperties properties =
                         PersistenceUtil.loadCampaignProperties(selectedFile);
-                    // TODO: Allow specifying whether it is a replace or merge
                     if (properties != null) {
                       MapTool.getCampaign().mergeCampaignProperties(properties);
                       copyCampaignToUI(properties);
@@ -410,10 +394,7 @@ public class CampaignPropertiesDialog extends JDialog {
     getExportButton()
         .addActionListener(
             e -> {
-              // TODO: Remove this hack. Specifically, make the export use a properties object
-              // composed of the current dialog entries instead of directly from the campaign
               copyUIToCampaign();
-              // END HACK
 
               JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 

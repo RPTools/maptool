@@ -756,7 +756,6 @@ public class ClientMessageHandler implements MessageHandler {
           Zone zone = Zone.fromDto(msg.getZone());
           client.getCampaign().putZone(zone);
 
-          // TODO: combine this with MapTool.addZone()
           var renderer = ZoneRendererFactory.newRenderer(zone);
           MapTool.getFrame().addZoneRenderer(renderer);
           if (MapTool.getFrame().getCurrentZoneRenderer() == null && zone.isVisible()) {

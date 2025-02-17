@@ -22,12 +22,9 @@ import javax.swing.JPopupMenu;
 
 public class TabPopupMenu extends JPopupMenu {
 
-  // private final JComponent parent;
   private int index;
 
-  // TODO: replace index with Tab.TABNAME.index
   public TabPopupMenu(JComponent parent, int index) {
-    // this.parent = parent;
     this.index = index;
     add(new AddNewButtonAction());
   }

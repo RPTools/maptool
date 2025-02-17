@@ -141,7 +141,6 @@ public class MapToolLineParser {
       if (function instanceof AdditionalFunctionDescription) {
         for (String alias : function.getAliases()) {
           functionList.put(alias, function.getClass().getName());
-          //          log.info(alias + " : " + function.getClass().getName());
         }
       } else {
         for (String alias : function.getAliases())
@@ -304,7 +303,8 @@ public class MapToolLineParser {
             for (OptionInfo option : optionList) {
               String error;
               /*
-               * TODO: If you're adding a new option, add a new case here to collect info from the parameters. If your option uses parameters, use the option.getXxxParam() methods to get
+               * If you're adding a new option, add a new case here to collect info from the
+               * parameters. If your option uses parameters, use the option.getXxxParam() methods to get
                * the text or parsed values of the parameters.
                */
               switch (option.getOptionType()) {
@@ -592,7 +592,7 @@ public class MapToolLineParser {
 
             switch (loopType) {
               /*
-               * TODO: If you're adding a new looping option, add a new case to handle the iteration
+               * If you're adding a new looping option, add a new case to handle the iteration
                */
               case NO_LOOP:
                 if (iteration > 0) { // stop after first iteration
@@ -711,7 +711,7 @@ public class MapToolLineParser {
             // Extract the branch to use
             switch (branchType) {
               /*
-               * TODO: If you're adding a new branching option, add a new case to extract the branch text
+               * If you're adding a new branching option, add a new case to extract the branch text
                */
               case NO_BRANCH:
                 {
@@ -815,7 +815,7 @@ public class MapToolLineParser {
                 // used.
                 switch (output) {
                   /*
-                   * TODO: If you're adding a new formatting option, add a new case to build the output
+                   * If you're adding a new formatting option, add a new case to build the output
                    */
                   case NONE:
                     parseExpression(resolver, tokenInContext, rollBranch, false);
@@ -875,7 +875,7 @@ public class MapToolLineParser {
                 } // end of switch(output) statement
                 break; // end of case NO_CODE in switch(codeType) statement
               /*
-               * TODO: If you're adding a new code option, add a new case to execute the code
+               * If you're adding a new code option, add a new case to execute the code
                */
               case MACRO:
                 // [MACRO("macroName@location"): args]
@@ -1001,7 +1001,6 @@ public class MapToolLineParser {
       return builder.toString();
     } catch (ParserException e) {
       // do nothing; this exception will never generate any output
-      // throw doError("macroExecutionAbort", opts == null ? "" : opts, roll == null ? line : roll);
       throw e;
     } catch (Exception e) {
       log.info(line, e);
@@ -1303,7 +1302,6 @@ public class MapToolLineParser {
       }
       return macroOutput;
     } finally {
-      // exitContext();
       macroRecurseDepth--;
     }
   }

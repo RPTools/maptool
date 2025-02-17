@@ -270,7 +270,6 @@ public class MessagePanel extends JPanel {
                   "(^|\\s|>|\002)(https?://[^<>\002\003\\s]+)", "$1<a href='$2'>$2</a>");
 
           if (!message.getSource().equals(MapTool.getPlayer().getName())) {
-            // TODO change this so 'macro' is case-insensitive
             Matcher m =
                 Pattern.compile(
                         "href=([\"'])\\s*(macro://(?:[^/]*)/(?:[^?]*)(?:\\?(?:.*?))?)\\1\\s*",
@@ -281,8 +280,6 @@ public class MessagePanel extends JPanel {
             }
           }
           // if rolls not being visible to this user result in an empty message, display nothing
-          // TODO The leading and trailing '.*' are probably not needed -- test this before
-          // removing them
           if (!output.matches(".*\002\\s*\003.*")) {
             output = output.replaceAll("\002|\003", "");
 
