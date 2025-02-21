@@ -866,9 +866,15 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     markerLocationList.clear();
     itemRenderList.clear();
 
-    if (!compositor.isInitialised()) compositor.setRenderer(this);
-    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
-    if (!haloRenderer.isInitialised()) haloRenderer.setRenderer(this);
+    if (!compositor.isInitialised()) {
+      compositor.setRenderer(this);
+    }
+    if (!gridRenderer.isInitialised()) {
+      gridRenderer.setRenderer(this);
+    }
+    if (!haloRenderer.isInitialised()) {
+      haloRenderer.setRenderer(this);
+    }
 
     Rectangle viewRect = new Rectangle(getSize().width, getSize().height);
 
@@ -1085,7 +1091,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     timer.stop("overlays");
 
     timer.start("renderCoordinates");
-    if (!gridRenderer.isInitialised()) gridRenderer.setRenderer(this);
+    if (!gridRenderer.isInitialised()) {
+      gridRenderer.setRenderer(this);
+    }
     gridRenderer.renderCoordinates(g2d, view);
     timer.stop("renderCoordinates");
 
@@ -2331,7 +2339,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
       // Calculate alpha Transparency from token and use opacity for indicating that token is moving
       float opacity = token.getTokenOpacity();
-      if (isTokenMoving(token)) opacity = opacity / 2.0f;
+      if (isTokenMoving(token)) {
+        opacity = opacity / 2.0f;
+      }
 
       // Finally render the token image
       timer.start("tokenlist-7");
@@ -2498,40 +2508,22 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       timer.stop("tokenlist-8");
 
       timer.start("tokenlist-9");
-      /**
-       * Paint States and Bars Set up the graphics so that the overlay can just be painted. Use
-       * non-rotated token bounds to avoid odd size changes
-       */
-      Token tmpToken = new Token(token);
-      tmpToken.setFacing(270);
-      Rectangle tmpBounds = tmpToken.getBounds(this.zone);
-
-      // Unless it is isometric, make it square to avoid distortion
-      double maxDim = Math.max(tmpBounds.getWidth(), tmpBounds.getHeight());
-      // scale it to the view
-      maxDim *= this.getScale();
-      Rectangle bounds;
-      if (zone.getGrid().isIsometric()) {
-        bounds =
-            new Rectangle(
-                0,
-                0,
-                (int) (tmpBounds.getWidth() * this.getScale()),
-                (int) (tmpBounds.getHeight() * this.getScale()));
-      } else {
-        bounds = new Rectangle(0, 0, (int) maxDim, (int) maxDim);
-      }
-
-      // calculate the drawing region from the token centre.
+      // Set up the graphics so that the overlay can just be painted.
       Graphics2D locg =
           (Graphics2D)
               tokenG.create(
-                  (int) Math.floor(tokenBounds.getBounds().getCenterX() - bounds.getWidth() / 2.0),
-                  (int) Math.floor(tokenBounds.getBounds().getCenterY() - bounds.getHeight() / 2.0),
-                  bounds.width,
-                  bounds.height);
+                  (int) tokenBounds.getBounds().getX(),
+                  (int) tokenBounds.getBounds().getY(),
+                  (int) tokenBounds.getBounds().getWidth(),
+                  (int) tokenBounds.getBounds().getHeight());
+      Rectangle bounds =
+          new Rectangle(
+              0,
+              0,
+              (int) tokenBounds.getBounds().getWidth(),
+              (int) tokenBounds.getBounds().getHeight());
 
-      // Check each of the set values and draw
+      // Check each of the set values
       for (String state : MapTool.getCampaign().getTokenStatesMap().keySet()) {
         Object stateValue = token.getState(state);
         AbstractTokenOverlay overlay = MapTool.getCampaign().getTokenStatesMap().get(state);
@@ -2762,7 +2754,9 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   private boolean isTokenInNeedOfClipping(Token token, Area tokenCellArea, boolean isGMView) {
 
     // can view everything or zone is not using vision = no clipping needed
-    if (isGMView || !zoneView.isUsingVision()) return false;
+    if (isGMView || !zoneView.isUsingVision()) {
+      return false;
+    }
 
     // no clipping if there is no visible screen area
     if (visibleScreenArea == null) {
