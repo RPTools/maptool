@@ -134,7 +134,7 @@ public final class ExtractImagesFromPDF {
         out.flush();
         out.close();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while writing PDF image to disk", e);
       }
     }
 
@@ -146,7 +146,7 @@ public final class ExtractImagesFromPDF {
       try {
         document.close();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while closing PDF document", e);
       }
     }
   }
@@ -193,23 +193,23 @@ public final class ExtractImagesFromPDF {
     BufferedImage image = null;
     try {
 
-      log.debug(String.format("Creating file %s (page %d of %d)", fileName, pageNumber, total));
+      log.debug("Creating file {} (page {} of {})", fileName, pageNumber, total);
       image = renderer.renderImageWithDPI(pageNumber - 1, PAGE_RENDER_DPI);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while rendering PDF page as image", e);
     }
     try (FileOutputStream out = new FileOutputStream(fileName)) {
       if (image != null) {
         if (ImageIO.write(image, "jpg", out)) {
           fileList.add(new File(fileName));
         } else {
-          log.debug(String.format("Failed to write image %d to file %s", pageNumber, fileName));
+          log.debug("Failed to write image {} to file {}", pageNumber, fileName);
         }
         out.flush();
         image.flush();
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while writing PDF page image to disk", e);
     }
   }
 
@@ -390,7 +390,7 @@ public final class ExtractImagesFromPDF {
         image.flush();
       }
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while writing image to file", e);
     }
   }
 }

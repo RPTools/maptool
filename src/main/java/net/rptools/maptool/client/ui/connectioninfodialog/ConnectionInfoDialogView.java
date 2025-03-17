@@ -14,11 +14,33 @@
  */
 package net.rptools.maptool.client.ui.connectioninfodialog;
 
-import java.awt.*;
 import javax.swing.*;
 
 public class ConnectionInfoDialogView {
   private JPanel mainPanel;
+  private JLabel nameLabel;
+  private JLabel LANIDLabel;
+  private JLabel localIpv4AddressLabel;
+  private JLabel localIpv6AddressLabel;
+  private JLabel externalAddressLabel;
+  private JLabel portLabel;
+  private JTextField nameTextField;
+  private JTextField serviceIdentifierTextField;
+  private JTextField localIpv4AddressTextField;
+  private JTextField localIpv6AddressTextField;
+  private JTextField externalAddressTextField;
+  private JTextField portTextField;
+  private JButton registryHttpUrlCopyButton;
+  private JButton registryUriCopyButton;
+  private JButton lanUriCopyButton;
+  private JButton lanHttpUrlCopyButton;
+  private JButton localIpv4UriCopyButton;
+  private JButton localIpv4HttpUrlCopyButton;
+  private JButton localIpv6UriCopyButton;
+  private JButton localIpv6HttpUrlCopyButton;
+  private JButton externalUriCopyButton;
+  private JButton externalHttpUrlCopyButton;
+  private JButton okButton;
 
   public JComponent getRootComponent() {
     return mainPanel;

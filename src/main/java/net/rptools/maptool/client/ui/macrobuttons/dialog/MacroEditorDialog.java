@@ -46,6 +46,8 @@ import net.rptools.maptool.client.ui.syntax.MapToolScriptAutoComplete;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.GoToDialog;
 import org.fife.rsta.ui.search.FindDialog;
@@ -74,6 +76,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   public static final String DEFAULT_COLOR_NAME = "default";
 
   private static final long serialVersionUID = 8228617911117087993L;
+  private static final Logger log = LogManager.getLogger(MacroEditorDialog.class);
   private final AbeillePanel panel;
   MacroButton button;
   MacroButtonProperties properties;
@@ -191,7 +194,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
             if (editingMacroButton) {
               updateOpenMacroList(false);
             }
-            // FJE fix for macOS pinwheel
             SwingUtilities.invokeLater(() -> dispose());
           }
         });
@@ -298,8 +300,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
       "0.75em", "0.80em", "0.85em", "0.90em", "0.95em", "1.00em", "1.05em", "1.10em", "1.15em",
       "1.20em", "1.25em"
     };
-    // String[] fontSizes = { "6pt", "7pt", "8pt", "9pt", "10pt", "11pt",
-    // "12pt", "13pt", "14pt", "15pt", "16pt" };
     JComboBox<String> combo = getFontSizeComboBox();
     combo.setModel(new DefaultComboBoxModel<String>(fontSizes));
   }
@@ -337,8 +337,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   private void installOKButton() {
     JButton button = (JButton) panel.getButton("okButton");
     button.addActionListener(e -> save(true));
-
-    // getRootPane().setDefaultButton(button);
   }
 
   private void installCancelButton() {
@@ -470,6 +468,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
     getToolTipTextField().setTabSize(2);
 
     // Macro Editor setup
+    macroEditorRSyntaxTextArea.setUseFocusableTips(false);
     macroEditorRSyntaxTextArea.setSyntaxEditingStyle("text/MapToolScript");
     macroEditorRSyntaxTextArea.setInsertPairedCharacters(false);
     macroEditorRSyntaxTextArea.setEditable(true);
@@ -500,7 +499,7 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
 
       macroEditorRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading macro editor theme", e);
     }
 
     // Listen for changes in the text
@@ -531,14 +530,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
 
     RTextScrollPane macroEditorRTextScrollPane = new RTextScrollPane(macroEditorRSyntaxTextArea);
     macroEditorRTextScrollPane.setLineNumbersEnabled(true);
-    // replaceComponent("macroEditorPanel", "macroEditorRTextScrollPane",
-    // macroEditorRTextScrollPane);
 
     csp.add(new ErrorStrip(getToolTipTextField()), BorderLayout.LINE_END);
-
-    //    RTextScrollPane macroEditorRTextScrollPane = new
-    // RTextScrollPane(macroEditorRSyntaxTextArea);
-    //    macroEditorRTextScrollPane.setLineNumbersEnabled(true);
 
     csp.add(macroEditorRTextScrollPane);
   }
@@ -671,7 +664,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
       if (replaceDialog.isVisible()) {
         replaceDialog.setVisible(false);
       }
-      // findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
       SwingUtil.centerOver(findDialog, callingDialog);
       findDialog.setVisible(true);
     }
@@ -690,7 +682,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
       if (findDialog.isVisible()) {
         findDialog.setVisible(false);
       }
-      // findDialog.setSearchString(macroEditorRSyntaxTextArea.getSelectedText());
       SwingUtil.centerOver(replaceDialog, callingDialog);
       replaceDialog.setVisible(true);
     }
@@ -718,8 +709,8 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
           macroEditorRSyntaxTextArea.setCaretPosition(
               macroEditorRSyntaxTextArea.getLineStartOffset(line - 1));
         } catch (BadLocationException ble) { // Never happens
+          log.error("Error while setting cursor to start of line", ble);
           UIManager.getLookAndFeel().provideErrorFeedback(macroEditorRSyntaxTextArea);
-          ble.printStackTrace();
         }
       }
     }
@@ -900,7 +891,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   private JComboBox<String> getColorComboBox() {
     var v = panel.getComboBox("colorComboBox");
     return v;
-    // return panel.getComboBox("colorComboBox");
   }
 
   private JTextField getLabelTextField() {
@@ -916,7 +906,6 @@ public class MacroEditorDialog extends JDialog implements SearchListener {
   }
 
   private RSyntaxTextArea getCommandTextArea() {
-    // return (JTextArea) panel.getTextComponent("command");
     return macroEditorRSyntaxTextArea;
   }
 

@@ -40,7 +40,6 @@ public class AssetTreeCellRenderer extends DefaultTreeCellRenderer {
       boolean hasFocus) {
 
     setBorder(null);
-    // System.out.println("expanded: " + expanded);
     super.getTreeCellRendererComponent(tree, value, sel, expanded, leaf, row, hasFocus);
 
     if (value instanceof Directory) {

@@ -123,7 +123,6 @@ public class MacroButtonPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent event) {
-      // TODO: refactor to put tab index from Tab enum
       if (panelClass.equals("GlobalPanel")) {
         new MacroButtonProperties(
             panelClass, MacroButtonPrefs.getNextIndex(), button.getProperties().getGroup());
@@ -376,7 +375,6 @@ public class MacroButtonPopupMenu extends JPopupMenu {
               PersistenceUtil.saveMacro(button.getProperties(), selectedFile);
               MapTool.showInformation(I18N.getText("msg.info.macro.exportSuccess"));
             } catch (IOException ioe) {
-              ioe.printStackTrace();
               MapTool.showError(I18N.getText("msg.error.macro.exportFail", ioe));
             }
           });

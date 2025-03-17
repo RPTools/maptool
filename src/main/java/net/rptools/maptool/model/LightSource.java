@@ -31,7 +31,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.server.proto.LightSourceDto;
-import org.apache.commons.lang.math.NumberUtils;
+import org.apache.commons.lang3.math.NumberUtils;
 
 /**
  * Represents a light source that can be attached to tokens.
@@ -265,7 +265,6 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
    */
   public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone, @Nonnull Light light) {
     Area area = light.getArea(token, zone, scaleWithToken);
-    // TODO: This seems horribly inefficient
     // Subtract out the lights that are previously defined
     for (int i = lightList.indexOf(light) - 1; i >= 0; i--) {
       Light lessLight = lightList.get(i);

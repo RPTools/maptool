@@ -44,6 +44,7 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.player.Player.Role;
+import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.VisionResult;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -68,7 +69,10 @@ public class FogUtil {
    *     {@code null} is returned to indicate no restriction on vision.
    */
   public static @Nullable LinearRing doVisionSweep(
-      Coordinate origin, Envelope visionBounds, NodedTopology topology) {
+      VisibilityType visibilityType,
+      Coordinate origin,
+      Envelope visionBounds,
+      NodedTopology topology) {
     var timer = CodeTimer.get();
 
     timer.start("create solver");
@@ -76,7 +80,7 @@ public class FogUtil {
     timer.stop("create solver");
 
     timer.start("accumulate blocking walls");
-    var visionResult = topology.getSegments(origin, visionBounds, problem::add);
+    var visionResult = topology.getSegments(visibilityType, origin, visionBounds, problem::add);
     if (visionResult == VisionResult.CompletelyObscured) {
       // No vision possible.
       return geometryFactory.createLinearRing();
@@ -111,7 +115,7 @@ public class FogUtil {
    *     vision is not possible.
    */
   public static @Nonnull Area calculateVisibility(
-      Point2D origin, Area vision, NodedTopology topology) {
+      VisibilityType visibilityType, Point2D origin, Area vision, NodedTopology topology) {
     var timer = CodeTimer.get();
     timer.start("FogUtil::calculateVisibility");
     try {
@@ -132,7 +136,7 @@ public class FogUtil {
       LinearRing visibilityPolygon;
       try {
         timer.start("doVisionSweep()");
-        visibilityPolygon = doVisionSweep(cOrigin, visionBounds, topology);
+        visibilityPolygon = doVisionSweep(visibilityType, cOrigin, visionBounds, topology);
       } finally {
         timer.stop("doVisionSweep()");
       }
@@ -224,7 +228,6 @@ public class FogUtil {
             MapTool.serverCommand().exposeFoW(zone.getId(), tokenVision, filteredToks);
           }
         }
-        // System.out.println("2. Token: " + token.getGMName() + " - ID: " + token.getId());
         renderer.flush(token);
       } else {
         renderer.flush(token);
@@ -338,19 +341,6 @@ public class FogUtil {
 
     for (Token token : tokList) tokenSet.add(token.getId());
 
-    // System.out.println("tokList: " + tokList.toString());
-
-    /*
-     * TODO: Jamz: May need to add back the isUseIndividualViews() logic later after testing... String playerName = MapTool.getPlayer().getName(); boolean isGM = MapTool.getPlayer().getRole() ==
-     * Role.GM;
-     *
-     * for (Token token : tokList) { boolean owner = token.isOwner(playerName) || isGM;
-     *
-     * //System.out.println("token: " + token.getName() + ", owner: " + owner);
-     *
-     * if ((!MapTool.isPersonalServer() || MapTool.getServerPolicy().isUseIndividualViews()) && !owner) { continue; } tokenSet.add(token.getId()); }
-     */
-
     renderer.getZone().clearExposedArea(tokenSet);
     exposeVisibleArea(renderer, tokenSet, true);
   }
@@ -361,7 +351,6 @@ public class FogUtil {
    * @param renderer the ZoneRenderer of the map.
    */
   public static void restoreFoW(final ZoneRenderer renderer) {
-    // System.out.println("Zone ID: " + renderer.getZone().getId());
     clearExposedArea(renderer.getZone(), false);
   }
 
@@ -461,9 +450,7 @@ public class FogUtil {
   }
 
   /**
-   * Find the center point of a vision TODO: This is a horrible horrible method. the API is just
-   * plain disgusting. But it'll work to consolidate all the places this has to be done until we can
-   * encapsulate it into the vision itself.
+   * Find the center point of a vision
    *
    * @param token the token to get the vision center of.
    * @param zone the Zone where the token is.

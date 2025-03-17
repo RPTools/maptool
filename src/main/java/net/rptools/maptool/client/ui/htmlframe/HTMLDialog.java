@@ -225,7 +225,6 @@ public class HTMLDialog extends JDialog implements HTMLPanelContainer {
     dialog.updateContents(
         html, title, frame, input, temp, closeButton, scrollReset, isHTML5, value);
 
-    // dialog.canResize = false;
     if (!dialog.isVisible()) {
       dialog.setVisible(true);
     }

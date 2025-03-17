@@ -79,7 +79,6 @@ public class MacroDialogFunctions extends AbstractFunction {
       throw new ParserException(
           I18N.getText("msg.error.frame.reservedName", parameters.get(0).toString()));
     }
-
     if (functionName.equalsIgnoreCase("isDialogVisible")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 1, 1);
       return HTMLFrameFactory.isVisible(false, parameters.get(0).toString())

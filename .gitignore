@@ -26,6 +26,7 @@ out/
 # Automatically Generated
 ################################################################################
 package/windows/MapTool.iss
+package/linux/MapTool*.desktop
 
 
 # IDEs

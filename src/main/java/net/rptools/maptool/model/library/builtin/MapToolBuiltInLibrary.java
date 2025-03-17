@@ -66,9 +66,7 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
   private String processHandlebarsTemplate(ResourceDetails rd) {
     try (var cssTemplateIs = MapToolBuiltInLibrary.class.getResourceAsStream(rd.path())) {
       var cssTemplate = new String(cssTemplateIs.readAllBytes());
-      var css = new HandlebarsUtil<>(cssTemplate).apply(new ThemeCssContext());
-      System.out.println(css);
-      return css;
+      return new HandlebarsUtil<>(cssTemplate).apply(new ThemeCssContext());
     } catch (IOException e) {
       MapTool.showError(I18N.getText("msg.error.parsing.handlebars", rd.path()), e);
       return "";

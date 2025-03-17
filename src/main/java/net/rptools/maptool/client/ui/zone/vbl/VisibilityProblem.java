@@ -188,7 +188,6 @@ public class VisibilityProblem {
     timer.start("initialize");
     endpointSet.simplify();
     final var endpoints = endpointSet.getEndpoints();
-    // verifyEndpoints(endpoints);
     timer.stop("initialize");
 
     // Now for the real sweep.

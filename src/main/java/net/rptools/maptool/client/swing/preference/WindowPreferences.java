@@ -23,6 +23,8 @@ import java.awt.event.WindowEvent;
 import java.util.prefs.BackingStoreException;
 import java.util.prefs.Preferences;
 import javax.swing.JFrame;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Automatically keeps track of and restores frame size when opening/closing the application.
@@ -32,6 +34,7 @@ import javax.swing.JFrame;
  * <p>new WindowPreferences(appName, identifier, this);
  */
 public class WindowPreferences extends WindowAdapter {
+  private static final Logger log = LogManager.getLogger(WindowPreferences.class);
   private final Preferences prefs;
 
   private static final String KEY_X = "x";
@@ -78,7 +81,7 @@ public class WindowPreferences extends WindowAdapter {
     } catch (BackingStoreException bse) {
       // This error shouldn't matter, really,
       // since it is an asthetic action
-      bse.printStackTrace();
+      log.error("Error while clearing window preferences", bse);
     }
   }
 

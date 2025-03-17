@@ -41,6 +41,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * New class extending AbstractFunction to create new "Macro Functions" drawVBL, eraseVBL, getVBL
@@ -129,6 +131,7 @@ public class Topology_Functions extends AbstractFunction {
   private static final Topology_Functions instance = new Topology_Functions();
   private static final String[] paramTranslate = new String[] {"tx", "ty"};
   private static final String[] paramScale = new String[] {"sx", "sy"};
+  private static final Logger log = LogManager.getLogger(Topology_Functions.class);
 
   private Topology_Functions() {
     super(
@@ -509,9 +512,6 @@ public class Topology_Functions extends AbstractFunction {
 
           break;
         case NONE:
-          // Setting to null causes various token topology updating to be skipped during event
-          // handling. Leaving it as an empty Area fixed that.
-          // tokenTopology = null;
           break;
       }
     }
@@ -1233,7 +1233,7 @@ public class Topology_Functions extends AbstractFunction {
       } else if (currentElement[0] == PathIterator.SEG_CLOSE) {
         pointConsumer.accept(moveTo[1], moveTo[2]);
       } else {
-        // System.out.println("in getAreaPoints(): found a curve, ignoring");
+        log.error("Found a curve in the path (segment type {}). Ignoring.", currentElement[0]);
       }
     }
   }

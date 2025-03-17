@@ -16,6 +16,8 @@ package net.rptools.maptool.client.swing;
 
 import java.util.ArrayList;
 import java.util.List;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author trevor
@@ -23,6 +25,7 @@ import java.util.List;
 public class AnimationManager {
 
   private static final List<Animatable> animatableList = new ArrayList<Animatable>();
+  private static final Logger log = LogManager.getLogger(AnimationManager.class);
 
   private static List<Animatable> removeList = new ArrayList<Animatable>();
   private static List<Animatable> addList = new ArrayList<Animatable>();
@@ -69,7 +72,7 @@ public class AnimationManager {
         try {
           Thread.sleep(delay);
         } catch (InterruptedException ie) {
-          ie.printStackTrace();
+          log.warn("Interrupted while sleeping", ie);
         }
       }
     }

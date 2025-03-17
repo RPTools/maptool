@@ -14,16 +14,15 @@
  */
 package net.rptools.maptool.client.ui.htmlframe;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
@@ -31,11 +30,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,6 +73,8 @@ public class HTMLOverlayPanel extends JFXPanel {
 
     Platform.runLater(this::setupScene);
     setVisible(false); // disabled by default
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
   /** Setups the scene of the JFXPanel. */
@@ -207,10 +211,12 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   private void removeOverlay(HTMLOverlayManager overlay) {
     if (overlay != null) {
-      root.getChildren().remove(overlay.getWebView());
-      overlays.remove(overlay);
-      AppMenuBar.removeFromOverlayMenu(overlay.getName());
-      overlay.flush();
+      if (!overlay.getName().startsWith(AppConstants.INTERNAL_FRAME_PREFIX)) {
+        root.getChildren().remove(overlay.getWebView());
+        overlays.remove(overlay);
+        AppMenuBar.removeFromOverlayMenu(overlay.getName());
+        overlay.flush();
+      }
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -219,17 +225,19 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** Removes all overlays. */
   public void removeAllOverlays() {
-    this.setVisible(false);
     Platform.runLater(
         () -> {
-          ObservableList<Node> listChildren = root.getChildren();
           for (HTMLOverlayManager overlay : overlays) {
-            listChildren.remove(overlay.getWebView());
-            AppMenuBar.removeFromOverlayMenu(overlay.getName());
-            overlay.flush();
+            if (!overlay.getName().startsWith(AppConstants.INTERNAL_FRAME_PREFIX)) {
+              root.getChildren().remove(overlay.getWebView());
+              overlays.remove(overlay);
+              AppMenuBar.removeFromOverlayMenu(overlay.getName());
+              overlay.flush();
+            }
           }
-          overlays.clear();
-          setVisible(false);
+          if (overlays.isEmpty()) {
+            setVisible(false);
+          }
         });
   }
 
@@ -252,12 +260,16 @@ public class HTMLOverlayPanel extends JFXPanel {
               // Blank removes the overlay
               removeOverlay(overlayManager);
               return;
-            } else if (zOrder != overlayManager.getZOrder()) {
-              // Resorts by removing and adding back the overlay
-              overlays.remove(overlayManager);
-              overlayManager.setZOrder(zOrder);
-              overlays.add(overlayManager);
+            } else {
+              if (zOrder != overlayManager.getZOrder()) {
+                // Resorts by removing and adding back the overlay
+                overlays.remove(overlayManager);
+                overlayManager.setZOrder(zOrder);
+                overlays.add(overlayManager);
+              }
+              overlayManager.setLocked(locked);
             }
+
           } else {
             overlayManager = new HTMLOverlayManager(name, zOrder, locked);
             overlayManager.setupWebView(new WebView());
@@ -273,6 +285,11 @@ public class HTMLOverlayPanel extends JFXPanel {
             overlayManager.setValue(frameValue);
           }
         });
+  }
+
+  @Subscribe
+  private void onOverlayVisibilityChanged(OverlayVisibilityChanged event) {
+    Platform.runLater(() -> setVisible(overlays.stream().anyMatch(HTMLOverlayManager::isVisible)));
   }
 
   /** Display the overlays according to their zOrder. */

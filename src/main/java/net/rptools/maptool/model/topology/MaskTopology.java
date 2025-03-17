@@ -83,7 +83,11 @@ public final class MaskTopology implements Topology {
   }
 
   @Override
-  public VisionResult addSegments(Coordinate origin, Envelope bounds, Consumer<Coordinate[]> sink) {
+  public VisionResult addSegments(
+      VisibilityType visibilityType,
+      Coordinate origin,
+      Envelope bounds,
+      Consumer<Coordinate[]> sink) {
     // Convenience for adding rings to the result.
     BiConsumer<LinearRing, Facing> add =
         (ring, facing) ->
@@ -97,7 +101,7 @@ public final class MaskTopology implements Topology {
                 origin, polygon.getExteriorRing().getCoordinateSequence());
 
     if (!isInside) {
-      switch (type) {
+      switch (this.type) {
         case WALL_VBL -> {
           // Just the frontside of the exterior needs to be added.
           add.accept(polygon.getExteriorRing(), Facing.OCEAN_SIDE_FACES_ORIGIN);
@@ -134,7 +138,7 @@ public final class MaskTopology implements Topology {
         }
       }
 
-      switch (type) {
+      switch (this.type) {
         case WALL_VBL -> {
           if (holeIndex < 0) {
             // Point is not in any hole, so vision is completely blocked.

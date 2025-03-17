@@ -279,7 +279,6 @@ public class AppPreferences {
   public static final Preference<Boolean> mapLabelShowBorder =
       BooleanType.create("mapLabelShowBorder", true);
 
-  // TODO Why is the default not a valid port?
   public static final Preference<Integer> webEndpointPort =
       IntegerType.create("webEndPointPort", 654555);
 

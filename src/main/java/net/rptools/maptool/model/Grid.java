@@ -228,8 +228,6 @@ public abstract class Grid implements Cloneable {
   @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
-    // Grid newGrid = (Grid) super.clone();
-    // return newGrid;
   }
 
   /**
@@ -587,19 +585,14 @@ public abstract class Grid implements Cloneable {
    * @return the distance (in cells) between the two cells
    */
   public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
-    int distance;
     int distX = Math.abs(cellA.x - cellB.x);
     int distY = Math.abs(cellA.y - cellB.y);
-    if (wmetric == WalkerMetric.NO_DIAGONALS || wmetric == WalkerMetric.MANHATTAN) {
-      distance = distX + distY;
-    } else if (wmetric == WalkerMetric.ONE_ONE_ONE) {
-      distance = Math.max(distX, distY);
-    } else if (wmetric == WalkerMetric.ONE_TWO_ONE) {
-      distance = Math.max(distX, distY) + Math.min(distX, distY) / 2;
-    } else {
-      System.out.println("Incorrect WalkerMetric in method cellDistance of Grid.java");
-      distance = -1; // error, should not happen;
-    }
+    int distance =
+        switch (wmetric) {
+          case NO_DIAGONALS, MANHATTAN -> distX + distY;
+          case ONE_TWO_ONE -> Math.max(distX, distY) + Math.min(distX, distY) / 2;
+          case ONE_ONE_ONE -> Math.max(distX, distY);
+        };
     return distance;
   }
 

@@ -14,6 +14,8 @@
  */
 package net.rptools.maptool.client;
 
+import net.rptools.maptool.model.library.LibraryManager;
+
 public class MapToolMacroContext {
   /** The name of the macro being executed. */
   private final String name;
@@ -99,5 +101,20 @@ public class MapToolMacroContext {
    */
   public boolean isUseToolTipsForUnformatedRolls() {
     return useToolTipsForUnformatedRolls;
+  }
+
+  /**
+   * Get the namespace for the macro in context
+   *
+   * @return name space
+   */
+  public String getNamespace() {
+    if (source.length() > 4) {
+      var ns = source.substring(4);
+      if (new LibraryManager().addOnLibraryExists(ns)) {
+        return ns;
+      }
+    }
+    return null;
   }
 }

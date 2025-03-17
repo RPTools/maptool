@@ -15,9 +15,7 @@
 package net.rptools.clientserver.simple;
 
 /**
- * @author drice
- *     <p>TODO To change the template for this generated type comment go to Window - Preferences -
- *     Java - Code Style - Code Templates
+ * @author drice Interface for handling client server messages.
  */
 public interface MessageHandler {
 

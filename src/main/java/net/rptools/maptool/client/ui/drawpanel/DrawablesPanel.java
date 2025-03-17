@@ -14,28 +14,18 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.AlphaComposite;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics;
-import java.awt.Graphics2D;
+import java.awt.*;
 import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import javax.swing.JComponent;
+import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawableColorPaint;
-import net.rptools.maptool.model.drawing.DrawablesGroup;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.Pen;
+import net.rptools.maptool.model.drawing.*;
 
 public class DrawablesPanel extends JComponent {
   private static final long serialVersionUID = 441600187734634440L;
@@ -78,7 +68,7 @@ public class DrawablesPanel extends JComponent {
               if (!de.getPen().isEraser()) onlyCuts = false;
             }
           }
-          if (drawableList.size() > 0) {
+          if (!drawableList.isEmpty()) {
             Collections.reverse(drawableList);
             Rectangle bounds = getBounds(zone, drawableList);
             double scale =

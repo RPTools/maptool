@@ -36,7 +36,6 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
  */
 public class ZoneImageGenerator extends BufferedImage {
 
-  // final JComponent largeComponent;
   final ZoneRenderer renderer;
   final PlayerView view;
   final Rectangle origBounds;

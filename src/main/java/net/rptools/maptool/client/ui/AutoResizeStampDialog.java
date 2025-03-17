@@ -79,7 +79,6 @@ public class AutoResizeStampDialog extends JDialog {
     setAlwaysOnTop(true);
     setModalityType(Dialog.ModalityType.APPLICATION_MODAL);
     setTitle(I18N.getString("dialog.resizeStamp.title"));
-    //    setBounds(100, 100, 450, 200);
     getContentPane().setLayout(new BorderLayout());
     contentPanel.setBorder(new EmptyBorder(5, 5, 5, 5));
     getContentPane().add(contentPanel, BorderLayout.CENTER);

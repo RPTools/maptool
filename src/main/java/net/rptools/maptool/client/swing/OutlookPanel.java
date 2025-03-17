@@ -29,7 +29,6 @@ import javax.swing.JPanel;
  */
 @SuppressWarnings("serial")
 public class OutlookPanel extends JPanel {
-  // TODO: Variable size buttons ?
   public static final int BUTTON_HEIGHT = 20;
 
   public OutlookPanel() {
@@ -115,7 +114,6 @@ public class OutlookPanel extends JPanel {
     g.setColor(getBackground());
     g.fillRect(0, 0, size.width, size.height);
 
-    // TODO: This can be pulled out and put in a layout manager
     for (int count = 0; count < m_compList.size(); count++) {
       JButtonEx button = m_compList.get(count);
 

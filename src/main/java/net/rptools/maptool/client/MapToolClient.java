@@ -21,6 +21,10 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.maptool.client.events.PlayerConnected;
@@ -50,6 +54,9 @@ import org.apache.logging.log4j.Logger;
  */
 public class MapToolClient {
   private static final Logger log = LogManager.getLogger(MapToolClient.class);
+  private static final ScheduledExecutorService periodTaskExecutor =
+      Executors.newSingleThreadScheduledExecutor();
+  private static final long HEARTBEAT_SECONDS = 20;
 
   public enum State {
     New,
@@ -70,6 +77,8 @@ public class MapToolClient {
   private ServerPolicy serverPolicy;
   private final ServerCommandClientImpl serverCommand;
   private State currentState = State.New;
+
+  private @Nullable ScheduledFuture<?> heartBeatHandle;
 
   private MapToolClient(
       @Nullable MapToolServer localServer,
@@ -187,11 +196,20 @@ public class MapToolClient {
         serverCommand.stop();
         throw e;
       }
+
+      var task = new HeartBeatTask(serverCommand, conn.getId());
+      heartBeatHandle =
+          periodTaskExecutor.scheduleAtFixedRate(
+              task, HEARTBEAT_SECONDS, HEARTBEAT_SECONDS, TimeUnit.SECONDS);
     }
   }
 
   public void close() {
     if (transitionToState(State.Closed)) {
+      if (heartBeatHandle != null) {
+        heartBeatHandle.cancel(true);
+      }
+
       serverCommand.stop();
       if (conn.isAlive()) {
         conn.close();
@@ -315,6 +333,14 @@ public class MapToolClient {
               MapTool.showError(I18N.getText("msg.error.server.cantrestart"), e);
             }
           });
+    }
+  }
+
+  private record HeartBeatTask(ServerCommand serverCommand, String name) implements Runnable {
+    @Override
+    public void run() {
+      log.debug("HeartBeatTask(…, {})#run()", name);
+      serverCommand.heartbeat(name);
     }
   }
 }

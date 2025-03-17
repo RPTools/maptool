@@ -16,7 +16,7 @@ package net.rptools.clientserver.simple.server;
 
 import java.io.IOException;
 
-public interface Server extends AutoCloseable {
+public sealed interface Server extends AutoCloseable permits NilServer, SocketServer, WebRTCServer {
   void start() throws IOException;
 
   void close();

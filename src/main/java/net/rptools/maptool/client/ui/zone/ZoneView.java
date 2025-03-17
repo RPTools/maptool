@@ -35,6 +35,7 @@ import net.rptools.maptool.client.ui.zone.vbl.NodedTopology;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.player.Player;
+import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.zones.MaskTopologyChanged;
 import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensChanged;
@@ -46,6 +47,7 @@ import org.apache.logging.log4j.Logger;
 
 /** Responsible for calculating lights and vision. */
 public class ZoneView {
+
   /**
    * Represents the important aspects of a sight for the purposes of calculating illumination.
    *
@@ -304,7 +306,8 @@ public class ZoneView {
 
     if (!lightSource.isIgnoresVBL()) {
       lightSourceVisibleArea =
-          FogUtil.calculateVisibility(p, lightSourceArea, prepareNodedTopology());
+          FogUtil.calculateVisibility(
+              VisibilityType.Light, p, lightSourceArea, prepareNodedTopology());
     }
     if (lightSourceVisibleArea.isEmpty()) {
       // Nothing illuminated for this source.
@@ -543,11 +546,11 @@ public class ZoneView {
       Point p = FogUtil.calculateVisionCenter(token, zone);
       Area visibleArea = sight.getVisionShape(token, zone);
       visibleArea.transform(AffineTransform.getTranslateInstance(p.x, p.y));
-      tokenVisibleArea = FogUtil.calculateVisibility(p, visibleArea, prepareNodedTopology());
+      tokenVisibleArea =
+          FogUtil.calculateVisibility(VisibilityType.Sight, p, visibleArea, prepareNodedTopology());
       tokenVisibleAreaCache.put(token.getId(), tokenVisibleArea);
     }
 
-    // TODO Instead of a defensive copy, we could include a very stern warning to not modify.
     return new Area(tokenVisibleArea);
   }
 
@@ -578,8 +581,6 @@ public class ZoneView {
 
     tokenVisionCache.put(token.getId(), litArea);
 
-    // log.info("getVisibleArea: \t\t" + stopwatch);
-
     return litArea;
   }
 
@@ -603,10 +604,6 @@ public class ZoneView {
                 if ((!token.isVisible()) && !view2.isGMView()) {
                   continue;
                 }
-                // TODO This playerOwns check is not view-reactive. Specifically it always
-                //  returns true for GMs, even if !view2.isGMView(). Somehow want to check against
-                //  MapTool.getServerPolicy().useStrictTokenManagement() but not
-                //  MapTool.getPlayer().isGM().
                 if (token.isVisibleOnlyToOwner() && !AppUtil.playerOwns(token)) {
                   continue;
                 }
@@ -629,7 +626,8 @@ public class ZoneView {
 
                   if (!lightSource.isIgnoresVBL()) {
                     visibleArea =
-                        FogUtil.calculateVisibility(p, lightSourceArea, prepareNodedTopology());
+                        FogUtil.calculateVisibility(
+                            VisibilityType.Aura, p, lightSourceArea, prepareNodedTopology());
                   }
 
                   // This needs to be cached somehow
@@ -768,7 +766,6 @@ public class ZoneView {
     }
     tokenVisibleAreaCache.remove(token.getId());
 
-    // TODO Split logic for light and sight, since the sight portion is entirely duplicated.
     final var modelsWithToken =
         illuminationModels.values().stream()
             .filter(model -> model.hasToken(token.getId()))
@@ -780,11 +777,9 @@ public class ZoneView {
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
-      // TODO Could we instead only clear those views that include the token?
       drawableLights.clear();
     } else if (token.getHasSight()) {
       contributedPersonalLightsByToken.remove(token.getId());
-      // TODO Could we instead only clear those views that include the token?
       illuminationsPerView.clear();
       exposedAreaMap.clear();
       visibleAreaMap.clear();
@@ -835,12 +830,11 @@ public class ZoneView {
   private boolean flushExistingTokens(List<Token> tokens) {
     boolean tokenChangedTopology = false;
     for (Token token : tokens) {
-      if (token.hasAnyMaskTopology()) tokenChangedTopology = true;
+      if (token.hasAnyMaskTopology()) {
+        tokenChangedTopology = true;
+      }
       flush(token);
     }
-    // Ug, stupid hack here, can't find a bug where if a NPC token is moved before lights are
-    // cleared on another token, changes aren't pushed to client?
-    // tokenVisionCache.clear();
     return tokenChangedTopology;
   }
 

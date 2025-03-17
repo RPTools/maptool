@@ -24,8 +24,6 @@ import net.rptools.maptool.client.macro.MacroDefinition;
  * Macro to clear the message panel
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 @MacroDefinition(
     name = "clear",

@@ -97,6 +97,10 @@ public class MapToolConnection {
     connection.addDisconnectHandler(serverDisconnectHandler);
   }
 
+  public String getId() {
+    return connection.getId();
+  }
+
   public boolean isAlive() {
     return connection.isAlive();
   }

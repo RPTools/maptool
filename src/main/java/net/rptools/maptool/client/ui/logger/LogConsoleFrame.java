@@ -39,8 +39,6 @@ import org.apache.logging.log4j.Logger;
 public class LogConsoleFrame extends JFrame {
   private static final Logger log = LogManager.getLogger(LogConsoleFrame.class);
 
-  // private RSyntaxTextArea jLoggingConsole; // Doesn't look like RSyntaxTextArea can keep up with
-  // large amounts of logging
   private JTextArea jLoggingConsole;
   private static final Font LOGGER_FONT = new Font("Lucida Console", Font.PLAIN, 12);
 
@@ -82,7 +80,6 @@ public class LogConsoleFrame extends JFrame {
 
   private JTextComponent getNoteArea() {
     if (jLoggingConsole == null) {
-      // jLoggingConsole = new RSyntaxTextArea();
       jLoggingConsole = new JTextArea();
       jLoggingConsole.setBorder(BorderFactory.createLineBorder(Color.black));
 

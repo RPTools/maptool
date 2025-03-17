@@ -352,6 +352,7 @@
                           <lineWrap value="true"/>
                           <name value="toolTip"/>
                           <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="component.tooltip.macro.tooltip"/>
+                          <useFocusableTips value="false"/>
                         </properties>
                       </component>
                     </children>

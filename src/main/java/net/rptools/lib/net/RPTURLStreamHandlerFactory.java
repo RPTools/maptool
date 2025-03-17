@@ -24,9 +24,12 @@ import java.net.URLStreamHandlerFactory;
 import java.util.HashMap;
 import java.util.Map;
 import net.rptools.lib.FileUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
 
+  private static final Logger log = LogManager.getLogger(RPTURLStreamHandlerFactory.class);
   private static Map<String, byte[]> imageMap = new HashMap<String, byte[]>();
 
   private Map<String, URLStreamHandler> protocolMap = new HashMap<String, URLStreamHandler>();
@@ -49,7 +52,6 @@ public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
     @Override
     protected URLConnection openConnection(URL u) {
 
-      // TODO: This should really figure out the exact type
       return new ImageURLConnection(u);
     }
   }
@@ -68,7 +70,7 @@ public class RPTURLStreamHandlerFactory implements URLStreamHandlerFactory {
           data = FileUtil.loadResource(path);
           imageMap.put(path, data);
         } catch (IOException ioe) {
-          ioe.printStackTrace();
+          log.error("Error trying to read resource {}", path);
           data = new byte[] {};
         }
       }

@@ -49,6 +49,8 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.Type;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.Node;
@@ -66,6 +68,7 @@ public final class ExtractHeroLab {
   private static final File tmpDir = AppUtil.getTmpDir();
   private static final String MISSING_XML_ERROR_MESSAGE =
       "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n<error>\n    XML Data is missing from Hero Lab portfolio.\n    Contact LWD Technology support at https://www.wolflair.com\n</error>";
+  private static final Logger log = LogManager.getLogger(ExtractHeroLab.class);
   private final File finalTempDir;
   private final File extractComplete;
   private final File portfolioFile;
@@ -81,7 +84,7 @@ public final class ExtractHeroLab {
     try {
       builder = factory.newDocumentBuilder();
     } catch (ParserConfigurationException e) {
-      e.printStackTrace();
+      log.error("Error while creating XML document builder", e);
     }
 
     finalTempDir = new File(tmpDir + "/hero_lab_" + heroLabPortfolio.hashCode());
@@ -112,8 +115,6 @@ public final class ExtractHeroLab {
       int returnVal = fileChooser.showOpenDialog(null);
 
       if (returnVal == JFileChooser.APPROVE_OPTION) {
-        System.out.println(
-            "New portfolio picked: " + fileChooser.getSelectedFile().getAbsolutePath());
         return fileChooser.getSelectedFile();
       }
     }
@@ -125,15 +126,6 @@ public final class ExtractHeroLab {
     return extractComplete.exists();
   }
 
-  private void markComplete() {
-    try {
-      extractComplete.createNewFile();
-      FileUtils.forceDeleteOnExit(finalTempDir);
-    } catch (IOException e) {
-      e.printStackTrace();
-    }
-  }
-
   private void markComplete(String contents) {
     try {
       PrintWriter out = new PrintWriter(extractComplete);
@@ -141,7 +133,7 @@ public final class ExtractHeroLab {
       out.close();
       FileUtils.forceDeleteOnExit(finalTempDir);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while writing out extracted XML", e);
     }
   }
 
@@ -257,7 +249,7 @@ public final class ExtractHeroLab {
         markComplete(new XMLDocument(portfolioIndex).toString());
       }
     } catch (IOException | XPathExpressionException | SAXException e) {
-      e.printStackTrace();
+      log.error("Error while extracting HeroLab characters", e);
     }
 
     return heroes;
@@ -329,7 +321,7 @@ public final class ExtractHeroLab {
 
       markComplete(new XMLDocument(portfolioIndex).toString());
     } catch (IOException | XPathExpressionException | SAXException e) {
-      e.printStackTrace();
+      log.error("Error while refreshing HeroLab character", e);
     }
 
     return heroLabData;
@@ -476,7 +468,7 @@ public final class ExtractHeroLab {
         | SAXException
         | TransformerFactoryConfigurationError
         | TransformerException e1) {
-      e1.printStackTrace();
+      log.error("Error while reading HeroLab statblock", e1);
     }
 
     return statBlocks;
@@ -496,7 +488,7 @@ public final class ExtractHeroLab {
                 + ((Element) statBlockNode).getAttribute("filename");
       }
     } catch (XPathExpressionException e) {
-      e.printStackTrace();
+      log.error("Error while reading HeroLab statblock for type {}", type, e);
     }
 
     return path;
@@ -521,9 +513,9 @@ public final class ExtractHeroLab {
 
       por.close();
     } catch (NullPointerException e) {
-      e.printStackTrace();
+      log.error("NPE while retrieving statblock", e);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Unexpected error while retrieving statblock", e);
     }
 
     return statBlock;

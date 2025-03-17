@@ -136,7 +136,6 @@ public class SwingUtil {
     int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
     // Jamz: For multiple monitor's, x & y can be negative values...
-    // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
     innerWindow.setLocation(x, y);
   }
 
@@ -269,7 +268,6 @@ public class SwingUtil {
     int x = flipHorizontal ? view.width - (rect.x + rect.width) : rect.x;
     int y = flipVertical ? view.height - (rect.y + rect.height) : rect.y;
 
-    // System.out.println(rect + " - " + new Rectangle(x, y, rect.width, rect.height));
     return new Rectangle(x, y, rect.width, rect.height);
   }
 

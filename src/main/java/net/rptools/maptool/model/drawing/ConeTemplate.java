@@ -30,13 +30,11 @@ import net.rptools.maptool.server.proto.drawing.DrawableDto;
  * are 8 different directions from each spine.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public class ConeTemplate extends RadiusTemplate {
 
   /**
-   * The dirction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint along the spine
+   * The direction to paint. The ne,se,nw,sw paint a quadrant and the n,w,e,w paint along the spine
    * of the selected vertex. Saved as a string as a hack to get around the hessian library's problem
    * w/ serializing enumerations.
    */

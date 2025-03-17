@@ -126,7 +126,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
   public Paint getBackground(int index) {
     return null;
-    // return Token.isTokenFile(fileList.get(index).getName()) ? TOKEN_BG_COLOR : null;
   }
 
   public Image[] getDecorations(int index) {
@@ -140,7 +139,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       }
       return new Image[] {rptokenDecorationImage};
     } catch (IOException | NullPointerException | IndexOutOfBoundsException e) {
-      e.printStackTrace();
+      log.error("Error while checking if this is a HeroLab token", e);
     }
     return null;
   }
@@ -166,7 +165,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       // TRANSFERING_IMAGE.
       // We could write logic using the progress bar but most likely this panel will get an update
       // with JavaFX soon(tm)...
-      e.printStackTrace();
+      log.error("Error while getting image from file list", e);
     }
 
     return image != null ? image : ImageManager.TRANSFERING_IMAGE;
@@ -235,7 +234,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       return null;
     }
 
-    // String name = fileList.get(index).getName();
     File file = fileList.get(index);
     String name = FileUtil.getNameWithoutExtension(file.getName());
     String caption = "<html><b>" + name + "</b></html>";
@@ -262,8 +260,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
                 + I18N.getText("panel.Asset.Mouseover.size", fileSize)
                 + "</html>";
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while checking image dimensions", e);
       }
     }
 
@@ -281,7 +278,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     } catch (NullPointerException e) {
       // This can occasionally happen during PDF extraction as it's multi-threaded and the fileList
       // is getting updated after each page is extracted...
-      e.printStackTrace();
+      log.error("Error while get file caption", e);
     }
 
     return "";
@@ -346,8 +343,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
           extractThreadPool.awaitTermination(1, TimeUnit.MINUTES);
         }
       } catch (InterruptedException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while canceling PDF extraction", e);
       }
     }
   }
@@ -369,10 +365,8 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
       try {
         extractor = new ExtractImagesFromPDF(dir.getPath(), forceRescan, extractRenderedPages);
-
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while initializing PDF extractor", e);
       }
 
       pageCount = extractor.getPageCount();
@@ -399,8 +393,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
           dir = new PdfAsDirectory(extractor.getTempDir(), AppConstants.IMAGE_FILE_FILTER);
         }
       } catch (IOException e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while creating image extraction task", e);
       }
 
       return null;
@@ -437,8 +430,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
       try {
         fileList.addAll(extractor.extractPage(pageNumber));
       } catch (Exception e) {
-        // TODO Auto-generated catch block
-        e.printStackTrace();
+        log.error("Error while extracting images", e);
       } finally {
         extractor.close();
         updatePdfProgress(pageNumber, null);
@@ -466,8 +458,7 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     try {
       fileList.addAll(dir.getFiles());
     } catch (FileNotFoundException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while listing files for cleanup", e);
     }
     fileListCleanup();
   }
@@ -485,9 +476,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
 
     fileList = new ArrayList<File>();
     subDirList = new ArrayList<Directory>();
-
-    // Jamz: TODO Add progress bar!
-    // MapTool.getFrame().getAssetPanel().updateImagePanel();
 
     boolean portfolioChanged = dir.hasChanged();
     ExtractHeroLab heroLabFile = new ExtractHeroLab(dir.getPath(), portfolioChanged);
@@ -514,16 +502,6 @@ public class ImageFileImagePanelModel implements ImagePanelModel {
     subDirList = new ArrayList<Directory>();
 
     if (global && filter != null && filter.length() > 0) {
-      // FIXME populate fileList from all filenames in the library
-      // Use the AssetManager class, something akin to searchForImageReferences()
-      // but I don't want to do a search; I want to use the existing cached results.
-      // Looks like all files with ".lnk" (see getAssetLinkFile() in the AssetManager class).
-      // assert global;
-
-      /*
-       * Jamz: In the meantime, doing raw search and only search subdirectories if some criteria is filled in. Didn't feel like hacking up AssetManager at this stage of development. For now
-       * limiting global search to prevent very large arrays of 1000's of files which the panel has a hard time rendering (even without global searches, it lags on large file lists).
-       */
 
       try {
         fileList.addAll(dir.getFiles());

@@ -158,8 +158,6 @@ public class ViewAssetDialog {
                       } else {
                         head.appendChild(cssNode);
                       }
-                      System.out.println(
-                          webEngine.executeScript("document.documentElement.innerHTML"));
                     }
                   });
           webEngine.loadContent(html);

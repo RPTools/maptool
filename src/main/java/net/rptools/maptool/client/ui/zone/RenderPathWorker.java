@@ -24,7 +24,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TerrainModifierOperation;
 
 public class RenderPathWorker extends SwingWorker<Void, Void> {
-  // private static final Logger log = LogManager.getLogger(RenderPathWorker.class);
 
   ZoneRenderer zoneRenderer;
   @Nonnull ZoneWalker walker;

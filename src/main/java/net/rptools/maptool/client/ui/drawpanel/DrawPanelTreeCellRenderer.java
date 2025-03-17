@@ -14,23 +14,13 @@
  */
 package net.rptools.maptool.client.ui.drawpanel;
 
-import java.awt.Component;
-import java.awt.Dimension;
-import javax.swing.Icon;
-import javax.swing.JTree;
-import javax.swing.SwingUtilities;
+import java.awt.*;
+import javax.swing.*;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.drawing.AbstractDrawing;
-import net.rptools.maptool.model.drawing.AbstractTemplate;
-import net.rptools.maptool.model.drawing.Drawable;
-import net.rptools.maptool.model.drawing.DrawablesGroup;
-import net.rptools.maptool.model.drawing.DrawnElement;
-import net.rptools.maptool.model.drawing.LineSegment;
-import net.rptools.maptool.model.drawing.Pen;
-import net.rptools.maptool.model.drawing.ShapeDrawable;
+import net.rptools.maptool.model.drawing.*;
 
 public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
@@ -72,8 +62,6 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
     } else if (value instanceof DrawPanelTreeModel.View) {
       DrawPanelTreeModel.View view = (DrawPanelTreeModel.View) value;
       text = view.getLayer().toString();
-    } else {
-      // setLeafIcon(null);
     }
 
     super.getTreeCellRendererComponent(tree, text, sel, expanded, leaf, row, hasFocus);
@@ -102,6 +90,20 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
 
   private Icon setDrawPanelIcon(String key, boolean eraser) {
     switch (key) {
+      case "panel.DrawExplorer.ShapeDrawable.Arc":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ARC_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.CubicCurve":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_CUBIC_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Line":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_LINE2D_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Path":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_PATH_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.QuadCurve":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_QUAD_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.Unknown":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_UNKNOWN_DRAW);
+      case "panel.DrawExplorer.ShapeDrawable.RoundRectangle":
+        return RessourceManager.getSmallIcon(Icons.DRAWPANEL_ROUND_RECT);
       case "panel.DrawExplorer.ShapeDrawable.Area":
         if (eraser) return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_ERASE);
         else return RessourceManager.getSmallIcon(Icons.DRAWPANEL_AREA_DRAW);
@@ -134,7 +136,7 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       case "panel.DrawExplorer.Template.WallTemplate":
         return RessourceManager.getSmallIcon(Icons.DRAWPANEL_TEMPLATE_WALL);
     }
-    return null;
+    return RessourceManager.getSmallIcon(Icons.DRAWPANEL_UNKNOWN_DRAW);
   }
 
   @Override

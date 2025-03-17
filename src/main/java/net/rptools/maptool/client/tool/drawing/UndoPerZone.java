@@ -36,10 +36,9 @@ import org.apache.logging.log4j.Logger;
  * UndoManager.
  *
  * @author jgorrell
- * @version $Revision: 5828 $ $Date: 2011-11-26 18:29:24 -0500 (Sat, 26 Nov 2011) $ $Author:
- *     azhrei_fje $
  */
 public class UndoPerZone {
+
   private static final Logger log = LogManager.getLogger(UndoPerZone.class);
 
   /** Swing's undo/redo support */
@@ -146,10 +145,9 @@ public class UndoPerZone {
    * able to manipulate only their own.
    *
    * @author jgorrell
-   * @version $Revision: 5828 $ $Date: 2011-11-26 18:29:24 -0500 (Sat, 26 Nov 2011) $ $Author:
-   *     azhrei_fje $
    */
   private class DrawableUndoableEdit extends AbstractUndoableEdit {
+
     private static final long serialVersionUID = -1373046215655231284L;
 
     /** The pen used to modify the zone. */
