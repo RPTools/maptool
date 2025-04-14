@@ -95,8 +95,6 @@ public class SquareGrid extends Grid {
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD9, 0), new MovementKey(callback, size, -size));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -size, 0));
-      // movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(callback,
-      // 0, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, size, 0));
       movementKeys.put(
@@ -277,8 +275,6 @@ public class SquareGrid extends Grid {
     int newX = (int) (calcX < 0 && !exactCalcX ? calcX - 1 : calcX);
     int newY = (int) (calcY < 0 && !exactCalcY ? calcY - 1 : calcY);
 
-    // System.out.format("%d / %d => %f, %f => %d, %d\n", zp.x, getSize(), calcX, calcY, newX,
-    // newY);
     return new CellPoint(newX, newY);
   }
 

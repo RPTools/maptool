@@ -68,9 +68,12 @@ import net.rptools.maptool.model.library.token.LibTokenConverter;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.util.FunctionUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private static final long serialVersionUID = -622385975780832588L;
+  private static final Logger log = LogManager.getLogger(TokenPopupMenu.class);
 
   public TokenPopupMenu(
       Set<GUID> selectedTokenSet, int x, int y, ZoneRenderer renderer, Token tokenUnderMouse) {
@@ -106,10 +109,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
     if (MapTool.getPlayer().isGM() || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
       add(createExposeMenu());
-      // if (MapTool.getPlayer().isGM()) {
-      // addGMItem(createVisionMenu());
-      // }
-      // add(new JSeparator());
     }
     addOwnedItem(createLightSourceMenu());
     add(new JSeparator());
@@ -192,7 +191,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
   private JMenu createExposedFOWMenu() {
     String viewMenu = I18N.getText("token.popup.menu.fow");
     JMenu menu = new JMenu(viewMenu);
-    // menu.add(new AddGlobalExposedAreaAction());
     menu.add(new AddPartyExposedAreaAction());
 
     Zone zone = getRenderer().getZone();
@@ -252,12 +250,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     }
   }
 
-  /**
-   * XXX If this object is supposed to merge all exposed areas together and apply that to the
-   * currently selected tokens, why is it using a nested loop? Should one loop be used to create the
-   * exposed area object, then a second (non-nested) loop be used to modify the exposed area of all
-   * selected tokens?
-   */
   private class AddPartyExposedAreaAction extends AbstractAction {
     private static final long serialVersionUID = 3672180436608883849L;
 
@@ -449,7 +441,7 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
         haloMenu.add(item);
       }
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while building halo color selection menu");
     }
     return haloMenu;
   }
@@ -661,8 +653,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
     protected Color currentColor;
     protected Set<GUID> tokenSet;
     protected ZoneRenderer renderer;
-
-    // private final String title = "Choose Halo Color";
 
     public SetColorChooserAction(ZoneRenderer renderer, Set<GUID> tokenSet, String name) {
       this.tokenSet = tokenSet;
@@ -993,7 +983,6 @@ public class TokenPopupMenu extends AbstractTokenPopupMenu {
           continue;
         }
         // Get the start cell of the last move
-        // TODO: I don't like this hard wiring, find a better way
         ZonePoint zp = null;
         if (path.getCellPath().get(0) instanceof CellPoint) {
           zp = zone.getGrid().convert((CellPoint) path.getCellPath().get(0));

@@ -92,10 +92,6 @@ public class SetTokenPropertyMacro implements Macro {
           break;
         }
       }
-      // TODO: This is currently done as part of the MapToolVariableResolver. I know this is bad
-      // as it is an implementation issue of MapToolVariableResolver that we should know nothing
-      // about or depend on here but at the moment it can't be helped.
-      // MapTool.serverCommand().putToken(MapTool.getFrame().getCurrentZoneRenderer().getZone().getId(), token); // update so others see the changes.
     }
   }
 

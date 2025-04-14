@@ -64,25 +64,15 @@ public abstract class AbstractButtonGroup extends JPanel
   private int spacerHeight = 0;
   private AreaGroup area;
 
-  public void dragEnter(DropTargetDragEvent event) {
-    // System.out.println("BG: drag enter");
-  }
+  public void dragEnter(DropTargetDragEvent event) {}
 
-  public void dragOver(DropTargetDragEvent event) {
-    // System.out.println("BG: drag over");
-  }
+  public void dragOver(DropTargetDragEvent event) {}
 
-  public void dropActionChanged(DropTargetDragEvent event) {
-    // System.out.println("BG: drag action changed");
-  }
+  public void dropActionChanged(DropTargetDragEvent event) {}
 
-  public void dragExit(DropTargetEvent event) {
-    // System.out.println("BG: drag exit");
-  }
+  public void dragExit(DropTargetEvent event) {}
 
-  public void drop(DropTargetDropEvent event) {
-    // System.out.println("BG: drop!");
-  }
+  public void drop(DropTargetDropEvent event) {}
 
   public Token getToken() {
     if (tokenId == null) {
@@ -224,8 +214,6 @@ public abstract class AbstractButtonGroup extends JPanel
     private String label;
     private Rectangle imageBounds;
 
-    // private final int X_OFFSET = 5;
-
     public ThumbnailedBorder(Image image, String label) {
       this.image = image;
       this.label = label;
@@ -234,10 +222,7 @@ public abstract class AbstractButtonGroup extends JPanel
     }
 
     public void paintBorder(Component c, Graphics g, int x, int y, int width, int height) {
-      // ((Graphics2D) g).setRenderingHint(RenderingHints.KEY_RENDERING,
-      // RenderingHints.VALUE_RENDER_QUALITY);
 
-      // TODO: change magic numbers to final fields
       // match line color to default titledborder line color
       g.setColor(new Color(165, 163, 151));
 

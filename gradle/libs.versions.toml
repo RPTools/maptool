@@ -1,0 +1,189 @@
+[versions]
+log4j = "2.22.1"
+junit = "5.11.4"
+imageio = "3.12.0"
+sentry = "1.7.29"
+jide = "3.7.9"
+flatlaf = "3.5.4"
+handlebars = "4.4.0"
+jai-imageio = "1.4.0"
+graalvm-js = "21.2.0"
+pdfbox = "3.0.0"
+protoc = "4.29.1"
+
+[libraries]
+findbugs-jsr305              = { group = "com.google.code.findbugs",    name = "jsr305",                  version     = "3.0.2"       }
+
+# Logging
+log4j-core                   = { group = "org.apache.logging.log4j",    name = "log4j-core",              version.ref = "log4j"       }
+log4j-api                    = { group = "org.apache.logging.log4j",    name = "log4j-api",               version.ref = "log4j"       }
+# Bridges v1 to v2 for other code in other libs
+log4j-1_2-api                = { group = "org.apache.logging.log4j",    name = "log4j-1.2-api",           version.ref = "log4j"       }
+slf4j-simple                 = { group = "org.slf4j",                   name = "slf4j-simple",            version     = "2.0.16"      }
+apache-commons-logging       = { group = "commons-logging",             name = "commons-logging",         version     = "1.3.0"       }
+# For Sentry bug reporting
+sentry                       = { group = "io.sentry",                   name = "sentry",                  version.ref = "sentry"      }
+sentry-log4j                 = { group = "io.sentry",                   name = "sentry-log4j2",           version.ref = "sentry"      }
+
+# Networking
+# Web RTC
+websocket                    = { group = "org.java-websocket",          name = "Java-WebSocket",          version = "1.5.7"           }
+webrtc                       = { group = "dev.onvoid.webrtc",           name = "webrtc-java",             version = "0.9.0"           }
+# compression of messages between client and server
+apache-commons-compress      = { group = "org.apache.commons",          name = "commons-compress",        version = "1.27.1"          }
+zstd                         = { group = "com.github.luben",            name = "zstd-jni",                version = "1.5.5-11"        }
+# Protobuf
+protobuf-grpc                = { group = "io.grpc",                     name = "grpc-protobuf",           version = "1.61.1"          }
+protobuf-java                = { group = "com.google.protobuf",         name = "protobuf-java-util",      version.ref = "protoc"      }
+protobuf-protoc              = { group = "com.google.protobuf",         name = "protoc",                  version.ref = "protoc"      }
+# find running instances in LAN
+servicediscovery             = { group = "net.tsc.servicediscovery",    name = "servicediscovery",        version = "1.0.b5"          }
+# UPNP. Maybe replace with jupnp
+upnplib                      = { group = "com.github.fishface60",       name = "upnplib",                 version = "0351d7502a57f6c5dc8653220bc03ad99af58b21" }
+# For RESTful functions
+okhttp                       = { group = "com.squareup.okhttp3",        name = "okhttp",                  version = "4.12.0"          }
+
+# Image processing lib
+imageio-core                 = { group = "com.twelvemonkeys.imageio",   name = "imageio-core",            version.ref = "imageio"     }
+imageio-jpeg                 = { group = "com.twelvemonkeys.imageio",   name = "imageio-jpeg",            version.ref = "imageio"     }
+imageio-psd                  = { group = "com.twelvemonkeys.imageio",   name = "imageio-psd",             version.ref = "imageio"     }
+imageio-tiff                 = { group = "com.twelvemonkeys.imageio",   name = "imageio-tiff",            version.ref = "imageio"     }
+imageio-batik                = { group = "com.twelvemonkeys.imageio",   name = "imageio-batik",           version.ref = "imageio"     }
+imageio-tga                  = { group = "com.twelvemonkeys.imageio",   name = "imageio-tga",             version.ref = "imageio"     }
+imageio-bmp                  = { group = "com.twelvemonkeys.imageio",   name = "imageio-bmp",             version.ref = "imageio"     }
+batik                        = { group = "org.apache.xmlgraphics",      name = "batik-all",               version     = "1.17"        }
+# PDF image extraction
+pdfbox                       = { group = "org.apache.pdfbox",           name = "pdfbox",                  version.ref = "pdfbox"      }
+pdfbox-tools                 = { group = "org.apache.pdfbox",           name = "pdfbox-tools",            version.ref = "pdfbox"      }
+# To decrypt passworded/secured PDFs
+bcmail                       = { group = "org.bouncycastle",            name = "bcmail-jdk15on",          version     = "1.70"        }
+# For pdf image extraction, specifically for jpeg2000 (jpx) support.
+jai-imageio-core             = { group = "com.github.jai-imageio",      name = "jai-imageio-core",        version.ref = "jai-imageio" }
+jai-imageio-jpeg             = { group = "com.github.jai-imageio",      name = "jai-imageio-jpeg2000",    version.ref = "jai-imageio" }
+# WebP support
+webp-imageio                 = { group = "com.github.gotson",           name = "webp-imageio",            version     = "0.2.2"       }
+
+# JIDE UI libraries. Currently hosted on nerps.net/repo
+jide-common                  = { group = "com.jidesoft",                name = "jide-common",             version.ref = "jide"        }
+jide-components              = { group = "com.jidesoft",                name = "jide-components",         version.ref = "jide"        }
+jide-dialogs                 = { group = "com.jidesoft",                name = "jide-dialogs",            version.ref = "jide"        }
+jide-dock                    = { group = "com.jidesoft",                name = "jide-dock",               version.ref = "jide"        }
+jide-editor                  = { group = "com.jidesoft",                name = "jide-editor",             version.ref = "jide"        }
+jide-grids                   = { group = "com.jidesoft",                name = "jide-grids",              version.ref = "jide"        }
+jide-properties              = { group = "com.jidesoft",                name = "jide-properties",         version.ref = "jide"        }
+jide-shortcut                = { group = "com.jidesoft",                name = "jide-shortcut",           version.ref = "jide"        }
+
+# Syntax highlighting in macro editor
+fifesoft-rsyntaxtexxtarea    = { group = "com.fifesoft",                name = "rsyntaxtextarea",         version = "3.5.3"           }
+fifesoft-rstaui              = { group = "com.fifesoft",                name = "rstaui",                  version = "3.3.1"           }
+fifesoft-autocomplete        = { group = "com.fifesoft",                name = "autocomplete",            version = "3.3.1"           }
+fifesoft-languagesupport     = { group = "com.fifesoft",                name = "languagesupport",         version = "3.3.0"           }
+
+# Themes
+flatlaf                      = { group = "com.formdev",                 name = "flatlaf",                 version.ref = "flatlaf"     }
+flatlaf-intellij-themes      = { group = "com.formdev",                 name = "flatlaf-intellij-themes", version.ref = "flatlaf"     }
+flatlaf-extras               = { group = "com.formdev",                 name = "flatlaf-extras",          version.ref = "flatlaf"     }
+flatlaf-jide-oss             = { group = "com.formdev",                 name = "flatlaf-jide-oss",        version.ref = "flatlaf"     }
+tinylaf-nocp                 = { group = "de.muntjak.tinylookandfeel",  name = "tinylaf-nocp",            version     = "1.4.0"       }
+jsvg                         = { group = "com.github.weisj",            name = "jsvg",                    version     = "1.4.0"       }
+
+handlebars                   = { group = "com.github.jknack",           name = "handlebars",              version.ref = "handlebars"  }
+handlebars-helpers           = { group = "com.github.jknack",           name = "handlebars-helpers",      version.ref = "handlebars"  }
+
+# Apache commons and other utilities
+# parsing of configuration data
+apache-commons-configuration = { group = "org.apache.commons",          name = "commons-configuration2",  version = "2.11.0"          }
+# Specialized collections: ReferenceMap, LinkedMap.
+apache-commons-collections   = { group = "org.apache.commons",          name = "commons-collections4",    version = "4.4"             }
+# Various file utilities
+apache-commons-io            = { group = "commons-io",                  name = "commons-io",              version = "2.15.1"          }
+#  ftp client
+apache-commons-net           = { group = "commons-net",                 name = "commons-net",             version = "3.11.1"          }
+# commandline parsing
+apache-commons-cli           = { group = "commons-cli",                 name = "commons-cli",             version = "1.6.0"           }
+# String utilities
+apache-commons-lang          = { group = "org.apache.commons",          name = "commons-lang3",           version = "3.17.0"          }
+# needed for preference dialog at runtime
+apache-commons-beanutils     = { group = "commons-beanutils",           name = "commons-beanutils",       version = "1.9.0"           }
+# XPath parsing, used for UPNP
+apache-commons-jxpath        = { group = "commons-jxpath",              name = "commons-jxpath",          version = "1.3"             }
+# For determining file type
+apache-tika                  = { group = "org.apache.tika",             name = "tika-core",               version = "3.0.0"           }
+
+# Parsing and serialization
+# Better JSON functions
+gson                         = { group = "com.google.code.gson",        name = "gson",                    version = "2.10.1"          }
+# JsonPath for java
+jsonpath                     = { group = "com.jayway.jsonpath",         name = "json-path",               version = "2.9.0"           }
+# HTML parsing
+jsoup                        = { group = "org.jsoup",                   name = "jsoup",                   version = "1.17.2"          }
+# XML utilities, for Hero Lab integration
+jcabi-xml                    = { group = "com.jcabi",                   name = "jcabi-xml",               version = "0.33.5"          }
+# Serialization for saving campaigns, maps, tokens, etc.
+xstream                      = { group = "com.thoughtworks.xstream",    name = "xstream",                 version = "1.4.21"          }
+
+# Java tuples
+javatuples                   = { group = "com.flipkart.utils",          name = "javatuples",              version = "3.0"             }
+# Event bus, collections, and other utilities
+guava                        = { group = "com.google.guava",            name = "guava",                   version = "33.0.0-jre"      }
+# Geometry library for pathfinding, vision, etc.
+jts-core                     = { group = "org.locationtech.jts",        name = "jts-core",                version = "1.19.0"          }
+# Graph library used for walls
+jgrapht-core                 = { group = "org.jgrapht",                 name = "jgrapht-core",            version = "1.5.2"           }
+# Markdown parsing
+flexmark-all                 = { group = "com.vladsch.flexmark",        name = "flexmark-all",            version = "0.64.8"          }
+# Utils for handling reflection
+reflections                  = { group = "org.reflections",             name = "reflections",             version = "0.10.2"          }
+# Custom binding stuff. Should probably be replaced with Beans Binding (JSR 295)
+yasb                         = { group = "yasb",                        name = "yasb",                    version = "0.2-21012007"    }
+# For map noise
+noiselib                     = { group = "com.github.cwisniew",         name = "NoiseLib",                version = "1.0.0"           }
+
+# JS support for macros
+graalvm-js                   = { group = "org.graalvm.js",              name = "js",                      version.ref = "graalvm-js"  }
+graalvm-js-scriptengine      = { group = "org.graalvm.js",              name = "js-scriptengine",         version.ref = "graalvm-js"  }
+
+# GUI forms
+intellij-forms-tasks         = { group = "com.jetbrains.intellij.java", name = "java-compiler-ant-tasks", version = "233.14475.56"    }
+intellij-forms-runtime       = { group = "com.jetbrains.intellij.java", name = "java-gui-forms-rt",       version = "241.12019"       }
+# layout for forms created in code
+miglayout-swing              = { group = "com.miglayout",               name = "miglayout-swing",         version = "11.3"            }
+
+# RPTools libs
+# default resources (token, textures etc.)
+rptools-maptool-resources    = { group = "com.github.RPTools",          name = "maptool-resources",       version = "1.6.0"           }
+# parser for macros
+rptools-parser               = { group = "com.github.RPTools",          name = "parser",                  version = "2.0.0"           }
+# Built In Add-on Libraries
+rptools-maptool-addons       = { group = "com.github.RPTools",          name = "maptool-builtin-addons",  version = "1.3"             }
+# For advanced dice roller
+rptools-dice-roller          = { group = "com.github.RPTools",          name = "advanced-dice-roller",    version = "1.0.3"           }
+
+# Test only
+junit-platform-launcher      = { group = "org.junit.platform",          name = "junit-platform-launcher", version     = "1.11.4"      }
+junit-engine                 = { group = "org.junit.jupiter",           name = "junit-jupiter-engine",    version.ref = "junit"       }
+junit-api                    = { group = "org.junit.jupiter",           name = "junit-jupiter-api",       version.ref = "junit"       }
+junit-params                 = { group = "org.junit.jupiter",           name = "junit-jupiter-params",    version.ref = "junit"       }
+# For mocking features during unit tests
+mockito-core                 = { group = "org.mockito",                 name = "mockito-core",            version     = "5.15.2"      }
+
+
+[bundles]
+log4j       = [ "log4j-core", "log4j-api", "log4j-1_2-api" ]
+sentry      = [ "sentry", "sentry-log4j" ]
+imageio     = [ "imageio-core", "imageio-jpeg", "imageio-psd", "imageio-tiff", "imageio-batik", "imageio-tga", "imageio-bmp" ]
+pdfbox      = [ "pdfbox", "pdfbox-tools" ]
+jide        = [ "jide-common", "jide-components", "jide-dialogs", "jide-dock", "jide-editor", "jide-grids", "jide-properties", "jide-shortcut" ]
+flatlaf     = [ "flatlaf", "flatlaf-intellij-themes", "flatlaf-extras", "flatlaf-jide-oss" ]
+handlebars  = [ "handlebars", "handlebars-helpers" ]
+junit       = [ "junit-api", "junit-engine", "junit-params" ]
+jai-imageio = [ "jai-imageio-core", "jai-imageio-jpeg" ]
+graalvm-js  = [ "graalvm-js", "graalvm-js-scriptengine" ]
+
+[plugins]
+grgit = { id = "org.ajoberstar.grgit", version = "5.2.1" }
+javafx = { id = "org.openjfx.javafxplugin", version = "0.0.14" }
+jpackage-runtime = { id = "org.beryx.runtime", version = "1.13.1" }
+protobuf = { id = "com.google.protobuf", version = "0.9.4" }
+shadow = { id = "com.github.johnrengelman.shadow", version = "8.1.1" }
+spotless = { id = "com.diffplug.spotless", version = "6.25.0" }

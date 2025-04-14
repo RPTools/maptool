@@ -305,7 +305,6 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
       for (int i = 0; i < useAuthTypeMsg.getChallengeCount(); i++) {
         try {
           Key key = client.getPlayer().getPassword();
-          // Key key = playerDatabase.getPlayerPassword(player.getName()).get();
           var handshakeChallenge =
               HandshakeChallenge.fromSymmetricChallengeBytes(
                   client.getPlayer().getName(),

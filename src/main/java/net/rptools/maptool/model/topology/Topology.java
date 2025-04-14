@@ -19,5 +19,9 @@ import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
 
 public interface Topology {
-  VisionResult addSegments(Coordinate origin, Envelope bounds, Consumer<Coordinate[]> sink);
+  VisionResult addSegments(
+      VisibilityType visibilityType,
+      Coordinate origin,
+      Envelope bounds,
+      Consumer<Coordinate[]> sink);
 }

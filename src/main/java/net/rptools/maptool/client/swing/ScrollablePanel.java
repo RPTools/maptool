@@ -56,7 +56,6 @@ public class ScrollablePanel extends JPanel implements Scrollable {
   ////
   // SCROLLABLE
   public Dimension getPreferredScrollableViewportSize() {
-    // TODO Auto-generated method stub
     return null;
   }
 

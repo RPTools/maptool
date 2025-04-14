@@ -140,7 +140,7 @@ public class AssetPanel extends JComponent {
      */
     imagePanel.setShowCaptions(true);
     imagePanel.setSelectionMode(SelectionMode.SINGLE);
-    imagePanel.setFont(new Font("Helvetica", 0, 10)); // XXX Overrides TinyLAF?
+    imagePanel.setFont(new Font("Helvetica", 0, 10));
     imagePanel.setVisibleRowCount(2);
 
     imagePanel.addMouseWheelListener(
@@ -149,7 +149,7 @@ public class AssetPanel extends JComponent {
           if (steps == 0) {
             return;
           }
-          if (SwingUtil.isControlDown(e) || e.isMetaDown()) { // XXX Why either one?
+          if (SwingUtil.isControlDown(e) || e.isMetaDown()) {
             e.consume();
             imagePanel.setGridSize(imagePanel.getGridSize() + steps);
             thumbnailPreviewSlider.setValue(imagePanel.getGridSize());
@@ -350,7 +350,6 @@ public class AssetPanel extends JComponent {
                 model.setExtractRenderedPages(getExtractRenderedPages().isSelected());
                 model.setGlobalSearch(getGlobalSearchField().isSelected());
                 model.setFilter(getFilterTextField().getText());
-                // TODO: This should be event based
                 imagePanel.revalidate();
                 imagePanel.repaint();
 
@@ -363,7 +362,6 @@ public class AssetPanel extends JComponent {
     }
   }
 
-  // TODO: Find a way around this, it's ugly
   public Asset getAsset(int index) {
     return ((ImageFileImagePanelModel) imagePanel.getModel()).getAsset(index);
   }
@@ -401,9 +399,6 @@ public class AssetPanel extends JComponent {
         new ImageFileImagePanelModel(dir, this) {
           @Override
           public Transferable getTransferable(int index) {
-            // TransferableAsset t = (TransferableAsset) super.getTransferable(index);
-            // assetBeingTransferred = t.getAsset();
-            // return t;
             return super.getTransferable(index);
           }
         });

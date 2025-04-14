@@ -168,6 +168,13 @@ message ShapeDto {
     PolygonDto polygon = 3;
     EllipseDto ellipse = 4;
     PathShapeDto path = 5;
+    ArcDto arc = 6;
+    CubicCurveDto cubicCurve = 7;
+    LineDto line = 8;
+    PolygonShapeDto polygon2d = 9;
+    QuadCurveDto quadCurve = 10;
+    RoundRectangleDto roundRectangle = 11;
+    Rectangle2DDto rectangle2d = 12;
   }
 }
 
@@ -191,9 +198,18 @@ message SegmentDto {
     QuadToSegment quad_to = 3;
     CubicToSegment cubic_to = 4;
     CloseSegment close = 5;
+    ArcToSegment arc_to = 6;
   }
 }
-
+message ArcToSegment{
+  double r_x = 1;
+  double r_y = 2;
+  double angle = 3;
+  bool largeArcFlag = 4;
+  bool sweepFlag = 5;
+  double x = 6;
+  double y = 7;
+}
 message MoveToSegment {
   DoublePointDto point_0 = 1;
 }
@@ -227,15 +243,25 @@ message DoublePointDto {
   double y = 2;
 }
 
-message PolygonDto {
-  repeated IntPointDto points = 1;
+message ArcDto {
+   double x = 1;
+   double y = 2;
+   double w = 3;
+   double h = 4;
+   double start = 5;
+   double extent = 6;
+   int32 type = 7;
 }
 
-message RectangleDto {
-  int32 x = 1;
-  int32 y = 2;
-  int32 width = 3;
-  int32 height = 4;
+message CubicCurveDto{
+  double x1 = 1;
+  double y1 = 2;
+  double ctrl_x1 = 3;
+  double ctrl_y1 = 4;
+  double ctrl_x2 = 5;
+  double ctrl_y2 = 6;
+  double x2 = 7;
+  double y2 = 8;
 }
 
 message EllipseDto {
@@ -244,7 +270,51 @@ message EllipseDto {
   double width = 3;
   double height = 4;
 }
+message LineDto{
+  double x1 = 1;
+  double y1 = 2;
+  double x2 = 3;
+  double y2 = 4;
+}
+message PolygonShapeDto{
+  repeated float x_points = 1;
+  repeated float y_points = 2;
+  int32 num_points = 3;
+}
+message PolygonDto {
+  repeated IntPointDto points = 1;
+}
 
+message QuadCurveDto{
+  double x1 = 1;
+  double y1 = 2;
+  double ctrl_x = 3;
+  double ctrl_y = 4;
+  double x2 = 5;
+  double y2 = 6;
+}
+
+message RectangleDto {
+  int32 x = 1;
+  int32 y = 2;
+  int32 width = 3;
+  int32 height = 4;
+}
+message Rectangle2DDto {
+  double x = 1;
+  double y = 2;
+  double width = 3;
+  double height = 4;
+}
+
+message RoundRectangleDto{
+  double x = 1;
+  double y = 2;
+  double w = 3;
+  double h = 4;
+  double arc_w = 5;
+  double arc_h = 6;
+}
 message DrawablePaintDto {
   oneof paint_type {
     DrawableColorPaintDto color_paint = 1;

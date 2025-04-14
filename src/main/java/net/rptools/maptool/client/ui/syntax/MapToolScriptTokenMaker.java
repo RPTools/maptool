@@ -421,7 +421,6 @@ public class MapToolScriptTokenMaker extends AbstractJFlexCTokenMaker {
      * We replaced the line below with the two below it because zzRefill no longer "refills" the buffer (since the way we do it, it's always "full" the first time through, since it points to the
      * segment's array). So, we assign zzEndRead here.
      */
-    // zzStartRead = zzEndRead = s.offset;
     zzStartRead = s.offset;
     zzEndRead = zzStartRead + s.count - 1;
     zzCurrentPos = zzMarkedPos = zzPushbackPos = s.offset;

@@ -45,7 +45,9 @@ import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
 import net.rptools.parser.function.ParameterException;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 // @formatter:off
 // Jamz: Had to remove <pre> tags and add formatter:off due to Spotless 3.x error, still not fixed
@@ -97,6 +99,8 @@ public class InputFunction extends AbstractFunction {
 
   /** The singleton instance. */
   private static final InputFunction instance = new InputFunction();
+
+  private static final Logger log = LogManager.getLogger(InputFunction.class);
 
   private InputFunction() {
     super(1, -1, "input");
@@ -493,12 +497,6 @@ public class InputFunction extends AbstractFunction {
 
     /** Sets the focus to the control that last had it. */
     public void restoreFocus() {
-      // // debugging
-      // String s = (onShowFocus instanceof JTextField) ?
-      // " (" + ((JTextField)onShowFocus).getText() + ")" : "";
-      // String c = (onShowFocus == null) ? "null" : onShowFocus.getClass().getName();
-      // System.out.println(" Shown: onShowFocus is " + c + s);
-
       if (onShowFocus != null) {
         onShowFocus.requestFocusInWindow();
       } else {
@@ -519,10 +517,6 @@ public class InputFunction extends AbstractFunction {
               JComponent src = (JComponent) fe.getSource();
               lastFocus = src;
               if (src instanceof JTextField) ((JTextField) src).selectAll();
-              // // debugging
-              // String s = (src instanceof JTextField) ?
-              // " (" + ((JTextField)src).getText() + ")" : "";
-              // System.out.println(" Got focus " + src.getClass().getName() + s);
             }
 
             public void focusLost(FocusEvent arg0) {}
@@ -776,7 +770,7 @@ public class InputFunction extends AbstractFunction {
           subvs = new VarSpec(name, value, prompt, it, options);
         } catch (OptionException e) {
           // Should never happen
-          e.printStackTrace();
+          log.error("Unexpected error while creating var-specs", e);
           subvs = null;
         }
         varSpecs.add(subvs);
@@ -962,13 +956,6 @@ public class InputFunction extends AbstractFunction {
               int newTabIndex = tabPane.getSelectedIndex();
               ColumnPanel cp = columnPanels.get(newTabIndex);
               cp.onShowFocus = cp.lastFocus;
-
-              // // debugging
-              // JComponent foc = cp.onShowFocus;
-              // String s = (foc instanceof JTextField) ?
-              // " (" + ((JTextField)foc).getText() + ")" : "";
-              // String c = (foc!=null) ? foc.getClass().getName() : "";
-              // System.out.println("tabpane foc = " + c + s);
             });
       }
     }
@@ -1045,7 +1032,6 @@ public class InputFunction extends AbstractFunction {
     InputPanel ip = new InputPanel(varSpecs);
 
     // Calculate the height
-    // TODO: remove this workaround
     int screenHeight = Toolkit.getDefaultToolkit().getScreenSize().height;
     int maxHeight = screenHeight * 3 / 4;
     Dimension ipPreferredDim = ip.getPreferredSize();
@@ -1195,9 +1181,6 @@ public class InputFunction extends AbstractFunction {
     }
 
     return BigDecimal.ONE; // success
-
-    // for debugging:
-    // return debugOutput(varSpecs);
   }
 
   /**
@@ -1290,13 +1273,6 @@ public class InputFunction extends AbstractFunction {
 
     public void setMacroLink(String link) {
       macroLink = link;
-      this.addMouseListener(
-          new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-              // System.out.println(macroLink);
-            }
-          });
     }
   }
 

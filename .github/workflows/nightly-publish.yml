@@ -2,7 +2,7 @@ name: Nightly Release
 
 on:
   schedule:
-    - cron:  '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
+    - cron: '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
 
 jobs:
   build:
@@ -23,3 +23,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
           gh release create  nightly-${NIGHTLY_DATE} -R ${{github.repository}} --title "MapTool Nightly ${NIGHTLY_DATE}"  --notes "MapTool Nightly Build for ${NIGHTLY_DATE}" --generate-notes -p --target develop
+      - name: Delete old Nightly releases
+        id: delete-old
+        env:
+          GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
+        run: |
+          gh release list -R ${{ github.repository }} --json 'name,tagName' --jq '.[] | select(.tagName | startswith("nightly"))|.tagName' | tail +2 | xargs -n 1 gh release delete -R ${{ github.repository}} -y --cleanup-tag

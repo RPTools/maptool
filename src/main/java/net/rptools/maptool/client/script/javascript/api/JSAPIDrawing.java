@@ -57,14 +57,6 @@ public class JSAPIDrawing implements MapToolJSAPIInterface {
   @HostAccess.Export
   public void removeDrawable() {
     if (!dead) {
-      //            AbstractDrawing target = null;
-      //            for (DrawnElement e:
-      // MapTool.getFrame().getCurrentZoneRenderer().getZone().getAllDrawnElements()) {
-      //                if (e.getDrawable().getId().equals(guid)) {
-      //                    target = (AbstractDrawing) e.getDrawable();
-      //                    break;
-      //                }
-      //            }
       MapTool.getFrame().getCurrentZoneRenderer().getZone().removeDrawable(guid);
     }
     dead = true;

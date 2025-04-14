@@ -20,7 +20,7 @@ import net.rptools.clientserver.simple.connection.Connection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public abstract class AbstractServer implements Server {
+public abstract class AbstractServer {
 
   private static final Logger log = LogManager.getLogger(AbstractServer.class);
 

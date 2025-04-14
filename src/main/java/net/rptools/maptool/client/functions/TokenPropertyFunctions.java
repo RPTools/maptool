@@ -353,7 +353,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       if (val instanceof String) {
         // try to convert to a number
         try {
-          return new BigDecimal(val.toString()); // XXX Localization here?
+          return new BigDecimal(val.toString());
         } catch (Exception e) {
           return val;
         }
@@ -643,7 +643,7 @@ public class TokenPropertyFunctions extends AbstractFunction {
       FunctionUtil.checkNumberParam(functionName, parameters, 0, 2);
       Token token = FunctionUtil.getTokenFromParam(resolver, functionName, parameters, 0, 1);
       if (!token.hasFacing()) {
-        return ""; // XXX Should be -1 instead of a string?
+        return "";
       }
       return BigDecimal.valueOf(token.getFacing());
     }

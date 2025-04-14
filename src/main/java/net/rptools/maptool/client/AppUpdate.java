@@ -46,7 +46,6 @@ public class AppUpdate {
    * @return has an update been made
    */
   public static boolean gitHubReleases() {
-    // AppPreferences.setSkipAutoUpdate(false); // For testing only
     if (AppPreferences.skipAutoUpdate.get()) {
       return false;
     }

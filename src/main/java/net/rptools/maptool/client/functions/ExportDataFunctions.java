@@ -27,6 +27,8 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * New class extending AbstractFunction to create new "Macro Functions" exportData and
@@ -41,6 +43,7 @@ import net.rptools.parser.function.AbstractFunction;
 public class ExportDataFunctions extends AbstractFunction {
 
   private static final ExportDataFunctions instance = new ExportDataFunctions();
+  private static final Logger log = LogManager.getLogger(ExportDataFunctions.class);
 
   private ExportDataFunctions() {
     super(1, 3, "exportData", "getEnvironmentVariable");
@@ -88,8 +91,7 @@ public class ExportDataFunctions extends AbstractFunction {
 
         bw.close();
       } catch (Exception e) {
-        System.out.println("Error in exportData during file write!");
-        e.printStackTrace();
+        log.error("Error in exportData() during file write", e);
         return BigDecimal.ZERO;
       }
 
@@ -105,8 +107,6 @@ public class ExportDataFunctions extends AbstractFunction {
       String envName = parameters.get(0).toString();
       String value = System.getenv(envName);
 
-      // System.out.format("%s=%s%n", envName, value);
-      // System.out.format("%s is not assigned.%n", envName);
       return Objects.requireNonNullElse(value, "");
     }
 

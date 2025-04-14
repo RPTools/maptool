@@ -19,6 +19,8 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * @author crash
@@ -26,6 +28,7 @@ import java.net.URL;
 class FTPClientConn {
   private static final String PROTOCOL = "ftp://";
   private static final String TYPE_IMAGE = ";type=i";
+  private static final Logger log = LogManager.getLogger(FTPClientConn.class);
   public final String host;
   public final String user;
   protected final String password;
@@ -53,7 +56,6 @@ class FTPClientConn {
    * <p>Note that the directory separator may be "/" locally and in URLs, but FTP servers are not
    * required to support it. This means that we really should be starting at the top of the tree and
    * issuing <code>cd()</code> calls for the entire pathname, creating any that fail along the way.
-   * Too much work for now. FIXME
    *
    * @param dir the full pathname to the directory to create
    * @return success or failure
@@ -65,16 +67,11 @@ class FTPClientConn {
       myftp = new FTPCommand(host);
       myftp.login(user, password);
       result = myftp.mkdir(dir);
-      // System.err.print("Response from mkdir() is " + myftp.getResponseString());
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while creating directory", e);
     } finally {
       if (myftp != null) {
-        try {
-          myftp.closeServer();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        myftp.closeServer();
       }
     }
     return result;
@@ -87,7 +84,6 @@ class FTPClientConn {
    * <p>Note that the directory separator may be "/" locally and in URLs, but FTP servers are not
    * required to support it. This means that we really should be starting at the top of the tree and
    * issuing <code>cd()</code> calls for the entire pathname, creating any that fail along the way.
-   * Too much work for now. FIXME
    *
    * @param filename the full pathname to the file to remove
    * @return success or failure
@@ -100,14 +96,10 @@ class FTPClientConn {
       myftp.login(user, password);
       result = myftp.remove(filename);
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while deleting file", e);
     } finally {
       if (myftp != null) {
-        try {
-          myftp.closeServer();
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+        myftp.closeServer();
       }
     }
     return result;

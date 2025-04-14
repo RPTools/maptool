@@ -49,7 +49,7 @@ public class FTPClient {
   protected FTPClientConn cconn;
 
   protected List<Object> fifoQueue;
-  protected final Map<Object, FTPTransferObject> todoMap; // Todo list for uploads
+  protected final Map<Object, FTPTransferObject> todoMap;
   protected final Map<Object, FTPTransferObject> transferringMap; // Currently in process...
 
   private int numThreads = 1;
@@ -207,8 +207,6 @@ public class FTPClient {
     boolean startAnother = false;
     synchronized (transferringMap) {
       transferringMap.remove(data.local);
-      // TODO Should delete the remote file for uploading, or remove the local
-      // file for downloading.
       if (fifoQueue.isEmpty() == false && transferringMap.size() < numThreads) startAnother = true;
     }
     if (startAnother) startNextTransfer();
@@ -229,7 +227,6 @@ public class FTPClient {
         is = (ByteArrayInputStream) data.local;
       } else if (data.local instanceof InputStream) {
         is = (InputStream) data.local;
-        // System.err.println("is.available() = " + is.available());
       } else if (data.local instanceof String) {
         File file = new File((String) data.local);
         try {
@@ -266,16 +263,12 @@ public class FTPClient {
       /*
        * In this situation, "data.remote" is the OutputStream.
        */
-      // try {
       if (data.remoteDir != null) {
         cconn.mkdir(data.remoteDir.getPath());
         os = cconn.openUploadStream(data.remoteDir.getPath(), data.remote);
-      } else os = cconn.openUploadStream(data.remote);
-      // } catch (IOException e) {
-      // File file = new File(data.remoteDir, data.remote);
-      // log.error("Attempting to FTP_PUT local asset " + file.getPath());
-      // e.printStackTrace();
-      // }
+      } else {
+        os = cconn.openUploadStream(data.remote);
+      }
     } else {
       /*
        * In this situation, "data.local" is the OutputStream.
@@ -330,14 +323,14 @@ public class FTPClient {
         try {
           is.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error("Error while closing input stream", e);
         }
       }
       if (os != null) {
         try {
           os.close();
         } catch (IOException e) {
-          e.printStackTrace();
+          log.error("Error while closing output stream", e);
         }
       }
       uploadDone(data, false);
@@ -362,7 +355,6 @@ public class FTPClient {
           "campaignItemList.xml", "mockup.jfpr", "standard.mtprops", "updateRepoDialog.xml",
         };
     FTPClient ftp = new FTPClient("www.eeconsulting.net", "username", "password");
-    // ftp.setNumberOfThreads(3);
     File dir = new File("testdir");
     for (String s : uploadList) {
       FTPTransferObject fto = new FTPTransferObject(Direction.FTP_PUT, s, dir, s);

@@ -59,6 +59,7 @@
                           <selectionStart value="0"/>
                           <syntaxEditingStyle value="text/html"/>
                           <text value=""/>
+                          <useFocusableTips value="false"/>
                         </properties>
                       </component>
                     </children>

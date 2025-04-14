@@ -154,8 +154,6 @@ public class LogFunctions extends AbstractFunction {
   }
 
   /**
-   * TODO: WORK IN PROGRESS Dynamically set pattern string for loggers
-   *
    * @param functionName the function name
    * @param parameters a list with the log pattern as the first element
    * @return BigDecimal.ONE if successfully set, otherwise BigDecimal.ZERO
@@ -165,40 +163,6 @@ public class LogFunctions extends AbstractFunction {
     checkParameters(functionName, parameters, 1, 1);
 
     String logPattern = parameters.get(0).toString();
-
-    // SAMPLE CODE BELOW but is for "new" configurations
-    // Need to pull in configuration from XML and modify PatternLayout...
-
-    //    ConfigurationBuilder<BuiltConfiguration> builder =
-    //        ConfigurationBuilderFactory.newConfigurationBuilder();
-    //    builder.setStatusLevel(Level.ERROR);
-    //    builder.setConfigurationName("BuilderTest");
-    //    builder.add(
-    //        builder
-    //            .newFilter("ThresholdFilter", Filter.Result.ACCEPT, Filter.Result.NEUTRAL)
-    //            .addAttribute("level", Level.DEBUG));
-    //
-    //    AppenderComponentBuilder appenderBuilder =
-    //        builder
-    //            .newAppender("Stdout", "CONSOLE")
-    //            .addAttribute("target", ConsoleAppender.Target.SYSTEM_OUT);
-    //    appenderBuilder.add(
-    //        builder
-    //            .newLayout("PatternLayout")
-    //            .addAttribute("pattern", "TEST %d Thread:[%t] %-5level: MSG: %msg%n%throwable"));
-    //
-    //    builder.add(appenderBuilder);
-    //
-    //    builder.add(
-    //        builder
-    //            .newLogger("org.apache.logging.log4j", Level.DEBUG)
-    //            .add(builder.newAppenderRef("Stdout"))
-    //            .addAttribute("additivity", false));
-    //    builder.add(builder.newRootLogger(Level.ERROR).add(builder.newAppenderRef("Stdout")));
-    //    Configurator.initialize(builder.build());
-
-    // appenderBuilder.add(builder.newLayout("PatternLayout").addAttribute("pattern", logPattern));
-
     return logPattern;
   }
 

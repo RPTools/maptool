@@ -14,7 +14,7 @@ Thumbs.db
 .gradle
 .gradletasknamecache
 build/
-/bin/
+bin/
 target/
 out/
 /releases/
@@ -26,6 +26,7 @@ out/
 # Automatically Generated
 ################################################################################
 package/windows/MapTool.iss
+package/linux/MapTool*.desktop
 
 
 # IDEs

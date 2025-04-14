@@ -45,9 +45,7 @@ import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.SightType;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.util.LightSyntax;
@@ -56,7 +54,6 @@ import net.rptools.maptool.util.SightSyntax;
 import org.apache.commons.text.*;
 
 public class CampaignPropertiesDialog extends JDialog {
-  // private static final Logger log = LogManager.getLogger(CampaignPropertiesDialog.class);
 
   public enum Status {
     OK,
@@ -76,7 +73,7 @@ public class CampaignPropertiesDialog extends JDialog {
 
     initialize();
 
-    pack(); // FJE
+    pack();
   }
 
   public Status getStatus() {
@@ -144,7 +141,6 @@ public class CampaignPropertiesDialog extends JDialog {
 
   private void initHelp() {
     /* simple check to see if one of the keys has been translated from English. */
-    // TODO: this should be a proper method instead of a dodgy workaround
     boolean isTranslated =
         MapTool.getLanguage().toLowerCase().startsWith("en")
             || !I18N.getText("sightLight.optionDescription.shape")
@@ -177,22 +173,9 @@ public class CampaignPropertiesDialog extends JDialog {
           if (newRepo == null || newRepo.isEmpty()) {
             return;
           }
-          // TODO: Check for uniqueness
           ((DefaultListModel) getRepositoryList().getModel()).addElement(newRepo);
         });
   }
-
-  //  private void initAddGalleryIndexButton() {
-  //    JButton button = (JButton) formPanel.getButton("addGalleryIndexButton");
-  //    button.addActionListener(
-  //        new ActionListener() {
-  //          public void actionPerformed(ActionEvent e) {
-  //            // TODO: Check for uniqueness
-  //            ((DefaultListModel) getRepositoryList().getModel())
-  //                .addElement("http://www.rptools.net/image-indexes/gallery.rpax.gz");
-  //          }
-  //        });
-  //  }
 
   public void initDeleteRepoButton() {
     JButton button = (JButton) formPanel.getButton("deleteRepoButton");
@@ -399,7 +382,6 @@ public class CampaignPropertiesDialog extends JDialog {
                   () -> {
                     CampaignProperties properties =
                         PersistenceUtil.loadCampaignProperties(selectedFile);
-                    // TODO: Allow specifying whether it is a replace or merge
                     if (properties != null) {
                       MapTool.getCampaign().mergeCampaignProperties(properties);
                       copyCampaignToUI(properties);
@@ -412,20 +394,17 @@ public class CampaignPropertiesDialog extends JDialog {
     getExportButton()
         .addActionListener(
             e -> {
-              // TODO: Remove this hack. Specifically, make the export use a properties object
-              // composed of the current dialog entries instead of directly from the campaign
               copyUIToCampaign();
-              // END HACK
 
-              JFileChooser chooser = MapTool.getFrame().getSavePropsFileChooser();
+              JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 
               boolean tryAgain = true;
               while (tryAgain) {
-                if (chooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+                if (fileChooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
                   return;
                 }
                 var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-                var saveDir = chooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+                var saveDir = fileChooser.getSelectedFile().toPath().getParent().toAbsolutePath();
                 if (saveDir.startsWith(installDir)) {
                   MapTool.showWarning("msg.warning.savePropToInstallDir");
                 } else {
@@ -433,7 +412,7 @@ public class CampaignPropertiesDialog extends JDialog {
                 }
               }
 
-              File selectedFile = chooser.getSelectedFile();
+              File selectedFile = fileChooser.getSelectedFile();
               if (selectedFile.exists()) {
                 if (selectedFile.getName().endsWith(".rpgame")) {
                   if (!MapTool.confirm("Import into game settings file?")) {
@@ -445,7 +424,7 @@ public class CampaignPropertiesDialog extends JDialog {
               }
               try {
                 if (selectedFile.getName().endsWith(".mtprops")) {
-                  PersistenceUtil.saveCampaignProperties(campaign, chooser.getSelectedFile());
+                  PersistenceUtil.saveCampaignProperties(campaign, fileChooser.getSelectedFile());
                   MapTool.showInformation("Properties Saved.");
                 } else {
                   MapTool.showMessage(
@@ -454,8 +433,9 @@ public class CampaignPropertiesDialog extends JDialog {
                       JOptionPane.INFORMATION_MESSAGE);
                   CampaignPropertiesDto campaignPropertiesDto =
                       MapTool.getCampaign().getCampaignProperties().toDto();
-                  FileOutputStream fos = new FileOutputStream(chooser.getSelectedFile());
+                  FileOutputStream fos = new FileOutputStream(fileChooser.getSelectedFile());
                   fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
+                  fos.close();
                 }
 
               } catch (IOException ioe) {
@@ -511,65 +491,6 @@ public class CampaignPropertiesDialog extends JDialog {
 
   protected File[] getPredefinedPropertyFiles(File propertyDir) {
     return propertyDir.listFiles(AppConstants.CAMPAIGN_PROPERTIES_FILE_FILTER);
-  }
-
-  public static void main(String[] args) {
-    JFrame frame = new JFrame("Testing campaign properties dialog syntax-specific fields");
-    CampaignPropertiesDialog cpd = new CampaignPropertiesDialog(frame);
-    // @formatter:off
-    String lights =
-        """
-            D20
-            ----
-            Lantern, Bullseye - 60 : cone arc=60 60#f0f0f0 120#330000
-            Lantern, Hooded - 30 : circle 30 60#330000 arc=60 120#f0f0f0
-            Torch - 20 : circle 20 40#330000
-
-            Aura
-            ----
-            Arc 120deg OwnerOnly - 20 : owner aura arc=120 22.5#115511
-            Arc 60deg - 60 : aura cone arc=60 facing=15 62.5#77ffaa
-            Circle - 20 : aura circle 22.5#220000
-            Circle GM+Owner : aura circle GM Owner 62.5#ff8080
-            Circle GM Only : aura circle GM 62.5#ff8080
-            Fancy - 30/60/120 : aura GM circle 30 60#330000 owner arc=60 120#f0f0f0
-            Ranges 30/60/90: aura circle 30.5 30.9#000000 60.5 60.9#000000 90.5 90.9#000000
-            """;
-    // @formatter:on
-    System.out.print(lights);
-
-    Map<String, Map<GUID, LightSource>> originalLightSourcesMap =
-        new HashMap<String, Map<GUID, LightSource>>();
-    Map<String, Map<GUID, LightSource>> lightMap = new HashMap<String, Map<GUID, LightSource>>();
-    try {
-      lightMap = cpd.commitLightMap(lights, originalLightSourcesMap);
-    } catch (Exception e) {
-    }
-
-    String text = cpd.updateLightPanel(lightMap);
-    System.out.print(text);
-
-    // keySet() might be empty if an exception occurred.
-    for (String string : lightMap.keySet()) {
-      System.out.println("\nGroup Name: " + string);
-      System.out.println("-------------");
-      for (GUID guid : lightMap.get(string).keySet()) {
-        LightSource ls = lightMap.get(string).get(guid);
-        System.out.println(ls.getType() + ", " + ls.getName() + ":");
-        for (Light light : ls.getLightList()) {
-          System.out.print("  [shape=" + light.getShape());
-          if (light.getShape() == ShapeType.CONE) {
-            System.out.print(", arc=" + light.getArcAngle());
-            System.out.print(", facing=" + light.getFacingOffset());
-          }
-          System.out.print(", gm=" + light.isGM());
-          System.out.print(", owner=" + light.isOwnerOnly());
-          System.out.print(", radius=" + light.getRadius());
-          System.out.print(", color=" + light.getPaint() + "]\n");
-        }
-      }
-    }
-    System.exit(1);
   }
 
   /**

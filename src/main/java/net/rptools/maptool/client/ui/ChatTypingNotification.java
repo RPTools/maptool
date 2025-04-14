@@ -43,7 +43,6 @@ public class ChatTypingNotification extends JPanel {
    */
   @Override
   protected void paintComponent(Graphics g) {
-    // System.out.println("Chat panel is painting itself...");
     if (AppPreferences.typingNotificationDurationInSeconds.get() == 0) {
       return;
     }

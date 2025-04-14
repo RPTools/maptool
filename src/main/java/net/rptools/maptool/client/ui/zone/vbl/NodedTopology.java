@@ -23,7 +23,9 @@ import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.topology.MaskTopology;
 import net.rptools.maptool.model.topology.Topology;
+import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.VisionResult;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 import org.locationtech.jts.geom.Coordinate;
 import org.locationtech.jts.geom.Envelope;
@@ -44,9 +46,13 @@ public class NodedTopology {
     this.preparedParts = preparedParts;
   }
 
-  public VisionResult getSegments(Coordinate origin, Envelope bounds, Consumer<Coordinate[]> sink) {
+  public VisionResult getSegments(
+      VisibilityType visibilityType,
+      Coordinate origin,
+      Envelope bounds,
+      Consumer<Coordinate[]> sink) {
     for (var preparedPart : preparedParts) {
-      var maskResult = preparedPart.addSegments(origin, bounds, sink);
+      var maskResult = preparedPart.addSegments(visibilityType, origin, bounds, sink);
       if (maskResult == VisionResult.CompletelyObscured) {
         return maskResult;
       }
@@ -110,7 +116,7 @@ public class NodedTopology {
             var preparedWalls = new WallTopology();
             for (var wallString : tempWalls.walls) {
               // String length will be at least 2.
-              var originalWall = (WallTopology.Wall) wallString.getData();
+              var originalWall = (Wall) wallString.getData();
               timer.start("get noded coordinates");
               var coordinates = wallString.getNodedCoordinates();
               timer.stop("get noded coordinates");
@@ -124,7 +130,8 @@ public class NodedTopology {
                   GeometryUtil.coordinateToPoint2D(coordinates[0]),
                   builder -> {
                     for (var i = 1; i < coordinates.length; ++i) {
-                      builder.push(GeometryUtil.coordinateToPoint2D(coordinates[i]));
+                      builder.push(
+                          GeometryUtil.coordinateToPoint2D(coordinates[i]), originalWall.data());
                     }
                   });
               timer.stop("build noded string");
@@ -159,7 +166,7 @@ public class NodedTopology {
           .getWalls()
           .forEach(
               wall -> {
-                var segment = wall.asSegment();
+                var segment = walls.asLineSegment(wall);
                 var string =
                     new NodedSegmentString(new Coordinate[] {segment.p0, segment.p1}, wall);
                 this.walls.add(string);

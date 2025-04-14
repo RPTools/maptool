@@ -22,6 +22,8 @@ import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
 import net.rptools.maptool.client.AppUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Custom Implementation of FileUtils.byteCountToDisplaySize to fix rounding bug
@@ -34,6 +36,8 @@ public class FileUtil {
   /** Regex to select an illegal symbol for a file name. The colon is illegal for Windows. */
   private static final String REGEX_SELECT_ILLEGAL =
       "[^a-zA-Z0-9._ /`~!@#$%^&()\\-=+\\[\\]{}',\\\\:]+";
+
+  private static final Logger log = LogManager.getLogger(FileUtil.class);
 
   enum FileSize {
     EXABYTE("EB", ONE_EB_BI),
@@ -136,7 +140,7 @@ public class FileUtil {
     try {
       newFileName = newFileName.getCanonicalFile();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while getting canonical path for {}", newFileName, e);
     }
 
     if (!extension.isEmpty()) {
@@ -151,7 +155,8 @@ public class FileUtil {
         newFileName.delete();
       }
     } catch (IOException e) {
-      System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
+      log.error("Bad file name. Replacing bad characters in {}{}", fileName, extension);
+
       fileName = fileName.replaceAll(REGEX_SELECT_ILLEGAL, "_");
       newFileName = new File(filePath + "/" + fileName + extension);
     }
@@ -178,7 +183,7 @@ public class FileUtil {
     try {
       newFileName = newFileName.getCanonicalFile();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while getting canonical path for {}", newFileName, e);
     }
 
     try {
@@ -186,7 +191,7 @@ public class FileUtil {
         newFileName.delete();
       }
     } catch (IOException e) {
-      System.out.println("Bad file name, replacing bad characters in: " + fileName + extension);
+      log.error("Bad file name. Replacing bad characters in {}{}", fileName, extension);
       fileName = fileName.replaceAll(REGEX_SELECT_ILLEGAL, "_");
 
       newFileName = new File(fileName + extension);

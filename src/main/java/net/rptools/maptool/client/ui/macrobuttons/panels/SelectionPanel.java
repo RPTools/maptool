@@ -44,7 +44,6 @@ public class SelectionPanel extends AbstractMacroPanel {
   private List<MacroButtonProperties> commonMacros = new ArrayList<MacroButtonProperties>();
 
   public SelectionPanel() {
-    // TODO: refactoring reminder
     setPanelClass("SelectionPanel");
     // when initially loading MT, the CurrentZoneRenderer isn't ready yet; just send an empty list
     init(new ArrayList<Token>());

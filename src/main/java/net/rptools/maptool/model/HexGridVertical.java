@@ -82,7 +82,6 @@ public class HexGridVertical extends HexGrid {
 
   protected int snapFacingInternal(
       int facing, boolean faceEdges, boolean faceVertices, int addedSteps) {
-    // TODO Distorted hexes surely require distorted facing angles.
 
     if (!faceEdges && !faceVertices) {
       // Facing not support. Return a default answer.

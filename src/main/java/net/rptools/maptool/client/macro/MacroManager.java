@@ -319,7 +319,6 @@ public class MacroManager {
 
         // Preprocess line if required.
         if (def == null || def.expandRolls()) {
-          // TODO: fix this, wow I really hate this, it's very, very ugly.
           Token tokenInContext = null;
           ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
           if (zr != null) {
@@ -509,7 +508,6 @@ public class MacroManager {
   }
 
   // Package level for testing
-  // TODO: This should probably go in a util class in rplib
   static List<String> split(String line) {
 
     List<String> list = new ArrayList<String>();

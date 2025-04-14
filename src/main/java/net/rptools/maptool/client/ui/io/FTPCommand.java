@@ -17,9 +17,8 @@ package net.rptools.maptool.client.ui.io;
 import java.io.IOException;
 import org.apache.commons.net.ftp.FTPClient;
 import org.apache.commons.net.ftp.FTPClientConfig;
-
-// import sun.net.TransferProtocolClient;
-// import sun.net.ftp.FtpClient;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * This class extends the Apache Commons {@link FTPClient} class to ease future modification.
@@ -38,6 +37,7 @@ import org.apache.commons.net.ftp.FTPClientConfig;
  * @author crash
  */
 public class FTPCommand extends FTPClient {
+  private static final Logger log = LogManager.getLogger(FTPCommand.class);
   private final String host;
 
   public FTPCommand(String h) throws IOException {
@@ -58,7 +58,7 @@ public class FTPCommand extends FTPClient {
       if (result != 550) {
         // "Directory already exists" is not necessarily an error. For now just print a
         // stack trace and we'll decide later if this is a problem...
-        e.printStackTrace();
+        log.warn("Unable to create directory", e);
       }
     }
     return result;
@@ -73,15 +73,18 @@ public class FTPCommand extends FTPClient {
       result = getReplyCode();
       if (result != 550) {
         // "File doesn't exist" is not an error, but we should report it for safety's sake.
-        e.printStackTrace();
+        log.warn("Unable to delete file", e);
       }
     }
     return result;
   }
 
-  public boolean closeServer() throws IOException {
-    boolean result = this.logout();
-    this.disconnect();
-    return result;
+  public void closeServer() {
+    try {
+      this.logout();
+      this.disconnect();
+    } catch (IOException e) {
+      log.error("Error while disconnecting from server", e);
+    }
   }
 }

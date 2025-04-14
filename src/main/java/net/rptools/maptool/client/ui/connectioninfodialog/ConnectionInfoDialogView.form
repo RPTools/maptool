@@ -1,61 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.connectioninfodialog.ConnectionInfoDialogView">
-  <grid id="f0bbd" binding="mainPanel" layout-manager="GridLayoutManager" row-count="7" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="f0bbd" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="207" height="211"/>
+      <xy x="10" y="10" width="700" height="400"/>
     </constraints>
     <properties/>
     <border type="none"/>
     <children>
-      <component id="a37b" class="javax.swing.JLabel">
+      <component id="a37b" class="javax.swing.JLabel" binding="nameLabel">
         <constraints>
           <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
+          <labelFor value="b98dc"/>
           <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
         </properties>
       </component>
-      <component id="12eb6" class="javax.swing.JLabel">
+      <component id="19e24" class="javax.swing.JLabel" binding="LANIDLabel">
         <constraints>
-          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
+          <enabled value="true"/>
           <font name="SansSerif" size="11" style="1"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
+          <labelFor value="d02d6"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.serviceIdentifier"/>
+          <toolTipText value="Name of the server advertised on the LAN"/>
         </properties>
       </component>
-      <component id="12eb5" class="javax.swing.JLabel">
+      <component id="12eb6" class="javax.swing.JLabel" binding="localIpv4AddressLabel">
         <constraints>
           <grid row="3" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
+          <labelFor value="4189"/>
           <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
         </properties>
       </component>
-      <component id="3c360" class="javax.swing.JLabel">
+      <component id="12eb5" class="javax.swing.JLabel" binding="localIpv6AddressLabel">
         <constraints>
           <grid row="4" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.external"/>
+          <labelFor value="4188"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.local"/>
         </properties>
       </component>
-      <component id="d0010" class="javax.swing.JLabel">
+      <component id="3c360" class="javax.swing.JLabel" binding="externalAddressLabel">
         <constraints>
           <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="1"/>
+          <labelFor value="96cea"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.address.external"/>
+        </properties>
+      </component>
+      <component id="d0010" class="javax.swing.JLabel" binding="portLabel">
+        <constraints>
+          <grid row="6" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <font name="SansSerif" size="11" style="1"/>
+          <labelFor value="a928c"/>
           <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.port"/>
         </properties>
       </component>
       <component id="495e1" class="javax.swing.JLabel">
         <constraints>
-          <grid row="0" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="0" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <font name="SansSerif" size="16" style="1"/>
@@ -63,7 +80,7 @@
           <text resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.title"/>
         </properties>
       </component>
-      <component id="b98dc" class="javax.swing.JTextField">
+      <component id="b98dc" class="javax.swing.JTextField" binding="nameTextField">
         <constraints>
           <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
@@ -76,9 +93,19 @@
           <text value="name"/>
         </properties>
       </component>
-      <component id="4189" class="javax.swing.JTextField">
+      <component id="d02d6" class="javax.swing.JTextField" binding="serviceIdentifierTextField">
         <constraints>
-          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="8" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <editable value="false"/>
+          <name value="serviceIdentifier"/>
+          <text value="serviceIdentifier"/>
+        </properties>
+      </component>
+      <component id="4189" class="javax.swing.JTextField" binding="localIpv4AddressTextField">
+        <constraints>
+          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -89,9 +116,9 @@
           <text value="localAddress"/>
         </properties>
       </component>
-      <component id="4188" class="javax.swing.JTextField">
+      <component id="4188" class="javax.swing.JTextField" binding="localIpv6AddressTextField">
         <constraints>
-          <grid row="3" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -102,9 +129,9 @@
           <text value="localAddress"/>
         </properties>
       </component>
-      <component id="96cea" class="javax.swing.JTextField">
+      <component id="96cea" class="javax.swing.JTextField" binding="externalAddressTextField">
         <constraints>
-          <grid row="4" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -115,9 +142,9 @@
           <text value="externalAddress"/>
         </properties>
       </component>
-      <component id="a928c" class="javax.swing.JTextField">
+      <component id="a928c" class="javax.swing.JTextField" binding="portTextField">
         <constraints>
-          <grid row="5" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+          <grid row="6" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <editable value="false"/>
@@ -128,9 +155,119 @@
           <text value="port"/>
         </properties>
       </component>
-      <component id="74e0b" class="javax.swing.JButton">
+      <component id="b3d4d" class="javax.swing.JButton" binding="registryUriCopyButton">
         <constraints>
-          <grid row="6" column="0" row-span="1" col-span="2" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/page_copy.png"/>
+          <name value="registryUriCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyUriToClipboard"/>
+        </properties>
+      </component>
+      <component id="3b241" class="javax.swing.JButton" binding="lanUriCopyButton">
+        <constraints>
+          <grid row="2" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/page_copy.png"/>
+          <name value="lanUriCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyUriToClipboard"/>
+        </properties>
+      </component>
+      <component id="af0db" class="javax.swing.JButton" binding="localIpv4UriCopyButton">
+        <constraints>
+          <grid row="3" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/page_copy.png"/>
+          <name value="localIpv4UriCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyUriToClipboard"/>
+        </properties>
+      </component>
+      <component id="7df76" class="javax.swing.JButton" binding="localIpv6UriCopyButton">
+        <constraints>
+          <grid row="4" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/page_copy.png"/>
+          <name value="localIpv6UriCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyUriToClipboard"/>
+        </properties>
+      </component>
+      <component id="be96" class="javax.swing.JButton" binding="externalUriCopyButton">
+        <constraints>
+          <grid row="5" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/page_copy.png"/>
+          <name value="externalUriCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyUriToClipboard"/>
+        </properties>
+      </component>
+      <component id="1487b" class="javax.swing.JButton" binding="registryHttpUrlCopyButton">
+        <constraints>
+          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/cursor.png"/>
+          <name value="registryHttpUrlCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyHttpUrlToClipboard"/>
+        </properties>
+      </component>
+      <component id="ecb2a" class="javax.swing.JButton" binding="lanHttpUrlCopyButton">
+        <constraints>
+          <grid row="2" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/cursor.png"/>
+          <name value="lanHttpUrlCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyHttpUrlToClipboard"/>
+        </properties>
+      </component>
+      <component id="33a53" class="javax.swing.JButton" binding="localIpv4HttpUrlCopyButton">
+        <constraints>
+          <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/cursor.png"/>
+          <name value="localIpv4HttpUrlCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyHttpUrlToClipboard"/>
+        </properties>
+      </component>
+      <component id="37765" class="javax.swing.JButton" binding="localIpv6HttpUrlCopyButton">
+        <constraints>
+          <grid row="4" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/cursor.png"/>
+          <name value="localIpv6HttpUrlCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyHttpUrlToClipboard"/>
+        </properties>
+      </component>
+      <component id="25e24" class="javax.swing.JButton" binding="externalHttpUrlCopyButton">
+        <constraints>
+          <grid row="5" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+        </constraints>
+        <properties>
+          <icon value="net/rptools/maptool/client/image/cursor.png"/>
+          <name value="externalHttpUrlCopyButton"/>
+          <text value=""/>
+          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="ConnectionInfoDialog.copyHttpUrlToClipboard"/>
+        </properties>
+      </component>
+      <component id="74e0b" class="javax.swing.JButton" binding="okButton">
+        <constraints>
+          <grid row="7" column="0" row-span="1" col-span="4" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties>
           <actionCommand value="OK"/>

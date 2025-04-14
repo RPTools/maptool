@@ -36,8 +36,6 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
-  private final String instructionKey;
-  private final String tooltipKey;
   private final Strategy<StateT> strategy;
 
   /** The current state of the tool. If {@code null}, nothing is being drawn right now. */
@@ -47,24 +45,9 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
   private boolean centerOnOrigin = false;
 
   public DrawingTool(String instructionKey, String tooltipKey, Strategy<StateT> strategy) {
-    this.instructionKey = instructionKey;
-    this.tooltipKey = tooltipKey;
+    super(instructionKey, tooltipKey);
+
     this.strategy = strategy;
-  }
-
-  @Override
-  public String getInstructions() {
-    return instructionKey;
-  }
-
-  @Override
-  public String getTooltip() {
-    return tooltipKey;
-  }
-
-  @Override
-  public boolean isAvailable() {
-    return MapTool.getPlayer().isGM();
   }
 
   @Override
@@ -296,5 +279,7 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
         submit(result.shape());
       }
     }
+
+    super.mouseReleased(e);
   }
 }

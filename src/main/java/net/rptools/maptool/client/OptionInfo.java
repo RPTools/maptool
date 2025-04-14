@@ -28,11 +28,7 @@ import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-/**
- * ******************************************************************************** OptionInfo class
- * - holds extracted name and parameters for a roll option.
- * ********************************************************************************
- */
+/** The OptionInfo class - holds extracted name and parameters for a roll options. */
 class OptionInfo {
 
   // Logger for this class.
@@ -44,20 +40,8 @@ class OptionInfo {
   private static final Object nullParam = null;
   private static final Pattern PATTERN_COMMA = Pattern.compile("^\\s*,\\s*(?!$)");
 
-  /*
-   * In order to add a new roll option, follow the instructions in the "todo" comments in this file.
-   */
+  /** The OptionType enum contains the option type that has been specified for the roll */
   enum OptionType {
-    /*
-     * TODO: If you're adding a new option, make an entry in this table
-     */
-
-    // The format is:
-    // NAME (nameRegex, minParams, maxParams, defaultValues...)
-    //
-    // You must provide (maxParams - minParams) default values (BigDecimal or String types).
-    //
-    // If maxParams is -1, unlimited params may be passed in.
     NO_OPTION("", 0, 0),
     // output formats
     EXPANDED("e|expanded", 0, 0),
@@ -96,10 +80,27 @@ class OptionInfo {
     // Run for another token
     TOKEN("token", 1, 1);
 
-    protected final Pattern namePattern;
-    protected final int minParams, maxParams;
-    protected final Object[] defaultParams;
+    /** The name pattern for the roll option. */
+    private final Pattern namePattern;
 
+    /** The minimum number of parameters for the roll option. */
+    private final int minParams;
+
+    /** The maximum number of parameters for the roll option, this will be -1 for unlimited */
+    private final int maxParams;
+
+    /** The default parameters for the roll option. */
+    private final Object[] defaultParams;
+
+    /**
+     * Creates a new OptionType enum value.
+     *
+     * @param nameRegex The regular expression for the option.
+     * @param minParams The minimum number of parameters for the option.
+     * @param maxParams The maximum number of parameters for the action, or -1 for unlimited.
+     * @param defaultParams The default parameters for the roll option (either String of
+     *     BigDecimal).
+     */
     OptionType(String nameRegex, int minParams, int maxParams, Object... defaultParams) {
       this.namePattern = Pattern.compile("^\\s*" + nameRegex + "\\s*$", Pattern.CASE_INSENSITIVE);
       this.minParams = minParams;
@@ -124,7 +125,7 @@ class OptionInfo {
     }
 
     /** Obtain one of the enum values, or null if <code>strName</code> doesn't match any of them. */
-    protected static OptionType optionTypeFromName(String strName) {
+    private static OptionType optionTypeFromName(String strName) {
       for (OptionType rot : OptionType.values()) {
         if (rot.getNamePattern().matcher(strName).matches()) {
           return rot;
@@ -148,11 +149,14 @@ class OptionInfo {
 
     /** Returns a copy of the default params array for this option type. */
     public Object[] getDefaultParams() {
-      if (maxParams == -1) return null;
+      if (maxParams == -1) {
+        return null;
+      }
 
       Object[] retval = new Object[maxParams];
-      if (maxParams - minParams >= 0)
+      if (maxParams - minParams >= 0) {
         System.arraycopy(defaultParams, 0, retval, minParams, maxParams - minParams);
+      }
 
       return retval;
     }
@@ -167,9 +171,13 @@ class OptionInfo {
         } else {
           retval.append(", ");
         }
-        if (p == null) retval.append("null");
-        else if (p instanceof String) retval.append("\"").append(p).append("\"");
-        else retval.append(p.toString());
+        if (p == null) {
+          retval.append("null");
+        } else if (p instanceof String) {
+          retval.append("\"").append(p).append("\"");
+        } else {
+          retval.append(p.toString());
+        }
       }
       retval.append("]");
       return retval.toString();
@@ -179,6 +187,7 @@ class OptionInfo {
   /** Thrown when a roll option can't be parsed. */
   @SuppressWarnings("serial")
   public static class RollOptionException extends Exception {
+
     public String msg;
 
     public RollOptionException(String msg) {
@@ -216,11 +225,15 @@ class OptionInfo {
   static List<OptionInfo> getRollOptionList(String optionString) throws RollOptionException {
 
     // check for null
-    if (optionString == null) return null;
+    if (optionString == null) {
+      return null;
+    }
 
     // check if already parsed
     List<OptionInfo> list = OPTION_INFO_CACHE.getIfPresent(optionString);
-    if (list != null) return list;
+    if (list != null) {
+      return list;
+    }
 
     list = new ArrayList<>();
     optionString = optionString.trim();
@@ -336,7 +349,9 @@ class OptionInfo {
     }
 
     // Fill in the found parameters, converting to BigDecimal if possible.
-    if (params == null) params = new Object[numParamsFound];
+    if (params == null) {
+      params = new Object[numParamsFound];
+    }
 
     for (int i = 0; i < numParamsFound; i++) {
       params[i] = toNumIfPossible(paramList.get(i));
@@ -432,8 +447,9 @@ class OptionInfo {
       int index, MapToolVariableResolver res, Token tokenInContext, MapToolLineParser parser)
       throws ParserException {
     Object retval = getParsedParam(index, res, tokenInContext, parser);
-    if (!(retval instanceof BigDecimal))
+    if (!(retval instanceof BigDecimal)) {
       throw new ParserException(I18N.getText("lineParser.notValidNumber", retval.toString()));
+    }
     return ((BigDecimal) retval).intValue();
   }
 
@@ -447,11 +463,15 @@ class OptionInfo {
       } else {
         retval.append(", ");
       }
-      if (p == null) retval.append("null");
-      else if (p instanceof String) retval.append("\"").append(p).append("\"");
-      else retval.append(p.toString());
+      if (p == null) {
+        retval.append("null");
+      } else if (p instanceof String) {
+        retval.append("\"").append(p).append("\"");
+      } else {
+        retval.append(p.toString());
+      }
     }
     retval.append(")");
     return retval.toString();
   }
-} ///////////////////// end of OptionInfo class
+}

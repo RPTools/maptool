@@ -17,7 +17,7 @@ package net.rptools.maptool.model;
 import java.io.Serializable;
 import java.util.HexFormat;
 import java.util.UUID;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.jetbrains.annotations.NotNull;
 
 /** Global unique identificator object. */
@@ -164,13 +164,6 @@ public class GUID implements Serializable, Comparable<GUID> {
    */
   public static boolean isNotGUID(String arg) {
     return arg.length() != GUID.GUID_LENGTH * 2;
-  }
-
-  public static void main(String[] args) {
-    for (int i = 0; i < 10; i++) {
-      GUID guid = new GUID();
-      System.out.println("insert into sys_guids values ('" + guid.toString() + "');");
-    }
   }
 
   public int compareTo(@NotNull GUID o) {

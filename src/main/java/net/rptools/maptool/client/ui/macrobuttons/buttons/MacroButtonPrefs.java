@@ -90,7 +90,6 @@ public class MacroButtonPrefs {
     // etc.)
     String paddedIndex = String.format(FORMAT_STRING, index);
 
-    // prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros/" + paddedIndex);
     Preferences prefs = Preferences.userRoot().node(AppConstants.APP_NAME + "/macros");
 
     try {
@@ -145,13 +144,6 @@ public class MacroButtonPrefs {
       for (String buttonNode : prefsRoot.childrenNames()) {
         Preferences buttonPref = prefsRoot.node(buttonNode);
 
-        // not elegant by any definition but works using already existing system
-        // the downside is the number of buttons the user can create is limited with
-        // Integer.MAX_VALUE
-        // after 2.147.. billion button creation the program will explode. if you were to create a
-        // new button
-        // every second it would take 63 years for this to overflow :)
-        // TODO: change this if you like
         int index = Integer.parseInt(buttonNode);
         if (index > maxIndex) {
           maxIndex = index;

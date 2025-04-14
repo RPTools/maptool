@@ -23,12 +23,10 @@ public class TransferableMacroButton implements Transferable {
   public static final DataFlavor macroButtonFlavor =
       new DataFlavor(MacroButton.class, "Macro Button");
 
-  // private TokenMacroButton button;
   private TransferData transferData;
 
   public TransferableMacroButton(
       MacroButton button, int transferGestureModifiers, int panelHashcode) {
-    // this.button = button;
     transferData = new TransferData(button, transferGestureModifiers, panelHashcode);
   }
 

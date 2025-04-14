@@ -30,8 +30,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 public final class ExposeTool<StateT> extends AbstractDrawingLikeTool {
-  private final String instructionKey;
-  private final String tooltipKey;
   private final Strategy<StateT> strategy;
 
   /** The current state of the tool. If {@code null}, nothing is being drawn right now. */
@@ -41,19 +39,9 @@ public final class ExposeTool<StateT> extends AbstractDrawingLikeTool {
   private boolean centerOnOrigin = false;
 
   public ExposeTool(String instructionKey, String tooltipKey, Strategy<StateT> strategy) {
-    this.instructionKey = instructionKey;
-    this.tooltipKey = tooltipKey;
+    super(instructionKey, tooltipKey);
+
     this.strategy = strategy;
-  }
-
-  @Override
-  public String getInstructions() {
-    return instructionKey;
-  }
-
-  @Override
-  public String getTooltip() {
-    return tooltipKey;
   }
 
   @Override
@@ -200,5 +188,7 @@ public final class ExposeTool<StateT> extends AbstractDrawingLikeTool {
         submit(result.shape());
       }
     }
+
+    super.mouseReleased(e);
   }
 }

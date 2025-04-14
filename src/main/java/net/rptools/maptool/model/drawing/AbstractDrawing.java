@@ -15,13 +15,7 @@
 package net.rptools.maptool.model.drawing;
 
 import com.google.common.annotations.VisibleForTesting;
-import java.awt.AlphaComposite;
-import java.awt.BasicStroke;
-import java.awt.Color;
-import java.awt.Composite;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Stroke;
+import java.awt.*;
 import java.awt.image.ImageObserver;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Campaign;
@@ -152,6 +146,15 @@ public abstract class AbstractDrawing implements Drawable, ImageObserver {
   @Override
   public int hashCode() {
     return id.hashCode();
+  }
+
+  @Override
+  public String toString() {
+    StringBuilder sb = new StringBuilder();
+    sb.append("name=").append(getName()).append(";");
+    sb.append("layer=").append(getLayer()).append(";");
+    sb.append("id=").append(getId()).append(";");
+    return sb.toString();
   }
 
   ////

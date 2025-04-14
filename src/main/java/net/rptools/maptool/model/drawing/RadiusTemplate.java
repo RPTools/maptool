@@ -29,8 +29,6 @@ import net.rptools.maptool.server.proto.drawing.RadiusTemplateDto;
  * The radius template draws a highlight over all the squares effected from a specific spine.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public class RadiusTemplate extends AbstractTemplate {
 
@@ -96,13 +94,6 @@ public class RadiusTemplate extends AbstractTemplate {
   protected void paintBorder(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
     paintBorderAtRadius(g, x, y, xOff, yOff, gridSize, distance, getRadius());
-
-    // At the center?
-    // FIXME This is wrong because it draws the filled rectangle at CellPoint(0,0) and it should be
-    // at the
-    // origin of the radius template. Perhaps the transform is missing a call to translate()?
-    // if (x == 0 && y == 0)
-    // g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
   }
 
   /**

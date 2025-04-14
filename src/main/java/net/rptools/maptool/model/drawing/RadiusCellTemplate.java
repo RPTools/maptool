@@ -119,13 +119,6 @@ public class RadiusCellTemplate extends AbstractTemplate {
   protected void paintBorder(
       Graphics2D g, int x, int y, int xOff, int yOff, int gridSize, int distance) {
     paintBorderAtRadius(g, x, y, xOff, yOff, gridSize, distance, getRadius());
-
-    // At the center?
-    // FIXME This is wrong because it draws the filled rectangle at CellPoint(0,0) and it should be
-    // at the
-    // origin of the radius template. Perhaps the transform is missing a call to translate()?
-    // if (x == 0 && y == 0)
-    // g.fillRect(getVertex().x + xOff - 4, getVertex().y + yOff - 4, 7, 7);
   }
 
   @Override

@@ -46,6 +46,7 @@ import net.rptools.maptool.util.ImageManager;
 import net.rptools.maptool.util.StringUtil;
 
 public class CommandPanel extends JPanel {
+
   private static final long serialVersionUID = 8710948417044703674L;
 
   private final List<String> commandHistory = new LinkedList<String>();
@@ -66,8 +67,6 @@ public class CommandPanel extends JPanel {
           RessourceManager.getSmallIcon(Icons.ACTION_CANCEL).getImage());
 
   // Chat timers
-  // private long chatNotifyDuration; // Initialize it on first load
-  // private Timer chatTimer;
 
   private ChatProcessor chatProcessor;
 
@@ -316,6 +315,7 @@ public class CommandPanel extends JPanel {
    * specified name.
    */
   public static class TokenIdentity {
+
     /** The name of the identity. If null, nothing is impersonated. */
     private final String identityName;
 
@@ -397,8 +397,11 @@ public class CommandPanel extends JPanel {
      */
     public String getIdentity() {
       if (identityName == null) {
-        if (identityGUID == null) return MapTool.getPlayer().getName();
-        else return identityGUID.toString();
+        if (identityGUID == null) {
+          return MapTool.getPlayer().getName();
+        } else {
+          return identityGUID.toString();
+        }
       }
       return identityName;
     }
@@ -493,12 +496,16 @@ public class CommandPanel extends JPanel {
 
             public void itemStateChanged(ItemEvent e) {
               if (e.getStateChange() == ItemEvent.SELECTED) {
-                if (ours != null) commandTextArea.removeKeyListener(ours);
+                if (ours != null) {
+                  commandTextArea.removeKeyListener(ours);
+                }
                 ours = null;
                 // Go ahead and turn off the chat panel right away.
                 MapTool.getFrame().getChatTypingPanel().setVisible(false);
               } else if (e.getStateChange() == ItemEvent.DESELECTED) {
-                if (ours == null) ours = new ChatTypingListener();
+                if (ours == null) {
+                  ours = new ChatTypingListener();
+                }
                 commandTextArea.addKeyListener(ours);
               }
             }
@@ -544,9 +551,6 @@ public class CommandPanel extends JPanel {
     constraints.gridy = 0;
 
     panel.add(getTextColorWell(), constraints);
-
-    // constraints.gridy++;
-    // panel.add(Box.createVerticalStrut(2), constraints);
 
     constraints.gridy++;
     panel.add(getScrollLockButton(), constraints);
@@ -605,7 +609,7 @@ public class CommandPanel extends JPanel {
             }
           };
       commandTextArea.setBorder(BorderFactory.createEmptyBorder(0, 5, 0, 5));
-      commandTextArea.setPreferredSize(new Dimension(50, 40)); // XXX should be resizable
+      commandTextArea.setPreferredSize(new Dimension(50, 40));
       commandTextArea.setFont(new Font("sans-serif", 0, AppPreferences.fontSize.get()));
       if (!ThemeSupport.shouldUseThemeColorsForChat()) {
         commandTextArea.setBackground(Color.WHITE);
@@ -639,6 +643,7 @@ public class CommandPanel extends JPanel {
    * removes the typing notification after the duration set in AppPreferences expires.
    */
   private class ChatTypingListener extends KeyAdapter {
+
     @Override
     public void keyReleased(KeyEvent kre) {
       // Get the key released
@@ -667,9 +672,6 @@ public class CommandPanel extends JPanel {
     }
   }
 
-  /*
-   * FIXME: this is insufficient for stopping faked rolls; the user can still do something like &{"laquo;"}.
-   */
   public static final Pattern CHEATER_PATTERN =
       Pattern.compile("\u00AB|\u00BB|&#171;?|&#187;?|&laquo;?|&raquo;?|&#xAB;?|&#xBB;?|\036|\037");
 
@@ -724,7 +726,6 @@ public class CommandPanel extends JPanel {
       return;
     }
     // Make sure they aren't trying to break out of the div
-    // FIXME: as above, </{"div"}> can be used to get around this
     int divCount = StringUtil.countOccurances(command, "<div");
     int closeDivCount = StringUtil.countOccurances(command, "</div>");
     while (closeDivCount < divCount) {
@@ -750,8 +751,6 @@ public class CommandPanel extends JPanel {
   public void cancelCommand() {
     commandTextArea.setText("");
     validate();
-    // Why were we closing the chat window on Esc?
-    // MapTool.getFrame().hideCommandPanel();
   }
 
   /** Inserts a newline into the chat input box. */
@@ -779,6 +778,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class CommandHistoryUpAction extends AbstractAction {
+
     public void actionPerformed(ActionEvent e) {
       if (commandHistory.size() == 0) {
         return;
@@ -795,6 +795,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class CommandHistoryDownAction extends AbstractAction {
+
     private static final long serialVersionUID = 7070274680351186504L;
 
     public void actionPerformed(ActionEvent e) {
@@ -834,6 +835,7 @@ public class CommandPanel extends JPanel {
   }
 
   public static class TextColorWell extends JPanel {
+
     private static final long serialVersionUID = -9006587537198176935L;
 
     // Set the Color from the saved chat color from AppPreferences
@@ -877,6 +879,7 @@ public class CommandPanel extends JPanel {
   }
 
   private class AvatarPanel extends JComponent {
+
     private static final long serialVersionUID = -8027749503951260361L;
     private static final int PADDING = 5;
 

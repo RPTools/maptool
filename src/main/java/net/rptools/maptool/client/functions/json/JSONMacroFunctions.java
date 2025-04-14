@@ -15,12 +15,16 @@
 package net.rptools.maptool.client.functions.json;
 
 import com.google.gson.*;
+import com.google.gson.stream.JsonWriter;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import com.jayway.jsonpath.PathNotFoundException;
 import com.jayway.jsonpath.spi.json.GsonJsonProvider;
 import com.jayway.jsonpath.spi.mapper.GsonMappingProvider;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
@@ -34,12 +38,14 @@ import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.AbstractFunction;
-import net.sf.json.JSONArray;
-import net.sf.json.JSONObject;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class used to implement Json related functions in MT script. */
 public class JSONMacroFunctions extends AbstractFunction {
+
+  private static final Logger log = LogManager.getLogger(JSONMacroFunctions.class);
 
   /** Object used to convert between json and MTS primitive types. */
   private final JsonMTSTypeConversion typeConversion;
@@ -778,13 +784,17 @@ public class JSONMacroFunctions extends AbstractFunction {
    * @return The json as a formatted string.
    */
   public String jsonIndent(JsonElement json, int indent) {
+    final Gson gsonPrettyPrinting =
+        new GsonBuilder().setPrettyPrinting().disableHtmlEscaping().create();
 
-    // This is a bit ugly but the GSON library offers no way to specify indentation.
-    if (json.isJsonArray()) {
-      return JSONArray.fromObject(json.toString()).toString(indent);
-    } else if (json.isJsonObject()) {
-      return JSONObject.fromObject(json.toString()).toString(indent);
-    } else {
+    try (final Writer writer = new StringWriter()) {
+      final JsonWriter jWriter = gsonPrettyPrinting.newJsonWriter(writer);
+      jWriter.setIndent(" ".repeat(indent));
+      gsonPrettyPrinting.toJson(json, jWriter);
+      return writer.toString();
+    } catch (final IOException e) {
+      // This case should not happen, it's just an artifact of working with writers.
+      log.error("Unexpected error while formatting JSON", e);
       return json.toString();
     }
   }

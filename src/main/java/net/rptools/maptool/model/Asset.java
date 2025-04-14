@@ -184,6 +184,11 @@ public final class Asset {
 
               default -> Type.INVALID;
             };
+        case "model" ->
+            switch (subType) {
+              case "vnd.mts" -> Type.TEXT;
+              default -> Type.INVALID;
+            };
         default -> Type.INVALID;
       };
     }

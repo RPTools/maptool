@@ -229,7 +229,6 @@ public class IsometricGrid extends Grid {
 
   @Override
   public void installMovementKeys(PointerTool callback, Map<KeyStroke, Action> actionMap) {
-    System.out.println("install iso movement keys");
     if (movementKeys == null) {
       movementKeys = new HashMap<KeyStroke, Action>(18); // This is 13/0.75, rounded up
       int size = getSize();
@@ -265,7 +264,6 @@ public class IsometricGrid extends Grid {
 
   @Override
   public void uninstallMovementKeys(Map<KeyStroke, Action> actionMap) {
-    System.out.println("uninstall iso movement keys");
     if (movementKeys != null) {
       for (KeyStroke key : movementKeys.keySet()) {
         actionMap.remove(key);
@@ -425,7 +423,6 @@ public class IsometricGrid extends Grid {
     int nSize = (planArea.getBounds().width + planArea.getBounds().height);
 
     return resize(rotate(planArea), nSize, nSize / 2);
-    // return rotate(planArea);
   }
 
   private static Area rotate(Area planArea) {

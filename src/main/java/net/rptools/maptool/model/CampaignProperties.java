@@ -119,7 +119,6 @@ public class CampaignProperties {
     lookupTableMap.putAll(properties.lookupTableMap);
     defaultSightType = properties.defaultSightType;
     sightTypeMap.putAll(properties.sightTypeMap);
-    // TODO: This doesn't feel right, should we deep copy, or does this do that automatically ?
     lightSourcesMap.putAll(properties.lightSourcesMap);
 
     for (BooleanTokenOverlay overlay : properties.tokenStates.values()) {
@@ -214,7 +213,6 @@ public class CampaignProperties {
     }
   }
 
-  // TODO: This is for conversion from 1.3b19-1.3b20
   public void setTokenTypeMap(Map<String, List<TokenProperty>> map) {
     tokenTypeMap.clear();
     tokenTypeMap.putAll(map);
@@ -246,7 +244,6 @@ public class CampaignProperties {
     return lookupTableMap;
   }
 
-  // TODO: This is for conversion from 1.3b19-1.3b20
   public void setLookupTableMap(Map<String, LookupTable> map) {
     lookupTableMap.clear();
     lookupTableMap.putAll(map);

@@ -36,9 +36,12 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
   private static final long serialVersionUID = -4404834393567699280L;
+  private static final Logger log = LogManager.getLogger(LookupTablePanel.class);
 
   private ImagePanel imagePanel;
   private JDialog editorDialog;
@@ -316,7 +319,7 @@ public class LookupTablePanel extends AbeillePanel<LookupTableImagePanelModel> {
                       MapTool.showInformation(
                           I18N.getText("LookupTablePanel.info.saved", selectedFile.getName()));
                     } catch (IOException ioe) {
-                      ioe.printStackTrace();
+                      log.error("Error while saving table", ioe);
                       MapTool.showError("LookupTablePanel.error.saveFailed", ioe);
                     }
                   });

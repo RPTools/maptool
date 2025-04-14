@@ -47,10 +47,10 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 
 /** */
 public class GraphicsUtil {
+
   public static final int BOX_PADDINGX = 10;
   public static final int BOX_PADDINGY = 2;
 
-  // TODO: Make this configurable
   public static final ImageLabel GREY_LABEL =
       new ImageLabel(RessourceManager.getImage(Images.BOX_GRAY), 4, 4);
   public static final ImageLabel BLUE_LABEL =
@@ -87,7 +87,6 @@ public class GraphicsUtil {
     if (string == null) {
       string = "";
     }
-    // TODO: expand to work for variable width fonts.
     Font oldFont = g.getFont();
     Font fixedWidthFont = new Font("Courier New", 0, 12);
     g.setFont(fixedWidthFont);
@@ -226,8 +225,9 @@ public class GraphicsUtil {
    *     light colors from getting bleached out.
    */
   public static Color lighten(Color c) {
-    if (c == null) return null;
-    else {
+    if (c == null) {
+      return null;
+    } else {
       int r = c.getRed();
       int g = c.getGreen();
       int b = c.getBlue();
@@ -329,7 +329,6 @@ public class GraphicsUtil {
     double b = h / 2;
 
     for (double t = -Math.PI; t <= Math.PI; t += (2 * Math.PI / steps)) {
-      // TODO Why do we accept double inputs, but round/cast to int here?
       int px = (int) Math.round(x + a * Math.cos(t));
       int py = (int) Math.round(y + b * Math.sin(t));
 
@@ -359,14 +358,9 @@ public class GraphicsUtil {
         RenderingHints.KEY_ANTIALIASING,
         RenderingHints.VALUE_ANTIALIAS_OFF); // Faster without antialiasing, and looks just as good
 
-    // float alpha = (float)initialAlpha / width / 6;
     float alpha = .04f;
     g2.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, alpha));
     for (int i = 1; i < width; i += 2) {
-      // if (alpha * i < .2) {
-      // // Too faded to see anyway, don't waste cycles on it
-      // continue;
-      // }
       g2.setStroke(new BasicStroke(i));
       g2.draw(shape);
     }
@@ -397,13 +391,10 @@ public class GraphicsUtil {
 
       double bottomAngle = (angle + delta / 2) % 360;
       double topAngle = bottomAngle + 180;
-      // System.out.println(angle + " - " + delta + " - " + bottomAngle + " - " + topAngle);
 
       bottomList.add(getPointAtVector(points[i], bottomAngle, width));
       topList.add(getPointAtVector(points[i], topAngle, width));
     }
-    // System.out.println(bottomList);
-    // System.out.println(topList);
     Collections.reverse(topList);
 
     GeneralPath path = new GeneralPath();
@@ -424,9 +415,6 @@ public class GraphicsUtil {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
 
-    // System.out.println(point + " - " + angle + " - " + x + "x" + y + " - " +
-    // Math.cos(Math.toRadians(angle)) + " - " + Math.sin(Math.toRadians(angle)) + " - " +
-    // Math.toRadians(angle));
     return new Point2D.Double(x, y);
   }
 
@@ -435,8 +423,6 @@ public class GraphicsUtil {
         new Point2D[] {
           new Point(20, 20), new Point(50, 50), new Point(80, 20), new Point(100, 100)
         };
-    // final Point2D[] points = new Point2D[]{new Point(50, 50), new Point(20, 20), new Point(20,
-    // 100), new Point(50,75)};
     final Area line = createLine(10, points);
 
     JFrame f = new JFrame();
@@ -462,6 +448,5 @@ public class GraphicsUtil {
         };
     f.add(p);
     f.setVisible(true);
-    // System.out.println(area.equals(area2));
   }
 }

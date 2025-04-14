@@ -23,13 +23,4 @@ public abstract class AbstractMacro implements Macro {
         + MapTool.getFrame().getCommandPanel().getChatProcessor().process(incoming)
         + "\003";
   }
-
-  // public static void main(String[] args) {
-  // new AbstractMacro(){
-  // public void execute(String macro) {
-  //
-  // System.out.println(getWords(macro));
-  // }
-  // }.execute("one \"two three\" \"four five\"");
-  // }
 }

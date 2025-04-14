@@ -109,7 +109,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       RessourceManager.getBigIcon(Icons.EDIT_TOKEN_REFRESH_ON);
   private static final ImageIcon REFRESH_ICON_OFF =
       RessourceManager.getBigIcon(Icons.EDIT_TOKEN_REFRESH_OFF);
-  // private CharSheetController controller;
   private final RSyntaxTextArea xmlStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final RSyntaxTextArea textStatblockRSyntaxTextArea = new RSyntaxTextArea(2, 2);
   private final WordWrapCellRenderer propertyCellRenderer = new WordWrapCellRenderer();
@@ -119,7 +118,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   private ImageAssetPanel imagePanel;
   private final LibraryManager libraryManager = new LibraryManager();
 
-  // private final Toolbox toolbox = new Toolbox();
   private HeroLabData heroLabData;
   private AutoGenerateTopologySwingWorker autoGenerateTopologySwingWorker =
       new AutoGenerateTopologySwingWorker(false, Color.BLACK);
@@ -188,7 +186,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
           @Override
           public void closeDialog() {
-            // TODO: I don't like this. There should really be a AbeilleDialog class that does this
 
             if (!autoGenerateTopologySwingWorker.isDone()) {
               log.info("Stopping autoGenerateTopologySwingWorker...");
@@ -463,6 +460,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       getHtmlStatblockEditor().setText(heroLabData.getStatBlock_html());
       getHtmlStatblockEditor().setCaretPosition(0);
 
+      xmlStatblockRSyntaxTextArea.setUseFocusableTips(false);
       xmlStatblockRSyntaxTextArea.setText(heroLabData.getStatBlock_xml());
       xmlStatblockRSyntaxTextArea.setCaretPosition(0);
 
@@ -486,7 +484,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       EventQueue.invokeLater(this::loadHeroLabImageList);
 
-      // loadHeroLabImageList();
     } else {
       tabbedPane.setEnabledAt(tabbedPane.indexOfTab(heroLabTitle), false);
       if (tabbedPane.getSelectedIndex() == tabbedPane.indexOfTab(heroLabTitle)) {
@@ -504,23 +501,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           getVisibleOnlyToOwnerLabel().setEnabled(selected);
         };
     getVisibleCheckBox().addActionListener(tokenVisibleActionListener);
-
-    // Character Sheets
-    // controller = null;
-    // String form =
-    // MapTool.getCampaign().getCharacterSheets().get(token.getPropertyType());
-    // if (form == null)
-    // return;
-    // URL formUrl = getClass().getClassLoader().getResource(form);
-    // if (formUrl == null)
-    // return;
-    // controller = new CharSheetController(formUrl, null);
-    // HashMap<String, Object> properties = new HashMap<String, Object>();
-    // for (String prop : token.getPropertyNames())
-    // properties.put(prop, token.getProperty(prop));
-    // controller.setData(properties);
-    // controller.getPanel().setName("characterSheet");
-    // replaceComponent("sheetPanel", "characterSheet", controller.getPanel());
 
     super.bind(token);
   }
@@ -939,7 +919,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     MapTool.getFrame().updateTokenTree();
     MapTool.getFrame().resetTokenPanels();
 
-    // Jamz: TODO check if topology changed on token first
     MapTool.getFrame()
         .getCurrentZoneRenderer()
         .getZone()
@@ -1213,8 +1192,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
             return text != null && text.length() > 100 ? text.substring(0, 100) + " ..." : text;
           }
         };
-    propertyTable.setFillsViewportHeight(true); // XXX This is Java6-only -- need
-    //  Java5 solution
+    propertyTable.setFillsViewportHeight(true);
     propertyTable.setName("propertiesTable");
 
     // wrap button and functionality
@@ -1229,13 +1207,8 @@ public class EditTokenDialog extends AbeillePanel<Token> {
     buttonsAndPropertyTable.add(wrapToggle, BorderLayout.PAGE_END);
 
     PropertyPane pane = new PropertyPane(propertyTable);
-    // pane.setPreferredSize(new Dimension(100, 300));
     buttonsAndPropertyTable.add(pane, BorderLayout.CENTER);
     replaceComponent("propertiesPanel", "propertiesTable", buttonsAndPropertyTable);
-  }
-
-  public void initTokenDetails() {
-    // tokenGMNameLabel = panel.getLabel("tokenGMNameLabel");
   }
 
   public void initTokenLayoutPanel() {
@@ -1596,7 +1569,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       xmlStatblockRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading XML syntax theme", e);
     }
 
     RTextScrollPane xmlStatblockRTextScrollPane = new RTextScrollPane(xmlStatblockRSyntaxTextArea);
@@ -1605,6 +1578,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         "xmlStatblockPanel", "xmlStatblockRTextScrollPane", xmlStatblockRTextScrollPane);
 
     // Setup the TEXT panel
+    textStatblockRSyntaxTextArea.setUseFocusableTips(false);
     textStatblockRSyntaxTextArea.setEditable(false);
     textStatblockRSyntaxTextArea.setLineWrap(true);
     textStatblockRSyntaxTextArea.setWrapStyleWord(true);
@@ -1618,7 +1592,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
       textStatblockRSyntaxTextArea.revalidate();
     } catch (IOException e) {
-      e.printStackTrace();
+      log.error("Error while loading test syntax theme", e);
     }
 
     RTextScrollPane textStatblockRTextScrollPane =
@@ -1749,9 +1723,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
           SearchContext context = new SearchContext();
           context.setSearchFor(searchText);
           context.setRegularExpression(true);
-          // context.setMatchCase(matchCaseCB.isSelected());
-          // context.setSearchForward(forward);
-          // context.setWholeWord(false);
 
           SearchEngine.find(textStatblockRSyntaxTextArea, context).wasFound();
         });
@@ -1928,7 +1899,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
         j.revalidate();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while loading multiline property editor theme", e);
       }
       JScrollPane localJScrollPane = new RTextScrollPane(j);
       localJScrollPane.setVerticalScrollBarPolicy(22);
@@ -1953,7 +1924,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       syntaxComboBox.addActionListener(
           e -> j.setSyntaxEditingStyle(syntaxComboBox.getSelectedItem().toString()));
 
-      // content.add(wrapToggle);
       add(syntaxComboBox, BorderLayout.BEFORE_FIRST_LINE);
       add(wrapToggle, BorderLayout.AFTER_LAST_LINE);
     }
@@ -1972,6 +1942,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     protected RSyntaxTextArea createTextArea() {
       RSyntaxTextArea textArea = new RSyntaxTextArea();
+      textArea.setUseFocusableTips(false);
       textArea.setAnimateBracketMatching(true);
       textArea.setBracketMatchingEnabled(true);
       textArea.setLineWrap(false);
@@ -1997,7 +1968,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
         revalidate();
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error("Error while loading theme", e);
       }
     }
 
@@ -2094,7 +2065,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                 175);
         label.setIcon(finalImage);
       } catch (Exception e) {
-        e.printStackTrace();
+        log.error("Error while loading hero lab image", e);
       }
       label.setIconTextGap(10);
       label.setHorizontalTextPosition(JLabel.LEFT);
@@ -2125,7 +2096,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               if (selectedText == null) {
                 selectedText = source.getText();
               }
-              // TODO: Combine this with the code in MacroButton
               JTextComponent commandArea =
                   MapTool.getFrame().getCommandPanel().getCommandTextArea();
 
@@ -2142,7 +2112,6 @@ public class EditTokenDialog extends AbeillePanel<Token> {
               if (selectedText == null) {
                 selectedText = source.getText();
               }
-              // TODO: Combine this with the code in MacroButton
               MapTool.getFrame().getCommandPanel().commitCommand("/emit " + selectedText);
               MapTool.getFrame().getCommandPanel().getCommandTextArea().requestFocusInWindow();
             });

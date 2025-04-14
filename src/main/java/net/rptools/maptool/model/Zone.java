@@ -32,7 +32,6 @@ import net.rptools.maptool.client.ui.MapToolFrame;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.ZoneView;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.client.ui.zone.vbl.NodedTopology;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
@@ -48,6 +47,7 @@ import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.model.tokens.TokenMacroChanged;
 import net.rptools.maptool.model.tokens.TokenPanelChanged;
 import net.rptools.maptool.model.topology.MaskTopology;
+import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
 import net.rptools.maptool.model.zones.BoardChanged;
 import net.rptools.maptool.model.zones.DrawableAdded;
@@ -391,8 +391,6 @@ public class Zone {
   // The new take on topology.
   private WallTopology walls = new WallTopology();
 
-  private transient @Nullable NodedTopology nodedTopology;
-
   // The 'board' layer, at the very bottom of the layer stack.
   // Itself has two sub-layers:
   // The top one is an optional texture, typically a pre-drawn map.
@@ -434,8 +432,6 @@ public class Zone {
   }
 
   public Zone() {
-    // TODO: Was this needed?
-    // setGrid(new SquareGrid());
     undo = new UndoPerZone(this); // registers as ModelChangeListener for drawables...
   }
 
@@ -956,7 +952,6 @@ public class Zone {
     }
     combined.intersect(tokenFootprint);
     return !combined.isEmpty();
-    // return combined.intersects(tokenSize);
   }
 
   public WallTopology getWalls() {
@@ -992,23 +987,21 @@ public class Zone {
 
   public void replaceWalls(WallTopology walls) {
     this.walls = walls;
-    this.nodedTopology = null;
     new MapToolEventBus().getMainEventBus().post(new WallTopologyChanged(this));
   }
 
-  /**
-   * Packages legacy topology, including token topology, together with wall topology, adding nodes
-   * at any intersection points.
-   *
-   * @return
-   */
-  public NodedTopology prepareNodedTopologies() {
-    if (nodedTopology == null) {
-      var legacyMasks = getMasks(EnumSet.allOf(TopologyType.class), null);
-      nodedTopology = NodedTopology.prepare(walls, legacyMasks);
-    }
+  public void updateWall(Wall wall) {
+    var existingWall = this.walls.getWall(wall.from(), wall.to());
 
-    return nodedTopology;
+    existingWall.ifPresentOrElse(
+        existing -> {
+          existing.copyDataFrom(wall);
+
+          new MapToolEventBus().getMainEventBus().post(new WallTopologyChanged(this));
+        },
+        () -> {
+          log.warn("Could not find wall [{}, {}] for updating", wall.from(), wall.to());
+        });
   }
 
   public Area getMaskTopology(TopologyType topologyType) {
@@ -1043,21 +1036,11 @@ public class Zone {
       topology.add(area);
     }
 
-    // MBL doesn't affect vision, so no need to invalidate the noding.
-    if (topologyType != TopologyType.MBL) {
-      nodedTopology = null;
-    }
     new MapToolEventBus().getMainEventBus().post(new MaskTopologyChanged(this));
   }
 
   /** Fire the event {@link MaskTopologyChanged}. */
   public void tokenMaskTopologyChanged(Collection<TopologyType> types) {
-    if (types.contains(TopologyType.WALL_VBL)
-        || types.contains(TopologyType.HILL_VBL)
-        || types.contains(TopologyType.PIT_VBL)
-        || types.contains(TopologyType.COVER_VBL)) {
-      nodedTopology = null;
-    }
     new MapToolEventBus().getMainEventBus().post(new MaskTopologyChanged(this));
   }
 
@@ -1172,7 +1155,7 @@ public class Zone {
         }
         putToken(tok);
         new MapToolEventBus().getMainEventBus().post(new FogChanged(this));
-        return; // FJE Added so that TEA isn't added to the GEA, below.
+        return;
       }
     }
     exposedArea.add(area);
@@ -1203,7 +1186,6 @@ public class Zone {
           MapTool.getPlayer().isGM() || !MapTool.getServerPolicy().useStrictTokenManagement();
       String playerId = MapTool.getPlayer().getName();
       MapToolFrame frame = MapTool.getFrame();
-      // FIXME 'zr' was null -- how can this happen? Fix is to use getId() instead of 'this'
       ZoneRenderer zr = frame.getZoneRenderer(getId());
       ZoneView zoneView = zr.getZoneView();
       ExposedAreaMetaData meta = null;
@@ -1328,11 +1310,6 @@ public class Zone {
       return combined;
     }
     for (Token tok : view.getTokens()) {
-      // Don't need this IF statement; see
-      // net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer.getPlayerView(Role)
-      // if (!tok.getHasSight() || !AppUtil.playerOwns(tok)) {
-      // continue;
-      // }
       ExposedAreaMetaData meta = exposedAreaMeta.get(tok.getExposedAreaGUID());
       if (meta != null) {
         combined.add(meta.getExposedAreaHistory());
@@ -1552,8 +1529,6 @@ public class Zone {
    */
   @Deprecated
   public void putTokens(List<Token> tokens) {
-    // System.out.println("putToken() called with list of " + tokens.size() + " tokens.");
-
     Collection<Token> values = tokenMap.values();
 
     List<Token> addedTokens = new LinkedList<Token>(tokens);
@@ -1805,15 +1780,9 @@ public class Zone {
   public List<Token> getOwnedTokensWithSight(Player p) {
     return getTokensFiltered(
         t -> {
-          // System.out.println("isOwnedByAll(): " + t.getName() + ":" + t.isOwnedByAll());
-          // System.out.println("AppUtil.playerOwns(t): " + t.getName() + ":" +
-          // AppUtil.playerOwns(t));
-          // return t.getType() == Token.Type.PC && t.getHasSight() && AppUtil.playerOwns(t);
-
           if (tokenSelection == null) {
             tokenSelection = TokenSelection.ALL;
           }
-          // System.out.println("TokenSelection: " + tokenSelection);
           switch (tokenSelection) {
             case ALL: // Show FoW for ANY Token I own
               return t.getHasSight() && AppUtil.playerOwns(t);
@@ -1848,7 +1817,6 @@ public class Zone {
    * @return the list of tokens with sight.
    */
   public List<Token> getTokensOwnedByAllWithSight() {
-    // String playerId = MapTool.getPlayer().getName();
     return getTokensFiltered(
         t ->
             (t.getHasSight()

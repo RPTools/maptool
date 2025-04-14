@@ -32,8 +32,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
-  private final String instructionKey;
-  private final String tooltipKey;
   private final boolean isFilled;
   private final Strategy<StateT> strategy;
   private final TopologyModeSelectionPanel topologyModeSelectionPanel;
@@ -54,8 +52,8 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
       boolean isFilled,
       Strategy<StateT> strategy,
       TopologyModeSelectionPanel topologyModeSelectionPanel) {
-    this.instructionKey = instructionKey;
-    this.tooltipKey = tooltipKey;
+    super(instructionKey, tooltipKey);
+
     this.isFilled = isFilled;
     this.strategy = strategy;
     // Consistency with topology tools before refactoring. Can be updated as part of #5002.
@@ -63,16 +61,6 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
     this.topologyModeSelectionPanel = topologyModeSelectionPanel;
 
     this.maskOverlay = new MaskOverlay();
-  }
-
-  @Override
-  public String getInstructions() {
-    return instructionKey;
-  }
-
-  @Override
-  public String getTooltip() {
-    return tooltipKey;
   }
 
   @Override

@@ -81,7 +81,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   private final TokenStackPanel tokenStackPanel = new TokenStackPanel();
 
-  // private Map<Shape, Token> rotateBoundsMap = new HashMap<Shape, Token>();
   private final Map<Shape, Token> resizeBoundsMap = new HashMap<Shape, Token>();
 
   // Keeps track of the start of a token drag, in screen coordinates.
@@ -219,8 +218,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
                 .startTokenDrag(
                     location.getToken(),
                     Collections.singleton(location.getToken().getId()),
-                    // TODO is dragstart even correct in this case? I know it's not from the map
-                    // explorer
                     new ScreenPoint(dragStartX, dragStartY).convertToZone(renderer),
                     false);
           }
@@ -655,7 +652,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
             toolbox.setSelectedTool(FacingTool.class);
           }
         });
-    // TODO: Optimize this by making it non anonymous
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_D, 0),
@@ -684,7 +680,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           }
         });
 
-    // TODO Should these keystrokes be based on the grid type, like they are in PointerTool?
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0),
         new AbstractAction() {
@@ -1001,7 +996,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       tokenStackPanel.paint(g);
     } else {
       resizeBoundsMap.clear();
-      // rotateBoundsMap.clear();
       for (GUID tokenGUID : renderer.getSelectedTokenSet()) {
         Token token = renderer.getZone().getToken(tokenGUID);
         if (token == null) {
@@ -1124,7 +1118,6 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         adjustAnchor(1 + (newScaleX - currentScaleX), 1 + (newScaleY - currentScaleY));
     }
 
-    // AppState.setShowGrid(showGrid);
     MapTool.getFrame().refresh();
   }
 
@@ -1178,7 +1171,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
 
     public void finish() {
-      renderer.commitMoveSelectionSet(tokenBeingDragged.getId()); // TODO: figure out a better way
+      renderer.commitMoveSelectionSet(tokenBeingDragged.getId());
     }
 
     public void dragTo(int mouseX, int mouseY) {
@@ -1195,23 +1188,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       }
 
       ZonePoint zonePoint = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-
-      zonePoint.x = this.dragAnchor.x + zonePoint.x - tokenDragStart.x;
-      zonePoint.y = this.dragAnchor.y + zonePoint.y - tokenDragStart.y;
-
-      var grid = renderer.getZone().getGrid();
-      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-        // Snap to grid point.
-        zonePoint = grid.convert(grid.convert(zonePoint));
-
-        if (debugEnabled) {
-          renderer.setShape(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
-        }
-
-        // Adjust given offet from grid to anchor point.
-        zonePoint.x += this.snapOffsetX;
-        zonePoint.y += this.snapOffsetY;
-      }
+      zonePoint.x += dragAnchor.x - tokenDragStart.x;
+      zonePoint.y += dragAnchor.y - tokenDragStart.y;
 
       if (debugEnabled) {
         renderer.setShape2(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
@@ -1244,11 +1222,21 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
 
     private void doDragTo(ZonePoint newAnchorPoint) {
-      tokenDragCurrent = new ZonePoint(newAnchorPoint);
-
       // Don't bother if there isn't any movement
       if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
         return;
+      }
+
+      tokenDragCurrent = new ZonePoint(newAnchorPoint);
+
+      var grid = renderer.getZone().getGrid();
+      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        // Snap to grid point.
+        newAnchorPoint = grid.convert(grid.convert(newAnchorPoint));
+
+        // Adjust given offset from grid to anchor point.
+        newAnchorPoint.x += this.snapOffsetX;
+        newAnchorPoint.y += this.snapOffsetY;
       }
 
       renderer.updateMoveSelectionSet(tokenBeingDragged.getId(), newAnchorPoint);

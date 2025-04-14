@@ -148,7 +148,6 @@ public abstract class HexGrid extends Grid {
     zp.x -= w / 2;
     zp.y -= h / 2;
 
-    // System.out.println(new Rectangle(zp.x, zp.y, w, h));
     return new Rectangle(zp.x, zp.y, w, h);
   }
 
@@ -603,17 +602,9 @@ public abstract class HexGrid extends Grid {
 
   protected abstract OffsetTranslator getOffsetTranslator();
 
-  public static HexGrid fromDto(HexGridDto dto) {
-    HexGrid grid = null;
-    if (dto.getVertical()) {
-      grid = new HexGridVertical();
-    } else {
-      grid = new HexGridHorizontal();
-    }
-
-    // Exact values do not matter, just the proportions. Grid itself will scale to the right size.
-    grid.setDimensions(100, 100 / grid.hexRatio);
-    return grid;
+  protected void readDto(HexGridDto dto) {
+    hexRatio = dto.getHexRatio();
+    setDimensions(getSize(), getSize() / hexRatio);
   }
 
   protected void fillDto(GridDto.Builder dto) {
@@ -681,7 +672,6 @@ public abstract class HexGrid extends Grid {
      * @return a {@link Shape} representing one slice of the 6-slice pie </div>
      */
     public Shape getFogAreaToCheck(int dir) {
-      // pieSlices = null; // debugging -- forces the following IF statement to always be true
       if (pieSlices == null) {
         double[][] coords = {
           {0, 0, -114, 0, -57, -100}, // NW

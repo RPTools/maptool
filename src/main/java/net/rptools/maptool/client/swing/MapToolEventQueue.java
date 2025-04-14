@@ -37,6 +37,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
+
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
   private static JideOptionPane optionPane;
 
@@ -61,7 +62,6 @@ public class MapToolEventQueue extends EventQueue {
       jta.setWrapStyleWord(true);
       jta.setMargin(new Insets(5, 10, 10, 10));
       optionPane.setDetails(jta);
-      // optionPane.setDetails(I18N.getString("MapToolEventQueue.stackOverflow"));
       displayPopup();
       reportToSentryIO(soe);
     } catch (Throwable t) {
@@ -130,19 +130,12 @@ public class MapToolEventQueue extends EventQueue {
     // current context (until the context is cleared).
 
     // Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-    // TODO: We could use this to record user actions to get a hint on what user was doing before
-    // exception was
-    // thrown...
-    // Sentry.getContext().recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an
-    // action").build());
-
     UserBuilder user = new UserBuilder();
     Player player = MapTool.getPlayer();
     if (player != null) {
       user.setUsername(player.getName());
       user.setId(MapTool.getClientId());
-      user.setEmail(
-          player.getName().replaceAll(" ", "_") + "@rptools.net"); // Lets prompt for this?
+      user.setEmail(player.getName().replaceAll(" ", "_") + "@rptools.net");
     } else {
       user.setUsername("Unknown");
       user.setId("Unknown");
