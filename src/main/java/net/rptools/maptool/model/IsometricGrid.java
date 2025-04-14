@@ -18,7 +18,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +39,15 @@ import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.IsometricGridDto;
 
 public class IsometricGrid extends Grid {
+  /**
+   * An attempt at an isometric style map grid where each cell is a diamond with the sides angled at
+   * approx 30 degrees. However rather than being true isometric, each cell is twice as wide as
+   * high. This makes converting images significantly easier for end-users.
+   */
+  private static final int ISO_ANGLE = 27;
+
+  private static final int[] ALL_ANGLES = new int[] {-135, -90, -45, 0, 45, 90, 135, 180};
+  private static int[] FACING_ANGLES;
   private static List<TokenFootprint> footprintList;
   private static final BufferedImage pathHighlight =
       RessourceManager.getImage(Images.GRID_BORDER_ISOMETRIC);
@@ -146,14 +155,12 @@ public class IsometricGrid extends Grid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/squareGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("SquareGrid.error.squareGridNotLoaded", ioe);
-      }
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("Isometric")) {
+      return campaignFootprints.get("Isometric");
     }
-    return footprintList;
+    return new ArrayList<>();
   }
 
   @Override

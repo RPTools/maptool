@@ -31,11 +31,11 @@ public class TokenFootprint {
   private final Set<Point> cellSet = new HashSet<Point>();
 
   private String name;
+  private String localizedName = null;
   private GUID id;
   private boolean isDefault;
   private double scale = 1;
   private boolean localizeName = false;
-
   private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
   public TokenFootprint() {
@@ -58,6 +58,9 @@ public class TokenFootprint {
     footPrint.id = GUID.valueOf(dto.getId());
     footPrint.isDefault = dto.getIsDefault();
     footPrint.scale = dto.getScale();
+    if (!dto.getLocalizedName().equals("")) {
+      footPrint.localizedName = dto.getLocalizedName();
+    }
     return footPrint;
   }
 
@@ -68,6 +71,9 @@ public class TokenFootprint {
     dto.setId(id.toString());
     dto.setIsDefault(isDefault);
     dto.setScale(scale);
+    if (localizedName != null) {
+      dto.setLocalizedName(localizedName);
+    }
     return dto.build();
   }
 
@@ -80,17 +86,19 @@ public class TokenFootprint {
     translatorList.add(translator);
   }
 
-  public Set<CellPoint> getOccupiedCells(CellPoint centerPoint) {
+  /* TokenFootprint is a list of cells relative to the (0,0)
+  This function returns the actual points when the (0,0) of the footprint is located at the reference point.
+  For Square Grids, the reference point is at the top left
+  For Hex Grids, the reference point is at the centre
+   */
+  public Set<CellPoint> getOccupiedCells(CellPoint referencePoint) {
     Set<CellPoint> occupiedSet = new HashSet<CellPoint>();
-
-    // Implied
-    occupiedSet.add(centerPoint);
 
     // Relative
     for (Point offset : cellSet) {
-      CellPoint cp = new CellPoint(centerPoint.x + offset.x, centerPoint.y + offset.y);
+      CellPoint cp = new CellPoint(referencePoint.x + offset.x, referencePoint.y + offset.y);
       for (OffsetTranslator translator : translatorList) {
-        translator.translate(centerPoint, cp);
+        translator.translate(referencePoint, cp);
       }
       occupiedSet.add(cp);
     }
@@ -101,8 +109,30 @@ public class TokenFootprint {
     this(name, false, 1, points);
   }
 
+  public TokenFootprint(
+      String name, boolean isDefault, Double scale, boolean localizeName, Point... points) {
+    this(name, isDefault, scale, points);
+    this.localizeName = localizeName;
+  }
+
+  public TokenFootprint(
+      String name,
+      boolean isDefault,
+      Double scale,
+      boolean localizeName,
+      OffsetTranslator translator,
+      Point... points) {
+    this(name, isDefault, scale, points);
+    this.localizeName = localizeName;
+    this.addOffsetTranslator(translator);
+  }
+
   public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
+  }
+
+  public void setLocalizeName(boolean localize) {
+    this.localizeName = localize;
   }
 
   public boolean isDefault() {
@@ -120,10 +150,24 @@ public class TokenFootprint {
 
   /** Returns the localized name of the footprint */
   public String getLocalizedName() {
-    if (localizeName) {
-      return I18N.getString("TokenFootprint.name." + name.toLowerCase());
+    return getLocalizedName(false);
+  }
+
+  public String getLocalizedName(boolean actual) {
+    if (localizeName && localizedName == null) {
+      localizedName = I18N.getString("TokenFootprint.name." + name.toLowerCase());
+      return localizedName;
+    } else if (localizedName != null) {
+      return localizedName;
+    } else if (!actual) {
+      return name;
+    } else {
+      return localizedName;
     }
-    return name;
+  }
+
+  public void setLocalizedName(String text) {
+    localizedName = text;
   }
 
   public Rectangle getBounds(Grid grid) {

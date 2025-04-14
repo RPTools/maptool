@@ -18,7 +18,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +31,6 @@ import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.GridlessGridDto;
 
 public class GridlessGrid extends Grid {
-  private static List<TokenFootprint> footprintList;
 
   // @formatter:off
   private static final GridCapabilities GRID_CAPABILITIES =
@@ -61,14 +60,12 @@ public class GridlessGrid extends Grid {
 
   @Override
   public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("GridlessGrid.error.notLoaded", ioe);
-      }
+    Map<String, List<TokenFootprint>> campaignFootprints =
+        MapTool.getCampaign().getCampaignProperties().getGridFootprints();
+    if (campaignFootprints.containsKey("None")) {
+      return campaignFootprints.get("None");
     }
-    return footprintList;
+    return new ArrayList<>();
   }
 
   @Override

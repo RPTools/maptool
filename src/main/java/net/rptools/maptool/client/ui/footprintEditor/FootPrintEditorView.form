@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.footprintEditor.FootPrintEditorView">
+  <grid id="27dc6" binding="mainPanel" layout-manager="BorderLayout" hgap="0" vgap="0">
+    <constraints>
+      <xy x="20" y="20" width="800" height="800"/>
+    </constraints>
+    <properties>
+      <focusCycleRoot value="true"/>
+      <focusTraversalPolicyProvider value="true"/>
+      <minimumSize width="800" height="600"/>
+      <name value="root"/>
+      <preferredSize width="800" height="600"/>
+      <requestFocusEnabled value="true"/>
+    </properties>
+    <border type="none"/>
+    <children>
+      <grid id="16f48" layout-manager="BorderLayout" hgap="0" vgap="0">
+        <constraints border-constraint="Center"/>
+        <properties>
+          <minimumSize width="-1" height="-1"/>
+          <name value=""/>
+          <opaque value="true"/>
+          <preferredSize width="800" height="600"/>
+          <requestFocusEnabled value="true"/>
+        </properties>
+        <border type="none"/>
+        <children>
+          <scrollpane id="d4377">
+            <constraints border-constraint="West"/>
+            <properties>
+              <preferredSize width="800" height="600"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <grid id="9b324" layout-manager="GridLayoutManager" row-count="3" column-count="3" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                <margin top="0" left="0" bottom="0" right="0"/>
+                <constraints/>
+                <properties>
+                  <preferredSize width="-1" height="-1"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <grid id="87328" layout-manager="CardLayout" hgap="0" vgap="0">
+                    <constraints>
+                      <grid row="0" column="1" row-span="1" col-span="2" vsize-policy="7" hsize-policy="7" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                        <minimum-size width="100" height="100"/>
+                      </grid>
+                    </constraints>
+                    <properties>
+                      <focusTraversalPolicyProvider value="false"/>
+                      <name value="footprintDisplayContainer"/>
+                    </properties>
+                    <border type="none">
+                      <size top="2" left="2" bottom="2" right="2"/>
+                      <color color="-13273872"/>
+                    </border>
+                    <children/>
+                  </grid>
+                  <grid id="1575" layout-manager="GridLayoutManager" row-count="2" column-count="9" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+                    <margin top="2" left="2" bottom="2" right="2"/>
+                    <constraints>
+                      <grid row="2" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                    <properties>
+                      <name value=""/>
+                      <opaque value="false"/>
+                    </properties>
+                    <border type="empty">
+                      <size top="4" left="8" bottom="8" right="8"/>
+                    </border>
+                    <children>
+                      <component id="680d6" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="token.popup.menu.size"/>
+                        </properties>
+                      </component>
+                      <component id="609ce" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.name"/>
+                          <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.label.playerMapAlias.tooltip"/>
+                        </properties>
+                      </component>
+                      <component id="d312a" class="javax.swing.JTextField">
+                        <constraints>
+                          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <columns value="14"/>
+                          <horizontalAlignment value="2"/>
+                          <name value="footprintName"/>
+                          <text value=""/>
+                        </properties>
+                      </component>
+                      <grid id="5c5a8" layout-manager="CardLayout" hgap="0" vgap="0" show="123f2">
+                        <constraints>
+                          <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="comboBoxPanel"/>
+                        </properties>
+                        <border type="none"/>
+                        <children>
+                          <component id="123f2" class="javax.swing.JComboBox" default-binding="true">
+                            <constraints>
+                              <card name=""/>
+                            </constraints>
+                            <properties>
+                              <enabled value="true"/>
+                              <name value="footprintCombo"/>
+                              <preferredSize width="84" height="30"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                      <hspacer id="5a199">
+                        <constraints>
+                          <grid row="1" column="7" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                      </hspacer>
+                      <component id="ce2e4" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="0" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="revertButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.revert"/>
+                        </properties>
+                      </component>
+                      <component id="ca82f" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="1" column="4" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <name value="addButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.add"/>
+                        </properties>
+                      </component>
+                      <component id="de941" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="0" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="OK"/>
+                          <name value="deleteButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.delete"/>
+                        </properties>
+                      </component>
+                      <component id="1c3ae" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="1" column="5" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value=""/>
+                          <name value="saveButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.save"/>
+                        </properties>
+                      </component>
+                      <component id="b8703" class="javax.swing.JCheckBox" default-binding="true">
+                        <constraints>
+                          <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="8" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <label resource-bundle="net/rptools/maptool/language/i18n" key="campaignPropertiesTable.column.defaultValue"/>
+                          <name value="defaultCheckbox"/>
+                          <selected value="true"/>
+                          <text value="Default"/>
+                        </properties>
+                      </component>
+                      <component id="dcc64" class="javax.swing.JSpinner" default-binding="true">
+                        <constraints>
+                          <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="0" hsize-policy="6" anchor="8" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="90" height="30"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <name value="scaleSpinner"/>
+                        </properties>
+                      </component>
+                      <grid id="96bcf" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="8" vgap="4">
+                        <margin top="0" left="0" bottom="0" right="0"/>
+                        <constraints>
+                          <grid row="0" column="6" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="400" height="72"/>
+                          </grid>
+                        </constraints>
+                        <properties/>
+                        <border type="etched"/>
+                        <children>
+                          <grid id="50d68" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                                <preferred-size width="0" height="0"/>
+                              </grid>
+                            </constraints>
+                            <properties>
+                              <doubleBuffered value="false"/>
+                              <enabled value="false"/>
+                              <focusable value="false"/>
+                              <opaque value="false"/>
+                              <requestFocusEnabled value="false"/>
+                              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.combo.maps.grid.isometric"/>
+                              <visible value="true"/>
+                            </properties>
+                            <border type="etched"/>
+                            <children>
+                              <component id="65e26" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <name value="isoRadio"/>
+                                  <opaque value="false"/>
+                                  <text value=""/>
+                                  <toolTipText value=""/>
+                                </properties>
+                              </component>
+                              <component id="16ff3" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/gridIsometric.png"/>
+                                  <name value="isoIcon"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <grid id="fc7e4" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <opaque value="false"/>
+                              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.combo.maps.grid.hexHori"/>
+                            </properties>
+                            <border type="etched"/>
+                            <children>
+                              <component id="39e0f" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <name value="hexHoriRadio"/>
+                                  <opaque value="false"/>
+                                  <text value=""/>
+                                  <toolTipText value=""/>
+                                </properties>
+                              </component>
+                              <component id="3bdd" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/gridHorizontalHex.png"/>
+                                  <name value="hexHoriIcon"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <grid id="852b1" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <opaque value="false"/>
+                              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="Preferences.combo.maps.grid.square"/>
+                            </properties>
+                            <border type="etched"/>
+                            <children>
+                              <component id="9808e" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <name value="squareRadio"/>
+                                  <opaque value="false"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                              <component id="6b89d" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/gridSquare.png"/>
+                                  <name value="squareIcon"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <grid id="d7050" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <opaque value="false"/>
+                            </properties>
+                            <border type="line"/>
+                            <children>
+                              <component id="ca13c" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <name value="hexVertRadio"/>
+                                  <opaque value="false"/>
+                                  <selected value="false"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                              <component id="d3e15" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/gridVerticalHex.png"/>
+                                  <name value="hexVertIcon"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <grid id="20047" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="1" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <enabled value="false"/>
+                              <opaque value="false"/>
+                              <visible value="true"/>
+                            </properties>
+                            <border type="etched"/>
+                            <children>
+                              <component id="c0ed5" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <enabled value="false"/>
+                                  <name value="isoHexRadio"/>
+                                  <opaque value="false"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                              <component id="f3c8a" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <enabled value="false"/>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/gridIsometric.png"/>
+                                  <name value="isoHexIcon"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <grid id="8b671" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="0" vgap="-1">
+                            <margin top="0" left="0" bottom="0" right="0"/>
+                            <constraints>
+                              <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <enabled value="false"/>
+                              <focusable value="false"/>
+                              <opaque value="false"/>
+                              <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.image.nogrid"/>
+                              <visible value="true"/>
+                            </properties>
+                            <border type="etched"/>
+                            <children>
+                              <component id="fce4c" class="javax.swing.JRadioButton">
+                                <constraints>
+                                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <actionCommand value=""/>
+                                  <enabled value="false"/>
+                                  <name value="noGridRadio"/>
+                                  <opaque value="false"/>
+                                  <text value=""/>
+                                </properties>
+                              </component>
+                              <component id="e0747" class="javax.swing.JLabel">
+                                <constraints>
+                                  <grid row="0" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                                </constraints>
+                                <properties>
+                                  <enabled value="false"/>
+                                  <font swing-font="Panel.font"/>
+                                  <horizontalAlignment value="0"/>
+                                  <horizontalTextPosition value="0"/>
+                                  <icon value="net/rptools/maptool/client/image/cross.png"/>
+                                  <name value="noGridIcon"/>
+                                  <text value=""/>
+                                  <toolTipText resource-bundle="net/rptools/maptool/language/i18n" key="MapPropertiesDialog.image.nogrid"/>
+                                </properties>
+                              </component>
+                            </children>
+                          </grid>
+                          <component id="30873" class="javax.swing.JLabel">
+                            <constraints>
+                              <grid row="0" column="0" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
+                            </constraints>
+                            <properties>
+                              <alignmentX value="0.5"/>
+                              <font size="13"/>
+                              <horizontalAlignment value="0"/>
+                              <maximumSize width="200" height="50"/>
+                              <minimumSize width="-1" height="28"/>
+                              <name value="toolbarTitle"/>
+                              <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.grid"/>
+                            </properties>
+                          </component>
+                        </children>
+                      </grid>
+                      <component id="57624" class="javax.swing.JLabel">
+                        <constraints>
+                          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="0" hsize-policy="0" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <text value="Scale"/>
+                        </properties>
+                      </component>
+                      <component id="da032" class="javax.swing.JButton" default-binding="true">
+                        <constraints>
+                          <grid row="0" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false">
+                            <preferred-size width="28" height="28"/>
+                          </grid>
+                        </constraints>
+                        <properties>
+                          <defaultCapable value="false"/>
+                          <label value="Sort"/>
+                          <name value="listOrderButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="initPanel.sort"/>
+                        </properties>
+                        <clientProperties>
+                          <hideActionText class="java.lang.Boolean" value="false"/>
+                        </clientProperties>
+                      </component>
+                      <component id="d7af7" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="0" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="ok"/>
+                          <name value="okButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.ok"/>
+                        </properties>
+                      </component>
+                      <component id="734ef" class="javax.swing.JButton">
+                        <constraints>
+                          <grid row="1" column="8" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="4" fill="0" indent="0" use-parent-layout="false"/>
+                        </constraints>
+                        <properties>
+                          <actionCommand value="cancel"/>
+                          <name value="cancelButton"/>
+                          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.cancel"/>
+                        </properties>
+                      </component>
+                    </children>
+                  </grid>
+                  <hspacer id="7c057">
+                    <constraints>
+                      <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </hspacer>
+                  <vspacer id="fb9ce">
+                    <constraints>
+                      <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+                    </constraints>
+                  </vspacer>
+                </children>
+              </grid>
+            </children>
+          </scrollpane>
+        </children>
+      </grid>
+    </children>
+  </grid>
+</form>
