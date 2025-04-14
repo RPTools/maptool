@@ -523,18 +523,19 @@ public class ServerHandshake implements Handshake<Player>, MessageHandler {
       } else {
         sendErrorResponseAndNotify(HandshakeResponseCodeMsg.INVALID_PUBLIC_KEY);
       }
-    }
-    CipherUtil.Key publicKey = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
-    String password = new PasswordGenerator().getPassword();
-    handshakeChallenges[0] =
-        HandshakeChallenge.createAsymmetricChallenge(player.getName(), password, publicKey);
+    } else {
+      CipherUtil.Key publicKey = playerDatabase.getPublicKey(player, playerPublicKeyMD5).get();
+      String password = new PasswordGenerator().getPassword();
+      handshakeChallenges[0] =
+          HandshakeChallenge.createAsymmetricChallenge(player.getName(), password, publicKey);
 
-    var authTypeMsg =
-        UseAuthTypeMsg.newBuilder()
-            .setAuthType(AuthTypeEnum.ASYMMETRIC_KEY)
-            .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
-    var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
-    sendMessage(State.AwaitingClientPublicKeyAuth, handshakeMsg);
+      var authTypeMsg =
+          UseAuthTypeMsg.newBuilder()
+              .setAuthType(AuthTypeEnum.ASYMMETRIC_KEY)
+              .addChallenge(ByteString.copyFrom(handshakeChallenges[0].getChallenge()));
+      var handshakeMsg = HandshakeMsg.newBuilder().setUseAuthTypeMsg(authTypeMsg).build();
+      sendMessage(State.AwaitingClientPublicKeyAuth, handshakeMsg);
+    }
   }
 
   @Override

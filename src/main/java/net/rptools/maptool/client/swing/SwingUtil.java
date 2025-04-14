@@ -29,6 +29,7 @@ import java.awt.Transparency;
 import java.awt.Window;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
@@ -135,7 +136,6 @@ public class SwingUtil {
     int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
     // Jamz: For multiple monitor's, x & y can be negative values...
-    // innerWindow.setLocation(x < 0 ? 0 : x, y < 0 ? 0 : y);
     innerWindow.setLocation(x, y);
   }
 
@@ -268,7 +268,6 @@ public class SwingUtil {
     int x = flipHorizontal ? view.width - (rect.x + rect.width) : rect.x;
     int y = flipVertical ? view.height - (rect.y + rect.height) : rect.y;
 
-    // System.out.println(rect + " - " + new Rectangle(x, y, rect.width, rect.height));
     return new Rectangle(x, y, rect.width, rect.height);
   }
 
@@ -372,5 +371,40 @@ public class SwingUtil {
           }
         });
     return button;
+  }
+
+  /**
+   * Returns the first text input field for a JFileChooser. Which is usually the only field in a
+   * chooser.
+   *
+   * @param cont JFileChooser
+   * @return JTextField
+   */
+  public static JTextField getFileChooserFilenameTextField(Container cont) {
+    List<JTextField> fields = getTextFields(cont, new ArrayList<>());
+    if (!fields.isEmpty()) {
+      return fields.getFirst();
+    } else {
+      return null;
+    }
+  }
+
+  /**
+   * Recursively search a container for JTextFields. Useful for extracting text fields from
+   * components like JFileChooser where it is not readily available.
+   *
+   * @param cont Container
+   * @param returnList List<JTextField
+   * @return List of JTextField
+   */
+  public static List<JTextField> getTextFields(Container cont, List<JTextField> returnList) {
+    for (Component c : cont.getComponents()) {
+      if (c instanceof JTextField) {
+        returnList.add((JTextField) c);
+      } else if (c instanceof Container) {
+        returnList.addAll(getTextFields(((Container) c), returnList));
+      }
+    }
+    return returnList;
   }
 }

@@ -17,12 +17,14 @@ package net.rptools.maptool.client;
 import java.io.File;
 import java.io.FilenameFilter;
 import javax.imageio.ImageIO;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.tsc.servicediscovery.ServiceGroup;
 
 public class AppConstants {
 
   public static final String APP_NAME = "MapTool";
+  public static final String APP_LOCAL_NAME = I18N.getString("ApplicationName");
 
   public static final File UNZIP_DIR = AppUtil.getAppHome("resource");
 

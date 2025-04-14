@@ -91,8 +91,6 @@ public class BoardTool extends DefaultTool {
         new SpinnerNumberModel(0, Integer.MIN_VALUE, Integer.MAX_VALUE, 1));
     boardPositionYSpinner.addChangeListener(new spinnerListener());
 
-    //    getBoardSizing();
-
     boardSizeXSpinner = (JSpinner) controlPanel.getComponent("sizeX");
 
     boardSizeYSpinner = (JSpinner) controlPanel.getComponent("sizeY");

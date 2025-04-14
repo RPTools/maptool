@@ -225,7 +225,6 @@ public class UIBuilder extends JDialog {
     tree = (CheckBoxTree) form.getTree("mainTree");
     DefaultMutableTreeNode root = new DefaultMutableTreeNode(new MaptoolNode("Root"));
     dtm = new TreeModel(root);
-    // buildTree();
 
     tree.setModel(dtm);
     tree.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION);
@@ -235,7 +234,6 @@ public class UIBuilder extends JDialog {
     tree.getCheckBoxTreeSelectionModel().addSelectionPath(new TreePath(root.getPath()));
 
     // This is how to turn OFF the checkbox for a particular node
-    // tree.getCheckBoxTreeSelectionModel().removeSelectionPath(new TreePath(root.getPath()));
 
     Dimension size;
     JScrollPane jsp = (JScrollPane) tree.getParent().getParent();

@@ -86,8 +86,6 @@ public class AssetTree extends JTree implements TreeSelectionListener {
    */
   public void valueChanged(TreeSelectionEvent e) {
 
-    // Keep memory tight
-    // TODO: make this an option
     if (selectedDirectory != null) {
       selectedDirectory.refresh();
     }

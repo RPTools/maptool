@@ -259,7 +259,6 @@ public class I18N {
         else k = KeyStroke.getKeyStroke(k.getKeyChar(), modifiers);
       }
       action.putValue(Action.ACCELERATOR_KEY, k);
-      // System.err.println("I18N.setAction(\"" + key + "\") = " + k);
     }
     String description = getDescription(key);
     if (description != null) action.putValue(Action.SHORT_DESCRIPTION, description);
@@ -277,7 +276,6 @@ public class I18N {
         if (k.getKeyCode() != 0) k = KeyStroke.getKeyStroke(k.getKeyCode(), modifiers);
         else k = KeyStroke.getKeyStroke(k.getKeyChar(), modifiers);
       }
-      // System.err.println("I18N.getKeystroke(\"" + key + "\") = " + k);
     }
     return k;
   }

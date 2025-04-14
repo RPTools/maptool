@@ -8,10 +8,8 @@ repositories {
     maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_21
-    targetCompatibility = JavaVersion.VERSION_21
-}
+apply from: rootProject.file('buildSrc/java-version.gradle')
+
 
 spotless {
     java {
@@ -32,4 +30,23 @@ spotless {
         // or spaces. Takes an integer argument if you don't like 4
         indentWithSpaces(4)
     }
+}
+
+configurations {
+    mockitoAgent
+}
+
+dependencies {
+    testRuntimeOnly(libs.junit.platform.launcher)
+    testRuntimeOnly(libs.junit.engine)
+    testImplementation(libs.bundles.junit)
+    testImplementation(libs.mockito.core)
+    mockitoAgent(libs.mockito.core) {
+        transitive = false
+    }
+}
+
+test {
+    useJUnitPlatform()
+    jvmArgs += "-javaagent:${configurations.mockitoAgent.asPath}"
 }

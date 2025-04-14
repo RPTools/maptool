@@ -181,7 +181,6 @@ public class PersistenceUtil {
     // Or to put it another way, the version you register should probably be equal to
     // the new value of CAMPAIGN_VERSION as of the time of your code changes.
 
-    // FIXME We should be using javax.xml.transform to do XSL transforms with a mechanism
     // that allows the XSL to be stored externally, perhaps via a URL with version number(s)
     // as parameters. Then if some backward compatibility fix is needed it could be
     // provided dynamically via the RPTools.net web site or somewhere else. We'll add this
@@ -197,8 +196,7 @@ public class PersistenceUtil {
     // V V
     campaignVersionManager.registerTransformation("1.3.51", new PCVisionTransform());
     campaignVersionManager.registerTransformation("1.3.75", new ExportInfoTransform());
-    campaignVersionManager.registerTransformation(
-        "1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
+    campaignVersionManager.registerTransformation("1.3.78", new TokenPropertyMapTransform());
     // Label background color and font
     campaignVersionManager.registerTransformation("1.15.0", new LabelFontAndBGTransform());
 
@@ -215,8 +213,7 @@ public class PersistenceUtil {
     // This version manager is only for loading and saving tokens. Note that many (all?) of its
     // contents will
     // be used by the campaign version manager since campaigns contain tokens...
-    tokenVersionManager.registerTransformation(
-        "1.3.78", new TokenPropertyMapTransform()); // FJE 2010-12-29
+    tokenVersionManager.registerTransformation("1.3.78", new TokenPropertyMapTransform());
   }
 
   /**
@@ -292,7 +289,6 @@ public class PersistenceUtil {
   public static PersistedMap loadMap(File mapFile) throws IOException {
     PersistedMap persistedMap = null;
 
-    // TODO: split in a try with resources and a try/catch
     try (PackedFile pakFile = new PackedFile(mapFile)) {
 
       // Sanity check
@@ -313,8 +309,6 @@ public class PersistenceUtil {
         for (Token token : persistedMap.zone.getAllTokens()) {
           token.imported();
         }
-        // XXX FJE This doesn't work the way I want it to. But doing this the Right Way
-        // is too much work right now. :-}
         Zone z = persistedMap.zone;
         String n = fixupZoneName(z.getName());
         z.setName(n);
@@ -324,8 +318,6 @@ public class PersistenceUtil {
         // Make sure the imported zone is as fresh as possible (new IDs all the way down).
         persistedMap.zone = new Zone(z, false);
       } else {
-        // TODO: Not a map but it is something with a property.xml file in it.
-        // Should we have a filetype property in there?
         throw new IOException(
             I18N.getText("PersistenceUtil.warn.importWrongFileType", o.getClass().getSimpleName()));
       }
@@ -466,7 +458,6 @@ public class PersistenceUtil {
           if (campaignFile.exists()) {
             saveTimer.start("Backup campaignFile");
             FileUtil.copyFile(campaignFile, bakFile);
-            // campaignFile.delete();
             saveTimer.stop("Backup campaignFile");
           }
 
@@ -569,14 +560,6 @@ public class PersistenceUtil {
         new CampaignManager().clearCampaignData();
         loadGameData(pakFile);
         loadAddOnLibraries(pakFile);
-
-        // for (Entry<String, Map<GUID, LightSource>> entry :
-        // persistedCampaign.campaign.getLightSourcesMap().entrySet()) {
-        // for (Entry<GUID, LightSource> entryLs : entry.getValue().entrySet()) {
-        // System.out.println(entryLs.getValue().getName() + " :: " + entryLs.getValue().getType() +
-        // " :: " + entryLs.getValue().getLumens());
-        // }
-        // }
 
         return persistedCampaign;
       }
@@ -965,9 +948,6 @@ public class PersistenceUtil {
 
       String extension = asset.getExtension();
       byte[] assetData = asset.getData();
-      // System.out.println("Saving AssetId " + assetId + "." + extension + " with size of " +
-      // assetData.length);
-
       pakFile.putFile(ASSET_DIR + assetId + "." + extension, assetData);
       pakFile.putFile(ASSET_DIR + assetId + "", asset); // Does not write the image
     }
@@ -1320,8 +1300,7 @@ public class PersistenceUtil {
       ImageIO.write(image, "png", tokenSaveFile);
       image.flush();
     } catch (IOException e) {
-      // TODO Auto-generated catch block
-      e.printStackTrace();
+      log.error("Error while saving token image", e);
     }
   }
 }

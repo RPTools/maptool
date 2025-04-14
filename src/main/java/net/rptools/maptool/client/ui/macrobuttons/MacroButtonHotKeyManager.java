@@ -125,8 +125,6 @@ public class MacroButtonHotKeyManager {
 
       // keep macrotabbedpane's keystrokes in sync
       if (MapTool.getFrame() != null) {
-        // MapTool.getFrame().getMacroTabbedPane().updateKeyStrokes();
-        // TODO: change this later to use the hub
         MapTool.getFrame().updateKeyStrokes();
       }
     }

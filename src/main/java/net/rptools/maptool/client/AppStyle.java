@@ -39,7 +39,8 @@ public class AppStyle {
   public static Color resizeBoxFill = Color.yellow;
   public static Color wallTopologyColor = new Color(255, 182, 0, 255);
   public static Color wallTopologyOutlineColor = Color.black;
-  public static Color selectedWallTopologyColor = new Color(255, 136, 0, 255);
+  public static Color highlightedWallTopologyColor = new Color(255, 136, 0, 255);
+  public static Color selectedWallOutlineColor = new Color(255, 255, 255, 255);
   public static Color topologyColor = new Color(0, 0, 255, 128);
   public static Color topologyAddColor = new Color(255, 0, 0, 128);
   public static Color topologyRemoveColor = new Color(255, 255, 255, 128);

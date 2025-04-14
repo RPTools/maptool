@@ -59,7 +59,7 @@ public class Campaign {
   // Static data isn't written to the campaign file when saved; these two fields hold the output
   // location and type, and the
   // settings of all JToggleButton objects (JRadioButtons and JCheckBoxes).
-  private Location exportLocation; // FJE 2011-01-14
+  private Location exportLocation;
   private Map<String, Boolean> exportSettings =
       new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
@@ -86,9 +86,6 @@ public class Campaign {
 
   private Map<String, Map<GUID, LightSource>> lightSourcesMap;
   private Map<String, LookupTable> lookupTableMap;
-
-  // DEPRECATED: as of 1.3b19 here to support old serialized versions
-  // private Map<GUID, LightSource> lightSourceMap;
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
@@ -155,7 +152,7 @@ public class Campaign {
   }
 
   public List<String> getRemoteRepositoryList() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
+    checkCampaignPropertyConversion();
     return campaignProperties.getRemoteRepositoryList();
   }
 
@@ -289,7 +286,7 @@ public class Campaign {
    * @return the {@link Map} of token types
    */
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
+    checkCampaignPropertyConversion();
     return campaignProperties.getTokenTypeMap();
   }
 
@@ -324,7 +321,7 @@ public class Campaign {
    * @return the {@link Map} of {@link LookupTable}s types
    */
   public Map<String, LookupTable> getLookupTableMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
+    checkCampaignPropertyConversion();
     return campaignProperties.getLookupTableMap();
   }
 
@@ -340,7 +337,7 @@ public class Campaign {
    * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
    */
   public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
-    checkCampaignPropertyConversion(); // TODO: Remove, for compatibility 1.3b19-1.3b20
+    checkCampaignPropertyConversion();
     return campaignProperties.getLightSourcesMap();
   }
 
@@ -721,11 +718,6 @@ public class Campaign {
   }
 
   public ExportDialog getExportDialog() {
-    // TODO: Ugh, what a kludge. This needs to be refactored so that the settings are separate from
-    // the dialog
-    // and easily accessible from elsewhere. I want separate XML files in the .cmpgn file eventually
-    // so that
-    // will be a good time to do this.
     exportDialog.setExportSettings(exportSettings);
     exportDialog.setExportLocation(exportLocation);
     return exportDialog;

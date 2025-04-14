@@ -33,6 +33,8 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class AssetDirectory extends Directory {
 
@@ -41,6 +43,7 @@ public class AssetDirectory extends Directory {
       RessourceManager.getSmallIcon(Icons.ASSETPANEL_PDF).getImage();
   private static final Image HERO_LAB_IMAGE =
       RessourceManager.getSmallIcon(Icons.ASSETPANEL_HEROLABS).getImage();
+  private static final Logger log = LogManager.getLogger(AssetDirectory.class);
 
   private final Map<File, FutureTask<Image>> imageMap = new HashMap<File, FutureTask<Image>>();
 
@@ -86,7 +89,6 @@ public class AssetDirectory extends Directory {
         try {
           return future.get() != INVALID_IMAGE ? future.get() : null;
         } catch (InterruptedException | ExecutionException e) {
-          // TODO: need to indicate a broken image
           return null;
         }
       }
@@ -136,18 +138,14 @@ public class AssetDirectory extends Directory {
         if (imageFile.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
           thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
         } else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
-          // Jamz: Added to mark all PDF assets with proper image, TODO: Move image asset to proper
-          // location
           thumbnail = PDF_IMAGE;
         } else if (imageFile.getName().toLowerCase().endsWith(".por")) {
-          // Jamz: Added to mark all Hero Lab assets with proper image, TODO: Move image asset to
-          // proper location
           thumbnail = HERO_LAB_IMAGE;
         } else {
           thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
         }
       } catch (Throwable t) {
-        t.printStackTrace();
+        log.error("Error while getting image thumbnail", t);
         thumbnail = INVALID_IMAGE;
       }
       return thumbnail;

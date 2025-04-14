@@ -1,3 +1,4 @@
 files:
   - source: /src/main/resources/net/rptools/maptool/language/i18n.properties
     translation: /%original_path%/%file_name%_%locale_with_underscore%.%file_extension%
+    escape_quotes: 3

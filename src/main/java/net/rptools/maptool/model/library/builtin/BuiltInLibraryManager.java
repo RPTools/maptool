@@ -29,12 +29,16 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.addon.AddOnLibrary;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /** Class for managing {@link AddOnLibrary} objects. */
 public class BuiltInLibraryManager {
 
   /** "Protocol" for built in add-on libraries. */
   private static final String LIBRARY_PROTOCOL = "lib";
+
+  private static final Logger log = LogManager.getLogger(BuiltInLibraryManager.class);
 
   /** The add-on libraries that are registered. */
   private final Map<String, Library> namespaceLibraryMap = new ConcurrentHashMap<>();
@@ -145,7 +149,6 @@ public class BuiltInLibraryManager {
               .filter(p -> p.toString().endsWith(AddOnLibraryImporter.DROP_IN_LIBRARY_EXTENSION))
               .toList();
 
-      libs.stream().forEach(System.out::println);
       var importer = new AddOnLibraryImporter();
       libs.stream()
           .forEach(

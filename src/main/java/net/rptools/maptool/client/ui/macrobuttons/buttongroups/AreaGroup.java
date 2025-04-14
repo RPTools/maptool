@@ -108,7 +108,6 @@ public class AreaGroup extends AbstractButtonGroup {
 
   @Override
   public void drop(DropTargetDropEvent event) {
-    // System.out.println("BG: drop!");
     event.rejectDrop(); // don't accept drops in an area group, it should be in the button group
     event.dropComplete(true);
   }

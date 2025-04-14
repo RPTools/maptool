@@ -19,6 +19,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -318,15 +319,8 @@ public class TransferableHelper extends TransferHandler {
         URI uri = new URI(s);
         URL url = uri.toURL();
         list.add(url);
-      } catch (Exception e) {
-        // There's no reason to trap the individual exceptions when a single catch suffices.
-        log.info(s, e);
-        // } catch (URISyntaxException e) { // Thrown by the URI constructor
-        // e.printStackTrace();
-        // } catch (IllegalArgumentException e) { // Thrown by URI.toURL()
-        // e.printStackTrace();
-        // } catch (MalformedURLException e) { // Thrown by URI.toURL()
-        // e.printStackTrace();
+      } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+        log.error("Error while parsing URL {}", s, e);
       }
     }
     return list;
@@ -357,48 +351,6 @@ public class TransferableHelper extends TransferHandler {
     }
     return asset;
   }
-
-  // private static Asset handleImage(Transferable transferable) throws IOException,
-  // UnsupportedFlavorException {
-  // String name = null;
-  // BufferedImage image = null;
-  // if (transferable.isDataFlavorSupported(URL_FLAVOR_PLAIN)) {
-  // try {
-  // String fname = (String) transferable.getTransferData(URL_FLAVOR_PLAIN);
-  // if (log.isDebugEnabled())
-  // log.debug("Transferable " + fname); //$NON-NLS-1$
-  // name = FileUtil.getNameWithoutExtension(fname);
-  //
-  // File file;
-  // URL url = new URL(fname);
-  // try {
-  // URI uri = url.toURI(); // Should replace '%20' sequences and such
-  // file = new File(uri);
-  // } catch (URISyntaxException e) {
-  // file = new File(fname);
-  // }
-  // if (file.exists()) {
-  // if (log.isDebugEnabled())
-  // log.debug("Reading local file: " + file); //$NON-NLS-1$
-  // image = ImageIO.read(file);
-  // } else {
-  // if (log.isDebugEnabled())
-  // log.debug("Reading remote URL: " + url); //$NON-NLS-1$
-  // image = ImageIO.read(url);
-  // }
-  // } catch (Exception e) {
-  // MapTool.showError("TransferableHelper.error.urlFlavor", e); //$NON-NLS-1$
-  // }
-  // }
-  // if (image == null) {
-  // if (log.isDebugEnabled())
-  // log.debug("URL_FLAVOR_PLAIN didn't work; trying
-  // ImageTransferableHandler().getTransferObject()"); //$NON-NLS-1$
-  // image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
-  // }
-  // Asset asset = new Asset(name, ImageUtil.imageToBytes(image));
-  // return asset;
-  // }
 
   private static List<Object> handleURLList(List<URL> list) throws Exception {
     List<Object> assets = new ArrayList<Object>();
@@ -498,8 +450,6 @@ public class TransferableHelper extends TransferHandler {
                 "TransferableHelper.warning.tokensAddedAndExcluded",
                 tokens.size(), // $NON-NLS-1$
                 missingTokens);
-        // if (EventQueue.isDispatchThread())
-        // System.out.println("Yes, we are on the EDT already.");
         SwingUtilities.invokeLater(() -> MapTool.showWarning(message));
       } // endif
     } catch (IOException e) {
@@ -554,47 +504,33 @@ public class TransferableHelper extends TransferHandler {
    * @param t Transferable to check
    * @return a list of all DataFlavor objects that succeeded
    */
-  // TODO The result is always ignored, this method is just used for informational logging now.
+  // The result is always ignored, this method is just used for informational logging now.
   private static List<DataFlavor> whichOnesWork(Transferable t) {
     List<DataFlavor> worked = new ArrayList<DataFlavor>();
 
-    // On OSX Java6, any data flavor that uses java.nio.ByteBuffer or an array of bytes
-    // appears to output the object to the console (via System.out?). Geez, can't
-    // Apple even run a frakkin' grep against their code before releasing it?!
-    // PrintStream old = null;
-    // if (MapTool.MAC_OS_X) {
-    // old = System.out;
-    // setOnOff(null);
-    // }
     for (DataFlavor flavor : t.getTransferDataFlavors()) {
       Object result = null;
       try {
         result = t.getTransferData(flavor);
       } catch (UnsupportedFlavorException ufe) {
-        log.debug("Failed (UFE):  {}", flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (UFE):  {}", flavor.toString(), ufe);
       } catch (IOException ioe) {
-        log.debug("Failed (IOE):  {}", flavor.toString()); // $NON-NLS-1$
+        log.debug("Failed (IOE):  {}", flavor.toString(), ioe);
       } catch (Exception e) {
-        // System.err.println(e);
+        log.error("Unable to get transfer data", e);
       }
       if (result != null) {
         for (Class<?> type : validTypes) {
           if (type.equals(result.getClass())) {
             worked.add(flavor);
-            log.info("Possible: {} ({})", flavor, result); // $NON-NLS-1$
+            log.info("Possible: {} ({})", flavor, result);
             break;
           }
         }
       }
     }
-    // if (MapTool.MAC_OS_X)
-    // setOnOff(old);
     return worked;
   }
-
-  // private static void setOnOff(PrintStream old) {
-  // System.setOut(old);
-  // }
 
   private static final Class<?> validTypes[] = {
     java.lang.String.class, java.net.URL.class, java.util.List.class, java.awt.Image.class,
@@ -607,12 +543,9 @@ public class TransferableHelper extends TransferHandler {
   @Override
   public boolean importData(JComponent comp, Transferable t) {
     if (tokens != null) {
-      // tokens.clear(); // will not help with memory cleanup and we may see unmodifiable lists here
       tokens = null;
     }
     if (configureTokens != null) {
-      // configureTokens.clear(); // will not help with memory cleanup and we may see unmodifiable
-      // lists here
       configureTokens = null;
     }
     if (log.isInfoEnabled()) whichOnesWork(t);
@@ -621,7 +554,6 @@ public class TransferableHelper extends TransferHandler {
     if (assets != null) {
       tokens = new ArrayList<Token>(assets.size());
       configureTokens = new ArrayList<Boolean>(assets.size());
-      // Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
       for (Object working : assets) {
         if (working instanceof Asset asset) {
           if (asset.getType() == Type.MTLIB) {
@@ -645,14 +577,12 @@ public class TransferableHelper extends TransferHandler {
             }
           } else {
             Token token = new Token(asset.getName(), asset.getMD5Key());
-            // token.setName(MapToolUtil.nextTokenId(zone, token));
             tokens.add(token);
             // A token from an image asset needs additional configuration.
             configureTokens.add(true);
           }
         } else if (working instanceof Token) {
           Token token = new Token((Token) working);
-          // token.setName(MapToolUtil.nextTokenId(zone, token));
           tokens.add(token);
           // A token from an .rptok file is already fully configured.
           configureTokens.add(false);

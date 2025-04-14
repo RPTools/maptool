@@ -24,7 +24,6 @@ public interface Handshake<T> {
   void startHandshake();
 
   class Failure extends Exception {
-    // TODO When we have access to I18N, force this to be translatable.
     public Failure(String message) {
       super(message);
     }

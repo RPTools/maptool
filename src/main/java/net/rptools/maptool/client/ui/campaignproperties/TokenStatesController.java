@@ -260,9 +260,7 @@ public class TokenStatesController
         .getSpinner(FLOW_GRID)
         .setModel(new SpinnerListModel(new String[] {"2x2", "3x3", "4x4", "5x5", "8x8"}));
     panel.getSpinner(OPACITY).setModel(new SpinnerNumberModel(100, 1, 100, 5));
-    panel
-        .getSpinner(INDEX)
-        .setModel(new SpinnerNumberModel(0, 0, 10000, 1)); // FIXME set proper upper limit?
+    panel.getSpinner(INDEX).setModel(new SpinnerNumberModel(0, 0, 10000, 1));
     panel.getSpinner(INDEX).addChangeListener(this);
     panel.getList(STATES).setCellRenderer(new StateListRenderer());
     panel.getList(STATES).addListSelectionListener(this);
@@ -303,7 +301,6 @@ public class TokenStatesController
           model.addElement(overlay);
           getNames().add(overlay.getName());
           selected = model.size() - 1;
-          System.out.println("selected = " + selected);
         } else {
           // model.addElement(overlay);
           // Jamz: Lets insert the new state at the current index instead of at the bottom, we'll

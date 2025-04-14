@@ -22,6 +22,7 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.colorpicker.ColorPicker;
+import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.Zone.Layer;
@@ -29,12 +30,13 @@ import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.Pen;
 
 /** Base class for tools that draw templates. */
-public abstract class AbstractTemplateTool extends AbstractDrawingLikeTool implements ZoneOverlay {
+public abstract class AbstractTemplateTool extends DefaultTool implements ZoneOverlay {
 
   private static final long serialVersionUID = 9121558405484986225L;
 
   private boolean isSnapToGridSelected;
   private boolean isEraseSelected;
+  private boolean isEraser;
 
   protected AffineTransform getPaintTransform(ZoneRenderer renderer) {
     AffineTransform transform = new AffineTransform();
@@ -69,18 +71,17 @@ public abstract class AbstractTemplateTool extends AbstractDrawingLikeTool imple
     super.detachFrom(renderer);
   }
 
+  protected void setIsEraser(boolean eraser) {
+    isEraser = eraser;
+  }
+
+  protected boolean isEraser() {
+    return isEraser;
+  }
+
   protected boolean isEraser(MouseEvent e) {
     boolean defaultValue = MapTool.getFrame().getColorPicker().isEraseSelected();
     if (SwingUtil.isShiftDown(e)) {
-      // Invert from the color panel
-      defaultValue = !defaultValue;
-    }
-    return defaultValue;
-  }
-
-  protected boolean isSnapToGrid(MouseEvent e) {
-    boolean defaultValue = MapTool.getFrame().getColorPicker().isSnapSelected();
-    if (SwingUtil.isControlDown(e)) {
       // Invert from the color panel
       defaultValue = !defaultValue;
     }

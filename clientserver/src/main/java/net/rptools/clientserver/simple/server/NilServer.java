@@ -15,7 +15,7 @@
 package net.rptools.clientserver.simple.server;
 
 /** A server implementation that never receives connections */
-public class NilServer extends AbstractServer {
+public final class NilServer extends AbstractServer implements Server {
   @Override
   public void start() {}
 

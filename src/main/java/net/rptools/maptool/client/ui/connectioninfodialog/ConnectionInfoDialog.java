@@ -14,19 +14,17 @@
  */
 package net.rptools.maptool.client.ui.connectioninfodialog;
 
+import static java.util.concurrent.CompletableFuture.completedFuture;
+
 import java.awt.GridLayout;
-import java.io.IOException;
-import java.net.Inet6Address;
-import java.net.InetAddress;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.concurrent.Callable;
-import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
-import java.util.concurrent.FutureTask;
+import java.awt.Toolkit;
+import java.awt.datatransfer.StringSelection;
+import java.net.URI;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import javax.annotation.Nonnull;
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
@@ -34,56 +32,19 @@ import javax.swing.JDialog;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolRegistry;
+import net.rptools.maptool.client.ServerAddress;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.MapToolServer;
+import net.rptools.maptool.util.NetUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 public class ConnectionInfoDialog extends JDialog {
-  private static String externalAddress =
-      "Unknown"; // Used to be "Discovering ..." -- note that this is a UX change
   private static JTextField externalAddressLabel;
 
   private static final Logger log = LogManager.getLogger(ConnectionInfoDialog.class);
-
-  /**
-   * Get the IP-Address of the active NetworkInterface
-   *
-   * @param v6 Should the IPv6 Address be returnes (true) or the IPv4 Address (false)
-   */
-  private static String getIPAddress(boolean v6) throws SocketException {
-    Enumeration<NetworkInterface> netInts = NetworkInterface.getNetworkInterfaces();
-    for (NetworkInterface netInt : Collections.list(netInts)) {
-      if (netInt.isUp() && !netInt.isLoopback()) {
-        for (InetAddress inetAddress : Collections.list(netInt.getInetAddresses())) {
-
-          if (inetAddress.isLoopbackAddress()
-              || inetAddress.isLinkLocalAddress()
-              || inetAddress.isMulticastAddress()) {
-            continue;
-          }
-
-          try {
-            InetAddress rptools = InetAddress.getByName("www.rptools.net");
-          } catch (UnknownHostException e) {
-            continue;
-          }
-
-          if (v6 && inetAddress instanceof Inet6Address) {
-            return inetAddress.getHostAddress();
-          }
-
-          if (!v6 && inetAddress instanceof InetAddress) {
-            return inetAddress.getHostAddress();
-          }
-        }
-      }
-    }
-    return null;
-  }
 
   /**
    * This is the default constructor
@@ -98,6 +59,7 @@ public class ConnectionInfoDialog extends JDialog {
     AbeillePanel panel = new AbeillePanel(new ConnectionInfoDialogView().getRootComponent());
 
     JTextField nameLabel = panel.getTextField("name");
+    JTextField serviceIdentifierLabel = panel.getTextField("serviceIdentifier");
     JTextField localv4AddressLabel = panel.getTextField("localv4Address");
     JTextField localv6AddressLabel = panel.getTextField("localv6Address");
     JTextField portLabel = panel.getTextField("port");
@@ -107,38 +69,119 @@ public class ConnectionInfoDialog extends JDialog {
     if (name == null || name.isEmpty()) {
       name = "---";
     }
-
-    String localv4Address = "Unknown";
-    try {
-      localv4Address = getIPAddress(false);
-    } catch (IOException e) { // UnknownHost | Socket
-      log.warn("Can't resolve our own IPv4 address!?", e);
-    }
-
-    String localv6Address = "Unknown";
-    try {
-      localv6Address = getIPAddress(true);
-    } catch (IOException e) { // UnknownHost | Socket
-      log.warn("Can't resolve our own IPv6 address!?", e);
-    }
+    String serviceIdentifier = Objects.toString(server.getServiceIdentifier(), "---");
 
     int port = server.getPort();
     String portString = port < 0 ? "---" : Integer.toString(port);
 
     nameLabel.setText(name);
-    localv4AddressLabel.setText(localv4Address);
-    localv6AddressLabel.setText(localv6Address);
+    serviceIdentifierLabel.setText(serviceIdentifier);
+    localv4AddressLabel.setText("Unknown");
+    localv6AddressLabel.setText("Unknown");
     externalAddressLabel.setText(I18N.getText("ConnectionInfoDialog.discovering"));
     portLabel.setText(portString);
 
-    JButton okButton = (JButton) panel.getButton("okButton");
-    bindOKButtonActions(okButton);
+    NetUtil.getInstance()
+        .getLocalAddresses()
+        .thenAccept(
+            localAddresses -> {
+              if (!localAddresses.ipv4().isEmpty()) {
+                localv4AddressLabel.setText(NetUtil.formatAddress(localAddresses.ipv4().get(0)));
+              }
+              if (!localAddresses.ipv6().isEmpty()) {
+                localv6AddressLabel.setText(NetUtil.formatAddress(localAddresses.ipv6().get(0)));
+              }
+            });
+
+    Supplier<CompletableFuture<ServerAddress.Registry>> getServerName =
+        () -> completedFuture(new ServerAddress.Registry(server.getName()));
+    Supplier<CompletableFuture<ServerAddress.Lan>> getServiceIdentifier =
+        () -> completedFuture(new ServerAddress.Lan(server.getServiceIdentifier()));
+    Supplier<CompletableFuture<ServerAddress.Tcp>> getLocalV4 =
+        () ->
+            NetUtil.getInstance()
+                .getLocalAddresses()
+                .thenApply(
+                    localAddresses -> {
+                      if (localAddresses.ipv4().isEmpty()) {
+                        return null;
+                      }
+                      return new ServerAddress.Tcp(
+                          NetUtil.formatAddress(localAddresses.ipv4().get(0)), server.getPort());
+                    });
+    Supplier<CompletableFuture<ServerAddress.Tcp>> getLocalV6 =
+        () ->
+            NetUtil.getInstance()
+                .getLocalAddresses()
+                .thenApply(
+                    localAddresses -> {
+                      if (localAddresses.ipv6().isEmpty()) {
+                        return null;
+                      }
+                      return new ServerAddress.Tcp(
+                          NetUtil.formatAddress(localAddresses.ipv6().get(0)), server.getPort());
+                    });
+    Supplier<CompletableFuture<ServerAddress.Tcp>> getExternal =
+        () ->
+            NetUtil.getInstance()
+                .getExternalAddress()
+                .thenApply(
+                    address -> {
+                      if (address == null) {
+                        return null;
+                      }
+                      return new ServerAddress.Tcp(
+                          NetUtil.formatAddress(address), server.getPort());
+                    });
+    registerCopyButton(panel, "registryUriCopyButton", getServerName, ServerAddress::toUri);
+    registerCopyButton(panel, "registryHttpUrlCopyButton", getServerName, ServerAddress::toHttpUrl);
+    registerCopyButton(panel, "lanUriCopyButton", getServiceIdentifier, ServerAddress::toUri);
+    registerCopyButton(
+        panel, "lanHttpUrlCopyButton", getServiceIdentifier, ServerAddress::toHttpUrl);
+    registerCopyButton(panel, "localIpv4UriCopyButton", getLocalV4, ServerAddress::toUri);
+    registerCopyButton(panel, "localIpv4HttpUrlCopyButton", getLocalV4, ServerAddress::toHttpUrl);
+    registerCopyButton(panel, "localIpv6UriCopyButton", getLocalV6, ServerAddress::toUri);
+    registerCopyButton(panel, "localIpv6HttpUrlCopyButton", getLocalV6, ServerAddress::toHttpUrl);
+    registerCopyButton(panel, "externalUriCopyButton", getExternal, ServerAddress::toUri);
+    registerCopyButton(panel, "externalHttpUrlCopyButton", getExternal, ServerAddress::toHttpUrl);
+    if (panel.getButton("okButton") instanceof JButton okButton) {
+      okButton.addActionListener(e -> setVisible(false));
+    }
 
     setLayout(new GridLayout());
     ((JComponent) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
     add(panel);
 
-    (new Thread(new ExternalAddressFinder(externalAddressLabel))).start();
+    NetUtil.getInstance()
+        .getExternalAddress()
+        .thenAccept(
+            address -> {
+              if (address != null) {
+                SwingUtilities.invokeLater(
+                    () -> externalAddressLabel.setText(NetUtil.formatAddress(address)));
+              }
+            });
+  }
+
+  private <T extends ServerAddress> void registerCopyButton(
+      @Nonnull AbeillePanel panel,
+      @Nonnull String buttonId,
+      @Nonnull Supplier<CompletableFuture<T>> connectionSupplier,
+      @Nonnull Function<T, URI> specToUri) {
+    if (!(panel.getButton(buttonId) instanceof JButton button)) {
+      return;
+    }
+    button.addActionListener(
+        e -> {
+          var future = connectionSupplier.get();
+          future.thenAccept(
+              connectionSpec -> {
+                var url = specToUri.apply(connectionSpec).toString();
+                Toolkit.getDefaultToolkit()
+                    .getSystemClipboard()
+                    .setContents(new StringSelection(url), null);
+              });
+        });
   }
 
   @Override
@@ -147,57 +190,5 @@ public class ConnectionInfoDialog extends JDialog {
       SwingUtil.centerOver(this, MapTool.getFrame());
     }
     super.setVisible(b);
-  }
-
-  private static FutureTask<String> getExternalAddressFinderResult() {
-    ExternalAddressFinder finder = new ExternalAddressFinder(externalAddressLabel);
-    FutureTask<String> future = new FutureTask<>(finder);
-    Executor executor = Executors.newSingleThreadExecutor();
-    executor.execute(future);
-    return future;
-  }
-
-  public static String getExternalAddress() {
-    if (externalAddress.equals("Unknown")) {
-      FutureTask<String> future = getExternalAddressFinderResult();
-      try {
-        externalAddress = future.get();
-      } catch (Exception e) {
-        // if there's an exception, we just keep the string 'Unknown'
-      }
-    }
-    return externalAddress;
-  }
-
-  /**
-   * This method initializes okButton
-   *
-   * @return javax.swing.JButton
-   */
-  private void bindOKButtonActions(JButton okButton) {
-    okButton.addActionListener(e -> setVisible(false));
-  }
-
-  private static class ExternalAddressFinder implements Callable<String>, Runnable {
-    private final JTextField myLabel;
-
-    public ExternalAddressFinder(JTextField label) {
-      myLabel = label;
-    }
-
-    @Override
-    public String call() {
-      String address = MapToolRegistry.getInstance().getAddress();
-      if (address == null || address.length() == 0) {
-        address = "Unknown";
-      }
-      return address;
-    }
-
-    @Override
-    public void run() {
-      String result = call();
-      SwingUtilities.invokeLater(() -> myLabel.setText(result));
-    }
   }
 }

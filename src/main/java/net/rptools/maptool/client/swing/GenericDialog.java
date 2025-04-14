@@ -93,7 +93,6 @@ public class GenericDialog extends JDialog {
   }
 
   public void closeDialog() {
-    // XXX Doesn't do anything useful and breaks OpenJDK: setVisible(false);
     dispose();
   }
 
@@ -127,7 +126,6 @@ public class GenericDialog extends JDialog {
       GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
   ActionListener resizeListener =
       e -> {
-        System.out.println(e);
         if (e.getActionCommand().equals("maximise")) {
           setBounds(screenBounds);
           swapResizeButtons();

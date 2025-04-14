@@ -29,7 +29,7 @@ import org.apache.logging.log4j.Logger;
 import org.java_websocket.client.WebSocketClient;
 import org.java_websocket.handshake.ServerHandshake;
 
-public class WebRTCServer extends AbstractServer {
+public final class WebRTCServer extends AbstractServer implements Server {
   private static final Logger log = LogManager.getLogger(WebRTCServer.class);
 
   public interface Listener {
@@ -105,7 +105,7 @@ public class WebRTCServer extends AbstractServer {
       @Override
       public void onError(Exception ex) {
         lastError = "WebSocket error: " + ex.toString() + "\n";
-        log.error("S " + lastError);
+        log.error("S " + lastError, ex);
         // onClose will be called after this method
       }
     };
@@ -147,7 +147,7 @@ public class WebRTCServer extends AbstractServer {
     try {
       fireClientConnect(connection);
     } catch (Exception e) {
-      log.error(e);
+      log.error("Unexpected error while handling new data channel", e);
     }
   }
 

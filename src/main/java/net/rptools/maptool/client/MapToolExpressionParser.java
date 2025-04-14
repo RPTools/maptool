@@ -22,7 +22,7 @@ import java.util.stream.Stream;
 import net.rptools.dicelib.expression.ExpressionParser;
 import net.rptools.maptool.client.functions.*;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.script.javascript.*;
+import net.rptools.maptool.client.script.javascript.JSMacro;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -95,6 +95,7 @@ public class MapToolExpressionParser extends ExpressionParser {
               DrawingGetterFunctions.getInstance(),
               DrawingSetterFunctions.getInstance(),
               DrawingMiscFunctions.getInstance(),
+              ShapeFunctions.getInstance(),
               ExportDataFunctions.getInstance(),
               RESTfulFunctions.getInstance(),
               HeroLabFunctions.getInstance(),
@@ -139,7 +140,6 @@ public class MapToolExpressionParser extends ExpressionParser {
 
     @Override
     public Expression parseExpression(String expression) throws ParserException {
-      // Expression exp = super.parseExpression(expression);
       Expression exp = expressionCache.getIfPresent(expression);
       if (exp == null) {
         exp = super.parseExpression(expression);

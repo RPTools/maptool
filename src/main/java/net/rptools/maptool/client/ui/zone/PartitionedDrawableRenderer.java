@@ -140,7 +140,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
               // Trim to the right size
               if (chunkList.size() > maxChunks) {
                 int chunkSize = chunkList.size();
-                // chunkList.subList(maxChunks, chunkSize).clear();
                 while (chunkSize > maxChunks) {
                   chunkList.remove(--chunkSize);
                 }
@@ -276,9 +275,6 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
 																 */) {
         g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, pen.getOpacity()));
       }
-
-      // g.setColor(Color.red);
-      // g.draw(drawnBounds);
 
       timer.start("createChunk:Draw");
       if (drawable instanceof DrawablesGroup) {

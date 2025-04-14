@@ -102,7 +102,7 @@ public class HeroLabData {
           Asset.createImageAsset(
               "DEFAULT_HERO_LAB_PORTRAIT", RessourceManager.getImage(Images.HEROLABS_PORTRAIT));
     } catch (Exception e) {
-      e.printStackTrace();
+      log.error("Error while loading default HeroLab assets", e);
     }
 
     if (!AssetManager.hasAsset(DEFAULT_HERO_LAB_TOKEN_ASSET)) {

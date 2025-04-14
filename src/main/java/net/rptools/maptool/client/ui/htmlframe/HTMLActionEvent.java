@@ -18,8 +18,10 @@ import java.awt.event.ActionEvent;
 
 /** Class holding nested classes for ActionEvent related to HTML. */
 public class HTMLActionEvent {
+
   /** Action event for changing title of the container. */
   public static class ChangeTitleActionEvent extends ActionEvent {
+
     private final String newTitle;
 
     ChangeTitleActionEvent(Object source, String title) {
@@ -36,6 +38,7 @@ public class HTMLActionEvent {
   }
 
   public static class MetaTagActionEvent extends ActionEvent {
+
     private final String name;
     private final String content;
 
@@ -66,6 +69,7 @@ public class HTMLActionEvent {
 
   /** Action event for registering a macro */
   public static class RegisterMacroActionEvent extends ActionEvent {
+
     private final String type;
     private final String macro;
 
@@ -96,6 +100,7 @@ public class HTMLActionEvent {
 
   /** Class that listens for form events. */
   public static class FormActionEvent extends ActionEvent {
+
     private final String method;
     private final String action;
     private final String data;
@@ -109,7 +114,6 @@ public class HTMLActionEvent {
         this.data = data;
       } else {
         this.data = data.replace("%0A", "%20"); // String properties can not handle \n in strings.
-        // XXX Shouldn't we warn the MTscript programmer somehow?
       }
     }
 

@@ -16,6 +16,4 @@ package net.rptools.maptool.model.tokens;
 
 import net.rptools.maptool.model.Token;
 
-// TODO Get rid of this event. Panels can just listen for token changes rather than having callers
-//  guess whether an update is needed.
 public record TokenPanelChanged(Token token) {}

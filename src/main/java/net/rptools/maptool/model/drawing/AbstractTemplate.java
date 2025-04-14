@@ -27,8 +27,6 @@ import net.rptools.maptool.model.ZonePoint;
  * Base class for the radius, line, and cone templates.
  *
  * @author jgorrell
- * @version $Revision: 5945 $ $Date: 2013-06-03 04:35:50 +0930 (Mon, 03 Jun 2013) $ $Author:
- *     azhrei_fje $
  */
 public abstract class AbstractTemplate extends AbstractDrawing {
   /*---------------------------------------------------------------------------------------------
@@ -41,6 +39,13 @@ public abstract class AbstractTemplate extends AbstractDrawing {
   /** The location of the vertex where painting starts. */
   private ZonePoint vertex = new ZonePoint(0, 0);
 
+  /**
+   * @deprecated This used to indicate the zone where this drawable is painted. We no longer track
+   *     this in the drawing, but old campaign files may keep a reference to this field. So we have
+   *     to keep this around so XStream can find the value if it needs it.
+   */
+  @Deprecated private GUID zoneId;
+
   protected AbstractTemplate() {}
 
   protected AbstractTemplate(GUID id) {
@@ -51,6 +56,11 @@ public abstract class AbstractTemplate extends AbstractDrawing {
     super(other);
     this.radius = other.radius;
     this.vertex = new ZonePoint(other.vertex);
+  }
+
+  public Object readResolve() {
+    zoneId = null;
+    return this;
   }
 
   /*---------------------------------------------------------------------------------------------

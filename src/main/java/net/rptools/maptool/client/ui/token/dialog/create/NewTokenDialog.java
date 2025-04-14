@@ -110,23 +110,6 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     return (JTextField) getComponent("@name");
   }
 
-  //
-  // public JTextField getGMNameTextField() {
-  // return (JTextField) getComponent("gmName");
-  // }
-  //
-  // public JRadioButton getNPCTypeRadio() {
-  // return (JRadioButton) getComponent("npcType");
-  // }
-  //
-  // public JRadioButton getMarkerTypeRadio() {
-  // return (JRadioButton) getComponent("markerType");
-  // }
-  //
-  // public JRadioButton getPCTypeRadio() {
-  // return (JRadioButton) getComponent("pcType");
-  // }
-  //
   public JButton getOKButton() {
     return (JButton) getComponent("okButton");
   }
@@ -151,22 +134,6 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     return (JComboBox) getComponent("statSheetLocationComboBox");
   }
 
-  // public void initNameTextField() {
-  // getNameTextField().setText(token.getName());
-  // }
-  //
-  // public void initGMNameTextField() {
-  // getGMNameTextField().setText(token.getGMName());
-  // }
-  //
-  // public void initNPCTypeRadio() {
-  // getNPCTypeRadio().setSelected(true);
-  // }
-  //
-  // public void initMarkerTypeRadio() {
-  // getMarkerTypeRadio().setVisible(false);
-  // }
-  //
   public void initTokenIconPanel() {
     getTokenIconPanel().setPreferredSize(new Dimension(100, 100));
     getTokenIconPanel().setMinimumSize(new Dimension(100, 100));

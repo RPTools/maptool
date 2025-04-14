@@ -93,14 +93,4 @@ public class BackupManager {
     }
     return count;
   }
-
-  // public static void main(String[] args) throws IOException {
-  //
-  // BackupManager mgr = new BackupManager(new File("/home/trevor/tmp/backup"));
-  // mgr.setMaxBackupSize(35000);
-  //
-  // mgr.backup(new File("/home/trevor/tmp/applet.html"));
-  //
-  // System.out.println("Done");
-  // }
 }

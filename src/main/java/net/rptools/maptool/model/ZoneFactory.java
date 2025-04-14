@@ -17,44 +17,65 @@ package net.rptools.maptool.model;
 import java.awt.Color;
 import java.io.File;
 import java.io.IOException;
+import javax.annotation.Nullable;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.util.ImageManager;
 import org.apache.commons.io.FileUtils;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ZoneFactory {
+  private static final Logger log = LogManager.getLogger(ZoneFactory.class);
 
   public static final String DEFAULT_MAP_NAME = "Grasslands";
-  public static MD5Key defaultImageId;
+  private static final DrawableColorPaint fallbackBackgroundPaint =
+      new DrawableColorPaint(Color.LIGHT_GRAY);
+  private static @Nullable MD5Key defaultImageId;
 
-  static {
-    // TODO: I really don't like this being hard wired this way, need to make it a preference or
-    // something
+  private static DrawablePaint getDefaultBackgroundPaint() {
+    if (defaultImageId != null) {
+      return new DrawableTexturePaint(defaultImageId);
+    }
+
     File grassImage =
         new File(AppUtil.getAppHome("resource/Default/Textures").getAbsolutePath() + "/Grass.png");
-    if (grassImage.exists()) {
-      try {
-        Asset asset =
-            Asset.createImageAsset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
-        defaultImageId = asset.getMD5Key();
-
-        // Make sure the image is loaded to avoid a flash screen when it becomes visible
-        ImageManager.getImageAndWait(asset.getMD5Key());
-      } catch (IOException ioe) {
-        ioe.printStackTrace();
-      }
+    if (!grassImage.exists()) {
+      log.warn(
+          "Unable to load the default background texture: file {} does not exist",
+          grassImage.getPath());
+      return fallbackBackgroundPaint;
     }
+
+    MD5Key imageId;
+    try {
+      Asset asset =
+          Asset.createImageAsset(DEFAULT_MAP_NAME, FileUtils.readFileToByteArray(grassImage));
+      imageId = asset.getMD5Key();
+
+      // Make sure the image is loaded to avoid a flash screen when it becomes visible
+      ImageManager.getImageAndWait(asset.getMD5Key());
+    } catch (IOException ioe) {
+      log.error("Error reading default background image", ioe);
+      return fallbackBackgroundPaint;
+    }
+
+    defaultImageId = imageId;
+    return new DrawableTexturePaint(defaultImageId);
   }
 
   public static Zone createZone() {
-
     Zone zone = new Zone();
 
     zone.setName(DEFAULT_MAP_NAME);
-    zone.setBackgroundPaint(new DrawableTexturePaint(defaultImageId));
+
+    var backgroundPaint = getDefaultBackgroundPaint();
+    zone.setBackgroundPaint(backgroundPaint);
+
     zone.setFogPaint(new DrawableColorPaint(Color.black));
 
     zone.setVisible(AppPreferences.newMapsVisible.get());

@@ -29,7 +29,6 @@ import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.GridlessGridDto;
-import net.rptools.maptool.util.GraphicsUtil;
 
 public class GridlessGrid extends Grid {
   private static List<TokenFootprint> footprintList;
@@ -120,8 +119,6 @@ public class GridlessGrid extends Grid {
           new MovementKey(callback, r.width, -r.height));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD4, 0), new MovementKey(callback, -r.width, 0));
-      // movementKeys.put(KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD5, 0), new MovementKey(callback,
-      // 0, 0));
       movementKeys.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_NUMPAD6, 0), new MovementKey(callback, r.width, 0));
       movementKeys.put(
@@ -198,8 +195,7 @@ public class GridlessGrid extends Grid {
   protected Area getGridArea(
       Token token, double range, boolean scaleWithToken, double visionRange) {
     // A grid area isn't well-defined when there is no grid, so fall back to a circle.
-    return GraphicsUtil.createLineSegmentEllipse(
-        -visionRange, -visionRange, visionRange, visionRange, CIRCLE_SEGMENTS);
+    return super.getGridArea(token, 0, scaleWithToken, visionRange);
   }
 
   @Override

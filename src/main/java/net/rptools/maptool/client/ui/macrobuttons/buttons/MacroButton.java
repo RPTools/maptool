@@ -168,7 +168,6 @@ public class MacroButton extends JButton implements MouseListener {
     String newMinWidth = properties.getMinWidth();
     if (newMinWidth != null && !newMinWidth.equals("")) {
       return " width:" + newMinWidth + ";";
-      // return " min-width:"+newMinWidth+";";
     }
     return "";
   }
@@ -298,26 +297,15 @@ public class MacroButton extends JButton implements MouseListener {
 
   private class DSListener implements DragSourceListener {
 
-    public void dragEnter(DragSourceDragEvent event) {
-      // System.out.println("TMB: drag enter");
-      // DragSourceContext context = event.getDragSourceContext();
-      // context.getComponent()
-    }
+    public void dragEnter(DragSourceDragEvent event) {}
 
-    public void dragOver(DragSourceDragEvent event) {
-      // System.out.println("TMB: drag over");
-    }
+    public void dragOver(DragSourceDragEvent event) {}
 
-    public void dropActionChanged(DragSourceDragEvent event) {
-      // System.out.println("TMB: drop action changed");
-    }
+    public void dropActionChanged(DragSourceDragEvent event) {}
 
-    public void dragExit(DragSourceEvent event) {
-      // System.out.println("TMB: drag exit");
-    }
+    public void dragExit(DragSourceEvent event) {}
 
     public void dragDropEnd(DragSourceDropEvent event) {
-      // System.out.println("TMB: drag drop end");
       // js commented out for testing - MapTool.getFrame().updateSelectionPanel();
       List<Token> affectedTokens = new ArrayList<Token>();
       MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);

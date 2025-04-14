@@ -243,7 +243,6 @@ public class ExpressionParserTest {
     assertEquals(new BigDecimal(4), result.getValue());
   }
 
-  @Test
   private VariableResolver initVar(String name, Object value) throws ParserException {
     VariableResolver result = new MapVariableResolver();
     result.setVariable(name, value);
@@ -384,7 +383,6 @@ public class ExpressionParserTest {
     assertEquals(flattenings[0], 1);
   }
 
-  @Test
   private void evaluateExpression(ExpressionParser p, String expression, BigDecimal answer)
       throws ParserException {
     Result result = p.evaluate(expression);

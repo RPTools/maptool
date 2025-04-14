@@ -21,7 +21,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
-import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * Manages the stat sheets that are available to the system. This includes the legacy stat sheet.

@@ -326,8 +326,6 @@ public class PathTest {
     }
   }
 
-  // TODO @Nested for derived tests.
-
   @Nested
   class DerivedPathTests {
     @Test

@@ -28,6 +28,11 @@ message SetWallTopologyMsg {
   WallTopologyDto topology = 2;
 }
 
+message UpdateWallDataMsg {
+  string zone_guid = 1;
+  WallDto wall = 2;
+}
+
 message BootPlayerMsg {
   string player_name = 1;
 }

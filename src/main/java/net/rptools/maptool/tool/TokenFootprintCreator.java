@@ -23,10 +23,7 @@ import net.rptools.maptool.model.TokenFootprint;
 
 public class TokenFootprintCreator {
   public static void main(String[] args) {
-    // List<TokenFootprint> footprintList = makeHorizHex();
     List<TokenFootprint> footprintList = makeVertHex();
-    // List<TokenFootprint> footprintList = makeSquare();
-    // List<TokenFootprint> footprintList = makeGridless();
     XStream xstream = FileUtil.getConfiguredXStream();
     System.out.println(xstream.toXML(footprintList));
   }

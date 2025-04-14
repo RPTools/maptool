@@ -25,7 +25,7 @@ import org.apache.logging.log4j.Logger;
 /**
  * @author drice
  */
-public class SocketServer extends AbstractServer {
+public final class SocketServer extends AbstractServer implements Server {
 
   private static final Logger log = LogManager.getLogger(SocketServer.class);
   private final int port;
@@ -39,6 +39,9 @@ public class SocketServer extends AbstractServer {
   @Override
   public void start() throws IOException {
     var serverSocket = new ServerSocket(port);
+    if (serverSocket.getLocalPort() == -1) {
+      throw new AssertionError("Socket not bound yet");
+    }
     // If the above throws, it will be as though we never started.
 
     socket = serverSocket;
@@ -68,6 +71,16 @@ public class SocketServer extends AbstractServer {
 
   public String getError() {
     return null;
+  }
+
+  /** Get the port of the socket the server is running on or -1. */
+  public int getPort() {
+    // NOTE: We do not use this.port because the socket's bound port can be different
+    if (socket == null || socket.isClosed()) {
+      return -1;
+    }
+
+    return socket.getLocalPort();
   }
 
   ////

@@ -228,8 +228,6 @@ public abstract class Grid implements Cloneable {
   @Override
   public Object clone() throws CloneNotSupportedException {
     return super.clone();
-    // Grid newGrid = (Grid) super.clone();
-    // return newGrid;
   }
 
   /**
@@ -537,10 +535,8 @@ public abstract class Grid implements Cloneable {
       double arcAngle,
       int offsetAngle,
       boolean scaleWithToken) {
-    if (range == 0) {
-      range = zone.getTokenVisionDistance();
-    }
-    double visionRange = range * getSize() / zone.getUnitsPerCell();
+    double visionRange =
+        ((range == 0) ? zone.getTokenVisionDistance() : range) * getSize() / zone.getUnitsPerCell();
 
     Rectangle footprint = token.getFootprint(this).getBounds(this);
 
@@ -589,19 +585,14 @@ public abstract class Grid implements Cloneable {
    * @return the distance (in cells) between the two cells
    */
   public double cellDistance(CellPoint cellA, CellPoint cellB, WalkerMetric wmetric) {
-    int distance;
     int distX = Math.abs(cellA.x - cellB.x);
     int distY = Math.abs(cellA.y - cellB.y);
-    if (wmetric == WalkerMetric.NO_DIAGONALS || wmetric == WalkerMetric.MANHATTAN) {
-      distance = distX + distY;
-    } else if (wmetric == WalkerMetric.ONE_ONE_ONE) {
-      distance = Math.max(distX, distY);
-    } else if (wmetric == WalkerMetric.ONE_TWO_ONE) {
-      distance = Math.max(distX, distY) + Math.min(distX, distY) / 2;
-    } else {
-      System.out.println("Incorrect WalkerMetric in method cellDistance of Grid.java");
-      distance = -1; // error, should not happen;
-    }
+    int distance =
+        switch (wmetric) {
+          case NO_DIAGONALS, MANHATTAN -> distX + distY;
+          case ONE_TWO_ONE -> Math.max(distX, distY) + Math.min(distX, distY) / 2;
+          case ONE_ONE_ONE -> Math.max(distX, distY);
+        };
     return distance;
   }
 
@@ -852,7 +843,8 @@ public abstract class Grid implements Cloneable {
    * Returns an Area with a given radius that is shaped and aligned to the current grid
    *
    * @param token token which to center the grid area on
-   * @param range range in units grid area extends out to
+   * @param range range in units grid area extends out to. if set to {@code 0}, the result will be a
+   *     circular area extending out to {@code visionRange}.
    * @param scaleWithToken whether grid area should expand by the size of the token
    * @param visionRange token's vision in pixels
    * @return the {@link Area} conforming to the current grid layout
@@ -1036,18 +1028,29 @@ public abstract class Grid implements Cloneable {
   }
 
   public static Grid fromDto(GridDto dto) {
-    Grid grid = null;
-    switch (dto.getTypeCase()) {
-      case GRIDLESS_GRID -> grid = new GridlessGrid();
-      case HEX_GRID -> {
-        grid = HexGrid.fromDto(dto.getHexGrid());
-      }
-      case SQUARE_GRID -> grid = new SquareGrid();
-      case ISOMETRIC_GRID -> grid = new IsometricGrid();
-    }
+    Runnable postProcess = () -> {};
+    Grid grid =
+        switch (dto.getTypeCase()) {
+          case GRIDLESS_GRID -> new GridlessGrid();
+          case HEX_GRID -> {
+            var hexDto = dto.getHexGrid();
+            var hexGrid = hexDto.getVertical() ? new HexGridVertical() : new HexGridHorizontal();
+            postProcess = () -> hexGrid.readDto(hexDto);
+            yield hexGrid;
+          }
+          case SQUARE_GRID -> new SquareGrid();
+          case ISOMETRIC_GRID -> new IsometricGrid();
+          default -> {
+            log.error("Unrecognized Grid DTO: {}. Defaulting to square grid", dto.getTypeCase());
+            yield new SquareGrid();
+          }
+        };
+
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
+    postProcess.run();
+
     grid.cellShape = grid.createCellShape();
 
     return grid;

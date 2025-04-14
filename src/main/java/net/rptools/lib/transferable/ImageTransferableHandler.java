@@ -29,8 +29,12 @@ import java.util.List;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 import net.rptools.lib.image.ImageUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class ImageTransferableHandler extends TransferableHandler {
+  private static final Logger log = LogManager.getLogger(ImageTransferableHandler.class);
+
   private enum Flavor {
     image(new DataFlavor("image/x-java-image; class=java.awt.Image", "Image")),
     url(new DataFlavor("text/plain; class=java.lang.String", "Image"));
@@ -74,7 +78,7 @@ public class ImageTransferableHandler extends TransferableHandler {
           try {
             mt.waitForID(0);
           } catch (InterruptedException ie) {
-            ie.printStackTrace();
+            log.error("Error while waiting for image to load", ie);
           }
         }
         if (!(image instanceof BufferedImage)) {
@@ -82,8 +86,7 @@ public class ImageTransferableHandler extends TransferableHandler {
         }
         return image;
       } catch (MalformedURLException mue) {
-        // TODO: this can probably be ignored
-        mue.printStackTrace();
+        log.error("Failed to parse URL {}", urlStr, mue);
       }
     }
     if (transferable.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {

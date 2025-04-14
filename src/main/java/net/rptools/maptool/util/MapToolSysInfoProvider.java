@@ -111,7 +111,6 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
 
     // maptool info
     mt.addProperty("version", MapTool.getVersion());
-    // mt.addProperty("home", AppUtil.getAppHome()); // this line crashes, I didnt figured out why
     mt.addProperty(
         "max mem avail", format.format(Runtime.getRuntime().maxMemory() / (1024 * 1024)));
     mt.addProperty(
@@ -136,8 +135,6 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
     os.addProperty("name", p.getProperty("os.name"));
     os.addProperty("version", p.getProperty("os.version"));
     os.addProperty("arch", p.getProperty("os.arch"));
-    // os.addProperty("path", (env.get("PATH") != null ? env.get("PATH") :
-    // p.getProperty("java.library.path")));
     info.add("os", os);
 
     return info;
@@ -267,11 +264,6 @@ public class MapToolSysInfoProvider implements SysInfoProvider {
 
     appendInfo("==== Display Information ====");
     appendInfo("Number of Displays: " + gs.length);
-    // XXX Is there any way to report on the actual hardware? nVidia and
-    // ATI/AMD cards sometimes have bugs in their proprietary drivers that
-    // cause headache for Java. It would be nice to have that information.
-    // For Windows it would be good to see DirectX module names and version
-    // numbers, but can we obtain that from the JRE...?
     int i = 0;
     for (GraphicsDevice gd : gs) {
       i++;

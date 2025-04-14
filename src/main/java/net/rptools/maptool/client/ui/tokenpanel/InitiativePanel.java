@@ -913,7 +913,6 @@ public class InitiativePanel extends JPanel
           return;
         }
         displayList.setSelectedIndex(model.getDisplayIndex(list.indexOf(ti)));
-        // TODO Can I use hasOwnerPermission(ti.getToken()) here instead?
         if (!hasGMPermission()
             && ti.getToken() != null
             && !ti.getToken().isOwner(MapTool.getPlayer().getName())) return;
