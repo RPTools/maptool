@@ -20,11 +20,7 @@ import java.util.List;
 import net.rptools.maptool.model.TokenFootprint;
 
 public class TokenFootprintCreator {
-  public static void main(String[] args) {
-    List<TokenFootprint> footprintList = makeVertHex();
-    XStream xstream = FileUtil.getConfiguredXStream();
-    System.out.println(xstream.toXML(footprintList));
-  }
+  public static void main(String[] args) {}
 
   public static Point[] points(int[][] points) {
     Point[] pa = new Point[points.length];
