@@ -32,6 +32,7 @@ import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
  */
 public class CrossTokenOverlay extends XTokenOverlay {
 
+
   /** Default constructor needed for XML encoding/decoding */
   public CrossTokenOverlay() {
     this(BooleanTokenOverlay.DEFAULT_STATE_NAME, Color.RED, 5);
