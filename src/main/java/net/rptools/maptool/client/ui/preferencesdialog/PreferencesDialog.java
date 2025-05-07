@@ -774,7 +774,7 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.scrollStatusSpeed.set(
                 ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
                     .getNumber()
-                    .floatValue()));
+                    .doubleValue()));
 
     statusScrollStartDelaySpinner = panel.getSpinner("statusScrollStartDelaySpinner");
     statusScrollStartDelaySpinner.setModel(
