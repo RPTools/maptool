@@ -134,12 +134,6 @@ public class AppPreferences {
   public static final Preference<Color> trustedPrefixForeground =
       ColorType.create("trustedPrefixFG", Color.BLACK, false);
 
-  public static final Preference<Integer> toolTipInitialDelay =
-      IntegerType.create("toolTipInitialDelay", 250);
-
-  public static final Preference<Integer> toolTipDismissDelay =
-      IntegerType.create("toolTipDismissDelay", 30000);
-
   public static final Preference<Boolean> openEditorForNewMacro =
       BooleanType.create("openEditorForNewMacro", true);
 
@@ -354,10 +348,10 @@ public class AppPreferences {
       FloatType.create("statusBarSpeed", 0.85f);
   /* Scroll status bar scrolling start delay */
   public static final Preference<Double> scrollStatusStartDelay =
-      DoubleType.create("statusBarDelay", 2.4);
+      DoubleType.create("scrollStatusStartDelay", 2.4);
   /* Scroll status bar scrolling end pause */
   public static final Preference<Double> scrollStatusEndPause =
-      DoubleType.create("statusBarDelay", 1.8);
+      DoubleType.create("scrollStatusEndPause", 1.8);
   /* Status bar temporary notification duration */
   public static final Preference<Double> scrollStatusTempDuration =
       DoubleType.create("scrollStatusTempDuration", 12d);
