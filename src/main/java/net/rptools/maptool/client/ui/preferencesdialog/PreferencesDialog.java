@@ -758,7 +758,7 @@ public class PreferencesDialog extends JDialog {
     statusTempMessageTimeSpinner = panel.getSpinner("statusTempMessageTimeSpinner");
     statusTempMessageTimeSpinner.setModel(
         new SpinnerNumberModel(
-            AppPreferences.scrollStatusTempDuration.get().doubleValue(), 0.1, 60d, 0.1));
+            AppPreferences.scrollStatusTempDuration.get().doubleValue(), 0.1, 5d, 0.01));
     statusTempMessageTimeSpinner.addChangeListener(
         e ->
             AppPreferences.scrollStatusTempDuration.set(
@@ -779,7 +779,7 @@ public class PreferencesDialog extends JDialog {
     statusScrollStartDelaySpinner = panel.getSpinner("statusScrollStartDelaySpinner");
     statusScrollStartDelaySpinner.setModel(
         new SpinnerNumberModel(
-            AppPreferences.scrollStatusStartDelay.get().doubleValue(), 0, 15d, 0.1));
+            AppPreferences.scrollStatusStartDelay.get().doubleValue(), 0, 10d, 0.1));
     statusScrollStartDelaySpinner.addChangeListener(
         e ->
             AppPreferences.scrollStatusStartDelay.set(
@@ -789,14 +789,13 @@ public class PreferencesDialog extends JDialog {
     statusScrollEndPause = panel.getSpinner("statusScrollEndPause");
     statusScrollEndPause.setModel(
         new SpinnerNumberModel(
-            AppPreferences.scrollStatusEndPause.get().doubleValue(), 0, 15d, 0.1));
+            AppPreferences.scrollStatusEndPause.get().doubleValue(), 0, 10d, 0.1));
     statusScrollEndPause.addChangeListener(
         e ->
             AppPreferences.scrollStatusEndPause.set(
                 ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
                     .getNumber()
                     .doubleValue()));
-
     showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
     showLabelBorderCheckBox.addActionListener(
         e -> {

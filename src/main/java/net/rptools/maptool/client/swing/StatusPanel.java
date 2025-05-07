@@ -72,7 +72,8 @@ public class StatusPanel extends JPanel {
         new ComponentAdapter() {
           @Override
           public void componentResized(ComponentEvent e) {
-            setStatus(StatusMarquee.labelText);
+            super.componentResized(e);
+            repaint();
           }
         });
   }
@@ -118,7 +119,7 @@ public class StatusPanel extends JPanel {
     private static int textDirection;
     private static double scrollSpeed;
     private static double scrollPosition = 0;
-    protected static String labelText = ""; // keep a copy as super truncates string overflow
+    private static String labelText = ""; // keep a copy as super truncates string overflow
     private static String oldText;
     private static float overflow; // amount that string overflows container
     private static Timer timer;
@@ -166,6 +167,7 @@ public class StatusPanel extends JPanel {
 
       add(scrollPane, BorderLayout.CENTER);
       validate();
+      //      viewport.setScrollMode(JViewport.BLIT_SCROLL_MODE);
       viewport.setDoubleBuffered(true);
 
       button.addMouseListener(LISTEN_BUTTON);
@@ -192,7 +194,7 @@ public class StatusPanel extends JPanel {
         scrollPosition =
             Math.clamp(
                 scrollPosition + (float) delta,
-                textDirection == 1 ? 0 : -1 * (getScrollWidth() + overflow),
+                textDirection == 1 ? 0 : -1 * getScrollWidth() + overflow,
                 textDirection == 1 ? getScrollWidth() + overflow : 0);
         SCROLL_TRANSFORM.setToTranslation(scrollPosition, 0);
         RepaintManager.currentManager(statusLabel)
@@ -211,8 +213,7 @@ public class StatusPanel extends JPanel {
       if (scrollPane == null) {
         return 0;
       } else {
-        return Math.max(
-            0, scrollPane.getWidth() - scrollPane.getInsets().left - scrollPane.getInsets().right);
+        return scrollPane.getWidth() - scrollPane.getInsets().left - scrollPane.getInsets().right;
       }
     }
 
@@ -238,7 +239,6 @@ public class StatusPanel extends JPanel {
         labelText = oldText;
         tempTimer.stop();
       }
-
       oldText = labelText;
       if (text == null || text.isBlank()) {
         text = oldText;
@@ -293,7 +293,7 @@ public class StatusPanel extends JPanel {
 
     private static void startTimer() {
       initTimer(); // just to make sure it exists
-      if (allowScroll && overflow > 0 && getScrollWidth() > 0) {
+      if (allowScroll && overflow > 0) {
         timer.start();
       } else if (timer.isRunning()) {
         timer.setActionCommand("stop");
