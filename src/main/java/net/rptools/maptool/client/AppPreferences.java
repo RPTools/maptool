@@ -25,6 +25,7 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
 import javax.annotation.Nullable;
+import javax.swing.*;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
@@ -133,13 +134,6 @@ public class AppPreferences {
 
   public static final Preference<Color> trustedPrefixForeground =
       ColorType.create("trustedPrefixFG", Color.BLACK, false);
-
-  public static final NumericPreference<Integer> toolTipInitialDelay =
-      IntegerType.create("toolTipInitialDelay", 250);
-
-  public static final NumericPreference<Integer> toolTipDismissDelay =
-      IntegerType.create("toolTipDismissDelay", 30000);
-
 
   public static final Preference<Boolean> openEditorForNewMacro =
       BooleanType.create("openEditorForNewMacro", true);
