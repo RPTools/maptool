@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.swing;
 
 import com.formdev.flatlaf.extras.components.FlatButton;
+import org.apache.commons.lang3.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
@@ -33,7 +34,7 @@ import org.apache.commons.text.similarity.JaroWinklerDistance;
  * @author trevor
  */
 public class StatusPanel extends JPanel {
-  private static final StatusMarquee statusLabel = new StatusMarquee();
+  private static StatusMarquee statusLabel = new StatusMarquee();
   // messages that will only be displayed for a short time before the previous message is restored.
   private static final List<String> TEMP_STRINGS = new ArrayList<>();
 
@@ -72,6 +73,11 @@ public class StatusPanel extends JPanel {
         new ComponentAdapter() {
           @Override
           public void componentResized(ComponentEvent e) {
+            setStatus(StatusMarquee.labelText);
+          }
+
+          @Override
+          public void componentMoved(ComponentEvent e) {
             setStatus(StatusMarquee.labelText);
           }
         });
@@ -134,6 +140,7 @@ public class StatusPanel extends JPanel {
       super();
       setLayout(new BorderLayout(1, 0));
       setBackground(BG);
+      setDoubleBuffered(AppPreferences.statusScrollDoubleBuffered.get());
 
       // Reverse direction for RTL scripts
       textDirection = this.getComponentOrientation().isLeftToRight() ? -1 : 1;
@@ -156,6 +163,7 @@ public class StatusPanel extends JPanel {
       JViewport viewport = new ScrollVP();
       viewport.setView(marqueeText);
       viewport.setBackground(getBackground());
+      viewport.setScrollMode(AppPreferences.statusScrollMode.get());
 
       scrollPane = new FadingScroll();
       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -166,7 +174,6 @@ public class StatusPanel extends JPanel {
 
       add(scrollPane, BorderLayout.CENTER);
       validate();
-      viewport.setDoubleBuffered(true);
 
       button.addMouseListener(LISTEN_BUTTON);
       marqueeText.addMouseListener(LISTEN_MOUSE);
@@ -195,13 +202,14 @@ public class StatusPanel extends JPanel {
                 textDirection == 1 ? 0 : -1 * (getScrollWidth() + overflow),
                 textDirection == 1 ? getScrollWidth() + overflow : 0);
         SCROLL_TRANSFORM.setToTranslation(scrollPosition, 0);
-        RepaintManager.currentManager(statusLabel)
-            .addDirtyRegion(
-                statusLabel,
-                statusLabel.getX() + button.getWidth(),
-                scrollPane.getY(),
-                statusLabel.getWidth() - button.getWidth(),
-                scrollPane.getHeight());
+        //        RepaintManager.currentManager(statusLabel)
+        //            .addDirtyRegion(
+        //                statusLabel,
+        //                statusLabel.getX() + button.getWidth(),
+        //                scrollPane.getY(),
+        //                statusLabel.getWidth() - button.getWidth(),
+        //                scrollPane.getHeight());
+        statusLabel.repaint();
       } else if (timer.isRunning()) {
         timer.stop();
       }
@@ -232,6 +240,11 @@ public class StatusPanel extends JPanel {
     }
 
     private static void setText(String text) {
+      if(scrollPane.getViewport().getScrollMode() != AppPreferences.statusScrollMode.get() || statusLabel.isDoubleBuffered() != AppPreferences.statusScrollDoubleBuffered.get()){
+        statusLabel = new StatusMarquee();
+        setText(text);
+        return;
+      }
       resetScrollPosition();
       if (tempTimer.isRunning()) {
         // if a message comes through before a temporary message has reset.
@@ -455,7 +468,14 @@ public class StatusPanel extends JPanel {
       public void paint(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
         GraphicsConfiguration gc = g2d.getDeviceConfiguration();
-        AffineTransform at = gc.getNormalizingTransform();
+        AffineTransform at;
+        if (AppPreferences.statusScrollDefaultTransform.get()) {
+          at = gc.getDefaultTransform();
+        } else if (AppPreferences.statusScrollNormalisingTransform.get()) {
+          at = gc.getNormalizingTransform();
+        } else {
+          at = g2d.getTransform();
+        }
         at.concatenate(SCROLL_TRANSFORM);
         g2d.transform(at);
         super.paint(g2d);

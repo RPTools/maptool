@@ -451,6 +451,14 @@ public class PreferencesDialog extends JDialog {
   /** status bar scrolling checkbox */
   private final JCheckBox statusScrollEnable;
 
+  private final JCheckBox statusScrollDoubleBuffered;
+  private final JCheckBox statusScrollNormalisingTransform;
+  private final JCheckBox statusScrollDefaultTransform;
+
+  private final JRadioButton BACKINGSTORE_SCROLL_MODE;
+  private final JRadioButton SIMPLE_SCROLL_MODE;
+  private final JRadioButton BLIT_SCROLL_MODE;
+
   /** status bar temp time display */
   private final JSpinner statusTempMessageTimeSpinner;
 
@@ -749,6 +757,53 @@ public class PreferencesDialog extends JDialog {
     labelBorderWidthSpinner.setValue(AppPreferences.mapLabelBorderWidth.get());
     labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
     labelBorderArcSpinner.setValue(AppPreferences.mapLabelBorderArc.get());
+
+    statusScrollNormalisingTransform = panel.getCheckBox("statusScrollNormalisingTransform");
+    statusScrollNormalisingTransform.setSelected(
+        AppPreferences.statusScrollNormalisingTransform.get());
+    statusScrollNormalisingTransform.addChangeListener(
+        e ->
+            AppPreferences.statusScrollNormalisingTransform.set(
+                ((JCheckBox) e.getSource()).isSelected()));
+
+    SIMPLE_SCROLL_MODE = panel.getRadioButton("SIMPLE_SCROLL_MODE");
+    SIMPLE_SCROLL_MODE.setSelected(AppPreferences.statusScrollMode.get() == 0);
+    SIMPLE_SCROLL_MODE.addChangeListener(
+        e -> {
+          if (((JRadioButton) e.getSource()).isSelected()) {
+            AppPreferences.statusScrollMode.set(0);
+          }
+        });
+    BLIT_SCROLL_MODE = panel.getRadioButton("BLIT_SCROLL_MODE");
+    BLIT_SCROLL_MODE.setSelected(AppPreferences.statusScrollMode.get() == 1);
+    BLIT_SCROLL_MODE.addChangeListener(
+        e -> {
+          if (((JRadioButton) e.getSource()).isSelected()) {
+            AppPreferences.statusScrollMode.set(1);
+          }
+        });
+    BACKINGSTORE_SCROLL_MODE = panel.getRadioButton("BACKINGSTORE_SCROLL_MODE");
+    BACKINGSTORE_SCROLL_MODE.setSelected(AppPreferences.statusScrollMode.get() == 2);
+    BACKINGSTORE_SCROLL_MODE.addChangeListener(
+        e -> {
+          if (((JRadioButton) e.getSource()).isSelected()) {
+            AppPreferences.statusScrollMode.set(2);
+          }
+        });
+
+    statusScrollDefaultTransform = panel.getCheckBox("statusScrollDefaultTransform");
+    statusScrollDefaultTransform.setSelected(AppPreferences.statusScrollDefaultTransform.get());
+    statusScrollDefaultTransform.addChangeListener(
+        e ->
+            AppPreferences.statusScrollDefaultTransform.set(
+                ((JCheckBox) e.getSource()).isSelected()));
+
+    statusScrollDoubleBuffered = panel.getCheckBox("statusScrollDoubleBuffered");
+    statusScrollDoubleBuffered.setSelected(AppPreferences.statusScrollDoubleBuffered.get());
+    statusScrollDoubleBuffered.addChangeListener(
+        e ->
+            AppPreferences.statusScrollDoubleBuffered.set(
+                ((JCheckBox) e.getSource()).isSelected()));
 
     statusScrollEnable = panel.getCheckBox("statusScrollEnable");
     statusScrollEnable.setSelected(AppPreferences.scrollStatusMessages.get());

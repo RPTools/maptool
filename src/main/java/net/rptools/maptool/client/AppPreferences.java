@@ -343,6 +343,16 @@ public class AppPreferences {
   public static final NumericPreference<Integer> frameRateCap =
       IntegerType.create("frameRateCap", 60, 1, Integer.MAX_VALUE);
 
+  // TEMPORARY PREFERENCES FOR DEBUGGING PURPOSES
+  public static final Preference<Boolean> statusScrollNormalisingTransform =
+      BooleanType.create("statusScrollNormalisingTransform", false);
+  public static final Preference<Boolean> statusScrollDefaultTransform =
+      BooleanType.create("statusScrollDefaultTransform", true);
+  public static final Preference<Boolean> statusScrollDoubleBuffered =
+      BooleanType.create("statusScrollDoubleBuffered", true);
+  public static final NumericPreference<Integer> statusScrollMode =
+      IntegerType.create("statusScrollMode", 2);
+
   /* Scroll status bar information messages that exceed the available size */
   public static final Preference<Boolean> scrollStatusMessages =
       BooleanType.create("statusBarScroll", true);
