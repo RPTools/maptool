@@ -197,7 +197,7 @@ public class LineTemplate extends AbstractTemplate {
    *
    * @return The new path or <code>null</code> if there is no path.
    */
-  protected List<CellPoint> calcPath() {
+  public List<CellPoint> calcPath() {
     if (getRadius() == 0) return null;
     if (pathVertex == null) return null;
     int radius = getRadius();

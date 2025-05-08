@@ -40,7 +40,9 @@ def javaArgs = [
         "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
         "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
         "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED",
+        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+        "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED","--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
         "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
         "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
 
@@ -111,7 +113,7 @@ spotless {
     java {
         target project.fileTree(project.projectDir) {
             include 'src/**/*.java'
-            exclude '**/JTextAreaAppender.java'
+            exclude '**/JTextAreaAppender.java', '**/GifDecoder.java'
             exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Flat*ContrastIJTheme.java'
             exclude 'src/main/java/net/rptools/maptool/client/ui/themes/Utils.java'
         }
@@ -415,6 +417,17 @@ dependencies {
     implementation(libs.rptools.maptool.addons)
     implementation(libs.rptools.dice.roller)
     implementation(libs.noiselib)
+
+    // libgdx
+    implementation 'com.github.thelsing:libgdx-jogl-backend:becdde406e'
+    implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.13.1'
+    implementation 'com.badlogicgames.gdx:gdx:1.13.1'
+    implementation 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-desktop'
+    implementation "space.earlygrey:shapedrawer:2.6.0"
+    implementation 'com.badlogicgames.gdx:gdx-freetype:1.13.1'
+    implementation 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-desktop'
+    implementation "com.badlogicgames.gdx-video:gdx-video:1.3.2-SNAPSHOT"
+    implementation "com.badlogicgames.gdx-video:gdx-video-lwjgl3:1.3.2-SNAPSHOT"
 }
 
 processResources {

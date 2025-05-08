@@ -82,7 +82,7 @@ public class WallTemplate extends LineTemplate {
    * @see net.rptools.maptool.model.drawing.LineTemplate#calcPath()
    */
   @Override
-  protected List<CellPoint> calcPath() {
+  public List<CellPoint> calcPath() {
     return getPath(); // Do nothing, path is set by tool.
   }
 

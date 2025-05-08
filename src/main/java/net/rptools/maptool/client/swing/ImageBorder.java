@@ -41,9 +41,11 @@ public class ImageBorder implements Border {
   private int bottomMargin;
   private int leftMargin;
   private int rightMargin;
+  private String imagePath;
 
   public ImageBorder(String imagePath) {
     try {
+      this.imagePath = imagePath;
       topRight = ImageUtil.getCompatibleImage(imagePath + "/tr.png");
       top = ImageUtil.getCompatibleImage(imagePath + "/top.png");
       topLeft = ImageUtil.getCompatibleImage(imagePath + "/tl.png");
@@ -60,6 +62,10 @@ public class ImageBorder implements Border {
     } catch (IOException ioe) {
       log.error("Faile to load component images for ImageBorder", ioe);
     }
+  }
+
+  public String getImagePath() {
+    return imagePath;
   }
 
   public int getTopMargin() {

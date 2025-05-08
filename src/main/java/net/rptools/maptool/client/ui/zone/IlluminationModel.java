@@ -25,6 +25,7 @@ import java.util.stream.Stream;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.Token;
 
 /**
  * Manages the light sources and illuminations of a zone, for a given set of illuminator parameters.
@@ -53,7 +54,7 @@ public class IlluminationModel {
    * @param lightSource
    * @param light
    */
-  public record LightInfo(LightSource lightSource, Light light) {}
+  public record LightInfo(LightSource lightSource, Light light, Token lightSourceToken) {}
 
   /**
    * The data structure for calculating lit areas according to lumens. Lit areas can be added and

@@ -166,6 +166,8 @@ public class ToolbarPanel extends JToolBar {
     tokenSelectionButtonAll.setSelected(true);
     // Jamz: End panel
 
+    add(createGdxButton(Icons.TOOLBAR_LIBGDX));
+
     // the "Select Map" button
     mapselect = createZoneSelectionButton();
     add(mapselect);
@@ -535,6 +537,17 @@ public class ToolbarPanel extends JToolBar {
       button.doClick();
     }
 
+    return button;
+  }
+
+  private JToggleButton createGdxButton(final Icons icon) {
+    final JToggleButton button = new JToggleButton();
+    button.addActionListener(
+        e -> {
+          MapTool.getFrame().switchRenderers();
+        });
+
+    button.setIcon(RessourceManager.getBigIcon(icon));
     return button;
   }
 

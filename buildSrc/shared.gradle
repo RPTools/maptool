@@ -4,8 +4,10 @@ repositories {
     mavenCentral()
     maven { url = 'https://maptool.craigs-stuff.net/repo/' }
     maven { url = 'https://jitpack.io' }
-    maven { url "https://www.jetbrains.com/intellij-repository/releases" }
-    maven { url "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+    maven { url = "https://www.jetbrains.com/intellij-repository/releases" }
+    maven { url = "https://cache-redirector.jetbrains.com/intellij-dependencies" }
+    maven { url = "https://oss.sonatype.org/content/repositories/snapshots" }
+    maven { url = "https://jogamp.org/deployment/maven" }
 }
 
 apply from: rootProject.file('buildSrc/java-version.gradle')
