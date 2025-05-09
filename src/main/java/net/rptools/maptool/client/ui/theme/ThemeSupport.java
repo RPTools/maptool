@@ -20,10 +20,12 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import java.awt.*;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.Collections;
 import javax.swing.*;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
@@ -509,32 +511,6 @@ public class ThemeSupport {
       UIManager.setLookAndFeel(themeDetails.themeClass.getDeclaredConstructor().newInstance());
       LookAndFeelFactory.installJideExtension();
       setLaf(laf);
-
-      try {
-        InputStream is =
-            ThemeSupport.class.getResourceAsStream(AppConstants.NOTO_SERIF_THAI_VARIABLE_FONT);
-        assert is != null;
-        Font[] newFonts = Font.createFonts(is);
-        is.close();
-        for (Font f : newFonts) {
-          GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(f);
-        }
-        UIDefaults defaults = UIManager.getDefaults();
-        for (Object key : defaults.keySet()) {
-          if (key.toString().contains("font")) {
-            Font oldFont = defaults.getFont(key);
-            UIManager.put(key, newFonts[0].deriveFont(oldFont.getStyle(), oldFont.getSize2D()));
-          }
-        }
-      } catch (FontFormatException | IOException e) {
-        throw new RuntimeException(e);
-      }
-
-      FlatLaf.setGlobalExtraDefaults(
-          Collections.singletonMap("[win]light.font", "NotoSerifThai-Light"));
-      FlatLaf.setGlobalExtraDefaults(
-          Collections.singletonMap("[win]semibold.font ", "NotoSerifThai-SemiBold"));
-
       currentThemeDetails = themeDetails;
       pendingThemeDetails = themeDetails;
     }
