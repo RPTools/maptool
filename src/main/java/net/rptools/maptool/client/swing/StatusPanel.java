@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.swing;
 
 import com.formdev.flatlaf.extras.components.FlatButton;
-import org.apache.commons.lang3.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.geom.AffineTransform;
@@ -28,6 +27,7 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
+import org.apache.commons.lang3.*;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 
 /**
@@ -74,11 +74,13 @@ public class StatusPanel extends JPanel {
           @Override
           public void componentResized(ComponentEvent e) {
             setStatus(StatusMarquee.labelText);
+            statusLabel.revalidate();
           }
 
           @Override
           public void componentMoved(ComponentEvent e) {
             setStatus(StatusMarquee.labelText);
+            statusLabel.revalidate();
           }
         });
   }
@@ -119,6 +121,7 @@ public class StatusPanel extends JPanel {
    */
   private static class StatusMarquee extends JPanel {
     private static final Color BG = UIManager.getColor("Panel.background");
+    private static final AffineTransform SCROLL_TRANSFORM = new AffineTransform();
     private static boolean allowScroll = AppPreferences.scrollStatusMessages.get();
     private static final int TICK_INTERVAL = 1000 / AppPreferences.frameRateCap.get();
     private static int textDirection;
@@ -132,7 +135,6 @@ public class StatusPanel extends JPanel {
     private static FlatButton button;
     private static JLabel marqueeText;
     private static JScrollPane scrollPane;
-    private static final AffineTransform SCROLL_TRANSFORM = new AffineTransform();
     private static final String FADE_STRING =
         "   "; // space used at start and end of string where content fades
 
@@ -163,7 +165,6 @@ public class StatusPanel extends JPanel {
       JViewport viewport = new ScrollVP();
       viewport.setView(marqueeText);
       viewport.setBackground(getBackground());
-      viewport.setScrollMode(AppPreferences.statusScrollMode.get());
 
       scrollPane = new FadingScroll();
       scrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
@@ -202,14 +203,7 @@ public class StatusPanel extends JPanel {
                 textDirection == 1 ? 0 : -1 * (getScrollWidth() + overflow),
                 textDirection == 1 ? getScrollWidth() + overflow : 0);
         SCROLL_TRANSFORM.setToTranslation(scrollPosition, 0);
-        //        RepaintManager.currentManager(statusLabel)
-        //            .addDirtyRegion(
-        //                statusLabel,
-        //                statusLabel.getX() + button.getWidth(),
-        //                scrollPane.getY(),
-        //                statusLabel.getWidth() - button.getWidth(),
-        //                scrollPane.getHeight());
-        statusLabel.repaint();
+        statusLabel.paintImmediately(scrollPane.getBounds());
       } else if (timer.isRunning()) {
         timer.stop();
       }
@@ -240,7 +234,7 @@ public class StatusPanel extends JPanel {
     }
 
     private static void setText(String text) {
-      if(scrollPane.getViewport().getScrollMode() != AppPreferences.statusScrollMode.get() || statusLabel.isDoubleBuffered() != AppPreferences.statusScrollDoubleBuffered.get()){
+      if (statusLabel.isDoubleBuffered() != AppPreferences.statusScrollDoubleBuffered.get()) {
         statusLabel = new StatusMarquee();
         setText(text);
         return;
@@ -458,7 +452,7 @@ public class StatusPanel extends JPanel {
     }
 
     /**
-     * The normal scroll pane does not scroll the view if the scroll bar is not visible and manually
+     * The normal scroll pane does not scroll the view when the scroll bar is not visible. Manually
      * setting the view position can only be done in integer increments. When animated using a
      * fractional scale this looks jumpy and jarring. This overcomes the problem by applying a
      * transform to the graphics object before normal painting.
@@ -469,15 +463,11 @@ public class StatusPanel extends JPanel {
         Graphics2D g2d = (Graphics2D) g;
         GraphicsConfiguration gc = g2d.getDeviceConfiguration();
         AffineTransform at;
-        if (AppPreferences.statusScrollDefaultTransform.get()) {
-          at = gc.getDefaultTransform();
-        } else if (AppPreferences.statusScrollNormalisingTransform.get()) {
-          at = gc.getNormalizingTransform();
-        } else {
-          at = g2d.getTransform();
+        if (AppPreferences.statusScrollNormalisingTransform.get()) {
+          g2d.setTransform(gc.getDefaultTransform());
+          g2d.transform(gc.getNormalizingTransform());
         }
-        at.concatenate(SCROLL_TRANSFORM);
-        g2d.transform(at);
+        g2d.transform(SCROLL_TRANSFORM);
         super.paint(g2d);
         g2d.dispose();
       }
