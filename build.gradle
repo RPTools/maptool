@@ -428,6 +428,7 @@ dependencies {
     implementation 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-desktop'
     implementation "com.badlogicgames.gdx-video:gdx-video:1.3.2-SNAPSHOT"
     implementation "com.badlogicgames.gdx-video:gdx-video-lwjgl3:1.3.2-SNAPSHOT"
+    implementation "net.java.jinput:jinput:2.0.10"
 }
 
 processResources {

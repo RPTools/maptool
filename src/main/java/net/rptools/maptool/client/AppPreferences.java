@@ -117,13 +117,6 @@ public class AppPreferences {
   public static final NumericPreference<Integer> typingNotificationDurationInSeconds =
       IntegerType.create("typingNotificationDuration", 5);
 
-  public static final Preference<Boolean> useToolTipForInlineRoll =
-      BooleanType.create("toolTipInlineRolls", false);
-  public static final Preference<Boolean> suppressToolTipsForMacroLinks =
-      BooleanType.create("suppressToolTipsMacroLinks", false);
-
-  public static final NumericPreference<Integer> toolTipInitialDelay =
-      IntegerType.create("toolTipInitialDelay", 250);
   public static final Preference<Boolean> chatNotificationBackground =
       BooleanType.create("chatNotificationShowBackground", true);
 
@@ -132,6 +125,12 @@ public class AppPreferences {
 
   public static final Preference<Boolean> suppressToolTipsForMacroLinks =
       BooleanType.create("suppressToolTipsMacroLinks", false);
+
+  public static final NumericPreference<Integer> toolTipInitialDelay =
+      IntegerType.create("toolTipInitialDelay", 250);
+
+  public static final NumericPreference<Integer> toolTipDismissDelay =
+      IntegerType.create("toolTipDismissDelay", 300);
 
   public static final Preference<Color> chatNotificationColor =
       ColorType.create("chatNotificationColor", Color.white, false);
