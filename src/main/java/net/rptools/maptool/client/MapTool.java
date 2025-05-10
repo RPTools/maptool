@@ -22,27 +22,20 @@ import io.sentry.SentryClient;
 import io.sentry.SentryClientFactory;
 import io.sentry.event.BreadcrumbBuilder;
 import io.sentry.event.UserBuilder;
-import java.awt.Desktop;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
-import java.awt.Graphics2D;
-import java.awt.GraphicsDevice;
-import java.awt.GraphicsEnvironment;
-import java.awt.SecondaryLoop;
-import java.awt.Toolkit;
-import java.awt.Transparency;
+import java.awt.*;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 import java.net.URL;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.*;
+import java.util.List;
 import javafx.application.Platform;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
@@ -1770,6 +1763,26 @@ public class MapTool {
         if (value instanceof FontUIResource) {
           UIManager.put(key, fontRes);
         }
+      }
+    } else {
+      final String notoSerifThaiVariableFont =
+          "/net/rptools/maptool/client/fonts/Noto_Serif_Thai/NotoSerifThai-VariableFont_wdth,wght.ttf";
+      try (InputStream is = MapTool.class.getResourceAsStream(notoSerifThaiVariableFont)) {
+        FontUIResource fontRes =
+            new FontUIResource(
+                Font.createFont(java.awt.Font.TRUETYPE_FONT, Objects.requireNonNull(is)));
+        for (Object key : UIManager.getDefaults().keySet()) {
+          Object value = UIManager.get(key);
+          if (value instanceof FontUIResource) {
+            Font dFont =
+                fontRes.deriveFont(
+                    ((FontUIResource) value).getStyle(), ((FontUIResource) value).getSize2D());
+            GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(dFont);
+            UIManager.put(key, dFont);
+          }
+        }
+      } catch (FontFormatException | IOException e) {
+        throw new RuntimeException(e);
       }
     }
 

@@ -55,7 +55,6 @@ public class AppConstants {
         // name.endsWith(".pdf") || name.endsWith(".por") ||
         name.endsWith(Token.FILE_EXTENSION); // RPTools Token format
       };
-
   public static final String CAMPAIGN_FILE_EXTENSION = ".cmpgn";
   public static final String CAMPAIGN_FILE_EXTENSION_ND = "cmpgn";
   public static final String CAMPAIGN_PROPERTIES_FILE_EXTENSION = ".mtprops";
