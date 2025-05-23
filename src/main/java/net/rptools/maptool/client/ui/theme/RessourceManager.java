@@ -15,15 +15,19 @@
 package net.rptools.maptool.client.ui.theme;
 
 import com.formdev.flatlaf.extras.FlatSVGIcon;
+import java.awt.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
+import java.io.*;
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.TreeSet;
+import java.util.*;
+import java.util.List;
+import java.util.stream.Collectors;
 import javax.swing.*;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.ImageBorder;
 import org.javatuples.Triplet;
 
@@ -572,6 +576,58 @@ public class RessourceManager {
 
   public static void main(String[] args) {
     checkMissingIcons(classicIcons, rodIcons);
+    checkExcessImages();
+  }
+
+  private static void checkExcessImages() {
+
+    List<File> walkedFiles = new ArrayList<>();
+    try {
+      for (String s : new String[] {IMAGE_DIR, ICON_DIR, ROD_ICONS}) {
+        Path p =
+            Path.of(
+                Objects.requireNonNull(
+                        RessourceManager.class.getClassLoader().getResource(IMAGE_DIR))
+                    .toURI());
+        try (var list = Files.walk(p)) {
+          list.forEach(path -> walkedFiles.add(path.toFile()));
+        }
+      }
+    } catch (URISyntaxException | IOException e) {
+      throw new RuntimeException(e);
+    }
+
+    List<String> allValues = new ArrayList<>();
+    allValues.addAll(images.values());
+    allValues.addAll(borders.values());
+    allValues.addAll(classicIcons.values());
+    allValues.addAll(rodIcons.values());
+    allValues =
+        allValues.stream()
+            .filter(Objects::nonNull)
+            .map(string -> string.substring(string.lastIndexOf('/') + 1))
+            .collect(Collectors.toList());
+
+    System.out.println("Seemingly extraneous files:");
+    for (File f : walkedFiles) {
+      boolean found = false;
+      Iterator<String> iterator = allValues.iterator();
+      while (iterator.hasNext() && !found) {
+        String s = iterator.next();
+        if (s != null) {
+          found = f.getPath().contains(s);
+        }
+      }
+      if (!found) {
+        System.out.println(f.getPath());
+      }
+    }
+    System.out.println(
+        "Found "
+            + walkedFiles.size()
+            + " files, compared to "
+            + allValues.size()
+            + "listed files.");
   }
 
   private static void checkMissingIcons(
