@@ -23,6 +23,7 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Represents the JPanel holding the HTML pane. */
 public class HTMLPanel extends JPanel implements HTMLPanelInterface {
@@ -45,7 +46,7 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
     } else {
       add(pane, BorderLayout.CENTER);
     }
-    updateContents("", false);
+    updateContents(HTMLContent.htmlFromString(""), false);
 
     // ESCAPE closes the window
     pane.getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
@@ -61,8 +62,8 @@ public class HTMLPanel extends JPanel implements HTMLPanelInterface {
   }
 
   @Override
-  public void updateContents(final String html, boolean scrollReset) {
-    pane.updateContents(html, scrollReset);
+  public void updateContents(final HTMLContent htmlContent, boolean scrollReset) {
+    pane.updateContents(htmlContent, scrollReset);
   }
 
   /** Flushes any caching for the panel. */

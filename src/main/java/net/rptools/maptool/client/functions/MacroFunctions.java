@@ -186,7 +186,7 @@ public class MacroFunctions extends AbstractFunction {
       return MapTool.getParser().getMacroName();
 
     } else if (functionName.equalsIgnoreCase("getMacroLocation")) {
-      return MapTool.getParser().getMacroSource();
+      return MapTool.getParser().getMacroSource().getLocation();
 
     } else if (functionName.equalsIgnoreCase("setMacroCommand")) {
       FunctionUtil.checkNumberParam(functionName, parameters, 2, 4);

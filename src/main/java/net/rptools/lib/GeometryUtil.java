@@ -14,32 +14,40 @@
  */
 package net.rptools.lib;
 
+import java.awt.Shape;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.locationtech.jts.algorithm.InteriorPointArea;
+import org.locationtech.jts.algorithm.Orientation;
+import org.locationtech.jts.algorithm.PointLocation;
 import org.locationtech.jts.awt.ShapeReader;
 import org.locationtech.jts.geom.Coordinate;
+import org.locationtech.jts.geom.CoordinateArrays;
+import org.locationtech.jts.geom.Envelope;
+import org.locationtech.jts.geom.Geometry;
 import org.locationtech.jts.geom.GeometryFactory;
+import org.locationtech.jts.geom.LinearRing;
+import org.locationtech.jts.geom.Location;
 import org.locationtech.jts.geom.MultiPolygon;
 import org.locationtech.jts.geom.Polygon;
 import org.locationtech.jts.geom.PrecisionModel;
-import org.locationtech.jts.noding.NodableSegmentString;
-import org.locationtech.jts.noding.NodedSegmentString;
-import org.locationtech.jts.noding.SegmentString;
-import org.locationtech.jts.noding.snapround.SnapRoundingNoder;
-import org.locationtech.jts.operation.polygonize.Polygonizer;
+import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.valid.IsValidOp;
+import org.locationtech.jts.precision.GeometryPrecisionReducer;
 
 public class GeometryUtil {
   private static final Logger log = LogManager.getLogger(GeometryUtil.class);
 
   private static final PrecisionModel precisionModel = new PrecisionModel(100_000.0);
+  private static final PrecisionModel finePrecisionModel = new PrecisionModel(1e10);
 
   private static final GeometryFactory geometryFactory = new GeometryFactory(precisionModel);
 
@@ -120,43 +128,8 @@ public class GeometryUtil {
     return geometryFactory;
   }
 
-  private static Polygonizer toPolygonizer(Area area) {
-    final var pathIterator = area.getPathIterator(null, 1. / precisionModel.getScale());
-
-    // Make sure the geometry is noded and precise before polygonizing.
-    final var coords = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
-    final var strings = new ArrayList<NodableSegmentString>(coords.size());
-    for (var string : coords) {
-      strings.add(new NodedSegmentString(string, null));
-    }
-
-    final var noder = new SnapRoundingNoder(precisionModel);
-    noder.computeNodes(strings);
-    final Collection<? extends SegmentString> nodedStrings = noder.getNodedSubstrings();
-
-    // Now build the polygons from our corrected geometry.
-    final var polygonizer = new Polygonizer(true);
-    for (var string : nodedStrings) {
-      final var lineString = geometryFactory.createLineString(string.getCoordinates());
-      polygonizer.add(lineString);
-    }
-
-    final var danglingEdges = polygonizer.getDangles().size();
-    final var cutEdges = polygonizer.getCutEdges().size();
-    final var invalidRings = polygonizer.getInvalidRingLines().size();
-    if (danglingEdges != 0 || cutEdges != 0 || invalidRings != 0) {
-      log.error(
-          "Found invalid geometry: {} dangling edges; {} cut edges; {} invalid rings",
-          danglingEdges,
-          cutEdges,
-          invalidRings);
-    }
-
-    return polygonizer;
-  }
-
-  public static MultiPolygon toJts(Area area) {
-    final var polygons = toJtsPolygons(area);
+  public static MultiPolygon toJts(Shape shape) {
+    final var polygons = toJtsPolygons(shape);
     final var geometry = geometryFactory.createMultiPolygon(polygons.toArray(Polygon[]::new));
     assert geometry.isValid()
         : "Returned geometry must be valid, but found this error: "
@@ -164,12 +137,95 @@ public class GeometryUtil {
     return geometry;
   }
 
-  public static Collection<Polygon> toJtsPolygons(Area area) {
-    if (area.isEmpty()) {
+  public static Collection<Polygon> toJtsPolygons(Shape shape) {
+    if (shape instanceof Area area && area.isEmpty()) {
       return Collections.emptyList();
     }
 
-    return toPolygonizer(area).getPolygons();
+    final var pathIterator = shape.getPathIterator(null, 1. / finePrecisionModel.getScale());
+    final var coordinates = (List<Coordinate[]>) ShapeReader.toCoordinates(pathIterator);
+
+    // Now collect all the noded rings into islands (JTS clockwise) and oceans (counterclockwise).
+    final List<Island> islands = new ArrayList<>();
+    final List<Coordinate[]> oceans = new ArrayList<>();
+    for (final var ring : coordinates) {
+      if (ring.length < 4) {
+        log.warn(
+            "Found invalid geometry: ring has only {} points but at least four are required.",
+            ring.length);
+        continue;
+      }
+
+      for (var c : ring) {
+        finePrecisionModel.makePrecise(c);
+      }
+      if (Orientation.isCCW(ring)) {
+        oceans.add(ring);
+      } else {
+        islands.add(new Island(geometryFactory, ring));
+      }
+    }
+
+    // Now we need to attach oceans to their parent islands to create polygons with holes.
+    islands.sort(Comparator.comparingDouble(i -> i.getBoundingBox().getArea()));
+    oceanLoop:
+    for (final var ocean : oceans) {
+      final Envelope oceanBoundingBox = CoordinateArrays.envelope(ocean);
+      final Coordinate oceanInteriorPoint =
+          InteriorPointArea.getInteriorPoint(geometryFactory.createPolygon(ocean));
+
+      /*
+       * Because each island and each ocean is a bounding volume, containment is as simple as
+       * checking that the ocean has any point in common with the island, and that the ocean's
+       * bounding box is contained within the island.
+       *
+       * Because `islands` is sorted from small to large, this loop will associate the ocean with
+       * the smallest containing island.
+       */
+      for (var island : islands) {
+        if (island.getBoundingBox().contains(oceanBoundingBox)
+            && island.containedInBoundary(oceanInteriorPoint)) {
+          island.addHole(ocean);
+          continue oceanLoop;
+        }
+      }
+
+      // If we get here, we didn't find a parent island.
+      log.warn("Weird, I couldn't find an island for an ocean.  Bad/overlapping VBL?");
+    }
+
+    // Our islands are now equivalent to JTS polygons. Build those polygons, and robustly reduce
+    // their precision
+    final var polygons = new ArrayList<Polygon>();
+    for (final var island : islands) {
+      // Build the polygon...
+      var polygon = island.toPolygon();
+      // ... then make sure it is valid, fixing it if not.
+      Geometry fixedPolygon;
+      try {
+        fixedPolygon = GeometryPrecisionReducer.reduce(GeometryFixer.fix(polygon), precisionModel);
+      } catch (Throwable t) {
+        log.error("Failure while reducing polygon", t);
+        continue;
+      }
+
+      switch (fixedPolygon) {
+        case Polygon p -> polygons.add(p);
+        case MultiPolygon mp -> {
+          for (var n = 0; n < mp.getNumGeometries(); ++n) {
+            polygons.add((Polygon) mp.getGeometryN(n));
+          }
+        }
+        default ->
+            log.error(
+                "Found unexpected geometry after fixing polygon: {}. Skipping",
+                fixedPolygon.getClass());
+      }
+    }
+
+    polygons.removeIf(Polygon::isEmpty);
+
+    return polygons;
   }
 
   public static Point2D coordinateToPoint2D(Coordinate coordinate) {
@@ -178,5 +234,71 @@ public class GeometryUtil {
 
   public static Coordinate point2DToCoordinate(Point2D point2D) {
     return new Coordinate(point2D.getX(), point2D.getY());
+  }
+
+  /**
+   * Represents intermediate results in {@link #toJtsPolygons(Shape)} that allows attaching oceans
+   * to parent islands.
+   *
+   * <p>The ultimate result is a {@link Polygon} that can be obtained via {@link #toPolygon()}.
+   */
+  private static final class Island {
+    private final GeometryFactory geometryFactory;
+    private final Coordinate[] boundary;
+    private final List<LinearRing> holes = new ArrayList<>();
+    private final Envelope boundingBox;
+
+    /**
+     * Create an initial island that has no holes.
+     *
+     * @param geometryFactory The geometry factory used to covert coordinate arrays to {@link
+     *     LinearRing} and the island as a whole to a {@link Polygon}.
+     * @param boundary The exterior ring bounding the island. Must be closed.
+     */
+    public Island(GeometryFactory geometryFactory, Coordinate[] boundary) {
+      this.geometryFactory = geometryFactory;
+      this.boundary = boundary;
+      this.boundingBox = CoordinateArrays.envelope(boundary);
+    }
+
+    /**
+     * @return The axis-aligned bounding box of the island's boundary.
+     */
+    public Envelope getBoundingBox() {
+      return boundingBox;
+    }
+
+    /**
+     * Adds a hole to the island.
+     *
+     * @param ring The boundary of the hole. Must be closed.
+     */
+    public void addHole(Coordinate[] ring) {
+      holes.add(geometryFactory.createLinearRing(ring));
+    }
+
+    /**
+     * Checks whether the point is contained within the boundary island.
+     *
+     * <p>This operation does not account for holes. It only checks against the island's boundary.
+     *
+     * @param coordinate The point to check for containment.
+     * @return {@code true} if {@code coordinate} is contained within the island's boundary.
+     */
+    public boolean containedInBoundary(Coordinate coordinate) {
+      // Islands include their boundary.
+      return Location.EXTERIOR != PointLocation.locateInRing(coordinate, boundary);
+    }
+
+    /**
+     * Converts the island to a {@link Polygon}.
+     *
+     * @return A {@code Polygon} with the same boundary as the island, and will holes corresponding
+     *     to each of the island's holes.
+     */
+    public Polygon toPolygon() {
+      return geometryFactory.createPolygon(
+          geometryFactory.createLinearRing(boundary), holes.toArray(LinearRing[]::new));
+    }
   }
 }

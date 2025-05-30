@@ -45,72 +45,20 @@ public class RequestHandler {
     // macro: URIs can only use POST requests
     if (scheme.equalsIgnoreCase("macro")) {
       if (!("post".equalsIgnoreCase(method))) {
-        responseHeaders.put(":Status", "0");
+        responseHeaders.put(":Status", "405");
         c.complete("Only POST method can call macros");
         return c;
       }
-      try {
-        Instant instant = Instant.now();
-        String formattedTime =
-            DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(instant);
-        responseHeaders.put("Server", "Maptool Macro Server");
-        responseHeaders.put("Date", formattedTime);
-        responseHeaders.put("Content-Type", "text/html");
-        responseHeaders.put(":Status", "200 OK");
-
-        final MapToolVariableResolver resolver = new MapToolVariableResolver(null);
-        c =
-            new ThreadExecutionHelper<String>()
-                .runOnSwingThread(
-                    () -> {
-                      String macroName = uri.getSchemeSpecificPart();
-
-                      resolver.setVariable("macro.requestHeaders", gson.toJsonTree(requestHeaders));
-                      resolver.setVariable(
-                          "macro.responseHeaders", gson.toJsonTree(responseHeaders));
-                      String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
-                      return line;
-                    })
-                .thenApply(
-                    (String r) -> {
-                      try {
-                        HashMap<String, String> returnedHeaders;
-                        Object headerObj = resolver.getVariable("macro.responseHeaders");
-
-                        if (headerObj instanceof JsonObject headerJson) {
-                          returnedHeaders =
-                              gson.fromJson(
-                                  headerJson,
-                                  new TypeToken<HashMap<String, String>>() {}.getType());
-                        } else {
-                          String headerString = headerObj.toString();
-                          returnedHeaders =
-                              gson.fromJson(
-                                  headerString,
-                                  new TypeToken<HashMap<String, String>>() {}.getType());
-                        }
-
-                        responseHeaders.putAll(returnedHeaders);
-                      } catch (Exception pe) {
-                        responseHeaders.put(
-                            ":Status", "500 Internal Exception (bad response header)");
-                        return pe.toString();
-                      }
-                      return r;
-                    });
-
-        return c;
-      } catch (Exception e) {
-        responseHeaders.put(":Status", "500 Internal Exception");
-        c.complete(e.getMessage());
-        return c;
-      }
+      return callMacro(uri, body, requestHeaders, responseHeaders);
     }
 
     InputStream stream = null;
     if (scheme.equalsIgnoreCase("lib")) {
+      if ("post".equalsIgnoreCase(method)) {
+        return callMacro(uri, body, requestHeaders, responseHeaders);
+      }
       if (!("get".equalsIgnoreCase(method))) {
-        responseHeaders.put(":Status", "0");
+        responseHeaders.put(":Status", "405");
         c.complete("Only GET method can retrieve resources");
         return c;
       }
@@ -135,7 +83,7 @@ public class RequestHandler {
 
     if (scheme.equalsIgnoreCase("asset")) {
       if (!("get".equalsIgnoreCase(method))) {
-        responseHeaders.put(":Status", "0");
+        responseHeaders.put(":Status", "405");
         c.complete("Only GET method can retrieve assets");
         return c;
       }
@@ -164,5 +112,73 @@ public class RequestHandler {
     }
     c.complete(null);
     return c;
+  }
+
+  private static CompletableFuture<String> callMacro(
+      URI uri,
+      String body,
+      HashMap<String, String> requestHeaders,
+      HashMap<String, String> responseHeaders) {
+    CompletableFuture<String> c = new CompletableFuture<String>();
+
+    try {
+      Instant instant = Instant.now();
+      String formattedTime =
+          DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(instant);
+      responseHeaders.put("Server", "Maptool Macro Server");
+      responseHeaders.put("Date", formattedTime);
+      responseHeaders.put("Content-Type", "text/html");
+      responseHeaders.put(":Status", "200 OK");
+
+      final MapToolVariableResolver resolver = new MapToolVariableResolver(null);
+      c =
+          new ThreadExecutionHelper<String>()
+              .runOnSwingThread(
+                  () -> {
+                    String macroName;
+                    if ("lib".equalsIgnoreCase(uri.getScheme())) {
+                      macroName = uri.toString();
+                    } else {
+                      macroName = uri.getSchemeSpecificPart();
+                    }
+
+                    resolver.setVariable("macro.requestHeaders", gson.toJsonTree(requestHeaders));
+                    resolver.setVariable("macro.responseHeaders", gson.toJsonTree(responseHeaders));
+                    String line = MapTool.getParser().runMacro(resolver, null, macroName, body);
+                    return line;
+                  })
+              .thenApply(
+                  (String r) -> {
+                    try {
+                      HashMap<String, String> returnedHeaders;
+                      Object headerObj = resolver.getVariable("macro.responseHeaders");
+
+                      if (headerObj instanceof JsonObject headerJson) {
+                        returnedHeaders =
+                            gson.fromJson(
+                                headerJson, new TypeToken<HashMap<String, String>>() {}.getType());
+                      } else {
+                        String headerString = headerObj.toString();
+                        returnedHeaders =
+                            gson.fromJson(
+                                headerString,
+                                new TypeToken<HashMap<String, String>>() {}.getType());
+                      }
+
+                      responseHeaders.putAll(returnedHeaders);
+                    } catch (Exception pe) {
+                      responseHeaders.put(
+                          ":Status", "500 Internal Exception (bad response header)");
+                      return pe.toString();
+                    }
+                    return r;
+                  });
+
+      return c;
+    } catch (Exception e) {
+      responseHeaders.put(":Status", "500 Internal Exception");
+      c.complete(e.getMessage());
+      return c;
+    }
   }
 }

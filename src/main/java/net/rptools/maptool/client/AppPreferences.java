@@ -22,7 +22,6 @@ import java.io.File;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.prefs.Preferences;
 import javax.annotation.Nullable;
@@ -60,10 +59,10 @@ public class AppPreferences {
   public static final Preference<Boolean> saveReminder =
       BooleanType.create("autoSaveReminder", true);
 
-  public static final Preference<Integer> autoSaveIncrement =
+  public static final NumericPreference<Integer> autoSaveIncrement =
       IntegerType.create("autoSaveIncrement", 5);
 
-  public static final Preference<Integer> chatAutoSaveTimeInMinutes =
+  public static final NumericPreference<Integer> chatAutoSaveTimeInMinutes =
       IntegerType.create("chatAutosaveTime", 0);
 
   public static final Preference<String> chatFilenameFormat =
@@ -87,22 +86,22 @@ public class AppPreferences {
   public static final Preference<Boolean> autoRevealVisionOnGMMovement =
       BooleanType.create("autoRevealVisionOnGMMove", false);
 
-  public static final Preference<Integer> haloOverlayOpacity =
-      ByteType.create("haloOverlayOpacity", 60);
+  public static final NumericPreference<Integer> haloOverlayOpacity =
+      IntegerType.createByte("haloOverlayOpacity", 60);
 
-  public static final Preference<Integer> auraOverlayOpacity =
-      ByteType.create("auraOverlayOpacity", 60);
+  public static final NumericPreference<Integer> auraOverlayOpacity =
+      IntegerType.createByte("auraOverlayOpacity", 60);
 
-  public static final Preference<Integer> lightOverlayOpacity =
-      ByteType.create("lightOverlayOpacity", 60);
+  public static final NumericPreference<Integer> lightOverlayOpacity =
+      IntegerType.createByte("lightOverlayOpacity", 60);
 
-  public static final Preference<Integer> lumensOverlayOpacity =
-      ByteType.create("lumensOverlayOpacity", 120);
+  public static final NumericPreference<Integer> lumensOverlayOpacity =
+      IntegerType.createByte("lumensOverlayOpacity", 120);
 
-  public static final Preference<Integer> fogOverlayOpacity =
-      ByteType.create("fogOverlayOpacity", 100);
+  public static final NumericPreference<Integer> fogOverlayOpacity =
+      IntegerType.createByte("fogOverlayOpacity", 100);
 
-  public static final Preference<Integer> lumensOverlayBorderThickness =
+  public static final NumericPreference<Integer> lumensOverlayBorderThickness =
       IntegerType.create("lumensOverlayBorderThickness", 5);
 
   public static final Preference<Boolean> lumensOverlayShowByDefault =
@@ -111,9 +110,10 @@ public class AppPreferences {
   public static final Preference<Boolean> lightsShowByDefault =
       BooleanType.create("lightsShowByDefault", true);
 
-  public static final Preference<Integer> haloLineWidth = IntegerType.create("haloLineWidth", 2);
+  public static final NumericPreference<Integer> haloLineWidth =
+      IntegerType.create("haloLineWidth", 2);
 
-  public static final Preference<Integer> typingNotificationDurationInSeconds =
+  public static final NumericPreference<Integer> typingNotificationDurationInSeconds =
       IntegerType.create("typingNotificationDuration", 5);
 
   public static final Preference<Boolean> chatNotificationBackground =
@@ -134,18 +134,23 @@ public class AppPreferences {
   public static final Preference<Color> trustedPrefixForeground =
       ColorType.create("trustedPrefixFG", Color.BLACK, false);
 
-  public static final Preference<Integer> toolTipInitialDelay =
+  public static final NumericPreference<Integer> toolTipInitialDelay =
       IntegerType.create("toolTipInitialDelay", 250);
 
-  public static final Preference<Integer> toolTipDismissDelay =
+  public static final NumericPreference<Integer> toolTipDismissDelay =
       IntegerType.create("toolTipDismissDelay", 30000);
+
+  public static final Preference<Boolean> openEditorForNewMacro =
+      BooleanType.create("openEditorForNewMacro", true);
 
   public static final Preference<Boolean> allowPlayerMacroEditsDefault =
       BooleanType.create("allowPlayerMacroEditsDefault", true);
 
-  public static final Preference<Integer> portraitSize = IntegerType.create("portraitSize", 175);
+  public static final NumericPreference<Integer> portraitSize =
+      IntegerType.create("portraitSize", 175);
 
-  public static final Preference<Integer> thumbnailSize = IntegerType.create("thumbnailSize", 500);
+  public static final NumericPreference<Integer> thumbnailSize =
+      IntegerType.create("thumbnailSize", 500);
 
   public static final Preference<Boolean> showSmilies = BooleanType.create("insertSmilies", true);
 
@@ -166,22 +171,22 @@ public class AppPreferences {
   public static final Preference<Boolean> syrinscapeActive =
       BooleanType.create("syrinscapeActive", false);
 
-  public static final Preference<Integer> fontSize = IntegerType.create("fontSize", 12);
+  public static final NumericPreference<Integer> fontSize = IntegerType.create("fontSize", 12);
 
   public static final Preference<Color> defaultGridColor =
       ColorType.create("defaultGridColor", Color.black, false);
 
-  public static final Preference<Integer> defaultGridSize =
+  public static final NumericPreference<Integer> defaultGridSize =
       IntegerType.create("defaultGridSize", 100);
 
-  public static final Preference<Double> defaultUnitsPerCell =
+  public static final NumericPreference<Double> defaultUnitsPerCell =
       DoubleType.create("unitsPerCell", 5.);
 
   public static final Preference<Boolean> faceVertex = BooleanType.create("faceVertex", false);
 
   public static final Preference<Boolean> faceEdge = BooleanType.create("faceEdge", true);
 
-  public static final Preference<Integer> defaultVisionDistance =
+  public static final NumericPreference<Integer> defaultVisionDistance =
       IntegerType.create("defaultVisionDistance", 1000);
 
   public static final Preference<Zone.VisionType> defaultVisionType =
@@ -189,6 +194,9 @@ public class AppPreferences {
 
   public static final Preference<MapSortType> mapSortType =
       EnumType.create(MapSortType.class, "sortByGMName", MapSortType.GMNAME);
+
+  public static final Preference<UvttLosImportType> uvttLosImportType =
+      EnumType.create(UvttLosImportType.class, "uvttLosImportType", UvttLosImportType.Prompt);
 
   public static final Preference<Boolean> useSoftFogEdges = BooleanType.create("useSoftFog", true);
 
@@ -264,22 +272,22 @@ public class AppPreferences {
           "nonVisMapLabelBorderColor", nonVisibleTokenMapLabelForeground.getDefault(), true);
 
   /** The font size to use for token map labels. */
-  public static final Preference<Integer> mapLabelFontSize =
+  public static final NumericPreference<Integer> mapLabelFontSize =
       IntegerType.create("mapLabelFontSize", AppStyle.labelFont.getSize());
 
   /** The width of the border for token map labels, in pixels. */
-  public static final Preference<Integer> mapLabelBorderWidth =
+  public static final NumericPreference<Integer> mapLabelBorderWidth =
       IntegerType.create("mapLabelBorderWidth", Label.DEFAULT_LABEL_BORDER_WIDTH);
 
   /** The size of the border arc for token map labels. */
-  public static final Preference<Integer> mapLabelBorderArc =
+  public static final NumericPreference<Integer> mapLabelBorderArc =
       IntegerType.create("mapLabelBorderArc", Label.DEFAULT_LABEL_BORDER_ARC);
 
   /** {@code true} if borders should be shown around map labels, {@code false} otherwise. */
   public static final Preference<Boolean> mapLabelShowBorder =
       BooleanType.create("mapLabelShowBorder", true);
 
-  public static final Preference<Integer> webEndpointPort =
+  public static final NumericPreference<Integer> webEndpointPort =
       IntegerType.create("webEndPointPort", 654555);
 
   public static final Preference<Boolean> tokensWarnWhenDeleted =
@@ -337,10 +345,26 @@ public class AppPreferences {
   public static final Preference<WalkerMetric> movementMetric =
       EnumType.create(WalkerMetric.class, "movementMetric", WalkerMetric.ONE_TWO_ONE);
 
-  public static final Preference<Integer> frameRateCap =
-      IntegerType.create("frameRateCap", 60).validateIt(cap -> cap > 0);
+  public static final NumericPreference<Integer> frameRateCap =
+      IntegerType.create("frameRateCap", 60, 1, Integer.MAX_VALUE);
 
-  public static final Preference<Integer> upnpDiscoveryTimeout =
+  /* Scroll status bar information messages that exceed the available size */
+  public static final Preference<Boolean> scrollStatusMessages =
+      BooleanType.create("statusBarScroll", true);
+  /* Scroll status bar scrolling speed */
+  public static final NumericPreference<Double> scrollStatusSpeed =
+      DoubleType.create("statusBarSpeed", 0.85);
+  /* Scroll status bar scrolling start delay */
+  public static final NumericPreference<Double> scrollStatusStartDelay =
+      DoubleType.create("statusBarDelay", 2.4);
+  /* Scroll status bar scrolling end pause */
+  public static final NumericPreference<Double> scrollStatusEndPause =
+      DoubleType.create("statusBarDelay", 1.8);
+  /* Status bar temporary notification duration */
+  public static final NumericPreference<Double> scrollStatusTempDuration =
+      DoubleType.create("scrollStatusTempDuration", 12d);
+
+  public static final NumericPreference<Integer> upnpDiscoveryTimeout =
       IntegerType.create("upnpDiscoveryTimeout", 5000);
 
   public static final Preference<String> fileSyncPath = StringType.create("fileSyncPath", "");
@@ -495,27 +519,51 @@ public class AppPreferences {
     }
   }
 
+  public enum UvttLosImportType {
+    Walls("uvttLosImportType.walls"),
+    Masks("uvttLosImportType.masks"),
+    Prompt("uvttLosImportType.prompt");
+
+    private final String displayName;
+
+    UvttLosImportType(String key) {
+      displayName = I18N.getString(key);
+    }
+
+    @Override
+    public String toString() {
+      return displayName;
+    }
+  }
+
   private interface Type<T> {
     void set(Preferences node, String key, T value);
 
     T get(Preferences node, String key, Supplier<T> defaultValue);
   }
 
-  public static final class Preference<T> {
+  private interface NumericType<T extends Number> extends Type<T> {
+    T clamp(T value, T minValue, T maxValue);
+  }
+
+  /**
+   * Represents a preference of arbitrary type.
+   *
+   * @param <T> The type of the preference. If {@code T} is a subclass of {@link Number}, consider
+   *     using {@link NumericPreference} instead.
+   */
+  public static class Preference<T> {
     private final String key;
     private final Supplier<T> defaultValue;
     private final Type<T> type;
 
-    private Predicate<T> validator = value -> true;
     private boolean cachingEnabled = false;
     private @Nullable T cachedValue;
 
     private final List<Consumer<T>> onChangeHandlers = new CopyOnWriteArrayList<>();
 
     private Preference(String key, T defaultValue, Type<T> type) {
-      this.key = key;
-      this.defaultValue = () -> defaultValue;
-      this.type = type;
+      this(key, () -> defaultValue, type);
     }
 
     private Preference(String key, Supplier<T> defaultValue, Type<T> type) {
@@ -529,9 +577,23 @@ public class AppPreferences {
     }
 
     /**
+     * Constrains {@code value} to a valid value.
+     *
+     * <p>For general preferences, there is no special subset which values must belong to. For
+     * numeric preferences, this method will clamp the value to the range of valid values.
+     *
+     * @param value The value to constrain.
+     * @return The constrained value.
+     */
+    protected T constrain(T value) {
+      return value;
+    }
+
+    /**
      * Loads and validates the value of the preference.
      *
-     * <p>If validation is unsuccessful, clears the preference and returns it the default value.
+     * <p>After being loaded, the value will be constrained to a valid value via the {@link
+     * #constrain(Object)} method.
      *
      * @return The value of the preference.
      */
@@ -541,11 +603,7 @@ public class AppPreferences {
       }
 
       var value = type.get(prefs, key, defaultValue);
-      if (!validator.test(value)) {
-        log.warn("Value read from preference {} did not pass validation: {}", name(), value);
-        value = getDefault();
-        remove();
-      }
+      value = constrain(value);
 
       cachedValue = value;
       return value;
@@ -554,15 +612,13 @@ public class AppPreferences {
     /**
      * Validates and stores the value of the preference.
      *
-     * <p>If validation is unsuccessful, stores the default value instead.
+     * <p>Before being stored, {@code value} will be constrained to a valid value via {@link
+     * #constrain(Object)}.
      *
      * @param value The value to set.
      */
     public void set(T value) {
-      if (!validator.test(value)) {
-        log.warn("Value written to preference {} did not pass validation: {}", name(), value);
-        value = getDefault();
-      }
+      value = constrain(value);
 
       type.set(prefs, key, value);
       cachedValue = value;
@@ -590,13 +646,60 @@ public class AppPreferences {
       return this;
     }
 
-    public Preference<T> validateIt(Predicate<T> predicate) {
-      validator = predicate;
-      return this;
-    }
-
     public void onChange(Consumer<T> handler) {
       onChangeHandlers.add(handler);
+    }
+  }
+
+  /**
+   * A preference with specialized logic for numbers
+   *
+   * <p>Numeric preferences have a valid range defined by a minimum and a maximum value. Values will
+   * be constrained to this range when loaded and stored. Both the minimum and maximem values are
+   * inclusive.
+   *
+   * <p>A numeric preference can be effectively unconstrained by setting the minimum and maximum
+   * values to the minimum and maximum values of the underlying type.
+   *
+   * @param <T> The numeric type of the preference.
+   */
+  public static class NumericPreference<T extends Number> extends Preference<T> {
+    private final NumericType<T> type;
+    private final T minValue;
+    private final T maxValue;
+
+    private NumericPreference(
+        String key, T defaultValue, T minValue, T maxValue, NumericType<T> type) {
+      super(key, defaultValue, type);
+      this.type = type;
+      this.minValue = minValue;
+      this.maxValue = maxValue;
+    }
+
+    /**
+     * @return The minimum value of the preference.
+     */
+    public T getMinValue() {
+      return minValue;
+    }
+
+    /**
+     * @return The maximum value of the preference.
+     */
+    public T getMaxValue() {
+      return maxValue;
+    }
+
+    /**
+     * Clamp {@code value} to be between {@link #getMinValue()} and {@link #getMaxValue()}.
+     *
+     * @param value The value to constrain.
+     * @return If {@code value < getMinValue()}, then {@code getMinValue()}. If {@code value >
+     *     getMaxValue()}, then {@code getMaxValue()}. Otherwise, {@code value}.
+     */
+    @Override
+    protected T constrain(T value) {
+      return type.clamp(value, getMinValue(), getMaxValue());
     }
   }
 
@@ -616,9 +719,23 @@ public class AppPreferences {
     }
   }
 
-  private static final class IntegerType implements Type<Integer> {
-    public static Preference<Integer> create(String key, int defaultValue) {
-      return new Preference<>(key, defaultValue, new IntegerType());
+  private static final class IntegerType implements NumericType<Integer> {
+    public static NumericPreference<Integer> create(String key, int defaultValue) {
+      return create(key, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
+    }
+
+    public static NumericPreference<Integer> createByte(String key, int defaultValue) {
+      return create(key, defaultValue, 0, 255);
+    }
+
+    public static NumericPreference<Integer> create(
+        String key, int defaultValue, int minValue, int maxValue) {
+      return new NumericPreference<>(key, defaultValue, minValue, maxValue, new IntegerType());
+    }
+
+    @Override
+    public Integer clamp(Integer value, Integer minValue, Integer maxValue) {
+      return Math.clamp(value, minValue, maxValue);
     }
 
     @Override
@@ -632,29 +749,19 @@ public class AppPreferences {
     }
   }
 
-  private static final class ByteType implements Type<Integer> {
-    public static Preference<Integer> create(String key, int defaultValue) {
-      return new Preference<>(key, defaultValue, new ByteType());
+  private static final class DoubleType implements NumericType<Double> {
+    public static NumericPreference<Double> create(String key, double defaultValue) {
+      return create(key, defaultValue, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
+    }
+
+    public static NumericPreference<Double> create(
+        String key, double defaultValue, double minValue, double maxValue) {
+      return new NumericPreference<>(key, defaultValue, minValue, maxValue, new DoubleType());
     }
 
     @Override
-    public void set(Preferences prefs, String key, Integer value) {
-      prefs.putInt(key, range0to255(value));
-    }
-
-    @Override
-    public Integer get(Preferences prefs, String key, Supplier<Integer> defaultValue) {
-      return range0to255(prefs.getInt(key, defaultValue.get()));
-    }
-
-    private static int range0to255(int value) {
-      return Math.clamp(value, 0, 255);
-    }
-  }
-
-  private static final class DoubleType implements Type<Double> {
-    public static Preference<Double> create(String key, double defaultValue) {
-      return new Preference<>(key, defaultValue, new DoubleType());
+    public Double clamp(Double value, Double minValue, Double maxValue) {
+      return Math.clamp(value, minValue, maxValue);
     }
 
     @Override

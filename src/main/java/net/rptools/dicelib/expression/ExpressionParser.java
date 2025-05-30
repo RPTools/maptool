@@ -28,6 +28,7 @@ import net.rptools.dicelib.expression.function.HeroRoll;
 import net.rptools.dicelib.expression.function.If;
 import net.rptools.dicelib.expression.function.KeepLowestRoll;
 import net.rptools.dicelib.expression.function.KeepRoll;
+import net.rptools.dicelib.expression.function.OpenEndedRoll;
 import net.rptools.dicelib.expression.function.OpenTestDice;
 import net.rptools.dicelib.expression.function.RerollDice;
 import net.rptools.dicelib.expression.function.RerollDiceOnce;
@@ -219,6 +220,21 @@ public class ExpressionParser {
         new String[] {"\\b[aA][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStress($1, $2)"},
         new String[] {"\\b[aA][nN][sS](\\d+)\\b", "arsMagicaStressNum($1, 0)"},
         new String[] {"\\b[aA][nN][sS](\\d+)[bB]#([+-]?\\d+)\\b", "arsMagicaStressNum($1, $2)"},
+
+        // Open-Ended Dice
+        // Rolemaster(-esque) -> single d100 with fixed open-ended thresholds of low=5 & high=96
+        new String[] {"\\b[dD]100[oO][eE]\\b", "openEnded(1, 100, 5, 96)"},
+        new String[] {"\\b[dD]100[oO][eE][lL]\\b", "openEnded(1, 100, 5, 0)"},
+        new String[] {"\\b[dD]100[oO][eE][hH]\\b", "openEnded(1, 100, 0, 96)"},
+        // Generic longer form open-ended dice expressions to complement system specific ones above.
+        new String[] {"\\b[dD](\\d+)[oO][eE](\\d+)\\b", "openEnded(1, $1, $2, ($1 + 1 - $2))"},
+        new String[] {"\\b[dD](\\d+)[oO][eE][lL](\\d+)[hH](\\d+)\\b", "openEnded(1, $1, $2, $3)"},
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[oO][eE](\\d+)\\b", "openEnded($1, $2, $3, ($2 + 1 - $3))"
+        },
+        new String[] {
+          "\\b(\\d+)[dD](\\d+)[oO][eE][lL](\\d+)[hH](\\d+)\\b", "openEnded($1, $2, $3, $4)"
+        },
       };
 
   private final Parser parser;
@@ -258,6 +274,7 @@ public class ExpressionParser {
     parser.addFunction(new KeepLowestRoll());
     parser.addFunction(new ArsMagicaStress());
     parser.addFunction(new AdvancedDiceRolls());
+    parser.addFunction(new OpenEndedRoll());
 
     parser.addFunction(new If());
 

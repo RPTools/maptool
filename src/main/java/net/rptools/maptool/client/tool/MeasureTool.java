@@ -182,13 +182,15 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
         gridlessPath.appendWaypoint(currentGridlessPoint);
       }
       renderer.repaint();
-      return;
+    } else {
+      super.mousePressed(e);
     }
-    super.mousePressed(e);
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     ZoneRenderer renderer = (ZoneRenderer) e.getSource();
 
     if (SwingUtilities.isLeftMouseButton(e)) {
@@ -199,9 +201,7 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
       gridlessPath = null;
       currentGridlessPoint = null;
       renderer.repaint();
-      return;
     }
-    super.mouseReleased(e);
   }
 
   ////
@@ -210,15 +210,15 @@ public class MeasureTool extends DefaultTool implements ZoneOverlay {
   public void mouseDragged(MouseEvent e) {
     if (SwingUtilities.isRightMouseButton(e)) {
       super.mouseDragged(e);
-      return;
+    } else {
+      ZoneRenderer renderer = (ZoneRenderer) e.getSource();
+      if (walker != null && renderer.getZone().getGrid().getCapabilities().isPathingSupported()) {
+        CellPoint cellPoint = renderer.getCellAt(new ScreenPoint(e.getX(), e.getY()));
+        walker.replaceLastWaypoint(cellPoint);
+      } else if (gridlessPath != null) {
+        currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
+      }
+      renderer.repaint();
     }
-    ZoneRenderer renderer = (ZoneRenderer) e.getSource();
-    if (walker != null && renderer.getZone().getGrid().getCapabilities().isPathingSupported()) {
-      CellPoint cellPoint = renderer.getCellAt(new ScreenPoint(e.getX(), e.getY()));
-      walker.replaceLastWaypoint(cellPoint);
-    } else if (gridlessPath != null) {
-      currentGridlessPoint = new ScreenPoint(e.getX(), e.getY()).convertToZone(renderer);
-    }
-    renderer.repaint();
   }
 }

@@ -19,6 +19,7 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;
@@ -45,11 +46,11 @@ public class HTMLFrameFactory {
    * @param frameType The type of the frame.
    * @param isHTML5 Does it use HTML5 (JavaFX) or HTML 3.2 (Swing).
    * @param properties The properties that determine the attributes of the frame or dialog.
-   * @param html The html contents of frame or dialog.
+   * @param htmlContent The html contents of frame or dialog.
    * @throws ParserException if zorder is not numerical
    */
   public static void show(
-      String name, FrameType frameType, boolean isHTML5, String properties, String html)
+      String name, FrameType frameType, boolean isHTML5, String properties, HTMLContent htmlContent)
       throws ParserException {
     if (listener == null) {
       listener = new HTMLFrameFactory.Listener();
@@ -159,7 +160,16 @@ public class HTMLFrameFactory {
     if (tabTitle == null) tabTitle = title; // if tabTitle not set, make it same as title
     if (frameType == FrameType.FRAME) {
       HTMLFrame.showFrame(
-          name, title, tabTitle, width, height, temporary, scrollReset, isHTML5, frameValue, html);
+          name,
+          title,
+          tabTitle,
+          width,
+          height,
+          temporary,
+          scrollReset,
+          isHTML5,
+          frameValue,
+          htmlContent);
     } else if (frameType == FrameType.DIALOG) {
       HTMLDialog.showDialog(
           name,
@@ -173,9 +183,11 @@ public class HTMLFrameFactory {
           scrollReset,
           isHTML5,
           frameValue,
-          html);
+          htmlContent);
     } else if (frameType == FrameType.OVERLAY) {
-      MapTool.getFrame().getOverlayPanel().showOverlay(name, zOrder, locked, html, frameValue);
+      MapTool.getFrame()
+          .getOverlayPanel()
+          .showOverlay(name, zOrder, locked, htmlContent, frameValue);
     }
   }
 

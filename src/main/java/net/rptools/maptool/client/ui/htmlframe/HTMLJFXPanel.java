@@ -24,6 +24,7 @@ import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.*;
 import javax.swing.*;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Class handles JFXPanel that contains a WebView that can display HTML5. */
 public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
@@ -119,8 +120,8 @@ public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {
   }
 
   @Override
-  public void updateContents(final String html, boolean scrollReset) {
-    Platform.runLater(() -> webViewManager.updateContents(html, scrollReset));
+  public void updateContents(final HTMLContent htmlContent, boolean scrollReset) {
+    Platform.runLater(() -> webViewManager.updateContents(htmlContent, scrollReset));
   }
 
   /**

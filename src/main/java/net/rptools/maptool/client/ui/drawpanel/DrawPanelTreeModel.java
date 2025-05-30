@@ -23,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JTree;
+import javax.swing.ToolTipManager;
 import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
@@ -70,6 +71,7 @@ public class DrawPanelTreeModel implements TreeModel {
     this.tree = tree;
     update();
     new MapToolEventBus().getMainEventBus().register(this);
+    ToolTipManager.sharedInstance().registerComponent(this.tree);
   }
 
   @Subscribe

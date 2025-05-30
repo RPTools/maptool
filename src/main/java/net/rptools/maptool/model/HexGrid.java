@@ -32,7 +32,6 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
-import net.rptools.maptool.model.TokenFootprint.OffsetTranslator;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.HexGridDto;
 
@@ -92,6 +91,10 @@ public abstract class HexGrid extends Grid {
   /** Distance from centerpoint to middle of a face. Set to gridSize/2. */
   private transient double minorRadius;
 
+  public double getMinorRadius() {
+    return minorRadius;
+  }
+
   /**
    * The projection of a sloped edge onto the diameter.
    *
@@ -100,11 +103,19 @@ public abstract class HexGrid extends Grid {
    */
   protected transient double edgeProjection;
 
+  public double getEdgeProjection() {
+    return edgeProjection;
+  }
+
   /**
    * Length all edges. For a regular hexagon, this will also be the distance from the center point
    * to any vertex, but for a stretch hexagon this does not hold different.
    */
   protected transient double edgeLength;
+
+  public double getEdgeLength() {
+    return edgeLength;
+  }
 
   @Override
   public boolean isHex() {
@@ -221,8 +232,7 @@ public abstract class HexGrid extends Grid {
     // edgeProjection = (diameter - edgeLength) / 2
   }
 
-  private GeneralPath createHalfShape(
-      double minorRadius, double edgeProjection, double edgeLength) {
+  public GeneralPath createHalfShape(double minorRadius, double edgeProjection, double edgeLength) {
     GeneralPath hex = new GeneralPath();
     hex.moveTo(0, minorRadius);
     hex.lineTo(edgeProjection, 0);
@@ -327,13 +337,13 @@ public abstract class HexGrid extends Grid {
 
   protected abstract void setGridDrawTranslation(Graphics2D g, double u, double v);
 
-  protected abstract double getRendererSizeU(ZoneRenderer renderer);
+  public abstract double getRendererSizeU(ZoneRenderer renderer);
 
-  protected abstract double getRendererSizeV(ZoneRenderer renderer);
+  public abstract double getRendererSizeV(ZoneRenderer renderer);
 
-  protected abstract int getOffV(ZoneRenderer renderer);
+  public abstract int getOffV(ZoneRenderer renderer);
 
-  protected abstract int getOffU(ZoneRenderer renderer);
+  public abstract int getOffU(ZoneRenderer renderer);
 
   @Override
   public void draw(ZoneRenderer renderer, Graphics2D g, Rectangle bounds) {
@@ -600,19 +610,9 @@ public abstract class HexGrid extends Grid {
     return getGridAreaFromCache(gridRadius).createTransformedArea(getGridOffset(token));
   }
 
-  protected abstract OffsetTranslator getOffsetTranslator();
-
-  public static HexGrid fromDto(HexGridDto dto) {
-    HexGrid grid = null;
-    if (dto.getVertical()) {
-      grid = new HexGridVertical();
-    } else {
-      grid = new HexGridHorizontal();
-    }
-
-    // Exact values do not matter, just the proportions. Grid itself will scale to the right size.
-    grid.setDimensions(100, 100 / grid.hexRatio);
-    return grid;
+  protected void readDto(HexGridDto dto) {
+    hexRatio = dto.getHexRatio();
+    setDimensions(getSize(), getSize() / hexRatio);
   }
 
   protected void fillDto(GridDto.Builder dto) {

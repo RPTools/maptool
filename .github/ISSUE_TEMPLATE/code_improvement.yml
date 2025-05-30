@@ -1,6 +1,7 @@
 name: Refactoring
 description: Suggest a refactoring to improve the codebase
 title: "[Refactoring]: "
+type: code-maintenance
 labels: ["code maintenance"]
 body:
   - type: markdown

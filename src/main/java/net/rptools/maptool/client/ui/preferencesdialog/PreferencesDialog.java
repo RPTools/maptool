@@ -17,6 +17,7 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
+import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.GridBagConstraints;
 import java.awt.Insets;
 import java.awt.Toolkit;
@@ -40,6 +41,7 @@ import javax.swing.event.DocumentListener;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppPreferences.RenderQuality;
+import net.rptools.maptool.client.AppPreferences.UvttLosImportType;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
@@ -146,6 +148,8 @@ public class PreferencesDialog extends JDialog {
   /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType;
 
+  private final JComboBox<UvttLosImportType> uvttLosImportType;
+
   /** Checkbox for displaying or hiding * the statistics sheet on token mouseover. */
   private final JCheckBox showStatSheetCheckBox;
 
@@ -220,6 +224,9 @@ public class PreferencesDialog extends JDialog {
 
   /** Checkbox for if new macros should be editable by players by default. */
   private final JCheckBox allowPlayerMacroEditsDefault;
+
+  /** Checkbox for opening macro editor on creating new macro. */
+  private final JCheckBox openEditorForNewMacros;
 
   /** Checkbox for if the details of inline rolls should be shown in tooltips. */
   private final JCheckBox toolTipInlineRolls;
@@ -391,6 +398,12 @@ public class PreferencesDialog extends JDialog {
   private final JComboBox<String> jamLanguageOverrideComboBox;
 
   /** Label for displaying startup information. */
+  private final JTextField cfgFilePath;
+
+  private final AbstractButton copyCfgFilePathButton;
+
+  private final JLabel configFileWarningLabel;
+
   private final JLabel startupInfoLabel;
 
   /** Flag indicating if JVM values have been changed. */
@@ -441,6 +454,21 @@ public class PreferencesDialog extends JDialog {
 
   // ** Checkbox for loading the most recently used campaign on startup */
   private final JCheckBox loadMRUcheckbox;
+
+  /** status bar scrolling checkbox */
+  private final JCheckBox statusScrollEnable;
+
+  /** status bar temp time display */
+  private final JSpinner statusTempMessageTimeSpinner;
+
+  /** status bar scrolling speed */
+  private final JSpinner statusScrollSpeedSpinner;
+
+  /** status bar scroll start delay */
+  private final JSpinner statusScrollStartDelaySpinner;
+
+  /** status bar scroll end delay */
+  private final JSpinner statusScrollEndPause;
 
   /**
    * Array of LocalizedComboItems representing the default grid types for the preferences dialog.
@@ -634,7 +662,9 @@ public class PreferencesDialog extends JDialog {
     showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
     visionTypeCombo = panel.getComboBox("defaultVisionType");
     mapSortType = panel.getComboBox("mapSortType");
+    uvttLosImportType = panel.getComboBox("uvttLosImportType");
     movementMetricCombo = panel.getComboBox("movementMetric");
+    openEditorForNewMacros = panel.getCheckBox("openEditorForNewMacros");
     allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
     toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
     suppressToolTipsMacroLinks = panel.getCheckBox("suppressToolTipsMacroLinks");
@@ -699,7 +729,19 @@ public class PreferencesDialog extends JDialog {
     jamLanguageOverrideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
     jamLanguageOverrideComboBox.setToolTipText(I18N.getText("prefs.language.override.tooltip"));
 
+    configFileWarningLabel = panel.getLabel("configFileWarningLabel");
+    configFileWarningLabel.setIcon(
+        new FlatSVGIcon("net/rptools/maptool/client/image/warning.svg", 16, 16));
+
     startupInfoLabel = panel.getLabel("startupInfoLabel");
+    cfgFilePath = panel.getTextField("cfgFilePath");
+    copyCfgFilePathButton = panel.getButton("copyCfgPath");
+    copyCfgFilePathButton.addActionListener(
+        e -> {
+          Toolkit.getDefaultToolkit()
+              .getSystemClipboard()
+              .setContents(new StringSelection(cfgFilePath.getText()), null);
+        });
 
     pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
     pcTokenLabelFG.setColor(AppPreferences.pcMapLabelForeground.get());
@@ -726,6 +768,54 @@ public class PreferencesDialog extends JDialog {
     labelBorderWidthSpinner.setValue(AppPreferences.mapLabelBorderWidth.get());
     labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
     labelBorderArcSpinner.setValue(AppPreferences.mapLabelBorderArc.get());
+
+    statusScrollEnable = panel.getCheckBox("statusScrollEnable");
+    statusScrollEnable.setSelected(AppPreferences.scrollStatusMessages.get());
+    statusScrollEnable.addChangeListener(
+        e -> AppPreferences.scrollStatusMessages.set(((JCheckBox) e.getSource()).isSelected()));
+
+    statusTempMessageTimeSpinner = panel.getSpinner("statusTempMessageTimeSpinner");
+    statusTempMessageTimeSpinner.setModel(
+        new SpinnerNumberModel(
+            AppPreferences.scrollStatusTempDuration.get().doubleValue(), 0.1, 60d, 0.1));
+    statusTempMessageTimeSpinner.addChangeListener(
+        e ->
+            AppPreferences.scrollStatusTempDuration.set(
+                ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
+                    .getNumber()
+                    .doubleValue()));
+    statusScrollSpeedSpinner = panel.getSpinner("statusScrollSpeedSpinner");
+    statusScrollSpeedSpinner.setModel(
+        new SpinnerNumberModel(
+            AppPreferences.scrollStatusSpeed.get().doubleValue(), 0.1, 5d, 0.01));
+    statusScrollSpeedSpinner.addChangeListener(
+        e ->
+            AppPreferences.scrollStatusSpeed.set(
+                ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
+                    .getNumber()
+                    .doubleValue()));
+
+    statusScrollStartDelaySpinner = panel.getSpinner("statusScrollStartDelaySpinner");
+    statusScrollStartDelaySpinner.setModel(
+        new SpinnerNumberModel(
+            AppPreferences.scrollStatusStartDelay.get().doubleValue(), 0, 15d, 0.1));
+    statusScrollStartDelaySpinner.addChangeListener(
+        e ->
+            AppPreferences.scrollStatusStartDelay.set(
+                ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
+                    .getNumber()
+                    .doubleValue()));
+    statusScrollEndPause = panel.getSpinner("statusScrollEndPause");
+    statusScrollEndPause.setModel(
+        new SpinnerNumberModel(
+            AppPreferences.scrollStatusEndPause.get().doubleValue(), 0, 15d, 0.1));
+    statusScrollEndPause.addChangeListener(
+        e ->
+            AppPreferences.scrollStatusEndPause.set(
+                ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
+                    .getNumber()
+                    .doubleValue()));
+
     showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
     showLabelBorderCheckBox.addActionListener(
         e -> {
@@ -804,11 +894,24 @@ public class PreferencesDialog extends JDialog {
     }
 
     File appCfgFile = AppUtil.getAppCfgFile();
-    String copyInfo = "";
-    if (appCfgFile != null) { // Don't try to display message if running from dev.
-      copyInfo = I18N.getText("startup.preferences.info.manualCopy", appCfgFile.toString());
+    if (appCfgFile != null) {
+      cfgFilePath.setText(appCfgFile.toString());
+      cfgFilePath.setCaretPosition(0);
+    } else {
+      cfgFilePath.setText("");
     }
-    String startupInfoMsg = I18N.getText("startup.preferences.info", copyInfo);
+
+    // jpackage config files can't be written to. Show a warning to the user describing the
+    // situation.
+    if (appCfgFile != null) {
+      configFileWarningLabel.setText(I18N.getText("startup.preferences.info.manualCopy"));
+      configFileWarningLabel.setVisible(true);
+    } else {
+      configFileWarningLabel.setText(null);
+      configFileWarningLabel.setVisible(false);
+    }
+
+    String startupInfoMsg = I18N.getText("startup.preferences.info");
     startupInfoLabel.setText(startupInfoMsg);
 
     DefaultComboBoxModel<String> languageModel = new DefaultComboBoxModel<String>();
@@ -926,7 +1029,8 @@ public class PreferencesDialog extends JDialog {
         e ->
             AppPreferences.allowPlayerMacroEditsDefault.set(
                 allowPlayerMacroEditsDefault.isSelected()));
-
+    openEditorForNewMacros.addActionListener(
+        e -> AppPreferences.openEditorForNewMacro.set(openEditorForNewMacros.isSelected()));
     showAvatarInChat.addActionListener(
         e -> AppPreferences.showAvatarInChat.set(showAvatarInChat.isSelected()));
     saveReminderCheckBox.addActionListener(
@@ -1458,6 +1562,13 @@ public class PreferencesDialog extends JDialog {
             AppPreferences.mapSortType.set(
                 (AppPreferences.MapSortType) mapSortType.getSelectedItem()));
 
+    uvttLosImportType.setModel(new DefaultComboBoxModel<>(UvttLosImportType.values()));
+    uvttLosImportType.setSelectedItem(AppPreferences.uvttLosImportType.get());
+    uvttLosImportType.addItemListener(
+        e ->
+            AppPreferences.uvttLosImportType.set(
+                (UvttLosImportType) uvttLosImportType.getSelectedItem()));
+
     macroEditorThemeCombo.setModel(new DefaultComboBoxModel<>());
     try (Stream<Path> paths = Files.list(AppConstants.THEMES_DIR.toPath())) {
       paths
@@ -1603,6 +1714,7 @@ public class PreferencesDialog extends JDialog {
     syrinscapeActiveCheckBox.setSelected(AppPreferences.syrinscapeActive.get());
     showAvatarInChat.setSelected(AppPreferences.showAvatarInChat.get());
     allowPlayerMacroEditsDefault.setSelected(AppPreferences.allowPlayerMacroEditsDefault.get());
+    openEditorForNewMacros.setSelected(AppPreferences.openEditorForNewMacro.get());
     toolTipInlineRolls.setSelected(AppPreferences.useToolTipForInlineRoll.get());
     suppressToolTipsMacroLinks.setSelected(AppPreferences.suppressToolTipsForMacroLinks.get());
     trustedOutputForeground.setColor(AppPreferences.trustedPrefixForeground.get());

@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.event.ActionListener;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Interface for the HTML Panel holding the HTML Pane. */
 interface HTMLPanelInterface {
@@ -22,10 +23,10 @@ interface HTMLPanelInterface {
   /**
    * Update the HTML content and the close button.
    *
-   * @param html the html to load.
+   * @param htmlContent the {@link HTMLContent} to load.
    * @param scrollreset whether the scroll bar should be reset.
    */
-  void updateContents(final String html, boolean scrollreset);
+  void updateContents(final HTMLContent htmlContent, boolean scrollreset);
 
   /** Flush the Panel. */
   void flush();

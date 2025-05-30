@@ -20,13 +20,10 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.Action;
-import javax.swing.JFileChooser;
-import javax.swing.JPopupMenu;
-import javax.swing.JSeparator;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroEditorDialog;
@@ -34,15 +31,28 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 @SuppressWarnings("serial")
 public class MacroButtonPopupMenu extends JPopupMenu {
-
+  private static final Logger log = LogManager.getLogger(MacroButtonPopupMenu.class);
   private final MacroButton button;
   private final String panelClass;
+  private final boolean openEditorOnNewMacro;
+
+  @Override
+  public JMenuItem add(Action a) {
+    JMenuItem mi = super.add(a);
+    if (openEditorOnNewMacro && a instanceof DuplicateButtonAction) {
+      mi.addActionListener(e -> MacroEditorDialog.createMacroButtonDialog().show(button));
+    }
+    return mi;
+  }
 
   public MacroButtonPopupMenu(MacroButton parent, String panelClass, Boolean commonMacro) {
     this.button = parent;
+    this.openEditorOnNewMacro = AppPreferences.openEditorForNewMacro.get();
     this.panelClass = panelClass;
     if (panelClass.equals("SelectionPanel")) {
       if (button.getProperties().getCommonMacro()) {

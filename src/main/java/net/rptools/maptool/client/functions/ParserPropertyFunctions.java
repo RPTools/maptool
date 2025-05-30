@@ -87,7 +87,7 @@ public class ParserPropertyFunctions extends AbstractFunction {
       MapToolMacroContext mc = mtlParser.getContext();
       mco.addProperty("stackSize", mtlParser.getContextStackSize());
       mco.addProperty("name", mc.getName());
-      mco.addProperty("source", mc.getSource());
+      mco.addProperty("source", mc.getSource().getLocation());
       mco.addProperty("trusted", mc.isTrusted());
       if (mc.getMacroButtonIndex() >= 0) {
         mco.addProperty("buttonIndex", mc.getMacroButtonIndex());

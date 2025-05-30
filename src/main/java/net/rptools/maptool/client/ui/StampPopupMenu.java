@@ -43,6 +43,7 @@ public class StampPopupMenu extends AbstractTokenPopupMenu {
     }
     add(new JSeparator());
     addOwnedItem(createLightSourceMenu());
+    addOwnedItem(createAurasMenu());
     add(new JSeparator());
 
     addToggledItem(

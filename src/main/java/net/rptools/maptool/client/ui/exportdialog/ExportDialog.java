@@ -567,7 +567,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
           // This uses the original screenshot code: I didn't want to touch it, so I need
           // to pass it the same parameter it took before.
           role = ExportRadioButtons.VIEW_GM.isChecked() ? Player.Role.GM : Player.Role.PLAYER;
-          BufferedImage screenCap = MapTool.takeMapScreenShot(renderer.getPlayerView(role));
+          BufferedImage screenCap = MapTool.takeMapScreenShot(renderer.makePlayerView(role, true));
           // since old screenshot code doesn't throw exceptions, look for null
           if (screenCap == null) {
             throw new Exception(I18N.getString("dialog.screenshot.error.failedImageGeneration"));
@@ -792,7 +792,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     // and by the tiling texture (for re-importing)
     //
     Player.Role viewRole = viewAsPlayer ? Player.Role.PLAYER : Player.Role.GM;
-    PlayerView view = renderer.getPlayerView(viewRole, false);
+    PlayerView view = renderer.makePlayerView(viewRole, false);
     Rectangle extents = zoneExtents(view);
     try {
       // Clip to what the players know about (if applicable).

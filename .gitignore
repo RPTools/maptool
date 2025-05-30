@@ -14,13 +14,15 @@ Thumbs.db
 .gradle
 .gradletasknamecache
 build/
-/bin/
+bin/
 target/
 out/
 /releases/
 *.log
 *~
 \${sys:appHome}/
+build-resources/wikiDocExtraction/*.txt
+build-resources/wikiDocExtraction/*.xml
 
 
 # Automatically Generated

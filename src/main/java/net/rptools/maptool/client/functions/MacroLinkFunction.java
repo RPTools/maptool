@@ -32,6 +32,7 @@ import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.AbortFunctionException;
 import net.rptools.maptool.client.functions.exceptions.AssertFunctionException;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.commandpanel.CommandPanel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
@@ -79,6 +80,10 @@ public class MacroLinkFunction extends AbstractFunction {
 
   static final Pattern MACROLINK_PATTERN =
       Pattern.compile("(?s)([^:]*)://(.*)/([^/]*)/([^?]*)(?:\\?(.*))?");
+
+  /** The factory for creating macro locations. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * Gets and instance of the MacroLinkFunction class.
@@ -236,7 +241,8 @@ public class MacroLinkFunction extends AbstractFunction {
   public String createMacroText(String macroName, String who, String target, String args) {
     if (macroName.toLowerCase().endsWith("@this")) {
       macroName =
-          macroName.substring(0, macroName.length() - 4) + MapTool.getParser().getMacroSource();
+          macroName.substring(0, macroName.length() - 4)
+              + MapTool.getParser().getMacroSource().getLocation();
     }
     return "macro://" + macroName + "/" + who + "/" + target + "?" + encode(args);
   }
@@ -490,14 +496,27 @@ public class MacroLinkFunction extends AbstractFunction {
       Token token, OutputTo outputTo, String macroName, String args, Set<String> playerList)
       throws ParserException {
 
+    var loc = macroLocationFactory.createMacroLinkLocation(macroName);
+    if (MapTool.getParser().isMacroTrusted()) {
+      MapTool.getParser().enterTrustedContext(macroName, loc);
+    } else {
+      MapTool.getParser().enterUntrustedContext(macroName, loc);
+    }
+
+    String line = "";
     // Execute the macro
-    MapToolVariableResolver resolver = new MapToolVariableResolver(token);
-    String line = MapTool.getParser().runMacro(resolver, token, macroName, args);
+    try {
+      MapToolVariableResolver resolver = new MapToolVariableResolver(token);
+      line = MapTool.getParser().runMacro(resolver, token, macroName, args);
+    } finally {
+      MapTool.getParser().exitContext();
+    }
 
     // Don't output blank messages. Fixes #1867.
     if ("".equals(line)) {
       return;
     }
+
     /*
      * First we check our player list to make sure we are not sending things out multiple times or the wrong way. This looks a little ugly, but all it is doing is searching for the strings "say",
      * "gm", or "gmself", and if it contains no other strings changes it to a more appropriate for such as /togm, /self, etc. If it contains other names then gm, self etc will be replaced with

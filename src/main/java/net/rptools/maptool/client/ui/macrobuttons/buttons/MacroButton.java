@@ -238,7 +238,10 @@ public class MacroButton extends JButton implements MouseListener {
     List<Token> selectedTokens =
         MapTool.getFrame().getCurrentZoneRenderer().getSelectedTokensList();
     if (SwingUtil.isShiftDown(event) || getProperties().getApplyToTokens()) {
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(selectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(selectedTokens);
     } else {
       if ("SelectionPanel".equals(getPanelClass())) {
         List<Token> affectedTokens = new ArrayList<Token>();
@@ -257,7 +260,10 @@ public class MacroButton extends JButton implements MouseListener {
         } else if (getProperties().getToken() != null) {
           affectedTokens.add(getProperties().getToken());
         }
-        MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+        MapTool.getFrame()
+            .getCurrentZoneRenderer()
+            .getViewModel()
+            .setHighlightCommonMacros(affectedTokens);
       }
     }
   }
@@ -265,7 +271,10 @@ public class MacroButton extends JButton implements MouseListener {
   public void mouseExited(MouseEvent event) {
     List<Token> affectedTokens = new ArrayList<Token>();
     if (MapTool.getFrame().getCurrentZoneRenderer() != null) {
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(affectedTokens);
     }
   }
 
@@ -308,7 +317,10 @@ public class MacroButton extends JButton implements MouseListener {
     public void dragDropEnd(DragSourceDropEvent event) {
       // js commented out for testing - MapTool.getFrame().updateSelectionPanel();
       List<Token> affectedTokens = new ArrayList<Token>();
-      MapTool.getFrame().getCurrentZoneRenderer().setHighlightCommonMacros(affectedTokens);
+      MapTool.getFrame()
+          .getCurrentZoneRenderer()
+          .getViewModel()
+          .setHighlightCommonMacros(affectedTokens);
     }
   }
 

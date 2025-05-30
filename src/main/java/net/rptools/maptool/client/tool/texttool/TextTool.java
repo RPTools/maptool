@@ -125,6 +125,8 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
   // MOUSE
   @Override
   public void mousePressed(MouseEvent e) {
+    super.mousePressed(e);
+
     Label label = renderer.getLabelAt(e.getX(), e.getY());
     if (label != selectedLabel) {
       selectedNewLabel = true;
@@ -137,11 +139,12 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       dragOffsetX = (int) (e.getX() - sp.x);
       dragOffsetY = (int) (e.getY() - sp.y);
     }
-    super.mousePressed(e);
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     if (SwingUtilities.isLeftMouseButton(e)) {
       if (!isDragging) {
         Label label = renderer.getLabelAt(e.getX(), e.getY());
@@ -176,7 +179,6 @@ public class TextTool extends DefaultTool implements ZoneOverlay {
       }
     }
     isDragging = false;
-    super.mouseReleased(e);
   }
 
   @Override

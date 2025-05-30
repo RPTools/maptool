@@ -36,8 +36,6 @@ import net.rptools.maptool.model.drawing.Pen;
 import net.rptools.maptool.model.drawing.ShapeDrawable;
 
 public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
-  private final String instructionKey;
-  private final String tooltipKey;
   private final Strategy<StateT> strategy;
 
   /** The current state of the tool. If {@code null}, nothing is being drawn right now. */
@@ -47,19 +45,9 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
   private boolean centerOnOrigin = false;
 
   public DrawingTool(String instructionKey, String tooltipKey, Strategy<StateT> strategy) {
-    this.instructionKey = instructionKey;
-    this.tooltipKey = tooltipKey;
+    super(instructionKey, tooltipKey);
+
     this.strategy = strategy;
-  }
-
-  @Override
-  public String getInstructions() {
-    return instructionKey;
-  }
-
-  @Override
-  public String getTooltip() {
-    return tooltipKey;
   }
 
   @Override
@@ -231,12 +219,15 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
     if (state == null) {
       // We're not doing anything, so delegate to default behaviour.
       super.mouseDragged(e);
-    } else if (strategy.isFreehand()) {
-      // Extend the line.
+    } else {
+      cancelMapDrag();
       setIsEraser(isEraser(e));
       currentPoint = getPoint(e);
-      centerOnOrigin = e.isAltDown(); // Pointless, but it doesn't hurt for consistency.
-      strategy.pushPoint(state, currentPoint);
+      centerOnOrigin = e.isAltDown();
+      if (strategy.isFreehand()) {
+        // Extend the line.
+        strategy.pushPoint(state, currentPoint);
+      }
       renderer.repaint();
     }
   }
@@ -277,11 +268,16 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
       renderer.repaint();
     }
 
-    super.mousePressed(e);
+    if (state == null) {
+      // We're not doing anything, so delegate to default behaviour.
+      super.mousePressed(e);
+    }
   }
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     if (strategy.isFreehand() && SwingUtilities.isLeftMouseButton(e)) {
       currentPoint = getPoint(e);
       centerOnOrigin = e.isAltDown();

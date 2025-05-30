@@ -207,13 +207,33 @@ public class MapTool {
    * @return the <code>String</code> result
    */
   public static String generateMessage(String msgKey, Throwable t) {
-    String msg;
-    if (t == null) {
-      msg = I18N.getText(msgKey);
-    } else if (msgKey == null) {
-      msg = t.toString();
-    } else {
-      msg = I18N.getText(msgKey) + "<br/>" + t.toString();
+    return generateMessage(msgKey, t, null);
+  }
+
+  /**
+   * Same as {@Link #generateMessage(String, Throwable)} but allows for additional arguments for
+   * formatting the string.
+   *
+   * @param msgKey the string to use when calling {@link I18N#getText(String)}
+   * @param t the exception to be processed
+   * @param params arguments to pass when fetching string.
+   * @return the <code>String</code> result
+   */
+  private static String generateMessage(String msgKey, Throwable t, Object[] params) {
+    String msg = "";
+    if (msgKey != null) {
+      if (params != null) {
+        msg = I18N.getText(msgKey, params);
+      } else {
+        msg = I18N.getText(msgKey);
+      }
+    }
+    if (t != null) {
+      if (msgKey != null) {
+        msg = msg + "<br/>" + t.toString();
+      } else {
+        msg = t.toString();
+      }
     }
     msg = msg.replace("\n", "<br/>");
     return msg;
@@ -297,6 +317,12 @@ public class MapTool {
   public static void showError(String msgKey, Throwable t) {
     String msg = generateMessage(msgKey, t);
     log.error(I18N.getText(msgKey), t);
+    showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
+  }
+
+  public static void showError(String msgKey, Throwable t, Object... params) {
+    String msg = generateMessage(msgKey, t, params);
+    log.error(I18N.getText(msgKey, params), t);
     showMessage(msg, "msg.title.messageDialogError", JOptionPane.ERROR_MESSAGE);
   }
 

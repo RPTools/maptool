@@ -480,6 +480,8 @@ public class PointerTool extends DefaultTool {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     mouseButtonDown = false;
 
     if (isShowingTokenStackPopup) {
@@ -860,25 +862,7 @@ public class PointerTool extends DefaultTool {
     actionMap.put(AppActions.CUT_TOKENS.getKeyStroke(), AppActions.CUT_TOKENS);
     actionMap.put(AppActions.COPY_TOKENS.getKeyStroke(), AppActions.COPY_TOKENS);
     actionMap.put(AppActions.PASTE_TOKENS.getKeyStroke(), AppActions.PASTE_TOKENS);
-    actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            if (renderer.getSelectedTokenSet().isEmpty()) {
-              return;
-            }
-            Toolbox toolbox = MapTool.getFrame().getToolbox();
-
-            FacingTool tool = toolbox.getTool(FacingTool.class);
-            tool.init(
-                renderer.getZone().getToken(renderer.getSelectedTokenSet().iterator().next()),
-                renderer.getSelectedTokenSet());
-
-            toolbox.setSelectedTool(FacingTool.class);
-          }
-        });
+    actionMap.put(AppActions.SET_FACING_ACTION.getKeyStroke(), AppActions.SET_FACING_ACTION);
 
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
     actionMap.put(
@@ -1011,55 +995,15 @@ public class PointerTool extends DefaultTool {
         });
 
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_I, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            if (MapTool.getPlayer().isGM()
-                || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
-              FogUtil.exposeVisibleArea(
-                  renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
-            }
-          }
-        });
+        AppActions.EXPOSE_VISIBLE_AREA_ACTION.getKeyStroke(),
+        AppActions.EXPOSE_VISIBLE_AREA_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_O, AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            // Only let the GM's do this
-            if (MapTool.getPlayer().isGM()) {
-              FogUtil.exposePCArea(renderer);
-            }
-          }
-        });
+        AppActions.EXPOSE_VISIBLE_AREA_ONLY_ACTION.getKeyStroke(),
+        AppActions.EXPOSE_VISIBLE_AREA_ONLY_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_F, AppActions.menuShortcut | InputEvent.SHIFT_DOWN_MASK),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            // Only let the GM's do this
-            if (MapTool.getPlayer().isGM()) {
-              FogUtil.exposeAllOwnedArea(renderer);
-            }
-          }
-        });
+        AppActions.EXPOSE_ALL_OWNED_ACTION.getKeyStroke(), AppActions.EXPOSE_ALL_OWNED_ACTION);
     actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_P, AppActions.menuShortcut),
-        new AbstractAction() {
-          private static final long serialVersionUID = 1L;
-
-          public void actionPerformed(ActionEvent e) {
-            if (MapTool.getPlayer().isGM()
-                || MapTool.getServerPolicy().getPlayersCanRevealVision()) {
-              FogUtil.exposeLastPath(
-                  renderer, renderer.getOwnedTokens(renderer.getSelectedTokenSet()));
-            }
-          }
-        });
+        AppActions.EXPOSE_LAST_PATH_ACTION.getKeyStroke(), AppActions.EXPOSE_LAST_PATH_ACTION);
   }
 
   /**
@@ -1838,36 +1782,13 @@ public class PointerTool extends DefaultTool {
       }
 
       ZonePoint zonePoint = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-
-      zonePoint.x = this.dragAnchor.x + zonePoint.x - tokenDragStart.x;
-      zonePoint.y = this.dragAnchor.y + zonePoint.y - tokenDragStart.y;
-
-      var grid = renderer.getZone().getGrid();
-      if (tokenBeingDragged.isSnapToGrid()
-          && grid.getCapabilities().isSnapToGridSupported()
-          && AppPreferences.tokensSnapWhileDragging.get()) {
-        // Snap to grid point.
-        zonePoint = grid.convert(grid.convert(zonePoint));
-
-        if (debugEnabled) {
-          renderer.setShape(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
-        }
-
-        // Adjust given offet from grid to anchor point.
-        zonePoint.x += this.snapOffsetX;
-        zonePoint.y += this.snapOffsetY;
-      }
+      zonePoint.x += dragAnchor.x - tokenDragStart.x;
+      zonePoint.y += dragAnchor.y - tokenDragStart.y;
 
       if (debugEnabled) {
         renderer.setShape2(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
       }
-
-      @Nullable ZonePoint previous = renderer.getLastWaypoint(tokenBeingDragged.getId());
-      if (previous == null) {
-        doDragTo(zonePoint, 0, 0);
-      } else {
-        doDragTo(zonePoint, zonePoint.x - previous.x, zonePoint.y - previous.y);
-      }
+      doDragTo(zonePoint);
     }
 
     public void moveByKey(double dx, double dy) {
@@ -1883,9 +1804,6 @@ public class PointerTool extends DefaultTool {
 
         zp.x += snapOffsetX;
         zp.y += snapOffsetY;
-
-        dx = zp.x - tokenBeingDragged.getX();
-        dy = zp.y - tokenBeingDragged.getY();
       } else {
         // Scalar for dx/dy in zone space. Defaulting to essentially 1 pixel.
         int moveFactor = 1;
@@ -1899,22 +1817,45 @@ public class PointerTool extends DefaultTool {
         zp = new ZonePoint(x, y);
       }
 
-      doDragTo(zp, (int) dx, (int) dy);
+      doDragTo(zp);
     }
 
-    private void doDragTo(ZonePoint newAnchorPoint, int dirx, int diry) {
+    private void doDragTo(ZonePoint newAnchorPoint) {
+
+      // For snapped tokens, validation is done snapped as well, even if the "snap token while
+      // dragging preference" if disabled.
+      var validationAnchorPoint = newAnchorPoint;
+      var grid = renderer.getZone().getGrid();
+      ZonePoint previousAnchorPoint = tokenDragCurrent;
+      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        // Snap to grid point.
+        validationAnchorPoint = grid.convert(grid.convert(validationAnchorPoint));
+
+        // Adjust given offset from grid to anchor point.
+        validationAnchorPoint.x += this.snapOffsetX;
+        validationAnchorPoint.y += this.snapOffsetY;
+
+        previousAnchorPoint = grid.convert(grid.convert(previousAnchorPoint));
+        previousAnchorPoint.x += this.snapOffsetX;
+        previousAnchorPoint.y += this.snapOffsetY;
+      }
+      if (AppPreferences.tokensSnapWhileDragging.get()) {
+        newAnchorPoint = validationAnchorPoint;
+      }
+
       // Don't bother if there isn't any movement
       if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
         return;
       }
 
-      // Make sure it's a valid move
+      // Make sure it's a valid move.
+      int dirx = validationAnchorPoint.x - previousAnchorPoint.x;
+      int diry = validationAnchorPoint.y - previousAnchorPoint.y;
       boolean isValid =
-          (renderer.getZone().getGrid().getSize() >= 9)
-              ? validateMove(
-                  tokenBeingDragged, renderer.getSelectedTokenSet(), newAnchorPoint, dirx, diry)
-              : validateMove_legacy(
-                  tokenBeingDragged, renderer.getSelectedTokenSet(), newAnchorPoint);
+          previousAnchorPoint.equals(validationAnchorPoint)
+              || ((renderer.getZone().getGrid().getSize() >= 9)
+                  ? validateMove(renderer.getSelectedTokenSet(), validationAnchorPoint, dirx, diry)
+                  : validateMove_legacy(renderer.getSelectedTokenSet(), validationAnchorPoint));
       if (!isValid) {
         return;
       }
@@ -1984,7 +1925,7 @@ public class PointerTool extends DefaultTool {
     }
 
     private boolean validateMove(
-        Token leadToken, Set<GUID> tokenSet, ZonePoint point, int dirx, int diry) {
+        Set<GUID> tokenSet, ZonePoint leadTokenNewAnchor, int dirx, int diry) {
       if (MapTool.getPlayer().isGM()) {
         return true;
       }
@@ -1999,8 +1940,8 @@ public class PointerTool extends DefaultTool {
         boolean useTokenExposedArea =
             MapTool.getServerPolicy().isUseIndividualFOW()
                 && zone.getVisionType() != VisionType.OFF;
-        int deltaX = point.x - leadToken.getX();
-        int deltaY = point.y - leadToken.getY();
+        int deltaX = leadTokenNewAnchor.x - this.dragAnchor.x;
+        int deltaY = leadTokenNewAnchor.y - this.dragAnchor.y;
         Grid grid = zone.getGrid();
         // Loop through all tokens. As soon as one of them is blocked, stop processing and
         // return
@@ -2039,7 +1980,7 @@ public class PointerTool extends DefaultTool {
       return !isBlocked;
     }
 
-    private boolean validateMove_legacy(Token leadToken, Set<GUID> tokenSet, ZonePoint point) {
+    private boolean validateMove_legacy(Set<GUID> tokenSet, ZonePoint leadTokenNewAnchor) {
       Zone zone = renderer.getZone();
       if (MapTool.getPlayer().isGM()) {
         return true;
@@ -2053,8 +1994,8 @@ public class PointerTool extends DefaultTool {
         }
         isVisible = false;
         int fudgeSize = Math.max(Math.min((zone.getGrid().getSize() - 2) / 3 - 1, 8), 0);
-        int deltaX = point.x - leadToken.getX();
-        int deltaY = point.y - leadToken.getY();
+        int deltaX = leadTokenNewAnchor.x - this.dragAnchor.x;
+        int deltaY = leadTokenNewAnchor.y - this.dragAnchor.y;
         Rectangle bounds = new Rectangle();
         for (GUID tokenGUID : tokenSet) {
           Token token = zone.getToken(tokenGUID);

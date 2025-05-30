@@ -49,6 +49,9 @@ public class CommandPanel extends JPanel {
 
   private static final long serialVersionUID = 8710948417044703674L;
 
+  private static final String COMMAND_UP_ID = "action.commandUp";
+  private static final String COMMAND_DOWN_ID = "action.commandDown";
+
   private final List<String> commandHistory = new LinkedList<String>();
 
   private JLabel characterLabel;
@@ -619,21 +622,23 @@ public class CommandPanel extends JPanel {
       SwingUtil.useAntiAliasing(commandTextArea);
 
       ActionMap actions = commandTextArea.getActionMap();
-      actions.put(AppActions.COMMIT_COMMAND_ID, AppActions.COMMIT_COMMAND);
-      actions.put(AppActions.ENTER_COMMAND_ID, AppActions.ENTER_COMMAND);
-      actions.put(AppActions.CANCEL_COMMAND_ID, AppActions.CANCEL_COMMAND);
-      actions.put(AppActions.COMMAND_UP_ID, new CommandHistoryUpAction());
-      actions.put(AppActions.COMMAND_DOWN_ID, new CommandHistoryDownAction());
-      actions.put(AppActions.NEWLINE_COMMAND_ID, AppActions.NEWLINE_COMMAND);
+      actions.put(AppActions.COMMIT_COMMAND.getI18nKey(), AppActions.COMMIT_COMMAND);
+      actions.put(AppActions.ENTER_COMMAND.getI18nKey(), AppActions.ENTER_COMMAND);
+      actions.put(AppActions.CANCEL_COMMAND.getI18nKey(), AppActions.CANCEL_COMMAND);
+      actions.put(COMMAND_UP_ID, new CommandHistoryUpAction());
+      actions.put(COMMAND_DOWN_ID, new CommandHistoryDownAction());
+      actions.put(AppActions.NEWLINE_COMMAND.getI18nKey(), AppActions.NEWLINE_COMMAND);
 
       InputMap inputs = commandTextArea.getInputMap();
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AppActions.CANCEL_COMMAND_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), AppActions.COMMIT_COMMAND_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), AppActions.COMMAND_UP_ID);
-      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), AppActions.COMMAND_DOWN_ID);
+      inputs.put(
+          KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), AppActions.CANCEL_COMMAND.getI18nKey());
+      inputs.put(
+          KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), AppActions.COMMIT_COMMAND.getI18nKey());
+      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_UP, 0), COMMAND_UP_ID);
+      inputs.put(KeyStroke.getKeyStroke(KeyEvent.VK_DOWN, 0), COMMAND_DOWN_ID);
       inputs.put(
           KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, InputEvent.SHIFT_DOWN_MASK),
-          AppActions.NEWLINE_COMMAND_ID);
+          AppActions.NEWLINE_COMMAND.getI18nKey());
     }
     return commandTextArea;
   }

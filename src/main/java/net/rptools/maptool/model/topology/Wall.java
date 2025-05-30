@@ -95,47 +95,12 @@ public final class Wall {
    * @return An equivalent but reversed wall.
    */
   public Wall reversed() {
-    return new Wall(to, from, direction().reversed(), data.movementModifier(), data.modifiers());
-  }
-
-  public Direction direction() {
-    return data.direction();
-  }
-
-  public void direction(Direction direction) {
-    data = new Data(direction, data.movementModifier(), data.modifiers());
-  }
-
-  public MovementDirectionModifier movementModifier() {
-    return data.movementModifier();
-  }
-
-  public void movementModifier(MovementDirectionModifier modifier) {
-    data = new Data(data.direction(), modifier, data.modifiers());
-  }
-
-  public DirectionModifier directionModifier(VisibilityType visibilityType) {
-    return data.directionModifier(visibilityType);
-  }
-
-  public void directionModifier(VisibilityType visibilityType, DirectionModifier modifier) {
-    var newModifiers = new EnumMap<VisibilityType, DirectionModifier>(VisibilityType.class);
-    newModifiers.putAll(data.modifiers());
-    newModifiers.put(visibilityType, modifier);
-    data = new Data(data.direction(), data.movementModifier(), newModifiers);
+    return new Wall(
+        to, from, data.direction().reversed(), data.movementModifier(), data.modifiers());
   }
 
   public void setData(Data otherData) {
     this.data = otherData;
-  }
-
-  public void copyDataFrom(Wall other) {
-    setData(other.data);
-  }
-
-  public void mergeDataFrom(Wall other) {
-    var newData = data.merge(other.data);
-    setData(newData);
   }
 
   /**

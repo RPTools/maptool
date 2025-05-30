@@ -27,6 +27,7 @@ import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.Zone.Layer;
 import net.rptools.maptool.model.drawing.AbstractDrawing;
+import net.rptools.maptool.model.drawing.AbstractTemplate;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.drawing.DrawablePaint;
@@ -251,7 +252,7 @@ public class DrawingFunctions extends AbstractFunction {
     dinfo.addProperty("id", el.getDrawable().getId().toString());
     dinfo.addProperty("name", d.getName());
     dinfo.addProperty("layer", el.getDrawable().getLayer().name());
-    dinfo.addProperty("type", getDrawbleType(d));
+    dinfo.addProperty("type", getDrawableType(el));
     dinfo.add("bounds", boundsToJSON(map, d));
     dinfo.addProperty("penColor", paintToString(el.getPen().getPaint()));
     dinfo.addProperty("fillColor", paintToString(el.getPen().getBackgroundPaint()));
@@ -259,6 +260,9 @@ public class DrawingFunctions extends AbstractFunction {
     dinfo.addProperty("isEraser", el.getPen().isEraser() ? BigDecimal.ONE : BigDecimal.ZERO);
     dinfo.addProperty("penWidth", el.getPen().getThickness());
     dinfo.add("path", pathToJSON(d));
+    if (el.getDrawable() instanceof AbstractTemplate t) {
+      dinfo.addProperty("templateSize", t.getRadius());
+    }
 
     return dinfo;
   }
@@ -272,13 +276,15 @@ public class DrawingFunctions extends AbstractFunction {
     return binfo;
   }
 
-  private String getDrawbleType(AbstractDrawing d) {
-    if (d instanceof LineSegment) {
+  private String getDrawableType(DrawnElement el) {
+    if (el.getDrawable() instanceof LineSegment) {
       return "Line";
-    } else if (d instanceof ShapeDrawable sd) {
+    } else if (el.getDrawable() instanceof ShapeDrawable sd) {
       return sd.getShapeTypeName();
-    } else if (d instanceof DrawablesGroup) {
+    } else if (el.getDrawable() instanceof DrawablesGroup) {
       return "Group";
+    } else if (el.getDrawable() instanceof AbstractTemplate t) {
+      return t.getClass().getSimpleName();
     } else {
       return "unknown";
     }

@@ -29,6 +29,7 @@ import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.MapToolSysInfoProvider;
@@ -38,8 +39,15 @@ import org.apache.logging.log4j.Logger;
 
 public class MapToolEventQueue extends EventQueue {
 
+  /** The Logger for this class. */
   private static final Logger log = LogManager.getLogger(MapToolEventQueue.class);
+
+  /** Option pane for displaying messages. */
   private static JideOptionPane optionPane;
+
+  /** Factory Class for creating MacroLocation objects. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   @Override
   protected void dispatchEvent(AWTEvent event) {
@@ -165,7 +173,8 @@ public class MapToolEventQueue extends EventQueue {
   private static void addGetInfoToSentry(String command) {
     Object campaign;
     try {
-      MapToolMacroContext sentryContext = new MapToolMacroContext(command, "sentryIOLogging", true);
+      var loc = macroLocationFactory.createSentryIoLoggingLocation();
+      MapToolMacroContext sentryContext = new MapToolMacroContext(command, loc, true);
       MapTool.getParser().enterContext(sentryContext);
       campaign =
           getInfoFunction

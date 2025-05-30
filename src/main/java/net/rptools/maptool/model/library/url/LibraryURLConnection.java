@@ -14,15 +14,17 @@
  */
 package net.rptools.maptool.model.library.url;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.Optional;
-import java.util.concurrent.ExecutionException;
-import net.rptools.maptool.model.library.Library;
-import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
+/**
+ * This class is a URL connection that fetches HTML content from a specified URL for library
+ * resources.
+ */
 public class LibraryURLConnection extends URLConnection {
 
   /**
@@ -41,16 +43,17 @@ public class LibraryURLConnection extends URLConnection {
 
   @Override
   public InputStream getInputStream() throws IOException {
-    try {
-      Optional<Library> libraryOpt = new LibraryManager().getLibrary(url).get();
-      if (libraryOpt.isEmpty()) {
-        throw new IOException("Unable to read location " + url.toExternalForm());
-      }
+    var content = HTMLContent.fromURL(url).injectJSAPI().InjectContentSecurityPolicy();
+    var query = url.getQuery();
+    if (query != null && query.toLowerCase().contains("mtvuefix=true")) {
+      content = content.injectVueHack();
+    }
 
-      var library = libraryOpt.get();
-      return library.read(url).get();
-    } catch (InterruptedException | ExecutionException e) {
-      throw new IOException(e);
+    content = content.preprocess();
+    if (content.isBinaryAsset()) {
+      return content.getAsset().getDataAsInputStream();
+    } else {
+      return new ByteArrayInputStream(content.getHtmlString().getBytes());
     }
   }
 }

@@ -20,6 +20,7 @@ import java.util.concurrent.ExecutionException;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.exceptions.*;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
@@ -32,6 +33,9 @@ import org.apache.logging.log4j.Logger;
 /** Utility class to facilitate macro events like onTokenMove and onInitiativeChange. */
 public class EventMacroUtil {
   private static final Logger LOGGER = LogManager.getLogger(EventMacroUtil.class);
+
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * Scans all maps to find any Lib:Tokens that contain a macro matching the given "callback" label.
@@ -253,12 +257,19 @@ public class EventMacroUtil {
       final Token tokenInContext,
       Map<String, Object> varsToSet,
       boolean suppressChatOutput) {
-    if (varsToSet == null) varsToSet = Collections.emptyMap();
+
+    if (varsToSet == null) {
+      varsToSet = Collections.emptyMap();
+    }
+
     MapToolVariableResolver newResolver = new MapToolVariableResolver(tokenInContext);
     try {
       for (Map.Entry<String, Object> entry : varsToSet.entrySet()) {
         newResolver.setVariable(entry.getKey(), entry.getValue());
       }
+      var loc = macroLocationFactory.createEventLocation(macroTarget);
+
+      MapTool.getParser().enterTrustedContext(loc.getName(), loc);
       String resultVal =
           MapTool.getParser().runMacro(newResolver, tokenInContext, macroTarget, args, false);
       if (!suppressChatOutput && resultVal != null && !resultVal.equals("")) {
@@ -274,6 +285,8 @@ public class EventMacroUtil {
       MapTool.addLocalMessage(
           "Event continuing after error running " + macroTarget + ": " + e.getMessage());
       LOGGER.debug("error running {}: {}", macroTarget, e.getMessage(), e);
+    } finally {
+      MapTool.getParser().exitContext();
     }
     return newResolver;
   }

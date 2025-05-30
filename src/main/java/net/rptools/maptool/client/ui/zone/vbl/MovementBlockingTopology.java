@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone.vbl;
 
+import java.util.ArrayList;
 import java.util.List;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.maptool.model.topology.MaskTopology;
@@ -41,56 +42,49 @@ import org.locationtech.jts.operation.union.UnaryUnionOp;
  *     with a {@link MultiPolygon} and a {@link MultiLineString}.
  */
 public class MovementBlockingTopology {
-  private final PreparedGeometry preparedMasks;
-  private final PreparedGeometry preparedWalls;
+  private final List<PreparedGeometry> preparedGeometries = new ArrayList<>();
 
-  // Note: when we add directional walls, those will need special support. A simple intersection
-  // will not suffice.
-
-  public MovementBlockingTopology() {
-    var factory = GeometryUtil.getGeometryFactory();
-    this.preparedMasks = PreparedGeometryFactory.prepare(factory.createPolygon());
-    this.preparedWalls = PreparedGeometryFactory.prepare(factory.createLineString());
-  }
+  public MovementBlockingTopology() {}
 
   public MovementBlockingTopology(WallTopology walls, List<MaskTopology> masks) {
     var factory = GeometryUtil.getGeometryFactory();
 
-    var maskPolygons = masks.stream().map(MaskTopology::getPolygon).toList();
-    var maskUnion = new UnaryUnionOp(maskPolygons, factory).union();
-    // maskUnion should be a Polygon or MultiPolygon which fares very well with prepared geometry.
-    this.preparedMasks = PreparedGeometryFactory.prepare(maskUnion);
+    var maskPolygons =
+        masks.stream().map(MaskTopology::getPolygon).filter(p -> !p.isEmpty()).toList();
+    if (!maskPolygons.isEmpty()) {
+      var maskUnion = new UnaryUnionOp(maskPolygons, factory).union();
+      // maskUnion should be a Polygon or MultiPolygon which fares very well with prepared geometry.
+      this.preparedGeometries.add(PreparedGeometryFactory.prepare(maskUnion));
+    }
 
     var wallGeometries =
         walls
             .getWalls()
             .filter(
                 wall ->
-                    switch (wall.movementModifier()) {
+                    switch (wall.data().movementModifier()) {
                       case ForceBoth -> true;
                       case Disabled -> false;
                     })
             .map(wall -> walls.asLineSegment(wall).toGeometry(factory))
             .toList();
-    var wallUnion = new UnaryUnionOp(wallGeometries, factory).union();
-    // wallUnion should be Lineal, which works well with prepared geometry.
-    this.preparedWalls = PreparedGeometryFactory.prepare(wallUnion);
-  }
-
-  private List<PreparedGeometry> allGeometries() {
-    return List.of(preparedMasks, preparedWalls);
+    if (!wallGeometries.isEmpty()) {
+      var wallUnion = new UnaryUnionOp(wallGeometries, factory).union();
+      // wallUnion should be Lineal, which works well with prepared geometry.
+      this.preparedGeometries.add(PreparedGeometryFactory.prepare(wallUnion));
+    }
   }
 
   public Envelope getEnvelope() {
     var envelope = new Envelope();
-    for (var geometry : allGeometries()) {
+    for (var geometry : preparedGeometries) {
       envelope.expandToInclude(geometry.getGeometry().getEnvelopeInternal());
     }
     return envelope;
   }
 
   public boolean intersects(Geometry other) {
-    for (var prepared : allGeometries()) {
+    for (var prepared : preparedGeometries) {
       if (prepared.intersects(other)) {
         return true;
       }

@@ -377,6 +377,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
   @Override
   public void mouseReleased(MouseEvent e) {
+    super.mouseReleased(e);
+
     if (isShowingTokenStackPopup) {
       if (tokenStackPanel.contains(e.getX(), e.getY())) {
         tokenStackPanel.handleMouseEvent(e);
@@ -636,22 +638,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     actionMap.put(AppActions.CUT_TOKENS.getKeyStroke(), AppActions.CUT_TOKENS);
     actionMap.put(AppActions.COPY_TOKENS.getKeyStroke(), AppActions.COPY_TOKENS);
     actionMap.put(AppActions.PASTE_TOKENS.getKeyStroke(), AppActions.PASTE_TOKENS);
-    actionMap.put(
-        KeyStroke.getKeyStroke(KeyEvent.VK_R, AppActions.menuShortcut),
-        new AbstractAction() {
-          @Override
-          public void actionPerformed(ActionEvent e) {
-            if (renderer.getSelectedTokenSet().isEmpty()) {
-              return;
-            }
-            Toolbox toolbox = MapTool.getFrame().getToolbox();
-            FacingTool tool = toolbox.getTool(FacingTool.class);
-            tool.init(
-                renderer.getZone().getToken(renderer.getSelectedTokenSet().iterator().next()),
-                renderer.getSelectedTokenSet());
-            toolbox.setSelectedTool(FacingTool.class);
-          }
-        });
+    actionMap.put(AppActions.SET_FACING_ACTION.getKeyStroke(), AppActions.SET_FACING_ACTION);
     actionMap.put(KeyStroke.getKeyStroke(KeyEvent.VK_DELETE, 0), ToolHelper.getDeleteTokenAction());
     actionMap.put(
         KeyStroke.getKeyStroke(KeyEvent.VK_D, 0),
@@ -1188,23 +1175,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
       }
 
       ZonePoint zonePoint = new ScreenPoint(mouseX, mouseY).convertToZone(renderer);
-
-      zonePoint.x = this.dragAnchor.x + zonePoint.x - tokenDragStart.x;
-      zonePoint.y = this.dragAnchor.y + zonePoint.y - tokenDragStart.y;
-
-      var grid = renderer.getZone().getGrid();
-      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-        // Snap to grid point.
-        zonePoint = grid.convert(grid.convert(zonePoint));
-
-        if (debugEnabled) {
-          renderer.setShape(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
-        }
-
-        // Adjust given offet from grid to anchor point.
-        zonePoint.x += this.snapOffsetX;
-        zonePoint.y += this.snapOffsetY;
-      }
+      zonePoint.x += dragAnchor.x - tokenDragStart.x;
+      zonePoint.y += dragAnchor.y - tokenDragStart.y;
 
       if (debugEnabled) {
         renderer.setShape2(new Rectangle2D.Double(zonePoint.x - 5, zonePoint.y - 5, 10, 10));
@@ -1237,11 +1209,21 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
     }
 
     private void doDragTo(ZonePoint newAnchorPoint) {
-      tokenDragCurrent = new ZonePoint(newAnchorPoint);
-
       // Don't bother if there isn't any movement
       if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
         return;
+      }
+
+      tokenDragCurrent = new ZonePoint(newAnchorPoint);
+
+      var grid = renderer.getZone().getGrid();
+      if (tokenBeingDragged.isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
+        // Snap to grid point.
+        newAnchorPoint = grid.convert(grid.convert(newAnchorPoint));
+
+        // Adjust given offset from grid to anchor point.
+        newAnchorPoint.x += this.snapOffsetX;
+        newAnchorPoint.y += this.snapOffsetY;
       }
 
       renderer.updateMoveSelectionSet(tokenBeingDragged.getId(), newAnchorPoint);
@@ -1339,8 +1321,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
       // For snap-to-grid tokens (except background stamps) we anchor at the center of the token.
       final var isSnapToGridAndAnchoredAtCenter =
-          tokenBeingResized.isSnapToGrid()
-              && tokenBeingResized.getLayer().anchorSnapToGridAtCenter();
+          tokenBeingResized.isSnapToGrid() && tokenBeingResized.getLayer().isSnapToGridAtCenter();
       final var snapToGridMultiplier = isSnapToGridAndAnchoredAtCenter ? 2 : 1;
       var widthIncrease = adjustment.x * snapToGridMultiplier;
       var heightIncrease = adjustment.y * snapToGridMultiplier;

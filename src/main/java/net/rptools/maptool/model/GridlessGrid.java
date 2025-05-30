@@ -18,20 +18,16 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
-import java.io.IOException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.GridlessGridDto;
 
 public class GridlessGrid extends Grid {
-  private static List<TokenFootprint> footprintList;
 
   // @formatter:off
   private static final GridCapabilities GRID_CAPABILITIES =
@@ -58,18 +54,6 @@ public class GridlessGrid extends Grid {
       };
 
   // @formatter:on
-
-  @Override
-  public List<TokenFootprint> getFootprints() {
-    if (footprintList == null) {
-      try {
-        footprintList = loadFootprints("net/rptools/maptool/model/gridlessGridFootprints.xml");
-      } catch (IOException ioe) {
-        MapTool.showError("GridlessGrid.error.notLoaded", ioe);
-      }
-    }
-    return footprintList;
-  }
 
   @Override
   protected int snapFacingInternal(

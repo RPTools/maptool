@@ -111,7 +111,7 @@ public class TokenImage extends AbstractFunction {
       FunctionUtil.paramAsFloat(functionName, args, 0, true);
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
 
-      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setTokenOpacity, strOpacity);
+      MapTool.serverCommand().updateTokenProperty(token, Token.Update.setOpacity, strOpacity);
       return token.getTokenOpacity();
     }
 
@@ -185,7 +185,6 @@ public class TokenImage extends AbstractFunction {
       }
     }
 
-    StringBuilder assetId = new StringBuilder("asset://");
     if (functionName.equalsIgnoreCase("createAsset")) {
       FunctionUtil.checkNumberParam(functionName, args, 2, 2);
       String imageName = args.get(0).toString();
@@ -195,16 +194,18 @@ public class TokenImage extends AbstractFunction {
             I18N.getText("macro.function.general.paramCannotBeEmpty", functionName));
       } else if (imageString.length() > 8) {
         Asset asset;
-        if (imageString.toLowerCase().startsWith("https://")
-            && (imageString.toLowerCase().endsWith(".jpg")
-                || imageString.toLowerCase().endsWith(".png")
-                || imageString.toLowerCase().endsWith(".webp"))) {
+        URI uri;
+        try {
+          uri = new URI(imageString);
+        } catch (URISyntaxException e) {
+          uri = null;
+        }
+        if (uri != null && isValidAssetScheme(uri) && isValidAssetExtension(uri)) {
           try {
-            URI uri = new URI(imageString);
             URL url = uri.toURL();
             BufferedImage imageRAW = ImageIO.read(url);
             asset = Asset.createImageAsset(imageName, imageRAW);
-          } catch (URISyntaxException | MalformedURLException | IllegalArgumentException e) {
+          } catch (MalformedURLException | IllegalArgumentException e) {
             throw new ParserException(
                 I18N.getText("macro.function.input.illegalArgumentType", imageString));
           } catch (IOException e1) {
@@ -227,8 +228,7 @@ public class TokenImage extends AbstractFunction {
           }
         }
         AssetManager.putAsset(asset);
-        assetId.append(asset.getMD5Key().toString());
-        return assetId;
+        return "asset://" + asset.getMD5Key().toString();
       } else {
         throw new ParserException(
             I18N.getText("macro.function.general.wrongParamType", functionName));
@@ -261,6 +261,7 @@ public class TokenImage extends AbstractFunction {
       token = FunctionUtil.getTokenFromParam(resolver, functionName, args, 1, 2);
     }
 
+    StringBuilder assetId = new StringBuilder("asset://");
     if (functionName.equalsIgnoreCase("getTokenImage")) {
       if (token.getImageAssetId() == null) {
         return "";
@@ -379,5 +380,33 @@ public class TokenImage extends AbstractFunction {
 
     // Lee: for the final "" return
     return null;
+  }
+
+  /**
+   * Checks to see if the URI scheme is supportes for the createAsset macro function.
+   *
+   * @param uri The URI to check.
+   * @return {@code true} if the scheme is valid.
+   */
+  private boolean isValidAssetScheme(URI uri) {
+    return uri.getScheme().equalsIgnoreCase("http")
+        || uri.getScheme().equalsIgnoreCase("https")
+        || uri.getScheme().equalsIgnoreCase("lib");
+  }
+
+  /**
+   * Checks to see if the URI extension is supported for the createAsset macro function.
+   *
+   * @param uri The URI to check.
+   * @return {@code true} if the extension is valid.
+   */
+  private boolean isValidAssetExtension(URI uri) {
+    String[] validExtensions = {".jpg", ".jpeg", ".png", ".webp"};
+    for (String ext : validExtensions) {
+      if (uri.getPath().endsWith(ext)) {
+        return true;
+      }
+    }
+    return false;
   }
 }

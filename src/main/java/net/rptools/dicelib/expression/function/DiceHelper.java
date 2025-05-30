@@ -329,4 +329,57 @@ public class DiceHelper {
 
     return result;
   }
+
+  public static int openEndedDice(int times, int sides, int low, int high)
+      throws EvaluationException {
+    int result = 0;
+    boolean doOpenEndedLow = low != 0;
+    boolean doOpenEndedHigh = high != 0;
+
+    if (doOpenEndedLow && !doOpenEndedHigh) {
+      // if only an open-ended low roll, we need to set a high threshold
+      high = sides + 1 - low;
+    }
+    if (sides <= 1) {
+      throw new EvaluationException("Number of sides must be > 1");
+    }
+    if (doOpenEndedLow && low >= sides) {
+      throw new EvaluationException("Open-ended low threshold must be &lt; number of sides");
+    }
+    if (doOpenEndedHigh && high <= 1) {
+      throw new EvaluationException("Open-ended high threshold must be > 1");
+    }
+    if ((doOpenEndedLow && doOpenEndedHigh) && low >= high) {
+      throw new EvaluationException("Open-ended high and low thresholds overlap");
+    }
+
+    RunData runData = RunData.getCurrent();
+
+    for (int i = 0; i < times; i++) {
+      boolean endRolling = false;
+      int unmodifiedRoll = runData.randomInt(sides);
+      result += unmodifiedRoll;
+      if (unmodifiedRoll <= low && doOpenEndedLow) {
+        // keep rolling and subtract further rolls
+        while (!endRolling) {
+          int roll = runData.randomInt(sides);
+          if (roll < high) {
+            endRolling = true;
+          }
+          result -= roll;
+        }
+      } else if (unmodifiedRoll >= high && doOpenEndedHigh) {
+        // keep rolling and add further rolls
+        while (!endRolling) {
+          int roll = runData.randomInt(sides);
+          if (roll < high) {
+            endRolling = true;
+          }
+          result += roll;
+        }
+      }
+    }
+
+    return result;
+  }
 }

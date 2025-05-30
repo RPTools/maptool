@@ -57,6 +57,8 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
         var key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
         text = I18N.getText(key, at.getRadius());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
+        String keyTooltip = String.format("%s.tooltip", key);
+        setToolTipText(I18N.getText(keyTooltip, at.getRadius()));
       }
       text = addText(de.getPen(), text, de.getDrawable());
     } else if (value instanceof DrawPanelTreeModel.View) {

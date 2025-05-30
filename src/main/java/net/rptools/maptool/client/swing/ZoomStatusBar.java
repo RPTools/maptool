@@ -14,10 +14,11 @@
  */
 package net.rptools.maptool.client.swing;
 
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
-import javax.swing.JTextField;
+import javax.swing.*;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -32,6 +33,10 @@ import net.rptools.maptool.util.StringUtil;
 public class ZoomStatusBar extends JTextField implements ActionListener {
   public ZoomStatusBar() {
     super("", 9);
+    setMinimumSize(
+        new Dimension(
+            SwingUtilities.computeStringWidth(getFontMetrics(getFont()), "1234.567%"),
+            getFontMetrics(getFont()).getHeight()));
     setHorizontalAlignment(RIGHT);
     setToolTipText(I18N.getString("ZoomStatusBar.tooltip"));
     addActionListener(this);
@@ -57,10 +62,6 @@ public class ZoomStatusBar extends JTextField implements ActionListener {
         // If the number is invalid, ignore it.
       }
     }
-  }
-
-  public void clear() {
-    setText("");
   }
 
   public void update() {

@@ -305,8 +305,16 @@ class LibraryToken implements Library {
     return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>()
         .runOnSwingThread(
             () -> {
+              // Cater for the different ways the macro name can be specified
+              String expectedMacroName = macroName;
+              if (macroName.toLowerCase().startsWith("lib://")) {
+                expectedMacroName = macroName.replaceFirst("(?i)lib:\\/\\/.*\\/macro\\/", "");
+              } else if (macroName.toLowerCase().startsWith("lib:")) {
+                expectedMacroName = macroName.substring(4);
+              }
+
               Token library = findLibrary(id);
-              MacroButtonProperties buttonProps = library.getMacro(macroName, false);
+              MacroButtonProperties buttonProps = library.getMacro(expectedMacroName, false);
               if (buttonProps == null) {
                 // Try the "unknown macro"
                 buttonProps = library.getMacro(UNKNOWN_LIB_MACRO, false);
@@ -317,7 +325,7 @@ class LibraryToken implements Library {
 
               return Optional.of(
                   new MTScriptMacroInfo(
-                      macroName,
+                      expectedMacroName,
                       buttonProps.getCommand(),
                       library.isOwnedByNone() || !buttonProps.getAllowPlayerEdits(),
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),

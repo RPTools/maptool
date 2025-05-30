@@ -325,7 +325,8 @@ public class ZoneView {
 
       litAreas.add(
           new ContributedLight(
-              new LitArea(light.getLumens(), area), new LightInfo(lightSource, light)));
+              new LitArea(light.getLumens(), area),
+              new LightInfo(lightSource, light, lightSourceToken)));
     }
 
     // Magnification can cause different ranges for a single light source to overlap. This is not

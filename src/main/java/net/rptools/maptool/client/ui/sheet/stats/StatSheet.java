@@ -19,10 +19,10 @@ import java.net.URL;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
-import net.rptools.maptool.util.HTMLUtil;
 import net.rptools.maptool.util.HandlebarsUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -45,7 +45,8 @@ public class StatSheet {
     try {
       var statSheetContext = new StatSheetContext(token, MapTool.getPlayer(), location);
       var output =
-          HTMLUtil.fixHTMLBase(new HandlebarsUtil<>(content, entry).apply(statSheetContext), entry);
+          HTMLContent.htmlFromString(new HandlebarsUtil<>(content, entry).apply(statSheetContext))
+              .injectURLBase(entry);
       Platform.runLater(
           () -> {
             var overlay =
@@ -81,7 +82,7 @@ public class StatSheet {
                   .getOverlay(AppConstants.INTERNAL_MAP_UNDER_POINTER_HTML_OVERLAY_NAME);
           if (overlay != null) {
             overlay.setVisible(false);
-            overlay.updateContents("", true);
+            overlay.updateContents(HTMLContent.htmlFromString(""), true);
           }
         });
   }

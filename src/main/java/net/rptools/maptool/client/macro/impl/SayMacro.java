@@ -37,7 +37,7 @@ public class SayMacro extends AbstractMacro {
               null,
               MapTool.getParser().isMacroPathTrusted(),
               executionContext.getName(),
-              executionContext.getSource());
+              executionContext.getSource().getLocation());
     } else {
       msg = MessageUtil.getFormattedSay(macro, null, false, null, null);
     }

@@ -119,7 +119,7 @@ public class FunctionUtil {
    * @return The string list of all results, or a JSON array of the same.
    */
   public static Object delimitedResult(String delim, List<String> results) {
-    if ("json".equals(delim)) {
+    if ("json".equalsIgnoreCase(delim)) {
       JsonArray jarr = new JsonArray();
       results.forEach(m -> jarr.add(new JsonPrimitive(m)));
       return jarr;
@@ -507,11 +507,6 @@ public class FunctionUtil {
           JSONMacroFunctions.getInstance()
               .getJsonObjectFunctions()
               .fromStrProp((String) paramObject, delimiter);
-    }
-    if (jsonObject.keySet().size() < requiredKeys.size()) {
-      throw new ParserException(
-          I18N.getText(
-              "macro.function.general.wrongNumFields", index, functionName, requiredKeys.size()));
     }
     Set<String> keySet = jsonObject.keySet();
     for (String key : requiredKeys) {

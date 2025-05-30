@@ -305,6 +305,11 @@ message TokenDto {
   int32 anchor_x = 9;
   int32 anchor_y = 10;
   double size_scale = 11;
+  double scale_x = 20;
+  double scale_y = 21;
+  bool is_flipped_x = 45;
+  bool is_flipped_y = 46;
+  bool is_flipped_iso = 47;
   int32 last_x = 12;
   int32 last_y = 13;
   PathDto last_path = 14;
@@ -313,8 +318,6 @@ message TokenDto {
   int32 height = 17;
   int32 iso_width = 18;
   int32 iso_height = 19;
-  double scale_x = 20;
-  double scale_y = 21;
   map<string, string> size_map = 22;
   bool snap_to_grid = 23;
   bool is_visible = 24;
@@ -342,9 +345,6 @@ message TokenDto {
   double terrain_modifier = 42;
   TerrainModifierOperationDto terrain_modifier_operation = 43;
   repeated TerrainModifierOperationDto terrain_modifiers_ignored = 44;
-  bool is_flipped_x = 45;
-  bool is_flipped_y = 46;
-  bool is_flipped_iso = 47;
   google.protobuf.StringValue charsheet_image = 48;
   google.protobuf.StringValue portrait_image = 49;
   repeated LightSourceDto unique_light_sources = 72;
@@ -639,7 +639,7 @@ enum TokenUpdateDto {
     setVisible = 34;
     setVisibleOnlyToOwner = 35;
     setIsAlwaysVisible = 36;
-    setTokenOpacity = 37;
+    setOpacity = 37;
     setTerrainModifier = 38;
     setTerrainModifierOperation = 39;
     setTerrainModifiersIgnored = 40;

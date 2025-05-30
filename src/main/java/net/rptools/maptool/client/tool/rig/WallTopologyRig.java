@@ -22,7 +22,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import javax.annotation.Nullable;
 import net.rptools.lib.GeometryUtil;
+import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.topology.Vertex;
 import net.rptools.maptool.model.topology.Wall;
 import net.rptools.maptool.model.topology.WallTopology;
@@ -50,13 +52,17 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     updateShape();
   }
 
-  public void bringToFront(Vertex vertex) {
-    this.walls.bringToFront(vertex);
+  public void bringToFront(MovableVertex vertex) {
+    this.walls.bringToFront(vertex.getSource());
   }
 
-  public void bringToFront(Wall wall) {
-    this.walls.bringToFront(this.walls.getFrom(wall));
-    this.walls.bringToFront(this.walls.getTo(wall));
+  public void bringToFront(MovableWall wall) {
+    this.walls.bringToFront(this.walls.getFrom(wall.getSource()));
+    this.walls.bringToFront(this.walls.getTo(wall.getSource()));
+  }
+
+  public Optional<MovableWall> getWall(GUID from, GUID to) {
+    return this.walls.getWall(from, to).map(wall -> new MovableWall(this, walls, wall));
   }
 
   @Override
@@ -192,14 +198,14 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
   /**
    * Creates a new wall connected to an existing vertex.
    *
+   * <p>The starting point of the resulting wall will be {@code connectTo}, while the ending point
+   * will be a new vertex with the same position as {@code connectTo}.
+   *
    * @param connectTo The vertex to connect the new wall to.
-   * @param point The position of the new vertex to create.
-   * @return The newly created wall. The starting point of the wall will be {@code connectTo} and
-   *     the ending point will be a new vertex with its position set to {@code point}.
+   * @return The newly created wall connected to {@code connectTo}.
    */
-  public WallTopologyRig.MovableWall addConnectedWall(Vertex connectTo, Point2D point) {
-    var newWall = new MovableWall(this, walls, walls.newWallStartingAt(connectTo));
-    newWall.getTo().moveTo(point);
+  public WallTopologyRig.MovableWall addConnectedWall(Handle<Vertex> connectTo) {
+    var newWall = new MovableWall(this, walls, walls.newWallStartingAt(connectTo.getSource()));
     updateShape();
     return newWall;
   }
@@ -217,6 +223,15 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
     return new WallTopology(walls);
   }
 
+  public Optional<MovableVertex> getOrCreateMergeCandidate(
+      Point2D position, @Nullable Element<?> connectTo) {
+    return switch (connectTo) {
+      case null -> Optional.empty();
+      case MovableVertex movableVertex -> Optional.of(movableVertex);
+      case MovableWall movableWall -> Optional.of(splitAt(movableWall, position));
+    };
+  }
+
   /**
    * Merge {@code one} with {@code two}.
    *
@@ -228,10 +243,11 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
    * @param two The second of the vertices to merge.
    * @return The surviving handle.
    */
-  public WallTopologyRig.MovableVertex mergeVertices(Handle<Vertex> one, Handle<Vertex> two) {
+  public Optional<WallTopologyRig.MovableVertex> mergeVertices(
+      Handle<Vertex> one, Handle<Vertex> two) {
     var survivor = walls.merge(one.getSource(), two.getSource());
     updateShape();
-    return new WallTopologyRig.MovableVertex(this, walls, survivor);
+    return survivor.map(vertex -> new MovableVertex(this, walls, vertex));
   }
 
   /**
@@ -241,7 +257,7 @@ public final class WallTopologyRig implements Rig<WallTopologyRig.Element<?>> {
    * @param reference A point close to the wall.
    * @return The point on {@code wall} nearest to {@code reference}.
    */
-  public Point2D getSplitPoint(Movable<Wall> wall, Point2D reference) {
+  private Point2D getSplitPoint(Movable<Wall> wall, Point2D reference) {
     var coordinate = GeometryUtil.point2DToCoordinate(reference);
     var segment = walls.asLineSegment(wall.getSource());
     var fraction = segment.segmentFraction(coordinate);

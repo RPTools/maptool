@@ -36,6 +36,8 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.commandpanel.MessagePanel;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.LibraryManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -114,19 +116,24 @@ public class HTMLPane extends JEditorPane {
   /**
    * Flush the pane, set the new html, and set the caret to zero.
    *
-   * @param html the html to set
+   * @param htmlContent the html to set
    * @param scrollReset whether the scrollbar should be reset
    */
-  public void updateContents(final String html, boolean scrollReset) {
+  public void updateContents(final HTMLContent htmlContent, boolean scrollReset) {
     EventQueue.invokeLater(
         () -> {
           DefaultCaret caret = (DefaultCaret) getCaret();
           caret.setUpdatePolicy(
               scrollReset ? DefaultCaret.UPDATE_WHEN_ON_EDT : DefaultCaret.NEVER_UPDATE);
           editorKit.flush();
-          setText(html);
-          if (scrollReset) {
-            setCaretPosition(0);
+          try {
+            String htmlString = htmlContent.fetchString();
+            setText(htmlString);
+            if (scrollReset) {
+              setCaretPosition(0);
+            }
+          } catch (IOException e) {
+            MapTool.showError(I18N.getText("msg.error.html.loading", e.getMessage()));
           }
         });
   }

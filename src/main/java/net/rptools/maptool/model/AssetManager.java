@@ -141,18 +141,6 @@ public class AssetManager {
   }
 
   /**
-   * Determine if the asset is currently being requested. While an asset is being loaded it will be
-   * marked as requested and this function will return true. Once the asset is done loading this
-   * function will return false and the asset will be available from the cache.
-   *
-   * @param key MD5Key of asset being requested
-   * @return True if asset is currently being requested, false otherwise
-   */
-  public static boolean isAssetRequested(MD5Key key) {
-    return assetLoader.isIdRequested(key);
-  }
-
-  /**
    * Register a listener with the asset manager. The listener will be notified when the asset is
    * done loading.
    *
@@ -300,9 +288,7 @@ public class AssetManager {
 
           // Let's get it from the server
           // As a last resort we request the asset from the server
-          if (!isAssetRequested(id)) {
-            requestAssetFromServer(id, listeners);
-          }
+          requestAssetFromServer(id, listeners);
         });
   }
 

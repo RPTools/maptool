@@ -14,14 +14,15 @@
  */
 package net.rptools.maptool.client;
 
-import net.rptools.maptool.model.library.LibraryManager;
+import javax.annotation.Nonnull;
+import net.rptools.maptool.client.macro.MacroLocation;
 
 public class MapToolMacroContext {
   /** The name of the macro being executed. */
   private final String name;
 
   /** Where the macro comes from. */
-  private final String source;
+  private final MacroLocation source;
 
   /** Is the macro trusted or not. */
   private final boolean trusted;
@@ -39,7 +40,7 @@ public class MapToolMacroContext {
    * @param source The source location of the macro.
    * @param trusted Is the macro trusted or not.
    */
-  public MapToolMacroContext(String name, String source, boolean trusted) {
+  public MapToolMacroContext(@Nonnull String name, @Nonnull MacroLocation source, boolean trusted) {
     this(name, source, trusted, -1);
   }
 
@@ -51,7 +52,8 @@ public class MapToolMacroContext {
    * @param trusted Is the macro trusted or not.
    * @param macroButtonIndex The index of the button that ran this command.
    */
-  public MapToolMacroContext(String name, String source, boolean trusted, int macroButtonIndex) {
+  public MapToolMacroContext(
+      @Nonnull String name, @Nonnull MacroLocation source, boolean trusted, int macroButtonIndex) {
     this.name = name;
     this.source = source;
     this.trusted = trusted;
@@ -72,7 +74,7 @@ public class MapToolMacroContext {
    *
    * @return the source location of the macro context.
    */
-  public String getSource() {
+  public MacroLocation getSource() {
     return source;
   }
 
@@ -101,20 +103,5 @@ public class MapToolMacroContext {
    */
   public boolean isUseToolTipsForUnformatedRolls() {
     return useToolTipsForUnformatedRolls;
-  }
-
-  /**
-   * Get the namespace for the macro in context
-   *
-   * @return name space
-   */
-  public String getNamespace() {
-    if (source.length() > 4) {
-      var ns = source.substring(4);
-      if (new LibraryManager().addOnLibraryExists(ns)) {
-        return ns;
-      }
-    }
-    return null;
   }
 }

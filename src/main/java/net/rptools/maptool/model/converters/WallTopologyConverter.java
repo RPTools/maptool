@@ -187,11 +187,11 @@ public class WallTopologyConverter extends AbstractCollectionConverter {
     public WallRepresentation(Wall wall) {
       this.from = wall.from().toString();
       this.to = wall.to().toString();
-      this.direction = wall.direction();
-      this.movementDirection = wall.movementModifier();
-      this.sightDirection = wall.directionModifier(VisibilityType.Sight);
-      this.lightDirection = wall.directionModifier(VisibilityType.Light);
-      this.auraDirection = wall.directionModifier(VisibilityType.Aura);
+      this.direction = wall.data().direction();
+      this.movementDirection = wall.data().movementModifier();
+      this.sightDirection = wall.data().directionModifier(VisibilityType.Sight);
+      this.lightDirection = wall.data().directionModifier(VisibilityType.Light);
+      this.auraDirection = wall.data().directionModifier(VisibilityType.Aura);
     }
   }
 

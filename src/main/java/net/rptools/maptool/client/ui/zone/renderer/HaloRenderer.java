@@ -15,42 +15,31 @@
 package net.rptools.maptool.client.ui.zone.renderer;
 
 import java.awt.*;
-import java.util.ArrayList;
 import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.model.Zone;
 
 public class HaloRenderer {
-  private Zone zone;
-  private ZoneRenderer renderer;
-  private boolean initialised = false;
+  private final RenderHelper renderHelper;
 
-  public boolean isInitialised() {
-    return initialised;
-  }
-
-  HaloRenderer() {}
-
-  public void setRenderer(ZoneRenderer zoneRenderer) {
-    renderer = zoneRenderer;
-    zone = renderer.getZone();
-    initialised = true;
+  public HaloRenderer(RenderHelper renderHelper) {
+    this.renderHelper = renderHelper;
   }
 
   // Render Halos
-  public void renderHalo(Graphics2D g2d, Token token, TokenLocation location) {
-    if (token.hasHalo()) {
-      g2d.setStroke(new BasicStroke(AppPreferences.haloLineWidth.get()));
-      g2d.setColor(token.getHaloColor());
-      g2d.draw(location.bounds);
+  public void renderHalo(Graphics2D g2d, Token token, ZoneViewModel.TokenPosition position) {
+    if (!token.hasHalo()) {
+      return;
     }
-  }
 
-  // Render halo batch
-  public void renderHalos(
-      Graphics2D g2d, ArrayList<Token> tokens, ArrayList<TokenLocation> locations) {
-    for (Token token : tokens) {
-      renderHalo(g2d, token, locations.get(tokens.indexOf(token)));
-    }
+    renderHelper.render(
+        g2d,
+        worldG -> {
+          worldG.setStroke(
+              new BasicStroke(
+                  AppPreferences.haloLineWidth.get() / (float) worldG.getTransform().getScaleX()));
+          worldG.setColor(token.getHaloColor());
+          worldG.draw(position.transformedBounds());
+        });
   }
 }

@@ -401,8 +401,20 @@ public class AddOnLibrary implements Library {
 
   @Override
   public boolean canMTScriptAccessPrivate(MapToolMacroContext context) {
-    String source = context.getSource().replaceFirst("(?i)^lib:", "");
-    return context == null || source.equalsIgnoreCase(namespace);
+    if (context == null || context.getSource() == null || context.getSource().getUri() == null) {
+      return false;
+    }
+
+    String ns = context.getSource().getUri().getHost();
+    if (ns == null) {
+      return false;
+    }
+
+    if (namespace.equalsIgnoreCase(ns)) {
+      return true;
+    }
+
+    return false;
   }
 
   @Override

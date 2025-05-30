@@ -1,23 +1,21 @@
-How To Setup User Interface (UI) Tools for MapTool
-==================================================
+# How To Setup User Interface (UI) Tools for MapTool
 
-You thought you were done? Sorry, there are two extra things you may wish to consider and both are related to managing UI elements within Maptool. The current edition of the tool uses **IntelliJ** to manage **Swing** elements within the design. Just open the `.form` files and install the plugin when prompted.
+MapTool uses Swing for its user interface (UI) components. This document provides instructions for
+setting up the tools needed to work on the UI components of MapTool.
+All of the Swing components are created using the IntelliJ IDEA GUI Designer. IntelliJ IDEA is
+the recommended IDE for working on the MapTool project. JetBrains provides a Community Edition
+of [IntelliJ IDEA](https://www.jetbrains.com/idea/download/) that is free to use. At time of
+writing you need to scroll down the page a little to find the Community Edition download link.
 
-As Swing is now deprecated within Java the plan is to move those elements over to **JavaFX**, although this work is further down the line at the moment. If you want to get to grips with JavaFX, you should probably install the Eclipse Plugin **e(fx)clipse** and the **JavaFX Scene Builder**. Scene Builder is also a WYSIWYG form designer, but this time for JavaFX Objects.
+There is a plugin for IntelliJ IDEA called "UI Designer" that is required to work on the UI
+components
+of MapTool. The
+following [tutorial](https://www.jetbrains.com/help/idea/design-gui-using-swing.html#sections-of-a-form)
+describes how to use the UI Designer.
 
-Install e(fx)clipse Plugin
---------------------------
+Note that the UI Designer is only required if you plan to modify the UI, the project can be built
+using gradle without needing either IntelliJ IDEA or the UI Designer.
 
-1. From within Eclipse, select Help, and Install New Software...
-2. Click the **Add** button
-3. For name enter **e(fx)clipse** and for location enter `http://download.eclipse.org/efxclipse/updates-released/1.2.0/site/` then click OK
-4. From the **Working with:** field select the e(fx)clipse address you have just added.
-5. Eclipse should now search the address for installable modules. Tick all options, the **e(fx)clipse - install** and the **e(fx)clipse - single components** option.
-6. Click **Next** and the components should start installing (this takes a while). Then click **Next**, accept the license and **Finish** and Eclipse will do the final install.
 
-Install JavaFX Scene Builder
-----------------------------
 
-The JavaFX Scene Builder application has been handed over to the open source community and as a consequence it can be hard to find the Scene Builder install. The latest version as of this writing is SceneBuilder 10.0.0 and is available from [GluonHQ.com](https://gluonhq.com/products/scene-builder/)
 
-Download and install SceneBuilder.  It can now be used to open **.fxml** files which are the JavaFX equivalent to `.form` files (above).

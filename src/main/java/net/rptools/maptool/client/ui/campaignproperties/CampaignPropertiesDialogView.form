@@ -139,12 +139,12 @@
                 <properties/>
                 <border type="none"/>
                 <children>
-                  <component id="5f828" class="javax.swing.JEditorPane">
+                  <component id="5f828" class="javax.swing.JEditorPane" binding="sightPanel">
                     <constraints/>
                     <properties>
                       <autoscrolls value="true"/>
                       <contentType value="text/plain"/>
-                      <name value="sightPanel"/>
+                      <name value=""/>
                       <text value=""/>
                       <visible value="true"/>
                     </properties>
@@ -154,23 +154,22 @@
               <scrollpane id="d244a">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="600" height="300"/>
+                    <preferred-size width="900" height="500"/>
                   </grid>
                 </constraints>
                 <properties>
-                  <horizontalScrollBarPolicy value="31"/>
                   <verticalScrollBarPolicy value="22"/>
                   <visible value="true"/>
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="88c6b" class="javax.swing.JEditorPane">
+                  <component id="88c6b" class="javax.swing.JEditorPane" binding="sightHelp">
                     <constraints/>
                     <properties>
                       <autoscrolls value="false"/>
                       <contentType value="text/html"/>
                       <editable value="false"/>
-                      <name value="sightHelp"/>
+                      <name value=""/>
                       <selectionEnd value="1"/>
                       <selectionStart value="1"/>
                       <text value="&lt;html&gt;&#10;  &lt;head&gt;&#10;    &#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;&#10;"/>
@@ -202,12 +201,12 @@
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="de2b2" class="javax.swing.JEditorPane">
+                  <component id="de2b2" class="javax.swing.JEditorPane" binding="lightPanel">
                     <constraints/>
                     <properties>
                       <autoscrolls value="false"/>
                       <contentType value="text/plain"/>
-                      <name value="lightPanel"/>
+                      <name value=""/>
                       <text value=""/>
                     </properties>
                   </component>
@@ -216,23 +215,82 @@
               <scrollpane id="1d7f4">
                 <constraints>
                   <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
-                    <preferred-size width="600" height="300"/>
+                    <preferred-size width="900" height="500"/>
                   </grid>
                 </constraints>
                 <properties>
-                  <horizontalScrollBarPolicy value="31"/>
                   <verticalScrollBarPolicy value="22"/>
                   <visible value="true"/>
                 </properties>
                 <border type="none"/>
                 <children>
-                  <component id="9ba18" class="javax.swing.JEditorPane">
+                  <component id="9ba18" class="javax.swing.JEditorPane" binding="lightHelp">
                     <constraints/>
                     <properties>
                       <autoscrolls value="false"/>
                       <contentType value="text/html"/>
                       <editable value="false"/>
-                      <name value="lightHelp"/>
+                      <name value=""/>
+                      <selectionEnd value="1"/>
+                      <selectionStart value="1"/>
+                      <text value="&lt;html&gt;&#10;  &lt;head&gt;&#10;    &#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;&#10;"/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+            </children>
+          </grid>
+          <grid id="28c3f" layout-manager="GridLayoutManager" row-count="2" column-count="1" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+            <margin top="5" left="5" bottom="5" right="5"/>
+            <constraints>
+              <tabbedpane title-resource-bundle="net/rptools/maptool/language/i18n" title-key="CampaignPropertiesDialog.tab.auras"/>
+            </constraints>
+            <properties>
+              <visible value="false"/>
+            </properties>
+            <border type="none"/>
+            <children>
+              <scrollpane id="24ef5">
+                <constraints>
+                  <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="600" height="300"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <visible value="true"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="9dc48" class="javax.swing.JEditorPane" binding="auraPanel">
+                    <constraints/>
+                    <properties>
+                      <autoscrolls value="false"/>
+                      <contentType value="text/plain"/>
+                      <name value=""/>
+                      <text value=""/>
+                    </properties>
+                  </component>
+                </children>
+              </scrollpane>
+              <scrollpane id="2da77">
+                <constraints>
+                  <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false">
+                    <preferred-size width="900" height="500"/>
+                  </grid>
+                </constraints>
+                <properties>
+                  <verticalScrollBarPolicy value="22"/>
+                  <visible value="true"/>
+                </properties>
+                <border type="none"/>
+                <children>
+                  <component id="3d304" class="javax.swing.JEditorPane" binding="auraHelp">
+                    <constraints/>
+                    <properties>
+                      <autoscrolls value="false"/>
+                      <contentType value="text/html"/>
+                      <editable value="false"/>
+                      <name value=""/>
                       <selectionEnd value="1"/>
                       <selectionStart value="1"/>
                       <text value="&lt;html&gt;&#10;  &lt;head&gt;&#10;    &#10;  &lt;/head&gt;&#10;  &lt;body&gt;&#10;  &lt;/body&gt;&#10;&lt;/html&gt;&#10;"/>

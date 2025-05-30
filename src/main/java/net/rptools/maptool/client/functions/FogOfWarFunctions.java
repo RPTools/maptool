@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import net.rptools.maptool.client.AppActions;
-import net.rptools.maptool.client.AppActions.ZoneAdminClientAction;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.ui.zone.FogUtil;
@@ -123,8 +122,8 @@ public class FogOfWarFunctions extends AbstractFunction {
      * Lee: String empty = toggleFoW()
      */
     if (functionName.equalsIgnoreCase("toggleFoW")) {
-      ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).execute(null);
-      return ((ZoneAdminClientAction) AppActions.TOGGLE_FOG).isSelected()
+      AppActions.TOGGLE_FOG.execute(null);
+      return AppActions.TOGGLE_FOG.isSelected()
           ? I18N.getText("msg.info.action.enableFoW")
           : I18N.getText("msg.info.action.disableFoW");
     }
@@ -133,10 +132,10 @@ public class FogOfWarFunctions extends AbstractFunction {
      */
     if (functionName.equalsIgnoreCase("exposeFogAtWaypoints")) {
 
-      if (((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL).isAvailable()) {
-        ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL).execute(null);
+      if (AppActions.TOGGLE_WAYPOINT_FOG_REVEAL.isAvailable()) {
+        AppActions.TOGGLE_WAYPOINT_FOG_REVEAL.execute(null);
 
-        return ((ZoneAdminClientAction) AppActions.TOGGLE_WAYPOINT_FOG_REVEAL).isSelected()
+        return AppActions.TOGGLE_WAYPOINT_FOG_REVEAL.isSelected()
             ? I18N.getText("msg.info.action.enableRevealFogAtWaypoints")
             : I18N.getText("msg.info.action.disableRevealFogAtWaypoints");
       } else {

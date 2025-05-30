@@ -78,10 +78,11 @@ public class MessageUtil {
     return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
   }
 
-  public static String getFormattedEmotePlural(String msg, Token token) {
+  public static String getFormattedEmotePossessive(String msg, Token token) {
     String identity =
         token == null ? MapTool.getFrame().getCommandPanel().getIdentity() : token.getName();
-    msg = applyChatColor(identity + "'s " + msg);
+    identity += identity.endsWith("s") ? "' " : "'s ";
+    msg = applyChatColor(identity + msg);
 
     return "<div class='emote'>" + getAvatarMessage(msg, token, identity) + "</div>";
   }

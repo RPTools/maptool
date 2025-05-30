@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -30,6 +31,8 @@ public class TokenPropertiesTest {
   MapToolVariableResolver variableResolver;
   List<TokenProperty> propsList;
   Token testToken;
+
+  MacroLocationFactory factory;
 
   @BeforeEach
   public void setUp() {
@@ -62,8 +65,9 @@ public class TokenPropertiesTest {
             tokenToUpdate.setProperty(varToUpdate, valueToSet);
           }
         };
-
-    MapTool.getParser().enterContext("test", "testToken", true);
+    factory = MacroLocationFactory.getInstance();
+    var loc = factory.createTokenLocation("test", testToken);
+    MapTool.getParser().enterContext("test", loc, true);
   }
 
   /**

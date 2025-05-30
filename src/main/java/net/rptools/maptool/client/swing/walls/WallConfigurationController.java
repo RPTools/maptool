@@ -14,32 +14,31 @@
  */
 package net.rptools.maptool.client.swing.walls;
 
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Maps;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
+import java.util.EnumMap;
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import javax.swing.JComboBox;
-import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.topology.VisibilityType;
 import net.rptools.maptool.model.topology.Wall;
 
 public class WallConfigurationController {
   private final WallConfigurationView view;
-  private @Nullable Zone modelZone;
-  private @Nonnull Wall model;
+  private final PropertyChangeListener changeListener;
+  private @Nonnull Wall.Data wallData = new Wall.Data();
 
-  public WallConfigurationController() {
+  public WallConfigurationController(PropertyChangeListener changeListener) {
     this.view = new WallConfigurationView();
-
-    this.modelZone = null;
-    this.model = new Wall();
+    this.changeListener = changeListener;
 
     var directionSelect = view.getDirectionSelect();
     directionSelect.addActionListener(
         e -> {
-          var direction = directionSelect.getItemAt(directionSelect.getSelectedIndex());
-          if (direction != null && !direction.equals(this.model.direction())) {
-            this.model.direction(direction);
-            wallUpdated();
+          var newDirection = directionSelect.getItemAt(directionSelect.getSelectedIndex());
+          if (newDirection != null) {
+            updateWall(newDirection, wallData.movementModifier(), wallData.modifiers());
           }
         });
 
@@ -48,9 +47,8 @@ public class WallConfigurationController {
         e -> {
           var modifier =
               movementModifierSelect.getItemAt(movementModifierSelect.getSelectedIndex());
-          if (modifier != null && !modifier.equals(this.model.movementModifier())) {
-            this.model.movementModifier(modifier);
-            wallUpdated();
+          if (modifier != null) {
+            updateWall(wallData.direction(), modifier, wallData.modifiers());
           }
         });
 
@@ -59,13 +57,35 @@ public class WallConfigurationController {
       input.addActionListener(
           e -> {
             var modifier = input.getItemAt(input.getSelectedIndex());
-            if (modifier != null
-                && !modifier.equals(this.model.directionModifier(visibilityType))) {
-              this.model.directionModifier(visibilityType, modifier);
-              wallUpdated();
+            if (modifier != null) {
+              var newModifiers =
+                  new EnumMap<VisibilityType, Wall.DirectionModifier>(VisibilityType.class);
+              newModifiers.putAll(wallData.modifiers());
+              newModifiers.put(visibilityType, modifier);
+
+              updateWall(
+                  wallData.direction(),
+                  wallData.movementModifier(),
+                  Maps.immutableEnumMap(newModifiers));
             }
           });
     }
+  }
+
+  private void updateWall(
+      Wall.Direction direction,
+      Wall.MovementDirectionModifier movementModifier,
+      ImmutableMap<VisibilityType, Wall.DirectionModifier> modifiers) {
+    var newWallData = new Wall.Data(direction, movementModifier, modifiers);
+
+    if (wallData.equals(newWallData)) {
+      return;
+    }
+
+    var oldWallData = wallData;
+    wallData = newWallData;
+
+    changeListener.propertyChange(new PropertyChangeEvent(this, "wallData", oldWallData, wallData));
   }
 
   public WallConfigurationView getView() {
@@ -80,36 +100,18 @@ public class WallConfigurationController {
     };
   }
 
-  private void wallUpdated() {
-    if (modelZone != null) {
-      MapTool.serverCommand().updateWall(modelZone, this.model);
-    }
-  }
+  public void bind(@Nonnull Wall.Data model) {
+    this.wallData = model;
 
-  public void unbind() {
-    // Preserve the current settings in a new prototype wall.
-    var prototype = new Wall();
-    prototype.copyDataFrom(model);
-    bind(null, prototype);
-  }
-
-  public void bind(@Nullable Zone zone, @Nonnull Wall model) {
-    // Avoid events firing during binding.
-    this.modelZone = null;
-    this.model = new Wall();
-
-    this.view.getDirectionSelect().setSelectedItem(model.direction());
-    this.view.getMovementModifier().setSelectedItem(model.movementModifier());
+    this.view.getDirectionSelect().setSelectedItem(this.wallData.direction());
+    this.view.getMovementModifier().setSelectedItem(this.wallData.movementModifier());
     for (var visibilityType : VisibilityType.values()) {
-      getModifierInput(visibilityType).setSelectedItem(model.directionModifier(visibilityType));
+      getModifierInput(visibilityType)
+          .setSelectedItem(this.wallData.directionModifier(visibilityType));
     }
-
-    // Now that the state is set, remember which wall we're bound to.
-    this.modelZone = zone;
-    this.model = model;
   }
 
-  public @Nonnull Wall getModel() {
-    return model;
+  public @Nonnull Wall.Data getModel() {
+    return wallData;
   }
 }

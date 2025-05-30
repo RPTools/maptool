@@ -315,6 +315,7 @@ public final class WallTopology implements Topology {
     }
 
     var newVertex = addNewVertex();
+    newVertex.position(from.position());
 
     Wall newWall = new Wall(from.id(), newVertex.id());
     try {
@@ -339,8 +340,8 @@ public final class WallTopology implements Topology {
     var newVertex = addNewVertex();
     var newWall1 = new Wall(removed.from(), newVertex.id());
     var newWall2 = new Wall(newVertex.id(), removed.to());
-    newWall1.copyDataFrom(wall);
-    newWall2.copyDataFrom(wall);
+    newWall1.setData(wall.data());
+    newWall2.setData(wall.data());
 
     try {
       addWallImpl(newWall1);
@@ -363,20 +364,29 @@ public final class WallTopology implements Topology {
    * @param second The vertex to augment by merging {@code remove} into it.
    * @return The merged vertex.
    */
-  public Vertex merge(Vertex first, Vertex second) {
-    // Current implementation is to remove `first` and keep `second.
+  public Optional<Vertex> merge(Vertex first, Vertex second) {
+    // Current implementation is to remove `first` and keep `second if possible.
+
+    var firstIsForeign = !graph.containsVertex(first.id());
+    if (firstIsForeign) {
+      throw new RuntimeException("Unable unable vertices: first vertex does not exist!");
+    }
+    var secondIsForeign = !graph.containsVertex(second.id());
+    if (secondIsForeign) {
+      throw new RuntimeException("Unable unable vertices: second vertex does not exist!");
+    }
+
+    if (first.equals(second)) {
+      // These are the same vertex. No merging necessary.
+      return Optional.of(second);
+    }
 
     // A copy is essential since graph.edgesOf() returns a live set.
     var incidentWalls = new ArrayList<>(graph.edgesOf(first.id()));
 
-    var secondIsForeign = !graph.containsVertex(second.id());
-    if (secondIsForeign) {
-      throw new RuntimeException("Unable unable merge vertex that does not exist!");
-    }
-
     var wasRemoved = graph.removeVertex(first.id());
     if (!wasRemoved) {
-      throw new RuntimeException("Unable unable merge vertex that does not exist!");
+      throw new RuntimeException("Unexpected error: could not remove first vertex.");
     }
 
     // Anything that used to point to or from `first` now has to point to or from `second`.
@@ -400,7 +410,7 @@ public final class WallTopology implements Topology {
         var newWall =
             new Wall(
                 firstIsSource ? second.id() : neighbour, firstIsSource ? neighbour : second.id());
-        newWall.copyDataFrom(oldWall);
+        newWall.setData(oldWall.data());
         try {
           addWallImpl(newWall);
         } catch (GraphException e) {
@@ -414,13 +424,18 @@ public final class WallTopology implements Topology {
         // If the walls point in opposite directions, flip the one being merged so that they agree
         // on things like direction.
         var wallToMerge = (firstIsSource == secondIsSource) ? oldWall : oldWall.reversed();
-        existingWall.mergeDataFrom(wallToMerge);
+        existingWall.setData(existingWall.data().merge(wallToMerge.data()));
       }
     }
 
     removeDanglingVertices();
 
-    return second;
+    if (verticesById.containsKey(second.id())) {
+      return Optional.of(second);
+    }
+
+    // Vertex was eliminated as part of the merger. There is no survivor.
+    return Optional.empty();
   }
 
   public void bringToFront(Vertex vertex) {
@@ -467,9 +482,9 @@ public final class WallTopology implements Topology {
 
               // For directional walls, ensure the origin is on the correct side.
               var direction =
-                  switch (wall.directionModifier(visibilityType)) {
-                    case SameDirection -> wall.direction();
-                    case ReverseDirection -> wall.direction().reversed();
+                  switch (wall.data().directionModifier(visibilityType)) {
+                    case SameDirection -> wall.data().direction();
+                    case ReverseDirection -> wall.data().direction().reversed();
                     case ForceBoth -> Wall.Direction.Both;
                     case Disabled -> null;
                   };

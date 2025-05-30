@@ -29,9 +29,11 @@ import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
+import net.rptools.maptool.client.ui.macrobuttons.dialog.MacroEditorDialog;
 import net.rptools.maptool.client.ui.macrobuttons.panels.CampaignPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GlobalPanel;
 import net.rptools.maptool.client.ui.macrobuttons.panels.GmPanel;
@@ -131,14 +133,17 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
     }
 
     public void actionPerformed(ActionEvent event) {
+      MacroButtonProperties mbp = null;
       if (panelClass.equals("GlobalPanel")) {
-        new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), macroGroup);
+        mbp = new MacroButtonProperties(panelClass, MacroButtonPrefs.getNextIndex(), macroGroup);
       } else if (panelClass.equals("CampaignPanel")) {
-        new MacroButtonProperties(
-            panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), macroGroup);
+        mbp =
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getMacroButtonNextIndex(), macroGroup);
       } else if (panelClass.equals("GmPanel")) {
-        new MacroButtonProperties(
-            panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), macroGroup);
+        mbp =
+            new MacroButtonProperties(
+                panelClass, MapTool.getCampaign().getGmMacroButtonNextIndex(), macroGroup);
       } else if (panelClass.equals("SelectionPanel")) {
         if (areaGroup != null) {
           if (areaGroup
@@ -150,12 +155,15 @@ public class ButtonGroupPopupMenu extends JPopupMenu {
             }
           } else if (tokenId != null) {
             Token token = getToken();
-            new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+            mbp = new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
           }
         }
       } else if (tokenId != null) {
         Token token = getToken();
-        new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+        mbp = new MacroButtonProperties(token, token.getMacroNextIndex(), macroGroup);
+      }
+      if (mbp != null && AppPreferences.openEditorForNewMacro.get()) {
+        MacroEditorDialog.createMacroButtonDialog().show(mbp);
       }
     }
   }

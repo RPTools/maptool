@@ -210,10 +210,6 @@ public class MapToolUtil {
     return result;
   }
 
-  public static boolean isDebugEnabled() {
-    return System.getProperty("MAPTOOL_DEV") != null;
-  }
-
   public static boolean isValidColor(String name) {
     return COLOR_MAP.containsKey(name);
   }

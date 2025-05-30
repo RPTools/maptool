@@ -27,6 +27,10 @@ public class LaunchInstructions {
   static {
     // This will inject additional data tags in log4j2 which will be picked up by Sentry.io
     System.setProperty("log4j2.isThreadContextMapInheritable", "true");
+    // This sets up log4j to capture logging from Java logging manager
+    if (System.getProperty("java.util.logging.manager") == null) {
+      System.setProperty("java.util.logging.manager", "org.apache.logging.log4j.jul.LogManager");
+    }
     ThreadContext.put("OS", System.getProperty("os.name"));
   }
 

@@ -27,10 +27,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
-import java.awt.geom.Area;
-import java.awt.geom.GeneralPath;
-import java.awt.geom.Path2D;
-import java.awt.geom.Point2D;
+import java.awt.geom.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -371,8 +368,8 @@ public class GraphicsUtil {
     if (points.length < 2) {
       throw new IllegalArgumentException("Must supply at least two points");
     }
-    List<Point2D> bottomList = new ArrayList<Point2D>(points.length);
-    List<Point2D> topList = new ArrayList<Point2D>(points.length);
+    List<Point2D> bottomList = new ArrayList<>(points.length);
+    List<Point2D> topList = new ArrayList<>(points.length);
 
     for (int i = 0; i < points.length; i++) {
       double angle =
@@ -391,14 +388,13 @@ public class GraphicsUtil {
 
       double bottomAngle = (angle + delta / 2) % 360;
       double topAngle = bottomAngle + 180;
-
       bottomList.add(getPointAtVector(points[i], bottomAngle, width));
       topList.add(getPointAtVector(points[i], topAngle, width));
     }
     Collections.reverse(topList);
 
     GeneralPath path = new GeneralPath();
-    Point2D initialPoint = bottomList.remove(0);
+    Point2D initialPoint = bottomList.removeFirst();
     path.moveTo((float) initialPoint.getX(), (float) initialPoint.getY());
 
     for (Point2D point : bottomList) {
@@ -414,7 +410,6 @@ public class GraphicsUtil {
   private static Point2D getPointAtVector(Point2D point, double angle, double length) {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
-
     return new Point2D.Double(x, y);
   }
 

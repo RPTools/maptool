@@ -20,10 +20,7 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
@@ -39,7 +36,6 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
-import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -123,34 +119,12 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   protected JMenu createLightSourceMenu() {
     JMenu menu = new JMenu(I18N.getText("panel.MapExplorer.View.LIGHT_SOURCES"));
 
-    boolean hasAnyLights = false;
-    boolean hasLights = false;
-    boolean hasAuras = false;
-    boolean hasGmAuras = false;
-    boolean hasOwnerOnlyAuras = false;
-
-    for (GUID tokenGUID : selectedTokenSet) {
-      Token token = renderer.getZone().getToken(tokenGUID);
-      hasAnyLights |= token.hasLightSources();
-      hasLights |= token.hasLightSourceType(LightSource.Type.NORMAL);
-      hasAuras |= token.hasLightSourceType(LightSource.Type.AURA);
-      hasGmAuras |= token.hasGMAuras();
-      hasOwnerOnlyAuras |= token.hasOwnerOnlyAuras();
-    }
-    if (hasAnyLights) {
-      menu.add(new ClearLightAction());
-      if (hasLights) {
-        menu.add(new ClearLightsOnlyAction());
-      }
-      if (hasAuras) {
-        menu.add(new ClearAurasOnlyAction());
-      }
-      if (hasGmAuras) {
-        menu.add(new ClearGMAurasOnlyAction());
-      }
-      if (hasOwnerOnlyAuras) {
-        menu.add(new ClearOwnerAurasOnlyAction());
-      }
+    boolean hasLights =
+        selectedTokenSet.stream()
+            .map(tokenGUID -> renderer.getZone().getToken(tokenGUID))
+            .anyMatch(token -> token.hasLightSourceType(LightSource.Type.NORMAL));
+    if (hasLights) {
+      menu.add(new ClearLightsAction());
       menu.addSeparator();
     }
 
@@ -176,10 +150,71 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
   protected JMenu createLightCategoryMenu(String categoryName, Collection<LightSource> sources) {
     JMenu subMenu = new JMenu(categoryName);
 
-    List<LightSource> lightSources = new ArrayList<>(sources);
-    Collections.sort(lightSources);
+    for (LightSource lightSource : sources) {
+      if (lightSource.getType() != LightSource.Type.NORMAL) {
+        continue;
+      }
 
-    for (LightSource lightSource : lightSources) {
+      JCheckBoxMenuItem menuItem = new JCheckBoxMenuItem(new ToggleLightSourceAction(lightSource));
+      menuItem.setSelected(tokenUnderMouse.hasLightSource(lightSource));
+      subMenu.add(menuItem);
+    }
+
+    return subMenu;
+  }
+
+  protected JMenu createAurasMenu() {
+    JMenu menu = new JMenu(I18N.getText("panel.MapExplorer.View.AURAS"));
+
+    boolean hasAuras = false;
+    boolean hasGmAuras = false;
+    boolean hasOwnerOnlyAuras = false;
+
+    for (GUID tokenGUID : selectedTokenSet) {
+      Token token = renderer.getZone().getToken(tokenGUID);
+      hasAuras |= token.hasLightSourceType(LightSource.Type.AURA);
+      hasGmAuras |= token.hasGMAuras();
+      hasOwnerOnlyAuras |= token.hasOwnerOnlyAuras();
+    }
+
+    if (hasAuras) {
+      menu.add(new ClearAurasAction());
+      if (hasGmAuras) {
+        menu.add(new ClearGMAurasOnlyAction());
+      }
+      if (hasOwnerOnlyAuras) {
+        menu.add(new ClearOwnerAurasOnlyAction());
+      }
+      menu.addSeparator();
+    }
+
+    // Add unique light sources for the token.
+    {
+      JMenu subMenu = createAuraCategoryMenu("Unique", tokenUnderMouse.getUniqueLightSources());
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+        menu.addSeparator();
+      }
+    }
+
+    for (Entry<String, Map<GUID, LightSource>> entry :
+        MapTool.getCampaign().getLightSourcesMap().entrySet()) {
+      JMenu subMenu = createAuraCategoryMenu(entry.getKey(), entry.getValue().values());
+      if (subMenu.getItemCount() != 0) {
+        menu.add(subMenu);
+      }
+    }
+    return menu;
+  }
+
+  protected JMenu createAuraCategoryMenu(String categoryName, Collection<LightSource> sources) {
+    JMenu subMenu = new JMenu(categoryName);
+
+    for (LightSource lightSource : sources) {
+      if (lightSource.getType() != LightSource.Type.AURA) {
+        continue;
+      }
+
       // Don't include light sources that don't have lights visible to the player. Note that the
       // player must be an owner to use the popup, so don't bother checking `::isOwner()`.
       boolean include =
@@ -248,7 +283,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
               if (token == null) {
                 continue;
               }
-              token.setFlippedIso(!token.isFlippedIso());
+              token.setIsFlippedIso(!token.getIsFlippedIso());
               MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
             }
             MapTool.getFrame().refresh();
@@ -706,8 +741,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
   }
 
-  public class ClearLightsOnlyAction extends AbstractAction {
-    public ClearLightsOnlyAction() {
+  public class ClearLightsAction extends AbstractAction {
+    public ClearLightsAction() {
       super(I18N.getString("token.popup.menu.lights.clear"));
     }
 
@@ -724,8 +759,8 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
   }
 
-  public class ClearAurasOnlyAction extends AbstractAction {
-    public ClearAurasOnlyAction() {
+  public class ClearAurasAction extends AbstractAction {
+    public ClearAurasAction() {
       super(I18N.getString("token.popup.menu.auras.clear"));
     }
 
@@ -782,24 +817,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     }
   }
 
-  public class ClearLightAction extends AbstractAction {
-    public ClearLightAction() {
-      super(I18N.getText("token.popup.menu.lights.clearAll"));
-    }
-
-    public void actionPerformed(ActionEvent e) {
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      for (GUID tokenGUID : selectedTokenSet) {
-        Token token = renderer.getZone().getToken(tokenGUID);
-        token.clearLightSources();
-        renderer.flush(token);
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-        renderer.getZone().putToken(token);
-      }
-      renderer.repaint();
-    }
-  }
-
   public class SnapToGridAction extends AbstractAction {
     private final boolean snapToGrid;
     private final ZoneRenderer renderer;
@@ -827,64 +844,6 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
         Token.Update update = Token.Update.setSnapToGridAndXY;
         MapTool.serverCommand().updateTokenProperty(token, update, !snapToGrid, zp.x, zp.y);
       }
-    }
-  }
-
-  /** Internal class used to handle token state changes. */
-  public class ChangeStateAction extends AbstractAction {
-
-    /**
-     * Initialize a state action for a given state.
-     *
-     * @param state The name of the state set when this action is executed
-     */
-    public ChangeStateAction(String state) {
-      putValue(ACTION_COMMAND_KEY, state); // Set the state command
-
-      // Load the name, mnemonic, accelerator, and description if
-      // available
-      String key = "defaultTool.stateAction." + state;
-      String name = net.rptools.maptool.language.I18N.getText(key);
-      if (!name.equals(key)) {
-        putValue(NAME, name);
-        int mnemonic = I18N.getMnemonic(key);
-        if (mnemonic != -1) putValue(MNEMONIC_KEY, mnemonic);
-        String accel = I18N.getAccelerator(key);
-        if (accel != null) putValue(ACCELERATOR_KEY, KeyStroke.getKeyStroke(accel));
-        String description = I18N.getDescription(key);
-        if (description != null) putValue(SHORT_DESCRIPTION, description);
-      } else {
-
-        // Default name if no I18N set
-        putValue(NAME, state);
-      } // endif
-    }
-
-    /**
-     * Set the state for all of the selected tokens.
-     *
-     * @see java.awt.event.ActionListener#actionPerformed(java.awt.event.ActionEvent)
-     */
-    public void actionPerformed(ActionEvent aE) {
-      ZoneRenderer renderer = MapTool.getFrame().getCurrentZoneRenderer();
-      for (GUID tokenGUID : selectedTokenSet) {
-        Token token = renderer.getZone().getToken(tokenGUID);
-        if (aE.getActionCommand().equals("clear")) {
-          // Wipe out the entire state HashMap, this is what the previous
-          // code attempted to do but was failing due to the Set returned
-          // by getStatePropertyNames being a non-static view into a set.
-          // Removing items from the map was messing up the iteration.
-          // Here, clear all states, unfortunately, including light.
-          token.getStatePropertyNames().clear();
-        } else {
-          token.setState(
-              aE.getActionCommand(),
-              ((JCheckBoxMenuItem) aE.getSource()).isSelected() ? Boolean.TRUE : null);
-        }
-        renderer.flush(token);
-        MapTool.serverCommand().putToken(renderer.getZone().getId(), token);
-      }
-      renderer.repaint();
     }
   }
 

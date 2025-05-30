@@ -19,10 +19,8 @@ import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.util.HashSet;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
@@ -65,11 +63,21 @@ public abstract class Grid implements Cloneable {
 
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
+  private static final Map<String, String> FOOTPRINT_XML_PATHS =
+      new HashMap<>(
+          Map.of(
+              GridFactory.HEX_HORI, "net/rptools/maptool/model/hexGridHorizFootprints.xml",
+              GridFactory.HEX_VERT, "net/rptools/maptool/model/hexGridVertFootprints.xml",
+              GridFactory.ISOMETRIC, "net/rptools/maptool/model/squareGridFootprints.xml",
+              GridFactory.ISOMETRIC_HEX, "net/rptools/maptool/model/hexGridHorizFootprints.xml",
+              GridFactory.NONE, "net/rptools/maptool/model/gridlessGridFootprints.xml",
+              GridFactory.SQUARE, "net/rptools/maptool/model/squareGridFootprints.xml"));
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   protected transient Map<KeyStroke, Action> movementKeys = null;
   private transient Zone zone;
   private transient Area cellShape;
+  private transient List<TokenFootprint> footprintList;
   private int offsetX = 0;
   private int offsetY = 0;
   private int size;
@@ -81,6 +89,62 @@ public abstract class Grid implements Cloneable {
   public Grid(Grid grid) {
     setSize(grid.getSize());
     setOffset(grid.offsetX, grid.offsetY);
+  }
+
+  public static Shape createGridShape(String gridType, double size) {
+    final Shape gridShape;
+    int sides = 0;
+    double startAngle = 0;
+    double increment;
+    double skew = 0;
+    double hScale = 1;
+    double vScale = 1;
+    final double root2 = Math.sqrt(2d);
+    final double root3 = Math.sqrt(3d);
+    switch (gridType) {
+      case GridFactory.HEX_HORI -> {
+        sides = 6;
+        startAngle = Math.TAU / 12;
+        hScale = vScale = root3 / 3d;
+      }
+      case GridFactory.HEX_VERT -> {
+        sides = 6;
+        hScale = vScale = root3 / 3d;
+      }
+      case GridFactory.ISOMETRIC -> {
+        sides = 4;
+        vScale = 0.5;
+      }
+      case GridFactory.ISOMETRIC_HEX -> {
+        sides = 6;
+        startAngle = Math.TAU / 24;
+        hScale = vScale = root3 / 3d;
+        skew = Math.toRadians(30d);
+      }
+      case GridFactory.NONE -> {
+        return new Ellipse2D.Double(-size / 2d, -size / 2d, size, size);
+      }
+      case GridFactory.SQUARE -> {
+        sides = 4;
+        hScale = vScale = root2 / 2d;
+        startAngle = Math.TAU / 8d;
+      }
+    }
+    increment = Math.TAU / sides;
+    Path2D path = new Path2D.Double();
+    path.moveTo(Math.cos(startAngle) * size * hScale, Math.sin(startAngle) * size * vScale);
+    for (int i = 1; i < sides; i++) {
+      path.lineTo(
+          Math.cos(startAngle + i * increment) * size * hScale,
+          Math.sin(startAngle + i * increment) * size * vScale);
+    }
+    path.closePath();
+    if (skew != 0) {
+      gridShape = AffineTransform.getShearInstance(skew, 0).createTransformedShape(path);
+    } else {
+      gridShape = path;
+    }
+    return gridShape;
   }
 
   protected Object readResolve() {
@@ -176,6 +240,10 @@ public abstract class Grid implements Cloneable {
    */
   public abstract Point2D.Double getCellCenter(CellPoint cell);
 
+  protected OffsetTranslator getOffsetTranslator() {
+    return null;
+  }
+
   protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
       throws IOException {
     Object obj = FileUtil.objFromResource(path);
@@ -211,7 +279,23 @@ public abstract class Grid implements Cloneable {
     return getDefaultFootprint();
   }
 
-  public abstract List<TokenFootprint> getFootprints();
+  public List<TokenFootprint> getFootprints() {
+    if (footprintList == null) {
+      String type = GridFactory.getGridType(this);
+      try {
+        String path = FOOTPRINT_XML_PATHS.get(type);
+        OffsetTranslator offsetTranslator = getOffsetTranslator();
+        if (offsetTranslator == null) {
+          footprintList = loadFootprints(path);
+        } else {
+          footprintList = loadFootprints(path, getOffsetTranslator());
+        }
+      } catch (IOException ioe) {
+        MapTool.showError("msg.error.footprints.load", ioe, type);
+      }
+    }
+    return footprintList;
+  }
 
   public boolean isIsometric() {
     return false;
@@ -1028,18 +1112,29 @@ public abstract class Grid implements Cloneable {
   }
 
   public static Grid fromDto(GridDto dto) {
-    Grid grid = null;
-    switch (dto.getTypeCase()) {
-      case GRIDLESS_GRID -> grid = new GridlessGrid();
-      case HEX_GRID -> {
-        grid = HexGrid.fromDto(dto.getHexGrid());
-      }
-      case SQUARE_GRID -> grid = new SquareGrid();
-      case ISOMETRIC_GRID -> grid = new IsometricGrid();
-    }
+    Runnable postProcess = () -> {};
+    Grid grid =
+        switch (dto.getTypeCase()) {
+          case GRIDLESS_GRID -> new GridlessGrid();
+          case HEX_GRID -> {
+            var hexDto = dto.getHexGrid();
+            var hexGrid = hexDto.getVertical() ? new HexGridVertical() : new HexGridHorizontal();
+            postProcess = () -> hexGrid.readDto(hexDto);
+            yield hexGrid;
+          }
+          case SQUARE_GRID -> new SquareGrid();
+          case ISOMETRIC_GRID -> new IsometricGrid();
+          default -> {
+            log.error("Unrecognized Grid DTO: {}. Defaulting to square grid", dto.getTypeCase());
+            yield new SquareGrid();
+          }
+        };
+
     grid.offsetX = dto.getOffsetX();
     grid.offsetY = dto.getOffsetY();
     grid.size = dto.getSize();
+    postProcess.run();
+
     grid.cellShape = grid.createCellShape();
 
     return grid;

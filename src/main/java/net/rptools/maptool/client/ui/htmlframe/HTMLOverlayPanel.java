@@ -21,10 +21,8 @@ import java.awt.image.BufferedImage;
 import java.util.*;
 import java.util.concurrent.ConcurrentSkipListSet;
 import javafx.application.Platform;
-import javafx.collections.ObservableList;
 import javafx.embed.swing.JFXPanel;
 import javafx.scene.Cursor;
-import javafx.scene.Node;
 import javafx.scene.Scene;
 import javafx.scene.input.ScrollEvent;
 import javafx.scene.layout.Background;
@@ -32,12 +30,14 @@ import javafx.scene.layout.Region;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.WebView;
 import javax.swing.*;
+import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
+import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
@@ -212,10 +212,12 @@ public class HTMLOverlayPanel extends JFXPanel {
    */
   private void removeOverlay(HTMLOverlayManager overlay) {
     if (overlay != null) {
-      root.getChildren().remove(overlay.getWebView());
-      overlays.remove(overlay);
-      AppMenuBar.removeFromOverlayMenu(overlay.getName());
-      overlay.flush();
+      if (!overlay.getName().startsWith(AppConstants.INTERNAL_FRAME_PREFIX)) {
+        root.getChildren().remove(overlay.getWebView());
+        overlays.remove(overlay);
+        AppMenuBar.removeFromOverlayMenu(overlay.getName());
+        overlay.flush();
+      }
       if (overlays.isEmpty()) {
         setVisible(false); // hide overlay panel if all are gone
       }
@@ -224,17 +226,19 @@ public class HTMLOverlayPanel extends JFXPanel {
 
   /** Removes all overlays. */
   public void removeAllOverlays() {
-    this.setVisible(false);
     Platform.runLater(
         () -> {
-          ObservableList<Node> listChildren = root.getChildren();
           for (HTMLOverlayManager overlay : overlays) {
-            listChildren.remove(overlay.getWebView());
-            AppMenuBar.removeFromOverlayMenu(overlay.getName());
-            overlay.flush();
+            if (!overlay.getName().startsWith(AppConstants.INTERNAL_FRAME_PREFIX)) {
+              root.getChildren().remove(overlay.getWebView());
+              overlays.remove(overlay);
+              AppMenuBar.removeFromOverlayMenu(overlay.getName());
+              overlay.flush();
+            }
           }
-          overlays.clear();
-          setVisible(false);
+          if (overlays.isEmpty()) {
+            setVisible(false);
+          }
         });
   }
 
@@ -244,25 +248,31 @@ public class HTMLOverlayPanel extends JFXPanel {
    * @param name the name of the overlay
    * @param zOrder the zOrder of the overlay
    * @param locked the locked state of the overlay
-   * @param html the HTML of the overlay
+   * @param htmlContent the HTML of the overlay
    */
-  public void showOverlay(String name, int zOrder, boolean locked, String html, Object frameValue) {
+  public void showOverlay(
+      String name, int zOrder, boolean locked, HTMLContent htmlContent, Object frameValue) {
     getDropTarget().setActive(false); // disables drop on overlay, drop goes to map
     setVisible(true);
     Platform.runLater(
         () -> {
           HTMLOverlayManager overlayManager = getOverlay(name);
           if (overlayManager != null) {
-            if ("".equals(html)) {
+            if ("".equals(htmlContent.getHtmlString())) {
               // Blank removes the overlay
               removeOverlay(overlayManager);
               return;
-            } else if (zOrder != overlayManager.getZOrder()) {
-              // Resorts by removing and adding back the overlay
-              overlays.remove(overlayManager);
-              overlayManager.setZOrder(zOrder);
-              overlays.add(overlayManager);
+            } else {
+              if (zOrder != overlayManager.getZOrder()) {
+                // Resorts by removing and adding back the overlay
+                overlays.remove(overlayManager);
+                overlayManager.setZOrder(zOrder);
+                overlays.add(overlayManager);
+              }
+              overlayManager.setLocked(locked);
+              AppMenuBar.updateOverlayMenuLocked(overlayManager);
             }
+
           } else {
             overlayManager = new HTMLOverlayManager(name, zOrder, locked);
             overlayManager.setupWebView(new WebView());
@@ -273,7 +283,7 @@ public class HTMLOverlayPanel extends JFXPanel {
             }
           }
           sortOverlays();
-          overlayManager.updateContents(html, true);
+          overlayManager.updateContents(htmlContent, true);
           if (frameValue != null) {
             overlayManager.setValue(frameValue);
           }

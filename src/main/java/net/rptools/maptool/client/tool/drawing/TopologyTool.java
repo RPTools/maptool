@@ -20,6 +20,7 @@ import java.awt.Graphics2D;
 import java.awt.Shape;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Area;
+import java.util.List;
 import javax.annotation.Nullable;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppStatePersisted;
@@ -32,8 +33,6 @@ import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.ZonePoint;
 
 public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
-  private final String instructionKey;
-  private final String tooltipKey;
   private final boolean isFilled;
   private final Strategy<StateT> strategy;
   private final TopologyModeSelectionPanel topologyModeSelectionPanel;
@@ -54,8 +53,8 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
       boolean isFilled,
       Strategy<StateT> strategy,
       TopologyModeSelectionPanel topologyModeSelectionPanel) {
-    this.instructionKey = instructionKey;
-    this.tooltipKey = tooltipKey;
+    super(instructionKey, tooltipKey);
+
     this.isFilled = isFilled;
     this.strategy = strategy;
     // Consistency with topology tools before refactoring. Can be updated as part of #5002.
@@ -63,16 +62,6 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
     this.topologyModeSelectionPanel = topologyModeSelectionPanel;
 
     this.maskOverlay = new MaskOverlay();
-  }
-
-  @Override
-  public String getInstructions() {
-    return instructionKey;
-  }
-
-  @Override
-  public String getTooltip() {
-    return tooltipKey;
   }
 
   @Override
@@ -170,6 +159,10 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
     if (state == null) {
       // We're not doing anything, so delegate to default behaviour.
       super.mouseDragged(e);
+    } else {
+      cancelMapDrag();
+      currentPoint = getPoint(e);
+      renderer.repaint();
     }
   }
 
@@ -206,7 +199,10 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
       renderer.repaint();
     }
 
-    super.mousePressed(e);
+    if (state == null) {
+      // We're not doing anything, so delegate to default behaviour.
+      super.mousePressed(e);
+    }
   }
 
   public static final class MaskOverlay implements ZoneOverlay {
@@ -223,16 +219,27 @@ public final class TopologyTool<StateT> extends AbstractDrawingLikeTool {
       g2.translate(renderer.getViewOffsetX(), renderer.getViewOffsetY());
       g2.scale(renderer.getScale(), renderer.getScale());
 
+      var tokenMasks = zone.getTokenMaskTopologies(null);
       g2.setColor(AppStyle.tokenMblColor);
-      g2.fill(zone.getTokenMaskTopology(Zone.TopologyType.MBL, null));
+      for (var topology : tokenMasks.getOrDefault(Zone.TopologyType.MBL, List.of())) {
+        g2.fill(topology);
+      }
       g2.setColor(AppStyle.tokenTopologyColor);
-      g2.fill(zone.getTokenMaskTopology(Zone.TopologyType.WALL_VBL, null));
+      for (var topology : tokenMasks.getOrDefault(Zone.TopologyType.WALL_VBL, List.of())) {
+        g2.fill(topology);
+      }
       g2.setColor(AppStyle.tokenHillVblColor);
-      g2.fill(zone.getTokenMaskTopology(Zone.TopologyType.HILL_VBL, null));
+      for (var topology : tokenMasks.getOrDefault(Zone.TopologyType.HILL_VBL, List.of())) {
+        g2.fill(topology);
+      }
       g2.setColor(AppStyle.tokenPitVblColor);
-      g2.fill(zone.getTokenMaskTopology(Zone.TopologyType.PIT_VBL, null));
+      for (var topology : tokenMasks.getOrDefault(Zone.TopologyType.PIT_VBL, List.of())) {
+        g2.fill(topology);
+      }
       g2.setColor(AppStyle.tokenCoverVblColor);
-      g2.fill(zone.getTokenMaskTopology(Zone.TopologyType.COVER_VBL, null));
+      for (var topology : tokenMasks.getOrDefault(Zone.TopologyType.COVER_VBL, List.of())) {
+        g2.fill(topology);
+      }
 
       g2.setColor(AppStyle.topologyTerrainColor);
       g2.fill(zone.getMaskTopology(Zone.TopologyType.MBL));

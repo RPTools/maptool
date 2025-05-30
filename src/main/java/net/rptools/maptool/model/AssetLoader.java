@@ -86,6 +86,14 @@ public class AssetLoader {
     repositoryStateMap.clear();
   }
 
+  /**
+   * Check whether there is currently a pending request for the given asset ID.
+   *
+   * <p>NOTE: This may be immediately incorrect by the time this function returns so decisions on
+   * whether to request an asset must not depend on the result.
+   *
+   * @return true if there is an incomplete request.
+   */
   public synchronized boolean isIdRequested(MD5Key id) {
     return requestedIdSet.contains(id);
   }
@@ -226,9 +234,20 @@ public class AssetLoader {
     return new File(REPO_CACHE_DIR.getAbsolutePath() + "/" + new MD5Key(repository.getBytes()));
   }
 
-  public synchronized void requestAsset(MD5Key id) {
+  /**
+   * Submit a new request to retrieve the asset with the given ID if needed.
+   *
+   * @param id The ID of the asset to request.
+   * @return false if there was already a request, true if a new request was submitted.
+   */
+  public synchronized boolean requestAsset(MD5Key id) {
+    if (requestedIdSet.contains(id)) {
+      return false;
+    }
+
     retrievalThreadPool.submit(new ImageRetrievalRequest(id, createRequestQueue(id)));
     requestedIdSet.add(id);
+    return true;
   }
 
   public synchronized void completeRequest(MD5Key id) {

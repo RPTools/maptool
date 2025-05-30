@@ -118,15 +118,19 @@ public class Toolbox {
   public void setSelectedTool(final Tool tool) {
     EventQueue.invokeLater(
         () -> {
-          if (tool == currentTool) {
+          if (tool == null || tool == currentTool || !tool.isAvailable()) {
             return;
           }
 
           detach();
-          var accepted = makeCurrent(tool);
-          if (accepted) {
-            attach();
+
+          currentTool = tool;
+          tool.setSelected(true);
+          if (MapTool.getFrame() != null) {
+            MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
           }
+
+          attach();
         });
   }
 
@@ -154,19 +158,5 @@ public class Toolbox {
         currentRenderer.removeOverlay((ZoneOverlay) currentTool);
       }
     }
-  }
-
-  private boolean makeCurrent(Tool tool) {
-    if (tool == null || !tool.isAvailable()) {
-      return false;
-    }
-
-    currentTool = tool;
-    tool.setSelected(true);
-    if (MapTool.getFrame() != null) {
-      MapTool.getFrame().setStatusMessage(I18N.getText(currentTool.getInstructions()));
-    }
-
-    return true;
   }
 }

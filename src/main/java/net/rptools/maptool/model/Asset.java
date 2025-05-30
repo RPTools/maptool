@@ -824,6 +824,21 @@ public final class Asset {
     return broken;
   }
 
+  /**
+   * Returns an {@link InputStream} for the {@code Asset}.
+   *
+   * @return the {@link InputStream} for the {@code Asset}.
+   */
+  public InputStream getDataAsInputStream() {
+    return new ByteArrayInputStream(data);
+  }
+
+  /**
+   * Creates an {@code Asset} from the {@link AssetDto}.
+   *
+   * @param dto the {@link AssetDto} to create the {@code Asset} from.
+   * @return the created {@code Asset}.
+   */
   public static Asset fromDto(AssetDto dto) {
     var dtoData = dto.getData().toByteArray();
     var asset =
@@ -837,6 +852,11 @@ public final class Asset {
     return asset;
   }
 
+  /**
+   * Converts this {@code Asset} to an {@link AssetDto}.
+   *
+   * @return the {@link AssetDto} for this {@code Asset}.
+   */
   public AssetDto toDto() {
     var builder =
         AssetDto.newBuilder()

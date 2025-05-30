@@ -68,7 +68,7 @@ public class CornerImageTokenOverlay extends ImageTokenOverlay {
    * @see ImageTokenOverlay#getImageBounds(java.awt.Rectangle, Token)
    */
   @Override
-  protected Rectangle getImageBounds(Rectangle bounds, Token token) {
+  public Rectangle getImageBounds(Rectangle bounds, Token token) {
     int x = (bounds.width + 1) / 2;
     int y = (bounds.height + 1) / 2;
     switch (corner) {

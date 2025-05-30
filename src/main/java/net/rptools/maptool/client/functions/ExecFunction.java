@@ -23,6 +23,7 @@ import net.rptools.maptool.client.MapToolExpressionParser;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
 import net.rptools.maptool.client.functions.json.JsonArrayFunctions;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.maptool.util.StringUtil;
@@ -45,6 +46,9 @@ public class ExecFunction extends AbstractFunction {
   /** Object used for various operations on {@link JsonArray}s. */
   private JsonArrayFunctions jsonArrayFunctions =
       JSONMacroFunctions.getInstance().getJsonArrayFunctions();
+
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   /**
    * Gets and instance of the ExecFunction class.
@@ -206,7 +210,8 @@ public class ExecFunction extends AbstractFunction {
   private static void runExecFunction(String functionName, List<Object> execArgs) {
     Parser parser = new MapToolExpressionParser().getParser();
     Function function = parser.getFunction(functionName);
-    MapTool.getParser().enterTrustedContext(functionName, "execFunction");
+    var loc = macroLocationFactory.createExecFunctionLocation(functionName);
+    MapTool.getParser().enterTrustedContext(functionName, loc);
     try {
       function.evaluate(parser, new MapToolVariableResolver(null), functionName, execArgs);
     } catch (ParserException pe) {

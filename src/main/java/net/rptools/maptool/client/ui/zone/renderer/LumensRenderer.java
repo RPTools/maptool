@@ -83,7 +83,7 @@ public class LumensRenderer {
       timer.stop("renderLumensOverlay:setClip");
     }
 
-    worldG.setComposite(AlphaComposite.SrcOver.derive(overlayOpacity));
+    worldG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
 
     timer.start("renderLumensOverlay:drawLumens");
     for (final var lumensLevel : disjointLumensLevels) {

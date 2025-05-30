@@ -93,6 +93,59 @@ public class AppConstants {
   public static final String MT_THEME_STAT_SHEET_CSS =
       "lib://net.rptools.maptool/css/mt-stat-sheet.css";
 
-  /** Namespace for built in add-ons. This is used to determine if an add-on is built in or not. */
+  /** Namespace for built-in add-ons. This is used to determine if an add-on is built in or not. */
   public static final String MT_BUILTIN_ADD_ON_NAMESPACE = "net.rptools.maptool";
+
+  /** Direction for use in processing image flipping */
+  public enum FLIP_DIRECTION {
+    NONE,
+    HORIZONTAL,
+    VERTICAL,
+    HORIZONTAL_VERTICAL,
+    ISOMETRIC,
+    ISOMETRIC_HORIZONTAL,
+    ISOMETRIC_VERTICAL,
+    ISOMETRIC_HORIZONTAL_VERTICAL;
+
+    public static FLIP_DIRECTION getFlipDirection(boolean x, boolean y, boolean iso) {
+      if (!x && !y && !iso) {
+        return NONE;
+      } else if (x && y && iso) {
+        return ISOMETRIC_HORIZONTAL_VERTICAL;
+      } else if (!x && y && iso) {
+        return ISOMETRIC_VERTICAL;
+      } else if (x && !y && iso) {
+        return ISOMETRIC_HORIZONTAL;
+      } else if (!x && !y) {
+        return ISOMETRIC;
+      } else if (x && y) {
+        return HORIZONTAL_VERTICAL;
+      } else if (!x) {
+        return VERTICAL;
+      } else {
+        return HORIZONTAL;
+      }
+    }
+
+    public static boolean isFlippedH(FLIP_DIRECTION flipDirection) {
+      return flipDirection.equals(HORIZONTAL)
+          || flipDirection.equals(HORIZONTAL_VERTICAL)
+          || flipDirection.equals(ISOMETRIC_HORIZONTAL)
+          || flipDirection.equals(ISOMETRIC_HORIZONTAL_VERTICAL);
+    }
+
+    public static boolean isFlippedIso(FLIP_DIRECTION flipDirection) {
+      return flipDirection.equals(ISOMETRIC)
+          || flipDirection.equals(ISOMETRIC_HORIZONTAL)
+          || flipDirection.equals(ISOMETRIC_VERTICAL)
+          || flipDirection.equals(ISOMETRIC_HORIZONTAL_VERTICAL);
+    }
+
+    public static boolean isFlippedV(FLIP_DIRECTION flipDirection) {
+      return flipDirection.equals(VERTICAL)
+          || flipDirection.equals(HORIZONTAL_VERTICAL)
+          || flipDirection.equals(ISOMETRIC_VERTICAL)
+          || flipDirection.equals(ISOMETRIC_HORIZONTAL_VERTICAL);
+    }
+  }
 }

@@ -341,6 +341,11 @@ public class Campaign {
     return campaignProperties.getLightSourcesMap();
   }
 
+  public void setLightSourcesMap(Map<String, Map<GUID, LightSource>> map) {
+    checkCampaignPropertyConversion();
+    campaignProperties.setLightSourcesMap(map);
+  }
+
   /**
    * Convenience method that calls {@link #getLightSourcesMap()} and returns the value for the key
    * <code>type</code>.

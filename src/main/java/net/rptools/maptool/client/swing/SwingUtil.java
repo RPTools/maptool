@@ -14,19 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Container;
-import java.awt.Cursor;
-import java.awt.Dimension;
-import java.awt.FontMetrics;
-import java.awt.Graphics2D;
-import java.awt.Point;
-import java.awt.Rectangle;
-import java.awt.RenderingHints;
-import java.awt.Toolkit;
-import java.awt.Transparency;
-import java.awt.Window;
+import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
@@ -129,12 +117,49 @@ public class SwingUtil {
    * @param outerWindow window to be centered over
    */
   public static void centerOver(Window innerWindow, Window outerWindow) {
+    // how big can it be?
+    // screen area minus OS bits like taskbars
+    GraphicsConfiguration gc = outerWindow.getGraphicsConfiguration();
+    Insets insets = outerWindow.getToolkit().getScreenInsets(gc);
+    Rectangle usableScreenArea = gc.getDevice().getDefaultConfiguration().getBounds();
+    usableScreenArea =
+        new Rectangle(
+            usableScreenArea.x + insets.left,
+            usableScreenArea.y + insets.top,
+            usableScreenArea.width - insets.left - insets.right,
+            usableScreenArea.height - insets.top - insets.bottom);
+
+    Dimension maxSize = usableScreenArea.getSize();
+
+    // what sizes are involved?
     Dimension innerSize = innerWindow.getSize();
     Dimension outerSize = outerWindow.getSize();
 
+    // make sure it fits
+    if (maxSize.width < innerSize.width || maxSize.height < innerSize.height) {
+      innerSize.setSize(
+          Math.min(maxSize.width, innerSize.width), Math.min(maxSize.height, innerSize.height));
+      innerWindow.setPreferredSize(innerSize);
+      innerWindow.setMaximumSize(innerSize);
+      innerWindow.revalidate();
+    }
+    // centre it
     int x = outerWindow.getLocation().x + (outerSize.width - innerSize.width) / 2;
     int y = outerWindow.getLocation().y + (outerSize.height - innerSize.height) / 2;
 
+    // just to make sure it doesn't cover UI elements, i.e. encroach on Screen Insets
+    // Left-hand side
+    x = (int) Math.max(x, usableScreenArea.getMinX());
+    // top side
+    y = (int) Math.max(y, usableScreenArea.getMinY());
+    // Right-hand side
+    if (x + innerSize.width > usableScreenArea.getMaxX()) {
+      x = (int) (usableScreenArea.getMaxX() - innerSize.width);
+    }
+    // Bottom
+    if (y + innerSize.height > usableScreenArea.getMaxY()) {
+      y = (int) (usableScreenArea.getMaxY() - innerSize.height);
+    }
     // Jamz: For multiple monitor's, x & y can be negative values...
     innerWindow.setLocation(x, y);
   }

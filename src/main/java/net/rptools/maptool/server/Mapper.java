@@ -279,7 +279,8 @@ public class Mapper {
               .setW(arc2D.getWidth())
               .setH(arc2D.getHeight())
               .setStart(arc2D.getAngleStart())
-              .setExtent(arc2D.getAngleExtent());
+              .setExtent(arc2D.getAngleExtent())
+              .setType(arc2D.getArcType());
       return shapeDto.setArc(dto).build();
     } else if (shape instanceof CubicCurve2D cc) {
       var dto =

@@ -1,3 +1,3 @@
-HTMLFormElement.prototype.submit = function(){
-    this.dispatchEvent(new Event('submit'));
+HTMLFormElement.prototype.submit = function () {
+  this.dispatchEvent(new Event('submit'));
 };

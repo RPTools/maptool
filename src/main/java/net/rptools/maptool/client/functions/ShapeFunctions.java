@@ -47,15 +47,77 @@ import org.apache.batik.parser.PathParser;
 // @formatter:on
 public class ShapeFunctions extends AbstractFunction {
   public static final Map<String, ShapeDrawable> CACHED_SHAPES;
+  public static final Map<String, List<String>> SHAPE_NAMED_ARGS =
+      Map.of(
+          "arc", List.of("x", "y", "w", "h", "start", "extent", "type"),
+          "arc-type", List.of("open", "0", "chord", "1", "pie", "2"),
+          "cubicCurve", List.of("x1", "y1", "ctrlx1", "ctrly1", "ctrlx2", "ctrly2", "x2", "y2"),
+          "ellipse", List.of("x", "y", "w", "h"),
+          "line", List.of("x1", "y1", "x2", "y2"),
+          "polygon", List.of("xpoints[]", "ypoints[]", "numpoints"),
+          "quadCurve", List.of("x1", "y1", "ctrlx", "ctrly", "x2", "y2"),
+          "rectangle", List.of("x", "y", "w", "h"),
+          "roundRectangle", List.of("x", "y", "w", "h", "arcw", "arch"));
+  public static final List<String> TRANSFORMS =
+      List.of(
+          "matrix, sX, shY, shX, sY, tX, tY",
+          "rotate, angle, x, y",
+          "rotate, angle",
+          "scale, sX, sY",
+          "shear, shX, shY",
+          "translate, tX, tY");
+  public static final List<String> PATH_ARGS =
+      List.of(
+          "wind/w/-1, 0/1",
+          "close/z/4",
+          "moveto/moveTo/move/m/0, number, number",
+          "line/lineto/lineTo/l/1, number, number",
+          "quad/quadto/quadTo/q/2, number, number, number, number",
+          "cubic/cubicto/cubicTo/c/3, number, number, number, number, number, number",
+          "arc/arcto/arcTo/a/4321, number, number, number, boolean, boolean, number, number");
+  public static final Map<String, String> SOURCE_LINKS =
+      Map.of(
+          "arc",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Arc2D.Double.html#Double-double-double-double-double-double-double-int-",
+          "cubicCurve",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/CubicCurve2D.Double.html#Double-double-double-double-double-double-double-double-double-",
+          "ellipse",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Ellipse2D.Double.html#Double-double-double-double-double-",
+          "line",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Line2D.Double.html#Double-double-double-double-double-",
+          "polygon",
+              "https://xmlgraphics.apache.org/batik/javadoc/org/apache/batik/ext/awt/geom/Polygon2D.html#Polygon2D-float:A-float:A-int-",
+          "quadCurve",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/QuadCurve2D.Double.html#Double-double-double-double-double-double-double-",
+          "rectangle",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/Rectangle2D.Double.html#Double-double-double-double-double-",
+          "roundRectangle",
+              "https://docs.oracle.com/javase/8/docs/api/java/awt/geom/RoundRectangle2D.Double.html#Double-double-double-double-double-double-double-",
+          "svgPath", "https://developer.mozilla.org/en-US/docs/Web/SVG/Tutorial/Paths");
+  public static final String[] SHAPE_TYPES =
+      new String[] {
+        "arc",
+        "cubiCurve",
+        "ellipse",
+        "line",
+        "path",
+        "polygon",
+        "quadCurve",
+        "rectangle",
+        "roundRectangle",
+        "svgPath"
+      };
+
   private static final ShapeFunctions instance = new ShapeFunctions();
   private static final AWTPathProducer AWT_PATH_PRODUCER = new AWTPathProducer();
   private static final PathParser PATH_PARSER = new PathParser();
   private static final String UNKNOWN_LAYER = "macro.function.tokenProperty.unknownLayer";
   private static final String OBJECT_NOT_FOUND = "macro.function.general.objectNotFound";
   private static final String INDEX_OUT_OF_BOUNDS =
-      "macro.function.general.indexOutOfBoundsVerbose";
+      "macro.function.general.indexOutOfBounds.verbose";
   private static final String UNABLE_TO_PARSE = "macro.function.general.unableToParse";
-  private static final String UNSUPPORTED_OPERATION = "macro.function.general.unsupportedOperation";
+  private static final String UNSUPPORTED_OPERATION =
+      "macro.function.general.unsupportedOperation.verbose";
   private static final String WRONG_NUMBER_OF_ARGUMENTS_FOR_OPERATION =
       "macro.function.general.wrongNumberArgumentsForOperation";
 
@@ -79,6 +141,7 @@ public class ShapeFunctions extends AbstractFunction {
         "shape.delete",
         "shape.draw",
         "shape.getProperties",
+        "shape.help",
         "shape.list",
         "shape.transform");
   }
@@ -118,9 +181,91 @@ public class ShapeFunctions extends AbstractFunction {
       return shapeList(parser, resolver, functionName, parameters);
     } else if (functionName.equalsIgnoreCase("shape.transform")) {
       return transformShape(parser, resolver, functionName, parameters);
+    } else if (functionName.equalsIgnoreCase("shape.help")) {
+      return shapeHelp(parser, resolver, functionName, parameters);
     } else {
       throw new ParserException(
           I18N.getText("macro.function.general.unknownFunction", functionName));
+    }
+  }
+
+  private Object shapeHelp(
+      Parser parser, VariableResolver resolver, String functionName, List<Object> parameters)
+      throws ParserException {
+    FunctionUtil.checkNumberParam(functionName, parameters, 0, 1);
+    String delim = ";";
+    if (!parameters.isEmpty()) {
+      delim = FunctionUtil.paramAsString(functionName, parameters, 0, false);
+    }
+    JsonObject jsonObject = new JsonObject();
+    StringBuilder sb = new StringBuilder();
+    boolean isJson = delim.equalsIgnoreCase("json");
+    for (String type : SHAPE_TYPES) {
+      if (!isJson) {
+        sb.append(type).append("=\"");
+      }
+      JsonObject nested = new JsonObject();
+      if (SOURCE_LINKS.containsKey(type)) {
+        String href = SOURCE_LINKS.get(type);
+        if (isJson) {
+          nested.addProperty("link", href);
+        } else {
+          sb.append("link=").append(href).append(delim);
+        }
+      }
+      if (SHAPE_NAMED_ARGS.containsKey(type)) {
+        if (isJson) {
+          nested.addProperty("named_arguments", String.join(",", SHAPE_NAMED_ARGS.get(type)));
+        } else {
+          sb.append("named_arguments=")
+              .append(String.join(",", SHAPE_NAMED_ARGS.get(type)))
+              .append(delim);
+        }
+        if (type.equalsIgnoreCase("arc")) {
+          if (isJson) {
+            nested.addProperty("type", String.join(",", SHAPE_NAMED_ARGS.get("arc-type")));
+          } else {
+            sb.append("\"type\"=")
+                .append(String.join(",", SHAPE_NAMED_ARGS.get("arc-type")))
+                .append(delim);
+          }
+        }
+      } else if (type.equalsIgnoreCase("svgpath")) {
+        if (isJson) {
+          nested.addProperty("arguments", "link");
+        } else {
+          sb.append("arguments=link").append(delim);
+        }
+      } else if (type.equalsIgnoreCase("path")) {
+        if (isJson) {
+          JsonArray nestedArray = new JsonArray();
+          for (String s : PATH_ARGS) {
+            nestedArray.add(s);
+          }
+          nested.add("segments", nestedArray);
+        } else {
+          sb.append("segments=").append(String.join(",", PATH_ARGS)).append(delim);
+        }
+      }
+      if (isJson) {
+        jsonObject.add(type, nested);
+      } else {
+        sb.append("\"").append(delim);
+      }
+    }
+    if (isJson) {
+      JsonArray nestedArray = new JsonArray();
+      for (String s : TRANSFORMS) {
+        nestedArray.add(s);
+      }
+      jsonObject.add("transforms", nestedArray);
+    } else {
+      sb.append("transforms=").append(String.join(",", TRANSFORMS)).append(delim);
+    }
+    if (isJson) {
+      return jsonObject;
+    } else {
+      return sb.toString();
     }
   }
 
@@ -333,7 +478,7 @@ public class ShapeFunctions extends AbstractFunction {
             case "roundrectangle" -> roundRectangle(functionName, shapeParams);
             default ->
                 throw new ParserException(
-                    I18N.getText(UNSUPPORTED_OPERATION, functionName, 3, shapeType));
+                    I18N.getText(UNSUPPORTED_OPERATION, functionName, 3, shapeType, SHAPE_TYPES));
           };
     }
     if (transformIndex != -1) {
@@ -690,7 +835,18 @@ public class ShapeFunctions extends AbstractFunction {
             shapeParameters.get("ypoints").getAsJsonArray().asList().stream()
                 .map(JsonElement::getAsDouble)
                 .toList());
-    return new Polygon2D(xpts, ypts, shapeParameters.get("numpoints").getAsInt());
+    int numPoints = shapeParameters.get("numpoints").getAsInt();
+    if (numPoints > xpts.length || numPoints > ypts.length || xpts.length != ypts.length) {
+      throw new ParserException(
+          I18N.getText(
+              "macro.function.general.indexOutOfBounds.verbose",
+              functionName,
+              5,
+              numPoints > xpts.length
+                  ? "numpoints"
+                  : numPoints > ypts.length ? "numpoints" : "xpoints/ypoints"));
+    }
+    return new Polygon2D(xpts, ypts, numPoints);
   }
 
   private Shape quadCurve(String functionName, JsonObject shapeParameters) throws ParserException {

@@ -26,6 +26,7 @@ import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.parser.ParserException;
@@ -34,6 +35,8 @@ import org.junit.jupiter.api.*;
 public class GetRolledTest {
 
   static MapToolLineParser parser;
+
+  private static MacroLocationFactory factory;
 
   private static final String GET_NEW_ROLLS_STR = "getNewRolls()";
   private static final String GET_ALL_ROLLS_STR = "getRolled()";
@@ -46,12 +49,15 @@ public class GetRolledTest {
           "[h: rolls_1 = getNewRolls()]",
           "[h: 1d20]",
           "[h: rolls_2 = getNewRolls()]",
-          "[r: macro.return = json.set('', 'priors', priors, 'rolls_1', rolls_1, 'rolls_2', rolls_2, 'all_rolls', getRolled())]");
+          "[r: macro.return = json.set('', 'priors', priors, 'rolls_1', rolls_1, 'rolls_2',"
+              + " rolls_2, 'all_rolls', getRolled())]");
 
   @BeforeAll
   public static void setUp() {
     parser = MapTool.getParser();
-    parser.enterContext("test", "test", true);
+    factory = MacroLocationFactory.getInstance();
+    var loc = factory.createChatLocation();
+    parser.enterContext("test", loc, true);
   }
 
   @AfterEach
@@ -214,13 +220,15 @@ public class GetRolledTest {
     token.setName("testToken");
     token.saveMacro(macro);
 
+    var loc = factory.createChatLocation();
     MapToolVariableResolver resolver = new MapToolVariableResolver(token);
+
     String result =
         parser.parseLine(
             resolver,
             token,
             "[h: 1d6]\n[h, macro('testMacro@TOKEN'):'']\n[r: macro.return]",
-            new MapToolMacroContext("test", "test", true));
+            new MapToolMacroContext("test", loc, true));
     JsonObject json =
         JSONMacroFunctions.getInstance().asJsonElement(result.trim()).getAsJsonObject();
     assertEquals(

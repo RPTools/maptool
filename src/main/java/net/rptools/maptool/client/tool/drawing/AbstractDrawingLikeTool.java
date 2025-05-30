@@ -22,10 +22,30 @@ import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.ToolHelper;
 import net.rptools.maptool.client.ui.zone.ZoneOverlay;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.ZonePoint;
 
 public abstract class AbstractDrawingLikeTool extends DefaultTool implements ZoneOverlay {
+  private final String instructionKey;
+  private final String tooltipKey;
   private boolean isEraser;
+
+  protected AbstractDrawingLikeTool(String instructionKey, String tooltipKey) {
+    this.instructionKey = instructionKey;
+    this.tooltipKey = tooltipKey;
+
+    setToolTipText(I18N.getText(tooltipKey));
+  }
+
+  @Override
+  public String getInstructions() {
+    return instructionKey;
+  }
+
+  @Override
+  public String getTooltip() {
+    return tooltipKey;
+  }
 
   protected void setIsEraser(boolean eraser) {
     isEraser = eraser;

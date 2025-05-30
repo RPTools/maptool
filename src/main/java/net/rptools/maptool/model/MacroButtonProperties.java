@@ -22,9 +22,10 @@ import javax.annotation.Nonnull;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.MapToolLineParser;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.MapToolUtil;
+import net.rptools.maptool.client.macro.MacroLocation;
+import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.client.ui.macrobuttons.MacroButtonHotKeyManager;
 import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
@@ -44,20 +45,44 @@ import org.jetbrains.annotations.NotNull;
  */
 public class MacroButtonProperties implements Comparable<MacroButtonProperties> {
 
+  /** Class for logging. */
   private static final Logger log = LogManager.getLogger(MacroButtonProperties.class);
+
+  /** Factory for creating macro locations. */
+  private static final MacroLocationFactory macroLocationFactory =
+      MacroLocationFactory.getInstance();
 
   // Jamz: Why a String and not UUID? Because stupid Hessian can't serialize UUID, ug.
   private @Nonnull String macroUUID = UUID.randomUUID().toString();
 
+  /** The id of the Token that this macro button is associated with. */
   private transient GUID tokenId;
+
+  /** location of the macro button, (e.g. CampaignPanel, GlobalPanel, Token) */
   private @Nonnull String saveLocation = "";
+
+  /** The index of the macro button on the panel. */
   private int index;
+
+  /** The Color key for the macro button. */
   private @Nonnull String colorKey = "default";
+
+  /** The hotkey for the macro button. */
   private @Nonnull String hotKey = MacroButtonHotKeyManager.HOTKEYS[0];
+
+  /** The command to execute when the button is clicked. */
   private @Nonnull String command = "";
+
+  /** The label for the macro button. */
   private @Nonnull String label = "";
+
+  /** The macro button group. */
   private @Nonnull String group = "";
+
+  /** The String to sort the macro button by. */
   private @Nonnull String sortby = "";
+
+  /** Does the macro button auto execute its contents or just append them to the chat input. */
   private boolean autoExecute;
 
   /** If {@code true}, include the macro lable when printing output. */
@@ -69,12 +94,25 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
    */
   private boolean applyToTokens;
 
+  /** The color key for the font of the macro button. */
   private @Nonnull String fontColorKey = "black";
+
+  /** The font size for the macro button. */
   private @Nonnull String fontSize = "1.00em";
+
+  /** The minimum width of the macro button. */
   private @Nonnull String minWidth = "";
+
+  /** The maximum width of the macro button. */
   private @Nonnull String maxWidth = "";
+
+  /** Can players edit this macro button? */
   private @Nonnull Boolean allowPlayerEdits = AppPreferences.allowPlayerMacroEditsDefault.get();
+
+  /** The ToolTip for the macro button. */
   private @Nonnull String toolTip = "";
+
+  /** Should the hotkey be displayed on the button? */
   private @Nonnull Boolean displayHotKey = true;
 
   private MacroButtonProperties() {}
@@ -487,7 +525,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
     ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
     Zone zone = (zr == null ? null : zr.getZone());
     Token contextToken = (zone == null ? null : zone.getToken(tokenId));
-    String loc;
+    MacroLocation loc;
     for (String command : commandsToExecute) {
       // If we aren't auto execute, then append the text instead of replace it
       command = impersonatePrefix + (!getAutoExecute() ? oldText + " " : "") + command;
@@ -497,25 +535,21 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
           trusted = true;
         }
         if (saveLocation.equals("GlobalPanel")) {
-          loc = "global";
+          loc = macroLocationFactory.createGlobalLocation(label);
           trusted = MapTool.getPlayer().isGM();
         } else if (saveLocation.equals("CampaignPanel")) {
-          loc = "campaign";
+          loc = macroLocationFactory.createCampaignLocation(label);
         } else if (saveLocation.equals("GmPanel")) {
-          loc = "gm";
+          loc = macroLocationFactory.createGmLocation(label);
           trusted = MapTool.getPlayer().isGM();
         } else if (contextToken != null) {
-          // Should this IF stmt really be:
-          // contextToken.matches("^[^:\\s]+:")
-          // That would match any token with a string of text followed by a colon
-          // with no spaces in front of the colon.
           if (contextToken.getName().toLowerCase().startsWith("lib:")) {
-            loc = contextToken.getName();
+            loc = macroLocationFactory.createLibTokenLocation(label, contextToken);
           } else {
-            loc = "Token:" + contextToken.getName();
+            loc = macroLocationFactory.createTokenLocation(label, contextToken);
           }
         } else {
-          loc = MapToolLineParser.CHAT_INPUT;
+          loc = macroLocationFactory.createChatLocation();
         }
         MapToolMacroContext newMacroContext = new MapToolMacroContext(label, loc, trusted, index);
         MapTool.getFrame().getCommandPanel().commitCommand(command, newMacroContext);
@@ -761,14 +795,16 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
       token = MapTool.getFrame().getCurrentZoneRenderer().getZone().getToken(tokenId);
     }
     try {
-      MapToolMacroContext context =
-          new MapToolMacroContext("ToolTip", token != null ? token.getName() : "", false, index);
+      var loc = macroLocationFactory.createToolTipLocation(token);
+      MapToolMacroContext context = new MapToolMacroContext("ToolTip", loc, false, index);
       if (token == null) {
         log.debug(
-            "Evaluating toolTip: ----------------------------------------------------------------------------------");
+            "Evaluating toolTip:"
+                + " ----------------------------------------------------------------------------------");
       } else {
         log.debug(
-            "Evaluating toolTip: for token {} ({})----------------------------------------------------------------------------------",
+            "Evaluating toolTip: for token {}"
+                + " ({})----------------------------------------------------------------------------------",
             token.getName(),
             token.getId());
       }

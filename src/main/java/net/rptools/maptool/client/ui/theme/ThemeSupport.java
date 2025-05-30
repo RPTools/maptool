@@ -29,6 +29,7 @@ import java.util.Arrays;
 import javax.swing.*;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.themes.*;
 import net.rptools.maptool.events.MapToolEventBus;
 import org.apache.logging.log4j.LogManager;
@@ -640,10 +641,13 @@ public class ThemeSupport {
       }
       var imageIcon = new ImageIcon(imageURL, themeDetails.name);
       if (dimension != null && dimension.width > 0 && dimension.height > 0) {
+        var imageSize = new Dimension(imageIcon.getIconWidth(), imageIcon.getIconHeight());
+        SwingUtil.constrainTo(imageSize, dimension.width, dimension.height);
+
         imageIcon.setImage(
             imageIcon
                 .getImage()
-                .getScaledInstance(dimension.width, dimension.height, Image.SCALE_AREA_AVERAGING));
+                .getScaledInstance(imageSize.width, imageSize.height, Image.SCALE_AREA_AVERAGING));
       }
       return imageIcon;
     }

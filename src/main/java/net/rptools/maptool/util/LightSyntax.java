@@ -37,10 +37,13 @@ import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public class LightSyntax {
 
   private static final int DEFAULT_LUMENS = 100;
+  private static final Logger log = LogManager.getLogger(LightSyntax.class);
 
   public Map<GUID, LightSource> parseLights(String text, Iterable<LightSource> original) {
     final var lightSourceMap = new HashMap<GUID, LightSource>();
@@ -143,13 +146,18 @@ public class LightSyntax {
 
   private void writeLightLines(StringBuilder builder, Iterable<LightSource> lights) {
     for (LightSource lightSource : lights) {
+      if (lightSource.getType() != LightSource.Type.NORMAL) {
+        log.error("A non-normal light was provided for lightt stringification. Skipping.");
+        continue;
+      }
+
       builder.append(lightSource.getName()).append(":");
 
-      if (lightSource.getType() != LightSource.Type.NORMAL) {
-        builder.append(' ').append(lightSource.getType().name().toLowerCase());
-      }
       if (lightSource.isScaleWithToken()) {
         builder.append(" scale");
+      }
+      if (lightSource.isIgnoresVBL()) {
+        builder.append(" ignores-vbl");
       }
 
       final var lastParameters = new LinkedHashMap<String, Object>();
@@ -157,18 +165,9 @@ public class LightSyntax {
       lastParameters.put("width", 0.);
       lastParameters.put("arc", 0.);
       lastParameters.put("offset", 0.);
-      lastParameters.put("GM", false);
-      lastParameters.put("OWNER", false);
-      lastParameters.put("IGNORES-VBL", false);
 
       for (Light light : lightSource.getLightList()) {
         final var parameters = new HashMap<>();
-
-        if (lightSource.getType() == LightSource.Type.AURA) {
-          parameters.put("GM", light.isGM());
-          parameters.put("OWNER", light.isOwnerOnly());
-        }
-        parameters.put("IGNORES-VBL", lightSource.isIgnoresVBL());
 
         parameters.put("", light.getShape().name().toLowerCase());
         switch (light.getShape()) {
@@ -220,14 +219,13 @@ public class LightSyntax {
           Color color = (Color) light.getPaint().getPaint();
           builder.append(toHex(color));
         }
-        if (lightSource.getType() == LightSource.Type.NORMAL) {
-          final var lumens = light.getLumens();
-          if (lumens != DEFAULT_LUMENS) {
-            if (lumens >= 0) {
-              builder.append('+');
-            }
-            builder.append(Integer.toString(lumens, 10));
+
+        final var lumens = light.getLumens();
+        if (lumens != DEFAULT_LUMENS) {
+          if (lumens >= 0) {
+            builder.append('+');
           }
+          builder.append(Integer.toString(lumens, 10));
         }
       }
       builder.append('\n');
@@ -250,7 +248,6 @@ public class LightSyntax {
     // region Light source properties.
     String name = line.substring(0, split).trim();
     GUID id = new GUID();
-    LightSource.Type type = LightSource.Type.NORMAL;
     boolean scaleWithToken = false;
     boolean ignoresVBL = false;
     List<Light> lights = new ArrayList<>();
@@ -260,24 +257,12 @@ public class LightSyntax {
     double width = 0;
     double arc = 0;
     double offset = 0;
-    boolean gmOnly = false;
-    boolean ownerOnly = false;
     String distance;
     // endregion
 
     for (String arg : line.substring(split + 1).split("\\s+")) {
       arg = arg.trim();
       if (arg.isEmpty()) {
-        continue;
-      }
-      if (arg.equalsIgnoreCase("GM")) {
-        gmOnly = true;
-        ownerOnly = false;
-        continue;
-      }
-      if (arg.equalsIgnoreCase("OWNER")) {
-        gmOnly = false;
-        ownerOnly = true;
         continue;
       }
       // Scale with token designation
@@ -294,14 +279,6 @@ public class LightSyntax {
       // Shape designation ?
       try {
         shape = ShapeType.valueOf(arg.toUpperCase());
-        continue;
-      } catch (IllegalArgumentException iae) {
-        // Expected when not defining a shape
-      }
-
-      // Type designation ?
-      try {
-        type = LightSource.Type.valueOf(arg.toUpperCase());
         continue;
       } catch (IllegalArgumentException iae) {
         // Expected when not defining a shape
@@ -367,13 +344,6 @@ public class LightSyntax {
         }
       }
 
-      boolean isAura = type == LightSource.Type.AURA;
-      if (!isAura && (gmOnly || ownerOnly)) {
-        errlog.add(I18N.getText("msg.error.mtprops.light.gmOrOwner", lineNumber));
-        gmOnly = false;
-        ownerOnly = false;
-      }
-      ownerOnly = !gmOnly && ownerOnly;
       try {
         Light t =
             new Light(
@@ -384,8 +354,8 @@ public class LightSyntax {
                 arc,
                 color == null ? null : new DrawableColorPaint(color),
                 perRangeLumens,
-                gmOnly,
-                ownerOnly);
+                false,
+                false);
         lights.add(t);
       } catch (ParseException pe) {
         errlog.add(I18N.getText("msg.error.mtprops.light.distance", lineNumber, distance));
@@ -395,14 +365,15 @@ public class LightSyntax {
     // Keep ID the same if modifying existing light. This avoids tokens losing their lights when
     // the light definition is modified.
     for (LightSource ls : originalInCategory) {
-      if (name.equalsIgnoreCase(ls.getName())) {
+      if (ls.getType() == LightSource.Type.NORMAL && name.equalsIgnoreCase(ls.getName())) {
         assert ls.getId() != null;
         id = ls.getId();
         break;
       }
     }
 
-    return LightSource.createRegular(name, id, type, scaleWithToken, ignoresVBL, lights);
+    return LightSource.createRegular(
+        name, id, LightSource.Type.NORMAL, scaleWithToken, ignoresVBL, lights);
   }
 
   private String toHex(Color color) {

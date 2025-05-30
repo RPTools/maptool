@@ -46,6 +46,7 @@ import net.rptools.CaseInsensitiveHashMap;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
@@ -94,6 +95,8 @@ public class Token implements Cloneable {
   public static final String NUM_ON_BOTH = "Both";
 
   public static final String LIB_TOKEN_PREFIX = "lib:";
+  private static final int OWNER_TYPE_ALL = 1;
+  private static final int OWNER_TYPE_LIST = 0;
 
   private boolean beingImpersonated = false;
   private GUID exposedAreaGUID = new GUID();
@@ -202,7 +205,7 @@ public class Token implements Cloneable {
     setVisible,
     setVisibleOnlyToOwner,
     setIsAlwaysVisible,
-    setTokenOpacity,
+    setOpacity,
     setTerrainModifier,
     setTerrainModifierOperation,
     setTerrainModifiersIgnored,
@@ -232,32 +235,28 @@ public class Token implements Cloneable {
   private int x;
   private int y;
   private int z;
-
-  private int anchorX;
-  private int anchorY;
-
-  private double sizeScale = 1;
-
+  private Integer facing = null;
   private int lastX;
   private int lastY;
   private Path<? extends AbstractPoint> lastPath;
 
-  private boolean snapToScale = true; // Whether the scaleX and scaleY represent snap-to-grid
-  // measurements
+  private int anchorX;
+  private int anchorY;
+  private double sizeScale = 1;
+  private double scaleX = 1;
+  private double scaleY = 1;
+  private boolean snapToScale = true; // Is size based on footprint
 
+  // measurements
   // These are the original image width and height
   private int width;
   private int height;
   private int isoWidth;
   private int isoHeight;
 
-  private double scaleX = 1;
-  private double scaleY = 1;
-
   private Map<String, GUID> sizeMap = new HashMap<>();
 
-  private boolean snapToGrid = true; // Whether the token snaps to the current grid or is free
-  // floating
+  private boolean snapToGrid = true; // Is token position constrained to grid increments
 
   private boolean isVisible = true;
   private boolean visibleOnlyToOwner = false;
@@ -266,23 +265,16 @@ public class Token implements Cloneable {
   // before token is shown over FoW
   private boolean isAlwaysVisible = false; // Controls whether a Token is shown over VBL
 
-  // region Topology masks
-
+  // Topology masks
   private Area vbl;
   private Area hillVbl;
   private Area pitVbl;
   private Area coverVbl;
   private Area mbl;
 
-  // endregion
-
   private String name = "";
   private Set<String> ownerList = new HashSet<>();
-
   private int ownerType;
-
-  private static final int OWNER_TYPE_ALL = 1;
-  private static final int OWNER_TYPE_LIST = 0;
 
   private String tokenShape = TokenShape.SQUARE.toString();
   private String tokenType = Type.NPC.toString();
@@ -292,10 +284,9 @@ public class Token implements Cloneable {
   private String propertyType =
       MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
-  private Integer facing = null;
-
   private Integer haloColorValue;
-  private transient Color haloColor;
+  private transient Color haloColor =
+      new Color(ImageUtil.negativeColourInt(AppPreferences.defaultGridColor.getDefault().getRGB()));
 
   private Integer visionOverlayColorValue;
   private transient Color visionOverlayColor;
@@ -421,9 +412,6 @@ public class Token implements Cloneable {
     height = token.height;
     isoWidth = token.isoWidth;
     isoHeight = token.isoHeight;
-    scaleX = token.scaleX;
-    scaleY = token.scaleY;
-    facing = token.facing;
     tokenShape = token.tokenShape;
     tokenType = token.tokenType;
     haloColorValue = token.haloColorValue;
@@ -449,9 +437,15 @@ public class Token implements Cloneable {
     gmNotesType = token.gmNotesType;
     label = token.label;
 
+    anchorX = token.anchorX;
+    anchorY = token.anchorY;
+    facing = token.facing;
     isFlippedX = token.isFlippedX;
     isFlippedY = token.isFlippedY;
     isFlippedIso = token.isFlippedIso;
+    scaleX = token.scaleX;
+    scaleY = token.scaleY;
+    sizeScale = token.sizeScale;
 
     layer = token.layer;
 
@@ -459,9 +453,6 @@ public class Token implements Cloneable {
 
     charsheetImage = token.charsheetImage;
     portraitImage = token.portraitImage;
-    anchorX = token.anchorX;
-    anchorY = token.anchorY;
-    sizeScale = token.sizeScale;
     sightType = token.sightType;
     hasSight = token.hasSight;
     propertyType = token.propertyType;
@@ -585,7 +576,7 @@ public class Token implements Cloneable {
   }
 
   public void setWidth(int width) {
-    if (isFlippedIso()) {
+    if (getIsFlippedIso()) {
       isoWidth = width;
     } else {
       this.width = width;
@@ -593,7 +584,7 @@ public class Token implements Cloneable {
   }
 
   public void setHeight(int height) {
-    if (isFlippedIso()) {
+    if (getIsFlippedIso()) {
       isoHeight = height;
     } else {
       this.height = height;
@@ -601,7 +592,7 @@ public class Token implements Cloneable {
   }
 
   public int getWidth() {
-    if (isFlippedIso() && isoWidth != 0) {
+    if (getIsFlippedIso() && isoWidth != 0) {
       return isoWidth;
     } else {
       return width;
@@ -609,7 +600,7 @@ public class Token implements Cloneable {
   }
 
   public int getHeight() {
-    if (isFlippedIso() && isoHeight != 0) {
+    if (getIsFlippedIso() && isoHeight != 0) {
       return isoHeight;
     } else {
       return height;
@@ -841,47 +832,6 @@ public class Token implements Cloneable {
   public void setLayer(Zone.Layer layer) {
     this.layer = layer.name();
     actualLayer = layer;
-  }
-
-  public boolean hasFacing() {
-    return facing != null;
-  }
-
-  public void setFacing(int facing) {
-    while (facing > 180 || facing < -179) {
-      facing += facing > 180 ? -360 : 0;
-      facing += facing < -179 ? 360 : 0;
-    }
-    this.facing = facing;
-  }
-
-  public void removeFacing() {
-    this.facing = null;
-  }
-
-  /**
-   * Facing is in the map space where 0 degrees is along the X axis to the right and proceeding CCW
-   * for positive angles.
-   *
-   * <p>Round/Square tokens that have no facing set, return null. Top Down tokens default to -90.
-   *
-   * @return null or angle in degrees
-   */
-  public int getFacing() {
-    // -90° is natural alignment.
-    return facing == null ? -90 : facing;
-  }
-
-  /**
-   * This returns the rotation of the facing of the token from the default facing of down or -90.
-   *
-   * <p>Positive for CW and negative for CCW. The range is currently from -270° (inclusive) to +90°
-   * (exclusive), but callers should not rely on this.
-   *
-   * @return angle in degrees
-   */
-  public int getFacingInDegrees() {
-    return -getFacing() - 90;
   }
 
   public boolean getHasSight() {
@@ -1185,6 +1135,24 @@ public class Token implements Cloneable {
     return assetId;
   }
 
+  public MD5Key getTokenImageAssetId() {
+    if (!getHasImageTable() || !hasFacing() || getImageTableName() == null)
+      return getImageAssetId();
+
+    LookupTable lookupTable = MapTool.getCampaign().getLookupTableMap().get(getImageTableName());
+    if (lookupTable == null) return getImageAssetId();
+
+    try {
+      LookupTable.LookupEntry result = lookupTable.getLookup(String.valueOf(getFacing()));
+      if (result != null) return result.getImageId();
+
+    } catch (ParserException p) {
+      /* do nothing  */
+    }
+
+    return getImageAssetId();
+  }
+
   /**
    * Store the token image, and set the native Width and Height.
    *
@@ -1288,22 +1256,6 @@ public class Token implements Cloneable {
 
   public Path<? extends AbstractPoint> getLastPath() {
     return lastPath;
-  }
-
-  public double getScaleX() {
-    return scaleX;
-  }
-
-  public double getScaleY() {
-    return scaleY;
-  }
-
-  public void setScaleX(double scaleX) {
-    this.scaleX = scaleX;
-  }
-
-  public void setScaleY(double scaleY) {
-    this.scaleY = scaleY;
   }
 
   /**
@@ -1526,7 +1478,7 @@ public class Token implements Cloneable {
       atArea.concatenate(AffineTransform.getTranslateInstance(0, -getHeight()));
     }
 
-    if (isFlippedIso()) {
+    if (getIsFlippedIso()) {
       return new Area(atArea.createTransformedShape(IsometricGrid.isoArea(areaToTransform)));
     }
 
@@ -1556,33 +1508,30 @@ public class Token implements Cloneable {
 
     // Sizing
     if (!isSnapToScale()) {
-      w = getWidth() * getScaleX();
-      h = getHeight() * getScaleY();
+      w = getWidth() * scaleX;
+      h = getHeight() * scaleY;
       if (grid.isIsometric() && getShape() == Token.TokenShape.FIGURE) {
         // Native size figure tokens need to follow iso rules
         h = (w / 2);
       }
     } else {
-      w = footprintBounds.width * footprint.getScale() * sizeScale;
-      h = footprintBounds.height * footprint.getScale() * sizeScale;
+      w = footprintBounds.width * footprint.getScale();
+      h = footprintBounds.height * footprint.getScale();
     }
     // Positioning
     if (!isSnapToGrid()) {
       footprintBounds.x = getX();
       footprintBounds.y = getY();
     } else {
-      if (getLayer().anchorSnapToGridAtCenter()) {
+      if (getLayer().isSnapToGridAtCenter()) {
         // Center it on the footprint
-        footprintBounds.x -= (w - footprintBounds.width) / 2;
-        footprintBounds.y -= (h - footprintBounds.height) / 2;
+        footprintBounds.x -= (int) ((w - footprintBounds.width) / 2d);
+        footprintBounds.y -= (int) ((h - footprintBounds.height) / 2d);
       }
     }
     footprintBounds.width = (int) w; // perhaps make this a double
     footprintBounds.height = (int) h;
 
-    // Offset
-    footprintBounds.x += anchorX;
-    footprintBounds.y += anchorY;
     return footprintBounds;
   }
 
@@ -1600,7 +1549,7 @@ public class Token implements Cloneable {
     Grid grid = zone.getGrid();
     int dragAnchorX, dragAnchorY;
     if (isSnapToGrid() && grid.getCapabilities().isSnapToGridSupported()) {
-      if (!getLayer().isStampLayer() || !getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
+      if (!getLayer().isStampLayer() || !getLayer().isSnapToGridAtCenter() || isSnapToScale()) {
         Point2D.Double centerOffset = grid.getCenterOffset();
         dragAnchorX = getX() + (int) centerOffset.x;
         dragAnchorY = getY() + (int) centerOffset.y;
@@ -1664,7 +1613,7 @@ public class Token implements Cloneable {
     Point2D.Double offset = getSnapToUnsnapOffset(zone);
     double newX = getX() + offset.x;
     double newY = getY() + offset.y;
-    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().isSnapToGridAtCenter()) {
       return grid.convert(
           grid.convert(new ZonePoint((int) Math.ceil(newX), (int) Math.ceil(newY))));
     } else {
@@ -1697,13 +1646,13 @@ public class Token implements Cloneable {
     double offsetX, offsetY;
     Rectangle tokenBounds = getBounds(zone);
     Grid grid = zone.getGrid();
-    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().anchorSnapToGridAtCenter()) {
-      if (!getLayer().anchorSnapToGridAtCenter() || isSnapToScale()) {
+    if (grid.getCapabilities().isSnapToGridSupported() || !getLayer().isSnapToGridAtCenter()) {
+      if (!getLayer().isSnapToGridAtCenter() || isSnapToScale()) {
         TokenFootprint footprint = getFootprint(grid);
         Rectangle footprintBounds = footprint.getBounds(grid);
         double footprintOffsetX = 0;
         double footprintOffsetY = 0;
-        if (getLayer().anchorSnapToGridAtCenter()) {
+        if (getLayer().isSnapToGridAtCenter()) {
           // Non-background tokens can have an offset from top left corner
           footprintOffsetX = tokenBounds.width - footprintBounds.width;
           footprintOffsetY = tokenBounds.height - footprintBounds.height;
@@ -2169,33 +2118,6 @@ public class Token implements Cloneable {
     notesType = type;
   }
 
-  public boolean isFlippedY() {
-    return isFlippedY;
-  }
-
-  public void setFlippedY(boolean isFlippedY) {
-    this.isFlippedY = isFlippedY;
-  }
-
-  public boolean isFlippedX() {
-    return isFlippedX;
-  }
-
-  public void setFlippedX(boolean isFlippedX) {
-    this.isFlippedX = isFlippedX;
-  }
-
-  public boolean isFlippedIso() {
-    if (isFlippedIso != null) {
-      return isFlippedIso;
-    }
-    return false;
-  }
-
-  public void setFlippedIso(boolean isFlippedIso) {
-    this.isFlippedIso = isFlippedIso;
-  }
-
   public Color getVisionOverlayColor() {
     if (visionOverlayColor == null && visionOverlayColorValue != null) {
       visionOverlayColor = new Color(visionOverlayColorValue);
@@ -2227,27 +2149,119 @@ public class Token implements Cloneable {
   }
 
   public int getAnchorX() {
-    return anchorX;
+    return this.anchorX;
+  }
+
+  public void setAnchorX(int xAnchor) {
+    this.anchorX = xAnchor;
   }
 
   public int getAnchorY() {
-    return anchorY;
+    return this.anchorY;
+  }
+
+  public void setAnchorY(int yAnchor) {
+    this.anchorY = yAnchor;
+  }
+
+  public boolean getIsFlippedIso() {
+    if (isFlippedIso != null) {
+      return isFlippedIso;
+    }
+    return false;
+  }
+
+  public void setIsFlippedIso(boolean isFlippedIso) {
+    this.isFlippedIso = isFlippedIso;
+  }
+
+  public boolean isFlippedX() {
+    return isFlippedX;
+  }
+
+  public void setFlippedX(boolean flippedX) {
+    this.isFlippedX = flippedX;
+  }
+
+  public boolean isFlippedY() {
+    return isFlippedY;
+  }
+
+  public void setFlippedY(boolean flippedY) {
+    this.isFlippedY = flippedY;
+  }
+
+  public double getScaleX() {
+    return this.scaleX;
+  }
+
+  public void setScaleX(double scaleX) {
+    this.scaleX = scaleX;
+  }
+
+  public double getScaleY() {
+    return this.scaleY;
+  }
+
+  public void setScaleY(double scaleY) {
+    this.scaleY = scaleY;
   }
 
   /**
-   * @return the scale of the token layout
+   * @return the scale of the image in token layout
    */
   public double getSizeScale() {
-    return sizeScale;
+    return this.sizeScale;
   }
 
   /**
-   * Set the scale of the token layout
+   * Set the scale of the image in token layout
    *
    * @param scale the scale of the token
    */
   public void setSizeScale(double scale) {
-    sizeScale = scale;
+    this.sizeScale = scale;
+  }
+
+  public boolean hasFacing() {
+    return facing != null;
+  }
+
+  public void setFacing(int direction) {
+    while (direction > 180 || direction < -179) {
+      direction += direction > 180 ? -360 : 0;
+      direction += direction < -179 ? 360 : 0;
+    }
+    this.facing = direction;
+  }
+
+  public void removeFacing() {
+    this.facing = null;
+  }
+
+  /**
+   * Facing is in the map space where 0 degrees is along the X axis to the right and proceeding CCW
+   * for positive angles.
+   *
+   * <p>Round/Square tokens that have no facing set, return null. Top Down tokens default to -90.
+   *
+   * @return null or angle in degrees
+   */
+  public int getFacing() {
+    // -90° is natural alignment.
+    return facing == null ? -90 : facing;
+  }
+
+  /**
+   * This returns the rotation of the facing of the token from the default facing of down or -90.
+   *
+   * <p>Positive for CW and negative for CCW. The range is currently from -270° (inclusive) to +90°
+   * (exclusive), but callers should not rely on this.
+   *
+   * @return angle in degrees
+   */
+  public int getFacingInDegrees() {
+    return -getFacing() - 90;
   }
 
   /**
@@ -2849,7 +2863,7 @@ public class Token implements Cloneable {
       case setIsAlwaysVisible:
         setIsAlwaysVisible(parameters.get(0).getBoolValue());
         break;
-      case setTokenOpacity:
+      case setOpacity:
         setTokenOpacity(Float.parseFloat(parameters.get(0).getStringValue()));
         break;
       case setTerrainModifier:
@@ -2947,7 +2961,7 @@ public class Token implements Cloneable {
         setFlippedY(!isFlippedY());
         break;
       case flipIso:
-        setFlippedIso(!isFlippedIso());
+        setIsFlippedIso(!getIsFlippedIso());
         break;
     }
     if (lightChanged) {
@@ -2982,17 +2996,23 @@ public class Token implements Cloneable {
     token.lastY = dto.getLastY();
     token.y = dto.getY();
     token.z = dto.getZ();
-    token.anchorX = dto.getAnchorX();
-    token.anchorY = dto.getAnchorY();
-    token.sizeScale = dto.getSizeScale();
     token.lastPath = dto.hasLastPath() ? Path.fromDto(dto.getLastPath()) : null;
     token.snapToScale = dto.getSnapToScale();
     token.width = dto.getWidth();
     token.height = dto.getHeight();
     token.isoWidth = dto.getIsoWidth();
     token.isoHeight = dto.getIsoHeight();
+
+    token.anchorX = dto.getAnchorX();
+    token.anchorY = dto.getAnchorY();
     token.scaleX = dto.getScaleX();
     token.scaleY = dto.getScaleY();
+    token.sizeScale = dto.getSizeScale();
+    token.isFlippedX = dto.getIsFlippedX();
+    token.isFlippedY = dto.getIsFlippedY();
+    token.isFlippedIso = dto.getIsFlippedIso();
+    token.facing = dto.hasFacing() ? dto.getFacing().getValue() : null;
+
     dto.getSizeMapMap().forEach((k, v) -> token.sizeMap.put(k, GUID.valueOf(v)));
     token.snapToGrid = dto.getSnapToGrid();
     token.isVisible = dto.getIsVisible();
@@ -3012,7 +3032,6 @@ public class Token implements Cloneable {
     token.tokenType = dto.getTokenType();
     token.layer = dto.getLayer();
     token.propertyType = dto.getPropertyType();
-    token.facing = dto.hasFacing() ? dto.getFacing().getValue() : null;
     token.haloColorValue = dto.hasHaloColor() ? dto.getHaloColor().getValue() : null;
     token.visionOverlayColorValue =
         dto.hasVisionOverlayColor() ? dto.getVisionOverlayColor().getValue() : null;
@@ -3020,14 +3039,12 @@ public class Token implements Cloneable {
     token.speechName = dto.getSpeechName();
     token.terrainModifier = dto.getTerrainModifier();
     token.terrainModifierOperation =
-        Token.TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name());
+        TerrainModifierOperation.valueOf(dto.getTerrainModifierOperation().name());
     token.terrainModifiersIgnored.addAll(
         dto.getTerrainModifiersIgnoredList().stream()
-            .map(m -> Token.TerrainModifierOperation.valueOf(m.name()))
+            .map(m -> TerrainModifierOperation.valueOf(m.name()))
             .collect(Collectors.toList()));
-    token.isFlippedX = dto.getIsFlippedX();
-    token.isFlippedY = dto.getIsFlippedY();
-    token.isFlippedIso = dto.getIsFlippedIso();
+
     token.charsheetImage =
         dto.hasCharsheetImage() ? new MD5Key(dto.getCharsheetImage().getValue()) : null;
     token.portraitImage =
@@ -3094,9 +3111,15 @@ public class Token implements Cloneable {
     dto.setLastY(lastY);
     dto.setY(y);
     dto.setZ(z);
+    if (facing != null) {
+      dto.setFacing(Int32Value.of(facing));
+    }
     dto.setAnchorX(anchorX);
     dto.setAnchorY(anchorY);
     dto.setSizeScale(sizeScale);
+    dto.setScaleX(scaleX);
+    dto.setScaleY(scaleY);
+
     if (lastPath != null) {
       dto.setLastPath(lastPath.toDto());
     }
@@ -3105,8 +3128,6 @@ public class Token implements Cloneable {
     dto.setHeight(height);
     dto.setIsoWidth(isoWidth);
     dto.setIsoHeight(isoHeight);
-    dto.setScaleX(scaleX);
-    dto.setScaleY(scaleY);
     sizeMap.forEach((k, v) -> dto.putSizeMap(k, v.toString()));
     dto.setSnapToGrid(snapToGrid);
     dto.setIsVisible(isVisible);
@@ -3136,9 +3157,7 @@ public class Token implements Cloneable {
     dto.setTokenType(tokenType);
     dto.setLayer(layer);
     dto.setPropertyType(propertyType);
-    if (facing != null) {
-      dto.setFacing(Int32Value.of(facing));
-    }
+
     if (haloColorValue != null) {
       dto.setHaloColor(Int32Value.of(haloColorValue));
     }
