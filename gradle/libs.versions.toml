@@ -104,7 +104,7 @@ apache-commons-cli = { group = "commons-cli", name = "commons-cli", version = "1
 # String utilities
 apache-commons-lang = { group = "org.apache.commons", name = "commons-lang3", version = "3.17.0" }
 # needed for preference dialog at runtime
-apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.9.0" }
+apache-commons-beanutils = { group = "commons-beanutils", name = "commons-beanutils", version = "1.11.0" }
 # XPath parsing, used for UPNP
 apache-commons-jxpath = { group = "commons-jxpath", name = "commons-jxpath", version = "1.3" }
 # For determining file type
