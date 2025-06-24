@@ -25,11 +25,11 @@ import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
@@ -76,7 +76,7 @@ public class IsometricGrid extends Grid {
   }
 
   public double getCellHeightHalf() {
-    return getSize() / 2;
+    return getSize() / 2f;
   }
 
   @Override
@@ -283,7 +283,7 @@ public class IsometricGrid extends Grid {
     Area cellShape = createCellShape(footprint.height);
     // convert the area to isometric view
     AffineTransform mtx = new AffineTransform();
-    mtx.translate(-footprint.width / 2, -footprint.height / 2);
+    mtx.translate(-footprint.width / 2f, -footprint.height / 2f);
     cellShape.transform(mtx);
     return cellShape;
   }
@@ -319,8 +319,7 @@ public class IsometricGrid extends Grid {
     double gridSize = getSize() * scale;
     double isoHeight = getSize() * scale;
     double isoWidth = getSize() * 2 * scale;
-
-    g.setColor(new Color(getZone().getGridColor()));
+    Path2D path = new Path2D.Double();
 
     int offX = (int) (renderer.getViewOffsetX() % isoWidth + getOffsetX() * scale);
     int offY = (int) (renderer.getViewOffsetY() % gridSize + getOffsetY() * scale);
@@ -330,7 +329,7 @@ public class IsometricGrid extends Grid {
 
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
       for (double col = startCol; col < bounds.x + bounds.width + isoWidth; col += isoWidth) {
-        drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
+        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
       }
     }
 
@@ -340,17 +339,23 @@ public class IsometricGrid extends Grid {
       for (double col = startCol - (isoWidth / 2);
           col < bounds.x + bounds.width + isoWidth;
           col += isoWidth) {
-        drawHatch(renderer, g, (int) (col + offX), (int) (row + offY));
+        path.append(drawHatch(renderer, (int) (col + offX), (int) (row + offY)), false);
       }
     }
+    GridRenderer.drawGridShape(g, path);
   }
 
-  private void drawHatch(ZoneRenderer renderer, Graphics2D g, int x, int y) {
+  private Shape drawHatch(ZoneRenderer renderer, int x, int y) {
     double isoWidth = getSize() * renderer.getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
-    g.setStroke(new BasicStroke(AppState.getGridSize()));
-    g.drawLine(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize);
-    g.drawLine(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize);
+    Path2D path = new Path2D.Double();
+    path.append(
+        new Line2D.Double(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize),
+        false);
+    path.append(
+        new Line2D.Double(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize),
+        false);
+    return path;
   }
 
   /**
@@ -377,7 +382,7 @@ public class IsometricGrid extends Grid {
     BufferedImage rotateImage = new BufferedImage(neww, newh, BufferedImage.TYPE_INT_ARGB);
     Graphics2D g = rotateImage.createGraphics();
     g.translate((neww - w) / 2, (newh - h) / 2);
-    g.rotate(Math.toRadians(45), w / 2, h / 2);
+    g.rotate(Math.toRadians(45), w / 2f, h / 2f);
     g.drawRenderedImage(planImage, null);
     g.dispose();
     // scale image to half height
@@ -414,8 +419,8 @@ public class IsometricGrid extends Grid {
     int neww = (int) Math.floor(w * cos + h * sin);
     int newh = (int) Math.floor(h * cos + w * sin);
 
-    double scaleX = neww / w;
-    double scaleY = newh / h;
+    double scaleX = 1f * neww / w;
+    double scaleY = 1f * newh / h;
 
     int tx = (neww - w) / 2;
     int ty = (newh - h) / 2;
@@ -423,13 +428,13 @@ public class IsometricGrid extends Grid {
     // Rotate Area 45 degrees
     AffineTransform atArea = AffineTransform.getScaleInstance(scaleX, scaleY);
     atArea.concatenate(AffineTransform.getTranslateInstance(tx, ty));
-    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2, h / 2));
+    atArea.concatenate(AffineTransform.getRotateInstance(Math.toRadians(45), w / 2f, h / 2f));
 
     return new Area(atArea.createTransformedShape(planArea));
   }
 
   private static Area resize(Area planArea, int newWidth, int newHeight) {
-    // Resize into a Area
+    // Resize into an Area
     double w = planArea.getBounds().width, h = planArea.getBounds().height;
     double scaleX = newWidth / w;
     double scaleY = newHeight / h;

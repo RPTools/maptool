@@ -31,6 +31,7 @@ import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.HexGridDto;
@@ -359,7 +360,7 @@ public abstract class HexGrid extends Grid {
 
     Object oldAntiAlias = SwingUtil.useAntiAliasing(g);
     g.setColor(new Color(getZone().getGridColor()));
-    g.setStroke(new BasicStroke(AppState.getGridSize()));
+    g.setStroke(new BasicStroke(AppState.getGridLineWeight()));
 
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < getRendererSizeV(renderer);
@@ -374,7 +375,7 @@ public abstract class HexGrid extends Grid {
       double incr = 2 * scaledEdgeLength + 2 * scaledEdgeProjection;
       for (double u = start; u < end; u += incr) {
         setGridDrawTranslation(g, u + offsetU, v);
-        g.draw(scaledHex);
+        GridRenderer.drawGridShape(g, scaledHex);
         setGridDrawTranslation(g, -(u + offsetU), -v);
       }
     }
