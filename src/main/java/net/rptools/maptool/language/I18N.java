@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.language;
 
+import com.github.jknack.handlebars.helper.I18nHelper;
 import java.text.MessageFormat;
 import java.util.Enumeration;
 import java.util.LinkedList;
@@ -51,6 +52,7 @@ public class I18N {
   static {
     // Put here to make breakpointing easier. :)
     BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
+    I18nHelper.i18n.setDefaultBundle("net.rptools.maptool.language.i18n");
     I18nTools report = new I18nTools(false);
   }
 
