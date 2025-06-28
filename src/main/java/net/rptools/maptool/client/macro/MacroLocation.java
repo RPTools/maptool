@@ -55,6 +55,9 @@ public class MacroLocation {
   /** The URI of the macro, if applicable. */
   @Nullable private final URI uri;
 
+  /** The token associated with this macro, if applicable. */
+  @Nullable private final Token token;
+
   /** MacroLocationFactory used to create locations during parsing. */
   private static final MacroLocationFactory factory = MacroLocationFactory.getInstance();
 
@@ -65,16 +68,19 @@ public class MacroLocation {
    * @param source the source of the macro.
    * @param location the location of the macro.
    * @param uri the URI of the macro, if applicable.
+   * @param Token the associated token, if applicable.
    */
   MacroLocation(
       @Nonnull String name,
       @Nonnull MacroSource source,
       @Nonnull String location,
-      @Nullable URI uri) {
+      @Nullable URI uri,
+      @Nullable Token token) {
     this.name = name;
     this.source = source;
     this.location = location;
     this.uri = uri;
+    this.token = token;
   }
 
   /** Enumeration to represent the source of the macro. */
@@ -148,11 +154,11 @@ public class MacroLocation {
    *
    * @param qMacroName the qualified macro name to parse.
    * @param calledFrom the location that called this macro, if applicable.
-   * @param token the token that called this macro, if applicable.
+   * @param token the token for this macro, if applicable.
    * @return a MacroLocation object representing the parsed macro name.
    */
   public static MacroLocation parseMacroName(
-      @Nonnull String qMacroName, @Nullable MacroLocation calledFrom, @Nullable Token token) {
+      @Nonnull String qMacroName, MacroLocation calledFrom, @Nullable Token token) {
     String qMacroNameLower = qMacroName.toLowerCase();
 
     if (qMacroNameLower.contains("@campaign")) {
@@ -160,6 +166,7 @@ public class MacroLocation {
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.campaign,
           MacroSource.campaign.getSourceName(),
+          null,
           null);
     }
 
@@ -168,6 +175,7 @@ public class MacroLocation {
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.gm,
           MacroSource.gm.getSourceName(),
+          null,
           null);
     }
 
@@ -176,6 +184,7 @@ public class MacroLocation {
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.global,
           MacroSource.global.getSourceName(),
+          null,
           null);
     }
 
@@ -187,13 +196,14 @@ public class MacroLocation {
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.token,
           token.getName(),
-          null);
+          null,
+          token);
     }
 
     if (qMacroNameLower.contains("@lib:")) {
-      String libName = qMacroName.substring(qMacroName.indexOf("@") + 1);
-      return new MacroLocation(
-          qMacroName.substring(0, qMacroName.indexOf("@")), MacroSource.library, libName, null);
+      String macroName = qMacroName.substring(0, qMacroName.indexOf("@"));
+      String namespace = qMacroName.replaceFirst("^[^@]*@(?i)lib:", "");
+      return new MacroLocation(macroName, MacroSource.library, namespace, null, token);
     }
 
     if (qMacroNameLower.contains("@this")) {
@@ -207,7 +217,7 @@ public class MacroLocation {
           return factory.createUnknownLocation(qMacroName);
         }
       }
-      return new MacroLocation(name, cfrom.getSource(), cfrom.getLocation(), null);
+      return new MacroLocation(name, cfrom.getSource(), cfrom.getLocation(), null, token);
     }
 
     // If none of the above then assume it is a URI
@@ -230,7 +240,7 @@ public class MacroLocation {
       return factory.createUnknownLocation(qMacroName);
     }
 
-    return new MacroLocation(uri.getPath().substring(1), MacroSource.uri, uri.getHost(), uri);
+    return new MacroLocation(uri.getPath().substring(1), MacroSource.uri, uri.getHost(), uri, null);
   }
 
   /**
@@ -269,6 +279,31 @@ public class MacroLocation {
     return uri;
   }
 
+  /**
+   * Returns the token associated with this macro, if applicable.
+   *
+   * @return the token associated with this macro, or null if not applicable.
+   */
+  public Token getToken() {
+    return token;
+  }
+
+  /**
+   * Returns the location of the macro that can be called from macro code using the '@' syntax.
+   *
+   * @return the location of the macro that can be called from other macros.
+   */
+  @Nonnull
+  public String getCallableLocation() {
+    if (source == MacroSource.token) {
+      return "Token:" + location;
+    } else if (source == MacroSource.library) {
+      return token != null ? token.getName() : location;
+    } else {
+      return location;
+    }
+  }
+
   @Override
   public String toString() {
     StringBuilder sb = new StringBuilder();
@@ -281,6 +316,10 @@ public class MacroLocation {
     if (uri != null) {
       sb.append(", uri='");
       sb.append(uri);
+    }
+    if (token != null) {
+      sb.append(", token='");
+      sb.append(token.getName());
     }
     sb.append("'}");
 
