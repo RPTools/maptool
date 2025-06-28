@@ -24,6 +24,8 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.JMenu;
+
+import com.github.jknack.handlebars.helper.I18nHelper;
 import net.rptools.maptool.client.AppUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -52,7 +54,7 @@ public class I18N {
   static {
     // Put here to make breakpointing easier. :)
     BUNDLE = ResourceBundle.getBundle("net.rptools.maptool.language.i18n");
-    I18nHelper.i18n.setDefaultBundle("net.rptools.maptool.language.i18n");
+    I18nHelper.i18n.setDefaultBundle("net.rptools.maptool.library.builtin.stat-sheet-i18n");
     I18nTools report = new I18nTools(false);
   }
 
