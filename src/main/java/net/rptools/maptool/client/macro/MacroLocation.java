@@ -68,7 +68,7 @@ public class MacroLocation {
    * @param source the source of the macro.
    * @param location the location of the macro.
    * @param uri the URI of the macro, if applicable.
-   * @param Token the associated token, if applicable.
+   * @param token the associated token, if applicable.
    */
   MacroLocation(
       @Nonnull String name,
@@ -81,6 +81,17 @@ public class MacroLocation {
     this.location = location;
     this.uri = uri;
     this.token = token;
+  }
+
+  /**
+   * Creates a new MacroLocation with the given name and source.
+   *
+   * @param name the name of the macro.
+   * @param source the source of the macro.
+   * @param location the location of the macro.
+   */
+  MacroLocation(@Nonnull String name, @Nonnull MacroSource source, @Nonnull String location) {
+    this(name, source, location, null, null);
   }
 
   /** Enumeration to represent the source of the macro. */
@@ -158,34 +169,28 @@ public class MacroLocation {
    * @return a MacroLocation object representing the parsed macro name.
    */
   public static MacroLocation parseMacroName(
-      @Nonnull String qMacroName, MacroLocation calledFrom, @Nullable Token token) {
+      @Nonnull String qMacroName, @Nullable MacroLocation calledFrom, @Nullable Token token) {
     String qMacroNameLower = qMacroName.toLowerCase();
 
     if (qMacroNameLower.contains("@campaign")) {
       return new MacroLocation(
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.campaign,
-          MacroSource.campaign.getSourceName(),
-          null,
-          null);
+          MacroSource.campaign.getSourceName());
     }
 
     if (qMacroNameLower.contains("@gm")) {
       return new MacroLocation(
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.gm,
-          MacroSource.gm.getSourceName(),
-          null,
-          null);
+          MacroSource.gm.getSourceName());
     }
 
     if (qMacroNameLower.contains("@global")) {
       return new MacroLocation(
           qMacroName.substring(0, qMacroName.indexOf("@")),
           MacroSource.global,
-          MacroSource.global.getSourceName(),
-          null,
-          null);
+          MacroSource.global.getSourceName());
     }
 
     if (qMacroNameLower.contains("@token")) {
