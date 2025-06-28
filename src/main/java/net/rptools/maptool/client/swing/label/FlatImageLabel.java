@@ -164,25 +164,50 @@ public class FlatImageLabel {
 
   /**
    * Renders a string with customizable properties such as font, padding, colors, and justification
-   * using the specified graphics context.
+   * using the specified graphics context. Height and width are computed based on the provided
+   * string. Also see {@link #render(Graphics2D, int, int, int, int, String)}.
    *
    * @param graphics2D the graphics context used for rendering
    * @param x the x-coordinate of the top-left corner of the rendered string
    * @param y the y-coordinate of the top-left corner of the rendered string
    * @param string the string to be rendered
    * @return a Rectangle representing the dimensions and position of the rendered string with
-   *     padding
+   *     padding.
    */
   public Rectangle render(Graphics2D graphics2D, int x, int y, String string) {
+
+    var g2d = (Graphics2D) graphics2D.create();
+    g2d.setFont(font);
+
+    var dim = getDimensions(g2d, string);
+    int width = (int) dim.getWidth();
+    int height = (int) dim.getHeight();
+
+    g2d.dispose();
+
+    return render(graphics2D, x, y, width, height, string);
+  }
+
+  /**
+   * Renders a string with customizable properties such as font, padding, colors, and justification
+   * using the specified graphics context.
+   *
+   * @param graphics2D the graphics context used for rendering
+   * @param x the x-coordinate of the top-left corner of the rendered string
+   * @param y the y-coordinate of the top-left corner of the rendered string
+   * @param width the width of the label
+   * @param height the height of the label
+   * @param string the string to be rendered
+   * @return a Rectangle representing the dimensions and position of the rendered string with
+   *     padding
+   */
+  public Rectangle render(
+      Graphics2D graphics2D, int x, int y, int width, int height, String string) {
     var g2d = (Graphics2D) graphics2D.create();
     g2d.setFont(font);
     var fm = g2d.getFontMetrics();
     int strWidth = SwingUtilities.computeStringWidth(fm, string);
     int strHeight = fm.getAscent() - fm.getDescent() - fm.getLeading();
-
-    var dim = getDimensions(g2d, string);
-    int width = (int) dim.getWidth();
-    int height = (int) dim.getHeight();
 
     var bounds = new Rectangle(x, y, width, height);
 
@@ -206,6 +231,7 @@ public class FlatImageLabel {
       g2d.draw(labelRect);
     }
 
+    g2d.dispose();
     return bounds;
   }
 }
