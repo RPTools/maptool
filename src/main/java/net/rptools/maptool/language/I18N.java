@@ -24,8 +24,6 @@ import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 import javax.swing.Action;
 import javax.swing.JMenu;
-
-import com.github.jknack.handlebars.helper.I18nHelper;
 import net.rptools.maptool.client.AppUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
