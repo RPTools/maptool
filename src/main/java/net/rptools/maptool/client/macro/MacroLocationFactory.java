@@ -49,7 +49,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for an unknown location.
    */
   public MacroLocation createUnknownLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.unknown, "", null, null);
+    return new MacroLocation(name, MacroSource.unknown, "");
   }
 
   /**
@@ -59,8 +59,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a global Panel.
    */
   public MacroLocation createGlobalLocation(@Nonnull String name) {
-    return new MacroLocation(
-        name, MacroSource.global, MacroSource.global.getSourceName(), null, null);
+    return new MacroLocation(name, MacroSource.global, MacroSource.global.getSourceName());
   }
 
   /**
@@ -70,8 +69,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a campaign Panel.
    */
   public MacroLocation createCampaignLocation(@Nonnull String name) {
-    return new MacroLocation(
-        name, MacroSource.campaign, MacroSource.campaign.getSourceName(), null, null);
+    return new MacroLocation(name, MacroSource.campaign, MacroSource.campaign.getSourceName());
   }
 
   /**
@@ -104,7 +102,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a GM Panel.
    */
   public MacroLocation createGmLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.gm, MacroSource.gm.getSourceName(), null, null);
+    return new MacroLocation(name, MacroSource.gm, MacroSource.gm.getSourceName());
   }
 
   /**
@@ -115,11 +113,7 @@ public class MacroLocationFactory {
    */
   public MacroLocation createExecFunctionLocation(@Nonnull String functionName) {
     return new MacroLocation(
-        MacroSource.execFunction.getSourceName(),
-        MacroSource.execFunction,
-        functionName,
-        null,
-        null);
+        MacroSource.execFunction.getSourceName(), MacroSource.execFunction, functionName);
   }
 
   /**
@@ -132,9 +126,7 @@ public class MacroLocationFactory {
     return new MacroLocation(
         MacroSource.macroLink.getSourceName(),
         MacroSource.macroLink,
-        MacroSource.macroLink.getSourceName(),
-        null,
-        null);
+        MacroSource.macroLink.getSourceName());
   }
 
   /**
@@ -144,17 +136,14 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for an event.
    */
   public MacroLocation createEventLocation(@Nonnull String name) {
-    return new MacroLocation(
-        MacroSource.event.getSourceName(), MacroSource.event, name, null, null);
+    return new MacroLocation(MacroSource.event.getSourceName(), MacroSource.event, name);
   }
 
   public MacroLocation createSentryIoLoggingLocation() {
     return new MacroLocation(
         MacroSource.sentryIoLogging.getSourceName(),
         MacroSource.sentryIoLogging,
-        MacroSource.sentryIoLogging.getSourceName(),
-        null,
-        null);
+        MacroSource.sentryIoLogging.getSourceName());
   }
 
   /**
@@ -187,11 +176,7 @@ public class MacroLocationFactory {
    */
   public MacroLocation createChatLocation() {
     return new MacroLocation(
-        MacroSource.chat.getSourceName(),
-        MacroSource.chat,
-        MacroSource.chat.getSourceName(),
-        null,
-        null);
+        MacroSource.chat.getSourceName(), MacroSource.chat, MacroSource.chat.getSourceName());
   }
 
   /**
