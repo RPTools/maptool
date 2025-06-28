@@ -30,8 +30,9 @@ import net.miginfocom.swing.MigLayout;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.ImageLabel;
 import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.label.FlatImageLabel;
+import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.ui.theme.Borders;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -39,7 +40,6 @@ import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
 
 /**
@@ -64,7 +64,7 @@ public class InitiativeListCellRenderer extends JPanel
   private final InitiativePanel panel;
 
   /** Used to draw the background of the item. */
-  private ImageLabel backgroundImageLabel;
+  private FlatImageLabel backgroundFlatImageLabel;
 
   /**
    * The text height for the background image label. Only the text is painted inside, the token
@@ -158,11 +158,18 @@ public class InitiativeListCellRenderer extends JPanel
       setBorder(UNSELECTED_BORDER);
       return this;
     } // endif
-    backgroundImageLabel =
-        token.isVisible()
-            ? token.getType() == Token.Type.NPC ? GraphicsUtil.BLUE_LABEL : GraphicsUtil.GREY_LABEL
-            : GraphicsUtil.DARK_GREY_LABEL;
-    name.setForeground(Color.BLACK);
+
+    var labelRenderFactory = new FlatImageLabelFactory();
+    backgroundFlatImageLabel = labelRenderFactory.getMapImageLabel(token);
+
+    // We still use the UI text so use the map label color preferences
+    if (!token.isVisible()) {
+      name.setForeground(AppPreferences.nonVisibleTokenMapLabelForeground.get());
+    } else if (token.getType() == Token.Type.NPC) {
+      name.setForeground(AppPreferences.npcMapLabelForeground.get());
+    } else {
+      name.setForeground(AppPreferences.pcMapLabelForeground.get());
+    }
     name.setFont(name.getFont().deriveFont(token.isVisible() ? Font.PLAIN : Font.ITALIC));
 
     // Show the indicator?
@@ -233,7 +240,8 @@ public class InitiativeListCellRenderer extends JPanel
       boolean initStateSecondLine = panel.isInitStateSecondLine() && panel.isShowInitState();
       Dimension s = name.getSize();
       int th = (textHeight + 2) * (initStateSecondLine ? 2 : 1);
-      backgroundImageLabel.renderLabel((Graphics2D) g, 0, (s.height - th) / 2, s.width, th);
+      // render an image label with set dimensions and without text
+      backgroundFlatImageLabel.render((Graphics2D) g, 0, (s.height - th) / 2, s.width, th, "");
       super.paintComponent(g);
     }
 
@@ -247,7 +255,7 @@ public class InitiativeListCellRenderer extends JPanel
       int th = textHeight * (initStateSecondLine ? 2 : 1);
       Insets insets = getInsets();
       if (getIcon() != null) th = Math.max(th, getIcon().getIconHeight());
-      s.height = th + insets.top + insets.bottom - 4;
+      s.height = th + insets.top + insets.bottom;
       return s;
     }
   }

@@ -78,7 +78,7 @@ jide-shortcut = { group = "com.jidesoft", name = "jide-shortcut", version.ref = 
 fifesoft-rsyntaxtexxtarea = { group = "com.fifesoft", name = "rsyntaxtextarea", version = "3.6.0" }
 fifesoft-rstaui = { group = "com.fifesoft", name = "rstaui", version = "3.3.1" }
 fifesoft-autocomplete = { group = "com.fifesoft", name = "autocomplete", version = "3.3.1" }
-fifesoft-languagesupport = { group = "com.fifesoft", name = "languagesupport", version = "3.3.0" }
+fifesoft-languagesupport = { group = "com.fifesoft", name = "languagesupport", version = "3.4.0" }
 
 # Themes
 flatlaf = { group = "com.formdev", name = "flatlaf", version.ref = "flatlaf" }
@@ -95,7 +95,7 @@ handlebars-helpers = { group = "com.github.jknack", name = "handlebars-helpers",
 # parsing of configuration data
 apache-commons-configuration = { group = "org.apache.commons", name = "commons-configuration2", version = "2.12.0" }
 # Specialized collections: ReferenceMap, LinkedMap.
-apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.4" }
+apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.5.0" }
 # Various file utilities
 apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.19.0" }
 #  ftp client
@@ -117,16 +117,16 @@ gson = { group = "com.google.code.gson", name = "gson", version = "2.13.1" }
 # JsonPath for java
 jsonpath = { group = "com.jayway.jsonpath", name = "json-path", version = "2.9.0" }
 # HTML parsing
-jsoup = { group = "org.jsoup", name = "jsoup", version = "1.20.1" }
+jsoup = { group = "org.jsoup", name = "jsoup", version = "1.21.1" }
 # XML utilities, for Hero Lab integration
-jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.33.5" }
+jcabi-xml = { group = "com.jcabi", name = "jcabi-xml", version = "0.35.0" }
 # Serialization for saving campaigns, maps, tokens, etc.
 xstream = { group = "com.thoughtworks.xstream", name = "xstream", version = "1.4.21" }
 
 # Java tuples
 javatuples = { group = "com.flipkart.utils", name = "javatuples", version = "3.0" }
 # Event bus, collections, and other utilities
-guava = { group = "com.google.guava", name = "guava", version = "33.0.0-jre" }
+guava = { group = "com.google.guava", name = "guava", version = "33.4.8-jre" }
 # Geometry library for pathfinding, vision, etc.
 jts-core = { group = "org.locationtech.jts", name = "jts-core", version = "1.20.0" }
 # Graph library used for walls
@@ -171,7 +171,7 @@ rptools-maptool-addons = { group = "com.github.RPTools", name = "maptool-builtin
 rptools-dice-roller = { group = "com.github.RPTools", name = "advanced-dice-roller", version = "1.0.3" }
 
 # Test only
-junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.1" }
+junit-platform-launcher = { group = "org.junit.platform", name = "junit-platform-launcher", version = "1.13.2" }
 junit-engine = { group = "org.junit.jupiter", name = "junit-jupiter-engine", version.ref = "junit" }
 junit-api = { group = "org.junit.jupiter", name = "junit-jupiter-api", version.ref = "junit" }
 junit-params = { group = "org.junit.jupiter", name = "junit-jupiter-params", version.ref = "junit" }

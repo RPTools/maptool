@@ -390,6 +390,9 @@ public class AppPreferences {
   public static final Preference<Boolean> showInitiativeGainedMessage =
       store.defineBoolean("showInitGainMessage", true);
 
+  public static final Preference<Boolean> initiativePanelWarnWhenResettingRoundCounter =
+      store.defineBoolean("initWarnWhenResettingRoundCounter", true);
+
   public static final Preference<Boolean> pathfindingEnabled =
       store.defineBoolean("useAstarPathfinding", true);
 
