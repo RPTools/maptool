@@ -1,239 +1,365 @@
 <map>
-<!--
-/*
- *  This software copyright by various authors including the RPTools.net
- *  development team, and licensed under the LGPL Version 3 or, at your
- *  option, any later version.
- *
- *  Portions of this software were originally covered under the Apache
- *  Software License, Version 1.1 or Version 2.0.
- *
- *  See the file LICENSE elsewhere in this distribution for license details.
- */
--->
   <entry>
-    <string>D20</string>
+    <string>d20</string>
     <list>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>Candle - 5</name>
+        <i18nKey>Default.campaign.lightSource.light.candle</i18nKey>
+        <id>
+          <baGUID>Al8x9z8WTy20YsZb9YwYeQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>5.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
           <net.rptools.maptool.model.Light>
-            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
-              <color>1677721600</color>
-            </paint>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>10.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
+              <color>1677721600</color>
+            </paint>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>Candle - 5</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCYyXCvh0BAAAAAKgCIQ==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>Lamp - 15</name>
+        <i18nKey>Default.campaign.lightSource.light.lamp</i18nKey>
+        <id>
+          <baGUID>GgU0IW7YQwCiuqKxJ3mTgQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>15.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
           <net.rptools.maptool.model.Light>
-            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
-              <color>1677721600</color>
-            </paint>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>30.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
-          </net.rptools.maptool.model.Light>
-        </lightList>
-        <name>Lamp - 15</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY3PCvh0CAAAAAKgCYw==</baGUID>
-        </id>
-      </net.rptools.maptool.model.LightSource>
-      <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
-          <net.rptools.maptool.model.Light>
-            <facingOffset>0.0</facingOffset>
-            <radius>20.0</radius>
-            <arcAngle>360.0</arcAngle>
-          </net.rptools.maptool.model.Light>
-          <net.rptools.maptool.model.Light>
             <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
               <color>1677721600</color>
             </paint>
-            <facingOffset>0.0</facingOffset>
-            <radius>40.0</radius>
-            <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
+        <lumens>-2147483648</lumens>
+      </net.rptools.maptool.model.LightSource>
+      <net.rptools.maptool.model.LightSource>
         <name>Torch - 20</name>
-        <lumens>0</lumens>
+        <i18nKey>Default.campaign.lightSource.light.torch</i18nKey>
         <id>
-          <baGUID>wKgCY3PCvh0DAAAAAKgCYw==</baGUID>
+          <baGUID>iDNgLGpnQjCHUVtWQDB7eg==</baGUID>
         </id>
-      </net.rptools.maptool.model.LightSource>
-      <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>20.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
           <net.rptools.maptool.model.Light>
-            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
-              <color>1677721600</color>
-            </paint>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>40.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
+              <color>1677721600</color>
+            </paint>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
+        <lumens>-2147483648</lumens>
+      </net.rptools.maptool.model.LightSource>
+      <net.rptools.maptool.model.LightSource>
         <name>Everburning - 20</name>
-        <lumens>0</lumens>
+        <i18nKey>Default.campaign.lightSource.light.everburning</i18nKey>
         <id>
-          <baGUID>wKgCY3PCvh0EAAAAAKgCYw==</baGUID>
+          <baGUID>J9oN63OYSreDRkoxUTEV9Q==</baGUID>
         </id>
-      </net.rptools.maptool.model.LightSource>
-      <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
-            <radius>30.0</radius>
+            <radius>20.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
+            <facingOffset>0.0</facingOffset>
+            <radius>40.0</radius>
+            <width>0.0</width>
+            <arcAngle>360.0</arcAngle>
             <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
               <color>1677721600</color>
             </paint>
-            <facingOffset>0.0</facingOffset>
-            <radius>60.0</radius>
-            <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
+        <lumens>-2147483648</lumens>
+      </net.rptools.maptool.model.LightSource>
+      <net.rptools.maptool.model.LightSource>
         <name>Lantern, Hooded - 30</name>
-        <lumens>0</lumens>
+        <i18nKey>Default.campaign.lightSource.light.lanternHooded</i18nKey>
         <id>
-          <baGUID>wKgCY3PCvh0FAAAAAKgCYw==</baGUID>
+          <baGUID>sqbX6yxQQYKVyR+c7BQLYg==</baGUID>
         </id>
-      </net.rptools.maptool.model.LightSource>
-      <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>30.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
+            <facingOffset>0.0</facingOffset>
+            <radius>60.0</radius>
+            <width>0.0</width>
+            <arcAngle>360.0</arcAngle>
             <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
               <color>1677721600</color>
             </paint>
-            <facingOffset>0.0</facingOffset>
-            <radius>60.0</radius>
-            <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
+        <lumens>-2147483648</lumens>
+      </net.rptools.maptool.model.LightSource>
+      <net.rptools.maptool.model.LightSource>
         <name>Sunrod - 30</name>
-        <lumens>0</lumens>
+        <i18nKey>Default.campaign.lightSource.light.sunrod</i18nKey>
         <id>
-          <baGUID>wKgCY3PCvh0GAAAAAKgCYw==</baGUID>
+          <baGUID>vCcGitXhTnyucnawrv6uSw==</baGUID>
         </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
+          <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
+            <facingOffset>0.0</facingOffset>
+            <radius>30.0</radius>
+            <width>0.0</width>
+            <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
+          </net.rptools.maptool.model.Light>
+          <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
+            <facingOffset>0.0</facingOffset>
+            <radius>60.0</radius>
+            <width>0.0</width>
+            <arcAngle>360.0</arcAngle>
+            <paint class="net.rptools.maptool.model.drawing.DrawableColorPaint">
+              <color>1677721600</color>
+            </paint>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
+          </net.rptools.maptool.model.Light>
+        </lightList>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
     </list>
   </entry>
   <entry>
-    <string>Generic</string>
+    <string>generic</string>
     <list>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>5</name>
+        <i18nKey>5</i18nKey>
+        <id>
+          <baGUID>bUBNIYupQ6OdiD9qvRHtxQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>5.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>5</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0HAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>15</name>
+        <i18nKey>15</i18nKey>
+        <id>
+          <baGUID>QnFogiLYSpepOz3AZJu3mQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>15.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>15</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0IAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>20</name>
+        <i18nKey>20</i18nKey>
+        <id>
+          <baGUID>Cg+mRPqwSkaSHeMb+Y/ulw==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>20.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>20</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0JAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>30</name>
+        <i18nKey>30</i18nKey>
+        <id>
+          <baGUID>EBMnrMahTvSEEy6FN+F5OQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>30.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>30</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0KAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>40</name>
+        <i18nKey>40</i18nKey>
+        <id>
+          <baGUID>X9P7n/0iSJay9ZxJjjBAsQ==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>40.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>40</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0LAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
       <net.rptools.maptool.model.LightSource>
-        <lightList class="linked-list">
+        <name>60</name>
+        <i18nKey>60</i18nKey>
+        <id>
+          <baGUID>tI2/VCOHQlW5OnG0HHE9GA==</baGUID>
+        </id>
+        <type>NORMAL</type>
+        <scaleWithToken>false</scaleWithToken>
+        <ignoresVBL>false</ignoresVBL>
+        <lightList>
           <net.rptools.maptool.model.Light>
+            <shape>CIRCLE</shape>
             <facingOffset>0.0</facingOffset>
             <radius>60.0</radius>
+            <width>0.0</width>
             <arcAngle>360.0</arcAngle>
+            <lumens>100</lumens>
+            <isGM>false</isGM>
+            <ownerOnly>false</ownerOnly>
           </net.rptools.maptool.model.Light>
         </lightList>
-        <name>60</name>
-        <lumens>0</lumens>
-        <id>
-          <baGUID>wKgCY4PCvh0MAAAAAKgCAw==</baGUID>
-        </id>
+        <lumens>-2147483648</lumens>
       </net.rptools.maptool.model.LightSource>
     </list>
   </entry>

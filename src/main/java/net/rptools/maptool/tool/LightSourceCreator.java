@@ -28,28 +28,32 @@ import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 
 public class LightSourceCreator {
+  private static final String ltPrefix = "Default.campaign.lightSource.light.";
+
   public static void main(String[] args) {
     Map<String, List<LightSource>> lightSourcesMap = new HashMap<String, List<LightSource>>();
 
     List<LightSource> lightSourceList = new ArrayList<LightSource>();
 
-    lightSourceList.add(createD20LightSource("Candle - 5", 5, 360));
-    lightSourceList.add(createD20LightSource("Lamp - 15", 15, 360));
-    lightSourceList.add(createD20LightSource("Torch - 20", 20, 360));
-    lightSourceList.add(createD20LightSource("Everburning - 20", 20, 360));
-    lightSourceList.add(createD20LightSource("Lantern, Hooded - 30", 30, 360));
-    lightSourceList.add(createD20LightSource("Sunrod - 30", 30, 360));
+    lightSourceList.add(createD20LightSource("Candle - 5", ltPrefix + "candle", 5, 360));
+    lightSourceList.add(createD20LightSource("Lamp - 15", ltPrefix + "lamp", 15, 360));
+    lightSourceList.add(createD20LightSource("Torch - 20", ltPrefix + "torch", 20, 360));
+    lightSourceList.add(
+        createD20LightSource("Everburning - 20", ltPrefix + "everburning", 20, 360));
+    lightSourceList.add(
+        createD20LightSource("Lantern, Hooded - 30", ltPrefix + "lanternHooded", 30, 360));
+    lightSourceList.add(createD20LightSource("Sunrod - 30", ltPrefix + "sunrod", 30, 360));
 
     lightSourcesMap.put("D20", lightSourceList);
 
     lightSourceList = new ArrayList<LightSource>();
 
-    lightSourceList.add(createLightSource("5", 5, 360));
-    lightSourceList.add(createLightSource("15", 15, 360));
-    lightSourceList.add(createLightSource("20", 20, 360));
-    lightSourceList.add(createLightSource("30", 30, 360));
-    lightSourceList.add(createLightSource("40", 40, 360));
-    lightSourceList.add(createLightSource("60", 60, 360));
+    lightSourceList.add(createLightSource("5", "5", 5, 360));
+    lightSourceList.add(createLightSource("15", "15", 15, 360));
+    lightSourceList.add(createLightSource("20", "20", 20, 360));
+    lightSourceList.add(createLightSource("30", "30", 30, 360));
+    lightSourceList.add(createLightSource("40", "40", 40, 360));
+    lightSourceList.add(createLightSource("60", "60", 60, 360));
 
     lightSourcesMap.put("Generic", lightSourceList);
 
@@ -57,9 +61,11 @@ public class LightSourceCreator {
     System.out.println(xstream.toXML(lightSourcesMap));
   }
 
-  private static LightSource createLightSource(String name, double radius, double arcAngle) {
+  private static LightSource createLightSource(
+      String name, String i18nKey, double radius, double arcAngle) {
     return LightSource.createRegular(
         name,
+        i18nKey,
         new GUID(),
         LightSource.Type.NORMAL,
         false,
@@ -67,9 +73,11 @@ public class LightSourceCreator {
         List.of(new Light(ShapeType.CIRCLE, 0, radius, 0, arcAngle, null, 100, false, false)));
   }
 
-  private static LightSource createD20LightSource(String name, double radius, double arcAngle) {
+  private static LightSource createD20LightSource(
+      String name, String i18nKey, double radius, double arcAngle) {
     return LightSource.createRegular(
         name,
+        i18nKey,
         new GUID(),
         LightSource.Type.NORMAL,
         false,

@@ -73,6 +73,7 @@ message LightSourceDto {
   }
   repeated LightDto lights = 1;
   google.protobuf.StringValue name = 2;
+  google.protobuf.StringValue i18nKey = 7;
   google.protobuf.StringValue id = 3;
   LightTypeDto type = 4;
   bool scale_with_token = 5;

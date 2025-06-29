@@ -372,7 +372,7 @@ public class LightSyntax {
     }
 
     return LightSource.createRegular(
-        name, id, LightSource.Type.NORMAL, scaleWithToken, ignoresVBL, lights);
+        name, null, id, LightSource.Type.NORMAL, scaleWithToken, ignoresVBL, lights);
   }
 
   private String toHex(Color color) {
