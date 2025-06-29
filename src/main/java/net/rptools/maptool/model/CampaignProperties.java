@@ -314,18 +314,30 @@ public class CampaignProperties implements Serializable {
 
   private void initSightTypeMap() {
     sights.clear();
-
+    final String prefix = "Default.campaign.sight.";
     final var types =
         List.of(
-            new SightType("Normal", 0, 1.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
-            new SightType("Lowlight", 0, 2.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
-            new SightType("Grid Vision", 0, 1, ShapeType.GRID, 0, 0, 0, true, null),
-            new SightType("Square Vision", 0, 1, ShapeType.SQUARE, 0, 0, 0, false, null),
             new SightType(
-                "Normal Vision - Short Range", 10, 1.0, ShapeType.CIRCLE, 0, 0, 0, true, null),
-            new SightType("Conic Vision", 0, 1.0, ShapeType.CONE, 0, 120, 0, false, null),
+                I18N.getText(prefix + "normal"), 0, 1.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
             new SightType(
-                "Darkvision",
+                I18N.getText(prefix + "lowlight"), 0, 2.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
+            new SightType(I18N.getText(prefix + "grid"), 0, 1, ShapeType.GRID, 0, 0, 0, true, null),
+            new SightType(
+                I18N.getText(prefix + "square"), 0, 1, ShapeType.SQUARE, 0, 0, 0, false, null),
+            new SightType(
+                I18N.getText(prefix + "normalShortRange"),
+                10,
+                1.0,
+                ShapeType.CIRCLE,
+                0,
+                0,
+                0,
+                true,
+                null),
+            new SightType(
+                I18N.getText(prefix + "conic"), 0, 1.0, ShapeType.CONE, 0, 120, 0, false, null),
+            new SightType(
+                I18N.getText(prefix + "dark"),
                 0,
                 1.0,
                 ShapeType.CIRCLE,
@@ -394,21 +406,42 @@ public class CampaignProperties implements Serializable {
 
   private void initTokenStatesMap() {
     tokenStates.clear();
-    tokenStates.put("Dead", (new XTokenOverlay("Dead", Color.RED, 5)));
-    tokenStates.put("Disabled", (new XTokenOverlay("Disabled", Color.GRAY, 5)));
-    tokenStates.put("Hidden", (new ShadedTokenOverlay("Hidden", Color.BLACK)));
-    tokenStates.put("Prone", (new OTokenOverlay("Prone", Color.BLUE, 5)));
-    tokenStates.put("Incapacitated", (new OTokenOverlay("Incapacitated", Color.RED, 5)));
-    tokenStates.put("Other", (new ColorDotTokenOverlay("Other", Color.RED, null)));
-    tokenStates.put("Other2", (new DiamondTokenOverlay("Other2", Color.RED, 5)));
-    tokenStates.put("Other3", (new YieldTokenOverlay("Other3", Color.YELLOW, 5)));
-    tokenStates.put("Other4", (new TriangleTokenOverlay("Other4", Color.MAGENTA, 5)));
+    final String prefix = "Default.campaign.state.";
+    tokenStates.put(
+        I18N.getText(prefix + "dead"),
+        (new XTokenOverlay(I18N.getText(prefix + "dead"), Color.RED, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "disabled"),
+        (new XTokenOverlay(I18N.getText(prefix + "disabled"), Color.GRAY, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "hidden"),
+        (new ShadedTokenOverlay(I18N.getText(prefix + "hidden"), Color.BLACK)));
+    tokenStates.put(
+        I18N.getText(prefix + "prone"),
+        (new OTokenOverlay(I18N.getText(prefix + "prone"), Color.BLUE, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "incapacitated"),
+        (new OTokenOverlay(I18N.getText(prefix + "incapacitated"), Color.RED, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "other"),
+        (new ColorDotTokenOverlay(I18N.getText(prefix + "other"), Color.RED, null)));
+    tokenStates.put(
+        I18N.getText(prefix + "other2"),
+        (new DiamondTokenOverlay(I18N.getText(prefix + "other2"), Color.RED, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "other3"),
+        (new YieldTokenOverlay(I18N.getText(prefix + "other3"), Color.YELLOW, 5)));
+    tokenStates.put(
+        I18N.getText(prefix + "other4"),
+        (new TriangleTokenOverlay(I18N.getText(prefix + "other4"), Color.MAGENTA, 5)));
   }
 
   private void initTokenBarsMap() {
     tokenBars.clear();
     tokenBars.put(
-        "Health", new TwoToneBarTokenOverlay("Health", new Color(0x20b420), Color.BLACK, 6));
+        I18N.getText("Default.campaign.bars.health"),
+        new TwoToneBarTokenOverlay(
+            I18N.getText("Default.campaign.bars.health"), new Color(0x20b420), Color.BLACK, 6));
   }
 
   private void initCharacterSheetsMap() {
