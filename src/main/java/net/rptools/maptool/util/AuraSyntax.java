@@ -372,7 +372,7 @@ public class AuraSyntax {
     }
 
     return LightSource.createRegular(
-        name, id, LightSource.Type.AURA, scaleWithToken, ignoresVBL, lights);
+        name, null, id, LightSource.Type.AURA, scaleWithToken, ignoresVBL, lights);
   }
 
   private String toHex(Color color) {
