@@ -507,7 +507,7 @@
             <properties>
               <actionCommand value="OK"/>
               <name value="runButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.runmacro"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.runMacro"/>
             </properties>
           </component>
           <component id="e9372" class="javax.swing.JButton">
