@@ -40,7 +40,6 @@ import org.apache.commons.lang3.math.NumberUtils;
  */
 public final class LightSource implements Comparable<LightSource>, Serializable {
 
-
   public enum Type {
     NORMAL,
     AURA
