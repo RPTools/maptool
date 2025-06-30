@@ -86,7 +86,7 @@ flatlaf-intellij-themes = { group = "com.formdev", name = "flatlaf-intellij-them
 flatlaf-extras = { group = "com.formdev", name = "flatlaf-extras", version.ref = "flatlaf" }
 flatlaf-jide-oss = { group = "com.formdev", name = "flatlaf-jide-oss", version.ref = "flatlaf" }
 tinylaf-nocp = { group = "de.muntjak.tinylookandfeel", name = "tinylaf-nocp", version = "1.4.0" }
-jsvg = { group = "com.github.weisj", name = "jsvg", version = "1.4.0" }
+jsvg = { group = "com.github.weisj", name = "jsvg", version = "2.0.0" }
 
 handlebars = { group = "com.github.jknack", name = "handlebars", version.ref = "handlebars" }
 handlebars-helpers = { group = "com.github.jknack", name = "handlebars-helpers", version.ref = "handlebars" }
