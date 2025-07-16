@@ -19,7 +19,6 @@ import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
@@ -85,48 +84,50 @@ public class TokenLightFunctions extends AbstractFunction {
    * Gets the names of the light sources that are on.
    *
    * @param token The token to get the light sources for.
-   * @param category The category to get the light sources for. If "*" then the light sources for
-   *     all categories will be returned. If "$token" then only light sources defined on the token
-   *     will be returned.
+   * @param categoryName The category to get the light sources for. If "*" then the light sources
+   *     for all categories will be returned. If "$token" then only light sources defined on the
+   *     token will be returned.
    * @param delim the delimiter for the list.
    * @return a string list containing the lights that are on.
    * @throws ParserException if the light type can't be found.
    */
-  private static String getLights(Token token, String category, String delim)
+  private static String getLights(Token token, String categoryName, String delim)
       throws ParserException {
     ArrayList<String> lightList = new ArrayList<String>();
-    Map<String, Map<GUID, LightSource>> lightSourcesMap =
-        MapTool.getCampaign().getLightSourcesMap();
+    CategorizedLights lightSources = MapTool.getCampaign().getLightSources();
 
-    if (category.equals("*")) {
+    if (categoryName.equals("*")) {
       // Look up on both token and campaign.
       for (LightSource ls : token.getUniqueLightSources()) {
         if (token.hasLightSource(ls)) {
           lightList.add(ls.getName());
         }
       }
-      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
-        for (LightSource ls : lsMap.values()) {
+      for (CategorizedLights.Category category : lightSources.getCategories()) {
+        for (LightSource ls : category.lights()) {
           if (token.hasLightSource(ls)) {
             lightList.add(ls.getName());
           }
         }
       }
-    } else if (TOKEN_CATEGORY.equals(category)) {
+    } else if (TOKEN_CATEGORY.equals(categoryName)) {
       for (LightSource ls : token.getUniqueLightSources()) {
         if (token.hasLightSource(ls)) {
           lightList.add(ls.getName());
         }
       }
-    } else if (lightSourcesMap.containsKey(category)) {
-      for (LightSource ls : lightSourcesMap.get(category).values()) {
-        if (token.hasLightSource(ls)) {
-          lightList.add(ls.getName());
-        }
-      }
     } else {
-      throw new ParserException(
-          I18N.getText("macro.function.tokenLight.unknownLightType", "getLights", category));
+      var category = lightSources.getCategory(categoryName);
+      if (category.isPresent()) {
+        for (LightSource ls : category.get().lights()) {
+          if (token.hasLightSource(ls)) {
+            lightList.add(ls.getName());
+          }
+        }
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenLight.unknownLightType", "getLights", categoryName));
+      }
     }
 
     if ("json".equals(delim)) {
@@ -142,27 +143,29 @@ public class TokenLightFunctions extends AbstractFunction {
    * Sets the light value for a token.
    *
    * @param token the token to set the light for.
-   * @param category the category of the light source. Use "$token" for light sources defined on the
-   *     token.
+   * @param categoryName the category of the light source. Use "$token" for light sources defined on
+   *     the token.
    * @param name the name of the light source.
    * @param val the value to set for the light source, 0 for off non 0 for on.
    * @return 0 if the light was not found, otherwise 1;
    * @throws ParserException if the light type can't be found.
    */
-  private static BigDecimal setLight(Token token, String category, String name, BigDecimal val)
+  private static BigDecimal setLight(Token token, String categoryName, String name, BigDecimal val)
       throws ParserException {
     boolean found = false;
-    Map<String, Map<GUID, LightSource>> lightSourcesMap =
-        MapTool.getCampaign().getLightSourcesMap();
+    CategorizedLights lightSources = MapTool.getCampaign().getLightSources();
 
-    Iterable<LightSource> sources;
-    if (TOKEN_CATEGORY.equals(category)) {
+    Lights sources;
+    if (TOKEN_CATEGORY.equals(categoryName)) {
       sources = token.getUniqueLightSources();
-    } else if (lightSourcesMap.containsKey(category)) {
-      sources = lightSourcesMap.get(category).values();
     } else {
-      throw new ParserException(
-          I18N.getText("macro.function.tokenLight.unknownLightType", "setLights", category));
+      var category = lightSources.getCategory(categoryName);
+      if (category.isPresent()) {
+        sources = category.get().lights();
+      } else {
+        throw new ParserException(
+            I18N.getText("macro.function.tokenLight.unknownLightType", "setLights", categoryName));
+      }
     }
 
     final var add = !BigDecimal.ZERO.equals(val);
@@ -184,50 +187,53 @@ public class TokenLightFunctions extends AbstractFunction {
    * checked.
    *
    * @param token the token to check.
-   * @param category the type of light to check.
+   * @param categoryName the type of light to check.
    * @param name the name of the light to check.
    * @return true if the token has the light source.
    * @throws ParserException if the light type can't be found.
    */
-  public static boolean hasLightSource(Token token, String category, String name)
+  public static boolean hasLightSource(Token token, String categoryName, String name)
       throws ParserException {
-    if ("*".equals(category) && "*".equals(name)) {
+    if ("*".equals(categoryName) && "*".equals(name)) {
       return token.hasLightSources();
     }
 
-    Map<String, Map<GUID, LightSource>> lightSourcesMap =
-        MapTool.getCampaign().getLightSourcesMap();
+    CategorizedLights lightSources = MapTool.getCampaign().getLightSources();
 
-    if ("*".equals(category)) {
+    if ("*".equals(categoryName)) {
       // Look up on both token and campaign.
       for (LightSource ls : token.getUniqueLightSources()) {
-        if (ls.getName().equals(name) && token.hasLightSource(ls)) {
+        if (name.equals(ls.getName()) && token.hasLightSource(ls)) {
           return true;
         }
       }
-      for (Map<GUID, LightSource> lsMap : lightSourcesMap.values()) {
-        for (LightSource ls : lsMap.values()) {
-          if (ls.getName().equals(name) && token.hasLightSource(ls)) {
+      for (CategorizedLights.Category category : lightSources.getCategories()) {
+        for (LightSource ls : category.lights()) {
+          if (name.equals(ls.getName()) && token.hasLightSource(ls)) {
             return true;
           }
         }
         return false;
       }
-    } else if (TOKEN_CATEGORY.equals(category)) {
+    } else if (TOKEN_CATEGORY.equals(categoryName)) {
       for (LightSource ls : token.getUniqueLightSources()) {
-        if ((ls.getName().equals(name) || "*".equals(name)) && token.hasLightSource(ls)) {
-          return true;
-        }
-      }
-    } else if (lightSourcesMap.containsKey(category)) {
-      for (LightSource ls : lightSourcesMap.get(category).values()) {
-        if ((ls.getName().equals(name) || "*".equals(name)) && token.hasLightSource(ls)) {
+        if ((name.equals(ls.getName()) || "*".equals(name)) && token.hasLightSource(ls)) {
           return true;
         }
       }
     } else {
-      throw new ParserException(
-          I18N.getText("macro.function.tokenLight.unknownLightType", "hasLightSource", category));
+      var category = lightSources.getCategory(categoryName);
+      if (category.isPresent()) {
+        for (LightSource ls : category.get().lights()) {
+          if ((name.equals(ls.getName()) || name.equals("*")) && token.hasLightSource(ls)) {
+            return true;
+          }
+        }
+      } else {
+        throw new ParserException(
+            I18N.getText(
+                "macro.function.tokenLight.unknownLightType", "hasLightSource", categoryName));
+      }
     }
 
     return false;

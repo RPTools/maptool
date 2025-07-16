@@ -48,6 +48,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
@@ -244,7 +245,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         BufferedImage image = ImageManager.getImage(token.getImageAssetId(), renderer);
 
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-        SwingUtil.constrainTo(imgSize, gridSize);
+        AwtUtil.constrainTo(imgSize, gridSize);
 
         Rectangle bounds =
             new Rectangle(
@@ -992,13 +993,8 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
           return;
         }
         // Show sizing controls
-        // getTokenBounds() pulls the data from the tokenLocationCache in ZoneRenderer. That cache
-        // is populated inside renderer.renderTokens(). As long as the cache is created first, we
-        // should
-        // be good, right? This code relies on the order of operations in another class! Ugh!
-        // Double-ugh! :)
-        Area bounds = renderer.getTokenBounds(token);
-        if (bounds == null || renderer.isTokenMoving(token)) {
+        if (!renderer.getViewModel().getOnScreenTokens().contains(token.getId())
+            || renderer.isTokenMoving(token)) {
           continue;
         }
         // Resize
@@ -1166,7 +1162,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         return;
       }
 
-      final boolean debugEnabled = DeveloperOptions.Toggle.DebugTokenDragging.isEnabled();
+      final boolean debugEnabled = DeveloperOptions.Toggle.DebugTokenDragging.get();
 
       if (debugEnabled) {
         renderer.setShape3(

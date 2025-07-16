@@ -67,7 +67,7 @@ public class AutoSaveManager {
     int interval =
         AppPreferences.autoSaveIncrement.get()
             * 1000
-            * (DeveloperOptions.Toggle.AutoSaveMeasuredInSeconds.isEnabled() ? 1 : 60);
+            * (DeveloperOptions.Toggle.AutoSaveMeasuredInSeconds.get() ? 1 : 60);
 
     // auto-save is turned off with <= 0
     if (interval <= 0) {

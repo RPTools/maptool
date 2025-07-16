@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.panels;
 
-import java.awt.Rectangle;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Collections;
@@ -48,9 +47,7 @@ public class MenuButtonsPanel extends JToolBar {
             ZoneRenderer zr = MapTool.getFrame().getCurrentZoneRenderer();
             // Check if there is a map. Fix #1605
             if (zr != null) {
-              final var tokens =
-                  zr.getTokenIdsInBounds(
-                      new Rectangle(zr.getX(), zr.getY(), zr.getWidth(), zr.getHeight()));
+              final var tokens = zr.getTokenIdsOnScreen();
               zr.getSelectionModel().replaceSelection(tokens);
             }
           }

@@ -35,8 +35,10 @@ import java.util.Map.Entry;
 import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.TokenHoverEnter;
 import net.rptools.maptool.client.events.TokenHoverExit;
@@ -56,8 +58,8 @@ import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
+import net.rptools.maptool.util.HTMLUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -80,7 +82,6 @@ public class PointerTool extends DefaultTool {
 
   // Hovers
   private boolean isShowingHover;
-  private Area hoverTokenBounds;
   private String hoverTokenNotes;
 
   // Track token interactions to hide statsheets when doing other stuff
@@ -341,7 +342,7 @@ public class PointerTool extends DefaultTool {
         BufferedImage image = ImageManager.getImage(token.getImageAssetId(), renderer);
 
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-        SwingUtil.constrainTo(imgSize, gridSize);
+        AwtUtil.constrainTo(imgSize, gridSize);
 
         Rectangle bounds =
             new Rectangle(
@@ -398,7 +399,6 @@ public class PointerTool extends DefaultTool {
 
     if (isShowingHover) {
       isShowingHover = false;
-      hoverTokenBounds = null;
       hoverTokenNotes = null;
       markerUnderMouse = renderer.getMarkerAt(e.getX(), e.getY());
       repaint();
@@ -514,12 +514,7 @@ public class PointerTool extends DefaultTool {
             && !isShowingHover
             && tokenDragOp == null) {
           isShowingHover = true;
-          hoverTokenBounds = renderer.getMarkerBounds(markerUnderMouse);
           hoverTokenNotes = createHoverNote(markerUnderMouse);
-          if (hoverTokenBounds == null) {
-            // Uhhhh, where's the token ?
-            isShowingHover = false;
-          }
           repaint();
         }
         // SELECTION BOUND BOX
@@ -1368,7 +1363,7 @@ public class PointerTool extends DefaultTool {
           imgSize = new Dimension(image.getWidth(), image.getHeight());
 
           // Size
-          SwingUtil.constrainTo(imgSize, AppPreferences.portraitSize.get());
+          AwtUtil.constrainTo(imgSize, AppPreferences.portraitSize.get());
         }
 
         Dimension statSize = null;
@@ -1623,16 +1618,8 @@ public class PointerTool extends DefaultTool {
               hoverTokenNotes,
               (int) (renderer.getWidth() * .75),
               (int) (renderer.getHeight() * .75));
-      Point location =
-          new Point(
-              hoverTokenBounds.getBounds().x
-                  + hoverTokenBounds.getBounds().width / 2
-                  - size.width / 2,
-              hoverTokenBounds.getBounds().y);
-
       // Anchor in the bottom left corner
-      location.x = 4 + PADDING;
-      location.y = viewSize.height - size.height - 4 - PADDING;
+      Point location = new Point(4 + PADDING, viewSize.height - size.height - 4 - PADDING);
 
       // Keep it on screen
       if (location.x + size.width > viewSize.width) {
@@ -1667,8 +1654,8 @@ public class PointerTool extends DefaultTool {
   }
 
   private String createHoverNote(Token marker) {
-    var notes = StringUtil.htmlize(marker.getNotes(), marker.getNotesType());
-    var gmNotes = StringUtil.htmlize(marker.getGMNotes(), marker.getGmNotesType());
+    var notes = HTMLUtil.htmlize(marker.getNotes(), marker.getNotesType());
+    var gmNotes = HTMLUtil.htmlize(marker.getGMNotes(), marker.getGmNotesType());
 
     boolean showGMNotes = MapTool.getPlayer().isGM() && !StringUtil.isEmpty(gmNotes);
     boolean showNotes = !StringUtil.isEmpty(notes);
@@ -1705,7 +1692,7 @@ public class PointerTool extends DefaultTool {
       Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
       if (imgSize.width > AppConstants.NOTE_PORTRAIT_SIZE
           || imgSize.height > AppConstants.NOTE_PORTRAIT_SIZE) {
-        SwingUtil.constrainTo(imgSize, AppConstants.NOTE_PORTRAIT_SIZE);
+        AwtUtil.constrainTo(imgSize, AppConstants.NOTE_PORTRAIT_SIZE);
       }
       builder.append("</td><td valign=top>");
       builder
@@ -1773,7 +1760,7 @@ public class PointerTool extends DefaultTool {
         return;
       }
 
-      final boolean debugEnabled = DeveloperOptions.Toggle.DebugTokenDragging.isEnabled();
+      final boolean debugEnabled = DeveloperOptions.Toggle.DebugTokenDragging.get();
 
       if (debugEnabled) {
         renderer.setShape3(

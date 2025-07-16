@@ -19,7 +19,7 @@ import java.net.URL;
 import javafx.application.Platform;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
+import net.rptools.maptool.client.ui.htmlframe.HTMLContent;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.sheet.stats.StatSheetContext;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;

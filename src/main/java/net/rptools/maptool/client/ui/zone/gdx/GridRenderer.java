@@ -19,7 +19,6 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.math.Matrix4;
 import com.badlogic.gdx.utils.Pools;
-import java.awt.*;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRendererConstants;
 import net.rptools.maptool.model.*;
@@ -80,14 +79,13 @@ public class GridRenderer {
     tmpColor.premultiplyAlpha();
     drawer.setColor(tmpColor);
     var floats = areaRenderer.pathToFloatArray(scaledHex.getPathIterator(null));
-    var lineWidth = AppState.getGridSize();
+    var lineWidth = AppState.getGridLineWeight();
 
     for (double v = offV % (scaledMinorRadius * 2) - (scaledMinorRadius * 2);
         v < grid.getRendererSizeV(renderer);
         v += scaledMinorRadius) {
       double offsetU = (int) ((count & 1) == 0 ? 0 : -(scaledEdgeProjection + scaledEdgeLength));
       count++;
-
       double start =
           offU % (2 * scaledEdgeLength + 2 * scaledEdgeProjection)
               - (2 * scaledEdgeLength + 2 * scaledEdgeProjection);
@@ -166,7 +164,7 @@ public class GridRenderer {
     double isoWidth = grid.getSize() * zoneCache.getZoneRenderer().getScale();
     int hatchSize = isoWidth > 10 ? (int) isoWidth / 8 : 2;
 
-    var lineWidth = AppState.getGridSize();
+    var lineWidth = AppState.getGridLineWeight();
 
     drawer.line(x - (hatchSize * 2), y - hatchSize, x + (hatchSize * 2), y + hatchSize, lineWidth);
     drawer.line(x - (hatchSize * 2), y + hatchSize, x + (hatchSize * 2), y - hatchSize, lineWidth);
@@ -196,7 +194,7 @@ public class GridRenderer {
     var startCol = ((int) (x / gridSize) * gridSize);
     var startRow = ((int) (y / gridSize) * gridSize);
 
-    var lineWidth = AppState.getGridSize();
+    var lineWidth = AppState.getGridLineWeight();
 
     for (float row = startRow; row < y + h + gridSize; row += gridSize) {
       var rounded = Math.round(h - (row + offY));

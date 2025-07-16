@@ -23,7 +23,6 @@ import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.KeyStroke;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Represents the JPanel holding the HTML pane. */
 public class HTMLPanel extends JPanel implements HTMLPanelInterface {

@@ -17,12 +17,11 @@ package net.rptools.maptool.client.ui.campaignproperties;
 import static org.apache.commons.text.WordUtils.capitalize;
 import static org.apache.commons.text.WordUtils.uncapitalize;
 
-import com.google.common.collect.Iterables;
 import com.google.protobuf.util.JsonFormat;
+import com.jidesoft.dialog.ButtonPanel;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -31,7 +30,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.event.HyperlinkEvent;
@@ -40,17 +38,15 @@ import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.ui.StaticMessageDialog;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
-import net.rptools.maptool.model.GUID;
-import net.rptools.maptool.model.LightSource;
-import net.rptools.maptool.model.SightType;
+import net.rptools.maptool.model.CategorizedLights;
+import net.rptools.maptool.model.Sights;
 import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.util.AuraSyntax;
 import net.rptools.maptool.util.LightSyntax;
@@ -58,93 +54,82 @@ import net.rptools.maptool.util.PersistenceUtil;
 import net.rptools.maptool.util.SightSyntax;
 import org.apache.commons.text.*;
 
-public class CampaignPropertiesDialog extends JDialog {
+public class CampaignPropertiesDialog extends AbeillePanel<CampaignPropertiesDialogView> {
 
-  public enum Status {
-    OK,
-    CANCEL
-  }
-
-  private final CampaignPropertiesDialogView view;
-  private TokenPropertiesManagementPanel tokenPropertiesPanel;
+  private final TokenPropertiesManagementPanel tokenPropertiesPanel =
+      new TokenPropertiesManagementPanel();
   private TokenStatesController tokenStatesController;
   private TokenBarController tokenBarController;
 
-  private Status status;
-  private AbeillePanel formPanel;
+  private JEditorPane getSightPanel() {
+    return (JEditorPane) getComponent("sightPanel");
+  }
+
+  private JEditorPane getLightPanel() {
+    return (JEditorPane) getComponent("lightPanel");
+  }
+
+  private JEditorPane getAuraPanel() {
+    return (JEditorPane) getComponent("auraPanel");
+  }
+
+  private JEditorPane getAuraHelp() {
+    return (JEditorPane) getComponent("auraHelp");
+  }
+
+  private JEditorPane getLightHelp() {
+    return (JEditorPane) getComponent("lightHelp");
+  }
+
+  private JEditorPane getSightHelp() {
+    return (JEditorPane) getComponent("sightHelp");
+  }
+
   private Campaign campaign;
+  private final GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getText("CampaignPropertiesDialog.label.title"))
+          .setCloseOperation(WindowConstants.HIDE_ON_CLOSE);
 
-  public CampaignPropertiesDialog(JFrame owner) {
-    super(owner, I18N.getText("CampaignPropertiesDialog.label.title"), true);
-    view = new CampaignPropertiesDialogView();
-
-    initialize();
-
-    pack();
+  public CampaignPropertiesDialog() {
+    super(new CampaignPropertiesDialogView().getRootComponent());
+    init();
+    dialogFactory
+        .setContent(this)
+        .setButtonOrder(dialogFactory.getButtonOrder().replace("O", ""))
+        .setOppositeButtonOrder("HO")
+        .addButton(ButtonKind.OK, e -> accept())
+        .setDefaultButton(ButtonKind.OK)
+        .addButton(
+            ButtonKind.CANCEL, e -> dialogFactory.setDialogResult(GenericDialog.DENY).closeDialog())
+        .addButton(ButtonKind.IMPORT, importListener)
+        .addButton(ButtonKind.EXPORT, exportListener)
+        .addButton(
+            getImportPredefinedButton(), importPredefinedButtonListener, ButtonPanel.OTHER_BUTTON)
+        .addNonButton(getPredefinedPropertiesComboBox(), ButtonPanel.OTHER_BUTTON)
+        .onBeforeShow(e -> tokenPropertiesPanel.getTokenTypeList().setSelectedIndex(0));
   }
 
-  public Status getStatus() {
-    return status;
+  public String showDialog() {
+    return dialogFactory.displayWithReturnValue();
   }
 
-  @Override
-  public void setVisible(boolean b) {
-    if (b) {
-      SwingUtil.centerOver(this, MapTool.getFrame());
-    } else {
-      MapTool.getFrame().repaint();
-    }
-    super.setVisible(b);
-  }
-
-  private void initialize() {
-
+  private void init() {
     setLayout(new GridLayout());
-    formPanel = new AbeillePanel(view.getRootComponent());
-
-    initTokenPropertiesDialog(formPanel);
-    tokenStatesController = new TokenStatesController(formPanel);
-    tokenBarController = new TokenBarController(formPanel);
-    tokenBarController.setNames(tokenStatesController.getNames());
-
-    initHelp();
-    initOKButton();
-    initCancelButton();
-    initAddRepoButton();
-    //    initAddGalleryIndexButton();
-    initDeleteRepoButton();
-
-    initImportButton();
-    initExportButton();
-    initImportPredefinedButton();
-    initPredefinedPropertiesComboBox();
-
-    add(formPanel);
-
-    // Escape key
-    formPanel
-        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-    formPanel
-        .getActionMap()
-        .put(
-            "cancel",
-            new AbstractAction() {
-              public void actionPerformed(ActionEvent e) {
-                cancel();
-              }
-            });
-    getRootPane().setDefaultButton(getOKButton());
-  }
-
-  private void initTokenPropertiesDialog(AbeillePanel panel) {
-    tokenPropertiesPanel = new TokenPropertiesManagementPanel();
-    panel.replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
+    replaceComponent("propertiesPanel", "tokenPropertiesPanel", tokenPropertiesPanel);
     tokenPropertiesPanel.prettify();
+
+    tokenStatesController = new TokenStatesController(this);
+    tokenBarController = new TokenBarController(this);
+    tokenBarController.setNames(tokenStatesController.getNames());
+    initPredefinedPropertiesComboBox();
+    initHelp();
+    initAddRepoButton();
+    initDeleteRepoButton();
   }
 
   public JTextField getNewServerTextField() {
-    return formPanel.getTextField("newServer");
+    return this.getTextField("newServer");
   }
 
   private void initHelp() {
@@ -157,19 +142,19 @@ public class CampaignPropertiesDialog extends JDialog {
           }
         };
 
-    JEditorPane lightHelp = view.getLightHelp();
+    JEditorPane lightHelp = getLightHelp();
     lightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     lightHelp.addHyperlinkListener(hyperLinkListener);
     lightHelp.setText(helpText[1]);
     lightHelp.setCaretPosition(0);
 
-    JEditorPane auraHelp = view.getAuraHelp();
+    JEditorPane auraHelp = getAuraHelp();
     auraHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     auraHelp.addHyperlinkListener(hyperLinkListener);
     auraHelp.setText(helpText[2]);
     auraHelp.setCaretPosition(0);
 
-    JEditorPane sightHelp = view.getSightHelp();
+    JEditorPane sightHelp = getSightHelp();
     sightHelp.putClientProperty(JEditorPane.HONOR_DISPLAY_PROPERTIES, Boolean.TRUE);
     sightHelp.addHyperlinkListener(hyperLinkListener);
     sightHelp.setText(helpText[0]);
@@ -177,7 +162,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   private void initAddRepoButton() {
-    JButton button = (JButton) formPanel.getButton("addRepoButton");
+    JButton button = (JButton) this.getButton("addRepoButton");
     button.addActionListener(
         e -> {
           String newRepo = getNewServerTextField().getText();
@@ -189,7 +174,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   public void initDeleteRepoButton() {
-    JButton button = (JButton) formPanel.getButton("deleteRepoButton");
+    JButton button = (JButton) this.getButton("deleteRepoButton");
     button.addActionListener(
         e -> {
           int[] selectedRows = getRepositoryList().getSelectedIndices();
@@ -200,28 +185,18 @@ public class CampaignPropertiesDialog extends JDialog {
         });
   }
 
-  private void cancel() {
-    status = Status.CANCEL;
-    setVisible(false);
-  }
-
   private void accept() {
     try {
       MapTool.getFrame()
           .showFilledGlassPane(
               new StaticMessageDialog("campaignPropertiesDialog.tokenTypeNameRename"));
       tokenPropertiesPanel.finalizeCellEditing();
-      tokenPropertiesPanel
-          .getRenameTypes()
-          .forEach(
-              (o, n) -> {
-                campaign.renameTokenTypes(o, n);
-              });
+      tokenPropertiesPanel.getRenameTypes().forEach((o, n) -> campaign.renameTokenTypes(o, n));
       MapTool.getFrame().hideGlassPane();
       copyUIToCampaign();
       AssetManager.updateRepositoryList();
-      status = Status.OK;
-      setVisible(false);
+      dialogFactory.setDialogResult(GenericDialog.AFFIRM).closeDialog();
+
     } catch (IllegalArgumentException iae) {
       MapTool.showError(iae.getMessage());
     }
@@ -237,39 +212,35 @@ public class CampaignPropertiesDialog extends JDialog {
     tokenPropertiesPanel.copyCampaignToUI(campaignProperties);
     updateRepositoryList(campaignProperties);
 
-    String sightText = new SightSyntax().stringify(campaignProperties.getSightTypeMap());
-    view.getSightPanel().setText(sightText);
-    view.getSightPanel().setCaretPosition(0);
+    String sightText = new SightSyntax().stringify(campaignProperties.getSightTypes());
+    getSightPanel().setText(sightText);
+    getSightPanel().setCaretPosition(0);
 
     // Separate auras from lights before populating fields.
-    Map<String, Map<GUID, LightSource>> lightSources = new TreeMap<>();
-    Map<String, Map<GUID, LightSource>> auras = new TreeMap<>();
-    for (var entry : campaignProperties.getLightSourcesMap().entrySet()) {
-      String category = entry.getKey();
-      for (var sourceEntry : entry.getValue().entrySet()) {
-        GUID guid = sourceEntry.getKey();
-        LightSource source = sourceEntry.getValue();
+    CategorizedLights lightSources = new CategorizedLights();
+    CategorizedLights auras = new CategorizedLights();
 
-        Map<String, Map<GUID, LightSource>> targetMap =
+    for (var category : campaignProperties.getLightSources().getCategories()) {
+      for (var source : category.lights()) {
+        CategorizedLights targetMap =
             switch (source.getType()) {
               case NORMAL -> lightSources;
               case AURA -> auras;
             };
-        targetMap.computeIfAbsent(category, c -> new HashMap<>()).put(guid, source);
+        targetMap.addToCategory(category.name(), source);
       }
     }
 
     String lightText = new LightSyntax().stringifyCategorizedLights(lightSources);
-    view.getLightPanel().setText(lightText);
-    view.getLightPanel().setCaretPosition(0);
+    getLightPanel().setText(lightText);
+    getLightPanel().setCaretPosition(0);
 
     String auraText = new AuraSyntax().stringifyCategorizedAuras(auras);
-    view.getAuraPanel().setText(auraText);
-    view.getAuraPanel().setCaretPosition(0);
+    getAuraPanel().setText(auraText);
+    getAuraPanel().setCaretPosition(0);
 
     tokenStatesController.copyCampaignToUI(campaignProperties);
     tokenBarController.copyCampaignToUI(campaignProperties);
-    // updateTableList();
   }
 
   private void updateRepositoryList(CampaignProperties properties) {
@@ -281,7 +252,7 @@ public class CampaignPropertiesDialog extends JDialog {
   }
 
   public JList getRepositoryList() {
-    return formPanel.getList("repoList");
+    return this.getList("repoList");
   }
 
   private void copyUIToCampaign() {
@@ -293,28 +264,16 @@ public class CampaignPropertiesDialog extends JDialog {
       campaign.getRemoteRepositoryList().add(repo);
     }
 
-    Map<String, Map<GUID, LightSource>> existingLightSources = campaign.getLightSourcesMap();
+    CategorizedLights existingLightSources = campaign.getLightSources();
 
-    Map<String, Map<GUID, LightSource>> newLights = new TreeMap<>();
+    CategorizedLights lights =
+        new LightSyntax().parseCategorizedLights(getLightPanel().getText(), existingLightSources);
+    CategorizedLights auras =
+        new AuraSyntax().parseCategorizedAuras(getAuraPanel().getText(), existingLightSources);
+    lights.addAll(auras);
+    campaign.setLightSources(lights);
 
-    Map<String, Map<GUID, LightSource>> lightMap =
-        commitLightMap(view.getLightPanel().getText(), existingLightSources);
-    Map<String, Map<GUID, LightSource>> aurasMap =
-        commitAurasMap(view.getAuraPanel().getText(), existingLightSources);
-
-    for (var entry : Iterables.concat(lightMap.entrySet(), aurasMap.entrySet())) {
-      var category = entry.getKey();
-      for (var sourceEntry : entry.getValue().entrySet()) {
-        var guid = sourceEntry.getKey();
-        var source = sourceEntry.getValue();
-
-        newLights.computeIfAbsent(category, c -> new HashMap<>()).put(guid, source);
-      }
-    }
-
-    campaign.setLightSourcesMap(newLights);
-
-    List<SightType> sightMap = commitSightMap(view.getSightPanel().getText());
+    Sights sightMap = commitSightMap(getSightPanel().getText());
     campaign.setSightTypes(sightMap);
 
     tokenStatesController.copyUIToCampaign(campaign);
@@ -329,222 +288,119 @@ public class CampaignPropertiesDialog extends JDialog {
     }
   }
 
-  private List<SightType> commitSightMap(final String text) {
+  private Sights commitSightMap(final String text) {
     return new SightSyntax().parse(text);
   }
 
-  /**
-   * Converts the string stored in <code>getLightPanel().getText()</code> into a Map that relates a
-   * group of light sources to a Map of GUID and LightSource.
-   *
-   * <p>The format for the text is as follows:
-   *
-   * <ol>
-   *   <li>Any line starting with a dash ("-") is a comment and is ignored.
-   *   <li>Blank lines (those containing only zero or more spaces) are group separators.
-   *   <li>The first line of a sequence is the group name.
-   *   <li>Within a group, any line without a colon (":") is ignored.
-   *   <li>Remaining lines are of the following format:
-   *       <p><b> <code>
-   *       [Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] [Offset=angle] distance [#rrggbb]
-   *       </code> </b>
-   *       <p>Brackets indicate optional components. A plus sign follows any default value for a
-   *       given field. Fields starting with an uppercase letter are literal text (although they are
-   *       case-insensitive). Fields that do not start with an uppercase letter represent
-   *       user-supplied values, typically numbers (such as <code>angle</code>, <code>distance
-   *       </code>, and <code>#rrggbb</code>). The <code>GM</code>/<code>Owner</code> field is only
-   *       valid for Auras.
-   * </ol>
-   *
-   * @param text The light definitions to parse.
-   * @param originalLightSourcesMap Used to compare names in the new text to existing names so that
-   *     GUIDs can be preserved. This is only necessary because we don't have a UI for lights.
-   */
-  private Map<String, Map<GUID, LightSource>> commitLightMap(
-      final String text, final Map<String, Map<GUID, LightSource>> originalLightSourcesMap) {
-    return new LightSyntax().parseCategorizedLights(text, originalLightSourcesMap);
-  }
-
-  /**
-   * Converts the string stored in <code>getAurasPanel().getText()</code> into a Map that relates a
-   * group of auras to a Map of GUID and LightSource.
-   *
-   * <p>The format for the text is as follows:
-   *
-   * <ol>
-   *   <li>Any line starting with a dash ("-") is a comment and is ignored.
-   *   <li>Blank lines (those containing only zero or more spaces) are group separators.
-   *   <li>The first line of a sequence is the group name.
-   *   <li>Within a group, any line without a colon (":") is ignored.
-   *   <li>Remaining lines are of the following format:
-   *       <p><b> <code>
-   *       [Gm | Owner] [Circle+ | Square | Cone] [Normal+ | Aura] [Arc=angle] [Offset=angle] distance [#rrggbb]
-   *       </code> </b>
-   *       <p>Brackets indicate optional components. A plus sign follows any default value for a
-   *       given field. Fields starting with an uppercase letter are literal text (although they are
-   *       case-insensitive). Fields that do not start with an uppercase letter represent
-   *       user-supplied values, typically numbers (such as <code>angle</code>, <code>distance
-   *       </code>, and <code>#rrggbb</code>). The <code>GM</code>/<code>Owner</code> field is only
-   *       valid for Auras.
-   * </ol>
-   *
-   * @param text The area definitions to parse.
-   * @param originalLightSourcesMap Used to compare names in the new text to existing names so that
-   *     GUIDs can be preserved. This is only necessary because we don't have a UI for auras.
-   */
-  private Map<String, Map<GUID, LightSource>> commitAurasMap(
-      final String text, final Map<String, Map<GUID, LightSource>> originalLightSourcesMap) {
-    return new AuraSyntax().parseCategorizedAuras(text, originalLightSourcesMap);
-  }
-
-  public JTextArea getTokenPropertiesTextArea() {
-    return (JTextArea) formPanel.getTextComponent("tokenProperties");
-  }
-
-  public JButton getOKButton() {
-    return (JButton) formPanel.getButton("okButton");
-  }
-
-  private void initOKButton() {
-    getOKButton().addActionListener(e -> accept());
-  }
-
-  public JButton getCancelButton() {
-    return (JButton) formPanel.getButton("cancelButton");
-  }
-
-  public JButton getImportButton() {
-    return (JButton) formPanel.getButton("importButton");
-  }
-
-  public JButton getExportButton() {
-    return (JButton) formPanel.getButton("exportButton");
-  }
+  private final JButton importPredefined =
+      new JButton(I18N.getText("CampaignPropertiesDialog.button.importPredefined"));
 
   public JButton getImportPredefinedButton() {
-    return (JButton) formPanel.getButton("importPredefinedButton");
+    return importPredefined;
   }
+
+  JComboBox<String> predefinedPropertiesComboBox = new JComboBox<>();
 
   public JComboBox<String> getPredefinedPropertiesComboBox() {
-    return (JComboBox<String>) formPanel.getComboBox("predefinedPropertiesComboBox");
+    return predefinedPropertiesComboBox;
   }
 
-  private void initCancelButton() {
-    getCancelButton()
-        .addActionListener(
-            e -> {
-              status = Status.CANCEL;
-              setVisible(false);
-            });
-  }
+  private final ActionListener importListener =
+      e -> {
+        JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
 
-  private void initImportButton() {
-    getImportButton()
-        .addActionListener(
-            e -> {
-              JFileChooser chooser = MapTool.getFrame().getLoadPropsFileChooser();
+        if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
 
-              if (chooser.showOpenDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) return;
-
-              final File selectedFile = chooser.getSelectedFile();
-              EventQueue.invokeLater(
-                  () -> {
-                    CampaignProperties properties =
-                        PersistenceUtil.loadCampaignProperties(selectedFile);
-                    if (properties != null) {
-                      MapTool.getCampaign().mergeCampaignProperties(properties);
-                      copyCampaignToUI(properties);
-                    }
-                  });
-            });
-  }
-
-  private void initExportButton() {
-    getExportButton()
-        .addActionListener(
-            e -> {
-              copyUIToCampaign();
-
-              JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
-
-              boolean tryAgain = true;
-              while (tryAgain) {
-                if (fileChooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
-                  return;
-                }
-                var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
-                var saveDir = fileChooser.getSelectedFile().toPath().getParent().toAbsolutePath();
-                if (saveDir.startsWith(installDir)) {
-                  MapTool.showWarning("msg.warning.savePropToInstallDir");
-                } else {
-                  tryAgain = false;
-                }
-              }
-
-              File selectedFile = fileChooser.getSelectedFile();
-              if (selectedFile.exists()) {
-                if (selectedFile.getName().endsWith(".rpgame")) {
-                  if (!MapTool.confirm("Import into game settings file?")) {
-                    return;
-                  }
-                } else if (!MapTool.confirm("Overwrite existing file?")) {
-                  return;
-                }
-              }
-              try {
-                if (selectedFile.getName().endsWith(".mtprops")) {
-                  PersistenceUtil.saveCampaignProperties(campaign, fileChooser.getSelectedFile());
-                  MapTool.showInformation("Properties Saved.");
-                } else {
-                  MapTool.showMessage(
-                      "CampaignPropertiesDialog.export.message",
-                      "msg.title.exportProperties",
-                      JOptionPane.INFORMATION_MESSAGE);
-                  CampaignPropertiesDto campaignPropertiesDto =
-                      MapTool.getCampaign().getCampaignProperties().toDto();
-                  FileOutputStream fos = new FileOutputStream(fileChooser.getSelectedFile());
-                  fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
-                  fos.close();
-                }
-
-              } catch (IOException ioe) {
-                MapTool.showError("Could not save properties: ", ioe);
+        final File selectedFile = chooser.getSelectedFile();
+        EventQueue.invokeLater(
+            () -> {
+              CampaignProperties properties = PersistenceUtil.loadCampaignProperties(selectedFile);
+              if (properties != null) {
+                MapTool.getCampaign().mergeCampaignProperties(properties);
+                copyCampaignToUI(properties);
               }
             });
-  }
+      };
 
-  private void initImportPredefinedButton() {
-    getImportPredefinedButton()
-        .addActionListener(
-            new ActionListener() {
+  private final ActionListener exportListener =
+      e -> {
+        copyUIToCampaign();
 
-              private File getSelectedPropertyFile() {
-                String property = (String) getPredefinedPropertiesComboBox().getSelectedItem();
-                return new File(
-                    AppConstants.CAMPAIGN_PROPERTIES_DIR,
-                    property + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
-              }
+        JFileChooser fileChooser = MapTool.getFrame().getSaveCampaignPropsFileChooser();
 
-              @Override
-              public void actionPerformed(ActionEvent e) {
-                File selectedFile = getSelectedPropertyFile();
-                EventQueue.invokeLater(
-                    () -> {
-                      CampaignProperties properties =
-                          PersistenceUtil.loadCampaignProperties(selectedFile);
-                      if (properties != null) {
-                        MapTool.getCampaign().mergeCampaignProperties(properties);
-                        copyCampaignToUI(properties);
-                      }
-                    });
-              }
-            });
-  }
+        boolean tryAgain = true;
+        while (tryAgain) {
+          if (fileChooser.showSaveDialog(MapTool.getFrame()) != JFileChooser.APPROVE_OPTION) {
+            return;
+          }
+          var installDir = AppUtil.getInstallDirectory().toAbsolutePath();
+          var saveDir = fileChooser.getSelectedFile().toPath().getParent().toAbsolutePath();
+          if (saveDir.startsWith(installDir)) {
+            MapTool.showWarning("msg.warning.savePropToInstallDir");
+          } else {
+            tryAgain = false;
+          }
+        }
+
+        File selectedFile = fileChooser.getSelectedFile();
+        if (selectedFile.exists()) {
+          if (selectedFile.getName().endsWith(".rpgame")) {
+            if (!MapTool.confirm("Import into game settings file?")) {
+              return;
+            }
+          } else if (!MapTool.confirm("Overwrite existing file?")) {
+            return;
+          }
+        }
+        try {
+          if (selectedFile.getName().endsWith(".mtprops")) {
+            PersistenceUtil.saveCampaignProperties(campaign, fileChooser.getSelectedFile());
+            MapTool.showInformation("Properties Saved.");
+          } else {
+            MapTool.showMessage(
+                "CampaignPropertiesDialog.export.message",
+                "msg.title.exportProperties",
+                JOptionPane.INFORMATION_MESSAGE);
+            CampaignPropertiesDto campaignPropertiesDto =
+                MapTool.getCampaign().getCampaignProperties().toDto();
+            FileOutputStream fos = new FileOutputStream(fileChooser.getSelectedFile());
+            fos.write(JsonFormat.printer().print(campaignPropertiesDto).getBytes());
+            fos.close();
+          }
+
+        } catch (IOException ioe) {
+          MapTool.showError("Could not save properties: ", ioe);
+        }
+      };
+
+  private final ActionListener importPredefinedButtonListener =
+      new ActionListener() {
+
+        private File getSelectedPropertyFile() {
+          String property = (String) getPredefinedPropertiesComboBox().getSelectedItem();
+          return new File(
+              AppConstants.CAMPAIGN_PROPERTIES_DIR,
+              property + AppConstants.CAMPAIGN_PROPERTIES_FILE_EXTENSION);
+        }
+
+        @Override
+        public void actionPerformed(ActionEvent e) {
+          File selectedFile = getSelectedPropertyFile();
+          EventQueue.invokeLater(
+              () -> {
+                CampaignProperties properties =
+                    PersistenceUtil.loadCampaignProperties(selectedFile);
+                if (properties != null) {
+                  MapTool.getCampaign().mergeCampaignProperties(properties);
+                  copyCampaignToUI(properties);
+                }
+              });
+        }
+      };
 
   private void initPredefinedPropertiesComboBox() {
-    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<String>();
+    DefaultComboBoxModel<String> model = new DefaultComboBoxModel<>();
     for (File f : getPredefinedProperty()) {
-
       model.addElement(FileUtil.getNameWithoutExtension(f));
     }
     getPredefinedPropertiesComboBox().setModel(model);
@@ -1032,7 +888,7 @@ public class CampaignPropertiesDialog extends JDialog {
             + examplesHeading
             + examplesAuras
             + "</body></html>";
-    ;
+
     String htmlSight =
         "<html><body>"
             + wikiLink

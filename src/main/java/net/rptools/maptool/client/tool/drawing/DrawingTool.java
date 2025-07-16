@@ -203,6 +203,9 @@ public final class DrawingTool<StateT> extends AbstractDrawingLikeTool {
           pen.setPaint(new DrawableColorPaint(Color.white));
           pen.setBackgroundPaint(new DrawableColorPaint(Color.white));
         }
+        if (isLinearTool()) {
+          pen.setForegroundMode(Pen.MODE_SOLID);
+        }
 
         drawable.draw(renderer.getZone(), g2, pen);
 

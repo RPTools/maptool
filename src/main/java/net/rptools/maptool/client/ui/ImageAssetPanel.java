@@ -36,11 +36,11 @@ import java.awt.image.ImageObserver;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.TransferableHelper;
 import net.rptools.maptool.client.swing.ImageChooserDialog;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -155,7 +155,7 @@ public class ImageAssetPanel extends JPanel implements DropTargetListener {
     BufferedImage image = ImageManager.getImage(imageId, observers);
 
     Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-    SwingUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
+    AwtUtil.constrainTo(imgSize, size.width - 8, size.height - 8);
 
     // support opacity of the image
     // setting JPanel background via alpha level to have opacity

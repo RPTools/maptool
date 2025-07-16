@@ -38,6 +38,7 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Campaign;
 import net.rptools.maptool.model.CampaignProperties;
+import net.rptools.maptool.model.CategorizedLights;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Light;
@@ -381,9 +382,9 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.add("token types", ttinfo);
 
     JsonObject llinfo = new JsonObject();
-    for (String ltype : c.getLightSourcesMap().keySet()) {
+    for (CategorizedLights.Category category : c.getLightSources().getCategories()) {
       JsonArray ltinfo = new JsonArray();
-      for (LightSource ls : c.getLightSourceMap(ltype).values()) {
+      for (LightSource ls : category.lights()) {
         JsonObject linfo = new JsonObject();
         linfo.addProperty("name", ls.getName());
         linfo.addProperty("max range", ls.getMaxRange());
@@ -397,7 +398,7 @@ public class getInfoFunction extends AbstractFunction {
         linfo.add("light segments", lightList);
         ltinfo.add(linfo);
       }
-      llinfo.add(ltype, ltinfo);
+      llinfo.add(category.name(), ltinfo);
     }
     cinfo.add("light sources", llinfo);
 
@@ -444,7 +445,7 @@ public class getInfoFunction extends AbstractFunction {
     cinfo.add("remote repository", remoteRepos);
 
     JsonObject sightInfo = new JsonObject();
-    for (SightType sightType : c.getSightTypeMap().values()) {
+    for (SightType sightType : c.getSightTypes()) {
       JsonObject si = new JsonObject();
       if (sightType.getShape() == ShapeType.BEAM) {
         si.addProperty("width", sightType.getWidth());

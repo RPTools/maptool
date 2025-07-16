@@ -164,34 +164,6 @@ public class SwingUtil {
     innerWindow.setLocation(x, y);
   }
 
-  public static void constrainTo(Dimension dim, int size) {
-    boolean widthBigger = dim.width > dim.height;
-
-    if (widthBigger) {
-      dim.height = (int) ((dim.height / (double) dim.width) * size);
-      dim.width = size;
-    } else {
-      dim.width = (int) ((dim.width / (double) dim.height) * size);
-      dim.height = size;
-    }
-  }
-
-  public static void constrainTo(Dimension dim, int width, int height) {
-    boolean widthBigger = dim.width > dim.height;
-
-    constrainTo(dim, widthBigger ? width : height);
-
-    if ((widthBigger && dim.height > height) || (!widthBigger && dim.width > width)) {
-      int size =
-          (int)
-              Math.round(
-                  widthBigger
-                      ? (height / (double) dim.height) * width
-                      : (width / (double) dim.width) * dim.height);
-      constrainTo(dim, size);
-    }
-  }
-
   /**
    * Don't show the mouse pointer for this component
    *

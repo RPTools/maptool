@@ -20,7 +20,9 @@ import java.awt.event.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -32,6 +34,7 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.preferences.Preference;
 import org.apache.commons.text.similarity.JaroWinklerDistance;
 
 /**
@@ -132,6 +135,19 @@ public class StatusPanel extends JPanel {
     private static final Color CLEAR = new Color(1f, 1f, 1f, 0);
     private static final Color[] GRAD_COLOURS = new Color[] {BG, CLEAR, CLEAR, BG};
     private static final AffineTransform SCROLL_TRANSFORM = new AffineTransform();
+    private static final Map<Preference<?>, Object> preferences =
+        new HashMap<>() {
+          {
+            put(AppPreferences.frameRateCap, AppPreferences.frameRateCap.get());
+            put(AppPreferences.scrollStatusEndPause, AppPreferences.scrollStatusEndPause.get());
+            put(AppPreferences.scrollStatusMessages, AppPreferences.scrollStatusMessages.get());
+            put(AppPreferences.scrollStatusSpeed, AppPreferences.scrollStatusSpeed.get());
+            put(AppPreferences.scrollStatusStartDelay, AppPreferences.scrollStatusStartDelay.get());
+            put(
+                AppPreferences.scrollStatusTempDuration,
+                AppPreferences.scrollStatusTempDuration.get());
+          }
+        };
     private static int tickInterval = 1000 / AppPreferences.frameRateCap.get();
     private static int startDelay = (int) (1000 * AppPreferences.scrollStatusStartDelay.get());
     private static int endDelay = (int) (1000 * AppPreferences.scrollStatusEndPause.get());
@@ -146,6 +162,7 @@ public class StatusPanel extends JPanel {
     private static float overflow; // amount that string overflows container
     private static Timer timer;
     private static Timer tempTimer;
+    private static boolean preferencesChanged = false;
     private static final Function<String, Boolean> TEMP_MESSAGE_CHECK =
         (string) -> {
           // check for similarity because some messages will not be exact,
@@ -203,18 +220,8 @@ public class StatusPanel extends JPanel {
           }
         };
 
-    private static final Supplier<Boolean> PREFERENCE_CHANGED =
-        () ->
-            1000 / AppPreferences.frameRateCap.get() != tickInterval
-                || startDelay != (int) (1000 * AppPreferences.scrollStatusStartDelay.get())
-                || endDelay != (int) (1000 * AppPreferences.scrollStatusEndPause.get())
-                || Math.abs(scrollSpeed) != AppPreferences.scrollStatusSpeed.get()
-                || tempDuration != (int) (1000 * AppPreferences.scrollStatusTempDuration.get())
-                || AppPreferences.scrollStatusMessages.get() != allowScroll;
-
-    private static void getPreferences() {
+    private static void setValuesFromPreferences() {
       allowScroll = AppPreferences.scrollStatusMessages.get();
-
       tickInterval = 1000 / AppPreferences.frameRateCap.get();
       startDelay = (int) (1000 * AppPreferences.scrollStatusStartDelay.get());
       endDelay = (int) (1000 * AppPreferences.scrollStatusEndPause.get());
@@ -224,11 +231,22 @@ public class StatusPanel extends JPanel {
       // Reverse direction for RTL scripts
       textDirection = MARQUEE_LABEL.getComponentOrientation().isLeftToRight() ? -1 : 1;
       scrollSpeed = AppPreferences.scrollStatusSpeed.get() * textDirection;
+      preferencesChanged = false;
     }
 
     private StatusMarquee() {
       super();
-      getPreferences();
+      setValuesFromPreferences();
+      for (Preference<?> preference : preferences.keySet()) {
+        preference.onChange(
+            value -> {
+              if (!preferences.get(preference).equals(value)) {
+                StatusMarquee.preferencesChanged = true;
+                preferences.put(preference, value);
+                setText(labelText);
+              }
+            });
+      }
       BoxLayout layout = new BoxLayout(this, BoxLayout.LINE_AXIS);
       setLayout(layout);
       setBackground(BG);
@@ -287,8 +305,8 @@ public class StatusPanel extends JPanel {
     }
 
     private static void setText(String text) {
-      if (PREFERENCE_CHANGED.get()) {
-        getPreferences();
+      if (preferencesChanged) {
+        setValuesFromPreferences();
         setText(text);
         return;
       }

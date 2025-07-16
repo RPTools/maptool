@@ -76,11 +76,19 @@ public class BufferedImagePool {
     this.checkedOut.clear();
   }
 
+  public int getWidth() {
+    return this.width;
+  }
+
   public void setWidth(int width) {
     if (width != this.width) {
       this.width = width;
       this.clear();
     }
+  }
+
+  public int getHeight() {
+    return this.height;
   }
 
   public void setHeight(int height) {

@@ -16,7 +16,7 @@ package net.rptools.maptool.client.swing;
 
 import com.jidesoft.dialog.JideOptionPane;
 import io.sentry.Sentry;
-import io.sentry.event.UserBuilder;
+import io.sentry.protocol.User;
 import java.awt.AWTEvent;
 import java.awt.EventQueue;
 import java.awt.Insets;
@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.*;
-import net.rptools.maptool.client.AppUtil;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -54,7 +54,7 @@ public class MapToolEventQueue extends EventQueue {
     try {
       if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
+        if (OsDetection.MAC_OS_X && mwe.isShiftDown()) {
           // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
           // held down.
           return;
@@ -128,7 +128,8 @@ public class MapToolEventQueue extends EventQueue {
   }
 
   private static void reportToSentryIO(Throwable thrown) {
-    if (Sentry.getStoredClient().getEnvironment().equalsIgnoreCase("development")) {
+    var hub = Sentry.getCurrentHub();
+    if ("development".equalsIgnoreCase(hub.getOptions().getEnvironment())) {
       log.info("Sentry.IO stacktrace logging skipped in development environment.");
       return;
     }
@@ -138,7 +139,7 @@ public class MapToolEventQueue extends EventQueue {
     // current context (until the context is cleared).
 
     // Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-    UserBuilder user = new UserBuilder();
+    User user = new User();
     Player player = MapTool.getPlayer();
     if (player != null) {
       user.setUsername(player.getName());
@@ -151,23 +152,23 @@ public class MapToolEventQueue extends EventQueue {
     }
 
     // Set the user in the current context.
-    Sentry.getContext().setUser(user.build());
+    Sentry.setUser(user);
 
-    Sentry.getContext().addTag("role", player != null ? player.getRole().name() : null);
+    Sentry.setTag("role", player != null ? player.getRole().name() : null);
     boolean hostingServer = MapTool.isHostingServer();
-    Sentry.getContext().addTag("hosting", String.valueOf(MapTool.isHostingServer()));
+    Sentry.setTag("hosting", String.valueOf(MapTool.isHostingServer()));
 
-    Sentry.getContext().addExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON());
+    Sentry.setExtra("System Info", new MapToolSysInfoProvider().getSysInfoJSON().toString());
 
     addGetInfoToSentry("campaign");
 
     if (hostingServer) {
       addGetInfoToSentry("server");
-      Sentry.getContext().addExtra("Server Policy", MapTool.getServerPolicy().toJSON());
+      Sentry.setExtra("Server Policy", MapTool.getServerPolicy().toJSON().toString());
     }
 
     // Send the event!
-    Sentry.capture(thrown);
+    Sentry.captureException(thrown);
   }
 
   private static void addGetInfoToSentry(String command) {
@@ -184,6 +185,6 @@ public class MapToolEventQueue extends EventQueue {
     } catch (ParserException e) {
       campaign = "Can't call getInfo(\"" + command + "\"), it threw " + e.getMessage();
     }
-    Sentry.getContext().addExtra("getinfo(\"" + command + "\")", campaign);
+    Sentry.setExtra("getinfo(\"" + command + "\")", campaign.toString());
   }
 }

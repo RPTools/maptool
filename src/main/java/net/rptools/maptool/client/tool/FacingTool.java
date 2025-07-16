@@ -87,16 +87,23 @@ public class FacingTool extends DefaultTool {
   public void mouseMoved(MouseEvent e) {
     super.mouseMoved(e);
 
-    if (tokenUnderMouse == null || renderer.getTokenBounds(tokenUnderMouse) == null) {
+    if (tokenUnderMouse == null) {
       return;
     }
-    Rectangle bounds = renderer.getTokenBounds(tokenUnderMouse).getBounds();
 
-    int x = bounds.x + bounds.width / 2;
-    int y = bounds.y + bounds.height / 2;
+    var viewModel = renderer.getViewModel();
+    var position = viewModel.getTokenPositions().get(tokenUnderMouse.getId());
+    if (position == null) {
+      return;
+    }
+    if (!viewModel.getOnScreenTokens().contains(tokenUnderMouse.getId())) {
+      return;
+    }
 
-    double angle = Math.atan2(y - e.getY(), e.getX() - x);
+    var bounds = viewModel.getZoneScale().toScreenSpace(position.transformedBounds()).getBounds2D();
 
+    double angle =
+        Math.atan2((int) bounds.getCenterY() - e.getY(), e.getX() - (int) bounds.getCenterX());
     int degrees = (int) Math.toDegrees(angle);
 
     if (!SwingUtil.isControlDown(e)) {

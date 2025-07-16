@@ -57,11 +57,10 @@ import java.util.stream.Collectors;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.SecretKeySpec;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil.Key;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -89,26 +88,14 @@ public final class PasswordFilePlayerDatabase
 
   private final PropertyChangeSupport propertyChangeSupport = new PropertyChangeSupport(this);
 
-  PasswordFilePlayerDatabase(File passwordFile, File additionalUsers)
+  PasswordFilePlayerDatabase(
+      File passwordFile, File additionalUsers, CipherUtil.Key serverPublicPrivateKey)
       throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {
     Objects.requireNonNull(passwordFile);
     this.passwordFile = passwordFile;
     this.backupPasswordFile = new File(passwordFile + ".backup");
     this.additionalUsers = additionalUsers;
-    try {
-      this.serverPublicPrivateKey = new PublicPrivateKeyStore().getKeys().get();
-    } catch (InterruptedException | ExecutionException e) {
-      if (e.getCause() instanceof IOException) {
-        throw (IOException) e.getCause();
-      }
-      if (e.getCause() instanceof NoSuchAlgorithmException) {
-        throw (NoSuchAlgorithmException) e.getCause();
-      } else if (e.getCause() instanceof InvalidKeySpecException) {
-        throw (InvalidKeySpecException) e.getCause();
-      } else {
-        throw new IOException(e.getCause());
-      }
-    }
+    this.serverPublicPrivateKey = serverPublicPrivateKey;
   }
 
   public void readPasswordFile()

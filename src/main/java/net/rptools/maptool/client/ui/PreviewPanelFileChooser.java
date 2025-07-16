@@ -54,7 +54,8 @@ public class PreviewPanelFileChooser extends JFileChooser {
 
       if (previewFile != null && !previewFile.isDirectory()) {
         try {
-          Image img = thumbnailManager.getThumbnail(previewFile);
+          Image img =
+              thumbnailManager.getThumbnail(previewFile, AppPreferences.renderQuality.get());
           getPreviewPanel().setImage(img);
         } catch (IOException ioe) {
           getPreviewPanel().setImage(null);

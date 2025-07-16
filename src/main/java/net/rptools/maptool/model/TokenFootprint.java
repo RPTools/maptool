@@ -18,7 +18,6 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.*;
 import java.util.stream.Collectors;
-import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.TokenFootPrintDto;
 
@@ -33,32 +32,53 @@ public class TokenFootprint {
   private String name;
   private GUID id;
   private boolean isDefault;
-  private double scale = 1;
-  private boolean localizeName = false;
+  private double scale;
+
+  /**
+   * @deprecated That was used when footprints were defined by XML. Now the constructor should be
+   *     provided translated names when needed.
+   */
+  @Deprecated private boolean localizeName = false;
+
+  private transient String localizedName;
 
   private transient List<OffsetTranslator> translatorList = new LinkedList<OffsetTranslator>();
 
   public TokenFootprint() {
-    // for serialization
+    this(new GUID(), "", "", false, 1.0);
   }
 
-  public TokenFootprint(String name, boolean isDefault, double scale, Point... points) {
+  public TokenFootprint(
+      GUID id,
+      String name,
+      String localizedName,
+      boolean isDefault,
+      double scale,
+      Point... points) {
+    this.id = id;
     this.name = name;
-    id = new GUID();
+    this.localizedName = localizedName;
     this.isDefault = isDefault;
     this.scale = scale;
-    cellSet.addAll(Arrays.asList(points));
+    this.cellSet.addAll(Arrays.asList(points));
+  }
+
+  public TokenFootprint(GUID id, String name, boolean isDefault, double scale, Point... points) {
+    this(id, name, name, isDefault, scale, points);
+  }
+
+  public TokenFootprint(GUID id, String name, String localizedName, Point... points) {
+    this(id, name, localizedName, false, 1, points);
   }
 
   public static TokenFootprint fromDto(TokenFootPrintDto dto) {
-    var footPrint = new TokenFootprint();
-    footPrint.cellSet.addAll(
-        dto.getCellSetList().stream().map(p -> Mapper.map(p)).collect(Collectors.toList()));
-    footPrint.name = dto.getName();
-    footPrint.id = GUID.valueOf(dto.getId());
-    footPrint.isDefault = dto.getIsDefault();
-    footPrint.scale = dto.getScale();
-    return footPrint;
+    return new TokenFootprint(
+        GUID.valueOf(dto.getId()),
+        dto.getName(),
+        dto.getLocalizedName(),
+        dto.getIsDefault(),
+        dto.getScale(),
+        dto.getCellSetList().stream().map(Mapper::map).toArray(Point[]::new));
   }
 
   public TokenFootPrintDto toDto() {
@@ -97,10 +117,6 @@ public class TokenFootprint {
     return occupiedSet;
   }
 
-  public TokenFootprint(String name, Point... points) {
-    this(name, false, 1, points);
-  }
-
   public void setDefault(boolean isDefault) {
     this.isDefault = isDefault;
   }
@@ -120,10 +136,7 @@ public class TokenFootprint {
 
   /** Returns the localized name of the footprint */
   public String getLocalizedName() {
-    if (localizeName) {
-      return I18N.getString("TokenFootprint.name." + name.toLowerCase());
-    }
-    return name;
+    return localizedName;
   }
 
   public Rectangle getBounds(Grid grid) {
@@ -171,7 +184,7 @@ public class TokenFootprint {
     return this;
   }
 
-  public static interface OffsetTranslator {
-    public void translate(CellPoint originPoint, CellPoint offsetPoint);
+  public interface OffsetTranslator {
+    void translate(CellPoint originPoint, CellPoint offsetPoint);
   }
 }

@@ -46,9 +46,9 @@ import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.vbl.TokenVBL.JTS_SimplifyMethodType;
@@ -237,7 +237,7 @@ public class TokenTopologyPanel extends JPanel {
               tokenSize.x, tokenSize.y - (int) iso_ho, tokenSize.width, (int) th);
     }
 
-    SwingUtil.constrainTo(imgSize, panelUsableSize.width, panelUsableSize.height);
+    AwtUtil.constrainTo(imgSize, panelUsableSize.width, panelUsableSize.height);
     Point centerPoint = new Point(panelSize.width / 2, panelSize.height / 2);
     Graphics2D g2d = (Graphics2D) g;
 

@@ -21,20 +21,20 @@ import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.CategorizedLights;
+import net.rptools.maptool.model.CategorizedLights.Category;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.Lights;
 import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import org.apache.logging.log4j.LogManager;
@@ -45,8 +45,8 @@ public class AuraSyntax {
   private static final int DEFAULT_LUMENS = 100;
   private static final Logger log = LogManager.getLogger(AuraSyntax.class);
 
-  public Map<GUID, LightSource> parseAuras(String text, Iterable<LightSource> original) {
-    final var aurasMap = new HashMap<GUID, LightSource>();
+  public Lights parseAuras(String text, Lights original) {
+    final var auras = new Lights();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
     List<String> errlog = new LinkedList<>();
 
@@ -57,7 +57,7 @@ public class AuraSyntax {
 
         var source = parseAuraLine(line, reader.getLineNumber(), original, errlog);
         if (source != null) {
-          aurasMap.put(source.getId(), source);
+          auras.add(source);
         }
       }
     } catch (IOException ioe) {
@@ -71,18 +71,17 @@ public class AuraSyntax {
           "msg.error.mtprops.aura.definition"); // Don't save lights...
     }
 
-    return aurasMap;
+    return auras;
   }
 
-  public Map<String, Map<GUID, LightSource>> parseCategorizedAuras(
-      String text, final Map<String, Map<GUID, LightSource>> originalAuraMap) {
-    final var auraMap = new TreeMap<String, Map<GUID, LightSource>>();
+  public CategorizedLights parseCategorizedAuras(String text, CategorizedLights originalAuraMap) {
+    final var categorized = new CategorizedLights();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
     List<String> errlog = new LinkedList<>();
 
     try {
-      Collection<LightSource> currentGroupOriginalAuras = Collections.emptyList();
-      Map<GUID, LightSource> auraGroupMap = null;
+      Lights currentGroupOriginalAuras = new Lights();
+      Category currentGroup = null;
 
       String line;
       while ((line = reader.readLine()) != null) {
@@ -90,25 +89,32 @@ public class AuraSyntax {
 
         // Blank lines
         if (line.isEmpty()) {
-          auraGroupMap = null;
+          if (currentGroup != null) {
+            categorized.addAllToCategory(currentGroup.name(), currentGroup.lights());
+          }
+          currentGroup = null;
           continue;
         }
         // New group
-        if (auraGroupMap == null) {
-          final var currentGroupName = line;
+        if (currentGroup == null) {
+          currentGroup = new Category(line, new Lights());
           currentGroupOriginalAuras =
-              originalAuraMap.getOrDefault(currentGroupName, Collections.emptyMap()).values();
-          auraGroupMap = new HashMap<>();
-          auraMap.put(currentGroupName, auraGroupMap);
+              originalAuraMap
+                  .getCategory(currentGroup.name())
+                  .map(Category::lights)
+                  .orElse(new Lights());
           continue;
         }
 
         var source = parseAuraLine(line, reader.getLineNumber(), currentGroupOriginalAuras, errlog);
         if (source != null) {
-          auraGroupMap.put(source.getId(), source);
+          currentGroup.lights().add(source);
         }
       }
-      auraMap.values().removeIf(Map::isEmpty);
+
+      if (currentGroup != null) {
+        categorized.addAllToCategory(currentGroup.name(), currentGroup.lights());
+      }
     } catch (IOException ioe) {
       MapTool.showError("msg.error.mtprops.aura.ioexception", ioe);
     }
@@ -120,28 +126,28 @@ public class AuraSyntax {
           "msg.error.mtprops.aura.definition"); // Don't save auras...
     }
 
-    return auraMap;
+    return categorized;
   }
 
-  public String stringifyAuras(Iterable<LightSource> auras) {
+  public String stringifyAuras(Lights auras) {
     StringBuilder builder = new StringBuilder();
     writeAuraLines(builder, auras);
     return builder.toString();
   }
 
-  public String stringifyCategorizedAuras(Map<String, Map<GUID, LightSource>> auras) {
+  public String stringifyCategorizedAuras(CategorizedLights auras) {
     StringBuilder builder = new StringBuilder();
-    for (Map.Entry<String, Map<GUID, LightSource>> entry : auras.entrySet()) {
-      builder.append(entry.getKey());
+    for (var category : auras.getCategories()) {
+      builder.append(category.name());
       builder.append("\n----\n");
 
-      writeAuraLines(builder, entry.getValue().values());
+      writeAuraLines(builder, category.lights());
       builder.append('\n');
     }
     return builder.toString();
   }
 
-  private void writeAuraLines(StringBuilder builder, Iterable<LightSource> auras) {
+  private void writeAuraLines(StringBuilder builder, Lights auras) {
     for (LightSource lightSource : auras) {
       if (lightSource.getType() != LightSource.Type.AURA) {
         log.error("A non-aura light was provided for aura stringification. Skipping.");
@@ -227,7 +233,7 @@ public class AuraSyntax {
   }
 
   private LightSource parseAuraLine(
-      String line, int lineNumber, Iterable<LightSource> originalInCategory, List<String> errlog) {
+      String line, int lineNumber, Lights originalInCategory, List<String> errlog) {
     // Blank lines, comments
     if (line.isEmpty() || line.charAt(0) == '-') {
       return null;

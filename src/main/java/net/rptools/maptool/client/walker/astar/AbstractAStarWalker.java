@@ -645,7 +645,7 @@ public abstract class AbstractAStarWalker extends AbstractZoneWalker {
   }
 
   protected void showDebugInfo(AStarCellPoint node) {
-    if (!DeveloperOptions.Toggle.ShowAiDebugging.isEnabled()) {
+    if (!DeveloperOptions.Toggle.ShowAiDebugging.get()) {
       return;
     }
 

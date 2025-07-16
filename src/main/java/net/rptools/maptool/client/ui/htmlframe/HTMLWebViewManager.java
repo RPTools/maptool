@@ -56,7 +56,6 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.library.LibraryManager;
@@ -318,7 +317,7 @@ public class HTMLWebViewManager {
   }
 
   /**
-   * Upate the contents of the WebView with the HTMLContent.
+   * Update the contents of the WebView with the HTMLContent.
    *
    * @param htmlContent the HTMLContent to display.
    * @param scrollReset true if the scrolling should be reset, false otherwise.
@@ -335,8 +334,7 @@ public class HTMLWebViewManager {
     if (htmlContent.isUrl()) {
       webEngine.load(htmlContent.getUrl().toString());
     } else {
-      webEngine.load(
-          htmlContent.injectJSAPI().InjectContentSecurityPolicy().getHtmlStringAsDataUrl());
+      webEngine.loadContent(htmlContent.injectJavaBridge().getHtmlString());
     }
   }
 

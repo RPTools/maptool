@@ -158,7 +158,7 @@ public class PartitionedDrawableRenderer implements DrawableRenderer {
               timer.stop("render:DrawImage");
 
               // DEBUG: Show partition boundaries
-              if (DeveloperOptions.Toggle.ShowPartitionDrawableBoundaries.isEnabled()) {
+              if (DeveloperOptions.Toggle.ShowPartitionDrawableBoundaries.get()) {
                 if (!messageLogged) {
                   messageLogged = true;
                   log.debug(

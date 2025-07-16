@@ -29,16 +29,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Set;
-import javax.swing.AbstractListModel;
-import javax.swing.DefaultListModel;
-import javax.swing.JButton;
-import javax.swing.JList;
-import javax.swing.JOptionPane;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextField;
-import javax.swing.ListModel;
-import javax.swing.ListSelectionModel;
-import javax.swing.SwingWorker;
+import javax.swing.*;
 import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppSetup;
 import net.rptools.maptool.client.AppStatePersisted;
@@ -46,7 +37,9 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.RemoteFileDownloader;
 import net.rptools.maptool.client.WebDownloader;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ButtonKind;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.swing.GenericDialogFactory;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
@@ -68,7 +61,11 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     RPTOOLS
   }
 
-  private GenericDialog dialog;
+  private final GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getText("action.addIconSelector"))
+          .addButton(ButtonKind.CANCEL)
+          .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
   private Model model;
   private boolean downloadLibraryListInitiated;
 
@@ -76,10 +73,19 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
 
   public AddResourceDialog() {
     super(new AddRessourcesDialogView().getRootComponent());
-
     setPreferredSize(new Dimension(550, 300));
-
     panelInit();
+    dialogFactory
+        .setContent(this)
+        .addButton(
+            ButtonKind.INSTALL,
+            e -> {
+              install = true;
+              if (commit()) {
+                dialogFactory.getDialog().closeDialog();
+              }
+            })
+        .setDefaultButton(ButtonKind.INSTALL);
   }
 
   public boolean getInstall() {
@@ -87,23 +93,14 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
   }
 
   public void showDialog() {
-    dialog = new GenericDialog(I18N.getText("action.addIconSelector"), MapTool.getFrame(), this);
-
     model = new Model();
-
     bind(model);
-
-    getRootPane().setDefaultButton(getInstallButton());
-    dialog.showDialog();
+    dialogFactory.display();
   }
 
   @Override
   public Model getModel() {
     return model;
-  }
-
-  public JButton getInstallButton() {
-    return (JButton) getComponent("installButton");
   }
 
   public JTextField getBrowseTextField() {
@@ -114,6 +111,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     return (JList) getComponent("@rptoolsList");
   }
 
+  @SuppressWarnings("unused")
   public void initLibraryList() {
     JList list = getLibraryList();
     list.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
@@ -121,6 +119,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     list.setModel(new MessageListModel(I18N.getText("dialog.addresource.downloading")));
   }
 
+  @SuppressWarnings("unused")
   public void initTabPane() {
 
     final JTabbedPane tabPane = (JTabbedPane) getComponent("tabPane");
@@ -134,20 +133,17 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
             e -> {
               // Hmmm, this is fragile (breaks if the order changes) rethink this later
               switch (tabPane.getSelectedIndex()) {
-                case 0:
-                  model.tab = Tab.LOCAL;
-                  break;
-                case 1:
-                  model.tab = Tab.WEB;
-                  break;
-                case 2:
+                case 0 -> model.tab = Tab.LOCAL;
+                case 1 -> model.tab = Tab.WEB;
+                case 2 -> {
                   model.tab = Tab.RPTOOLS;
                   downloadLibraryList();
-                  break;
+                }
               }
             });
   }
 
+  @SuppressWarnings("unused")
   public void initLocalDirectoryButton() {
     final JButton button = (JButton) getComponent("localDirectoryButton");
     button.addActionListener(
@@ -165,22 +161,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
             getBrowseTextField().setText(root.getAbsolutePath());
           }
         });
-  }
-
-  public void initInstallButton() {
-    JButton button = (JButton) getComponent("installButton");
-    button.addActionListener(
-        e -> {
-          install = true;
-          if (commit()) {
-            close();
-          }
-        });
-  }
-
-  public void initCancelButton() {
-    JButton button = (JButton) getComponent("cancelButton");
-    button.addActionListener(e -> close());
   }
 
   private void downloadLibraryList() {
@@ -214,10 +194,10 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
     }
 
     // Add the resource
-    final List<LibraryRow> rowList = new ArrayList<LibraryRow>();
+    final List<LibraryRow> rowList = new ArrayList<>();
 
     switch (model.getTab()) {
-      case LOCAL:
+      case LOCAL -> {
         if (StringUtils.isEmpty(model.getLocalDirectory())) {
           MapTool.showMessage(
               "dialog.addresource.warn.filenotfound",
@@ -245,8 +225,8 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
         }
         AppSetup.installLibrary(FileUtil.getNameWithoutExtension(root), root);
         return true;
-
-      case WEB:
+      }
+      case WEB -> {
         if (StringUtils.isEmpty(model.getUrlName())) {
           MapTool.showMessage(
               "dialog.addresource.warn.musthavename",
@@ -267,9 +247,9 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           return false;
         }
         rowList.add(new LibraryRow(model.getUrlName(), model.getUrl(), -1));
-        break;
+      }
 
-      case RPTOOLS:
+      case RPTOOLS -> {
         Object[] selectedRows = getLibraryList().getSelectedValuesList().toArray();
 
         if (selectedRows == null || selectedRows.length == 0) {
@@ -283,7 +263,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           if (obj instanceof String) {
             MapTool.showMessage(
                 "dialog.addresource.warn.badresourceid", "Error", JOptionPane.ERROR_MESSAGE, obj);
-            Sentry.capture("Add Resource to Library Error\nResource: " + obj);
+            Sentry.captureMessage("Add Resource to Library Error\nResource: " + obj);
             // Move on to next one...
             continue;
           }
@@ -300,7 +280,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
           }
           rowList.add(row);
         }
-        break;
+      }
     }
 
     new SwingWorker<Object, Object>() {
@@ -313,7 +293,7 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
             AppSetup.installLibrary(row.name, tmpFile.toURI().toURL());
             tmpFile.delete();
           } catch (IOException e) {
-            log.error("Error downloading library: " + e, e);
+            log.error("Error downloading library: {}", e, e);
             MapTool.showInformation("dialog.addresource.warn.couldnotload");
           }
         }
@@ -321,11 +301,6 @@ public class AddResourceDialog extends AbeillePanel<AddResourceDialog.Model> {
       }
     }.execute();
     return true;
-  }
-
-  private void close() {
-    unbind();
-    dialog.closeDialog();
   }
 
   public static class Model {

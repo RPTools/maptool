@@ -29,7 +29,6 @@ import java.util.stream.Stream;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.client.ui.MapToolFrame;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;

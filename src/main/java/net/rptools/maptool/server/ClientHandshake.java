@@ -36,6 +36,9 @@ import javax.swing.*;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil.Key;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolClient;
 import net.rptools.maptool.language.I18N;
@@ -49,9 +52,6 @@ import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.server.proto.*;
 import net.rptools.maptool.server.proto.HandshakeMsg.MessageTypeCase;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -69,6 +69,8 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
   /** The connection for the handshake. */
   private final Connection connection;
 
+  private final PublicPrivateKeyStore keyStore;
+
   /** PIN for sending public key to client */
   private String pin;
 
@@ -79,9 +81,11 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
   /** The current state of the handshake process. */
   private State currentState = State.AwaitingUseAuthType;
 
-  public ClientHandshake(MapToolClient client, Connection connection) {
+  public ClientHandshake(
+      MapToolClient client, Connection connection, PublicPrivateKeyStore keyStore) {
     this.client = client;
     this.connection = connection;
+    this.keyStore = keyStore;
 
     whenComplete(
         (result, error) -> {
@@ -133,7 +137,7 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
   private void startHandshakeInternal() {
     MD5Key md5key;
     try {
-      md5key = CipherUtil.publicKeyMD5(new PublicPrivateKeyStore().getKeys().get().publicKey());
+      md5key = CipherUtil.publicKeyMD5(keyStore.getKeys().get().publicKey());
     } catch (ExecutionException | InterruptedException e) {
       // Report the error the same way as any other handshake error.
       var errorMessage = I18N.getText("Handshake.msg.failedToGetPublicKey");
@@ -238,7 +242,7 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
 
   private void handle(RequestPublicKeyMsg requestPublicKeyMsg) {
     pin = requestPublicKeyMsg.getPin();
-    var publicKey = new PublicPrivateKeyStore().getKeys().join();
+    var publicKey = keyStore.getKeys().join();
     var publicKeyUploadBuilder = PublicKeyUploadMsg.newBuilder();
     publicKeyUploadBuilder.setPublicKey(publicKey.getEncodedPublicKeyText());
     sendMessage(
@@ -287,7 +291,7 @@ public class ClientHandshake implements Handshake<Void>, MessageHandler {
     var clientAuthMsg = ClientAuthMsg.newBuilder();
 
     if (useAuthTypeMsg.getAuthType() == AuthTypeEnum.ASYMMETRIC_KEY) {
-      CipherUtil.Key publicKey = new PublicPrivateKeyStore().getKeys().get();
+      CipherUtil.Key publicKey = keyStore.getKeys().get();
       var handshakeChallenge =
           HandshakeChallenge.fromAsymmetricChallengeBytes(
               client.getPlayer().getName(),

@@ -19,7 +19,6 @@ import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.events.ZoneDeactivated;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.client.ui.zone.SelectionModel;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.language.I18N;

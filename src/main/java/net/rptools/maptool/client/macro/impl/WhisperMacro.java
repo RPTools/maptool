@@ -16,6 +16,7 @@ package net.rptools.maptool.client.macro.impl;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
@@ -24,7 +25,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.MessageUtil;
-import net.rptools.maptool.util.StringUtil;
 
 @MacroDefinition(
     name = "whisper",

@@ -17,11 +17,11 @@ package net.rptools.maptool.client;
 import com.jidesoft.plaf.LookAndFeelFactory;
 import com.jidesoft.plaf.UIDefaultsLookup;
 import com.jidesoft.plaf.basic.ThemePainter;
+import io.sentry.EventProcessor;
+import io.sentry.Hint;
 import io.sentry.Sentry;
 import io.sentry.SentryClient;
-import io.sentry.SentryClientFactory;
-import io.sentry.event.BreadcrumbBuilder;
-import io.sentry.event.UserBuilder;
+import io.sentry.SentryEvent;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.EventQueue;
@@ -55,9 +55,13 @@ import net.rptools.clientserver.simple.connection.DirectConnection;
 import net.rptools.lib.BackupManager;
 import net.rptools.lib.DebugStream;
 import net.rptools.lib.FileUtil;
+import net.rptools.lib.OsDetection;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.TaskBarFlasher;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 import net.rptools.lib.image.ThumbnailManager;
 import net.rptools.lib.net.RPTURLStreamHandlerFactory;
+import net.rptools.lib.net.SyrinscapeURLStreamHandler;
 import net.rptools.lib.sound.SoundManager;
 import net.rptools.maptool.client.MapToolConnection.HandshakeCompletionObserver;
 import net.rptools.maptool.client.events.ChatMessageAdded;
@@ -103,7 +107,6 @@ import net.rptools.maptool.model.zones.TokensAdded;
 import net.rptools.maptool.model.zones.TokensRemoved;
 import net.rptools.maptool.model.zones.ZoneAdded;
 import net.rptools.maptool.model.zones.ZoneRemoved;
-import net.rptools.maptool.protocol.syrinscape.SyrinscapeURLStreamHandler;
 import net.rptools.maptool.server.MapToolServer;
 import net.rptools.maptool.server.ServerCommand;
 import net.rptools.maptool.server.ServerConfig;
@@ -140,6 +143,7 @@ public class MapTool {
   public static final String SND_INVALID_OPERATION = "invalidOperation";
 
   private static String clientId = AppUtil.readClientId();
+  private static final PublicPrivateKeyStore keyStore;
 
   // Jamz: This sets the thumbnail size that is cached for imageThumbs
   // Set it to 500 (from 100) for now to support larger asset window previews
@@ -181,6 +185,12 @@ public class MapTool {
   @Nullable private static RemoteServerConfig remoteServerConfig = null;
 
   static {
+    keyStore =
+        new PublicPrivateKeyStore(
+            AppUtil.getAppHome("config").toPath().resolve("public.key").toFile(),
+            AppUtil.getAppHome("config").toPath().resolve("private.key").toFile());
+    ;
+
     try {
       var connections = DirectConnection.create("local");
       var playerDB = new PersonalServerPlayerDatabase(new LocalPlayer());
@@ -188,7 +198,9 @@ public class MapTool {
       var policy = new ServerPolicy();
 
       server = new MapToolServer(null, new Campaign(campaign), null, false, policy, playerDB);
-      client = new MapToolClient(server, campaign, playerDB.getPlayer(), connections.clientSide());
+      client =
+          new MapToolClient(
+              server, campaign, playerDB.getPlayer(), connections.clientSide(), keyStore);
     } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
       throw new RuntimeException("Unable to create default personal server", e);
     }
@@ -1008,7 +1020,7 @@ public class MapTool {
 
     var connections = DirectConnection.create("local");
     server = new MapToolServer(id, new Campaign(campaign), config, useUPnP, policy, playerDatabase);
-    client = new MapToolClient(server, campaign, player, connections.clientSide());
+    client = new MapToolClient(server, campaign, player, connections.clientSide(), keyStore);
 
     if (!server.isPersonalServer()) {
       getFrame().getConnectionPanel().startHosting();
@@ -1161,6 +1173,10 @@ public class MapTool {
     return client;
   }
 
+  public static PublicPrivateKeyStore getKeyStore() {
+    return keyStore;
+  }
+
   public static LocalPlayer getPlayer() {
     return client.getPlayer();
   }
@@ -1207,7 +1223,7 @@ public class MapTool {
     var connection = ConnectionFactory.getInstance().createConnection(player.getName(), config);
 
     server = null;
-    client = new MapToolClient(player, connection);
+    client = new MapToolClient(player, connection, keyStore);
     setUpClient(client);
     client.getConnection().onCompleted(onCompleted);
 
@@ -1335,6 +1351,7 @@ public class MapTool {
             AppActions.loadCampaign(campaignFile);
           }
         } catch (NoSuchElementException nse) {
+          AppPreferences.loadMruCampaignAtStart.set(false);
           log.info("MRU Campaign not loaded. List is empty.");
         }
       }
@@ -1351,8 +1368,8 @@ public class MapTool {
     new MapToolEventBus().getMainEventBus().register(new StatSheetListener());
     new MapToolEventBus().getMainEventBus().register(new TokenHoverListener());
 
-    final var enabledDeveloperOptions = DeveloperOptions.getEnabledOptions();
-    if (!enabledDeveloperOptions.isEmpty()) {
+    final var enabledDeveloperOptions = DeveloperOptions.Toggle.getEnabledOptions();
+    if (!enabledDeveloperOptions.isEmpty() && !MapTool.isDevelopment()) {
       final var message = new StringBuilder();
       message
           .append("<p>")
@@ -1470,43 +1487,6 @@ public class MapTool {
     return StringUtil.parseInteger(cmd.getOptionValue(searchValue), defaultValue);
   }
 
-  /** An example method that throws an exception. */
-  static void unsafeMethod() {
-    throw new UnsupportedOperationException("You shouldn't call this either!");
-  }
-
-  /** Examples using the (recommended) static API. */
-  static void testSentryAPI() {
-    // Note that all fields set on the context are optional. Context data is copied onto
-    // all future events in the current context (until the context is cleared).
-
-    // Record a breadcrumb in the current context. By default the last 100 breadcrumbs are kept.
-    Sentry.getContext()
-        .recordBreadcrumb(new BreadcrumbBuilder().setMessage("User made an action").build());
-
-    // Set the user in the current context.
-    Sentry.getContext().setUser(new UserBuilder().setEmail("hello@sentry.io").build());
-
-    // Add extra data to future events in this context.
-    Sentry.getContext().addExtra("extra", "thing");
-
-    // Add an additional tag to future events in this context.
-    Sentry.getContext().addTag("tagName", "tagValue");
-
-    /*
-     * This sends a simple event to Sentry using the statically stored instance that was created in the ``main`` method.
-     */
-    Sentry.capture("This is another logWithStaticAPI test");
-
-    try {
-      unsafeMethod();
-    } catch (Exception e) {
-      // This sends an exception event to Sentry using the statically stored instance
-      // that was created in the ``main`` method.
-      Sentry.capture(e);
-    }
-  }
-
   public static String getLoggerFileName() {
     org.apache.logging.log4j.core.Logger loggerImpl = (org.apache.logging.log4j.core.Logger) log;
     Appender appender = loggerImpl.getAppenders().get("LogFile");
@@ -1558,7 +1538,7 @@ public class MapTool {
     String versionImplementation = version;
     String versionOverride = version;
 
-    if (AppUtil.MAC_OS_X) {
+    if (OsDetection.MAC_OS_X) {
       // On OSX the menu bar at the top of the screen can be enabled at any time, but the
       // title (ie. name of the application) has to be set before the GUI is initialized (by
       // creating a frame, loading a splash screen, etc). So we do it here.
@@ -1583,9 +1563,18 @@ public class MapTool {
     }
 
     // Initialize Sentry.io logging
-    Sentry.init();
-    sentry = SentryClientFactory.sentryClient();
-    // testSentryAPI(); // purely for testing...
+    Sentry.init(
+        options -> {
+          options.setEnableExternalConfiguration(true);
+          options.addEventProcessor(
+              new EventProcessor() {
+                @Override
+                public SentryEvent process(@Nonnull SentryEvent event, @Nullable Hint hint) {
+                  event.setRelease(getVersion());
+                  return event;
+                }
+              });
+        });
 
     // Jamz: Overwrite version for testing if passed as command line argument using -v or
     // -version
@@ -1666,11 +1655,10 @@ public class MapTool {
     }
 
     // Set MapTool version
-    sentry.setRelease(getVersion());
-    sentry.addTag("os", System.getProperty("os.name"));
-    sentry.addTag("version", MapTool.getVersion());
-    sentry.addTag("versionImplementation", versionImplementation);
-    sentry.addTag("versionOverride", versionOverride);
+    Sentry.setTag("os", System.getProperty("os.name"));
+    Sentry.setTag("version", MapTool.getVersion());
+    Sentry.setTag("versionImplementation", versionImplementation);
+    Sentry.setTag("versionOverride", versionOverride);
 
     if (listMacros) {
       StringBuilder logOutput = new StringBuilder();
@@ -1723,7 +1711,7 @@ public class MapTool {
       // allows the system to set up system defaults before we go and modify things.
       // That is, please don't move these lines around unless you test the result on windows
       // and mac
-      if (AppUtil.MAC_OS_X) {
+      if (OsDetection.MAC_OS_X) {
         menuBar = new AppMenuBar();
         OSXAdapter.macOSXicon();
       } else {

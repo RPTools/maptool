@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.addresource.AddRessourcesDialogView">
-  <grid id="2bcf8" binding="mainPanel" layout-manager="GridLayoutManager" row-count="2" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
+  <grid id="2bcf8" binding="mainPanel" layout-manager="GridLayoutManager" row-count="1" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
     <margin top="5" left="5" bottom="5" right="5"/>
     <constraints>
-      <xy x="10" y="10" width="386" height="238"/>
+      <xy x="10" y="10" width="386" height="229"/>
     </constraints>
     <properties/>
     <border type="none"/>
@@ -212,31 +212,6 @@
           </grid>
         </children>
       </tabbedpane>
-      <component id="a5ae7" class="javax.swing.JButton">
-        <constraints>
-          <grid row="1" column="2" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <actionCommand value="Cancel"/>
-          <name value="cancelButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.cancel"/>
-        </properties>
-      </component>
-      <component id="2f2d3" class="javax.swing.JButton">
-        <constraints>
-          <grid row="1" column="1" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <actionCommand value="Install &gt;&gt;"/>
-          <name value="installButton"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.install"/>
-        </properties>
-      </component>
-      <hspacer id="ccf0f">
-        <constraints>
-          <grid row="1" column="0" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-        </constraints>
-      </hspacer>
       <vspacer id="aef1b">
         <constraints>
           <grid row="0" column="3" row-span="1" col-span="1" vsize-policy="6" hsize-policy="1" anchor="0" fill="2" indent="0" use-parent-layout="false"/>

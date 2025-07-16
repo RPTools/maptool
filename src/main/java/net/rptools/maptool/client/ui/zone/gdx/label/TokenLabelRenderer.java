@@ -18,10 +18,10 @@ import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.math.Vector3;
 import javax.swing.*;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.GraphicsUtil;
-import net.rptools.maptool.util.StringUtil;
 
 public class TokenLabelRenderer implements ItemRenderer {
   private final boolean isGMView;

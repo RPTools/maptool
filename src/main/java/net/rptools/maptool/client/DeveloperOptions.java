@@ -14,68 +14,63 @@
  */
 package net.rptools.maptool.client;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.prefs.Preferences;
-import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.preferences.Preference;
+import net.rptools.maptool.util.preferences.PreferenceStore;
 
 public class DeveloperOptions {
-  private static final Preferences prefs =
-      Preferences.userRoot().node(AppConstants.APP_NAME + "/dev");
+  private static final PreferenceStore store =
+      new PreferenceStore(Preferences.userRoot().node(AppConstants.APP_NAME + "/dev"));
 
-  public enum Toggle {
-    /**
-     * When enabled, make auto-save 60x more frequent by interpreting the user-provided value as
-     * seconds instead of minutes.
-     */
-    AutoSaveMeasuredInSeconds("autoSaveMeasuredInSeconds"),
+  public static final class Toggle {
+    public static final Preference<Boolean> AutoSaveMeasuredInSeconds =
+        store.defineBoolean(
+            "autoSaveMeasuredInSeconds",
+            "Preferences.developer.autoSaveMeasuredInSeconds.label",
+            "Preferences.developer.autoSaveMeasuredInSeconds.tooltip",
+            false);
+    public static final Preference<Boolean> ShowPartitionDrawableBoundaries =
+        store.defineBoolean(
+            "showPartitionDrawableBoundaries",
+            "Preferences.developer.showPartitionDrawableBoundaries.label",
+            "Preferences.developer.showPartitionDrawableBoundaries.tooltip",
+            false);
+    public static final Preference<Boolean> ShowAiDebugging =
+        store.defineBoolean(
+            "showAiDebugging",
+            "Preferences.developer.showAiDebugging.label",
+            "Preferences.developer.showAiDebugging.tooltip",
+            false);
+    public static final Preference<Boolean> IgnoreGridShapeCache =
+        store.defineBoolean(
+            "ignoreGridShapeCache",
+            "Preferences.developer.ignoreGridShapeCache.label",
+            "Preferences.developer.ignoreGridShapeCache.tooltip",
+            false);
+    public static final Preference<Boolean> DebugTokenDragging =
+        store.defineBoolean(
+            "debugTokenDragging",
+            "Preferences.developer.debugTokenDragging.label",
+            "Preferences.developer.debugTokenDragging.tooltip",
+            false);
+    public static final Preference<Boolean> EnableLibGdxRendererToggleButton =
+        store.defineBoolean(
+            "enableLibGDXRendererToggleButton",
+            "Preferences.developer.enableLibGDXRendererToggleButton.label",
+            "Preferences.developer.enableLibGDXRendererToggleButton.tooltip",
+            false);
 
-    /** When enabled, draw boundaries around each partition. */
-    ShowPartitionDrawableBoundaries("showPartitionDrawableBoundaries"),
-
-    /**
-     * When enabled, shows F, G, H scores for each cell encountered during pathfinding, as well as
-     * blocked moved.
-     */
-    ShowAiDebugging("showAiDebugging"),
-
-    /** When enabled, recalculates the grid shape each time it is needed. */
-    IgnoreGridShapeCache("ignoreGridShapeCache"),
-
-    /**
-     * When enabled, highlights the important points used during token drags, for example, the drag
-     * anchor and starting position of the cursor.
-     */
-    DebugTokenDragging("debugTokenDragging");
-
-    private final String key;
-
-    Toggle(String key) {
-      this.key = key;
+    public static List<Preference<Boolean>> getOptions() {
+      return store.getDefinedPreferences().stream()
+          .map(p -> p.cast(Boolean.class))
+          .<Preference<Boolean>>mapMulti(Optional::ifPresent)
+          .toList();
     }
 
-    public String getKey() {
-      return key;
+    public static List<Preference<Boolean>> getEnabledOptions() {
+      return getOptions().stream().filter(Preference::get).toList();
     }
-
-    public boolean isEnabled() {
-      return prefs.getBoolean(key, false);
-    }
-
-    public void setEnabled(boolean enabled) {
-      prefs.putBoolean(key, enabled);
-    }
-
-    public String getLabel() {
-      return I18N.getText(String.format("Preferences.developer.%s.label", key));
-    }
-
-    public String getTooltip() {
-      return I18N.getText(String.format("Preferences.developer.%s.tooltip", key));
-    }
-  }
-
-  public static List<Toggle> getEnabledOptions() {
-    return Arrays.stream(Toggle.values()).filter(Toggle::isEnabled).toList();
   }
 }

@@ -30,7 +30,6 @@ import java.util.regex.Pattern;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.htmlframe.*;
 import net.rptools.maptool.client.ui.htmlframe.HTMLFrameFactory.FrameType;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.library.Library;
 import net.rptools.maptool.model.library.LibraryManager;

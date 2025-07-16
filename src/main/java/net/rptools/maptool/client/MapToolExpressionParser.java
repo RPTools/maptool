@@ -17,6 +17,7 @@ package net.rptools.maptool.client;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import java.util.List;
+import java.util.function.BiFunction;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import net.rptools.dicelib.expression.ExpressionParser;
@@ -26,6 +27,7 @@ import net.rptools.maptool.client.script.javascript.JSMacro;
 import net.rptools.parser.Expression;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
+import net.rptools.parser.VariableResolver;
 import net.rptools.parser.function.Function;
 
 public class MapToolExpressionParser extends ExpressionParser {
@@ -115,7 +117,11 @@ public class MapToolExpressionParser extends ExpressionParser {
               new CallFunction())
           .collect(Collectors.toList());
 
-  public MapToolExpressionParser() {
+  public MapToolExpressionParser(
+      BiFunction<VariableResolver, String, Object> variableLookup,
+      BiFunction<VariableResolver, String, Object> propertyLookup,
+      java.util.function.Function<String, String> prompter) {
+    super(variableLookup, propertyLookup, prompter);
     super.getParser().addFunctions(mapToolParserFunctions);
   }
 

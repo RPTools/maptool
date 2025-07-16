@@ -15,32 +15,33 @@
 package net.rptools.maptool.client.ui.startserverdialog;
 
 import java.text.DecimalFormat;
-import javax.swing.DefaultComboBoxModel;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComboBox;
-import javax.swing.JTextField;
+import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ButtonKind;
 import net.rptools.maptool.client.swing.GenericDialog;
+import net.rptools.maptool.client.swing.GenericDialogFactory;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
 
 /**
  * @author trevor
  */
 public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences> {
-  private boolean accepted;
-
   private StartServerDialogPreferences prefs;
-  private GenericDialog dialog;
+  private final GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getText("ServerDialog.msg.title"))
+          .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
+          .addButton(ButtonKind.OK)
+          .setDefaultButton(ButtonKind.OK);
   private JComboBox movementMetricCombo;
   private JCheckBox useIndividualFOW;
   private JCheckBox useIndividualViews;
@@ -60,16 +61,24 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   public StartServerDialog() {
     super(new StartServerDialogView().getRootComponent());
     panelInit();
+    dialogFactory
+        .setContent(this)
+        .addButton(
+            ButtonKind.NETWORKING_HELP,
+            e -> {
+              // We don't have a good, server-side way of testing anymore.
+              boolean ok = MapTool.confirm("msg.info.server.networkingHelp");
+              if (ok) {
+                MapTool.showDocument(I18N.getString("msg.info.server.forumNFAQ_URL"));
+              }
+            })
+        .addButton(
+            ButtonKind.CANCEL,
+            e -> dialogFactory.setDialogResult(GenericDialog.DENY).closeDialog());
   }
 
-  public boolean accepted() {
-    return accepted;
-  }
-
-  public void showDialog() {
-    dialog = new GenericDialog(I18N.getText("ServerDialog.msg.title"), MapTool.getFrame(), this);
+  public String showDialog() {
     prefs = new StartServerDialogPreferences();
-
     bind(prefs);
     useIndividualFOW = (JCheckBox) getComponent("@useIndividualFOW");
     useIndividualViews = (JCheckBox) getComponent("@useIndividualViews");
@@ -163,9 +172,9 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
           playerPassword.setText(password);
         });
 
-    getRootPane().setDefaultButton(getOKButton());
-    getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
-    dialog.showDialog();
+    getRootPane().setDefaultButton(dialogFactory.getDefaultButton());
+    getUseWebRTCCheckBox().setEnabled(!getRPToolsAlias().getText().isEmpty());
+    return dialogFactory.displayWithReturnValue();
   }
 
   public JCheckBox getUseWebRTCCheckBox() {
@@ -190,14 +199,6 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
 
   public JTextField getUsernameTextField() {
     return (JTextField) getComponent("@username");
-  }
-
-  public JButton getOKButton() {
-    return (JButton) getComponent("okButton");
-  }
-
-  public JButton getCancelButton() {
-    return (JButton) getComponent("cancelButton");
   }
 
   public JComboBox getRoleCombo() {
@@ -226,17 +227,18 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
   }
 
   public void initOKButton() {
-    getOKButton()
+    dialogFactory
+        .getOKButton()
         .addActionListener(
             e -> {
-              if (getPortTextField().getText().length() == 0) {
+              if (getPortTextField().getText().isEmpty()) {
                 MapTool.showError("ServerDialog.error.port");
                 return;
               }
               // If not using the password file then both the player and GM passwords must be
               // present and must differ.
               if (!usePasswordFile.isSelected()) {
-                if (gmPassword.getText().length() == 0 || playerPassword.getText().length() == 0) {
+                if (gmPassword.getText().isEmpty() || playerPassword.getText().isEmpty()) {
                   MapTool.showError("ServerDialog.error.passwordMissing");
                   return;
                 }
@@ -270,8 +272,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
                 prefs.setKeyUseWebrtc(
                     useWebRTCCheckBox.isEnabled() && useWebRTCCheckBox.isSelected());
 
-                accepted = true;
-                dialog.closeDialog();
+                dialogFactory.setDialogResult(GenericDialog.AFFIRM).closeDialog();
               }
             });
     getRPToolsAlias()
@@ -279,7 +280,7 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
         .addDocumentListener(
             new DocumentListener() {
               private void checkName() {
-                getUseWebRTCCheckBox().setEnabled(getRPToolsAlias().getText().length() > 0);
+                getUseWebRTCCheckBox().setEnabled(!getRPToolsAlias().getText().isEmpty());
               }
 
               @Override
@@ -296,26 +297,6 @@ public class StartServerDialog extends AbeillePanel<StartServerDialogPreferences
               public void changedUpdate(DocumentEvent e) {
                 checkName();
               }
-            });
-  }
-
-  public void initCancelButton() {
-    getCancelButton()
-        .addActionListener(
-            e -> {
-              accepted = false;
-              dialog.closeDialog();
-            });
-  }
-
-  @SuppressWarnings("unused")
-  public void initTestConnectionButton() {
-    getNetworkingHelpButton()
-        .addActionListener(
-            e -> {
-              // We don't have a good, server-side way of testing any more.
-              boolean ok = MapTool.confirm("msg.info.server.networkingHelp");
-              if (ok) MapTool.showDocument(I18N.getString("msg.info.server.forumNFAQ_URL"));
             });
   }
 }

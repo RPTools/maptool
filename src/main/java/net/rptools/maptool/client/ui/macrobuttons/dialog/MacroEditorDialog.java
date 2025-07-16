@@ -14,7 +14,7 @@
  */
 package net.rptools.maptool.client.ui.macrobuttons.dialog;
 
-import static net.rptools.maptool.client.AppActions.withMenuShortcut;
+import static net.rptools.lib.OsDetection.withMenuShortcut;
 
 import java.awt.BorderLayout;
 import java.awt.event.WindowAdapter;

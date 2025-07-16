@@ -23,10 +23,13 @@ import com.badlogic.gdx.utils.ShortArray;
 import java.awt.geom.Area;
 import java.awt.geom.PathIterator;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.gdx.Earcut;
 import net.rptools.lib.gdx.Joiner;
+import org.locationtech.jts.geom.Polygon;
 import space.earlygrey.shapedrawer.DefaultSideEstimator;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 import space.earlygrey.shapedrawer.ShapeUtils;
@@ -76,74 +79,53 @@ public class AreaRenderer {
     this.textureRegion = textureRegion;
   }
 
-  public List<TriangledPolygon> triangulate(Area area) {
-    if (area == null || area.isEmpty()) return new ArrayList<>();
-
-    var result = new ArrayList<TriangledPolygon>();
-
-    pathToFloatArray(area.getPathIterator(null));
-
-    if (segmentIndicies.size == 1) {
-      removeStartFromEnd();
-      var vertices = tmpFloat.toArray();
-      var indices = Earcut.earcut(vertices).toArray();
-      result.add(new TriangledPolygon(vertices, indices));
-      return result;
+  public List<TriangledPolygon> triangulate(Collection<Polygon> jts) {
+    if (jts.isEmpty()) {
+      return List.of();
     }
 
-    var lastSegmentIndex = 0;
-    var polygons = new ArrayList<Polygon>();
-    // Polygons in a PathIterator are ordered. If polygon p contains q, q comes first.
-    // So we draw polygons that contains others, those others are the holes.
-    var floats = tmpFloat.toArray();
-    for (int i = 1; i <= segmentIndicies.size; i++) {
-      var idx = i == segmentIndicies.size ? floats.length / 2 : segmentIndicies.get(i);
-      var vertexCount = idx - lastSegmentIndex;
-      var currentPolyVertices = new float[2 * vertexCount];
-      System.arraycopy(floats, 2 * lastSegmentIndex, currentPolyVertices, 0, 2 * vertexCount);
-      lastSegmentIndex = idx;
-
-      var poly = new Polygon(currentPolyVertices);
-      var holes = new ArrayList<Polygon>();
-
-      for (int j = 0; j < polygons.size(); j++) {
-        var prevPoly = polygons.get(j);
-        var prevVertices = prevPoly.getVertices();
-        if (poly.contains(prevVertices[0], prevVertices[1])) {
-          holes.add(prevPoly);
-        }
-      }
-      if (holes.isEmpty()) {
-        polygons.add(poly);
-        continue;
-      }
+    var result = new ArrayList<TriangledPolygon>();
+    for (var poly : jts) {
+      short[] holeIndices = new short[poly.getNumInteriorRing()];
       tmpFloat.clear();
-      tmpFloat.addAll(poly.getVertices());
 
-      short[] holeIndices = new short[holes.size()];
-      var lastPoly = poly;
-      var lastHoleIndex = 0;
-      for (int j = 0; j < holes.size(); j++) {
-        lastHoleIndex += lastPoly.getVertices().length;
-        holeIndices[j] = (short) (lastHoleIndex / 2);
-        lastPoly = holes.get(j);
-        polygons.remove(lastPoly);
-        tmpFloat.addAll(lastPoly.getVertices());
+      for (var c : poly.getExteriorRing().getCoordinates()) {
+        tmpFloat.add((float) c.x, -(float) c.y);
+      }
+
+      for (int holeI = 0, holeN = poly.getNumInteriorRing(); holeI < holeN; ++holeI) {
+        holeIndices[holeI] = (short) (tmpFloat.size / 2);
+        for (var c : poly.getInteriorRingN(holeI).getCoordinates()) {
+          tmpFloat.add((float) c.x, -(float) c.y);
+        }
       }
 
       var indices = Earcut.earcut(tmpFloat.toArray(), holeIndices, (short) 2);
       result.add(new TriangledPolygon(tmpFloat.toArray(), indices.toArray()));
     }
-
-    for (var poly : polygons) {
-      var indices = Earcut.earcut(poly.getVertices());
-      result.add(new TriangledPolygon(poly.getVertices(), indices.toArray()));
-    }
     return result;
   }
 
+  public List<TriangledPolygon> triangulate(Area area) {
+    if (area == null || area.isEmpty()) {
+      return List.of();
+    }
+
+    var jts = GeometryUtil.toJtsPolygons(area);
+    return triangulate(jts);
+  }
+
+  public void fill(PolygonSpriteBatch batch, List<TriangledPolygon> polygons) {
+    for (var poly : polygons) {
+      var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
+      paintRegion(batch, polyRegion);
+    }
+  }
+
   public void fillArea(PolygonSpriteBatch batch, Area area) {
-    if (area == null || area.isEmpty()) return;
+    if (area == null || area.isEmpty()) {
+      return;
+    }
     for (var poly : triangulate(area)) {
       var polyRegion = new PolygonRegion(textureRegion, poly.vertices, poly.indices);
       paintRegion(batch, polyRegion);
@@ -181,7 +163,8 @@ public class AreaRenderer {
   }
 
   private void removeStartFromEnd() {
-    while (tmpFloat.get(0) == tmpFloat.get(tmpFloat.size - 2)
+    while (tmpFloat.size > 2
+        && tmpFloat.get(0) == tmpFloat.get(tmpFloat.size - 2)
         && tmpFloat.get(1) == tmpFloat.get(tmpFloat.size - 1)) {
       // make sure we don't have last and first point the same
       tmpFloat.pop();

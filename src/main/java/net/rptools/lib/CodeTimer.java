@@ -62,6 +62,7 @@ public class CodeTimer {
     return stack.isEmpty() ? ROOT_TIMER.get() : stack.getLast();
   }
 
+  private final Map<String, Integer> counterMap = new LinkedHashMap<>();
   private final Map<String, Timer> timeMap = new LinkedHashMap<>();
   private final String name;
   private long threshold = 1;
@@ -82,6 +83,14 @@ public class CodeTimer {
 
   public void setEnabled(boolean enabled) {
     this.enabled = enabled;
+  }
+
+  public void increment(String id) {
+    increment(id, 1);
+  }
+
+  public void increment(String id, int amount) {
+    counterMap.merge(id, amount, Integer::sum);
   }
 
   public void start(String id, Object... parameters) {
@@ -113,6 +122,7 @@ public class CodeTimer {
 
   public void clear() {
     timeMap.clear();
+    counterMap.clear();
   }
 
   @Override
@@ -137,6 +147,20 @@ public class CodeTimer {
       }
       builder.append(String.format("  %3d.  %6d ms  %s\n", i, elapsed, id));
     }
+
+    if (!counterMap.isEmpty()) {
+      builder.append("\nCounters\n");
+      i = -1;
+      for (var entry : counterMap.entrySet()) {
+        ++i;
+
+        var id = entry.getKey();
+        var count = entry.getValue();
+
+        builder.append(String.format("  %3d.  %6d     %s\n", i, count, id));
+      }
+    }
+
     return builder.toString();
   }
 

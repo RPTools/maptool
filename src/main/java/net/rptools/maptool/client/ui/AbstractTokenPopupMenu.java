@@ -20,9 +20,6 @@ import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -46,10 +43,12 @@ import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.*;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.CategorizedLights;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Grid;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.Lights;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Token.TokenShape;
 import net.rptools.maptool.model.TokenFootprint;
@@ -137,9 +136,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
     }
 
-    for (Entry<String, Map<GUID, LightSource>> entry :
-        MapTool.getCampaign().getLightSourcesMap().entrySet()) {
-      JMenu subMenu = createLightCategoryMenu(entry.getKey(), entry.getValue().values());
+    for (CategorizedLights.Category category :
+        MapTool.getCampaign().getLightSources().getCategories()) {
+      JMenu subMenu = createLightCategoryMenu(category.name(), category.lights());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
       }
@@ -147,7 +146,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     return menu;
   }
 
-  protected JMenu createLightCategoryMenu(String categoryName, Collection<LightSource> sources) {
+  protected JMenu createLightCategoryMenu(String categoryName, Lights sources) {
     JMenu subMenu = new JMenu(categoryName);
 
     for (LightSource lightSource : sources) {
@@ -197,9 +196,9 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
       }
     }
 
-    for (Entry<String, Map<GUID, LightSource>> entry :
-        MapTool.getCampaign().getLightSourcesMap().entrySet()) {
-      JMenu subMenu = createAuraCategoryMenu(entry.getKey(), entry.getValue().values());
+    for (CategorizedLights.Category category :
+        MapTool.getCampaign().getLightSources().getCategories()) {
+      JMenu subMenu = createAuraCategoryMenu(category.name(), category.lights());
       if (subMenu.getItemCount() != 0) {
         menu.add(subMenu);
       }
@@ -207,7 +206,7 @@ public abstract class AbstractTokenPopupMenu extends JPopupMenu {
     return menu;
   }
 
-  protected JMenu createAuraCategoryMenu(String categoryName, Collection<LightSource> sources) {
+  protected JMenu createAuraCategoryMenu(String categoryName, Lights sources) {
     JMenu subMenu = new JMenu(categoryName);
 
     for (LightSource lightSource : sources) {

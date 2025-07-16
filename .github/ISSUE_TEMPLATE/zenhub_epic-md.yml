@@ -1,7 +1,7 @@
 name: ZenHub Epic
 description: This template is for creating ZenHub Epics
 title: '[Epic]: '
-labels: 'epic'
+labels: ["epic"]
 body:
   - type: markdown
     attributes:

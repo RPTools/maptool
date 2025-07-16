@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <form xmlns="http://www.intellij.com/uidesigner/form/" version="1" bind-to-class="net.rptools.maptool.client.ui.campaignproperties.TokenPropertiesManagementPanelView">
   <grid id="26b35" binding="mainPanel" layout-manager="GridLayoutManager" row-count="8" column-count="4" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
-
     <margin top="0" left="0" bottom="0" right="0"/>
     <constraints>
       <xy x="10" y="10" width="1503" height="474"/>
@@ -12,7 +11,6 @@
     </properties>
     <border type="none"/>
     <children>
-
       <scrollpane id="d849c">
         <constraints>
           <grid row="2" column="0" row-span="3" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
@@ -241,7 +239,6 @@
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="1" column="3" row-span="2" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="3" indent="0" use-parent-layout="false"/>
-
         </constraints>
         <properties/>
         <border type="etched" title-resource-bundle="net/rptools/maptool/language/i18n" title-key="TokenPropertiesPanel.label.type"/>
@@ -325,7 +322,6 @@
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
           <grid row="3" column="3" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="9" fill="0" indent="0" use-parent-layout="false"/>
-
         </constraints>
         <properties/>
         <border type="none"/>
@@ -337,7 +333,7 @@
             <properties>
               <actionCommand value="MovePropertyUp"/>
               <name value="propertyMoveUpButton"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.up"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.moveUp"/>
             </properties>
           </component>
           <component id="f04b7" class="javax.swing.JButton">
@@ -348,7 +344,7 @@
               <actionCommand value="MovePropertyDown"/>
               <name value="propertyMoveDownButton"/>
               <selected value="false"/>
-              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.down"/>
+              <text resource-bundle="net/rptools/maptool/language/i18n" key="Button.moveDown"/>
             </properties>
           </component>
           <component id="7a102" class="javax.swing.JButton">
@@ -396,13 +392,12 @@
       <hspacer id="168d3">
         <constraints>
           <grid row="7" column="3" row-span="1" col-span="1" vsize-policy="1" hsize-policy="6" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
-
         </constraints>
       </hspacer>
       <grid id="1fc7e" layout-manager="GridLayoutManager" row-count="1" column-count="2" same-size-horizontally="false" same-size-vertically="false" hgap="-1" vgap="-1">
         <margin top="0" left="0" bottom="0" right="0"/>
         <constraints>
-         <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
+          <grid row="5" column="0" row-span="1" col-span="1" vsize-policy="3" hsize-policy="3" anchor="0" fill="2" indent="0" use-parent-layout="false"/>
         </constraints>
         <properties/>
         <border type="none"/>
@@ -447,7 +442,6 @@
               <grid row="0" column="0" row-span="1" col-span="1" vsize-policy="0" hsize-policy="3" anchor="0" fill="1" indent="0" use-parent-layout="false"/>
             </constraints>
             <properties>
-
               <name value="typeDuplicateButton"/>
               <text resource-bundle="net/rptools/maptool/language/i18n" key="action.copyTokens"/>
             </properties>
@@ -464,14 +458,6 @@
           </component>
         </children>
       </grid>
-      <component id="31030" class="javax.swing.JLabel">
-        <constraints>
-          <grid row="0" column="0" row-span="1" col-span="3" vsize-policy="3" hsize-policy="3" anchor="0" fill="0" indent="0" use-parent-layout="false"/>
-        </constraints>
-        <properties>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="TokenPropertiesPanel.label.type"/>
-        </properties>
-      </component>
     </children>
   </grid>
 </form>

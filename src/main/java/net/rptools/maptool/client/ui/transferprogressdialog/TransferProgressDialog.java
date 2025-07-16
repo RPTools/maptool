@@ -18,61 +18,43 @@ import java.awt.EventQueue;
 import java.io.File;
 import java.text.NumberFormat;
 import java.util.List;
-import javax.swing.JButton;
 import javax.swing.JTable;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.TableColumnModel;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.ButtonKind;
 import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.transfer.AssetConsumer;
 import net.rptools.maptool.transfer.ConsumerListener;
 
-/** This dialog is used to display all of the assets being transferred */
+/** This dialog is used to display all the assets being transferred */
 public class TransferProgressDialog extends AbeillePanel<Token> implements ConsumerListener {
-
-  private GenericDialog dialog;
-
   public TransferProgressDialog() {
     super(new TransferProgressDialogView().getRootComponent());
-
     panelInit();
   }
 
   public void showDialog() {
-    dialog =
-        new GenericDialog(
-            I18N.getText("TransferProgressDialog.title"), MapTool.getFrame(), this, false) {
-          @Override
-          public void showDialog() {
-            MapTool.getAssetTransferManager().addConsumerListener(TransferProgressDialog.this);
-            super.showDialog();
-          }
-
-          @Override
-          public void closeDialog() {
-            MapTool.getAssetTransferManager().removeConsumerListener(TransferProgressDialog.this);
-            super.closeDialog();
-          }
-        };
-
-    getRootPane().setDefaultButton(getCloseButton());
-    dialog.showDialog();
-  }
-
-  public JButton getCloseButton() {
-    return (JButton) getComponent("closeButton");
+    GenericDialog.getFactory()
+        .setDialogTitle(I18N.getText("TransferProgressDialog.title"))
+        .setContent(this)
+        .onBeforeShow(
+            e -> MapTool.getAssetTransferManager().addConsumerListener(TransferProgressDialog.this))
+        .onBeforeClose(
+            e ->
+                MapTool.getAssetTransferManager()
+                    .removeConsumerListener(TransferProgressDialog.this))
+        .addButton(ButtonKind.CLOSE)
+        .setDefaultButton(ButtonKind.CLOSE)
+        .display();
   }
 
   public JTable getTransferTable() {
     return (JTable) getComponent("transferTable");
-  }
-
-  public void initCloseButton() {
-    getCloseButton().addActionListener(e -> dialog.closeDialog());
   }
 
   private void updateTransferTable() {
@@ -88,6 +70,7 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
         });
   }
 
+  @SuppressWarnings("unused")
   public void initTransferTable() {
     updateTransferTable();
   }
@@ -110,40 +93,32 @@ public class TransferProgressDialog extends AbeillePanel<Token> implements Consu
 
     public Object getValueAt(int rowIndex, int columnIndex) {
 
-      if (consumerList.size() == 0) {
+      if (consumerList.isEmpty()) {
         return columnIndex == 0 ? I18N.getText("AddResourcesDialog.label.none") : "";
       }
 
       AssetConsumer consumer = consumerList.get(rowIndex);
 
-      switch (columnIndex) {
-        case 0:
-          return consumer.getId();
-        case 1:
-          return formatSize(consumer.getSize());
-        case 2:
-          return NumberFormat.getPercentInstance().format(consumer.getPercentComplete());
-      }
-
-      return null;
+      return switch (columnIndex) {
+        case 0 -> consumer.getId();
+        case 1 -> formatSize(consumer.getSize());
+        case 2 -> NumberFormat.getPercentInstance().format(consumer.getPercentComplete());
+        default -> null;
+      };
     }
 
     private String formatSize(long size) {
-
       return NumberFormat.getIntegerInstance().format(size / 1024) + "k";
     }
 
     @Override
     public String getColumnName(int column) {
-      switch (column) {
-        case 0:
-          return I18N.getText("EditTokenDialog.msg.speech.colID");
-        case 1:
-          return I18N.getText("token.popup.menu.size");
-        case 2:
-          return I18N.getText("Label.progress");
-      }
-      return "";
+      return switch (column) {
+        case 0 -> I18N.getText("EditTokenDialog.msg.speech.colID");
+        case 1 -> I18N.getText("token.popup.menu.size");
+        case 2 -> I18N.getText("Label.progress");
+        default -> "";
+      };
     }
   }
 

@@ -18,6 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -328,10 +329,27 @@ public class PathTest {
 
   @Nested
   class DerivedPathTests {
+    private Grid grid;
+
+    @BeforeEach
+    public void setUp() {
+      var gridCapabilities = mock(GridCapabilities.class);
+      when(gridCapabilities.isSnapToGridSupported()).thenReturn(true);
+      when(gridCapabilities.isPathingSupported()).thenReturn(true);
+      when(gridCapabilities.isPathLineSupported()).thenReturn(true);
+      when(gridCapabilities.isSecondDimensionAdjustmentSupported()).thenReturn(false);
+      when(gridCapabilities.isCoordinatesSupported()).thenReturn(true);
+
+      grid = mock(Grid.class);
+      when(grid.getCapabilities()).thenReturn(gridCapabilities);
+    }
+
     @Test
     @DisplayName(
         "Test that a non-snap-to-grid follower path is properly derived from a non-snap-to-grid leader path")
     public void testDeriveNonStgFollowingNonStg() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
       var path = new Path<ZonePoint>();
       path.appendWaypoint(new ZonePoint(52, 427));
       path.appendPartialPath(
@@ -342,7 +360,7 @@ public class PathTest {
               new ZonePoint(429, 65)));
       path.appendPartialPath(
           List.of(new ZonePoint(502, -91), new ZonePoint(628, -171), new ZonePoint(756, -272)));
-      var grid = mock(Grid.class);
+
       var leaderToken = mock(Token.class);
       when(leaderToken.isSnapToGrid()).thenReturn(false);
       // Position agrees with start of path.
@@ -384,6 +402,8 @@ public class PathTest {
     @DisplayName(
         "Test that a snap-to-grid follower path is properly derived from a snap-to-grid leader path")
     public void testDeriveStgFollowingStg() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
       var path = new Path<CellPoint>();
       path.appendWaypoint(new CellPoint(0, 4));
       path.appendPartialPath(
@@ -391,7 +411,7 @@ public class PathTest {
               new CellPoint(1, 3), new CellPoint(2, 2), new CellPoint(3, 1), new CellPoint(4, 0)));
       path.appendPartialPath(
           List.of(new CellPoint(5, -1), new CellPoint(6, -2), new CellPoint(7, -3)));
-      var grid = mock(Grid.class);
+
       when(grid.convert(new ZonePoint(52, 427))).thenReturn(new CellPoint(0, 4));
       when(grid.convert(new ZonePoint(1012, 1184))).thenReturn(new CellPoint(10, 11));
 
@@ -435,7 +455,9 @@ public class PathTest {
     @Test
     @DisplayName(
         "Test that a non-snap-to-grid follower path is properly derived from a snap-to-grid leader path")
-    public void testDeriveNonStgFollowingStg() {
+    public void testDeriveNonStgFollowingStgOnStgGrid() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
       var path = new Path<CellPoint>();
       path.appendWaypoint(new CellPoint(0, 4));
       path.appendPartialPath(
@@ -443,7 +465,8 @@ public class PathTest {
               new CellPoint(1, 3), new CellPoint(2, 2), new CellPoint(3, 1), new CellPoint(4, 0)));
       path.appendPartialPath(
           List.of(new CellPoint(5, -1), new CellPoint(6, -2), new CellPoint(7, -3)));
-      var grid = mock(Grid.class);
+
+      when(grid.convert(new CellPoint(0, 0))).thenReturn(new ZonePoint(50, 50));
       when(grid.convert(new CellPoint(0, 4))).thenReturn(new ZonePoint(0, 400));
       when(grid.convert(new CellPoint(1, 3))).thenReturn(new ZonePoint(100, 300));
       when(grid.convert(new CellPoint(2, 2))).thenReturn(new ZonePoint(200, 200));
@@ -452,6 +475,7 @@ public class PathTest {
       when(grid.convert(new CellPoint(5, -1))).thenReturn(new ZonePoint(500, -100));
       when(grid.convert(new CellPoint(6, -2))).thenReturn(new ZonePoint(600, -200));
       when(grid.convert(new CellPoint(7, -3))).thenReturn(new ZonePoint(700, -300));
+
       var leaderToken = mock(Token.class);
       when(leaderToken.isSnapToGrid()).thenReturn(true);
       // Position agrees with start of path.
@@ -482,8 +506,10 @@ public class PathTest {
 
     @Test
     @DisplayName(
-        "Test that a snap-to-grid follower path is properly derived from a non-snap-to-grid leader path")
-    public void testDeriveStgFollowingNonStg() {
+        "Test that a non-snap-to-grid follower path is properly derived from a snap-to-grid leader path when the grid does not support snap to grid")
+    public void testDeriveNonStgFollowingStgOnNonStgGrid() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(false);
+
       var path = new Path<ZonePoint>();
       path.appendWaypoint(new ZonePoint(52, 427));
       path.appendPartialPath(
@@ -494,10 +520,65 @@ public class PathTest {
               new ZonePoint(429, 65)));
       path.appendPartialPath(
           List.of(new ZonePoint(502, -91), new ZonePoint(628, -171), new ZonePoint(756, -272)));
-      var grid = mock(Grid.class);
+
+      var leaderToken = mock(Token.class);
+      when(leaderToken.isSnapToGrid()).thenReturn(true);
+      // Position agrees with start of path.
+      when(leaderToken.getX()).thenReturn(52);
+      when(leaderToken.getY()).thenReturn(427);
+      var followerToken = mock(Token.class);
+      when(followerToken.isSnapToGrid()).thenReturn(false);
+      // Offset a bit from the leader.
+      when(followerToken.getX()).thenReturn(1012);
+      when(followerToken.getY()).thenReturn(1184);
+
+      var derived = path.derive(grid, leaderToken, followerToken);
+
+      // All points are used, even though in practice non-STG tokens only have waypoints.
+      var expectedCellPoints =
+          List.of(
+              new ZonePoint(1012, 1184),
+              new ZonePoint(1076, 1121),
+              new ZonePoint(1191, 1047),
+              new ZonePoint(1302, 929),
+              new ZonePoint(1389, 822),
+              new ZonePoint(1462, 666),
+              new ZonePoint(1588, 586),
+              new ZonePoint(1716, 485));
+      assertIterableEquals(expectedCellPoints, derived.getCellPath());
+      var expectedWaypoints =
+          List.of(new ZonePoint(1012, 1184), new ZonePoint(1389, 822), new ZonePoint(1716, 485));
+      assertIterableEquals(expectedWaypoints, derived.getWayPointList());
+
+      for (var cell : derived.getCellPath()) {
+        assertInstanceOf(ZonePoint.class, cell);
+      }
+      for (var waypoint : derived.getWayPointList()) {
+        assertInstanceOf(ZonePoint.class, waypoint);
+      }
+    }
+
+    @Test
+    @DisplayName(
+        "Test that a snap-to-grid follower path is properly derived from a non-snap-to-grid leader path")
+    public void testDeriveStgFollowingNonStg() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
+      var path = new Path<ZonePoint>();
+      path.appendWaypoint(new ZonePoint(52, 427));
+      path.appendPartialPath(
+          List.of(
+              new ZonePoint(116, 364),
+              new ZonePoint(231, 290),
+              new ZonePoint(342, 172),
+              new ZonePoint(429, 65)));
+      path.appendPartialPath(
+          List.of(new ZonePoint(502, -91), new ZonePoint(628, -171), new ZonePoint(756, -272)));
+
       when(grid.convert(new ZonePoint(1012, 1184))).thenReturn(new CellPoint(10, 11));
       when(grid.convert(new ZonePoint(1389, 822))).thenReturn(new CellPoint(13, 8));
       when(grid.convert(new ZonePoint(1716, 485))).thenReturn(new CellPoint(17, 4));
+
       var leaderToken = mock(Token.class);
       when(leaderToken.isSnapToGrid()).thenReturn(false);
       // Position agrees with start of path.
@@ -539,11 +620,13 @@ public class PathTest {
     @DisplayName(
         "Test that a snap-to-grid follower path is properly derived from a non-snap-to-grid leader path using the naive walk")
     public void testDeriveStgFollowingNonStgWithDifferentSlope() {
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
       var path = new Path<ZonePoint>();
       path.appendWaypoint(new ZonePoint(52, 427));
       path.appendWaypoint(new ZonePoint(889, 838));
       path.appendWaypoint(new ZonePoint(445, -238));
-      var grid = mock(Grid.class);
+
       when(grid.convert(new ZonePoint(1012, 1184))).thenReturn(new CellPoint(10, 11));
       when(grid.convert(new ZonePoint(1849, 1595))).thenReturn(new CellPoint(18, 15));
       when(grid.convert(new ZonePoint(1405, 519))).thenReturn(new CellPoint(14, 5));
@@ -603,6 +686,8 @@ public class PathTest {
       // position was a waypoint. So a path that crosses itself could be given many more waypoints
       // than were actually set. We don't do that anymore, and this test ensures it.
 
+      when(grid.getCapabilities().isSnapToGridSupported()).thenReturn(true);
+
       var path = new Path<CellPoint>();
       path.appendWaypoint(new CellPoint(0, 0));
       path.appendPartialPath(
@@ -625,8 +710,8 @@ public class PathTest {
               new CellPoint(1, -1),
               // Note: this last point crosses through the first partial path.
               new CellPoint(2, 0)));
-      var grid = mock(Grid.class);
       when(grid.convert(new ZonePoint(50, 50))).thenReturn(new CellPoint(0, 0));
+
       var leaderToken = mock(Token.class);
       when(leaderToken.isSnapToGrid()).thenReturn(true);
       // Position agrees with start of path.

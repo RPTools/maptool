@@ -15,6 +15,8 @@
 package net.rptools.maptool.model;
 
 import com.google.protobuf.BoolValue;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.*;
 import java.util.Map.Entry;
 import java.util.stream.Collectors;
@@ -43,7 +45,7 @@ import net.rptools.maptool.server.proto.CampaignDto;
  * <p>Roughly this is equivalent to multiple tabs that will appear on the client and all of the
  * images that will appear on it (and also campaign macro buttons).
  */
-public class Campaign {
+public class Campaign implements Serializable {
   private GUID id = new GUID();
 
   /** The {@link Zone}s that make up this {@code Campaign}. */
@@ -63,7 +65,7 @@ public class Campaign {
   private Map<String, Boolean> exportSettings =
       new HashMap<>(); // the state of each checkbox/radiobutton for the Export>ScreenshotAs dialog
 
-  private CampaignProperties campaignProperties = new CampaignProperties();
+  private @Nonnull CampaignProperties campaignProperties = new CampaignProperties();
   private transient boolean isBeingSerialized;
 
   // campaign macro button properties. these are saved along with the campaign.
@@ -80,12 +82,13 @@ public class Campaign {
 
   // DEPRECATED: As of 1.3b20 these are now in campaignProperties, but are here for backward
   // compatibility
-  private Map<String, List<TokenProperty>> tokenTypeMap;
+  @Deprecated private Map<String, List<TokenProperty>> tokenTypeMap;
 
-  private List<String> remoteRepositoryList;
+  @Deprecated private List<String> remoteRepositoryList;
 
-  private Map<String, Map<GUID, LightSource>> lightSourcesMap;
-  private Map<String, LookupTable> lookupTableMap;
+  @Deprecated private Map<String, Map<GUID, LightSource>> lightSourcesMap;
+
+  @Deprecated private Map<String, LookupTable> lookupTableMap;
 
   /**
    * This flag indicates whether the manual fog tools have been used in this campaign while a server
@@ -121,15 +124,12 @@ public class Campaign {
     return this.landingMapId;
   }
 
+  @Serial
   private Object readResolve() {
     if (exportSettings == null) {
       exportSettings = new HashMap<>();
     }
 
-    return this;
-  }
-
-  private void checkCampaignPropertyConversion() {
     if (campaignProperties == null) {
       campaignProperties = new CampaignProperties();
     }
@@ -142,17 +142,18 @@ public class Campaign {
       remoteRepositoryList = null;
     }
     if (lightSourcesMap != null) {
-      campaignProperties.setLightSourcesMap(lightSourcesMap);
+      campaignProperties.setLightSources(CategorizedLights.copyOf(lightSourcesMap));
       lightSourcesMap = null;
     }
     if (lookupTableMap != null) {
       campaignProperties.setLookupTableMap(lookupTableMap);
       lookupTableMap = null;
     }
+
+    return this;
   }
 
   public List<String> getRemoteRepositoryList() {
-    checkCampaignPropertyConversion();
     return campaignProperties.getRemoteRepositoryList();
   }
 
@@ -255,19 +256,12 @@ public class Campaign {
     campaignProperties.setDefaultTokenPropertyType(def);
   }
 
-  public List<String> getSightTypes() {
-    List<String> list = new ArrayList<String>(getSightTypeMap().keySet());
-    Collections.sort(list);
-    return list;
+  public Sights getSightTypes() {
+    return campaignProperties.getSightTypes();
   }
 
-  public void setSightTypes(List<SightType> typeList) {
-    checkCampaignPropertyConversion();
-    Map<String, SightType> map = new HashMap<String, SightType>();
-    for (SightType sightType : typeList) {
-      map.put(sightType.getName(), sightType);
-    }
-    campaignProperties.setSightTypeMap(map);
+  public void setSightTypes(Sights sights) {
+    campaignProperties.setSightTypes(sights);
   }
 
   public List<TokenProperty> getTokenPropertyList(String tokenType) {
@@ -286,33 +280,22 @@ public class Campaign {
    * @return the {@link Map} of token types
    */
   public Map<String, List<TokenProperty>> getTokenTypeMap() {
-    checkCampaignPropertyConversion();
     return campaignProperties.getTokenTypeMap();
   }
 
   /**
-   * Convenience method that calls {@link #getSightTypeMap()} and returns the value for the key
-   * <code>type</code>.
+   * Convenience method that calls {@link #getSightTypes()} and returns the value for the key <code>
+   * type</code>.
    *
    * @param type the String corresponding to the SightType.
    * @return the SightType.
    */
   public SightType getSightType(String type) {
-    return getSightTypeMap()
-        .get(
-            (type != null && getSightTypeMap().containsKey(type))
-                ? type
-                : campaignProperties.getDefaultSightType());
-  }
+    if (type == null) {
+      type = campaignProperties.getDefaultSightType();
+    }
 
-  /**
-   * Stub that calls <code>campaignProperties.getSightTypeMap()</code>.
-   *
-   * @return the {@link Map} of {@link SightType}s
-   */
-  public Map<String, SightType> getSightTypeMap() {
-    checkCampaignPropertyConversion();
-    return campaignProperties.getSightTypeMap();
+    return getSightTypes().get(type).orElse(null);
   }
 
   /**
@@ -321,7 +304,6 @@ public class Campaign {
    * @return the {@link Map} of {@link LookupTable}s types
    */
   public Map<String, LookupTable> getLookupTableMap() {
-    checkCampaignPropertyConversion();
     return campaignProperties.getLookupTableMap();
   }
 
@@ -336,25 +318,12 @@ public class Campaign {
    *
    * @return the {@link Map} of between lightSourceIds and {@link LightSource}s
    */
-  public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
-    checkCampaignPropertyConversion();
-    return campaignProperties.getLightSourcesMap();
+  public CategorizedLights getLightSources() {
+    return campaignProperties.getLightSources();
   }
 
-  public void setLightSourcesMap(Map<String, Map<GUID, LightSource>> map) {
-    checkCampaignPropertyConversion();
-    campaignProperties.setLightSourcesMap(map);
-  }
-
-  /**
-   * Convenience method that calls {@link #getLightSourcesMap()} and returns the value for the key
-   * <code>type</code>.
-   *
-   * @param type the key
-   * @return the {@link Map} of between lightSourceIds and {@link LightSource}s for a specifict type
-   */
-  public Map<GUID, LightSource> getLightSourceMap(String type) {
-    return getLightSourcesMap().get(type);
+  public void setLightSources(CategorizedLights map) {
+    campaignProperties.setLightSources(map);
   }
 
   /**

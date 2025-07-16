@@ -17,7 +17,9 @@ package net.rptools.maptool.client.ui.zone;
 import java.awt.Image;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -25,10 +27,14 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.rptools.lib.CollectionUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
+import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneLoaded;
@@ -36,14 +42,14 @@ import net.rptools.maptool.client.ui.Scale;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
+import net.rptools.maptool.model.AttachedLightSource;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.util.CollectionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +66,25 @@ public class ZoneViewModel {
    *
    * <p>Obsoletes various other TokenPosition types that are either screen-based or inconsistent.
    */
-  public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {}
+  public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {
+    public static TokenPosition fromToken(Token token, Zone zone) {
+      Rectangle2D footprintBounds = token.getBounds(zone);
+
+      final Area transformedBounds = new Area(footprintBounds);
+      if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
+        // facing defaults to down or -90 degrees
+        double centerX = footprintBounds.getCenterX() - token.getAnchorX();
+        double centerY = footprintBounds.getCenterY() - token.getAnchorY();
+        var at =
+            AffineTransform.getRotateInstance(
+                Math.toRadians(token.getFacingInDegrees()), centerX, centerY);
+
+        transformedBounds.transform(at);
+      }
+
+      return new TokenPosition(token, footprintBounds, transformedBounds);
+    }
+  }
 
   public final Zone zone;
 
@@ -88,6 +112,7 @@ public class ZoneViewModel {
   private final Set<GUID> movingTokens = new HashSet<>();
 
   private final Map<GUID, TokenPosition> tokenPositions = new HashMap<>();
+  private final Set<GUID> onScreenTokens = new HashSet<>();
   private final Map<Zone.Layer, List<TokenPosition>> tokenPositionsByLayer =
       CollectionUtil.newFilledEnumMap(Zone.Layer.class, l -> new LinkedList<>());
 
@@ -96,6 +121,8 @@ public class ZoneViewModel {
 
   private final Map<Zone.Layer, Set<GUID>> visibleTokensByLayer =
       CollectionUtil.newFilledEnumMap(Zone.Layer.class, layer -> new HashSet<>());
+
+  private final List<Point2D> lightPositions = new ArrayList<>();
 
   // endregion
 
@@ -132,6 +159,10 @@ public class ZoneViewModel {
   public Rectangle2D getViewport() {
     return new Rectangle2D.Double(
         viewport.getMinX(), viewport.getMinY(), viewport.getWidth(), viewport.getHeight());
+  }
+
+  public Area getVisibleArea() {
+    return visibleArea;
   }
 
   public PlayerView getPlayerView() {
@@ -173,6 +204,10 @@ public class ZoneViewModel {
     return Collections.unmodifiableMap(tokenPositions);
   }
 
+  public Set<GUID> getOnScreenTokens() {
+    return Collections.unmodifiableSet(onScreenTokens);
+  }
+
   public List<TokenPosition> getTokenPositionsForLayer(Zone.Layer layer) {
     return Collections.unmodifiableList(
         tokenPositionsByLayer.getOrDefault(layer, Collections.emptyList()));
@@ -207,6 +242,10 @@ public class ZoneViewModel {
     affectedTokens.stream().map(Token::getId).forEach(highlightCommonMacros::add);
   }
 
+  public List<Point2D> getLightPositions() {
+    return Collections.unmodifiableList(lightPositions);
+  }
+
   public void update() {
     updateIsUsingGdxRenderer();
     updateIsLoading();
@@ -219,6 +258,7 @@ public class ZoneViewModel {
     updateMarkerPositions();
     updateTokenStacks();
     updateVisibleTokens();
+    updateLightPosition();
   }
 
   private void updateIsUsingGdxRenderer() {
@@ -236,6 +276,12 @@ public class ZoneViewModel {
       // We're done, until the cache is cleared
       return;
     }
+
+    ImageObserver observer =
+        Objects.requireNonNullElseGet(
+            MapTool.getFrame().getZoneRenderer(this.zone),
+            () -> (ImageObserver) (img, infoflags, x, y, width, height) -> false);
+
     // Get a list of all the assets in the zone
     Set<MD5Key> assetSet = zone.getAllAssetIds();
     assetSet.remove(null); // remove bad data
@@ -255,7 +301,7 @@ public class ZoneViewModel {
       downloadCount++;
 
       // Have we loaded the image into memory yet ?
-      Image image = ImageManager.getImage(asset.getMD5Key());
+      Image image = ImageManager.getImage(asset.getMD5Key(), observer);
       if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
         loaded = false;
         continue;
@@ -330,33 +376,8 @@ public class ZoneViewModel {
           continue;
         }
 
-        Rectangle2D footprintBounds = token.getBounds(zone);
+        var tokenPosition = TokenPosition.fromToken(token, zone);
 
-        final Area transformedBounds = new Area(footprintBounds);
-        if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {
-          // facing defaults to down or -90 degrees
-          double centerX = footprintBounds.getCenterX() - token.getAnchorX();
-          double centerY = footprintBounds.getCenterY() - token.getAnchorY();
-          var at =
-              AffineTransform.getRotateInstance(
-                  Math.toRadians(token.getFacingInDegrees()), centerX, centerY);
-
-          transformedBounds.transform(at);
-        }
-
-        if (!transformedBounds.intersects(viewport)) {
-          continue;
-        }
-
-        // Then make sure it is in revealed area (for players).
-        if (!playerView.isGMView()
-            && layer.supportsVision()
-            && zoneView.isUsingVision()
-            && !GraphicsUtil.intersects(transformedBounds, visibleArea)) {
-          continue;
-        }
-
-        TokenPosition tokenPosition = new TokenPosition(token, footprintBounds, transformedBounds);
         tokenPositions.put(token.getId(), tokenPosition);
         layerList.add(tokenPosition);
       }
@@ -418,13 +439,29 @@ public class ZoneViewModel {
       scale = renderer.getZoneScale().getScale();
     }
 
+    onScreenTokens.clear();
+
     for (var layer : Zone.Layer.values()) {
-      // This list only contains tokens that are on screen.
       var tokenPositions = tokenPositionsByLayer.get(layer);
 
       var visibleTokens = visibleTokensByLayer.get(layer);
       visibleTokens.clear();
       for (var tokenPosition : tokenPositions) {
+        // First make sure it is on screen.
+        if (!tokenPosition.transformedBounds().intersects(viewport)) {
+          continue;
+        }
+
+        onScreenTokens.add(tokenPosition.token().getId());
+
+        // Then make sure it is in revealed area (for players).
+        if (!playerView.isGMView()
+            && layer.supportsVision()
+            && zoneView.isUsingVision()
+            && !GraphicsUtil.intersects(tokenPosition.transformedBounds(), visibleArea)) {
+          continue;
+        }
+
         var bounds = tokenPosition.transformedBounds().getBounds2D();
         if (bounds.getWidth() * scale < 1 || bounds.getHeight() * scale < 1) {
           continue;
@@ -445,6 +482,38 @@ public class ZoneViewModel {
 
     for (final var selectionSet : renderer.getSelectionSetMap().values()) {
       movingTokens.addAll(selectionSet.getTokens());
+    }
+  }
+
+  private void updateLightPosition() {
+    lightPositions.clear();
+
+    if (!AppState.isShowLightSources() || !playerView.isGMView()) {
+      return;
+    }
+
+    for (TokenPosition position : tokenPositions.values()) {
+      var token = position.token();
+
+      if (!token.hasLightSources()) {
+        continue;
+      }
+      if (!onScreenTokens.contains(token.getId())) {
+        continue;
+      }
+
+      boolean foundNormalLight = false;
+      for (AttachedLightSource attachedLightSource : token.getLightSources()) {
+        LightSource lightSource = attachedLightSource.resolve(token, MapTool.getCampaign());
+        if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
+          foundNormalLight = true;
+          break;
+        }
+      }
+      if (foundNormalLight) {
+        var bounds = position.transformedBounds().getBounds2D();
+        lightPositions.add(new Point2D.Double(bounds.getCenterX(), bounds.getCenterY()));
+      }
     }
   }
 }

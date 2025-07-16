@@ -27,6 +27,7 @@ import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nullable;
 import net.rptools.clientserver.simple.connection.Connection;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.client.events.PlayerConnected;
 import net.rptools.maptool.client.events.PlayerDisconnected;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -86,7 +87,8 @@ public class MapToolClient {
       LocalPlayer player,
       Connection connection,
       ServerPolicy policy,
-      PlayerDatabase playerDatabase) {
+      PlayerDatabase playerDatabase,
+      PublicPrivateKeyStore keyStore) {
     this.localServer = localServer;
     this.campaign = campaign;
     this.player = player;
@@ -94,9 +96,12 @@ public class MapToolClient {
     this.playerList = new ArrayList<>();
     this.serverPolicy = new ServerPolicy(policy);
 
-    this.conn =
-        new MapToolConnection(
-            connection, player, localServer == null ? new ClientHandshake(this, connection) : null);
+    ClientHandshake handshake = null;
+    if (localServer == null) {
+      handshake = new ClientHandshake(this, connection, keyStore);
+    }
+
+    this.conn = new MapToolConnection(connection, player, handshake);
 
     this.serverCommand = new ServerCommandClientImpl(this);
 
@@ -118,14 +123,19 @@ public class MapToolClient {
 
   /** Creates a client for a local server, whether personal or hosted. */
   public MapToolClient(
-      MapToolServer localServer, Campaign campaign, LocalPlayer player, Connection connection) {
+      MapToolServer localServer,
+      Campaign campaign,
+      LocalPlayer player,
+      Connection connection,
+      PublicPrivateKeyStore keyStore) {
     this(
         localServer,
         campaign,
         player,
         connection,
         localServer.getPolicy(),
-        localServer.getPlayerDatabase());
+        localServer.getPlayerDatabase(),
+        keyStore);
   }
 
   /**
@@ -133,14 +143,15 @@ public class MapToolClient {
    *
    * @param player The player connecting to the server.
    */
-  public MapToolClient(LocalPlayer player, Connection connection) {
+  public MapToolClient(LocalPlayer player, Connection connection, PublicPrivateKeyStore keyStore) {
     this(
         null,
         new Campaign(),
         player,
         connection,
         new ServerPolicy(),
-        PlayerDatabaseFactory.getLocalPlayerDatabase(player));
+        PlayerDatabaseFactory.getLocalPlayerDatabase(player),
+        keyStore);
   }
 
   /**

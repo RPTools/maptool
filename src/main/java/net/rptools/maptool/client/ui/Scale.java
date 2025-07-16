@@ -15,6 +15,8 @@
 package net.rptools.maptool.client.ui;
 
 import java.awt.Point;
+import java.awt.geom.AffineTransform;
+import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
 import java.beans.PropertyChangeListener;
@@ -179,6 +181,13 @@ public class Scale implements Serializable {
         screenRect.getHeight() / scale);
   }
 
+  public Area toWorldSpace(Area area) {
+    var transform = new AffineTransform();
+    transform.scale(1 / scale, 1 / scale);
+    transform.translate(-offsetX, -offsetY);
+    return area.createTransformedArea(transform);
+  }
+
   /**
    * Transforms a rectangle from world space to screen space.
    *
@@ -193,12 +202,19 @@ public class Scale implements Serializable {
         worldRect.getHeight() * scale);
   }
 
-  public ScreenPoint toScreenSpace(Point2D.Double worldSpace) {
-    return toScreenSpace(worldSpace.x, worldSpace.y);
+  public ScreenPoint toScreenSpace(Point2D worldSpace) {
+    return toScreenSpace(worldSpace.getX(), worldSpace.getY());
   }
 
   public ScreenPoint toScreenSpace(double x, double y) {
     return new ScreenPoint(x * scale + offsetX, y * scale + offsetY);
+  }
+
+  public Area toScreenSpace(Area area) {
+    var transform = new AffineTransform();
+    transform.translate(offsetX, offsetY);
+    transform.scale(scale, scale);
+    return area.createTransformedArea(transform);
   }
 
   private PropertyChangeSupport getPropertyChangeSupport() {

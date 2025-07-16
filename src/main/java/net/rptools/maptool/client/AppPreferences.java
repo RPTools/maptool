@@ -14,409 +14,759 @@
  */
 package net.rptools.maptool.client;
 
-import com.twelvemonkeys.image.ResampleOp;
 import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.RenderingHints;
 import java.io.File;
-import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import java.util.prefs.Preferences;
-import javax.annotation.Nullable;
+import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Label;
 import net.rptools.maptool.model.Zone;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.rptools.maptool.util.preferences.Preference;
+import net.rptools.maptool.util.preferences.PreferenceStore;
 
 /** Manages and persists user preferences for the application. */
 public class AppPreferences {
-  private static final Logger log = LogManager.getLogger(AppPreferences.class);
+  private static final PreferenceStore store =
+      new PreferenceStore(Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs"));
+  private static final boolean PRINT_KEYS_MISSING_I18N_ON_STARTUP =
+      false; // for finding pesky wabbitses
 
-  /**
-   * This private static variable represents the user preferences node for the application. It is an
-   * instance of the Preferences class, which provides a way to store and retrieve user preferences
-   * using a hierarchical tree of preference nodes, starting from the user root node.
-   *
-   * <p>The preferences are stored under a specific node path derived from the application name
-   * using the AppConstants.APP_NAME constant.
-   *
-   * <p>This variable is used to access and modify user preferences throughout the application.
-   */
-  private static final Preferences prefs =
-      Preferences.userRoot().node(AppConstants.APP_NAME + "/prefs");
+  public static PreferenceStore getAppPreferenceStore() {
+    return store;
+  }
 
   public static final Preference<Boolean> fillSelectionBox =
-      BooleanType.create("fillSelectionBox", true);
+      store.defineBoolean(
+          "fillSelectionBox",
+          "Preferences.label.performance.fillselection",
+          "Preferences.label.performance.fillselection.tooltip",
+          true);
 
   public static final Preference<Color> chatColor =
-      ColorType.create("chatColor", Color.black, false);
+      store.defineColor("chatColor", Color.black, false);
 
   public static final Preference<Boolean> saveReminder =
-      BooleanType.create("autoSaveReminder", true);
+      store.defineBoolean(
+          "autoSaveReminder",
+          "Preferences.label.save.reminder",
+          "Preferences.label.save.reminder.tooltip",
+          true);
 
-  public static final NumericPreference<Integer> autoSaveIncrement =
-      IntegerType.create("autoSaveIncrement", 5);
+  public static final Preference.Numeric<Integer> autoSaveIncrement =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("autoSaveIncrement", 5)
+              .setLabel("Preferences.label.autosave")
+              .setTooltip("Preferences.label.autosave.tooltip");
 
-  public static final NumericPreference<Integer> chatAutoSaveTimeInMinutes =
-      IntegerType.create("chatAutosaveTime", 0);
+  public static final Preference.Numeric<Integer> chatAutoSaveTimeInMinutes =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("chatAutosaveTime", 0)
+              .setLabel("Preferences.label.autosave.chat")
+              .setTooltip("Preferences.label.autosave.chat.tooltip");
 
   public static final Preference<String> chatFilenameFormat =
-      StringType.create("chatFilenameFormat", "chatlog-%1$tF-%1$tR.html");
+      store
+          .defineString("chatFilenameFormat", "chatlog-%1$tF-%1$tR.html")
+          .setLabel("Preferences.label.autosave.chat.filename")
+          .setTooltip("Preferences.label.autosave.chat.filename.tooltip");
 
   public static final Preference<String> tokenNumberDisplay =
-      StringType.create("tokenNumberDisplayg", "Name");
+      store.defineString("tokenNumberDisplay", "Name");
 
   public static final Preference<String> duplicateTokenNumber =
-      StringType.create("duplicateTokenNumber", "Increment");
+      store
+          .defineString("duplicateTokenNumber", "Increment")
+          .setLabel("Preferences.label.tokens.duplicate")
+          .setTooltip("Preferences.label.tokens.duplicate.tooltip");
 
   public static final Preference<String> newTokenNaming =
-      StringType.create("newTokenNaming", "Use Filename");
+      store
+          .defineString("newTokenNaming", "Use Filename")
+          .setLabel("Preferences.label.tokens.naming")
+          .setTooltip("Preferences.label.tokens.naming.tooltip");
 
   public static final Preference<Boolean> useHaloColorOnVisionOverlay =
-      BooleanType.create("useHaloColorForVisionOverlay", false);
+      store.defineBoolean(
+          "useHaloColorForVisionOverlay",
+          "Preferences.label.halo.color",
+          "Preferences.label.halo.color.tooltip",
+          false);
 
   public static final Preference<Boolean> mapVisibilityWarning =
-      BooleanType.create("mapVisibilityWarning", false);
+      store.defineBoolean(
+          "mapVisibilityWarning",
+          "Preferences.label.fog.mapvisibilitywarning",
+          "Preferences.label.fog.mapvisibilitywarning.tooltip",
+          false);
 
   public static final Preference<Boolean> autoRevealVisionOnGMMovement =
-      BooleanType.create("autoRevealVisionOnGMMove", false);
+      store.defineBoolean(
+          "autoRevealVisionOnGMMove",
+          "Preferences.label.fog.autoexpose",
+          "Preferences.label.fog.autoexpose.tooltip",
+          false);
 
-  public static final NumericPreference<Integer> haloOverlayOpacity =
-      IntegerType.createByte("haloOverlayOpacity", 60);
+  public static final Preference.Numeric<Integer> haloOverlayOpacity =
+      (Preference.Numeric<Integer>)
+          store
+              .defineByte("haloOverlayOpacity", 60)
+              .setLabel("Preferences.label.halo.opacity")
+              .setTooltip("Preferences.label.halo.opacity.tooltip");
 
-  public static final NumericPreference<Integer> auraOverlayOpacity =
-      IntegerType.createByte("auraOverlayOpacity", 60);
+  public static final Preference.Numeric<Integer> auraOverlayOpacity =
+      (Preference.Numeric<Integer>)
+          store
+              .defineByte("auraOverlayOpacity", 60)
+              .setLabel("Preferences.label.aura.opacity")
+              .setTooltip("Preferences.label.aura.opacity.tooltip");
 
-  public static final NumericPreference<Integer> lightOverlayOpacity =
-      IntegerType.createByte("lightOverlayOpacity", 60);
+  public static final Preference.Numeric<Integer> lightOverlayOpacity =
+      (Preference.Numeric<Integer>)
+          store
+              .defineByte("lightOverlayOpacity", 60)
+              .setLabel("Preferences.label.light.opacity")
+              .setTooltip("Preferences.label.light.opacity.tooltip");
 
-  public static final NumericPreference<Integer> lumensOverlayOpacity =
-      IntegerType.createByte("lumensOverlayOpacity", 120);
+  public static final Preference.Numeric<Integer> lumensOverlayOpacity =
+      (Preference.Numeric<Integer>)
+          store
+              .defineByte("lumensOverlayOpacity", 120)
+              .setLabel("Preferences.label.lumens.opacity")
+              .setTooltip("Preferences.label.lumens.opacity.tooltip");
 
-  public static final NumericPreference<Integer> fogOverlayOpacity =
-      IntegerType.createByte("fogOverlayOpacity", 100);
+  public static final Preference.Numeric<Integer> fogOverlayOpacity =
+      (Preference.Numeric<Integer>)
+          store
+              .defineByte("fogOverlayOpacity", 100)
+              .setLabel("Preferences.label.fog.opacity")
+              .setTooltip("Preferences.label.fog.opacity.tooltip");
 
-  public static final NumericPreference<Integer> lumensOverlayBorderThickness =
-      IntegerType.create("lumensOverlayBorderThickness", 5);
+  public static final Preference.Numeric<Integer> lumensOverlayBorderThickness =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("lumensOverlayBorderThickness", 5)
+              .setLabel("Preferences.label.lumens.borderThickness")
+              .setTooltip("Preferences.label.lumens.borderThickness.tooltip");
 
   public static final Preference<Boolean> lumensOverlayShowByDefault =
-      BooleanType.create("lumensOverlayShowByDefault", false);
+      store.defineBoolean(
+          "lumensOverlayShowByDefault",
+          "Preferences.label.lumens.startEnabled",
+          "Preferences.label.lumens.startEnabled.tooltip",
+          false);
 
   public static final Preference<Boolean> lightsShowByDefault =
-      BooleanType.create("lightsShowByDefault", true);
+      store.defineBoolean(
+          "lightsShowByDefault",
+          "Preferences.label.lights.startEnabled",
+          "Preferences.label.lights.startEnabled.tooltip",
+          true);
 
-  public static final NumericPreference<Integer> haloLineWidth =
-      IntegerType.create("haloLineWidth", 2);
+  public static final Preference.Numeric<Integer> haloLineWidth =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("haloLineWidth", 2)
+              .setLabel("Preferences.label.halo.width")
+              .setTooltip("Preferences.label.halo.width.tooltip");
 
-  public static final NumericPreference<Integer> typingNotificationDurationInSeconds =
-      IntegerType.create("typingNotificationDuration", 5);
+  public static final Preference.Numeric<Integer> typingNotificationDurationInSeconds =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("typingNotificationDuration", 5)
+              .setLabel("Preferences.label.chat.type.duration")
+              .setTooltip("Preferences.label.chat.type.duration.tooltip");
 
   public static final Preference<Boolean> chatNotificationBackground =
-      BooleanType.create("chatNotificationShowBackground", true);
+      store.defineBoolean(
+          "chatNotificationShowBackground",
+          "Preferences.label.chat.type.background",
+          "Preferences.label.chat.type.background.tooltip",
+          true);
 
   public static final Preference<Boolean> useToolTipForInlineRoll =
-      BooleanType.create("toolTipInlineRolls", false);
+      store.defineBoolean(
+          "toolTipInlineRolls",
+          "Preferences.label.chat.rolls",
+          "Preferences.label.chat.rolls.tooltip",
+          false);
 
   public static final Preference<Boolean> suppressToolTipsForMacroLinks =
-      BooleanType.create("suppressToolTipsMacroLinks", false);
+      store.defineBoolean(
+          "suppressToolTipsMacroLinks",
+          "Preferences.label.chat.macrolinks",
+          "Preferences.label.chat.macrolinks.tooltip",
+          false);
 
   public static final Preference<Color> chatNotificationColor =
-      ColorType.create("chatNotificationColor", Color.white, false);
+      store
+          .defineColor("chatNotificationColor", Color.white, false)
+          .setLabel("Preferences.label.chat.type.color")
+          .setTooltip("Preferences.label.chat.type.color.tooltip");
 
   public static final Preference<Color> trustedPrefixBackground =
-      ColorType.create("trustedPrefixBG", new Color(0xD8, 0xE9, 0xF6), false);
+      store
+          .defineColor("trustedPrefixBG", new Color(0xD8, 0xE9, 0xF6), false)
+          .setLabel("Preferences.label.chat.trusted.background")
+          .setTooltip("Preferences.label.chat.trusted.background.tooltip");
 
   public static final Preference<Color> trustedPrefixForeground =
-      ColorType.create("trustedPrefixFG", Color.BLACK, false);
+      store
+          .defineColor("trustedPrefixFG", Color.BLACK, false)
+          .setLabel("Preferences.label.chat.trusted.foreground")
+          .setTooltip("Preferences.label.chat.trusted.foreground.tooltip");
 
-  public static final NumericPreference<Integer> toolTipInitialDelay =
-      IntegerType.create("toolTipInitialDelay", 250);
+  public static final Preference.Numeric<Integer> toolTipInitialDelay =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("toolTipInitialDelay", 250)
+              .setLabel("Preferences.label.access.delay")
+              .setTooltip("Preferences.label.access.delay.tooltip");
 
-  public static final NumericPreference<Integer> toolTipDismissDelay =
-      IntegerType.create("toolTipDismissDelay", 30000);
+  public static final Preference.Numeric<Integer> toolTipDismissDelay =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("toolTipDismissDelay", 30000)
+              .setLabel("Preferences.label.access.delay.dismiss")
+              .setTooltip("Preferences.label.access.delay.dismiss.tooltip");
 
   public static final Preference<Boolean> openEditorForNewMacro =
-      BooleanType.create("openEditorForNewMacro", true);
+      store.defineBoolean(
+          "openEditorForNewMacro",
+          "Preferences.label.macro.editor",
+          "Preferences.label.macro.editor.tooltip",
+          true);
 
   public static final Preference<Boolean> allowPlayerMacroEditsDefault =
-      BooleanType.create("allowPlayerMacroEditsDefault", true);
+      store.defineBoolean(
+          "allowPlayerMacroEditsDefault",
+          "Preferences.label.macros.edit",
+          "Preferences.label.macros.edit.tooltip",
+          true);
 
-  public static final NumericPreference<Integer> portraitSize =
-      IntegerType.create("portraitSize", 175);
+  public static final Preference.Numeric<Integer> portraitSize =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("portraitSize", 175)
+              .setLabel("Preferences.label.tokens.statsheet")
+              .setTooltip("Preferences.label.tokens.statsheet.tooltip");
 
-  public static final NumericPreference<Integer> thumbnailSize =
-      IntegerType.create("thumbnailSize", 500);
+  public static final Preference.Numeric<Integer> thumbnailSize =
+      store.defineInteger("thumbnailSize", 500);
 
-  public static final Preference<Boolean> showSmilies = BooleanType.create("insertSmilies", true);
+  public static final Preference<Boolean> showSmilies =
+      store.defineBoolean(
+          "insertSmilies",
+          "Preferences.label.chat.smilies",
+          "Preferences.label.chat.smilies.tooltip",
+          true);
 
   public static final Preference<Boolean> showDialogOnNewToken =
-      BooleanType.create("showDialogOnNewToken", true);
+      store.defineBoolean(
+          "showDialogOnNewToken",
+          "Preferences.label.tokens.dialog",
+          "Preferences.label.tokens.dialog.tooltip",
+          true);
 
   public static final Preference<Boolean> showAvatarInChat =
-      BooleanType.create("showAvatarInChat", true);
+      store.defineBoolean(
+          "showAvatarInChat",
+          "Preferences.label.chat.avatar",
+          "Preferences.label.chat.avatar.tooltip",
+          true);
 
   public static final Preference<Boolean> playSystemSounds =
-      BooleanType.create("playSystemSounds", true);
+      store.defineBoolean(
+          "playSystemSounds",
+          "Preferences.label.sound.system",
+          "Preferences.label.sound.system.tooltip",
+          true);
 
   public static final Preference<Boolean> playSystemSoundsOnlyWhenNotFocused =
-      BooleanType.create("playSystemSoundsOnlyWhenNotFocused", false);
+      store.defineBoolean(
+          "playSystemSoundsOnlyWhenNotFocused",
+          "Preferences.label.sound.focus",
+          "Preferences.label.sound.focus.tooltip",
+          false);
 
-  public static final Preference<Boolean> playStreams = BooleanType.create("playStreams", true);
+  public static final Preference<Boolean> playStreams =
+      store.defineBoolean(
+          "playStreams",
+          "Preferences.label.sound.stream",
+          "Preferences.label.sound.stream.tooltip",
+          true);
 
   public static final Preference<Boolean> syrinscapeActive =
-      BooleanType.create("syrinscapeActive", false);
+      store.defineBoolean(
+          "syrinscapeActive",
+          "Preferences.label.sound.syrinscape",
+          "Preferences.label.sound.syrinscape.tooltip",
+          false);
 
-  public static final NumericPreference<Integer> fontSize = IntegerType.create("fontSize", 12);
+  public static final Preference.Numeric<Integer> fontSize =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("fontSize", 12)
+              .setLabel("Preferences.label.access.size")
+              .setTooltip("Preferences.label.access.size.tooltip");
 
   public static final Preference<Color> defaultGridColor =
-      ColorType.create("defaultGridColor", Color.black, false);
+      store.defineColor("defaultGridColor", Color.black, false);
 
-  public static final NumericPreference<Integer> defaultGridSize =
-      IntegerType.create("defaultGridSize", 100);
+  public static final Preference.Numeric<Integer> defaultGridSize =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("defaultGridSize", 100)
+              .setLabel("Preferences.label.maps.gridSize.new")
+              .setTooltip("Preferences.label.maps.gridSize.tooltip");
 
-  public static final NumericPreference<Double> defaultUnitsPerCell =
-      DoubleType.create("unitsPerCell", 5.);
+  public static final Preference.Numeric<Double> defaultUnitsPerCell =
+      (Preference.Numeric<Double>)
+          store
+              .defineDouble("unitsPerCell", 5.)
+              .setLabel("Preferences.label.maps.units")
+              .setTooltip("Preferences.label.maps.units.tooltip");
 
-  public static final Preference<Boolean> faceVertex = BooleanType.create("faceVertex", false);
+  public static final Preference<Boolean> faceVertex =
+      store.defineBoolean(
+          "faceVertex",
+          "Preferences.label.facing.vertices",
+          "Preferences.label.facing.vertices.tooltip",
+          false);
 
-  public static final Preference<Boolean> faceEdge = BooleanType.create("faceEdge", true);
+  public static final Preference<Boolean> faceEdge =
+      store.defineBoolean(
+          "faceEdge",
+          "Preferences.label.facing.edge",
+          "Preferences.label.facing.edge.tooltip",
+          true);
 
-  public static final NumericPreference<Integer> defaultVisionDistance =
-      IntegerType.create("defaultVisionDistance", 1000);
+  public static final Preference.Numeric<Integer> defaultVisionDistance =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("defaultVisionDistance", 1000)
+              .setLabel("Preferences.label.maps.vision")
+              .setTooltip("Preferences.label.maps.vision.tooltip");
 
   public static final Preference<Zone.VisionType> defaultVisionType =
-      EnumType.create(Zone.VisionType.class, "defaultVisionType", Zone.VisionType.OFF);
+      store
+          .defineEnum(Zone.VisionType.class, "defaultVisionType", Zone.VisionType.OFF)
+          .setLabel("Preferences.label.maps.light")
+          .setTooltip("Preferences.label.maps.light.tooltip");
 
   public static final Preference<MapSortType> mapSortType =
-      EnumType.create(MapSortType.class, "sortByGMName", MapSortType.GMNAME);
+      store
+          .defineEnum(MapSortType.class, "sortByGMName", MapSortType.GMNAME)
+          .setLabel("Preferences.label.maps.sortType")
+          .setTooltip("Preferences.label.maps.sortType.tooltip");
 
   public static final Preference<UvttLosImportType> uvttLosImportType =
-      EnumType.create(UvttLosImportType.class, "uvttLosImportType", UvttLosImportType.Prompt);
+      store
+          .defineEnum(UvttLosImportType.class, "uvttLosImportType", UvttLosImportType.Prompt)
+          .setLabel("Preferences.label.maps.uvttLosImport")
+          .setTooltip("Preferences.label.maps.uvttLosImport.tooltip");
 
-  public static final Preference<Boolean> useSoftFogEdges = BooleanType.create("useSoftFog", true);
+  public static final Preference<Boolean> useSoftFogEdges = store.defineBoolean("useSoftFog", true);
 
   public static final Preference<Boolean> newMapsHaveFow =
-      BooleanType.create("newMapsHaveFow", false);
+      store.defineBoolean(
+          "newMapsHaveFow",
+          "Preferences.label.maps.fow",
+          "Preferences.label.maps.fow.tooltip",
+          false);
 
   public static final Preference<Boolean> newTokensVisible =
-      BooleanType.create("newTokensVisible", true);
+      store.defineBoolean(
+          "newTokensVisible",
+          "Preferences.label.tokens.visible",
+          "Preferences.label.tokens.visible.tooltip",
+          true);
 
   public static final Preference<Boolean> newMapsVisible =
-      BooleanType.create("newMapsVisible", true);
+      store.defineBoolean(
+          "newMapsVisible",
+          "Preferences.label.maps.visible",
+          "Preferences.label.maps.visible.tooltip",
+          true);
 
   public static final Preference<Boolean> newObjectsVisible =
-      BooleanType.create("newObjectsVisible", true);
+      store.defineBoolean("newObjectsVisible", true);
 
   public static final Preference<Boolean> newBackgroundsVisible =
-      BooleanType.create("newBackgroundsVisible", true);
+      store.defineBoolean("newBackgroundsVisible", true);
 
   public static final Preference<File> saveDirectory =
-      FileType.create("saveDir", () -> new File(File.separator));
+      store.defineFile("saveDir", () -> new File(File.separator));
 
   public static final Preference<File> tokenSaveDirectory =
-      FileType.create("saveTokenDir", saveDirectory::get);
+      store.defineFile("saveTokenDir", saveDirectory::get);
 
   public static final Preference<File> mapSaveDirectory =
-      FileType.create("saveMapDir", saveDirectory::get);
+      store.defineFile("saveMapDir", saveDirectory::get);
 
   public static final Preference<File> addOnLoadDirectory =
-      FileType.create("addOnLoadDir", saveDirectory::get);
+      store.defineFile("addOnLoadDir", saveDirectory::get);
 
   public static final Preference<File> loadDirectory =
-      FileType.create("loadDir", () -> new File(File.separator));
+      store.defineFile("loadDir", () -> new File(File.separator));
 
   public static final Preference<RenderQuality> renderQuality =
-      EnumType.create(RenderQuality.class, "renderScaleQuality", RenderQuality.LOW_SCALING)
-          .cacheIt();
+      store
+          .defineEnum(RenderQuality.class, "renderScaleQuality", RenderQuality.LOW_SCALING)
+          .cacheIt()
+          .setLabel("Preferences.label.performance.render")
+          .setTooltip("Preferences.label.performance.render.tooltip");
 
   /** The background color to use for NPC map labels. */
   public static final Preference<Color> npcMapLabelBackground =
-      ColorType.create("npcMapLabelBG", Color.LIGHT_GRAY, true);
+      store
+          .defineColor("npcMapLabelBG", Color.LIGHT_GRAY, true)
+          .setLabel("Preferences.label.access.tokenLabel.npcBackground");
 
   /** The foreground color to use for NPC map labels. */
   public static final Preference<Color> npcMapLabelForeground =
-      ColorType.create("npcMapLabelFG", Color.BLACK, true);
+      store
+          .defineColor("npcMapLabelFG", Color.BLACK, true)
+          .setLabel("Preferences.label.access.tokenLabel.npcForeground");
 
   /** The border color to use for NPC map labels. */
   public static final Preference<Color> npcMapLabelBorder =
-      ColorType.create("mapLabelBorderColor", npcMapLabelForeground.getDefault(), true);
+      store
+          .defineColor("mapLabelBorderColor", npcMapLabelForeground.getDefault(), true)
+          .setLabel("Preferences.label.access.tokenLabel.npcBorderColor");
 
   /** The background color to use for PC map labels. */
   public static final Preference<Color> pcMapLabelBackground =
-      ColorType.create("pcMapLabelBG", Color.WHITE, true);
+      store
+          .defineColor("pcMapLabelBG", Color.WHITE, true)
+          .setLabel("Preferences.label.access.tokenLabel.pcBackground");
 
   /** The foreground color to use for PC map labels. */
   public static final Preference<Color> pcMapLabelForeground =
-      ColorType.create("pcMapLabelFG", Color.BLUE, true);
+      store
+          .defineColor("pcMapLabelFG", Color.BLUE, true)
+          .setLabel("Preferences.label.access.tokenLabel.pcForeground");
 
   /** The border color to use for PC map labels. */
   public static final Preference<Color> pcMapLabelBorder =
-      ColorType.create("pcMapLabelBorderColor", pcMapLabelForeground.getDefault(), true);
+      store
+          .defineColor("pcMapLabelBorderColor", pcMapLabelForeground.getDefault(), true)
+          .setLabel("Preferences.label.access.tokenLabel.pcBorderColor");
 
   /** The background color to use for Non-Visible Token map labels. */
   public static final Preference<Color> nonVisibleTokenMapLabelBackground =
-      ColorType.create("nonVisMapLabelBG", Color.BLACK, true);
+      store
+          .defineColor("nonVisMapLabelBG", Color.BLACK, true)
+          .setLabel("Preferences.label.access.tokenLabel.nonVisBackground");
 
   /** The foreground color to use for Non-Visible Token map labels. */
   public static final Preference<Color> nonVisibleTokenMapLabelForeground =
-      ColorType.create("nonVisMapLabelFG", Color.WHITE, true);
+      store
+          .defineColor("nonVisMapLabelFG", Color.WHITE, true)
+          .setLabel("Preferences.label.access.tokenLabel.nonVisForeground");
 
   /** The border color to use for Non-Visible Token map labels. */
   public static final Preference<Color> nonVisibleTokenMapLabelBorder =
-      ColorType.create(
-          "nonVisMapLabelBorderColor", nonVisibleTokenMapLabelForeground.getDefault(), true);
+      store
+          .defineColor(
+              "nonVisMapLabelBorderColor", nonVisibleTokenMapLabelForeground.getDefault(), true)
+          .setLabel("Preferences.label.access.tokenLabel.nonVisBorderColor");
 
   /** The font size to use for token map labels. */
-  public static final NumericPreference<Integer> mapLabelFontSize =
-      IntegerType.create("mapLabelFontSize", AppStyle.labelFont.getSize());
+  public static final Preference.Numeric<Integer> mapLabelFontSize =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("mapLabelFontSize", AppStyle.labelFont.getSize())
+              .setLabel("Preferences.label.access.tokenLabel.size");
 
   /** The width of the border for token map labels, in pixels. */
-  public static final NumericPreference<Integer> mapLabelBorderWidth =
-      IntegerType.create("mapLabelBorderWidth", Label.DEFAULT_LABEL_BORDER_WIDTH);
+  public static final Preference.Numeric<Integer> mapLabelBorderWidth =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("mapLabelBorderWidth", Label.DEFAULT_LABEL_BORDER_WIDTH)
+              .setLabel("Preferences.label.access.tokenLabel.borderSize");
 
   /** The size of the border arc for token map labels. */
-  public static final NumericPreference<Integer> mapLabelBorderArc =
-      IntegerType.create("mapLabelBorderArc", Label.DEFAULT_LABEL_BORDER_ARC);
+  public static final Preference.Numeric<Integer> mapLabelBorderArc =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("mapLabelBorderArc", Label.DEFAULT_LABEL_BORDER_ARC)
+              .setLabel("Preferences.label.access.tokenLabel.borderArc");
 
   /** {@code true} if borders should be shown around map labels, {@code false} otherwise. */
   public static final Preference<Boolean> mapLabelShowBorder =
-      BooleanType.create("mapLabelShowBorder", true);
+      store.defineBoolean("mapLabelShowBorder", true).setLabel("Label.showBorder");
 
-  public static final NumericPreference<Integer> webEndpointPort =
-      IntegerType.create("webEndPointPort", 654555);
+  public static final Preference.Numeric<Integer> webEndpointPort =
+      store.defineInteger("webEndPointPort", 654555);
 
   public static final Preference<Boolean> tokensWarnWhenDeleted =
-      BooleanType.create("tokensWarnWhenDeleted", true);
+      store
+          .defineBoolean("tokensWarnWhenDeleted", true)
+          .setLabel("Preferences.label.tokens.delete")
+          .setTooltip("Preferences.label.tokens.delete.tooltip");
 
   public static final Preference<Boolean> drawingsWarnWhenDeleted =
-      BooleanType.create("drawWarnWhenDeleted", true);
+      store.defineBoolean("drawWarnWhenDeleted", true);
 
   public static final Preference<Boolean> tokensSnapWhileDragging =
-      BooleanType.create("tokensSnapWhileDragging", true);
+      store.defineBoolean(
+          "tokensSnapWhileDragging",
+          "Preferences.label.tokens.drag.snap",
+          "Preferences.label.tokens.drag.snap.tooltip",
+          true);
 
   public static final Preference<Boolean> hideMousePointerWhileDragging =
-      BooleanType.create("hideMousePointerWhileDragging", true);
+      store.defineBoolean(
+          "hideMousePointerWhileDragging",
+          "Preferences.label.tokens.drag.hide",
+          "Preferences.label.tokens.drag.hide.tooltip",
+          true);
 
   public static final Preference<Boolean> hideTokenStackIndicator =
-      BooleanType.create("hideTokenStackIndicator", false);
+      store.defineBoolean(
+          "hideTokenStackIndicator",
+          "Preferences.label.tokens.stack.hide",
+          "Preferences.label.tokens.stack.hide.tooltip",
+          false);
 
   public static final Preference<Boolean> tokensStartSnapToGrid =
-      BooleanType.create("newTokensStartSnapToGrid", true);
+      store.defineBoolean(
+          "newTokensStartSnapToGrid",
+          "Preferences.label.objects.snap",
+          "Preferences.label.tokens.snap.tooltip",
+          true);
 
   public static final Preference<Boolean> objectsStartSnapToGrid =
-      BooleanType.create("newStampsStartSnapToGrid", false);
+      store.defineBoolean(
+          "newStampsStartSnapToGrid",
+          "Preferences.label.objects.snap",
+          "Preferences.label.objects.snap.tooltip",
+          false);
 
   public static final Preference<Boolean> backgroundsStartSnapToGrid =
-      BooleanType.create("newBackgroundsStartSnapToGrid", false);
+      store.defineBoolean(
+          "newBackgroundsStartSnapToGrid",
+          "Preferences.label.objects.snap",
+          "Preferences.label.background.snap.tooltip",
+          false);
 
   public static final Preference<Boolean> tokensStartFreesize =
-      BooleanType.create("newTokensStartFreesize", false);
+      store.defineBoolean(
+          "newTokensStartFreesize",
+          "Preferences.label.objects.free",
+          "Preferences.label.tokens.free.tooltip",
+          false);
 
   public static final Preference<Boolean> objectsStartFreesize =
-      BooleanType.create("newStampsStartFreesize", true);
+      store.defineBoolean(
+          "newStampsStartFreesize",
+          "Preferences.label.objects.free",
+          "Preferences.label.objects.free.tooltip",
+          true);
 
   public static final Preference<Boolean> backgroundsStartFreesize =
-      BooleanType.create("newBackgroundsStartFreesize", true);
+      store.defineBoolean(
+          "newBackgroundsStartFreesize",
+          "Preferences.label.objects.free",
+          "Preferences.label.background.free.tooltip",
+          true);
 
   public static final Preference<String> defaultGridType =
-      StringType.create("defaultGridType", GridFactory.SQUARE);
+      store
+          .defineString("defaultGridType", GridFactory.SQUARE)
+          .setLabel("Preferences.label.maps.grid")
+          .setTooltip("Preferences.label.maps.grid.tooltip");
 
-  public static final Preference<Boolean> showStatSheet = BooleanType.create("showStatSheet", true);
+  public static final Preference<Boolean> showStatSheet =
+      store.defineBoolean(
+          "showStatSheet",
+          "Preferences.label.tokens.statsheet.mouse",
+          "Preferences.label.tokens.statsheet.mouse.tooltip",
+          true);
 
   public static final Preference<Boolean> showStatSheetRequiresModifierKey =
-      BooleanType.create("showStatSheetModifier", false);
+      store.defineBoolean(
+          "showStatSheetModifier",
+          "Preferences.label.tokens.statsheet.shift",
+          "Preferences.label.tokens.statsheet.shift.tooltip",
+          false);
 
-  public static final Preference<Boolean> showPortrait = BooleanType.create("showPortrait", true);
+  public static final Preference<Boolean> showPortrait =
+      store.defineBoolean(
+          "showPortrait",
+          "Preferences.label.tokens.portrait.mouse",
+          "Preferences.label.tokens.portrait.mouse.tooltip",
+          true);
 
   public static final Preference<Boolean> forceFacingArrow =
-      BooleanType.create("forceFacingArrow", false);
+      store.defineBoolean(
+          "forceFacingArrow",
+          "Preferences.label.tokens.arrow",
+          "Preferences.label.tokens.arrow.tooltip",
+          false);
 
-  public static final Preference<Boolean> fitGmView = BooleanType.create("fitGMView", true);
+  public static final Preference<Boolean> fitGmView =
+      store.defineBoolean(
+          "fitGMView",
+          "Preferences.label.client.fitview",
+          "Preferences.label.client.fitview.tooltip",
+          true);
 
   public static final Preference<String> defaultUserName =
-      StringType.create(
-          "defaultUsername", I18N.getString("Preferences.client.default.username.value"));
+      store
+          .defineString(
+              "defaultUsername", I18N.getString("Preferences.client.default.username.value"))
+          .setLabel("Preferences.label.client.default.username")
+          .setTooltip("Preferences.label.client.default.username.tooltip");
 
   public static final Preference<WalkerMetric> movementMetric =
-      EnumType.create(WalkerMetric.class, "movementMetric", WalkerMetric.ONE_TWO_ONE);
+      store
+          .defineEnum(WalkerMetric.class, "movementMetric", WalkerMetric.ONE_TWO_ONE)
+          .setLabel("Preferences.label.maps.metric")
+          .setTooltip("Preferences.label.maps.metric.tooltip");
 
-  public static final NumericPreference<Integer> frameRateCap =
-      IntegerType.create("frameRateCap", 60, 1, Integer.MAX_VALUE);
+  public static final Preference.Numeric<Integer> frameRateCap =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("frameRateCap", 60, 1, Integer.MAX_VALUE)
+              .setLabel("Preferences.label.performance.cap")
+              .setTooltip("Preferences.label.performance.cap.tooltip");
 
   /* Scroll status bar information messages that exceed the available size */
   public static final Preference<Boolean> scrollStatusMessages =
-      BooleanType.create("statusBarScroll", true);
+      store.defineBoolean(
+          "statusBarScroll", "Preferences.label.access.status.allowScroll", null, true);
   /* Scroll status bar scrolling speed */
-  public static final NumericPreference<Double> scrollStatusSpeed =
-      DoubleType.create("statusBarSpeed", 0.85);
+  public static final Preference.Numeric<Double> scrollStatusSpeed =
+      (Preference.Numeric<Double>)
+          store
+              .defineDouble("statusBarSpeed", 0.85)
+              .setLabel("Preferences.label.access.status.scrollSpeed");
   /* Scroll status bar scrolling start delay */
-  public static final NumericPreference<Double> scrollStatusStartDelay =
-      DoubleType.create("statusBarDelay", 2.4);
+  public static final Preference.Numeric<Double> scrollStatusStartDelay =
+      (Preference.Numeric<Double>)
+          store
+              .defineDouble("statusBarDelay", 2.4)
+              .setLabel("Preferences.label.access.status.scrollStartDelay");
   /* Scroll status bar scrolling end pause */
-  public static final NumericPreference<Double> scrollStatusEndPause =
-      DoubleType.create("statusBarDelay", 1.8);
+  public static final Preference.Numeric<Double> scrollStatusEndPause =
+      (Preference.Numeric<Double>)
+          store
+              .defineDouble("statusBarDelay", 1.8)
+              .setLabel("Preferences.label.access.status.scrollEndPause");
   /* Status bar temporary notification duration */
-  public static final NumericPreference<Double> scrollStatusTempDuration =
-      DoubleType.create("scrollStatusTempDuration", 12d);
+  public static final Preference.Numeric<Double> scrollStatusTempDuration =
+      (Preference.Numeric<Double>)
+          store
+              .defineDouble("scrollStatusTempDuration", 12d)
+              .setLabel("Preferences.label.access.status.tempTime");
 
-  public static final NumericPreference<Integer> upnpDiscoveryTimeout =
-      IntegerType.create("upnpDiscoveryTimeout", 5000);
+  public static final Preference.Numeric<Integer> upnpDiscoveryTimeout =
+      (Preference.Numeric<Integer>)
+          store
+              .defineInteger("upnpDiscoveryTimeout", 5000)
+              .setLabel("Preferences.label.upnp.timeout")
+              .setTooltip("Preferences.label.upnp.timeout.tooltip");
 
-  public static final Preference<String> fileSyncPath = StringType.create("fileSyncPath", "");
+  public static final Preference<String> fileSyncPath =
+      store
+          .defineString("fileSyncPath", "")
+          .setLabel("Preferences.label.directory.sync")
+          .setTooltip("Preferences.label.directory.sync.tooltip");
 
   public static final Preference<Boolean> skipAutoUpdate =
-      BooleanType.create("skipAutoUpdate", false);
+      store.defineBoolean("skipAutoUpdate", false);
 
   public static final Preference<String> skipAutoUpdateRelease =
-      StringType.create("skipAutoUpdateRelease", "");
+      store.defineString("skipAutoUpdateRelease", "");
 
   public static final Preference<Boolean> allowExternalMacroAccess =
-      BooleanType.create("allowExternalMacroAccess", false);
+      store.defineBoolean(
+          "allowExternalMacroAccess",
+          "Preferences.label.macros.permissions",
+          "Preferences.label.macros.permissions.tooltip",
+          false);
 
   public static final Preference<Boolean> loadMruCampaignAtStart =
-      BooleanType.create("loadMRUCampaignAtStart", false);
+      store.defineBoolean(
+          "loadMRUCampaignAtStart",
+          "Preferences.label.loadMRU",
+          "Preferences.label.loadMRU.tooltip",
+          false);
 
   public static final Preference<Boolean> initiativePanelShowsTokenImage =
-      BooleanType.create("initShowTokens", true);
+      store.defineBoolean("initShowTokens", true);
 
   public static final Preference<Boolean> initiativePanelShowsTokenState =
-      BooleanType.create("initShowTokenStates", true);
+      store.defineBoolean("initShowTokenStates", true);
 
   public static final Preference<Boolean> initiativePanelShowsInitiative =
-      BooleanType.create("initShowInitiative", true);
+      store.defineBoolean("initShowInitiative", true);
 
   public static final Preference<Boolean> initiativePanelShowsInitiativeOnLine2 =
-      BooleanType.create("initShow2ndLine", false);
+      store.defineBoolean("initShow2ndLine", false);
 
   public static final Preference<Boolean> initiativePanelHidesNpcs =
-      BooleanType.create("initHideNpcs", false);
+      store.defineBoolean(
+          "initHideNpcs",
+          "Preferences.label.initiative.hidenpc",
+          "Preferences.label.initiative.hidenpc.tooltip",
+          false);
 
   public static final Preference<Boolean> initiativePanelAllowsOwnerPermissions =
-      BooleanType.create("initOwnerPermissions", false);
+      store.defineBoolean(
+          "initOwnerPermissions",
+          "Preferences.label.initiative.owner",
+          "Preferences.label.initiative.owner.tooltip",
+          false);
 
   public static final Preference<Boolean> initiativeMovementLocked =
-      BooleanType.create("initLockMovement", false);
+      store.defineBoolean(
+          "initLockMovement",
+          "Preferences.label.initiative.lock",
+          "Preferences.label.initiative.lock.tooltip",
+          false);
 
   public static final Preference<Boolean> showInitiativeGainedMessage =
-      BooleanType.create("showInitGainMessage", true);
+      store.defineBoolean(
+          "showInitGainMessage",
+          "Preferences.label.initiative.msg",
+          "Preferences.label.initiative.msg.tooltip",
+          true);
+
+  public static final Preference<Boolean> initiativePanelWarnWhenResettingRoundCounter =
+      store.defineBoolean(
+          "initWarnWhenResettingRoundCounter",
+          "initPanel.warnWhenResettingRoundCounter",
+          "initPanel.warnWhenResettingRoundCounter.description",
+          true);
 
   public static final Preference<Boolean> pathfindingEnabled =
-      BooleanType.create("useAstarPathfinding", true);
+      store.defineBoolean("useAstarPathfinding", true);
 
   public static final Preference<Boolean> pathfindingBlockedByVbl =
-      BooleanType.create("vblBlocksMove", true);
+      store.defineBoolean("vblBlocksMove", true);
 
   public static final Preference<String> defaultMacroEditorTheme =
-      StringType.create("macroEditorTheme", "Default");
+      store.defineString("macroEditorTheme", "Default");
 
-  public static final Preference<String> iconTheme = StringType.create("iconTheme", "Rod Takehara");
+  public static final Preference<String> iconTheme =
+      store
+          .defineString("iconTheme", "Rod Takehara")
+          .setLabel("Label.icontheme")
+          .setTooltip("Preferences.label.icontheme.tooltip");
+
+  public static final Preference<Boolean> useCustomThemeFontProperties =
+      store.defineBoolean(
+          "useCustomUIProperties", "Preferences.theme.override.checkbox", null, false);
 
   static {
+    var prefs = store.getStorage();
+
     // Used to be stored as separate components but now is one color. Add if not already there.
     if (prefs.get("trustedPrefixFG", null) == null) {
       var defaultValue = trustedPrefixForeground.getDefault();
@@ -441,63 +791,6 @@ public class AppPreferences {
               prefs.getInt("chatNotificationColorRed", defaultValue.getRed()),
               prefs.getInt("chatNotificationColorGreen", defaultValue.getGreen()),
               prefs.getInt("chatNotificationColorBlue", defaultValue.getBlue())));
-    }
-  }
-
-  public enum RenderQuality {
-    LOW_SCALING,
-    PIXEL_ART_SCALING,
-    MEDIUM_SCALING,
-    HIGH_SCALING;
-
-    public void setRenderingHints(Graphics2D g) {
-      switch (this) {
-        case LOW_SCALING, PIXEL_ART_SCALING -> {
-          g.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION,
-              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        }
-        case MEDIUM_SCALING -> {
-          g.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
-        }
-        case HIGH_SCALING -> {
-          g.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
-          g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        }
-      }
-    }
-
-    public void setShrinkRenderingHints(Graphics2D d) {
-      switch (this) {
-        case LOW_SCALING, PIXEL_ART_SCALING -> {
-          d.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION,
-              RenderingHints.VALUE_INTERPOLATION_NEAREST_NEIGHBOR);
-          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_SPEED);
-        }
-        case MEDIUM_SCALING -> {
-          d.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_DEFAULT);
-        }
-        case HIGH_SCALING -> {
-          d.setRenderingHint(
-              RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-          d.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
-        }
-      }
-    }
-
-    public int getResampleOpFilter() {
-      return switch (this) {
-        case LOW_SCALING, PIXEL_ART_SCALING -> ResampleOp.FILTER_POINT;
-        case MEDIUM_SCALING -> ResampleOp.FILTER_TRIANGLE;
-        case HIGH_SCALING -> ResampleOp.FILTER_QUADRATIC;
-      };
     }
   }
 
@@ -536,333 +829,11 @@ public class AppPreferences {
     }
   }
 
-  private interface Type<T> {
-    void set(Preferences node, String key, T value);
-
-    T get(Preferences node, String key, Supplier<T> defaultValue);
-  }
-
-  private interface NumericType<T extends Number> extends Type<T> {
-    T clamp(T value, T minValue, T maxValue);
-  }
-
-  /**
-   * Represents a preference of arbitrary type.
-   *
-   * @param <T> The type of the preference. If {@code T} is a subclass of {@link Number}, consider
-   *     using {@link NumericPreference} instead.
-   */
-  public static class Preference<T> {
-    private final String key;
-    private final Supplier<T> defaultValue;
-    private final Type<T> type;
-
-    private boolean cachingEnabled = false;
-    private @Nullable T cachedValue;
-
-    private final List<Consumer<T>> onChangeHandlers = new CopyOnWriteArrayList<>();
-
-    private Preference(String key, T defaultValue, Type<T> type) {
-      this(key, () -> defaultValue, type);
-    }
-
-    private Preference(String key, Supplier<T> defaultValue, Type<T> type) {
-      this.key = key;
-      this.defaultValue = defaultValue;
-      this.type = type;
-    }
-
-    public String name() {
-      return key;
-    }
-
-    /**
-     * Constrains {@code value} to a valid value.
-     *
-     * <p>For general preferences, there is no special subset which values must belong to. For
-     * numeric preferences, this method will clamp the value to the range of valid values.
-     *
-     * @param value The value to constrain.
-     * @return The constrained value.
-     */
-    protected T constrain(T value) {
-      return value;
-    }
-
-    /**
-     * Loads and validates the value of the preference.
-     *
-     * <p>After being loaded, the value will be constrained to a valid value via the {@link
-     * #constrain(Object)} method.
-     *
-     * @return The value of the preference.
-     */
-    public T get() {
-      if (cachingEnabled && cachedValue != null) {
-        return cachedValue;
-      }
-
-      var value = type.get(prefs, key, defaultValue);
-      value = constrain(value);
-
-      cachedValue = value;
-      return value;
-    }
-
-    /**
-     * Validates and stores the value of the preference.
-     *
-     * <p>Before being stored, {@code value} will be constrained to a valid value via {@link
-     * #constrain(Object)}.
-     *
-     * @param value The value to set.
-     */
-    public void set(T value) {
-      value = constrain(value);
-
-      type.set(prefs, key, value);
-      cachedValue = value;
-
-      for (var handler : onChangeHandlers) {
-        handler.accept(value);
-      }
-    }
-
-    public void remove() {
-      prefs.remove(key);
-      cachedValue = getDefault();
-
-      for (var handler : onChangeHandlers) {
-        handler.accept(cachedValue);
-      }
-    }
-
-    public T getDefault() {
-      return defaultValue.get();
-    }
-
-    public Preference<T> cacheIt() {
-      this.cachingEnabled = true;
-      return this;
-    }
-
-    public void onChange(Consumer<T> handler) {
-      onChangeHandlers.add(handler);
-    }
-  }
-
-  /**
-   * A preference with specialized logic for numbers
-   *
-   * <p>Numeric preferences have a valid range defined by a minimum and a maximum value. Values will
-   * be constrained to this range when loaded and stored. Both the minimum and maximem values are
-   * inclusive.
-   *
-   * <p>A numeric preference can be effectively unconstrained by setting the minimum and maximum
-   * values to the minimum and maximum values of the underlying type.
-   *
-   * @param <T> The numeric type of the preference.
-   */
-  public static class NumericPreference<T extends Number> extends Preference<T> {
-    private final NumericType<T> type;
-    private final T minValue;
-    private final T maxValue;
-
-    private NumericPreference(
-        String key, T defaultValue, T minValue, T maxValue, NumericType<T> type) {
-      super(key, defaultValue, type);
-      this.type = type;
-      this.minValue = minValue;
-      this.maxValue = maxValue;
-    }
-
-    /**
-     * @return The minimum value of the preference.
-     */
-    public T getMinValue() {
-      return minValue;
-    }
-
-    /**
-     * @return The maximum value of the preference.
-     */
-    public T getMaxValue() {
-      return maxValue;
-    }
-
-    /**
-     * Clamp {@code value} to be between {@link #getMinValue()} and {@link #getMaxValue()}.
-     *
-     * @param value The value to constrain.
-     * @return If {@code value < getMinValue()}, then {@code getMinValue()}. If {@code value >
-     *     getMaxValue()}, then {@code getMaxValue()}. Otherwise, {@code value}.
-     */
-    @Override
-    protected T constrain(T value) {
-      return type.clamp(value, getMinValue(), getMaxValue());
-    }
-  }
-
-  private static final class BooleanType implements Type<Boolean> {
-    public static Preference<Boolean> create(String key, boolean defaultValue) {
-      return new Preference<>(key, defaultValue, new BooleanType());
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, Boolean value) {
-      prefs.putBoolean(key, value);
-    }
-
-    @Override
-    public Boolean get(Preferences prefs, String key, Supplier<Boolean> defaultValue) {
-      return prefs.getBoolean(key, defaultValue.get());
-    }
-  }
-
-  private static final class IntegerType implements NumericType<Integer> {
-    public static NumericPreference<Integer> create(String key, int defaultValue) {
-      return create(key, defaultValue, Integer.MIN_VALUE, Integer.MAX_VALUE);
-    }
-
-    public static NumericPreference<Integer> createByte(String key, int defaultValue) {
-      return create(key, defaultValue, 0, 255);
-    }
-
-    public static NumericPreference<Integer> create(
-        String key, int defaultValue, int minValue, int maxValue) {
-      return new NumericPreference<>(key, defaultValue, minValue, maxValue, new IntegerType());
-    }
-
-    @Override
-    public Integer clamp(Integer value, Integer minValue, Integer maxValue) {
-      return Math.clamp(value, minValue, maxValue);
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, Integer value) {
-      prefs.putInt(key, value);
-    }
-
-    @Override
-    public Integer get(Preferences prefs, String key, Supplier<Integer> defaultValue) {
-      return prefs.getInt(key, defaultValue.get());
-    }
-  }
-
-  private static final class DoubleType implements NumericType<Double> {
-    public static NumericPreference<Double> create(String key, double defaultValue) {
-      return create(key, defaultValue, Double.NEGATIVE_INFINITY, Double.POSITIVE_INFINITY);
-    }
-
-    public static NumericPreference<Double> create(
-        String key, double defaultValue, double minValue, double maxValue) {
-      return new NumericPreference<>(key, defaultValue, minValue, maxValue, new DoubleType());
-    }
-
-    @Override
-    public Double clamp(Double value, Double minValue, Double maxValue) {
-      return Math.clamp(value, minValue, maxValue);
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, Double value) {
-      prefs.putDouble(key, value);
-    }
-
-    @Override
-    public Double get(Preferences prefs, String key, Supplier<Double> defaultValue) {
-      return prefs.getDouble(key, defaultValue.get());
-    }
-  }
-
-  private static final class StringType implements Type<String> {
-    public static Preference<String> create(String key, String defaultValue) {
-      return new Preference<>(key, defaultValue, new StringType());
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, String value) {
-      prefs.put(key, value);
-    }
-
-    @Override
-    public String get(Preferences prefs, String key, Supplier<String> defaultValue) {
-      return prefs.get(key, defaultValue.get());
-    }
-  }
-
-  private static final class FileType implements Type<File> {
-    public static Preference<File> create(String key, Supplier<File> defaultValue) {
-      return new Preference<>(key, defaultValue, new FileType());
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, File value) {
-      prefs.put(key, value.toString());
-    }
-
-    @Override
-    public File get(Preferences prefs, String key, Supplier<File> defaultValue) {
-      String filePath = prefs.get(key, null);
-      if (filePath != null) {
-        return new File(filePath);
-      }
-
-      return defaultValue.get();
-    }
-  }
-
-  private static final class EnumType<T extends Enum<T>> implements Type<T> {
-    public static <T extends Enum<T>> Preference<T> create(
-        Class<T> class_, String key, T defaultValue) {
-      return new Preference<>(key, defaultValue, new EnumType<>(class_));
-    }
-
-    private final Class<T> class_;
-
-    public EnumType(Class<T> class_) {
-      this.class_ = class_;
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, T value) {
-      prefs.put(key, value.name());
-    }
-
-    @Override
-    public T get(Preferences prefs, String key, Supplier<T> defaultValue) {
-      var stored = prefs.get(key, null);
-      if (stored == null) {
-        return defaultValue.get();
-      }
-
-      try {
-        return Enum.valueOf(class_, stored);
-      } catch (Exception e) {
-        return defaultValue.get();
-      }
-    }
-  }
-
-  private static final class ColorType implements Type<Color> {
-    public static Preference<Color> create(String key, Color defaultValue, boolean hasAlpha) {
-      return new Preference<>(key, defaultValue, new ColorType(hasAlpha));
-    }
-
-    private final boolean hasAlpha;
-
-    public ColorType(boolean hasAlpha) {
-      this.hasAlpha = hasAlpha;
-    }
-
-    @Override
-    public void set(Preferences prefs, String key, Color value) {
-      prefs.putInt(key, value.getRGB());
-    }
-
-    @Override
-    public Color get(Preferences prefs, String key, Supplier<Color> defaultValue) {
-      return new Color(prefs.getInt(key, defaultValue.get().getRGB()), hasAlpha);
+  static {
+    if (PRINT_KEYS_MISSING_I18N_ON_STARTUP) {
+      store.getDefinedPreferences().stream()
+          .filter(p -> p.getLabel().equals(p.getKey()))
+          .forEach(p -> System.out.println(p.getKey()));
     }
   }
 }

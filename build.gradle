@@ -18,7 +18,6 @@ plugins {
     alias(libs.plugins.git.version)
     alias(libs.plugins.javafx)
     alias(libs.plugins.jpackage.runtime)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.shadow)
 
     alias(libs.plugins.spotless) apply false
@@ -33,34 +32,9 @@ apply from: rootProject.file('buildSrc/shared.gradle')
 // Definitions
 defaultTasks 'clean', 'build'
 
-def javaArgs = [
-        "-Xss8M", "-Dsun.java2d.d3d=false", "-Dsentry.environment=Production", "-Dfile.encoding=UTF-8",
-        "-Dpolyglot.engine.WarnInterpreterOnly=false",
-        "-Djava.util.Arrays.useLegacyMergeSort=true",
-        "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
-        "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
-        "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
-        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
-        "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED","--add-opens=java.base/java.lang=ALL-UNNAMED",
-        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
-        "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
-        "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
-
-// Used by gradle assemble & run tasks
-application {
-    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
-    applicationDefaultJvmArgs = javaArgs + ["-DRUN_FROM_IDE=true"]
-    if (osdetector.os.is('osx')) {
-        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
-    }
-}
-def appSemVer = ""
-
-configurations {
-    forms.extendsFrom implementation
-}
 
 // Custom properties
+def appSemVer = ""
 ext {
     // Allow packagers to build from the source code tarball, which doesn't
     // have '.git'
@@ -76,15 +50,25 @@ ext {
 
         revision = details.gitHash
         revisionFull = details.gitHashFull
-        if (details.commitDistance == 0) {
-          tagVersion = details.lastTag
-          environment = "Production"
-            sentryDSN = sentry_production_dsn
-        } else {
+        // Do not count as production if changes (committed or otherwise) have been made to the tree
+        // since the tag. And if the tag is a nightly tag, give it the special "Nightly" environment
+        // instead of counting it the same as a production release.
+        if (!details.isCleanTag) {
             tagVersion = 'SNAPSHOT-' + revision
             project.description = "SNAPSHOT-" + revision
             environment = "Development"
             sentryDSN = sentry_development_dsn
+        }
+        else if (details.lastTag.startsWith('nightly')) {
+            tagVersion = 'NIGHTLY-' + revision
+            project.description = "NIGHTLY-" + revision
+            environment = "Nightly"
+            sentryDSN = sentry_production_dsn
+        }
+        else {
+            tagVersion = details.lastTag
+            environment = "Production"
+            sentryDSN = sentry_production_dsn
         }
     }
 
@@ -108,6 +92,31 @@ ext {
     println "OS Detected: " + osdetector.os
 }
 
+def javaArgs = [
+        "-Xss8M", "-Dsun.java2d.d3d=false", "-Dfile.encoding=UTF-8",
+        "-Dpolyglot.engine.WarnInterpreterOnly=false",
+        "-Djava.util.Arrays.useLegacyMergeSort=true",
+        "-DMAPTOOL_DATADIR=.maptool-" + vendor.toLowerCase(), "-XX:+ShowCodeDetailsInExceptionMessages",
+        "--add-opens=java.desktop/java.awt=ALL-UNNAMED", "--add-opens=java.desktop/java.awt.geom=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt.geom=ALL-UNNAMED", "--add-opens=java.base/java.util=ALL-UNNAMED",
+        "--add-opens=javafx.web/javafx.scene.web=ALL-UNNAMED", "--add-opens=javafx.web/com.sun.webkit=ALL-UNNAMED",
+        "--add-opens=javafx.web/com.sun.webkit.dom=ALL-UNNAMED","--add-opens=java.base/java.lang=ALL-UNNAMED",
+        "--add-opens=java.desktop/sun.awt=ALL-UNNAMED", "--add-opens=java.desktop/sun.java2d=ALL-UNNAMED",
+        "--add-opens=java.desktop/javax.swing=ALL-UNNAMED","--add-opens=java.desktop/sun.awt.shell=ALL-UNNAMED",
+        "--add-opens=java.desktop/com.sun.java.swing.plaf.windows=ALL-UNNAMED"]
+
+// Used by gradle assemble & run tasks
+application {
+    mainClass = 'net.rptools.maptool.client.LaunchInstructions'
+    applicationDefaultJvmArgs = javaArgs + ["-DRUN_FROM_IDE=true", "-Dsentry.environment=Development"]
+    if (osdetector.os.is('osx')) {
+        applicationDefaultJvmArgs += [ '-Xdock:name=' + project.name + developerRelease ]
+    }
+}
+
+configurations {
+    forms.extendsFrom implementation
+}
 
 spotless {
     java {
@@ -125,21 +134,6 @@ javafx {
     version = '22'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
-}
-
-protobuf {
-    protoc {
-        artifact = libs.protobuf.protoc.get()
-    }
-}
-
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/source/proto/main/java'
-        }
-    }
 }
 
 run {
@@ -351,7 +345,10 @@ def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    implementation project(':common')
+    implementation project(':dicelib')
     implementation project(':clientserver')
+    implementation project(':messages')
 
     implementation(libs.bundles.log4j)
     implementation(libs.slf4j.simple)
@@ -361,8 +358,6 @@ dependencies {
     implementation(libs.servicediscovery)
     implementation(libs.upnplib)
     implementation(libs.okhttp)
-    implementation(libs.protobuf.grpc)
-    implementation(libs.protobuf.java)
 
     implementation(libs.bundles.imageio)
     implementation(libs.batik)
@@ -393,7 +388,14 @@ dependencies {
     implementation(libs.apache.tika)
 
     implementation(libs.gson)
-    implementation(libs.jsonpath)
+
+    // region json-smart <2.5.2 is subject to DoS, but json-path has not updated yet. Force it to.
+    implementation(libs.jsonpath) {
+        exclude group: 'net.minidev', module: 'json-smart'
+    }
+    implementation("net.minidev:json-smart:2.5.2")
+    // endregion
+
     implementation(libs.jsoup)
     implementation(libs.jcabi.xml)
     implementation(libs.xstream)
@@ -419,17 +421,9 @@ dependencies {
     implementation(libs.noiselib)
 
     // libgdx
-    implementation 'com.github.thelsing:libgdx-jogl-backend:becdde406e'
-    implementation 'com.badlogicgames.gdx:gdx-backend-lwjgl:1.13.1'
-    implementation 'com.badlogicgames.gdx:gdx:1.13.1'
-    implementation 'com.badlogicgames.gdx:gdx-platform:1.13.1:natives-desktop'
-    implementation "space.earlygrey:shapedrawer:2.6.0"
-    implementation 'com.badlogicgames.gdx:gdx-freetype:1.13.1'
-    implementation 'com.badlogicgames.gdx:gdx-freetype-platform:1.13.1:natives-desktop'
-    implementation "com.badlogicgames.gdx-video:gdx-video:1.3.2-SNAPSHOT"
-    implementation "com.badlogicgames.gdx-video:gdx-video-lwjgl3:1.3.2-SNAPSHOT"
-    // https://mvnrepository.com/artifact/org.apache.logging.log4j/log4j-jul
-    implementation("org.apache.logging.log4j:log4j-jul:2.22.1")
+    implementation(libs.bundles.gdx)
+    implementation(variantOf(libs.gdx.platform) { classifier('natives-desktop')})
+    implementation(variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop')})
 }
 
 processResources {

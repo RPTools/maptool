@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.swing.htmleditorsplit;
 
-import java.awt.*;
 import java.awt.event.*;
 import java.util.HashMap;
 import java.util.Map;
@@ -30,7 +29,7 @@ import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.StringUtil;
+import net.rptools.maptool.util.HTMLUtil;
 import org.fife.rsta.ac.LanguageSupportFactory;
 import org.fife.rsta.ui.CollapsibleSectionPanel;
 import org.fife.rsta.ui.search.FindToolBar;
@@ -218,7 +217,7 @@ public class HtmlEditorSplitGui {
                   if (sourceTextArea
                       .getSyntaxEditingStyle()
                       .equals(SyntaxConstants.SYNTAX_STYLE_MARKDOWN)) {
-                    htmlEditor.setHtmlText(StringUtil.markDownToHtml(sourceTextArea.getText()));
+                    htmlEditor.setHtmlText(HTMLUtil.markDownToHtml(sourceTextArea.getText()));
                   } else {
                     htmlEditor.setHtmlText(sourceTextArea.getText());
                   }

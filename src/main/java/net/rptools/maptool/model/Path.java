@@ -98,24 +98,28 @@ public class Path<T extends AbstractPoint> {
 
   /** Create a related path that can be applied to a follower token. */
   public Path<?> derive(Grid grid, Token keyToken, Token followerToken) {
-    if (keyToken.isSnapToGrid() && followerToken.isSnapToGrid()) {
+    final var gridSupportsStg = grid.getCapabilities().isSnapToGridSupported();
+    final var keyIsStg = keyToken.isSnapToGrid() && gridSupportsStg;
+    final var followerIsStg = followerToken.isSnapToGrid() && gridSupportsStg;
+
+    if (keyIsStg && followerIsStg) {
       // Assume T = CellPoint.
       var originCell = grid.convert(new ZonePoint(keyToken.getX(), keyToken.getY()));
       var tokenCell = grid.convert(new ZonePoint(followerToken.getX(), followerToken.getY()));
       return deriveSameSnapToGrid(this, originCell.x - tokenCell.x, originCell.y - tokenCell.y);
-    } else if (!keyToken.isSnapToGrid() && !followerToken.isSnapToGrid()) {
+    } else if (!keyIsStg && !followerIsStg) {
       // Assume T = ZonePoint.
       var originPoint = new ZonePoint(keyToken.getX(), keyToken.getY());
       var tokenPoint = new ZonePoint(followerToken.getX(), followerToken.getY());
       return deriveSameSnapToGrid(this, originPoint.x - tokenPoint.x, originPoint.y - tokenPoint.y);
-    } else if (keyToken.isSnapToGrid()) {
+    } else if (keyIsStg) { // && !followerIsStg
       // Assume T = CellPoint.
       return deriveFromSnapToGrid(
           (Path<CellPoint>) this,
           grid,
           keyToken.getX() - followerToken.getX(),
           keyToken.getY() - followerToken.getY());
-    } else /* (!keyToken.isSnapToGrid) */ {
+    } else /* (!keyIsStg && followerIsStg) */ {
       // Assume T = ZonePoint.
       return deriveFromNotSnapToGrid(
           (Path<ZonePoint>) this,

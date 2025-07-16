@@ -16,9 +16,12 @@ package net.rptools.maptool.client.ui.zone.renderer;
 
 import java.awt.Composite;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
+import java.awt.Transparency;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import java.util.function.Consumer;
 import net.rptools.lib.CodeTimer;
@@ -82,26 +85,47 @@ public class RenderHelper {
 
   public void bufferedRender(Graphics2D g, Composite blitComposite, Consumer<Graphics2D> render) {
     var timer = CodeTimer.get();
-    g = (Graphics2D) g.create();
+
     timer.start("RenderHelper-acquireBuffer");
-    try (final var entry = tempBufferPool.acquire()) {
-      final var buffer = entry.get();
-      timer.stop("RenderHelper-acquireBuffer");
-
-      Graphics2D buffG = buffer.createGraphics();
-      try {
-        buffG.setClip(new Area(new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight())));
-        doRender(buffG, render);
-      } finally {
-        buffG.dispose();
+    if (tempBufferPool.getWidth() == renderer.getWidth()
+        && tempBufferPool.getHeight() == renderer.getHeight()) {
+      // This case only holds during regular rendering. Other rendering, such as screenshots, may
+      // have different dimensions.
+      try (final var entry = tempBufferPool.acquire()) {
+        var buffer = entry.get();
+        bufferedRender(buffer, g, blitComposite, render);
       }
+    } else {
+      var buffer =
+          GraphicsEnvironment.getLocalGraphicsEnvironment()
+              .getDefaultScreenDevice()
+              .getDefaultConfiguration()
+              .createCompatibleImage(
+                  renderer.getWidth(), renderer.getHeight(), Transparency.TRANSLUCENT);
+      bufferedRender(buffer, g, blitComposite, render);
+    }
+  }
 
-      timer.start("RenderHelper-blit");
+  private void bufferedRender(
+      BufferedImage buffer, Graphics2D g, Composite blitComposite, Consumer<Graphics2D> render) {
+    var timer = CodeTimer.get();
+
+    Graphics2D buffG = buffer.createGraphics();
+    try {
+      buffG.setClip(new Area(new Rectangle(0, 0, buffer.getWidth(), buffer.getHeight())));
+      doRender(buffG, render);
+    } finally {
+      buffG.dispose();
+    }
+
+    timer.start("RenderHelper-blit");
+    g = (Graphics2D) g.create();
+    try {
       g.setComposite(blitComposite);
       g.drawImage(buffer, 0, 0, renderer);
-      timer.stop("RenderHelper-blit");
     } finally {
       g.dispose();
     }
+    timer.stop("RenderHelper-blit");
   }
 }

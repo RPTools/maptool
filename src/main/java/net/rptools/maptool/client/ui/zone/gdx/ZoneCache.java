@@ -31,6 +31,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneView;
+import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.IsometricGrid;
@@ -71,6 +72,10 @@ public class ZoneCache implements Disposable {
 
   public ZoneRenderer getZoneRenderer() {
     return zoneRenderer;
+  }
+
+  public ZoneViewModel getZoneViewModel() {
+    return zoneRenderer.getViewModel();
   }
 
   public ZoneView getZoneView() {

@@ -27,11 +27,11 @@ import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.awt.image.ImageObserver;
 import javax.swing.JPanel;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.swing.ImageBorder;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Zone;
@@ -87,7 +87,7 @@ public class ZoneMiniMapPanel extends JPanel {
       ImageBorder border = AppStyle.miniMapBorder;
 
       Dimension size = new Dimension(img.getWidth(), img.getHeight());
-      SwingUtil.constrainTo(
+      AwtUtil.constrainTo(
           size,
           mySize.width - border.getLeftMargin() - border.getRightMargin(),
           mySize.height - border.getTopMargin() - border.getBottomMargin());
@@ -135,7 +135,7 @@ public class ZoneMiniMapPanel extends JPanel {
     ImageBorder border = AppStyle.miniMapBorder;
 
     Dimension size = new Dimension(img.getWidth(), img.getHeight());
-    SwingUtil.constrainTo(size, SIZE_WIDTH, SIZE_HEIGHT);
+    AwtUtil.constrainTo(size, SIZE_WIDTH, SIZE_HEIGHT);
     size.width += border.getLeftMargin() + border.getRightMargin();
     size.height += border.getTopMargin() + border.getBottomMargin();
 

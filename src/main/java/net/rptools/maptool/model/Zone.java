@@ -24,8 +24,10 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import javax.swing.*;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -69,7 +71,6 @@ import net.rptools.maptool.model.zones.ZoneLightingChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.DrawnElementListDto;
 import net.rptools.maptool.server.proto.ZoneDto;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -724,7 +725,9 @@ public class Zone {
   public void setGrid(Grid grid) {
     this.grid = grid;
     grid.setZone(this);
-    new MapToolEventBus().getMainEventBus().post(new GridChanged(this));
+    // invoke later to prevent firing with null zone during initialisation
+    SwingUtilities.invokeLater(
+        () -> new MapToolEventBus().getMainEventBus().post(new GridChanged(this)));
   }
 
   public Grid getGrid() {

@@ -28,6 +28,7 @@ import javax.swing.event.TreeModelEvent;
 import javax.swing.event.TreeModelListener;
 import javax.swing.tree.TreeModel;
 import javax.swing.tree.TreePath;
+import net.rptools.lib.CollectionUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Zone;
@@ -36,7 +37,6 @@ import net.rptools.maptool.model.drawing.DrawablesGroup;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.zones.DrawableAdded;
 import net.rptools.maptool.model.zones.DrawableRemoved;
-import net.rptools.maptool.util.CollectionUtil;
 
 public class DrawPanelTreeModel implements TreeModel {
 

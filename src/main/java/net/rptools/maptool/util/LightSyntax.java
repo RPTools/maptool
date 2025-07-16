@@ -21,20 +21,19 @@ import java.io.LineNumberReader;
 import java.io.StringReader;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.CategorizedLights;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.Light;
 import net.rptools.maptool.model.LightSource;
+import net.rptools.maptool.model.Lights;
 import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import org.apache.logging.log4j.LogManager;
@@ -45,8 +44,8 @@ public class LightSyntax {
   private static final int DEFAULT_LUMENS = 100;
   private static final Logger log = LogManager.getLogger(LightSyntax.class);
 
-  public Map<GUID, LightSource> parseLights(String text, Iterable<LightSource> original) {
-    final var lightSourceMap = new HashMap<GUID, LightSource>();
+  public Lights parseLights(String text, Lights original) {
+    final var lightSourceMap = new Lights();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
     List<String> errlog = new LinkedList<>();
 
@@ -57,7 +56,7 @@ public class LightSyntax {
 
         var source = parseLightLine(line, reader.getLineNumber(), original, errlog);
         if (source != null) {
-          lightSourceMap.put(source.getId(), source);
+          lightSourceMap.add(source);
         }
       }
     } catch (IOException ioe) {
@@ -74,15 +73,15 @@ public class LightSyntax {
     return lightSourceMap;
   }
 
-  public Map<String, Map<GUID, LightSource>> parseCategorizedLights(
-      String text, final Map<String, Map<GUID, LightSource>> originalLightSourcesMap) {
-    final var lightMap = new TreeMap<String, Map<GUID, LightSource>>();
+  public CategorizedLights parseCategorizedLights(
+      String text, CategorizedLights originalLightSourcesMap) {
+    final var categorized = new CategorizedLights();
     final var reader = new LineNumberReader(new BufferedReader(new StringReader(text)));
     List<String> errlog = new LinkedList<>();
 
     try {
-      Collection<LightSource> currentGroupOriginalLightSources = Collections.emptyList();
-      Map<GUID, LightSource> lightSourceMap = null;
+      Lights currentGroupOriginalLightSources = new Lights();
+      CategorizedLights.Category currentGroup = null;
 
       String line;
       while ((line = reader.readLine()) != null) {
@@ -90,28 +89,33 @@ public class LightSyntax {
 
         // Blank lines
         if (line.isEmpty()) {
-          lightSourceMap = null;
+          if (currentGroup != null) {
+            categorized.addAllToCategory(currentGroup.name(), currentGroup.lights());
+          }
+          currentGroup = null;
           continue;
         }
         // New group
-        if (lightSourceMap == null) {
-          final var currentGroupName = line;
+        if (currentGroup == null) {
+          currentGroup = new CategorizedLights.Category(line, new Lights());
           currentGroupOriginalLightSources =
               originalLightSourcesMap
-                  .getOrDefault(currentGroupName, Collections.emptyMap())
-                  .values();
-          lightSourceMap = new HashMap<>();
-          lightMap.put(currentGroupName, lightSourceMap);
+                  .getCategory(currentGroup.name())
+                  .map(CategorizedLights.Category::lights)
+                  .orElse(new Lights());
           continue;
         }
 
         var source =
             parseLightLine(line, reader.getLineNumber(), currentGroupOriginalLightSources, errlog);
         if (source != null) {
-          lightSourceMap.put(source.getId(), source);
+          currentGroup.lights().add(source);
         }
       }
-      lightMap.values().removeIf(Map::isEmpty);
+
+      if (currentGroup != null) {
+        categorized.addAllToCategory(currentGroup.name(), currentGroup.lights());
+      }
     } catch (IOException ioe) {
       MapTool.showError("msg.error.mtprops.light.ioexception", ioe);
     }
@@ -123,28 +127,28 @@ public class LightSyntax {
           "msg.error.mtprops.light.definition"); // Don't save lights...
     }
 
-    return lightMap;
+    return categorized;
   }
 
-  public String stringifyLights(Iterable<LightSource> lights) {
+  public String stringifyLights(Lights lights) {
     StringBuilder builder = new StringBuilder();
     writeLightLines(builder, lights);
     return builder.toString();
   }
 
-  public String stringifyCategorizedLights(Map<String, Map<GUID, LightSource>> lightSources) {
+  public String stringifyCategorizedLights(CategorizedLights lightSources) {
     StringBuilder builder = new StringBuilder();
-    for (Map.Entry<String, Map<GUID, LightSource>> entry : lightSources.entrySet()) {
-      builder.append(entry.getKey());
+    for (var category : lightSources.getCategories()) {
+      builder.append(category.name());
       builder.append("\n----\n");
 
-      writeLightLines(builder, entry.getValue().values());
+      writeLightLines(builder, category.lights());
       builder.append('\n');
     }
     return builder.toString();
   }
 
-  private void writeLightLines(StringBuilder builder, Iterable<LightSource> lights) {
+  private void writeLightLines(StringBuilder builder, Lights lights) {
     for (LightSource lightSource : lights) {
       if (lightSource.getType() != LightSource.Type.NORMAL) {
         log.error("A non-normal light was provided for lightt stringification. Skipping.");
@@ -233,7 +237,7 @@ public class LightSyntax {
   }
 
   private LightSource parseLightLine(
-      String line, int lineNumber, Iterable<LightSource> originalInCategory, List<String> errlog) {
+      String line, int lineNumber, Lights originalInCategory, List<String> errlog) {
     // Blank lines, comments
     if (line.isEmpty() || line.charAt(0) == '-') {
       return null;

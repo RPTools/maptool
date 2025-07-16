@@ -37,7 +37,6 @@ import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.DefaultTool;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.ui.AppMenuBar;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.Token;
 import org.apache.logging.log4j.LogManager;
@@ -258,7 +257,7 @@ public class HTMLOverlayPanel extends JFXPanel {
         () -> {
           HTMLOverlayManager overlayManager = getOverlay(name);
           if (overlayManager != null) {
-            if ("".equals(htmlContent.getHtmlString())) {
+            if ("".equals(htmlContent)) {
               // Blank removes the overlay
               removeOverlay(overlayManager);
               return;

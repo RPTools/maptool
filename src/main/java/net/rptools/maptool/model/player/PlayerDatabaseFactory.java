@@ -22,9 +22,13 @@ import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ExecutionException;
 import java.util.function.Supplier;
 import javax.crypto.NoSuchPaddingException;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.client.AppUtil;
+import net.rptools.maptool.client.MapTool;
 
 public class PlayerDatabaseFactory {
   private enum PlayerDatabaseType {
@@ -35,9 +39,10 @@ public class PlayerDatabaseFactory {
 
   private static final Map<PlayerDatabaseType, PlayerDatabase> playerDatabaseMap =
       new ConcurrentHashMap<>();
+  private static final PublicPrivateKeyStore keyStore = MapTool.getKeyStore();
 
   public static LocalPlayerDatabase getLocalPlayerDatabase(LocalPlayer player) {
-    return new LocalPlayerDatabase(player);
+    return new LocalPlayerDatabase(player, keyStore);
   }
 
   public static PersonalServerPlayerDatabase getPersonalServerPlayerDatabase(LocalPlayer player) {
@@ -66,7 +71,24 @@ public class PlayerDatabaseFactory {
                 File passwordFile = configRoot.resolve("passwords.json").toFile();
                 File additionalFile = configRoot.resolve("passwords_add.json").toFile();
 
-                return new PasswordFilePlayerDatabase(passwordFile, additionalFile);
+                CipherUtil.Key serverPublicPrivateKey;
+                try {
+                  serverPublicPrivateKey = keyStore.getKeys().get();
+                } catch (InterruptedException | ExecutionException e) {
+                  if (e.getCause() instanceof IOException) {
+                    throw (IOException) e.getCause();
+                  }
+                  if (e.getCause() instanceof NoSuchAlgorithmException) {
+                    throw (NoSuchAlgorithmException) e.getCause();
+                  } else if (e.getCause() instanceof InvalidKeySpecException) {
+                    throw (InvalidKeySpecException) e.getCause();
+                  } else {
+                    throw new IOException(e.getCause());
+                  }
+                }
+
+                return new PasswordFilePlayerDatabase(
+                    passwordFile, additionalFile, serverPublicPrivateKey);
               } catch (IOException | NoSuchAlgorithmException | InvalidKeySpecException e) {
                 throw new IllegalStateException(e);
               }

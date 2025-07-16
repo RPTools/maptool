@@ -24,12 +24,12 @@ import java.util.Map;
 import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
-import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.ImageSupport;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
@@ -48,6 +48,7 @@ public class TokenRenderer {
 
   public void renderToken(Token token, TokenPosition position, Graphics2D g2d, float opacity) {
     var timer = CodeTimer.get();
+    timer.increment("TokenRenderer-renderToken");
     timer.start("TokenRenderer-renderToken");
 
     timer.start("TokenRenderer-loadImageTable");
@@ -81,7 +82,7 @@ public class TokenRenderer {
                     .getFirst());
       }
     } else {
-      bi = ImageUtil.getTokenImage(token, renderHelper.getImageObserver());
+      bi = ImageSupport.getTokenImage(token, renderHelper.getImageObserver());
     }
     timer.stop("TokenRenderer-getRenderImage");
     return bi;

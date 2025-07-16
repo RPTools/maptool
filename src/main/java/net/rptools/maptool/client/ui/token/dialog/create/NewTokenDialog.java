@@ -23,11 +23,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.GenericDialog;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -37,19 +38,24 @@ import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
 import net.rptools.maptool.util.ImageManager;
 
-/** This dialog is used to display all of the token states and notes to the user. */
+/** This dialog is used to display all the token's states and notes to the user. */
 public class NewTokenDialog extends AbeillePanel<Token> {
 
   /** The size used to constrain the icon. */
   public static final int SIZE = 64;
 
   private final Token token;
-  private boolean success;
 
   private final int centerX;
   private final int centerY;
 
-  private GenericDialog dialog;
+  private final GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getString("dialog.NewToken.title"))
+          .makeModal(true)
+          .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE)
+          .createOkCancelButtons()
+          .setDefaultButton(ButtonKind.OK);
 
   /**
    * Create a new token notes dialog.
@@ -68,38 +74,36 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     panelInit();
   }
 
-  public void showDialog() {
-    dialog =
-        new GenericDialog(I18N.getString("dialog.NewToken.title"), MapTool.getFrame(), this) {
-          @Override
-          protected void positionInitialView() {
+  public String showDialog() {
+    dialogFactory
+        .setContent(this)
+        .onBeforeShow(
+            e -> {
+              // Position over the drop spot
+              Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+              Dimension size = getSize();
+              int x = centerX - size.width / 2;
+              int y = centerY - size.height / 2;
+              if (x < 0) {
+                x = 0;
+              }
+              if (y < 0) {
+                y = 0;
+              }
+              if (x + size.width > screenSize.width) {
+                x = screenSize.width - size.width;
+              }
+              if (y + size.height > screenSize.height) {
+                y = screenSize.height - size.height;
+              }
 
-            // Position over the drop spot
-            Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-            Dimension size = getSize();
-            int x = centerX - size.width / 2;
-            int y = centerY - size.height / 2;
-            if (x < 0) {
-              x = 0;
-            }
-            if (y < 0) {
-              y = 0;
-            }
-            if (x + size.width > screenSize.width) {
-              x = screenSize.width - size.width;
-            }
-            if (y + size.height > screenSize.height) {
-              y = screenSize.height - size.height;
-            }
-
-            setLocation(x, y);
-          }
-        };
+              dialogFactory.getDialog().setLocation(x, y);
+            });
 
     bind(token);
 
-    getRootPane().setDefaultButton(getOKButton());
-    dialog.showDialog();
+    getRootPane().setDefaultButton((JButton) dialogFactory.getOKButton());
+    return dialogFactory.displayWithReturnValue();
   }
 
   public JLabel getTokenIconPanel() {
@@ -108,14 +112,6 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 
   public JTextField getNameTextField() {
     return (JTextField) getComponent("@name");
-  }
-
-  public JButton getOKButton() {
-    return (JButton) getComponent("okButton");
-  }
-
-  public JButton getCancelButton() {
-    return (JButton) getComponent("cancelButton");
   }
 
   public JCheckBox getShowDialogCheckbox() {
@@ -141,10 +137,10 @@ public class NewTokenDialog extends AbeillePanel<Token> {
   }
 
   public void initOKButton() {
-    getOKButton()
+    dialogFactory
+        .getOKButton()
         .addActionListener(
             e -> {
-              success = true;
               if (!getShowDialogCheckbox().isSelected()) {
                 AppPreferences.showDialogOnNewToken.set(false);
               }
@@ -152,8 +148,9 @@ public class NewTokenDialog extends AbeillePanel<Token> {
                 MapTool.showError(I18N.getText("msg.error.emptyTokenName"));
                 return;
               }
+              dialogFactory.setDialogResult(GenericDialog.AFFIRM);
               if (commit()) {
-                dialog.closeDialog();
+                dialogFactory.closeDialog();
               }
             });
   }
@@ -184,12 +181,9 @@ public class NewTokenDialog extends AbeillePanel<Token> {
   }
 
   public void initCancelButton() {
-    getCancelButton()
-        .addActionListener(
-            e -> {
-              success = false;
-              dialog.closeDialog();
-            });
+    dialogFactory
+        .getCancelButton()
+        .addActionListener(e -> dialogFactory.setDialogResult(GenericDialog.DENY).closeDialog());
   }
 
   public void initPropertyTypeComboBox() {
@@ -282,10 +276,6 @@ public class NewTokenDialog extends AbeillePanel<Token> {
     populateStatSheetComboBoxes((String) getPropertyTypeComboBox().getSelectedItem(), null);
   }
 
-  public boolean isSuccess() {
-    return success;
-  }
-
   // /**
   // * Update the token to match the state of the dialog
   // */
@@ -320,7 +310,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 
     // Need to resize?
     Dimension imgSize = new Dimension(assetImage.getWidth(), assetImage.getHeight());
-    SwingUtil.constrainTo(imgSize, SIZE);
+    AwtUtil.constrainTo(imgSize, SIZE);
     BufferedImage image = new BufferedImage(imgSize.width, imgSize.height, Transparency.BITMASK);
     Graphics2D g = image.createGraphics();
     g.drawImage(

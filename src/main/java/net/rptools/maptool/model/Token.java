@@ -43,15 +43,15 @@ import javax.annotation.Nullable;
 import javax.swing.Icon;
 import javax.swing.ImageIcon;
 import net.rptools.CaseInsensitiveHashMap;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.TokenTransferData;
-import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.json.JSONMacroFunctions;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -60,7 +60,6 @@ import net.rptools.maptool.server.proto.TerrainModifierOperationDto;
 import net.rptools.maptool.server.proto.TokenDto;
 import net.rptools.maptool.server.proto.TokenPropertyValueDto;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.TokenUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
@@ -285,8 +284,7 @@ public class Token implements Cloneable {
       MapTool.getCampaign().getCampaignProperties().getDefaultTokenPropertyType();
 
   private Integer haloColorValue;
-  private transient Color haloColor =
-      new Color(ImageUtil.negativeColourInt(AppPreferences.defaultGridColor.getDefault().getRGB()));
+  private transient Color haloColor;
 
   private Integer visionOverlayColorValue;
   private transient Color visionOverlayColor;
@@ -554,7 +552,7 @@ public class Token implements Cloneable {
 
     // Try and silently catch any errors if there is an issue with sightType...
     try {
-      if (!MapTool.getCampaign().getCampaignProperties().getSightTypeMap().containsKey(sightType)) {
+      if (MapTool.getCampaign().getCampaignProperties().getSightTypes().get(sightType).isEmpty()) {
         sightType = MapTool.getCampaign().getCampaignProperties().getDefaultSightType();
       }
     } catch (Exception e) {
@@ -652,10 +650,6 @@ public class Token implements Cloneable {
     gmName = name;
   }
 
-  public boolean hasHalo() {
-    return haloColorValue != null;
-  }
-
   public String getLabel() {
     return label;
   }
@@ -673,10 +667,16 @@ public class Token implements Cloneable {
     haloColor = color;
   }
 
-  public Color getHaloColor() {
-    if (haloColor == null && haloColorValue != null) {
+  public @Nullable Color getHaloColor() {
+    if (haloColorValue == null) {
+      return null;
+    }
+
+    // Cache the Color from the int.
+    if (haloColor == null) {
       haloColor = new Color(haloColorValue);
     }
+
     return haloColor;
   }
 
@@ -849,8 +849,8 @@ public class Token implements Cloneable {
     return imageTableName;
   }
 
-  public @Nonnull Collection<LightSource> getUniqueLightSources() {
-    return uniqueLightSources.values();
+  public @Nonnull Lights getUniqueLightSources() {
+    return Lights.copyOf(uniqueLightSources.values());
   }
 
   public @Nullable LightSource getUniqueLightSource(GUID lightSourceId) {
@@ -1423,7 +1423,7 @@ public class Token implements Cloneable {
 
     Rectangle footprintBounds = getBounds(MapTool.getFrame().getCurrentZoneRenderer().getZone());
     Dimension imgSize = new Dimension(getWidth(), getHeight());
-    SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
     // Lets account for ISO images
     double iso_ho = 0;

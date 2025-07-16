@@ -24,7 +24,6 @@ import javafx.scene.input.*;
 import javafx.scene.layout.StackPane;
 import javafx.scene.web.*;
 import javax.swing.*;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Class handles JFXPanel that contains a WebView that can display HTML5. */
 public class HTMLJFXPanel extends JFXPanel implements HTMLPanelInterface {

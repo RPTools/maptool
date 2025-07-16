@@ -33,6 +33,7 @@ import net.rptools.dicelib.expression.Result;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.client.functions.EvalMacroFunctions;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.maptool.util.FunctionUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
@@ -553,7 +554,7 @@ public class JSONMacroFunctions extends AbstractFunction {
 
   private JsonObject jsonObjRolls(JsonArray names, JsonArray stats, JsonArray rolls)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser();
+    ExpressionParser parser = new ExpressionParserFactory().create();
 
     if (stats.size() != rolls.size()) {
       throw new ParserException(I18N.getText("macro.function.json.matchingArrayOrRoll"));
@@ -608,7 +609,7 @@ public class JSONMacroFunctions extends AbstractFunction {
    */
   private JsonArray jsonRolls(String rollString, int outerDim, int innerDim)
       throws ParserException {
-    ExpressionParser parser = new ExpressionParser();
+    ExpressionParser parser = new ExpressionParserFactory().create();
 
     if (innerDim == 1) {
       return jsonRolls(rollString, outerDim, parser);

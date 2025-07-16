@@ -29,7 +29,6 @@ import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.OverlayVisibilityChanged;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import netscape.javascript.JSObject;

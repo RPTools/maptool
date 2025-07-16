@@ -1,0 +1,24 @@
+plugins {
+    id "base"
+    id "java-library"
+}
+
+apply from: rootProject.file('buildSrc/shared.gradle')
+
+// In this section you declare the dependencies for your production and test code
+dependencies {
+    implementation(libs.findbugs.jsr305)
+
+    implementation(libs.bundles.log4j)
+    implementation(libs.slf4j.simple)
+    implementation(libs.apache.commons.logging)
+
+    implementation(libs.gson)
+
+    implementation(libs.bundles.imageio)
+    implementation(libs.batik)
+
+    implementation(libs.apache.commons.io)
+
+    implementation(libs.jts.core)
+}

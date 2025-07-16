@@ -15,7 +15,6 @@
 package net.rptools.maptool.client.ui.htmlframe;
 
 import java.awt.event.ActionListener;
-import net.rptools.maptool.client.ui.htmlframe.content.HTMLContent;
 
 /** Interface for the HTML Panel holding the HTML Pane. */
 interface HTMLPanelInterface {
@@ -75,7 +74,7 @@ interface HTMLPanelInterface {
             "\036(\001\002)?([^\036]*)\036",
             "&#171;<span class='roll' style='color:blue'>&nbsp;$2&nbsp;</span>&#187;");
     // Auto inline expansion
-    html = html.replaceAll("(^|\\s)(https?://[\\w.%-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
+    html = html.replaceAll("(^|\\s)(https?://[\\w.%\\-/~?&+#=]+)", "$1<a href='$2'>$2</a>");
 
     // Web view doesn't have any way to turn off caching for a link so we have to resort to a bit
     // of a hack

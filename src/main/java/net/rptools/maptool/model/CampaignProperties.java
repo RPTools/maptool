@@ -16,7 +16,8 @@ package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
 import java.awt.Color;
-import java.io.IOException;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -28,9 +29,9 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
+import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -46,6 +47,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -53,7 +55,7 @@ import net.rptools.maptool.server.proto.CampaignPropertiesDto;
 import net.rptools.maptool.server.proto.LightSourceListDto;
 import net.rptools.maptool.server.proto.TokenPropertyListDto;
 
-public class CampaignProperties {
+public class CampaignProperties implements Serializable {
 
   /** The property type to fall back to for the default when none is defined. */
   private static final String FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE = "Basic";
@@ -67,9 +69,24 @@ public class CampaignProperties {
   private Map<String, StatSheetProperties> tokenTypeStatSheetMap = new HashMap<>();
 
   private List<String> remoteRepositoryList = new ArrayList<>();
-  private Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
+
+  /**
+   * @deprecated Only present for serialization. Instead use {@link #categorizedLights} (outside of
+   *     {@link #readResolve()} and {@code #writeReplace()}).
+   */
+  @Deprecated private Map<String, Map<GUID, LightSource>> lightSourcesMap = new TreeMap<>();
+
+  private transient @Nonnull CategorizedLights categorizedLights = new CategorizedLights();
+
+  /**
+   * @deprecated Only present for serialization. Instead use {@link #sights} (outside of {@link
+   *     #readResolve()} and {@code #writeReplace()})
+   */
+  @Deprecated private Map<String, SightType> sightTypeMap = new LinkedHashMap<>();
+
+  private transient @Nonnull Sights sights = new Sights();
+
   private Map<String, LookupTable> lookupTableMap = new HashMap<>();
-  private Map<String, SightType> sightTypeMap = new HashMap<>();
 
   private String defaultSightType;
 
@@ -122,12 +139,8 @@ public class CampaignProperties {
 
     lookupTableMap.putAll(properties.lookupTableMap);
     defaultSightType = properties.defaultSightType;
-    sightTypeMap.putAll(properties.sightTypeMap);
-
-    // Play it safe. Don't keep the provided implementations but copy them.
-    for (var entry : properties.lightSourcesMap.entrySet()) {
-      lightSourcesMap.put(entry.getKey(), new HashMap<>(entry.getValue()));
-    }
+    sights = new Sights(properties.sights);
+    categorizedLights = new CategorizedLights(properties.categorizedLights);
 
     for (BooleanTokenOverlay overlay : properties.tokenStates.values()) {
       overlay = (BooleanTokenOverlay) overlay.clone();
@@ -162,12 +175,9 @@ public class CampaignProperties {
       }
     }
 
-    // Play it safe. Don't keep the provided implementations but copy them.
-    for (var entry : lightSourcesMap.entrySet()) {
-      properties.lightSourcesMap.put(entry.getKey(), new HashMap<>(entry.getValue()));
-    }
+    properties.categorizedLights.addAll(categorizedLights);
     properties.lookupTableMap.putAll(lookupTableMap);
-    properties.sightTypeMap.putAll(sightTypeMap);
+    properties.sights.addAll(sights);
     properties.tokenStates.putAll(tokenStates);
     properties.tokenBars.putAll(tokenBars);
     properties.defaultTokenPropertyType = defaultTokenPropertyType;
@@ -205,14 +215,13 @@ public class CampaignProperties {
     }
   }
 
-  public Map<String, SightType> getSightTypeMap() {
-    return sightTypeMap;
+  public Sights getSightTypes() {
+    return new Sights(sights);
   }
 
-  public void setSightTypeMap(Map<String, SightType> map) {
-    if (map != null) {
-      sightTypeMap.clear();
-      sightTypeMap.putAll(map);
+  public void setSightTypes(Sights newSights) {
+    if (newSights != null) {
+      sights = new Sights(newSights);
     }
   }
 
@@ -234,20 +243,12 @@ public class CampaignProperties {
     remoteRepositoryList.addAll(list);
   }
 
-  public Map<String, Map<GUID, LightSource>> getLightSourcesMap() {
-    var copy = new TreeMap<String, Map<GUID, LightSource>>();
-    for (var entry : lightSourcesMap.entrySet()) {
-      copy.put(entry.getKey(), new HashMap<>(entry.getValue()));
-    }
-    return copy;
+  public CategorizedLights getLightSources() {
+    return new CategorizedLights(categorizedLights);
   }
 
-  public void setLightSourcesMap(Map<String, Map<GUID, LightSource>> map) {
-    lightSourcesMap.clear();
-    // Play it safe. Don't keep the provided implementations but copy them.
-    for (var entry : map.entrySet()) {
-      lightSourcesMap.put(entry.getKey(), new HashMap<>(entry.getValue()));
-    }
+  public void setLightSources(CategorizedLights newLights) {
+    categorizedLights = new CategorizedLights(newLights);
   }
 
   public Map<String, LookupTable> getLookupTableMap() {
@@ -278,7 +279,7 @@ public class CampaignProperties {
   }
 
   public void initDefaultProperties() {
-    initLightSourcesMap();
+    initLightSources();
     initTokenTypeMap();
     initSightTypeMap();
     initTokenStatesMap();
@@ -286,24 +287,60 @@ public class CampaignProperties {
     initCharacterSheetsMap();
   }
 
-  private void initLightSourcesMap() {
-    if (!lightSourcesMap.isEmpty()) {
+  private void initLightSources() {
+    if (!categorizedLights.isEmpty()) {
       return;
     }
 
-    try {
-      Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (var entry : map.entrySet()) {
-        String key = entry.getKey();
-        Map<GUID, LightSource> lightSourceMap = new HashMap<>();
-        for (LightSource source : entry.getValue()) {
-          lightSourceMap.put(source.getId(), source);
-        }
-        lightSourcesMap.put(key, lightSourceMap);
-      }
-    } catch (IOException ioe) {
-      MapTool.showError("CampaignProperties.error.initLightSources", ioe);
-    }
+    categorizedLights.addAllToCategory(
+        "D20",
+        List.of(
+            createD20LightSource("Candle", 5),
+            createD20LightSource("Lamp", 15),
+            createD20LightSource("Torch", 20),
+            createD20LightSource("Everburning", 20),
+            createD20LightSource("Lantern, Hooded", 30),
+            createD20LightSource("Sunrod", 30)));
+    categorizedLights.addAllToCategory(
+        "Generic",
+        List.of(
+            createGenericLightSource(5),
+            createGenericLightSource(15),
+            createGenericLightSource(20),
+            createGenericLightSource(30),
+            createGenericLightSource(40),
+            createGenericLightSource(60)));
+  }
+
+  private static LightSource createGenericLightSource(int radius) {
+    return LightSource.createRegular(
+        String.format("%d", radius),
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        false,
+        List.of(new Light(ShapeType.CIRCLE, 0, radius, 0, 360, null, 100, false, false)));
+  }
+
+  private static LightSource createD20LightSource(String name, int radius) {
+    return LightSource.createRegular(
+        String.format("%s - %d", name, radius),
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        false,
+        List.of(
+            new Light(ShapeType.CIRCLE, 0, radius, 0, 360, null, 100, false, false),
+            new Light(
+                ShapeType.CIRCLE,
+                0,
+                radius * 2,
+                0,
+                360,
+                new DrawableColorPaint(new Color(0, 0, 0, 100)),
+                100,
+                false,
+                false)));
   }
 
   public String getDefaultSightType() {
@@ -311,36 +348,33 @@ public class CampaignProperties {
   }
 
   private void initSightTypeMap() {
-    sightTypeMap.clear();
+    sights.clear();
 
     final var types =
-        new SightType[] {
-          new SightType("Normal", 0, 1.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
-          new SightType("Lowlight", 0, 2.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
-          new SightType("Grid Vision", 0, 1, ShapeType.GRID, 0, 0, 0, true, null),
-          new SightType("Square Vision", 0, 1, ShapeType.SQUARE, 0, 0, 0, false, null),
-          new SightType(
-              "Normal Vision - Short Range", 10, 1.0, ShapeType.CIRCLE, 0, 0, 0, true, null),
-          new SightType("Conic Vision", 0, 1.0, ShapeType.CONE, 0, 120, 0, false, null),
-          new SightType(
-              "Darkvision",
-              0,
-              1.0,
-              ShapeType.CIRCLE,
-              0,
-              0,
-              0,
-              true,
-              LightSource.createPersonal(
-                  true,
-                  false,
-                  List.of(new Light(ShapeType.CIRCLE, 0, 60, 0, 0, null, 100, false, false)))),
-        };
+        List.of(
+            new SightType("Normal", 0, 1.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
+            new SightType("Lowlight", 0, 2.0, ShapeType.CIRCLE, 0, 0, 0, false, null),
+            new SightType("Grid Vision", 0, 1, ShapeType.GRID, 0, 0, 0, true, null),
+            new SightType("Square Vision", 0, 1, ShapeType.SQUARE, 0, 0, 0, false, null),
+            new SightType(
+                "Normal Vision - Short Range", 10, 1.0, ShapeType.CIRCLE, 0, 0, 0, true, null),
+            new SightType("Conic Vision", 0, 1.0, ShapeType.CONE, 0, 120, 0, false, null),
+            new SightType(
+                "Darkvision",
+                0,
+                1.0,
+                ShapeType.CIRCLE,
+                0,
+                0,
+                0,
+                true,
+                LightSource.createPersonal(
+                    true,
+                    false,
+                    List.of(new Light(ShapeType.CIRCLE, 0, 60, 0, 0, null, 100, false, false)))));
 
-    for (SightType st : types) {
-      sightTypeMap.put(st.getName(), st);
-    }
-    defaultSightType = types[0].getName();
+    sights.addAll(types);
+    defaultSightType = types.get(0).getName();
   }
 
   private void initTokenTypeMap() {
@@ -478,6 +512,7 @@ public class CampaignProperties {
     this.characterSheets.putAll(characterSheets);
   }
 
+  @Serial
   protected Object readResolve() {
     if (tokenTypeMap == null) {
       tokenTypeMap = new HashMap<>();
@@ -486,21 +521,26 @@ public class CampaignProperties {
       remoteRepositoryList = new ArrayList<>();
     }
 
-    // Make sure we aren't using any strange map implementations we aren't counting on.
-    // Also that we actually have light sources.
-    var oldLightSourcesMap = lightSourcesMap;
-    lightSourcesMap = new TreeMap<>();
-    if (oldLightSourcesMap != null) {
-      for (var entry : oldLightSourcesMap.entrySet()) {
-        lightSourcesMap.put(entry.getKey(), new HashMap<>(entry.getValue()));
-      }
+    categorizedLights = new CategorizedLights();
+    if (lightSourcesMap != null) {
+      // Import the serialized light sources.
+      categorizedLights = CategorizedLights.copyOf(lightSourcesMap);
+    } else {
+      // We'll still need it when serializing.
+      lightSourcesMap = new TreeMap<>();
+    }
+
+    sights = new Sights();
+    if (sightTypeMap != null) {
+      // Import the serialized light sources.
+      sights = Sights.copyOf(sightTypeMap.values());
+    } else {
+      // We'll still need it when serializing.
+      sightTypeMap = new LinkedHashMap<>();
     }
 
     if (lookupTableMap == null) {
       lookupTableMap = new HashMap<>();
-    }
-    if (sightTypeMap == null) {
-      sightTypeMap = new HashMap<>();
     }
     if (tokenStates == null) {
       tokenStates = new LinkedHashMap<>();
@@ -519,6 +559,27 @@ public class CampaignProperties {
     if (defaultTokenPropertyType == null) {
       defaultTokenPropertyType = FALLBACK_DEFAULT_TOKEN_PROPERTY_TYPE;
     }
+    return this;
+  }
+
+  @Serial
+  protected Object writeReplace() {
+    // We still use lightSourcesMap and sightTypeMap for storage. So make sure they are populated.
+
+    lightSourcesMap.clear();
+    for (var category : categorizedLights.getCategories()) {
+      var map = new LinkedHashMap<GUID, LightSource>();
+      for (var lightSource : category.lights()) {
+        map.put(lightSource.getId(), lightSource);
+      }
+      lightSourcesMap.put(category.name(), map);
+    }
+
+    sightTypeMap.clear();
+    for (var sightType : sights) {
+      sightTypeMap.put(sightType.getName(), sightType);
+    }
+
     return this;
   }
 
@@ -564,14 +625,8 @@ public class CampaignProperties {
     dto.getLightSourcesMap()
         .forEach(
             (k, v) -> {
-              var map = new HashMap<GUID, LightSource>();
               v.getLightSourcesList()
-                  .forEach(
-                      l -> {
-                        var lightSource = LightSource.fromDto(l);
-                        map.put(lightSource.getId(), lightSource);
-                      });
-              props.lightSourcesMap.put(k, map);
+                  .forEach(l -> props.categorizedLights.addToCategory(k, LightSource.fromDto(l)));
             });
     props.remoteRepositoryList.addAll(dto.getRemoteRepositoriesList());
     dto.getLookupTablesList()
@@ -584,7 +639,7 @@ public class CampaignProperties {
         .forEach(
             st -> {
               var sightType = SightType.fromDto(st);
-              props.sightTypeMap.put(sightType.getName(), sightType);
+              props.sights.add(sightType);
             });
 
     if (dto.hasDefaultTokenPropertyType()) {
@@ -625,19 +680,22 @@ public class CampaignProperties {
     dto.setInitiativeMovementLock(initiativeMovementLock);
     dto.setInitiativeUseReverseSort(initiativeUseReverseSort);
     dto.setInitiativePanelButtonsDisabled(initiativePanelButtonsDisabled);
-    lightSourcesMap.forEach(
-        (k, v) ->
-            dto.putLightSources(
-                k,
-                LightSourceListDto.newBuilder()
-                    .addAllLightSources(
-                        v.values().stream().map(LightSource::toDto).collect(Collectors.toList()))
-                    .build()));
+
+    categorizedLights
+        .getCategories()
+        .forEach(
+            category -> {
+              LightSourceListDto.Builder lightSources = LightSourceListDto.newBuilder();
+              category.lights().stream()
+                  .map(LightSource::toDto)
+                  .forEachOrdered(lightSources::addLightSources);
+              dto.putLightSources(category.name(), lightSources.build());
+            });
+
     dto.addAllRemoteRepositories(remoteRepositoryList);
     dto.addAllLookupTables(
         lookupTableMap.values().stream().map(LookupTable::toDto).collect(Collectors.toList()));
-    dto.addAllSightTypes(
-        sightTypeMap.values().stream().map(SightType::toDto).collect(Collectors.toList()));
+    dto.addAllSightTypes(sights.stream().map(SightType::toDto).collect(Collectors.toList()));
     dto.setDefaultTokenPropertyType(StringValue.of(defaultTokenPropertyType));
     return dto.build();
   }

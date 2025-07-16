@@ -20,8 +20,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 

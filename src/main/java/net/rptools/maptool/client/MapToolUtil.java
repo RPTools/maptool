@@ -24,6 +24,7 @@ import java.util.TreeMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.utilities.RandomSuffixFactory;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Asset;
@@ -32,7 +33,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.drawing.DrawablePaint;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
-import net.rptools.maptool.util.StringUtil;
 
 public class MapToolUtil {
   private static final Random RAND = new SecureRandom();

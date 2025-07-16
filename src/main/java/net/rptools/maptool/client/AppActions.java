@@ -14,11 +14,11 @@
  */
 package net.rptools.maptool.client;
 
+import static net.rptools.lib.OsDetection.withMenuShortcut;
+
 import com.jidesoft.docking.DockableFrame;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.InputEvent;
-import java.awt.event.KeyEvent;
 import java.awt.image.BufferedImage;
 import java.io.*;
 import java.net.MalformedURLException;
@@ -41,6 +41,8 @@ import javax.swing.*;
 import javax.swing.text.BadLocationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.OsDetection;
+import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.FacingTool;
 import net.rptools.maptool.client.tool.Toolbox;
@@ -119,31 +121,7 @@ public class AppActions {
    */
   private static Set<Token> tokenCopySet = null;
 
-  private static final int menuShortcut = getMenuShortcutKeyMask();
   private static boolean keepIdsOnPaste = false;
-
-  private static int getMenuShortcutKeyMask() {
-    int key = Toolkit.getDefaultToolkit().getMenuShortcutKeyMaskEx();
-    String prop = System.getProperty("os.name", "unknown");
-    if ("darwin".equalsIgnoreCase(prop)) {
-      // shortcut is CTRL...
-      if (key == InputEvent.CTRL_DOWN_MASK) {
-        key = InputEvent.META_DOWN_MASK;
-      }
-    }
-    return key;
-  }
-
-  public static KeyStroke withMenuShortcut(KeyStroke k) {
-    int modifiers = k.getModifiers() | AppActions.menuShortcut;
-    if (k.getKeyCode() != KeyEvent.VK_UNDEFINED) {
-      k = KeyStroke.getKeyStroke(k.getKeyCode(), modifiers);
-    } else {
-      k = KeyStroke.getKeyStroke(k.getKeyChar(), modifiers);
-    }
-
-    return k;
-  }
 
   /** This action will rotate through the PC tokens owned by the player. */
   public static final Action NEXT_TOKEN =
@@ -506,7 +484,7 @@ public class AppActions {
 
           // Probably don't have to create a new one each time
           PreferencesDialog dialog = new PreferencesDialog();
-          dialog.setVisible(true);
+          dialog.showDialog();
         }
       };
 
@@ -1927,9 +1905,9 @@ public class AppActions {
           }
 
           StartServerDialog dialog = new StartServerDialog();
-          dialog.showDialog();
+          boolean cancelled = dialog.showDialog().equals(GenericDialog.DENY);
 
-          if (!dialog.accepted()) { // Results stored in Preferences.userRoot()
+          if (cancelled) { // Results stored in Preferences.userRoot()
             return;
           }
 
@@ -2720,10 +2698,10 @@ public class AppActions {
         protected void executeAction() {
           Campaign campaign = MapTool.getCampaign();
 
-          CampaignPropertiesDialog dialog = new CampaignPropertiesDialog(MapTool.getFrame());
+          CampaignPropertiesDialog dialog = new CampaignPropertiesDialog();
           dialog.setCampaign(campaign);
-          dialog.setVisible(true);
-          if (dialog.getStatus() == CampaignPropertiesDialog.Status.CANCEL) {
+          boolean cancelled = dialog.showDialog().equals(GenericDialog.DENY);
+          if (cancelled) {
             return;
           }
           MapTool.serverCommand().updateCampaign(campaign.getCampaignProperties());
@@ -2741,12 +2719,12 @@ public class AppActions {
 
     @Override
     public boolean isSelected() {
-      return AppState.getGridSize() == size;
+      return AppState.getGridLineWeight() == size;
     }
 
     @Override
     protected void executeAction() {
-      AppState.setGridSize(size);
+      AppState.setGridLineWeight(size);
       MapTool.getFrame().refresh();
     }
   }
@@ -2764,7 +2742,9 @@ public class AppActions {
         // Make smaller
         BufferedImage iconImage =
             new BufferedImage(QUICK_MAP_ICON_SIZE, QUICK_MAP_ICON_SIZE, Transparency.OPAQUE);
-        Image image = MapTool.getThumbnailManager().getThumbnail(imagePath);
+        Image image =
+            MapTool.getThumbnailManager()
+                .getThumbnail(imagePath, AppPreferences.renderQuality.get());
 
         Graphics2D g = iconImage.createGraphics();
         g.drawImage(image, 0, 0, QUICK_MAP_ICON_SIZE, QUICK_MAP_ICON_SIZE, null);
@@ -3125,7 +3105,7 @@ public class AppActions {
             return; // Nothing to do as its due to the JDK bug
             // https://bugs.openjdk.java.net/browse/JDK-8208712
           }
-        } else if ((e.getModifiers() & menuShortcut) != 0) {
+        } else if ((e.getModifiers() & OsDetection.menuShortcut) != 0) {
           lastAccelInvoke = e.getWhen();
         }
       }

@@ -17,12 +17,12 @@ package net.rptools.maptool.client.functions;
 import java.awt.Color;
 import java.math.BigDecimal;
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolUtil;
 import net.rptools.maptool.client.MapToolVariableResolver;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.Parser;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
@@ -64,8 +64,9 @@ public class TokenHaloFunction extends AbstractFunction {
    * @return the halo.
    */
   public static Object getHalo(Token token) {
-    if (token.getHaloColor() != null) {
-      return "#" + Integer.toHexString(token.getHaloColor().getRGB()).substring(2);
+    var haloColor = token.getHaloColor();
+    if (haloColor != null) {
+      return "#" + Integer.toHexString(haloColor.getRGB()).substring(2);
     } else {
       return "None";
     }

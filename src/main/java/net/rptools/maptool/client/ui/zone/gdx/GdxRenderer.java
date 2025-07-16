@@ -24,6 +24,7 @@ import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGeneratorLoader;
 import com.badlogic.gdx.graphics.g2d.freetype.FreetypeFontLoader;
 import com.badlogic.gdx.graphics.glutils.FrameBuffer;
+import com.badlogic.gdx.graphics.glutils.ShaderProgram;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.scenes.scene2d.utils.TiledDrawable;
@@ -40,11 +41,11 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.Deflater;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.swing.ImageBorder;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.WallTopologyTool;
 import net.rptools.maptool.client.ui.Scale;
@@ -84,6 +85,7 @@ import space.earlygrey.shapedrawer.ShapeDrawer;
 public class GdxRenderer extends ApplicationAdapter {
 
   private static final Logger log = LogManager.getLogger(GdxRenderer.class);
+  private static final int BLENDING_TEXTURE_INDEX = 1;
 
   public static final float POINTS_PER_BEZIER = 10f;
   private static GdxRenderer _instance;
@@ -112,6 +114,8 @@ public class GdxRenderer extends ApplicationAdapter {
   private boolean renderZone = false;
   private boolean showAstarDebugging = false;
 
+  private ShaderProgram environmentalLightingShader;
+
   // general resources
   private OrthographicCamera cam;
   private PerspectiveCamera cam3d;
@@ -124,7 +128,26 @@ public class GdxRenderer extends ApplicationAdapter {
   private BitmapFont boldFont;
   private float boldFontScale = 0;
   private final CodeTimer timer = new CodeTimer("GdxRenderer.renderZone");
+
+  /** Used by render layers to compose the layer prior to blending. */
   private FrameBuffer backBuffer;
+
+  /**
+   * Holds the results of all layers rendered so far.
+   *
+   * <p>If any rendering layer binds a different buffer, it must rebind this buffer before
+   * completing.
+   */
+  private FrameBuffer resultsBuffer;
+
+  /**
+   * Used when a layer needs to blend {@link #backBuffer} with {@link #resultsBuffer} using a
+   * shader.
+   *
+   * <p>After such a render, this buffer is swapped with {@link #resultsBuffer}.
+   */
+  private FrameBuffer spareBuffer;
+
   private com.badlogic.gdx.assets.AssetManager manager;
   private TextureAtlas atlas;
   private Texture onePixel;
@@ -172,6 +195,12 @@ public class GdxRenderer extends ApplicationAdapter {
       boldFont = null;
     }
 
+    environmentalLightingShader =
+        new ShaderProgram(
+            Gdx.files.classpath("net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.vsh"),
+            Gdx.files.classpath(
+                "net/rptools/maptool/client/ui/zone/gdx/environmentalLighting.fsh"));
+
     manager = new com.badlogic.gdx.assets.AssetManager();
     loadAssets();
 
@@ -198,6 +227,8 @@ public class GdxRenderer extends ApplicationAdapter {
     batch.enableBlending();
 
     backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+    resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+    spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
     // TODO: Add it to the texture atlas
     Pixmap pixmap = new Pixmap(1, 1, Pixmap.Format.RGBA8888);
@@ -218,6 +249,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
   @Override
   public void dispose() {
+    environmentalLightingShader.dispose();
     manager.dispose();
     batch.dispose();
     if (zoneCache != null) {
@@ -230,10 +262,59 @@ public class GdxRenderer extends ApplicationAdapter {
   public void resize(int width, int height) {
     this.width = width;
     this.height = height;
+
     backBuffer.dispose();
     backBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
 
+    resultsBuffer.dispose();
+    resultsBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+
+    spareBuffer.dispose();
+    spareBuffer = new FrameBuffer(Pixmap.Format.RGBA8888, width, height, false);
+
     updateCam();
+  }
+
+  private void drawBackBuffer(BlendFunction blendDown) {
+    setProjectionMatrix(hudCam.combined);
+    resultsBuffer.begin();
+    blendDown.applyToBatch(batch);
+    batch.draw(backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
+    setProjectionMatrix(cam.combined);
+    // Leave results buffer current for the next folks.
+  }
+
+  private void drawBackBuffer(ShaderProgram shader) {
+    var oldShader = batch.getShader();
+
+    setProjectionMatrix(hudCam.combined);
+    spareBuffer.begin();
+    batch.setShader(shader);
+    ScreenUtils.clear(Color.CLEAR);
+    BlendFunction.SRC_ONLY.applyToBatch(batch);
+    try {
+      shader.setUniformi("u_dst", BLENDING_TEXTURE_INDEX);
+      try {
+        resultsBuffer.getColorBufferTexture().bind(BLENDING_TEXTURE_INDEX);
+        // Avoid affecting resultsResults.getColorBufferTexture() any more (OpenGL state machine)
+        Gdx.gl.glActiveTexture(GL20.GL_TEXTURE0);
+
+        batch.draw(backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
+      } finally {
+        batch.flush();
+
+        // Swap buffers
+        var tmp = resultsBuffer;
+        resultsBuffer = spareBuffer;
+        spareBuffer = tmp;
+
+        // Leave results buffer current for the next folks.
+      }
+    } finally {
+      batch.setShader(oldShader);
+    }
+
+    setProjectionMatrix(cam.combined);
   }
 
   private void updateCam() {
@@ -400,8 +481,207 @@ public class GdxRenderer extends ApplicationAdapter {
   }
 
   private void renderZone(PlayerView view) {
-    if (viewModel.getLoadingStatus().isPresent() || MapTool.getCampaign().isBeingSerialized()) {
+    if (!prerender(view)) {
       return;
+    }
+
+    resultsBuffer.begin();
+    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
+    ScreenUtils.clear(Color.CLEAR);
+
+    renderBoard();
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.BACKGROUND, view)) {
+      renderDrawables(zoneCache.getZone().getDrawnElements(Zone.Layer.BACKGROUND));
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.BACKGROUND, view)) {
+      timer.start("tokensBackground");
+      renderTokens(zoneCache.getZone().getTokensOnLayer(Zone.Layer.BACKGROUND, false), view, false);
+      timer.stop("tokensBackground");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.OBJECT, view)) {
+      // Drawables on the object layer are always below the grid, and...
+      timer.start("drawableObjects");
+      drawnElementRenderer.render(
+          batch, zoneCache.getZone(), zoneCache.getZone().getDrawnElements(Zone.Layer.OBJECT));
+      timer.stop("drawableObjects");
+    }
+
+    timer.start("grid");
+    setProjectionMatrix(hudCam.combined);
+    gridRenderer.render();
+    setProjectionMatrix(cam.combined);
+    timer.stop("grid");
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.OBJECT, view)) {
+      // ... Images on the object layer are always ABOVE the grid.
+      timer.start("tokensStamp");
+      renderTokens(zoneCache.getZone().getTokensOnLayer(Zone.Layer.OBJECT, false), view, false);
+      timer.stop("tokensStamp");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("lights");
+      renderLights(view);
+      timer.stop("lights");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("lumens");
+      renderLumens(view);
+      timer.stop("lumens");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("auras");
+      renderAuras(view);
+      timer.stop("auras");
+    }
+
+    renderPlayerDarkness(view);
+
+    /*
+     * The following sections used to handle rendering of the Hidden (i.e. "GM") layer followed by
+     * the Token layer. The problem was that we want all drawables to appear below all tokens, and
+     * the old configuration performed the rendering in the following order:
+     *
+     * <ol>
+     *   <li>Render Hidden-layer tokens
+     *   <li>Render Hidden-layer drawables
+     *   <li>Render Token-layer drawables
+     *   <li>Render Token-layer tokens
+     * </ol>
+     *
+     * That's fine for players, but clearly wrong if the view is for the GM. We now use:
+     *
+     * <ol>
+     *   <li>Render Token-layer drawables // Player-drawn images shouldn't obscure GM's images?
+     *   <li>Render Hidden-layer drawables // GM could always use "View As Player" if needed?
+     *   <li>Render Hidden-layer tokens
+     *   <li>Render Token-layer tokens
+     * </ol>
+     */
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("drawableTokens");
+      drawnElementRenderer.render(
+          batch, zoneCache.getZone(), zoneCache.getZone().getDrawnElements(Zone.Layer.TOKEN));
+      timer.stop("drawableTokens");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.GM, view)) {
+        timer.start("drawableGM");
+        drawnElementRenderer.render(
+            batch, zoneCache.getZone(), zoneCache.getZone().getDrawnElements(Zone.Layer.GM));
+        timer.stop("drawableGM");
+      }
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.GM, view)) {
+        timer.start("tokensGM");
+        renderTokens(zoneCache.getZone().getTokensOnLayer(Zone.Layer.GM, false), view, false);
+        timer.stop("tokensGM");
+      }
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("tokens");
+      renderTokens(zoneCache.getZone().getTokensOnLayer(Zone.Layer.TOKEN, false), view, false);
+      timer.stop("tokens");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("unowned movement");
+      showBlockedMoves(view, zoneCache.getZoneRenderer().getUnOwnedMovementSet(view));
+      timer.stop("unowned movement");
+    }
+
+    if (AppState.getShowTextLabels()) {
+      renderLabels(view);
+    }
+
+    if (zoneCache.getZone().hasFog()) {
+      batch.flush();
+      backBuffer.begin();
+      renderFog(view);
+      batch.flush();
+      backBuffer.end();
+
+      drawBackBuffer(BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER);
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
+      // For example. this allows a "door" stamp to block vision but still allow you to see the
+      // door.
+      timer.start("tokens - always visible");
+      renderTokens(zoneCache.getZone().getTokensAlwaysVisible(), view, true);
+      timer.stop("tokens - always visible");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      // if there is fog or vision we may need to re-render figure type tokens
+      // and figure tokens need sorting via alternative logic.
+      List<Token> tokens = zoneCache.getZone().getFigureTokens();
+      List<Token> sortedTokens = new ArrayList<>(tokens);
+      sortedTokens.sort(zoneCache.getZone().getFigureZOrderComparator());
+      timer.start("tokens - figures");
+      renderTokens(sortedTokens, view, true);
+      timer.stop("tokens - figures");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("owned movement");
+      showBlockedMoves(view, zoneCache.getZoneRenderer().getOwnedMovementSet(view));
+      timer.stop("owned movement");
+    }
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
+      // of, the tokens themselves.
+      // So if one moving token is on top of another moving token, at least the textual identifiers
+      // will be visible.
+      setProjectionMatrix(hudCam.combined);
+      timer.start("token name/labels");
+      renderRenderables();
+      timer.stop("token name/labels");
+      setProjectionMatrix(cam.combined);
+    }
+
+    timer.start("visionOverlay");
+    renderVisionOverlay(view);
+    timer.stop("visionOverlay");
+
+    timer.start("renderCoordinates");
+    renderCoordinates(view);
+    timer.stop("renderCoordinates");
+
+    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
+      timer.start("lightSourceIconOverlay.paintOverlay");
+      paintLightSourceIconOverlay(view);
+      timer.stop("lightSourceIconOverlay.paintOverlay");
+    }
+
+    batch.flush();
+    resultsBuffer.end();
+
+    setProjectionMatrix(hudCam.combined);
+    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
+    batch.draw(resultsBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
+    setProjectionMatrix(cam.combined);
+  }
+
+  /**
+   * Updates renderer state prior to rendering the zone.
+   *
+   * @return {@code true} if rendering should proceed.
+   */
+  private boolean prerender(PlayerView view) {
+    if (viewModel.getLoadingStatus().isPresent() || MapTool.getCampaign().isBeingSerialized()) {
+      return false;
     }
 
     if (lastView != null && !lastView.equals(view)) {
@@ -423,207 +703,7 @@ public class GdxRenderer extends ApplicationAdapter {
     exposedFogArea = new Area(zoneCache.getZone().getExposedArea());
     timer.stop("calcs-2");
 
-    renderBoard();
-
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.BACKGROUND, view)) {
-      List<DrawnElement> drawables = zoneCache.getZone().getDrawnElements(Zone.Layer.BACKGROUND);
-
-      timer.start("drawableBackground");
-      drawnElementRenderer.render(batch, zoneCache.getZone(), drawables);
-      timer.stop("drawableBackground");
-
-      List<Token> background = zoneCache.getZone().getTokensOnLayer(Zone.Layer.BACKGROUND, false);
-      if (!background.isEmpty()) {
-        timer.start("tokensBackground");
-        renderTokens(background, view, false);
-        timer.stop("tokensBackground");
-      }
-    }
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.OBJECT, view)) {
-      // Drawables on the object layer are always below the grid, and...
-      List<DrawnElement> drawables = zoneCache.getZone().getDrawnElements(Zone.Layer.OBJECT);
-      // if (!drawables.isEmpty()) {
-      timer.start("drawableObjects");
-      drawnElementRenderer.render(batch, zoneCache.getZone(), drawables);
-      timer.stop("drawableObjects");
-      // }
-    }
-    timer.start("grid");
-    setProjectionMatrix(hudCam.combined);
-    gridRenderer.render();
-    setProjectionMatrix(cam.combined);
-
-    timer.stop("grid");
-
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.OBJECT, view)) {
-      // ... Images on the object layer are always ABOVE the grid.
-      List<Token> stamps = zoneCache.getZone().getTokensOnLayer(Zone.Layer.OBJECT, false);
-      if (!stamps.isEmpty()) {
-        timer.start("tokensStamp");
-        renderTokens(stamps, view, false);
-        timer.stop("tokensStamp");
-      }
-    }
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
-      timer.start("lights");
-      renderLights(view);
-      timer.stop("lights");
-
-      timer.start("auras");
-      renderAuras(view);
-      timer.stop("auras");
-    }
-    renderPlayerDarkness(view);
-    //    *
-    //     * The following sections used to handle rendering of the Hidden (i.e. "GM") layer
-    // followed by
-    //     * the Token layer. The problem was that we want all drawables to appear below all tokens,
-    // and
-    //     * the old configuration performed the rendering in the following order:
-    //     *
-    //     * <ol>
-    //     *   <li>Render Hidden-layer tokens
-    //     *   <li>Render Hidden-layer drawables
-    //     *   <li>Render Token-layer drawables
-    //     *   <li>Render Token-layer tokens
-    //     * </ol>
-    //     *
-    //     * That's fine for players, but clearly wrong if the view is for the GM. We now use:
-    //     *
-    //     * <ol>
-    //     *   <li>Render Token-layer drawables // Player-drawn images shouldn't obscure GM's
-    // images?
-    //     *   <li>Render Hidden-layer drawables // GM could always use "View As Player" if needed?
-    //     *   <li>Render Hidden-layer tokens
-    //     *   <li>Render Token-layer tokens
-    //     * </ol>
-    //     *
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
-      List<DrawnElement> drawables = zoneCache.getZone().getDrawnElements(Zone.Layer.TOKEN);
-      // if (!drawables.isEmpty()) {
-      timer.start("drawableTokens");
-      drawnElementRenderer.render(batch, zoneCache.getZone(), drawables);
-      timer.stop("drawableTokens");
-      // }
-
-      if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.GM, view)) {
-        drawables = zoneCache.getZone().getDrawnElements(Zone.Layer.GM);
-        // if (!drawables.isEmpty()) {
-        timer.start("drawableGM");
-        drawnElementRenderer.render(batch, zoneCache.getZone(), drawables);
-        timer.stop("drawableGM");
-        // }
-        List<Token> stamps = zoneCache.getZone().getTokensOnLayer(Zone.Layer.GM, false);
-        if (!stamps.isEmpty()) {
-          timer.start("tokensGM");
-          renderTokens(stamps, view, false);
-          timer.stop("tokensGM");
-        }
-      }
-      List<Token> tokens = zoneCache.getZone().getTokensOnLayer(Zone.Layer.TOKEN, false);
-      if (!tokens.isEmpty()) {
-        timer.start("tokens");
-        renderTokens(tokens, view, false);
-        timer.stop("tokens");
-      }
-      timer.start("unowned movement");
-      showBlockedMoves(view, zoneCache.getZoneRenderer().getUnOwnedMovementSet(view));
-      timer.stop("unowned movement");
-    }
-
-    // *
-    // * FJE It's probably not appropriate for labels to be above everything, including tokens.
-    // Above
-    // * drawables, yes. Above tokens, no. (Although in that case labels could be completely
-    // obscured.
-    // * Hm.)
-    // *
-    // Drawing labels is slooooow. :(
-    // Perhaps we should draw the fog first and use hard fog to determine whether labels need to be
-    // drawn?
-    // (This method has it's own 'timer' calls)
-    if (AppState.getShowTextLabels()) {
-      renderLabels(view);
-    }
-
-    //   if(zoneCache.getZone().getLightingStyle() == Zone.LightingStyle.ENVIRONMENTAL &&
-    // AppState.isShowLights()) {
-    if (view.isGMView()) {
-      //  rayHandler.setAmbientLight(0.6f);
-    } else {
-      // rayHandler.setAmbientLight(1.0f);
-    }
-    // rayHandler.setCombinedMatrix(cam);
-    // rayHandler.updateAndRender();
-    //  }
-
-    // (This method has it's own 'timer' calls)
-    if (zoneCache.getZone().hasFog()) {
-      renderFog(view);
-    }
-
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)) {
-      // Jamz: If there is fog or vision we may need to re-render vision-blocking type tokens
-      // For example. this allows a "door" stamp to block vision but still allow you to see the
-      // door.
-      List<Token> vblTokens = zoneCache.getZone().getTokensAlwaysVisible();
-      if (!vblTokens.isEmpty()) {
-        timer.start("tokens - always visible");
-        renderTokens(vblTokens, view, true);
-        timer.stop("tokens - always visible");
-      }
-
-      // if there is fog or vision we may need to re-render figure type tokens
-      // and figure tokens need sorting via alternative logic.
-      List<Token> tokens = zoneCache.getZone().getFigureTokens();
-      List<Token> sortedTokens = new ArrayList<>(tokens);
-      sortedTokens.sort(zoneCache.getZone().getFigureZOrderComparator());
-      if (!tokens.isEmpty()) {
-        timer.start("tokens - figures");
-        renderTokens(sortedTokens, view, true);
-        timer.stop("tokens - figures");
-      }
-
-      timer.start("owned movement");
-      showBlockedMoves(view, zoneCache.getZoneRenderer().getOwnedMovementSet(view));
-      timer.stop("owned movement");
-
-      // Text associated with tokens being moved is added to a list to be drawn after, i.e. on top
-      // of, the tokens
-      // themselves.
-      // So if one moving token is on top of another moving token, at least the textual identifiers
-      // will be
-      // visible.
-
-      setProjectionMatrix(hudCam.combined);
-      timer.start("token name/labels");
-      renderRenderables();
-      timer.stop("token name/labels");
-      setProjectionMatrix(cam.combined);
-    }
-
-    // if (zoneCache.getZone().visionType ...)
-    if (view.isGMView()) {
-      timer.start("visionOverlayGM");
-      renderGMVisionOverlay(view);
-      timer.stop("visionOverlayGM");
-    } else {
-      timer.start("visionOverlayPlayer");
-      renderPlayerVisionOverlay(view);
-      timer.stop("visionOverlayPlayer");
-    }
-
-    timer.start("renderCoordinates");
-    renderCoordinates(view);
-    timer.stop("renderCoordinates");
-
-    timer.start("lightSourceIconOverlay.paintOverlay");
-    if (zoneCache.getZoneRenderer().shouldRenderLayer(Zone.Layer.TOKEN, view)
-        && view.isGMView()
-        && AppState.isShowLightSources()) {
-      paintlightSourceIconOverlay();
-    }
-    timer.stop("lightSourceIconOverlay.paintOverlay");
+    return true;
   }
 
   private void renderCoordinates(PlayerView view) {
@@ -682,32 +762,16 @@ public class GdxRenderer extends ApplicationAdapter {
     batch.setProjectionMatrix(cam.combined);
   }
 
-  private void paintlightSourceIconOverlay() {
-    var lightbulb = zoneCache.fetch("lightbulb");
-    for (Token token : zoneCache.getZone().getAllTokens()) {
+  private void paintLightSourceIconOverlay(PlayerView view) {
+    if (!AppState.isShowLightSources() || !view.isGMView()) {
+      return;
+    }
 
-      if (token.hasLightSources()) {
-        boolean foundNormalLight = false;
-        for (AttachedLightSource attachedLightSource : token.getLightSources()) {
-          LightSource lightSource = attachedLightSource.resolve(token, MapTool.getCampaign());
-          if (lightSource != null && lightSource.getType() == LightSource.Type.NORMAL) {
-            foundNormalLight = true;
-            break;
-          }
-        }
-        if (!foundNormalLight) {
-          continue;
-        }
-
-        Area area = zoneCache.getZoneRenderer().getTokenBounds(token);
-        if (area == null) {
-          continue;
-        }
-
-        int x = area.getBounds().x + (area.getBounds().width - lightbulb.getRegionWidth()) / 2;
-        int y = -area.getBounds().y - (area.getBounds().height + lightbulb.getRegionHeight()) / 2;
-        batch.draw(lightbulb, x, y);
-      }
+    TextureRegion lightbulb = zoneCache.fetch("lightbulb");
+    for (var point : viewModel.getLightPositions()) {
+      var x = point.getX() - lightbulb.getRegionWidth() / 2.;
+      var y = -point.getY() - lightbulb.getRegionHeight() / 2.;
+      batch.draw(lightbulb, (float) x, (float) y);
     }
   }
 
@@ -724,33 +788,6 @@ public class GdxRenderer extends ApplicationAdapter {
     }
     areaRenderer.setColor(Color.BLACK);
     areaRenderer.fillArea(batch, darkness);
-  }
-
-  private void renderPlayerVisionOverlay(PlayerView view) {
-    /* //  This doesn't seem to have any effect ??
-    if (zoneCache.getZone().hasFog()) {
-           Area clip = new Area(new Rectangle(getSize().width, getSize().height));
-
-           Area viewArea = new Area(exposedFogArea);
-           List<Token> tokens = view.getTokens();
-           if (tokens != null && !tokens.isEmpty()) {
-               for (Token tok : tokens) {
-                   ExposedAreaMetaData exposedMeta = zoneCache.getZone().getExposedAreaMetaData(tok.getExposedAreaGUID());
-                   viewArea.add(exposedMeta.getExposedAreaHistory());
-               }
-           }
-           if (!viewArea.isEmpty()) {
-               clip.intersect(new Area(viewArea.getBounds2D()));
-           }
-           // Note: the viewArea doesn't need to be transform()'d because exposedFogArea has been
-           // already.
-           g2.setClip(clip);
-       }*/
-    renderVisionOverlay(view);
-  }
-
-  private void renderGMVisionOverlay(PlayerView view) {
-    renderVisionOverlay(view);
   }
 
   private void renderVisionOverlay(PlayerView view) {
@@ -820,34 +857,6 @@ public class GdxRenderer extends ApplicationAdapter {
   }
 
   private void renderFog(PlayerView view) {
-    Area combined = null;
-
-    timer.start("renderFog");
-
-    batch.flush();
-
-    backBuffer.begin();
-    ScreenUtils.clear(Color.CLEAR);
-
-    BlendFunction.SRC_ONLY.applyToBatch(batch);
-    setProjectionMatrix(cam.combined);
-
-    timer.start("renderFog-allocateBufferedImage");
-    timer.stop("renderFog-allocateBufferedImage");
-
-    timer.start("renderFog-fill");
-
-    // Fill
-    batch.setColor(Color.WHITE);
-    var paint = zoneCache.getZone().getFogPaint();
-    var fogPaint = zoneCache.getPaint(paint);
-    var fogColor = fogPaint.color();
-    fogPaint
-        .color()
-        .set(fogColor.r, fogColor.g, fogColor.b, view.isGMView() ? .6f : 1f)
-        .premultiplyAlpha();
-    fillViewportWith(fogPaint);
-
     var zoneView = zoneCache.getZoneView();
 
     timer.start("renderFog-visibleArea");
@@ -859,61 +868,70 @@ public class GdxRenderer extends ApplicationAdapter {
       msg = "renderFog-combined(" + (view.isUsingTokenView() ? view.getTokens().size() : 0) + ")";
     }
     timer.start(msg);
-    combined = zoneView.getExposedArea(view);
+    Area exposedArea = zoneView.getExposedArea(view);
     timer.stop(msg);
 
-    timer.start("renderFogArea");
-    areaRenderer.setColor(Color.CLEAR);
-    areaRenderer.fillArea(batch, combined);
-    // renderFogArea(combined, visibleArea);
-    if (visibleScreenArea != null) {
+    Area softFogArea;
+    Area clearArea;
+    if (zoneView.isUsingVision()) {
+      softFogArea = exposedArea;
+      clearArea = new Area(visibleArea);
+      clearArea.intersect(softFogArea);
+    } else {
+      softFogArea = new Area();
+      clearArea = exposedArea;
+    }
+
+    timer.start("renderFog");
+    ScreenUtils.clear(Color.CLEAR);
+
+    BlendFunction.SRC_ONLY.applyToBatch(batch);
+    setProjectionMatrix(cam.combined);
+
+    timer.start("renderFog-hardFow");
+    // Fill
+    batch.setColor(Color.WHITE);
+    var paint = zoneCache.getZone().getFogPaint();
+    var fogPaint = zoneCache.getPaint(paint);
+    var fogColor = fogPaint.color();
+    fogPaint
+        .color()
+        .set(fogColor.r, fogColor.g, fogColor.b, view.isGMView() ? .6f : 1f)
+        .premultiplyAlpha();
+    fillViewportWith(fogPaint);
+    timer.stop("renderFog-hardFow");
+
+    timer.start("renderFog-softFow");
+    if (!softFogArea.isEmpty()) {
+      areaRenderer.setColor(tmpColor.set(0, 0, 0, AppPreferences.fogOverlayOpacity.get() / 255.0f));
+      // Fill in the exposed area
+      areaRenderer.fillArea(batch, softFogArea);
+    }
+    timer.stop("renderFog-softFow");
+
+    timer.start("renderFog-exposedArea");
+    if (!clearArea.isEmpty()) {
+      areaRenderer.setColor(tmpColor.set(Color.CLEAR));
+      // Fill in the exposed area
+      areaRenderer.fillArea(batch, clearArea);
+    }
+    timer.stop("renderFog-exposedArea");
+
+    timer.start("renderFog-outline");
+    // If there is no boundary between soft fog and visible area, there is no need for an outline.
+    if (!softFogArea.isEmpty() && !clearArea.isEmpty()) {
       areaRenderer.setColor(Color.BLACK);
       areaRenderer.drawArea(
           batch, visibleScreenArea, false, (float) (1 / viewModel.getZoneScale().getScale()));
     }
+    timer.stop("renderFog-outline");
 
-    timer.stop("renderFogArea");
-
-    batch.flush();
-    // createScreenshot("fog");
-    backBuffer.end();
-
-    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
-    setProjectionMatrix(hudCam.combined);
-    batch.setColor(Color.WHITE);
-    batch.draw(backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
-
-    setProjectionMatrix(cam.combined);
     timer.stop("renderFog");
   }
 
   private void setProjectionMatrix(Matrix4 matrix) {
     batch.setProjectionMatrix(matrix);
     drawer.update();
-  }
-
-  private void renderFogArea(Area softFog, Area visibleArea) {
-    if (zoneCache.getZoneView().isUsingVision()) {
-      if (visibleArea != null && !visibleArea.isEmpty()) {
-        tmpColor.set(0, 0, 0, AppPreferences.fogOverlayOpacity.get() / 255.0f);
-        areaRenderer.setColor(tmpColor);
-        // Fill in the exposed area
-        areaRenderer.fillArea(batch, softFog);
-
-        areaRenderer.setColor(Color.CLEAR);
-
-        visibleArea.intersect(softFog);
-
-        areaRenderer.fillArea(batch, visibleArea);
-      } else {
-        tmpColor.set(0, 0, 0, AppPreferences.fogOverlayOpacity.get() / 255.0f);
-        areaRenderer.setColor(tmpColor);
-        areaRenderer.fillArea(batch, softFog);
-      }
-    } else {
-      areaRenderer.setColor(Color.CLEAR);
-      areaRenderer.fillArea(batch, softFog);
-    }
   }
 
   private void renderLabels(PlayerView view) {
@@ -1036,7 +1054,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
             for (CellPoint point : blockedMoves) {
               ZonePoint zp =
-                  point.midZonePoint(zoneCache.getZoneRenderer().getZone().getGrid(), position);
+                  zoneCache.getZoneRenderer().getZone().getGrid().midZonePoint(point, position);
               double r = (zp.x - 1) * 45;
               showBlockedMoves(zp, r, zoneCache.getSprite("block_move"), 1.0f);
             }
@@ -1168,55 +1186,8 @@ public class GdxRenderer extends ApplicationAdapter {
     image.draw(batch);
   }
 
-  private void renderAuras(PlayerView view) {
-    var alpha = AppPreferences.auraOverlayOpacity.get() / 255.0f;
-
-    // Setup
-    timer.start("renderAuras:getAuras");
-    final var drawableAuras = zoneCache.getZoneView().getDrawableAuras(view);
-    timer.stop("renderAuras:getAuras");
-
-    timer.start("renderAuras:renderAuraOverlay");
-    renderLightOverlay(drawableAuras, alpha, BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER, true);
-    timer.stop("renderAuras:renderAuraOverlay");
-  }
-
-  private void renderLights(PlayerView view) {
-    // Collect and organize lights
-    timer.start("renderLights:getLights");
-    final var drawableLights = zoneCache.getZoneView().getDrawableLights(view);
-    timer.stop("renderLights:getLights");
-
-    if (AppState.isShowLights()
-        && zoneCache.getZone().getLightingStyle() != Zone.LightingStyle.ENVIRONMENTAL) {
-      // Lighting enabled.
-      timer.start("renderLights:renderLightOverlay");
-      // zoneCache.getZone().getLightingStyle() is not supported currently as you would probably
-      // need a custom shader, reusing it for box2dlights
-
-      renderLightOverlay(
-          drawableLights,
-          AppPreferences.lightOverlayOpacity.get() / 255.f,
-          BlendFunction.SCREEN,
-          false);
-      timer.stop("renderLights:renderLightOverlay");
-    }
-
-    if (AppState.isShowLumensOverlay()) {
-      // Lumens overlay enabled.
-      timer.start("renderLights:renderLumensOverlay");
-      renderLumensOverlay(view, AppPreferences.lumensOverlayOpacity.get() / 255.0f);
-      timer.stop("renderLights:renderLumensOverlay");
-    }
-  }
-
   private void renderLumensOverlay(PlayerView view, float overlayAlpha) {
     final var disjointLumensLevels = zoneCache.getZoneView().getDisjointObscuredLumensLevels(view);
-
-    timer.start("renderLumensOverlay:allocateBuffer");
-    batch.flush();
-    backBuffer.begin();
-    timer.stop("renderLumensOverlay:allocateBuffer");
 
     BlendFunction.SRC_ONLY.applyToBatch(batch);
     // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
@@ -1277,19 +1248,62 @@ public class GdxRenderer extends ApplicationAdapter {
         timer.stop("renderLumensOverlay:drawLights:drawArea");
       }
     }
+  }
+
+  private void renderLights(PlayerView view) {
+    if (AppState.isShowLights()) {
+      timer.start("renderLights:getLights");
+      final var drawableLights = zoneCache.getZoneView().getDrawableLights(view);
+      timer.stop("renderLights:getLights");
+
+      timer.start("renderLights:renderLightOverlay");
+      if (!drawableLights.isEmpty()) {
+        batch.flush();
+        backBuffer.begin();
+        renderLightOverlay(
+            drawableLights,
+            AppPreferences.lightOverlayOpacity.get() / 255.f,
+            BlendFunction.SCREEN,
+            false);
+        batch.flush();
+        backBuffer.end();
+
+        if (zoneCache.getZone().getLightingStyle() == Zone.LightingStyle.ENVIRONMENTAL) {
+          drawBackBuffer(environmentalLightingShader);
+        } else {
+          drawBackBuffer(BlendFunction.ALPHA_SRC_OVER);
+        }
+      }
+      timer.stop("renderLights:renderLightOverlay");
+    }
+  }
+
+  private void renderLumens(PlayerView view) {
+    if (AppState.isShowLumensOverlay()) {
+      batch.flush();
+      backBuffer.begin();
+      renderLumensOverlay(view, AppPreferences.lumensOverlayOpacity.get() / 255.0f);
+      batch.flush();
+      backBuffer.end();
+      drawBackBuffer(BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER);
+    }
+  }
+
+  private void renderAuras(PlayerView view) {
+    timer.start("renderAuras:getAuras");
+    final var drawableAuras = zoneCache.getZoneView().getDrawableAuras(view);
+    timer.stop("renderAuras:getAuras");
 
     batch.flush();
-
-    // createScreenshot("lumens");
-
+    backBuffer.begin();
+    renderLightOverlay(
+        drawableAuras,
+        AppPreferences.auraOverlayOpacity.get() / 255.0f,
+        BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER,
+        true);
+    batch.flush();
     backBuffer.end();
-
-    timer.start("renderLumensOverlay:drawBuffer");
-    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
-    setProjectionMatrix(hudCam.combined);
-    batch.draw(backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
-    setProjectionMatrix(cam.combined);
-    timer.stop("renderLumensOverlay:drawBuffer");
+    drawBackBuffer(BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER);
   }
 
   private void renderLightOverlay(
@@ -1297,16 +1311,8 @@ public class GdxRenderer extends ApplicationAdapter {
       float alpha,
       BlendFunction lightBlending,
       boolean premultipy) {
-    if (lights.isEmpty()) {
-      // No points spending resources accomplishing nothing.
-      return;
-    }
-
     // Set up a buffer image for lights to be drawn onto before the map
     timer.start("renderLightOverlay:allocateBuffer");
-    batch.flush();
-    backBuffer.begin();
-
     ScreenUtils.clear(Color.CLEAR);
     setProjectionMatrix(cam.combined);
     lightBlending.applyToBatch(batch);
@@ -1328,27 +1334,11 @@ public class GdxRenderer extends ApplicationAdapter {
         tmpColor.premultiplyAlpha();
       }
       areaRenderer.setColor(tmpColor);
-      areaRenderer.fillArea(batch, light.getArea());
-    }
 
-    batch.flush();
-    backBuffer.end();
+      var triangulation = areaRenderer.triangulate(light.getAreaAsPolygons());
+      areaRenderer.fill(batch, triangulation);
+    }
     timer.stop("renderLightOverlay:drawLights");
-
-    // Draw the buffer image with all the lights onto the map
-    timer.start("renderLightOverlay:drawBuffer");
-    if (premultipy) {
-      BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
-    } else {
-      BlendFunction.ALPHA_SRC_OVER.applyToBatch(batch);
-    }
-
-    setProjectionMatrix(hudCam.combined);
-    batch.draw(backBuffer.getColorBufferTexture(), 0, 0, width, height, 0, 0, 1, 1);
-    setProjectionMatrix(cam.combined);
-    timer.stop("renderLightOverlay:drawBuffer");
-
-    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
   }
 
   private void createScreenshot(String name) {
@@ -1374,6 +1364,12 @@ public class GdxRenderer extends ApplicationAdapter {
     }
   }
 
+  private void renderDrawables(List<DrawnElement> drawables) {
+    timer.start("drawableBackground");
+    drawnElementRenderer.render(batch, zoneCache.getZone(), drawables);
+    timer.stop("drawableBackground");
+  }
+
   private void fillViewportWith(ZoneCache.GdxPaint paint) {
     var w = cam.viewportWidth * zoom;
     var h = cam.viewportHeight * zoom;
@@ -1393,9 +1389,11 @@ public class GdxRenderer extends ApplicationAdapter {
   }
 
   private void renderTokens(List<Token> tokenList, PlayerView view, boolean figuresOnly) {
-    boolean isGMView = view.isGMView(); // speed things up
+    if (tokenList.isEmpty() || visibleScreenArea == null) {
+      return;
+    }
 
-    if (visibleScreenArea == null) return;
+    boolean isGMView = view.isGMView(); // speed things up
 
     for (Token token : tokenList) {
       if (token.getShape() != Token.TokenShape.FIGURE && figuresOnly && !token.isAlwaysVisible()) {
@@ -1468,8 +1466,9 @@ public class GdxRenderer extends ApplicationAdapter {
       prepareTokenSprite(image, token, footprintBounds);
 
       // Render Halo
-      if (token.hasHalo()) {
-        Color.argb8888ToColor(tmpColor, token.getHaloColor().getRGB());
+      var haloColor = token.getHaloColor();
+      if (haloColor != null) {
+        Color.argb8888ToColor(tmpColor, haloColor.getRGB());
         tmpColor.premultiplyAlpha();
         areaRenderer.setColor(tmpColor);
         areaRenderer.drawArea(
@@ -1503,7 +1502,7 @@ public class GdxRenderer extends ApplicationAdapter {
           image.draw(batch);
         } else {
           // else draw the clipped token
-          paintClipped(image, tokenCellArea, cellArea);
+          paintClipped(resultsBuffer, image, tokenCellArea, cellArea);
         }
       } else if (!isGMView && zoneCache.getZoneView().isUsingVision() && token.isAlwaysVisible()) {
         // Jamz: Always Visible tokens will get rendered again here to place on top of FoW
@@ -1523,14 +1522,16 @@ public class GdxRenderer extends ApplicationAdapter {
             // else draw the clipped stamp/token
             // This will only show the part of the token that does not have VBL on it
             // as any VBL on the token will block LOS, affecting the clipping.
-            paintClipped(image, tokenCellArea, cellArea);
+            paintClipped(resultsBuffer, image, tokenCellArea, cellArea);
           }
         }
       } else {
         // fallthrough normal token rendered against visible area
-
-        if (zoneCache.getZoneRenderer().isTokenInNeedOfClipping(token, tokenCellArea, isGMView)) {
-          paintClipped(image, tokenCellArea, cellArea);
+        if (zoneCache
+            .getZoneRenderer()
+            .isTokenInNeedOfClipping(
+                token, viewModel.getZoneScale().toWorldSpace(tokenCellArea), isGMView)) {
+          paintClipped(resultsBuffer, image, tokenCellArea, cellArea);
         } else image.draw(batch);
       }
       image.setColor(Color.WHITE);
@@ -1833,7 +1834,7 @@ public class GdxRenderer extends ApplicationAdapter {
           new java.awt.Rectangle(
               footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
     }
-    SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
     int offsetx = 0;
     int offsety = 0;
@@ -1998,9 +1999,11 @@ public class GdxRenderer extends ApplicationAdapter {
         AffineTransform.getRotateInstance(-Math.toRadians(angle)));
   }
 
-  private void paintClipped(Sprite image, Area bounds, Area clip) {
+  private void paintClipped(FrameBuffer buffer, Sprite image, Area bounds, Area clip) {
     batch.flush();
-    backBuffer.begin();
+    buffer.end();
+
+    spareBuffer.begin();
     ScreenUtils.clear(Color.CLEAR);
 
     setProjectionMatrix(cam.combined);
@@ -2012,9 +2015,12 @@ public class GdxRenderer extends ApplicationAdapter {
     tmpArea.add(bounds);
     tmpArea.subtract(clip);
     areaRenderer.fillArea(batch, tmpArea);
-    batch.flush();
 
-    backBuffer.end();
+    batch.flush();
+    spareBuffer.end();
+
+    buffer.begin();
+    BlendFunction.PREMULTIPLIED_ALPHA_SRC_OVER.applyToBatch(batch);
 
     tmpWorldCoord.x = image.getX();
     tmpWorldCoord.y = image.getY();
@@ -2029,7 +2035,7 @@ public class GdxRenderer extends ApplicationAdapter {
     var hsrc = image.getHeight() / zoom;
 
     batch.draw(
-        backBuffer.getColorBufferTexture(),
+        spareBuffer.getColorBufferTexture(),
         x,
         y,
         w,

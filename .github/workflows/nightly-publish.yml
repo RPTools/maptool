@@ -1,11 +1,17 @@
 name: Nightly Release
 
+# Note that we use the NIGHTLY_BUILD_GH_TOKEN PAT in this workflow, and do not define permissions
+# for GITHUB_TOKEN. If we use GITHUB_TOKEN, GitHub will not trigger downstream workflows, in
+# particular, the publish.yml workflow will not run. So we have to use a PAT that has the necessary
+# permissions preconfigured.
+
 on:
   schedule:
     - cron: '13 2 * * *' # Odd time so that it doesn't run afoul of busy periods everyone picks
 
 jobs:
   build:
+    if: github.repository == 'RPTools/maptool'  # Don't run nightly releases on contributor forks.
     runs-on: ubuntu-latest
     steps:
       - name: Set Vars
@@ -13,7 +19,7 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
-          echo "LATEST_STABLE_TAG=$(gh release list -R ${{ github.repository}} | grep -v nightly | awk '{ print $1}' | head -1)"  >> $GITHUB_ENV
+          echo "LATEST_STABLE_TAG=$(gh release list -R ${{ github.repository}} --exclude-drafts --exclude-pre-releases --order 'desc' --limit 1 --json tagName --jq '.[].tagName')"  >> $GITHUB_ENV
           echo "Latest Stable Tag: $LATEST_STABLE_TAG"
           echo "NIGHTLY_DATE=$(date +%Y%m%d)" >> $GITHUB_ENV
           echo "Creating for Nightly: $NIGHTLY_DATE"
@@ -28,4 +34,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.NIGHTLY_BUILD_GH_TOKEN }}
         run: |
-          gh release list -R ${{ github.repository }} --json 'name,tagName' --jq '.[] | select(.tagName | startswith("nightly"))|.tagName' | tail +2 | xargs -n 1 gh release delete -R ${{ github.repository}} -y --cleanup-tag
+          gh release list -R ${{ github.repository }} --json 'name,tagName' --jq '.[] | select(.tagName | startswith("nightly"))|.tagName' | tail +2 | xargs -r -n 1 gh release delete -R ${{ github.repository}} -y --cleanup-tag

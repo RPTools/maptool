@@ -19,37 +19,42 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.awt.geom.Path2D;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ScreenPoint;
 import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.PointerTool;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
+import net.rptools.maptool.client.ui.zone.renderer.GridRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.client.walker.astar.AStarSquareEuclideanWalker;
+import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.GridDto;
 import net.rptools.maptool.server.proto.SquareGridDto;
 
 public class SquareGrid extends Grid {
   private static final String alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"; // $NON-NLS-1$
   private static final Dimension CELL_OFFSET = new Dimension(0, 0);
-  private static BufferedImage pathHighlight = RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
+  private static final BufferedImage pathHighlight =
+      RessourceManager.getImage(Images.GRID_BORDER_SQUARE);
 
-  // @formatter:off
   private static final GridCapabilities CAPABILITIES =
       new GridCapabilities() {
         public boolean isPathingSupported() {
@@ -73,7 +78,76 @@ public class SquareGrid extends Grid {
         }
       };
 
-  // @formatter:on
+  @Override
+  protected List<TokenFootprint> createFootprints() {
+    return List.of(
+        new TokenFootprint(
+            new GUID("7F000101CD65152A010000002A000101"),
+            "Fine",
+            I18N.getString("TokenFootprint.name.fine"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CD65152A020000002A000101"),
+            "Diminutive",
+            I18N.getString("TokenFootprint.name.diminutive"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A030000002A000100"),
+            "Tiny",
+            I18N.getString("TokenFootprint.name.tiny"),
+            false,
+            0.5),
+        new TokenFootprint(
+            new GUID("7F000101CE65152A040000002A000100"),
+            "Small",
+            I18N.getString("TokenFootprint.name.small"),
+            false,
+            0.75),
+        new TokenFootprint(
+            new GUID("7F000101CF65152A050000002A000101"),
+            "Medium",
+            I18N.getString("TokenFootprint.name.medium"),
+            true,
+            1.0),
+        new TokenFootprint(
+            new GUID("7F000101D065152A060000002A000100"),
+            "Large",
+            I18N.getString("TokenFootprint.name.large"),
+            squareFootprintPoints(2)),
+        new TokenFootprint(
+            new GUID("7F000101D065152A070000002A000100"),
+            "Huge",
+            I18N.getString("TokenFootprint.name.huge"),
+            squareFootprintPoints(3)),
+        new TokenFootprint(
+            new GUID("7F000101D165152A080000002A000101"),
+            "Gargantuan",
+            I18N.getString("TokenFootprint.name.gargantuan"),
+            squareFootprintPoints(4)),
+        new TokenFootprint(
+            new GUID("7F000101E165152A090000002A000101"),
+            "Colossal",
+            I18N.getString("TokenFootprint.name.colossal"),
+            squareFootprintPoints(6)));
+  }
+
+  private static Point[] squareFootprintPoints(int size) {
+    Point[] pa = new Point[size * size - 1];
+
+    int indx = 0;
+    for (int y = 0; y < size; y++) {
+      for (int x = 0; x < size; x++) {
+        if (y == 0 && x == 0) {
+          continue;
+        }
+        pa[indx] = new Point(x, y);
+        indx++;
+      }
+    }
+    return pa;
+  }
 
   @Override
   public Point2D.Double getCenterOffset() {
@@ -175,9 +249,12 @@ public class SquareGrid extends Grid {
 
       if (x > startX && strX > nextAvailableSpace) {
         g.setColor(Color.black);
-        g.drawString(coord, strX, fm.getHeight());
-        g.setColor(Color.orange);
         g.drawString(coord, strX - 1, fm.getHeight() - 1);
+        g.drawString(coord, strX + 1, fm.getHeight() - 1);
+        g.drawString(coord, strX - 1, fm.getHeight() + 1);
+        g.drawString(coord, strX + 1, fm.getHeight() + 1);
+        g.setColor(Color.orange);
+        g.drawString(coord, strX, fm.getHeight());
 
         nextAvailableSpace = strX + strWidth + 10;
       }
@@ -193,9 +270,12 @@ public class SquareGrid extends Grid {
 
       if (y > fm.getHeight() && strY > nextAvailableSpace) {
         g.setColor(Color.black);
-        g.drawString(coord, 10, strY);
-        g.setColor(Color.yellow);
         g.drawString(coord, 10 - 1, strY - 1);
+        g.drawString(coord, 10 + 1, strY - 1);
+        g.drawString(coord, 10 - 1, strY + 1);
+        g.drawString(coord, 10 + 1, strY + 1);
+        g.setColor(Color.yellow);
+        g.drawString(coord, 10, strY);
 
         nextAvailableSpace = strY + fm.getAscent() / 2 + 10;
       }
@@ -311,35 +391,26 @@ public class SquareGrid extends Grid {
 
     int startCol = (int) ((int) (bounds.x / gridSize) * gridSize);
     int startRow = (int) ((int) (bounds.y / gridSize) * gridSize);
-
+    Path2D path = new Path2D.Double();
     for (double row = startRow; row < bounds.y + bounds.height + gridSize; row += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine(bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY));
-      } else {
-        g.fillRect(
-            bounds.x,
-            (int) (row + offY - (AppState.getGridSize() / 2)),
-            bounds.width,
-            AppState.getGridSize());
-      }
+      path.append(
+          new Line2D.Double(
+              bounds.x, (int) (row + offY), bounds.x + bounds.width, (int) (row + offY)),
+          false);
     }
     for (double col = startCol; col < bounds.x + bounds.width + gridSize; col += gridSize) {
-      if (AppState.getGridSize() == 1) {
-        g.drawLine((int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height);
-      } else {
-        g.fillRect(
-            (int) (col + offX - (AppState.getGridSize() / 2)),
-            bounds.y,
-            AppState.getGridSize(),
-            bounds.height);
-      }
+      path.append(
+          new Line2D.Double(
+              (int) (col + offX), bounds.y, (int) (col + offX), bounds.y + bounds.height),
+          false);
     }
+    GridRenderer.drawGridShape(g, path);
   }
 
   public ZonePoint getCenterPoint(CellPoint cellPoint) {
     ZonePoint zp = convert(cellPoint);
-    zp.x += getCellWidth() / 2;
-    zp.y += getCellHeight() / 2;
+    zp.x += (int) (getCellWidth() / 2d);
+    zp.y += (int) (getCellHeight() / 2d);
     return zp;
   }
 

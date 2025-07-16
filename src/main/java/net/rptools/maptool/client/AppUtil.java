@@ -50,26 +50,6 @@ public class AppUtil {
 
   private static Logger log;
 
-  /** Returns true if currently running on a Windows based operating system. */
-  public static boolean WINDOWS =
-      (System.getProperty("os.name").toLowerCase().startsWith("windows"));
-
-  /** Returns true if currently running on a Mac OS X based operating system. */
-  public static boolean MAC_OS_X =
-      (System.getProperty("os.name").toLowerCase().startsWith("mac os x"));
-
-  /** Returns true if currently running on Linux or other Unix/Unix like system. */
-  public static boolean LINUX_OR_UNIX =
-      (System.getProperty("os.name").indexOf("nix") >= 0
-          || System.getProperty("os.name").indexOf("nux") >= 0
-          || System.getProperty("os.name").indexOf("aix") >= 0
-          || System.getProperty("os.name").indexOf("sunos") >= 0);
-
-  public static final String LOOK_AND_FEEL_NAME =
-      MAC_OS_X
-          ? "net.rptools.maptool.client.TinyLookAndFeelMac"
-          : "de.muntjak.tinylookandfeel.TinyLookAndFeel";
-
   private static File dataDirPath;
   private static String packagerCfgFileName =
       getAttributeFromJarManifest("Implementation-Title", AppConstants.APP_NAME) != null

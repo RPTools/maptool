@@ -21,7 +21,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.math.RoundingMode;
-import net.rptools.maptool.client.AppUtil;
+import net.rptools.lib.OsDetection;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -131,7 +131,7 @@ public class FileUtil {
    * @return the File object with new name
    */
   public static File getCleanFileName(String filePath, String fileName, String extension) {
-    if (AppUtil.WINDOWS) {
+    if (OsDetection.WINDOWS) {
       // The colon is illegal for windows, so we replace it. Fix #1566
       fileName = fileName.replaceAll(":", "_");
     }
@@ -174,7 +174,7 @@ public class FileUtil {
    * @return the File object with new name
    */
   public static File cleanFileName(String path, String fileName, String extension) {
-    if (AppUtil.WINDOWS) {
+    if (OsDetection.WINDOWS) {
       // The colon is illegal for windows, so we replace it. Fix #1566
       fileName = fileName.replaceAll(":", "_");
     }

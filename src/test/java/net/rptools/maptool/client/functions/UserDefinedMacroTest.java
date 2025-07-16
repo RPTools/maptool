@@ -20,6 +20,7 @@ import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.macro.MacroLocationFactory;
 import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
 import org.junit.jupiter.api.Test;
 
@@ -43,7 +44,7 @@ public class UserDefinedMacroTest {
     MapTool.getParser().enterContext(new MapToolMacroContext("test", loc, true));
 
     // define myfunction
-    MapToolExpressionParser parser = new MapToolExpressionParser();
+    MapToolExpressionParser parser = new ExpressionParserFactory().createMT();
     parser.evaluate("defineFunction('myfunction', 'mymacro@TOKEN')", resolver);
 
     // evaluate myfunction that should call mymacro on token

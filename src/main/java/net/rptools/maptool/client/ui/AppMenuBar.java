@@ -24,6 +24,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.swing.*;
 import net.rptools.lib.FileUtil;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.OpenUrlAction;
 import net.rptools.maptool.client.ui.MapToolFrame.MTFrame;
@@ -97,7 +98,7 @@ public class AppMenuBar extends JMenuBar {
     fileMenu.add(new JMenuItem(AppActions.SHOW_CONNECTION_INFO));
     fileMenu.addSeparator();
     fileMenu.add(createRecentCampaignMenu());
-    if (!AppUtil.MAC_OS_X) {
+    if (!OsDetection.MAC_OS_X) {
       fileMenu.addSeparator();
       fileMenu.add(new JMenuItem(AppActions.EXIT));
     }
@@ -215,7 +216,7 @@ public class AppMenuBar extends JMenuBar {
     menu.addSeparator();
 
     menu.add(new JMenuItem(AppActions.CAMPAIGN_PROPERTIES));
-    if (!AppUtil.MAC_OS_X) menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
+    if (!OsDetection.MAC_OS_X) menu.add(new JMenuItem(AppActions.SHOW_PREFERENCES));
 
     return menu;
   }
@@ -397,7 +398,7 @@ public class AppMenuBar extends JMenuBar {
     }
     menu.add(new JMenuItem(AppActions.GATHER_DEBUG_INFO));
 
-    if (!AppUtil.MAC_OS_X) {
+    if (!OsDetection.MAC_OS_X) {
       menu.addSeparator();
       menu.add(new JMenuItem(AppActions.SHOW_ABOUT));
     }

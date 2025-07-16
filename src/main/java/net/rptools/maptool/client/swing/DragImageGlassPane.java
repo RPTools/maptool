@@ -20,6 +20,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import javax.swing.JPanel;
+import net.rptools.lib.AwtUtil;
 
 public class DragImageGlassPane extends JPanel {
   private static final int DEFAULT_MAX_SIZE = 75;
@@ -80,7 +81,7 @@ public class DragImageGlassPane extends JPanel {
   private Dimension getImageSize() {
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
     if (size.width > DEFAULT_MAX_SIZE || size.height > DEFAULT_MAX_SIZE) {
-      SwingUtil.constrainTo(size, DEFAULT_MAX_SIZE);
+      AwtUtil.constrainTo(size, DEFAULT_MAX_SIZE);
     }
     return size;
   }

@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.model;
 
-import java.util.Map;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import net.rptools.maptool.server.proto.AttachedLightSourceDto;
@@ -54,9 +53,10 @@ public final class AttachedLightSource {
       return uniqueLightSource;
     }
 
-    for (Map<GUID, LightSource> map : campaign.getLightSourcesMap().values()) {
-      if (map.containsKey(lightSourceId)) {
-        return map.get(lightSourceId);
+    for (CategorizedLights.Category category : campaign.getLightSources().getCategories()) {
+      var source = category.lights().get(lightSourceId);
+      if (source.isPresent()) {
+        return source.get();
       }
     }
 

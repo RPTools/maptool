@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
@@ -142,7 +143,9 @@ public class AssetDirectory extends Directory {
         } else if (imageFile.getName().toLowerCase().endsWith(".por")) {
           thumbnail = HERO_LAB_IMAGE;
         } else {
-          thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
+          thumbnail =
+              MapTool.getThumbnailManager()
+                  .getThumbnail(imageFile, AppPreferences.renderQuality.get());
         }
       } catch (Throwable t) {
         log.error("Error while getting image thumbnail", t);

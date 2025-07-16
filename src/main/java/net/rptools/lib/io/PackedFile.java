@@ -37,6 +37,7 @@ import net.rptools.lib.ModelVersionManager;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.AssetManager;
 import net.rptools.maptool.model.GUID;
+import net.rptools.maptool.util.PersistenceUtil;
 import org.apache.batik.ext.awt.geom.ExtendedGeneralPath;
 import org.apache.batik.ext.awt.geom.Polygon2D;
 import org.apache.commons.io.IOUtils;
@@ -97,7 +98,7 @@ public class PackedFile implements AutoCloseable {
   private static File tmpDir =
       new File(System.getProperty("java.io.tmpdir")); // Shared temporary directory
 
-  private final XStream xstream = FileUtil.getConfiguredXStream();
+  private final XStream xstream = PersistenceUtil.getConfiguredXStream();
 
   private final File file; // Original zip file
   private final File tmpFile; // Temporary directory where changes are kept

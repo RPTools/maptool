@@ -37,6 +37,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextField;
 import javax.crypto.NoSuchPaddingException;
+import net.rptools.lib.cipher.CipherUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogController;
 import net.rptools.maptool.client.ui.javfx.SwingJavaFXDialogEventHandler;
@@ -46,7 +47,6 @@ import net.rptools.maptool.model.player.PlayerDatabase.AuthMethod;
 import net.rptools.maptool.model.player.PlayerInfo;
 import net.rptools.maptool.model.player.Players;
 import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.cipher.CipherUtil;
 
 /** Controller for the dialog used to edit player details in the database. */
 public class PlayerDatabaseEditController implements SwingJavaFXDialogController {

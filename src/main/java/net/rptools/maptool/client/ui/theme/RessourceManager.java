@@ -329,6 +329,28 @@ public class RessourceManager {
           put(Icons.COLORPICKER_SNAP_OFF, ROD_ICONS + "freehand.svg");
           put(Icons.COLORPICKER_SNAP_ON, ROD_ICONS + "shape_handles.svg");
           put(Icons.EDIT_TOKEN_COLOR_PICKER, ROD_ICONS + "misc/Colour Selection (eye dropper).svg");
+          put(Icons.DRAWPANEL_AREA_DRAW, ROD_ICONS + "ribbon/Draw Poly Line.svg");
+          put(Icons.DRAWPANEL_AREA_ERASE, ROD_ICONS + "ribbon/Draw Poly Line Erase.svg");
+          put(Icons.DRAWPANEL_ELLIPSE_DRAW, ROD_ICONS + "ribbon/Draw Oval.svg");
+          put(Icons.DRAWPANEL_ELLIPSE_ERASE, ROD_ICONS + "ribbon/Draw Oval Erase.svg");
+          put(Icons.DRAWPANEL_LINE_DRAW, ROD_ICONS + "ribbon/Draw Straight Lines.svg");
+          put(Icons.DRAWPANEL_LINE_ERASE, ROD_ICONS + "ribbon/Draw Straight Lines Erase.svg");
+          put(Icons.DRAWPANEL_POLYGON_DRAW, ROD_ICONS + "ribbon/Draw Polygon.svg");
+          put(Icons.DRAWPANEL_POLYGON_ERASE, ROD_ICONS + "ribbon/Draw Polygon Erase.svg");
+          put(Icons.DRAWPANEL_RECTANGLE_DRAW, ROD_ICONS + "ribbon/Draw Rectangle.svg");
+          put(Icons.DRAWPANEL_RECTANGLE_ERASE, ROD_ICONS + "ribbon/Draw Rectangle Erase.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_BLAST, ROD_ICONS + "ribbon/Blast Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_BURST, ROD_ICONS + "ribbon/Burst Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_CONE, ROD_ICONS + "ribbon/Cone Template.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_LINE, ROD_ICONS + "ribbon/Line Template.svg");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_LINECELL,
+              ROD_ICONS + "ribbon/Line Template Centered on Grid.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_RADIUS, ROD_ICONS + "ribbon/Radius Template.svg");
+          put(
+              Icons.DRAWPANEL_TEMPLATE_RADIUSCELL,
+              ROD_ICONS + "ribbon/Radius Template Centered on Grid.svg");
+          put(Icons.DRAWPANEL_TEMPLATE_WALL, ROD_ICONS + "ribbon/Wall Line Template.svg");
           put(Icons.EDIT_TOKEN_HEROLAB, ROD_ICONS + "hero-lab-icon.svg");
           put(Icons.EDIT_TOKEN_REFRESH_OFF, ROD_ICONS + "refresh_arrows.svg");
           put(Icons.EDIT_TOKEN_REFRESH_ON, ROD_ICONS + "refresh_arrows.svg");
@@ -371,7 +393,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_DRAW_DELETE, ROD_ICONS + "ribbon/Delete Drawing.svg");
           put(Icons.TOOLBAR_DRAW_DIAMOND, ROD_ICONS + "ribbon/Draw Diamond_2.svg");
           put(Icons.TOOLBAR_DRAW_FREEHAND, ROD_ICONS + "ribbon/Draw Freehand Lines.svg");
-          put(Icons.TOOLBAR_DRAW_LINE, ROD_ICONS + "ribbon/Draw Straight Lines.svg");
+          put(Icons.TOOLBAR_DRAW_LINE, ROD_ICONS + "ribbon/Draw Straight Lines_2.svg");
           put(Icons.TOOLBAR_DRAW_OFF, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_ON, ROD_ICONS + "ribbon/Drawing Tools.svg");
           put(Icons.TOOLBAR_DRAW_OVAL, ROD_ICONS + "ribbon/Draw Oval_2.svg");
@@ -525,7 +547,9 @@ public class RessourceManager {
               // big
               var image = ImageUtil.getImage(iconPath);
               if (image.getWidth(null) > width || image.getHeight(null) > height)
-                image = ImageUtil.createCompatibleImage(image, width, height, null);
+                image =
+                    ImageUtil.createCompatibleImage(
+                        image, width, height, AppPreferences.renderQuality.get());
               return new ImageIcon(image);
             }
           } catch (IOException e) {

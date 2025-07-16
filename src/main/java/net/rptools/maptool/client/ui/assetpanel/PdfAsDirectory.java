@@ -28,6 +28,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.atomic.AtomicBoolean;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.PersistenceUtil;
@@ -131,9 +132,13 @@ public class PdfAsDirectory extends Directory {
         if (imageFile.getName().toLowerCase().endsWith(Token.FILE_EXTENSION)) {
           thumbnail = PersistenceUtil.getTokenThumbnail(imageFile);
         } else if (imageFile.getName().toLowerCase().endsWith(".pdf")) {
-          thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
+          thumbnail =
+              MapTool.getThumbnailManager()
+                  .getThumbnail(imageFile, AppPreferences.renderQuality.get());
         } else {
-          thumbnail = MapTool.getThumbnailManager().getThumbnail(imageFile);
+          thumbnail =
+              MapTool.getThumbnailManager()
+                  .getThumbnail(imageFile, AppPreferences.renderQuality.get());
         }
       } catch (Throwable t) {
         log.error("Error while getting image thumbnail", t);

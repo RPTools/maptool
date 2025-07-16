@@ -45,14 +45,17 @@ public class DrawPanelTreeCellRenderer extends DefaultTreeCellRenderer {
       text = de.getDrawable().toString();
       if (de.getDrawable() instanceof DrawablesGroup) {
         text = I18N.getString("panel.DrawExplorer.group");
+        setToolTipText(null);
       } else if (de.getDrawable() instanceof ShapeDrawable sd) {
         var key = String.format("panel.DrawExplorer.ShapeDrawable.%s", sd.getShapeTypeName());
         text = I18N.getText(key, sd.getBounds().width, sd.getBounds().height);
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
+        setToolTipText(null);
       } else if (de.getDrawable() instanceof LineSegment ls) {
         var key = "panel.DrawExplorer.LineSegment.Line";
         text = I18N.getText(key, ls.getPoints().size(), de.getPen().getThickness());
         setLeafIcon(setDrawPanelIcon(key, de.getPen().isEraser()));
+        setToolTipText(null);
       } else if (de.getDrawable() instanceof AbstractTemplate at) {
         var key = String.format("panel.DrawExplorer.Template.%s", at.getClass().getSimpleName());
         text = I18N.getText(key, at.getRadius());

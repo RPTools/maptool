@@ -18,6 +18,7 @@ import java.awt.*;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import javax.swing.*;
+import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -548,6 +549,9 @@ public class ToolbarPanel extends JToolBar {
         });
 
     button.setIcon(RessourceManager.getBigIcon(icon));
+    button.setVisible(DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.get());
+    DeveloperOptions.Toggle.EnableLibGdxRendererToggleButton.onChange(button::setVisible);
+
     return button;
   }
 

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import java.util.List;
+import java.util.function.Function;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import net.rptools.CaseInsensitiveHashMap;
@@ -692,7 +693,6 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
   }
 
   public void prettify() {
-
     /* fix text areas to look like labels
      * dig down to the appropriate container level
      * then set the backgrounds to transparent
@@ -709,6 +709,38 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     }
 
     JTable propertyTable = getTokenPropertiesTable();
+
+    // try to set sizes to header text
+    Font hFont = propertyTable.getTableHeader().getComponent(0).getFont();
+    FontMetrics fm =
+        GraphicsEnvironment.getLocalGraphicsEnvironment()
+            .getDefaultScreenDevice()
+            .getDefaultConfiguration()
+            .createCompatibleVolatileImage(1, 1)
+            .getGraphics()
+            .getFontMetrics(hFont);
+    final List<Integer> headerSizes = new ArrayList<>();
+    for (int i = 0; i < propertyTable.getModel().getColumnCount(); i++) {
+      headerSizes.add(
+          SwingUtilities.computeStringWidth(
+              fm,
+              switch (i) {
+                case 0 -> I18N.getText("campaignPropertiesTable.column.name");
+                case 1 -> I18N.getText("campaignPropertiesTable.column.shortName");
+                case 2 -> I18N.getText("campaignPropertiesTable.column.displayName");
+                case 3 -> I18N.getText("campaignPropertiesTable.column.defaultValue");
+                case 4 -> I18N.getText("campaignPropertiesTable.column.onStatSheet");
+                case 5 -> I18N.getText("campaignPropertiesTable.column.gmStatSheet");
+                case 6 -> I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
+                default -> "";
+              }));
+    }
+    // preferred widths
+    headerSizes.add(
+        6 + Math.max(Math.max(headerSizes.get(0), headerSizes.get(2)), headerSizes.get(3)));
+    headerSizes.add((12 + headerSizes.get(1)) / 2);
+    headerSizes.add(
+        6 + Math.max(Math.max(headerSizes.get(4), headerSizes.get(5)), headerSizes.get(6)));
     /* prettify - take cell background colour and adjust the luminance for cell contrast.
     change the hue and saturation for the grid line colour
      */
@@ -745,20 +777,21 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     cellRenderer.setBackground(bgSmall);
     cellRenderer.setHorizontalAlignment(DefaultTableCellRenderer.LEFT);
 
-    DefaultTableCellRenderer headerRenderer =
-        new DefaultTableCellRenderer(); // cell renderer for contrasting headings
-    headerRenderer.setBackground(bg);
-    headerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
-    headerRenderer.setVerticalAlignment(SwingConstants.TOP);
-
-    DefaultTableCellRenderer headerRenderer2 = new DefaultTableCellRenderer();
-    headerRenderer2.setVerticalAlignment(SwingConstants.TOP);
-    headerRenderer2.setHorizontalAlignment(SwingConstants.CENTER);
-
-    DefaultTableCellRenderer rowHeaderRenderer =
-        new DefaultTableCellRenderer(); // cell renderer for contrasting headings
-    headerRenderer.setBackground(bg);
-    headerRenderer.setHorizontalAlignment(DefaultTableCellRenderer.LEFT);
+    // cell renderer for contrasting headings
+    Color finalBg = bg;
+    Function<Integer, DefaultTableCellRenderer> headerRenderer =
+        column -> {
+          DefaultTableCellRenderer hr = new DefaultTableCellRenderer();
+          if ((column & 1) == 1) {
+            hr.setBackground(finalBg);
+          }
+          hr.setHorizontalAlignment(DefaultTableCellRenderer.CENTER);
+          hr.setVerticalAlignment(
+              column == 1 || column == 4 ? SwingConstants.TOP : SwingConstants.CENTER);
+          hr.setToolTipText(
+              ((TokenPropertiesTableModel) propertyTable.getModel()).getColumnTooltipText(column));
+          return hr;
+        };
 
     propertyTable.setGridColor(gridColour);
     propertyTable.setIntercellSpacing(new Dimension(2, 2));
@@ -768,36 +801,31 @@ public class TokenPropertiesManagementPanel extends AbeillePanel<CampaignPropert
     propertyTable.setFillsViewportHeight(true);
 
     for (int i = 0; i < propertyTable.getColumnCount(); i++) {
-
+      propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer.apply(i));
       switch (i) { // set column shading
-        case 0, 2, 4, 6 ->
-            propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer);
-        case 1, 3 -> {
-          propertyTable.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
-          propertyTable.getColumnModel().getColumn(i).setHeaderRenderer(headerRenderer2);
-        }
+        case 1, 3 -> propertyTable.getColumnModel().getColumn(i).setCellRenderer(cellRenderer);
       }
-
-      switch (i) { // set column sizes
+      // set column sizes
+      propertyTable.getColumnModel().getColumn(i).setMinWidth(headerSizes.get(i) + 6);
+      switch (i) {
         case 0, 2, 3 -> {
-          propertyTable.getColumnModel().getColumn(i).setMinWidth(60);
-          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(80);
+          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(headerSizes.get(7));
         }
         case 1 -> {
-          propertyTable.getColumnModel().getColumn(i).setMinWidth(45);
-          propertyTable.getColumnModel().getColumn(i).setMaxWidth(100);
-          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(55);
+          propertyTable.getColumnModel().getColumn(i).setMinWidth(headerSizes.get(1) / 3 * 2);
+          propertyTable.getColumnModel().getColumn(i).setMaxWidth(headerSizes.get(8) / 2 * 3);
+          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(headerSizes.get(8));
         }
         case 4, 5, 6 -> {
-          propertyTable.getColumnModel().getColumn(i).setMinWidth(50);
-          propertyTable.getColumnModel().getColumn(i).setMaxWidth(80);
-          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(50);
+          propertyTable.getColumnModel().getColumn(i).setMinWidth(headerSizes.get(9) / 3 * 2);
+          propertyTable.getColumnModel().getColumn(i).setMaxWidth(headerSizes.get(9) / 2 * 3);
+          propertyTable.getColumnModel().getColumn(i).setPreferredWidth(headerSizes.get(9));
         }
       }
     }
-    Font hFont = propertyTable.getTableHeader().getComponent(0).getFont();
+
     Dimension headerDim = propertyTable.getTableHeader().getSize();
-    headerDim.height = (int) (hFont.getSize() * 3.41);
+    headerDim.height = (int) (hFont.getSize() * 3.71);
     propertyTable.getTableHeader().setPreferredSize(headerDim);
   }
 

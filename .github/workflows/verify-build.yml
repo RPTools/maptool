@@ -21,6 +21,8 @@ on:
       - develop
 jobs:
   formatting:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Git checkout
@@ -33,6 +35,8 @@ jobs:
       - name: spotlessCheck
         run: ./gradlew spotlessCheck
   build:
+    permissions:
+      contents: read
     name: ${{ matrix.os }} w/JDK ${{ matrix.java }}
     runs-on:  ${{ matrix.os }}
     strategy:

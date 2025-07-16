@@ -499,10 +499,9 @@ public class FindTokenFunctions extends AbstractFunction {
           type = jobjLight.has("category") ? jobjLight.get("category").getAsString() : "*";
           name = jobjLight.has("name") ? jobjLight.get("name").getAsString() : "*";
 
-          Map<String, Map<GUID, LightSource>> lightSourcesMap =
-              MapTool.getCampaign().getLightSourcesMap();
+          CategorizedLights lightSources = MapTool.getCampaign().getLightSources();
 
-          if (!"*".equals(type) && !lightSourcesMap.containsKey(type)) {
+          if (!"*".equals(type) && lightSources.getCategory(type).isEmpty()) {
             throw new ParserException(
                 I18N.getText("macro.function.tokenLight.unknownLightType", "light", type));
           }
