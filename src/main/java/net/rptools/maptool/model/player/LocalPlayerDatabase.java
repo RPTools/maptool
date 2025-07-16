@@ -19,17 +19,19 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.PublicPrivateKeyStore;
 
 /** This class provides the implementation for the "database" for the client local player. */
 public class LocalPlayerDatabase implements PlayerDatabase {
 
   private final LocalPlayer localPlayer;
   private final LoggedInPlayers loggedInPlayers = new LoggedInPlayers();
+  private final PublicPrivateKeyStore keyStore;
 
-  public LocalPlayerDatabase(LocalPlayer player) {
+  public LocalPlayerDatabase(LocalPlayer player, PublicPrivateKeyStore keyStore) {
     localPlayer = player;
+    this.keyStore = keyStore;
   }
 
   private synchronized LocalPlayer getLocalPlayer() {
@@ -88,7 +90,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
 
   @Override
   public CompletableFuture<CipherUtil.Key> getPublicKey(Player player, MD5Key md5key) {
-    return new PublicPrivateKeyStore().getKeys();
+    return keyStore.getKeys();
   }
 
   @Override
@@ -98,9 +100,7 @@ public class LocalPlayerDatabase implements PlayerDatabase {
 
   @Override
   public CompletableFuture<Boolean> hasPublicKey(Player player, MD5Key md5key) {
-    return new PublicPrivateKeyStore()
-        .getKeys()
-        .thenApply(k -> CipherUtil.publicKeyMD5(k.publicKey()).equals(md5key));
+    return keyStore.getKeys().thenApply(k -> CipherUtil.publicKeyMD5(k.publicKey()).equals(md5key));
   }
 
   @Override

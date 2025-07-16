@@ -25,7 +25,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import javax.swing.*;
-import net.rptools.maptool.client.AppUtil;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.functions.getInfoFunction;
@@ -54,7 +54,7 @@ public class MapToolEventQueue extends EventQueue {
     try {
       if (event instanceof MouseWheelEvent) {
         MouseWheelEvent mwe = (MouseWheelEvent) event;
-        if (AppUtil.MAC_OS_X && mwe.isShiftDown()) {
+        if (OsDetection.MAC_OS_X && mwe.isShiftDown()) {
           // issue 1317: ignore ALL horizontal movement on macOS, *even if* the physical Shift is
           // held down.
           return;

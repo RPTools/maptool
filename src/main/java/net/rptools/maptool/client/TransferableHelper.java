@@ -35,6 +35,7 @@ import javax.swing.JComponent;
 import javax.swing.SwingUtilities;
 import javax.swing.TransferHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.transferable.FileTransferableHandler;
 import net.rptools.lib.transferable.GroupTokenTransferData;
@@ -49,7 +50,6 @@ import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.library.LibraryManager;
 import net.rptools.maptool.model.library.addon.AddOnLibraryImporter;
 import net.rptools.maptool.util.PersistenceUtil;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.tika.mime.MediaType;
@@ -258,7 +258,9 @@ public class TransferableHelper extends TransferHandler {
       if (o == null && transferable.isDataFlavorSupported(X_JAVA_IMAGE)) {
         log.info("Selected: {}", X_JAVA_IMAGE);
         BufferedImage image =
-            (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
+            (BufferedImage)
+                new ImageTransferableHandler(AppPreferences.renderQuality::get)
+                    .getTransferObject(transferable);
         o = Asset.createImageAsset("unnamed", ImageUtil.imageToBytes(image));
       }
 
@@ -340,7 +342,10 @@ public class TransferableHelper extends TransferHandler {
       log.debug(
           "{} didn't work; trying ImageTransferableHandler().getTransferObject()",
           type); // $NON-NLS-1$
-      image = (BufferedImage) new ImageTransferableHandler().getTransferObject(transferable);
+      image =
+          (BufferedImage)
+              new ImageTransferableHandler(AppPreferences.renderQuality::get)
+                  .getTransferObject(transferable);
     }
     if (image != null) {
       String name = findName(url);

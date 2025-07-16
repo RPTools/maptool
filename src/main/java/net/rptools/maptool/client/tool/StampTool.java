@@ -48,6 +48,7 @@ import javax.swing.JDialog;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppActions;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppStyle;
@@ -244,7 +245,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
         BufferedImage image = ImageManager.getImage(token.getImageAssetId(), renderer);
 
         Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-        SwingUtil.constrainTo(imgSize, gridSize);
+        AwtUtil.constrainTo(imgSize, gridSize);
 
         Rectangle bounds =
             new Rectangle(

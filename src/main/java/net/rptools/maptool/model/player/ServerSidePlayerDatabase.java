@@ -17,7 +17,7 @@ package net.rptools.maptool.model.player;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Optional;
-import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil;
 
 /**
  * A {@link net.rptools.maptool.model.player.PlayerDatabase} augmented with functinoality only
@@ -25,11 +25,11 @@ import net.rptools.maptool.util.cipher.CipherUtil;
  */
 public interface ServerSidePlayerDatabase extends PlayerDatabase {
   /**
-   * Returns the {@link net.rptools.maptool.util.cipher.CipherUtil.Key} for the player. If the
-   * database only supports role based passwords the returned value will be empty.
+   * Returns the {@link CipherUtil.Key} for the player. If the database only supports role based
+   * passwords the returned value will be empty.
    *
    * @param playerName The name of the player to check.
-   * @return the {@link net.rptools.maptool.util.cipher.CipherUtil.Key} to use.
+   * @return the {@link CipherUtil.Key} to use.
    */
   Optional<CipherUtil.Key> getPlayerPassword(String playerName);
 

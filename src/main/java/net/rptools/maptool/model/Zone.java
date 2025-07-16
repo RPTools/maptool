@@ -27,6 +27,7 @@ import javax.annotation.Nullable;
 import javax.swing.*;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -70,7 +71,6 @@ import net.rptools.maptool.model.zones.ZoneLightingChanged;
 import net.rptools.maptool.server.Mapper;
 import net.rptools.maptool.server.proto.DrawnElementListDto;
 import net.rptools.maptool.server.proto.ZoneDto;
-import net.rptools.maptool.util.StringUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

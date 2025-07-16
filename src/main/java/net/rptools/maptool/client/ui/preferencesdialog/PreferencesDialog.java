@@ -27,27 +27,27 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import net.rptools.lib.StringUtil;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.image.RenderQuality;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.AppPreferences.RenderQuality;
 import net.rptools.maptool.client.AppPreferences.UvttLosImportType;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
-import net.rptools.maptool.client.swing.AbeillePanel;
-import net.rptools.maptool.client.swing.ColorWell;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeFontPreferences;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -58,11 +58,8 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.maptool.util.UserJvmOptions;
 import net.rptools.maptool.util.UserJvmOptions.JVM_OPTION;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.PublicPrivateKeyStore;
 import net.rptools.maptool.util.preferences.Preference;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
@@ -73,7 +70,7 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>A dialog box to manage user preferences.
  */
-public class PreferencesDialog extends JDialog {
+public class PreferencesDialog extends AbeillePanel {
 
   /** Logger instance used for logging messages in the PreferencesDialog class. */
   private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
@@ -83,326 +80,347 @@ public class PreferencesDialog extends JDialog {
    * managing multiple tabs.
    */
   // Tabbed Panel
-  private final JTabbedPane tabbedPane;
+  private final JTabbedPane tabbedPane = getTabbedPane("TabPane");
 
   /**
    * Represents a check box for the preference setting to have fog of war (FOW) enabled on new maps.
    */
   // Interactions
-  private final JCheckBox newMapsHaveFOWCheckBox;
+  private final JCheckBox newMapsHaveFOWCheckBox = getCheckBox("newMapsHaveFOW");
 
   /** Represents a check box for enabling a warning popup when a token is deleted. */
-  private final JCheckBox tokensPopupWarningWhenDeletedCheckBox;
+  private final JCheckBox tokensPopupWarningWhenDeletedCheckBox =
+      getCheckBox("tokensPopupWarningWhenDeleted");
 
   /** The checkbox used to indicate whether tokens should start snapping to the grid. */
-  private final JCheckBox tokensStartSnapToGridCheckBox;
+  private final JCheckBox tokensStartSnapToGridCheckBox = getCheckBox("tokensStartSnapToGrid");
 
   /**
    * Represents a checkbox for the preference setting to have tokens snap to the grid while being
    * dragged.
    */
-  private final JCheckBox tokensSnapWhileDraggingCheckBox;
+  private final JCheckBox tokensSnapWhileDraggingCheckBox = getCheckBox("tokensSnapWhileDragging");
 
   /** Represents a checkbox that allows the user to hide the mouse pointer while dragging. */
-  private final JCheckBox hideMousePointerWhileDraggingCheckBox;
+  private final JCheckBox hideMousePointerWhileDraggingCheckBox =
+      getCheckBox("hideMousePointerWhileDragging");
 
   /** Represents a checkbox indicating whether to hide the token stack indicator. */
-  private final JCheckBox hideTokenStackIndicatorCheckBox;
+  private final JCheckBox hideTokenStackIndicatorCheckBox =
+      getCheckBox("hideMousePointerWhileDragging");
 
   /** Represents a checkbox for controlling the visibility of new maps. */
-  private final JCheckBox newMapsVisibleCheckBox;
+  private final JCheckBox newMapsVisibleCheckBox = getCheckBox("newMapsVisible");
 
   /** Represents the checkbox for controlling the visibility of new tokens. */
-  private final JCheckBox newTokensVisibleCheckBox;
+  private final JCheckBox newTokensVisibleCheckBox = getCheckBox("newTokensVisible");
 
   /** Represents the checkbox for starting tokens with free size. */
-  private final JCheckBox tokensStartFreeSizeCheckBox;
+  private final JCheckBox tokensStartFreeSizeCheckBox = getCheckBox("tokensStartFreeSize");
 
   /** The checkbox for new stamps with snap-to-grid enabled. */
-  private final JCheckBox stampsStartSnapToGridCheckBox;
+  private final JCheckBox stampsStartSnapToGridCheckBox = getCheckBox("stampsStartSnapToGrid");
 
   /** The checkbox for new stamps with free size enabled. */
-  private final JCheckBox stampsStartFreeSizeCheckBox;
+  private final JCheckBox stampsStartFreeSizeCheckBox = getCheckBox("stampsStartFreeSize");
 
   /** Provides a checkbox for new backgrounds snap-to-grid enabled. */
-  private final JCheckBox backgroundsStartSnapToGridCheckBox;
+  private final JCheckBox backgroundsStartSnapToGridCheckBox =
+      getCheckBox("backgroundsStartSnapToGrid");
 
   /** The checkbox for new backgrounds free size enabled. */
-  private final JCheckBox backgroundsStartFreeSizeCheckBox;
+  private final JCheckBox backgroundsStartFreeSizeCheckBox =
+      getCheckBox("backgroundsStartFreeSize");
 
   /** JComboBox variable used to display duplicate token naming options. */
-  private final JComboBox<LocalizedComboItem> duplicateTokenCombo;
+  private final JComboBox<LocalizedComboItem> duplicateTokenCombo =
+      getComboBox("duplicateTokenCombo");
 
   /** JComboBox variable used to display token naming options for imported tokens. */
-  private final JComboBox<LocalizedComboItem> tokenNamingCombo;
+  private final JComboBox<LocalizedComboItem> tokenNamingCombo = getComboBox("tokenNamingCombo");
 
   /** JComboBox variable used to display token numbering options. */
-  private final JComboBox<LocalizedComboItem> showNumberingCombo;
+  private final JComboBox<LocalizedComboItem> showNumberingCombo =
+      getComboBox("showNumberingCombo");
 
   /** JComboBox variable used to display movement metric options. */
-  private final JComboBox<WalkerMetric> movementMetricCombo;
+  private final JComboBox<WalkerMetric> movementMetricCombo = getComboBox("movementMetricCombo");
 
   /** JComboBox variable used to display vision type options. */
-  private final JComboBox<Zone.VisionType> visionTypeCombo;
+  private final JComboBox<Zone.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
 
   /** JComboBox variable used to display map sorting options. */
-  private final JComboBox<AppPreferences.MapSortType> mapSortType;
+  private final JComboBox<AppPreferences.MapSortType> mapSortType = getComboBox("mapSortTypeCombo");
 
-  private final JComboBox<UvttLosImportType> uvttLosImportType;
+  private final JComboBox<UvttLosImportType> uvttLosImportType =
+      getComboBox("uvttLosImportTypeCombo");
 
   /** Checkbox for displaying or hiding * the statistics sheet on token mouseover. */
-  private final JCheckBox showStatSheetCheckBox;
+  private final JCheckBox showStatSheetCheckBox = getCheckBox("showStatSheet");
 
   /** Checkbox for displaying or hiding the token portrait on token mouseover. */
-  private final JCheckBox showPortraitCheckBox;
+  private final JCheckBox showPortraitCheckBox = getCheckBox("showPortrait");
 
   /** Checkbox for if the modifier key needs to be held down to show the stat sheet. */
-  private final JCheckBox showStatSheetModifierCheckBox;
+  private final JCheckBox showStatSheetModifierCheckBox = getCheckBox("showStatSheetModifier");
 
   /** Checkbox for if the facing arrow should be forced to be shown. */
-  private final JCheckBox forceFacingArrowCheckBox;
+  private final JCheckBox forceFacingArrowCheckBox = getCheckBox("forceFacingArrow");
 
   /** Checkbox for if the map visibility warning should be shown. */
-  private final JCheckBox mapVisibilityWarning;
+  private final JCheckBox mapVisibilityWarning = getCheckBox("mapVisibilityWarning");
 
   /** Spinner for the halo line width. */
-  private final JSpinner haloLineWidthSpinner;
+  private final JSpinner haloLineWidthSpinner = getSpinner("haloLineWidthSpinner");
 
   /** Spinner for the halo overlay opacity. */
-  private final JSpinner haloOverlayOpacitySpinner;
+  private final JSpinner haloOverlayOpacitySpinner = getSpinner("haloOverlayOpacitySpinner");
 
   /** Spinner for the aura overlay opacity. */
-  private final JSpinner auraOverlayOpacitySpinner;
+  private final JSpinner auraOverlayOpacitySpinner = getSpinner("auraOverlayOpacitySpinner");
 
   /** Spinner for the light overlay opacity. */
-  private final JSpinner lightOverlayOpacitySpinner;
+  private final JSpinner lightOverlayOpacitySpinner = getSpinner("lightOverlayOpacitySpinner");
 
   /** Spinner for the luminosity overlay opacity. */
-  private final JSpinner lumensOverlayOpacitySpinner;
+  private final JSpinner lumensOverlayOpacitySpinner = getSpinner("lumensOverlayOpacitySpinner");
 
   /** Spinner for the luminosity overlay border thickness. */
-  private final JSpinner lumensOverlayBorderThicknessSpinner;
+  private final JSpinner lumensOverlayBorderThicknessSpinner =
+      getSpinner("lumensOverlayBorderThicknessSpinner");
 
   /** Checkbox for if the luminosity overlay should be shown by default. */
-  private final JCheckBox lumensOverlayShowByDefaultCheckBox;
+  private final JCheckBox lumensOverlayShowByDefaultCheckBox =
+      getCheckBox("lumensOverlayShowByDefault");
 
   /** Checkbox for if the environmental lights should be shown by default. */
-  private final JCheckBox lightsShowByDefaultCheckBox;
+  private final JCheckBox lightsShowByDefaultCheckBox = getCheckBox("lightsShowByDefault");
 
   /** Spinner for the fog opacity. */
-  private final JSpinner fogOverlayOpacitySpinner;
+  private final JSpinner fogOverlayOpacitySpinner = getSpinner("fogOverlayOpacitySpinner");
 
   /** Checkbox for if the halo color should be used as the vision overlay. */
-  private final JCheckBox useHaloColorAsVisionOverlayCheckBox;
+  private final JCheckBox useHaloColorAsVisionOverlayCheckBox =
+      getCheckBox("useHaloColorAsVisionOverlay");
 
   /** Checkbox for if the vision should be auto-revealed on GM move. */
-  private final JCheckBox autoRevealVisionOnGMMoveCheckBox;
+  private final JCheckBox autoRevealVisionOnGMMoveCheckBox =
+      getCheckBox("autoRevealVisionOnGMMove");
 
   /** Checkbox for if smilies should be converted to images in chat. */
-  private final JCheckBox showSmiliesCheckBox;
+  private final JCheckBox showSmiliesCheckBox = getCheckBox("showSmilies");
 
   /** Checkbox for if system sounds should be played. */
-  private final JCheckBox playSystemSoundCheckBox;
+  private final JCheckBox playSystemSoundCheckBox = getCheckBox("playSystemSound");
 
   /** Checkbox for if audio streams should be played. */
-  private final JCheckBox playStreamsCheckBox;
+  private final JCheckBox playStreamsCheckBox = getCheckBox("playStreams");
 
   /** Checkbox for if system sounds should be played only when not focused. */
-  private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox;
+  private final JCheckBox playSystemSoundOnlyWhenNotFocusedCheckBox =
+      getCheckBox("soundsOnlyWhenNotFocused");
 
   /** Checkbox for if Syrinscape integration should be enabled. */
-  private final JCheckBox syrinscapeActiveCheckBox;
+  private final JCheckBox syrinscapeActiveCheckBox = getCheckBox("syrinscapeActive");
 
   /** Checkbox for if token facing is allowed to point to edges of the grid cells. */
-  private final JCheckBox facingFaceEdges;
+  private final JCheckBox facingFaceEdges = getCheckBox("facingFaceEdges");
 
   /** Checkbox for if token facing is allowed to point to vertices of the grid cells. */
-  private final JCheckBox facingFaceVertices;
+  private final JCheckBox facingFaceVertices = getCheckBox("facingFaceVertices");
 
   /** Checkbox for if the avatar should be shown in chat. */
-  private final JCheckBox showAvatarInChat;
+  private final JCheckBox showAvatarInChat = getCheckBox("showAvatarInChat");
 
   /** Checkbox for if new macros should be editable by players by default. */
-  private final JCheckBox allowPlayerMacroEditsDefault;
+  private final JCheckBox allowPlayerMacroEditsDefault =
+      getCheckBox("allowPlayerMacroEditsDefault");
 
   /** Checkbox for opening macro editor on creating new macro. */
-  private final JCheckBox openEditorForNewMacros;
+  private final JCheckBox openEditorForNewMacros = getCheckBox("openEditorForNewMacros");
 
   /** Checkbox for if the details of inline rolls should be shown in tooltips. */
-  private final JCheckBox toolTipInlineRolls;
+  private final JCheckBox toolTipInlineRolls = getCheckBox("toolTipInlineRolls");
 
   /** Checkbox for if macro link details should be suppressed in tooltips. */
-  private final JCheckBox suppressToolTipsMacroLinks;
+  private final JCheckBox suppressToolTipsMacroLinks = getCheckBox("suppressToolTipsMacroLinks");
 
   /** ColorWell for the completed trusted path output foreground color. */
-  private final ColorWell trustedOutputForeground;
+  private final ColorWell trustedOutputForeground =
+      (ColorWell) getComponent("trustedOuputForeground");
 
   /** ColorWell for the completed trusted path output background color. */
-  private final ColorWell trustedOutputBackground;
+  private final ColorWell trustedOutputBackground =
+      (ColorWell) getComponent("trustedOuputBackground");
 
   /** Spinner for the chat autosave time. */
-  private final JSpinner chatAutosaveTime;
+  private final JSpinner chatAutosaveTime = getSpinner("chatAutosaveTime");
 
   /** Text field for the chat autosave filename format. */
-  private final JTextField chatFilenameFormat;
+  private final JTextField chatFilenameFormat = getTextField("chatFilenameFormat");
 
   /** Spinner for the typing notification duration. */
-  private final JSpinner typingNotificationDuration;
+  private final JSpinner typingNotificationDuration = getSpinner("typingNotificationDuration");
 
   /** ComboBox for the macro editor theme. */
-  private final JComboBox<String> macroEditorThemeCombo;
+  private final JComboBox<String> macroEditorThemeCombo = getComboBox("macroEditorThemeCombo");
 
   /** ComboBox for the icon theme. */
-  private final JComboBox<String> iconThemeCombo;
+  private final JComboBox<String> iconThemeCombo = getComboBox("iconThemeCombo");
 
   // Chat Notification
   /** ColorWell for the chat notification color. */
-  private final ColorWell chatNotificationColor;
+  private final ColorWell chatNotificationColor = (ColorWell) getComponent("chatNotificationColor");
 
   /** Checkbox for if the chat notification background should be shown. */
-  private final JCheckBox chatNotificationShowBackground;
+  private final JCheckBox chatNotificationShowBackground =
+      getCheckBox("chatNotificationShowBackground");
 
   // Defaults
   /** ComboBox for the default grid type to use for new maps. */
-  private final JComboBox<LocalizedComboItem> defaultGridTypeCombo;
+  private final JComboBox<LocalizedComboItem> defaultGridTypeCombo =
+      getComboBox("defaultGridTypeCombo");
 
   /** Text field for the default grid size to use for new maps. */
-  private final JTextField defaultGridSizeTextField;
+  private final JTextField defaultGridSizeTextField = getTextField("defaultGridSize");
 
   /** Text field for the default units per cell to use for new maps. */
-  private final JTextField defaultUnitsPerCellTextField;
+  private final JTextField defaultUnitsPerCellTextField = getTextField("defaultUnitsPerCell");
 
   /** Text field for the default vision distance to use for new maps. */
-  private final JTextField defaultVisionDistanceTextField;
+  private final JTextField defaultVisionDistanceTextField = getTextField("defaultVisionDistance");
 
   /** Spinner for the stat sheet portrait size. */
-  private final JTextField statsheetPortraitSize;
+  private final JTextField statsheetPortraitSize = getTextField("statsheetPortraitSize");
 
   /** Spinner for the auto-save interval for campaign data. */
-  private final JSpinner autoSaveSpinner;
+  private final JSpinner autoSaveSpinner = getSpinner("autoSaveSpinner");
 
   /** Checkbox for if the save reminder should be shown on exit, new campaign etc. */
-  private final JCheckBox saveReminderCheckBox;
+  private final JCheckBox saveReminderCheckBox = getCheckBox("saveReminder");
 
   /** Checkbox for if the dialog should be shown on new token creation. */
-  private final JCheckBox showDialogOnNewToken;
+  private final JCheckBox showDialogOnNewToken = getCheckBox("showDialogOnNewToken");
 
   // Accessibility
   /** Text field for the chat font size. */
-  private final JTextField fontSizeTextField;
+  private final JTextField fontSizeTextField = getTextField("fontSize");
 
   /** Spinner for the initial delay for tooltips. */
-  private final JTextField toolTipInitialDelay;
+  private final JTextField toolTipInitialDelay = getTextField("toolTipInitialDelay");
 
   /** Spinner for the dismiss delay for tooltips. */
-  private final JTextField toolTipDismissDelay;
+  private final JTextField toolTipDismissDelay = getTextField("toolTipDismissDelay");
 
   // Application
   /** Checkbox for if the client should fit the GM view automatically. */
-  private final JCheckBox fitGMView;
+  private final JCheckBox fitGMView = getCheckBox("fitGMView");
 
   /** Checkbox for if the selection should be filled when selecting objects. */
-  private final JCheckBox fillSelectionCheckBox;
+  private final JCheckBox fillSelectionCheckBox = getCheckBox("fillSelection");
 
   /** Text field for the frame rate cap for rendering. */
-  private final JTextField frameRateCapTextField;
+  private final JTextField frameRateCapTextField = getTextField("frameRateCap");
 
   /** ComboBox for the render performance optimization level. */
-  private final JComboBox<LocalizedComboItem> renderPerformanceComboBox;
+  private final JComboBox<LocalizedComboItem> renderPerformanceComboBox =
+      getComboBox("renderPerformanceComboBox");
 
   /** Text field for the default username when not logged into a server. */
-  private final JTextField defaultUsername;
+  private final JTextField defaultUsername = getTextField("defaultUsername");
 
   /** Checkbox for if non-player characters should be hidden when creating a new map. */
-  private final JCheckBox hideNPCs;
+  private final JCheckBox hideNPCs = getCheckBox("hideNPCs");
 
   /** Checkbox for if owner permissions should be granted when creating a new campaign. */
-  private final JCheckBox ownerPermissions;
+  private final JCheckBox ownerPermissions = getCheckBox("ownerPermissions");
 
   /** Checkbox for if movement should be locked in new campaigns. */
-  private final JCheckBox lockMovement;
+  private final JCheckBox lockMovement = getCheckBox("lockMovement");
 
   /** Checkbox for if initiative gain messages should be shown. */
-  private final JCheckBox showInitGainMessage;
+  private final JCheckBox showInitGainMessage = getCheckBox("showInitGainMessage");
 
   /** Text field for the UPnP discovery timeout. */
-  private final JTextField upnpDiscoveryTimeoutTextField;
+  private final JTextField upnpDiscoveryTimeoutTextField = getTextField("upnpDiscoveryTimeout");
 
   /** Text field for the file synchronization path. */
-  private final JTextField fileSyncPath;
+  private final JTextField fileSyncPath = getTextField("fileSyncPath");
 
   /** Button for opening the file synchronization path selection dialog. */
-  private final JButton fileSyncPathButton;
+  private final JButton fileSyncPathButton = (JButton) getButton("fileSyncPathButton");
 
   /** Checkbox for if macros should be allowed to access external resources. */
-  private final JCheckBox allowExternalMacroAccessCheckBox;
+  private final JCheckBox allowExternalMacroAccessCheckBox =
+      getCheckBox("allowExternalMacroAccess");
 
   // Authentication
   /** Text area for displaying the public key for authentication. */
-  private final JTextArea publicKeyTextArea;
+  private final JTextArea publicKeyTextArea = (JTextArea) getComponent("publicKeyTextArea");
 
   /** Button for regenerating the public key. */
-  private final JButton regeneratePublicKey;
+  private final JButton regeneratePublicKey = (JButton) getButton("regeneratePublicKey");
 
   /** Button for copying the public key to the clipboard. */
-  private final JButton copyPublicKey;
+  private final JButton copyPublicKey = (JButton) getButton("copyPublicKey");
 
   // Themes
   /** List for displaying available themes. */
-  private final JList<String> themeList;
+  private final JList<String> themeList = (JList<String>) getList("themeList");
 
   /** Label for displaying the theme image. */
-  private final JLabel themeImageLabel;
+  private final JLabel themeImageLabel = (JLabel) getComponent("themeImageLabel");
 
   /** Label for displaying the theme name. */
-  private final JLabel themeNameLabel;
+  private final JLabel themeNameLabel = (JLabel) getComponent("themeNameLabel");
 
   /** List model for all available themes. */
-  private final ListModel<String> allThemesListModel;
+  private ListModel<String> allThemesListModel;
 
   /** List model for light themes. */
-  private final ListModel<String> lightThemesListModel;
+  private ListModel<String> lightThemesListModel;
 
   /** List model for dark themes. */
-  private final ListModel<String> darkThemesListModel;
+  private ListModel<String> darkThemesListModel;
 
   /** Combo box for selecting the theme filter. */
-  private final JComboBox<LocalizedComboItem> themeFilterCombo;
+  private final JComboBox<LocalizedComboItem> themeFilterCombo = getComboBox("themeFilterCombo");
 
   /** Checkbox for if the theme should be applied to the chat window. */
-  private final JCheckBox useThemeForChat;
+  private final JCheckBox useThemeForChat = getCheckBox("useThemeForChat");
 
   // Startup
   /** Text field for the JVM maximum memory allocation. */
-  private final JTextField jvmXmxTextField;
+  private final JTextField jvmXmxTextField = getTextField("jvmXmx");
 
   /** Text field for the JVM initial memory allocation. */
-  private final JTextField jvmXmsTextField;
+  private final JTextField jvmXmsTextField = getTextField("jvmXms");
 
   /** Text field for the JVM thread stack size. */
-  private final JTextField jvmXssTextField;
+  private final JTextField jvmXssTextField = getTextField("jvmXss");
 
   /** Text field for the data directory. */
-  private final JTextField dataDirTextField;
+  private final JTextField dataDirTextField = getTextField("dataDir");
 
   /** Checkbox for if the JVM should use Direct3D. */
-  private final JCheckBox jvmDirect3dCheckbox;
+  private final JCheckBox jvmDirect3dCheckbox = getCheckBox("jvmDirect3d");
 
   /** Checkbox for if the JVM should use OpenGL. */
-  private final JCheckBox jvmOpenGLCheckbox;
+  private final JCheckBox jvmOpenGLCheckbox = getCheckBox("jvmOpenGL");
 
   /** Checkbox for if the JVM should initialize AWT. */
-  private final JCheckBox jvmInitAwtCheckbox;
+  private final JCheckBox jvmInitAwtCheckbox = getCheckBox("jvmInitAwt");
 
   /** Combo box for selecting the language override for JAM messages. */
-  private final JComboBox<String> jamLanguageOverrideComboBox;
+  private final JComboBox<String> jamLanguageOverrideComboBox =
+      getComboBox("jamLanguageOverrideComboBox");
 
   /** Label for displaying startup information. */
-  private final JTextField cfgFilePath;
+  private final JTextField cfgFilePath = getTextField("cfgFilePath");
 
-  private final AbstractButton copyCfgFilePathButton;
+  private final AbstractButton copyCfgFilePathButton = getButton("copyCfgFilePathButton");
 
-  private final JPanel configFileWarningPanel;
+  private final JPanel configFileWarningPanel = (JPanel) getComponent("configFileWarningPanel");
 
   /** Flag indicating if JVM values have been changed. */
   private boolean jvmValuesChanged = false;
@@ -412,61 +430,73 @@ public class PreferencesDialog extends JDialog {
 
   // Map Token Labels
   /** ColorWell for displaying the PC token label foreground color. */
-  private final ColorWell pcTokenLabelFG;
+  private final ColorWell pcTokenLabelFG = (ColorWell) getComponent("pcTokenLabelFG");
 
   /** ColorWell for displaying the PC token label background color. */
-  private final ColorWell pcTokenLabelBG;
+  private final ColorWell pcTokenLabelBG = (ColorWell) getComponent("pcTokenLabelBG");
 
   /** ColorWell for displaying the NPC token label foreground color. */
-  private final ColorWell npcTokenLabelFG;
+  private final ColorWell npcTokenLabelFG = (ColorWell) getComponent("npcTokenLabelFG");
 
   /** ColorWell for displaying the NPC token label background color. */
-  private final ColorWell npcTokenLabelBG;
+  private final ColorWell npcTokenLabelBG = (ColorWell) getComponent("npcTokenLabelBG");
 
   /** ColorWell for displaying the non-visibility token label foreground color. */
-  private final ColorWell nonVisTokenLabelFG;
+  private final ColorWell nonVisTokenLabelFG = (ColorWell) getComponent("nonVisTokenLabelFG");
 
   /** ColorWell for displaying the non-visibility token label background color. */
-  private final ColorWell nonVisTokenLabelBG;
+  private final ColorWell nonVisTokenLabelBG = (ColorWell) getComponent("nonVisTokenLabelBG");
 
   /** Spinner for setting the token label font size. */
-  private final JSpinner labelFontSizeSpinner;
+  private final JSpinner labelFontSizeSpinner = getSpinner("labelFontSizeSpinner");
 
   /** ColorWell for displaying the token label border color for PCs. */
-  private final ColorWell pcTokenLabelBorderColor;
+  private final ColorWell pcTokenLabelBorderColor = (ColorWell) getComponent("pcTokenLabelBorder");
 
   /** ColorWell for displaying the token label border color for NPCs. */
-  private final ColorWell npcTokenLabelBorderColor;
+  private final ColorWell npcTokenLabelBorderColor =
+      (ColorWell) getComponent("npcTokenLabelBorder");
 
   /** ColorWell for displaying the token label border color for non-visible tokens. */
-  private final ColorWell nonVisTokenLabelBorderColor;
+  private final ColorWell nonVisTokenLabelBorderColor =
+      (ColorWell) getComponent("nonVisTokenLabelBorder");
 
   /** Spinner for setting the token label border width. */
-  private final JSpinner labelBorderWidthSpinner;
+  private final JSpinner labelBorderWidthSpinner = getSpinner("labelBorderWidthSpinner");
 
   /** Spinner for setting the token label border arc. */
-  private final JSpinner labelBorderArcSpinner;
+  private final JSpinner labelBorderArcSpinner = getSpinner("labelBorderArcSpinner");
 
   /** Checkbox for showing the token label border. */
-  private final JCheckBox showLabelBorderCheckBox;
+  private final JCheckBox showLabelBorderCheckBox = getCheckBox("showLabelBorder");
 
   // ** Checkbox for loading the most recently used campaign on startup */
-  private final JCheckBox loadMRUcheckbox;
+  private final JCheckBox loadMRUcheckbox = getCheckBox("loadMRU");
 
   /** status bar scrolling checkbox */
-  private final JCheckBox statusScrollEnable;
+  private final JCheckBox statusScrollEnable = getCheckBox("statusScrollEnable");
 
   /** status bar temp time display */
-  private final JSpinner statusTempMessageTimeSpinner;
+  private final JSpinner statusTempMessageTimeSpinner = getSpinner("statusTempMessageTimeSpinner");
 
   /** status bar scrolling speed */
-  private final JSpinner statusScrollSpeedSpinner;
+  private final JSpinner statusScrollSpeedSpinner = getSpinner("statusScrollSpeedSpinner");
 
   /** status bar scroll start delay */
-  private final JSpinner statusScrollStartDelaySpinner;
+  private final JSpinner statusScrollStartDelaySpinner =
+      getSpinner("statusScrollStartDelaySpinner");
 
   /** status bar scroll end delay */
-  private final JSpinner statusScrollEndPause;
+  private final JSpinner statusScrollEndPause = getSpinner("statusScrollEndPause");
+
+  private final JTextField installDirTextField = getTextField("installDir");
+
+  private final Consumer<JSpinner> setSpinnerEditorWidth =
+      spinner -> {
+        Component mySpinnerEditor = spinner.getEditor();
+        JFormattedTextField jftf = ((JSpinner.DefaultEditor) mySpinnerEditor).getTextField();
+        jftf.setColumns(3);
+      };
 
   /**
    * Array of LocalizedComboItems representing the default grid types for the preferences dialog.
@@ -550,6 +580,16 @@ public class PreferencesDialog extends JDialog {
     new LocalizedComboItem("Light", "Preferences.combo.themes.filter.light")
   };
 
+  private final AbeillePanel<?> themeFontPreferences = new ThemeFontPreferences();
+
+  GenericDialogFactory dialogFactory =
+      GenericDialog.getFactory()
+          .setDialogTitle(I18N.getString("Label.preferences"))
+          .makeModal(true)
+          .addButton(ButtonKind.CLOSE)
+          .setDefaultButton(ButtonKind.CLOSE)
+          .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+
   /**
    * The PreferencesDialog class represents a dialog window that allows users to customize their
    * preferences.
@@ -557,15 +597,32 @@ public class PreferencesDialog extends JDialog {
    * <p>This dialog window is modal.
    */
   public PreferencesDialog() {
-    super(MapTool.getFrame(), I18N.getString("Label.preferences"), true);
-    setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-    ((JPanel) getContentPane()).setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+    super(new PreferencesDialogView().getRootComponent());
+    initComponents();
 
+    setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+
+    dialogFactory
+        .onBeforeClose(
+            e -> {
+              themeChanged = themeChanged | themeFontPreferences.commit();
+              new MapToolEventBus().getMainEventBus().post(new PreferencesChanged());
+              if (themeChanged || ThemeSupport.needsRestartForNewTheme()) {
+                MapTool.showMessage(
+                    "PreferencesDialog.themeChangeWarning",
+                    "PreferencesDialog.themeChangeWarningTitle",
+                    JOptionPane.WARNING_MESSAGE);
+              }
+            })
+        .setContent(this);
+  }
+
+  private void initComponents() {
     var lm = new DefaultListModel<String>();
     Arrays.stream(ThemeSupport.THEMES).map(ThemeDetails::name).sorted().forEach(lm::addElement);
     allThemesListModel = lm;
 
-    lm = new DefaultListModel<String>();
+    lm = new DefaultListModel<>();
     Arrays.stream(ThemeSupport.THEMES)
         .filter(ThemeDetails::dark)
         .map(ThemeDetails::name)
@@ -573,7 +630,7 @@ public class PreferencesDialog extends JDialog {
         .forEach(lm::addElement);
     darkThemesListModel = lm;
 
-    lm = new DefaultListModel<String>();
+    lm = new DefaultListModel<>();
     Arrays.stream(ThemeSupport.THEMES)
         .filter(t -> !t.dark())
         .map(ThemeDetails::name)
@@ -581,154 +638,15 @@ public class PreferencesDialog extends JDialog {
         .forEach(lm::addElement);
     lightThemesListModel = lm;
 
-    AbeillePanel panel = new AbeillePanel(new PreferencesDialogView().getRootComponent());
-
-    JButton okButton = (JButton) panel.getButton("okButton");
-    getRootPane().setDefaultButton(okButton);
-    AbeillePanel<?> themeFontPreferences = new ThemeFontPreferences();
-    okButton.addActionListener(
-        e -> {
-          boolean close = true;
-          if (close) {
-            themeChanged = themeChanged | themeFontPreferences.commit();
-            setVisible(false);
-            dispose();
-          }
-          new MapToolEventBus().getMainEventBus().post(new PreferencesChanged());
-          if (themeChanged || ThemeSupport.needsRestartForNewTheme()) {
-            MapTool.showMessage(
-                "PreferencesDialog.themeChangeWarning",
-                "PreferencesDialog.themeChangeWarningTitle",
-                JOptionPane.WARNING_MESSAGE);
-          }
-        });
-    JPanel ui = (JPanel) panel.getComponent("uiFontPrefs");
+    JPanel ui = (JPanel) getComponent("uiFontPrefs");
     ui.add(themeFontPreferences, BorderLayout.CENTER);
 
-    tabbedPane = panel.getTabbedPane("TabPane");
-
-    forceFacingArrowCheckBox = panel.getCheckBox("forceFacingArrow");
-    showStatSheetCheckBox = panel.getCheckBox("showStatSheet");
-    showPortraitCheckBox = panel.getCheckBox("showPortrait");
-    showStatSheetModifierCheckBox = panel.getCheckBox("showStatSheetModifier");
-    showNumberingCombo = panel.getComboBox("showNumberingCombo");
-    saveReminderCheckBox = panel.getCheckBox("saveReminderCheckBox");
-    fillSelectionCheckBox = panel.getCheckBox("fillSelectionCheckBox");
-    frameRateCapTextField = panel.getTextField("frameRateCapTextField");
-    renderPerformanceComboBox = panel.getComboBox("renderPerformanceComboBox");
-
-    defaultUsername = panel.getTextField("defaultUsername");
-    autoSaveSpinner = panel.getSpinner("autoSaveSpinner");
-    duplicateTokenCombo = panel.getComboBox("duplicateTokenCombo");
-    tokenNamingCombo = panel.getComboBox("tokenNamingCombo");
-    newMapsHaveFOWCheckBox = panel.getCheckBox("newMapsHaveFOWCheckBox");
-    tokensPopupWarningWhenDeletedCheckBox =
-        panel.getCheckBox("tokensPopupWarningWhenDeletedCheckBox"); // new
-    tokensStartSnapToGridCheckBox = panel.getCheckBox("tokensStartSnapToGridCheckBox");
-    tokensSnapWhileDraggingCheckBox = panel.getCheckBox("tokensSnapWhileDragging");
-    hideMousePointerWhileDraggingCheckBox = panel.getCheckBox("hideMousePointerWhileDragging");
-    hideTokenStackIndicatorCheckBox = panel.getCheckBox("hideTokenStackIndicator");
-    newMapsVisibleCheckBox = panel.getCheckBox("newMapsVisibleCheckBox");
-    newTokensVisibleCheckBox = panel.getCheckBox("newTokensVisibleCheckBox");
-    stampsStartFreeSizeCheckBox = panel.getCheckBox("stampsStartFreeSize");
-    tokensStartFreeSizeCheckBox = panel.getCheckBox("tokensStartFreeSize");
-    stampsStartSnapToGridCheckBox = panel.getCheckBox("stampsStartSnapToGrid");
-    backgroundsStartFreeSizeCheckBox = panel.getCheckBox("backgroundsStartFreeSize");
-    backgroundsStartSnapToGridCheckBox = panel.getCheckBox("backgroundsStartSnapToGrid");
-    defaultGridTypeCombo = panel.getComboBox("defaultGridTypeCombo");
-    defaultGridSizeTextField = panel.getTextField("defaultGridSize");
-    defaultUnitsPerCellTextField = panel.getTextField("defaultUnitsPerCell");
-    defaultVisionDistanceTextField = panel.getTextField("defaultVisionDistance");
-    statsheetPortraitSize = panel.getTextField("statsheetPortraitSize");
-    fontSizeTextField = panel.getTextField("fontSize");
-
-    haloLineWidthSpinner = panel.getSpinner("haloLineWidthSpinner");
-    haloOverlayOpacitySpinner = panel.getSpinner("haloOverlayOpacitySpinner");
-    auraOverlayOpacitySpinner = panel.getSpinner("auraOverlayOpacitySpinner");
-    lightOverlayOpacitySpinner = panel.getSpinner("lightOverlayOpacitySpinner");
-    lumensOverlayOpacitySpinner = panel.getSpinner("lumensOverlayOpacitySpinner");
-    lumensOverlayBorderThicknessSpinner = panel.getSpinner("lumensOverlayBorderThicknessSpinner");
-    lumensOverlayShowByDefaultCheckBox = panel.getCheckBox("lumensOverlayShowByDefaultCheckBox");
-    lightsShowByDefaultCheckBox = panel.getCheckBox("lightsShowByDefaultCheckBox");
-    fogOverlayOpacitySpinner = panel.getSpinner("fogOverlayOpacitySpinner");
-    mapVisibilityWarning = panel.getCheckBox("mapVisibilityWarning");
-
-    useHaloColorAsVisionOverlayCheckBox = panel.getCheckBox("useHaloColorAsVisionOverlayCheckBox");
-    autoRevealVisionOnGMMoveCheckBox = panel.getCheckBox("autoRevealVisionOnGMMoveCheckBox");
-    showSmiliesCheckBox = panel.getCheckBox("showSmiliesCheckBox");
-    playSystemSoundCheckBox = panel.getCheckBox("playSystemSounds");
-    playStreamsCheckBox = panel.getCheckBox("playStreams");
-    playSystemSoundOnlyWhenNotFocusedCheckBox = panel.getCheckBox("soundsOnlyWhenNotFocused");
-    syrinscapeActiveCheckBox = panel.getCheckBox("syrinscapeActive");
-    showAvatarInChat = panel.getCheckBox("showChatAvatar");
-    showDialogOnNewToken = panel.getCheckBox("showDialogOnNewToken");
-    visionTypeCombo = panel.getComboBox("defaultVisionType");
-    mapSortType = panel.getComboBox("mapSortType");
-    uvttLosImportType = panel.getComboBox("uvttLosImportType");
-    movementMetricCombo = panel.getComboBox("movementMetric");
-    openEditorForNewMacros = panel.getCheckBox("openEditorForNewMacros");
-    allowPlayerMacroEditsDefault = panel.getCheckBox("allowPlayerMacroEditsDefault");
-    toolTipInlineRolls = panel.getCheckBox("toolTipInlineRolls");
-    suppressToolTipsMacroLinks = panel.getCheckBox("suppressToolTipsMacroLinks");
-    trustedOutputForeground = (ColorWell) panel.getComponent("trustedOuputForeground");
-    trustedOutputBackground = (ColorWell) panel.getComponent("trustedOuputBackground");
-    toolTipInitialDelay = panel.getTextField("toolTipInitialDelay");
-    toolTipDismissDelay = panel.getTextField("toolTipDismissDelay");
-    facingFaceEdges = panel.getCheckBox("facingFaceEdges");
-    facingFaceVertices = panel.getCheckBox("facingFaceVertices");
-
-    chatNotificationColor = (ColorWell) panel.getComponent("chatNotificationColor");
-    chatNotificationShowBackground = panel.getCheckBox("chatNotificationShowBackground");
-
-    chatAutosaveTime = panel.getSpinner("chatAutosaveTime");
-    chatFilenameFormat = panel.getTextField("chatFilenameFormat");
-
-    macroEditorThemeCombo = panel.getComboBox("macroEditorThemeCombo");
-    iconThemeCombo = panel.getComboBox("iconThemeCombo");
-
-    fitGMView = panel.getCheckBox("fitGMView");
-    hideNPCs = panel.getCheckBox("hideNPCs");
-    ownerPermissions = panel.getCheckBox("ownerPermission");
-    lockMovement = panel.getCheckBox("lockMovement");
-    showInitGainMessage = panel.getCheckBox("showInitGainMessage");
-    upnpDiscoveryTimeoutTextField = panel.getTextField("upnpDiscoveryTimeoutTextField");
-    typingNotificationDuration = panel.getSpinner("typingNotificationDuration");
-    allowExternalMacroAccessCheckBox = panel.getCheckBox("allowExternalMacroAccessCheckBox");
-    fileSyncPath = panel.getTextField("fileSyncPath");
-    fileSyncPathButton = (JButton) panel.getButton("fileSyncPathButton");
-    loadMRUcheckbox = (JCheckBox) panel.getCheckBox("loadMRUcheckbox");
-    final var installDirTextField = (JTextField) panel.getComponent("InstallDirTextField");
     installDirTextField.setText(AppUtil.getInstallDirectory().toString());
 
-    publicKeyTextArea = (JTextArea) panel.getTextComponent("publicKeyTextArea");
-    regeneratePublicKey = (JButton) panel.getButton("regeneratePublicKey");
-    copyPublicKey = (JButton) panel.getButton("copyKey");
-
-    themeList = (JList<String>) panel.getList("themeList");
-    themeImageLabel = (JLabel) panel.getComponent("themeImage");
-    themeNameLabel = (JLabel) panel.getComponent("currentThemeName");
-    useThemeForChat = (JCheckBox) panel.getComponent("useThemeForChat");
-    themeFilterCombo = panel.getComboBox("themeFilterCombo");
-
-    jvmXmxTextField = panel.getTextField("jvmXmxTextField");
-    jvmXmsTextField = panel.getTextField("jvmXmsTextField");
-    jvmXssTextField = panel.getTextField("jvmXssTextField");
-
-    dataDirTextField = panel.getTextField("dataDirTextField");
-
-    jvmDirect3dCheckbox = panel.getCheckBox("jvmDirect3dCheckbox");
-    jvmOpenGLCheckbox = panel.getCheckBox("jvmOpenGLCheckbox");
-    jvmInitAwtCheckbox = panel.getCheckBox("jvmInitAwtCheckbox");
-
-    jamLanguageOverrideComboBox = panel.getComboBox("jvmLanguageOverideComboBox");
-
-    configFileWarningPanel = (JPanel) panel.getComponent("configFileWarningPanel");
-    JLabel configFileWarningIcon = panel.getLabel("configFileWarningIcon");
+    JLabel configFileWarningIcon = getLabel("configFileWarningIcon");
     configFileWarningIcon.setIcon(
         new FlatSVGIcon("net/rptools/maptool/client/image/warning.svg", 16, 16));
 
-    cfgFilePath = panel.getTextField("cfgFilePath");
-    copyCfgFilePathButton = panel.getButton("copyCfgPath");
     copyCfgFilePathButton.addActionListener(
         e -> {
           Toolkit.getDefaultToolkit()
@@ -736,38 +654,24 @@ public class PreferencesDialog extends JDialog {
               .setContents(new StringSelection(cfgFilePath.getText()), null);
         });
 
-    pcTokenLabelFG = (ColorWell) panel.getComponent("pcTokenLabelFG");
     pcTokenLabelFG.setColor(AppPreferences.pcMapLabelForeground.get());
-    pcTokenLabelBG = (ColorWell) panel.getComponent("pcTokenLabelBG");
     pcTokenLabelBG.setColor(AppPreferences.pcMapLabelBackground.get());
-    pcTokenLabelBorderColor = (ColorWell) panel.getComponent("pcTokenLabelBorder");
     pcTokenLabelBorderColor.setColor(AppPreferences.pcMapLabelBorder.get());
-    npcTokenLabelFG = (ColorWell) panel.getComponent("npcTokenLabelFG");
     npcTokenLabelFG.setColor(AppPreferences.npcMapLabelForeground.get());
-    npcTokenLabelBG = (ColorWell) panel.getComponent("npcTokenLabelBG");
     npcTokenLabelBG.setColor(AppPreferences.npcMapLabelBackground.get());
-    npcTokenLabelBorderColor = (ColorWell) panel.getComponent("npcTokenLabelBorder");
     npcTokenLabelBorderColor.setColor(AppPreferences.npcMapLabelBorder.get());
-    nonVisTokenLabelFG = (ColorWell) panel.getComponent("nonVisTokenLabelFG");
     nonVisTokenLabelFG.setColor(AppPreferences.nonVisibleTokenMapLabelForeground.get());
-    nonVisTokenLabelBG = (ColorWell) panel.getComponent("nonVisTokenLabelBG");
     nonVisTokenLabelBG.setColor(AppPreferences.nonVisibleTokenMapLabelBackground.get());
-    nonVisTokenLabelBorderColor = (ColorWell) panel.getComponent("nonVisTokenLabelBorder");
     nonVisTokenLabelBorderColor.setColor(AppPreferences.nonVisibleTokenMapLabelBorder.get());
 
-    labelFontSizeSpinner = (JSpinner) panel.getComponent("labelFontSizeSpinner");
     labelFontSizeSpinner.setValue(AppPreferences.mapLabelFontSize.get());
-    labelBorderWidthSpinner = (JSpinner) panel.getComponent("labelBorderWidthSpinner");
     labelBorderWidthSpinner.setValue(AppPreferences.mapLabelBorderWidth.get());
-    labelBorderArcSpinner = (JSpinner) panel.getComponent("labelBorderArcSpinner");
     labelBorderArcSpinner.setValue(AppPreferences.mapLabelBorderArc.get());
 
-    statusScrollEnable = panel.getCheckBox("statusScrollEnable");
     statusScrollEnable.setSelected(AppPreferences.scrollStatusMessages.get());
     statusScrollEnable.addChangeListener(
         e -> AppPreferences.scrollStatusMessages.set(((JCheckBox) e.getSource()).isSelected()));
 
-    statusTempMessageTimeSpinner = panel.getSpinner("statusTempMessageTimeSpinner");
     statusTempMessageTimeSpinner.setModel(
         new SpinnerNumberModel(
             AppPreferences.scrollStatusTempDuration.get().doubleValue(),
@@ -780,7 +684,6 @@ public class PreferencesDialog extends JDialog {
                 ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
                     .getNumber()
                     .doubleValue()));
-    statusScrollSpeedSpinner = panel.getSpinner("statusScrollSpeedSpinner");
     statusScrollSpeedSpinner.setModel(
         new SpinnerNumberModel(
             AppPreferences.scrollStatusSpeed.get().doubleValue(),
@@ -794,7 +697,6 @@ public class PreferencesDialog extends JDialog {
                     .getNumber()
                     .doubleValue()));
 
-    statusScrollStartDelaySpinner = panel.getSpinner("statusScrollStartDelaySpinner");
     statusScrollStartDelaySpinner.setModel(
         new SpinnerNumberModel(
             AppPreferences.scrollStatusStartDelay.get().doubleValue(),
@@ -807,7 +709,6 @@ public class PreferencesDialog extends JDialog {
                 ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
                     .getNumber()
                     .doubleValue()));
-    statusScrollEndPause = panel.getSpinner("statusScrollEndPause");
     statusScrollEndPause.setModel(
         new SpinnerNumberModel(
             AppPreferences.scrollStatusEndPause.get().doubleValue(),
@@ -821,7 +722,6 @@ public class PreferencesDialog extends JDialog {
                     .getNumber()
                     .doubleValue()));
 
-    showLabelBorderCheckBox = (JCheckBox) panel.getComponent("showLabelBorder");
     showLabelBorderCheckBox.addActionListener(
         e -> {
           if (showLabelBorderCheckBox.isSelected()) {
@@ -858,7 +758,7 @@ public class PreferencesDialog extends JDialog {
     }
 
     {
-      final var developerOptionToggles = (JPanel) panel.getComponent("developerOptionToggles");
+      final var developerOptionToggles = (JPanel) getComponent("developerOptionToggles");
       final var developerLayout = developerOptionToggles.getLayout();
 
       final var labelConstraints = new GridBagConstraints();
@@ -1621,7 +1521,7 @@ public class PreferencesDialog extends JDialog {
 
     regeneratePublicKey.addActionListener(
         e -> {
-          CompletableFuture<CipherUtil.Key> keys = new PublicPrivateKeyStore().regenerateKeys();
+          CompletableFuture<CipherUtil.Key> keys = MapTool.getKeyStore().regenerateKeys();
 
           keys.thenAccept(
               cu -> {
@@ -1631,18 +1531,29 @@ public class PreferencesDialog extends JDialog {
                     });
               });
         });
-
-    add(panel);
-    pack();
-  }
-
-  @Override
-  public void setVisible(boolean b) {
-    if (b) {
-      SwingUtil.centerOver(this, MapTool.getFrame());
-      themeChanged = false;
+    JSpinner[] spinners =
+        new JSpinner[] {
+          haloLineWidthSpinner,
+          haloOverlayOpacitySpinner,
+          auraOverlayOpacitySpinner,
+          lightOverlayOpacitySpinner,
+          lumensOverlayOpacitySpinner,
+          lumensOverlayBorderThicknessSpinner,
+          fogOverlayOpacitySpinner,
+          chatAutosaveTime,
+          typingNotificationDuration,
+          autoSaveSpinner,
+          labelFontSizeSpinner,
+          labelBorderWidthSpinner,
+          labelBorderArcSpinner,
+          statusTempMessageTimeSpinner,
+          statusScrollSpeedSpinner,
+          statusScrollStartDelaySpinner,
+          statusScrollEndPause
+        };
+    for (JSpinner spinner : spinners) {
+      setSpinnerEditorWidth.accept(spinner);
     }
-    super.setVisible(b);
   }
 
   /**
@@ -1786,7 +1697,7 @@ public class PreferencesDialog extends JDialog {
     chatNotificationColor.setColor(AppPreferences.chatNotificationColor.get());
     chatNotificationShowBackground.setSelected(AppPreferences.chatNotificationBackground.get());
 
-    CompletableFuture<CipherUtil.Key> keys = new PublicPrivateKeyStore().getKeys();
+    CompletableFuture<CipherUtil.Key> keys = MapTool.getKeyStore().getKeys();
 
     keys.thenAccept(
         cu -> {
@@ -1994,5 +1905,10 @@ public class PreferencesDialog extends JDialog {
     public String toString() {
       return displayName;
     }
+  }
+
+  public void showDialog() {
+    themeChanged = false;
+    dialogFactory.display();
   }
 }

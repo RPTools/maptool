@@ -41,11 +41,11 @@ import java.util.*;
 import java.util.List;
 import java.util.zip.Deflater;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.CodeTimer;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ZoneActivated;
 import net.rptools.maptool.client.swing.ImageBorder;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.tool.Tool;
 import net.rptools.maptool.client.tool.WallTopologyTool;
 import net.rptools.maptool.client.ui.Scale;
@@ -1054,7 +1054,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
             for (CellPoint point : blockedMoves) {
               ZonePoint zp =
-                  point.midZonePoint(zoneCache.getZoneRenderer().getZone().getGrid(), position);
+                  zoneCache.getZoneRenderer().getZone().getGrid().midZonePoint(point, position);
               double r = (zp.x - 1) * 45;
               showBlockedMoves(zp, r, zoneCache.getSprite("block_move"), 1.0f);
             }
@@ -1834,7 +1834,7 @@ public class GdxRenderer extends ApplicationAdapter {
           new java.awt.Rectangle(
               footprintBounds.x, footprintBounds.y - (int) iso_ho, footprintBounds.width, (int) th);
     }
-    SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+    AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
 
     int offsetx = 0;
     int offsety = 0;

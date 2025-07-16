@@ -58,7 +58,7 @@ class MacroLocationTest {
     MacroLocation location = MacroLocation.parseMacroName("test@lib:libName", null, null);
     assertEquals("test", location.getName());
     assertEquals(MacroLocation.MacroSource.library, location.getSource());
-    assertEquals("lib:libName", location.getLocation());
+    assertEquals("libName", location.getLocation());
     assertNull(location.getUri());
   }
 
@@ -158,7 +158,7 @@ class MacroLocationTest {
     MacroLocation location = MacroLocation.parseMacroName("test@this", caller, null);
     assertEquals("test", location.getName());
     assertEquals(MacroLocation.MacroSource.library, location.getSource());
-    assertEquals("lib:libName", location.getLocation());
+    assertEquals("libName", location.getLocation());
     assertNull(location.getUri());
   }
 
@@ -182,5 +182,44 @@ class MacroLocationTest {
     assertEquals(MacroLocation.MacroSource.unknown, location.getSource());
     assertEquals("", location.getLocation());
     assertNull(location.getUri());
+  }
+
+  @Test
+  void testTokenGetCallableLocation() {
+    Token mockToken = Mockito.mock(Token.class);
+    Mockito.when(mockToken.getName()).thenReturn("mockToken");
+    MacroLocation location = MacroLocation.parseMacroName("test@token", null, mockToken);
+    assertEquals("Token:mockToken", location.getCallableLocation());
+  }
+
+  @Test
+  void testCampaignGetCallableLocation() {
+    MacroLocation location = MacroLocation.parseMacroName("test@campaign", null, null);
+    assertEquals("campaign", location.getCallableLocation());
+  }
+
+  @Test
+  void testGmGetCallableLocation() {
+    MacroLocation location = MacroLocation.parseMacroName("test@gm", null, null);
+    assertEquals("gm", location.getCallableLocation());
+  }
+
+  @Test
+  void testGlobalGetCallableLocation() {
+    MacroLocation location = MacroLocation.parseMacroName("test@global", null, null);
+    assertEquals("global", location.getCallableLocation());
+  }
+
+  @Test
+  void testLibGetCallableLocation() {
+    Token mockToken = Mockito.mock(Token.class);
+    Mockito.when(mockToken.getName()).thenReturn("Lib:TestToken");
+    MacroLocation location = MacroLocation.parseMacroName("test@Lib:TestToken", null, mockToken);
+    assertEquals("Lib:TestToken", location.getCallableLocation());
+
+    Token mockToken2 = Mockito.mock(Token.class);
+    Mockito.when(mockToken2.getName()).thenReturn("lib:TestToken");
+    MacroLocation location2 = MacroLocation.parseMacroName("test@lib:TestToken", null, mockToken2);
+    assertEquals("lib:TestToken", location2.getCallableLocation());
   }
 }

@@ -27,10 +27,10 @@ import javax.swing.ListCellRenderer;
 import javax.swing.SwingConstants;
 import javax.swing.border.Border;
 import net.miginfocom.swing.MigLayout;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.swing.label.FlatImageLabel;
 import net.rptools.maptool.client.swing.label.FlatImageLabelFactory;
 import net.rptools.maptool.client.ui.theme.Borders;
@@ -311,7 +311,7 @@ public class InitiativeListCellRenderer extends JPanel
           ImageUtil.createCompatibleImage(
               getIconWidth(), getIconHeight(), Transparency.TRANSLUCENT);
       Dimension d = new Dimension(image.getWidth(null), image.getHeight(null));
-      SwingUtil.constrainTo(d, getIconWidth(), getIconHeight());
+      AwtUtil.constrainTo(d, getIconWidth(), getIconHeight());
       Graphics2D g = bi.createGraphics();
       g.setComposite(
           AlphaComposite.getInstance(

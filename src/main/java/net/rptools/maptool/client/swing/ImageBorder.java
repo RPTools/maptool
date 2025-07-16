@@ -46,6 +46,7 @@ public class ImageBorder implements Border {
   public ImageBorder(String imagePath) {
     try {
       this.imagePath = imagePath;
+
       topRight = ImageUtil.getCompatibleImage(imagePath + "/tr.png");
       top = ImageUtil.getCompatibleImage(imagePath + "/top.png");
       topLeft = ImageUtil.getCompatibleImage(imagePath + "/tl.png");

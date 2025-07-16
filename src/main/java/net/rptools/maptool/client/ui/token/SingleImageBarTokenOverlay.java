@@ -20,8 +20,8 @@ import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BarTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -82,7 +82,7 @@ public class SingleImageBarTokenOverlay extends BarTokenOverlay {
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Find the position of the images according to the size and side where they are placed
     int x = 0;

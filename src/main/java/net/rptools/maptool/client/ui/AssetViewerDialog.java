@@ -33,6 +33,7 @@ import java.awt.image.BufferedImage;
 import javax.swing.JDialog;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppPreferences;
@@ -135,7 +136,7 @@ public class AssetViewerDialog extends JDialog {
                 // Keep it within the screen
                 Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
                 if (size.width > screenSize.width || size.height > screenSize.height) {
-                  SwingUtil.constrainTo(size, screenSize.width, screenSize.height);
+                  AwtUtil.constrainTo(size, screenSize.width, screenSize.height);
                 }
 
                 AssetViewerDialog.this.setSize(size.width, size.height);
@@ -164,7 +165,7 @@ public class AssetViewerDialog extends JDialog {
       }
 
       Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
-      SwingUtil.constrainTo(imgSize, size.width, size.height);
+      AwtUtil.constrainTo(imgSize, size.width, size.height);
 
       Object oldHint = g2d.getRenderingHint(RenderingHints.KEY_RENDERING);
       AppPreferences.renderQuality.get().setShrinkRenderingHints(g2d);
@@ -224,7 +225,7 @@ public class AssetViewerDialog extends JDialog {
     // Keep it within the screen
     Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
     if (size.width > screenSize.width || size.height > screenSize.height) {
-      SwingUtil.constrainTo(size, screenSize.width, screenSize.height);
+      AwtUtil.constrainTo(size, screenSize.width, screenSize.height);
     }
 
     getContentPane().setPreferredSize(size);

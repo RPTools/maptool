@@ -52,7 +52,6 @@ import okhttp3.RequestBody;
 import okhttp3.Response;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 public class MapToolRegistry {
   private static final String SERVICE_URL = "https://services-mt.rptools.net";
@@ -214,12 +213,12 @@ public class MapToolRegistry {
         .enqueue(
             new Callback() {
               @Override
-              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+              public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
                 log.error("Error unregistering server ", e);
               }
 
               @Override
-              public void onResponse(@NotNull Call call, @NotNull Response response)
+              public void onResponse(@Nonnull Call call, @Nonnull Response response)
                   throws IOException {
                 try {
                   response.close();
@@ -249,12 +248,12 @@ public class MapToolRegistry {
         .enqueue(
             new Callback() {
               @Override
-              public void onFailure(@NotNull Call call, @NotNull IOException e) {
+              public void onFailure(@Nonnull Call call, @Nonnull IOException e) {
                 log.error("Error sending heart beat", e);
               }
 
               @Override
-              public void onResponse(@NotNull Call call, @NotNull Response response)
+              public void onResponse(@Nonnull Call call, @Nonnull Response response)
                   throws IOException {
                 try {
                   response.close();

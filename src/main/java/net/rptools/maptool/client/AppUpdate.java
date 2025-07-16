@@ -22,6 +22,7 @@ import java.util.Properties;
 import java.util.jar.*;
 import javax.swing.*;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.language.I18N;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -53,8 +54,8 @@ public class AppUpdate {
     // Default for Linux?
     String DOWNLOAD_EXTENSION = ".deb";
 
-    if (AppUtil.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
-    else if (AppUtil.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
+    if (OsDetection.WINDOWS) DOWNLOAD_EXTENSION = ".exe";
+    else if (OsDetection.MAC_OS_X) DOWNLOAD_EXTENSION = ".pkg"; // Better default than .dmg?
 
     String runningVersion = getImplementationVersion();
     if (StringUtils.isBlank(runningVersion)) {

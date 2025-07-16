@@ -20,38 +20,8 @@ import javax.swing.*;
 public class CampaignPropertiesDialogView {
 
   private JPanel mainPanel;
-  private JEditorPane sightPanel;
-  private JEditorPane lightPanel;
-  private JEditorPane auraPanel;
-  private JEditorPane auraHelp;
-  private JEditorPane lightHelp;
-  private JEditorPane sightHelp;
 
   public JComponent getRootComponent() {
     return mainPanel;
-  }
-
-  public JEditorPane getSightPanel() {
-    return sightPanel;
-  }
-
-  public JEditorPane getSightHelp() {
-    return sightHelp;
-  }
-
-  public JEditorPane getLightPanel() {
-    return lightPanel;
-  }
-
-  public JEditorPane getLightHelp() {
-    return lightHelp;
-  }
-
-  public JEditorPane getAuraPanel() {
-    return auraPanel;
-  }
-
-  public JEditorPane getAuraHelp() {
-    return auraHelp;
   }
 }

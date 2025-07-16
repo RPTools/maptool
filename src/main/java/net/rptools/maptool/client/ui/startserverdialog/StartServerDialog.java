@@ -18,6 +18,7 @@ import java.text.DecimalFormat;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -28,7 +29,6 @@ import net.rptools.maptool.client.walker.WalkerMetric;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.player.Player;
 import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.StringUtil;
 import yasb.Binder;
 
 /**

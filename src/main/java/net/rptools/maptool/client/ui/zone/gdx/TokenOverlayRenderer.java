@@ -18,7 +18,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.PolygonSpriteBatch;
 import java.awt.*;
 import java.awt.geom.Area;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.util.FunctionUtil;
@@ -90,7 +90,7 @@ public class TokenOverlayRenderer {
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Find the position of the image according to the size and side where they are placed
     switch (overlay.getSide()) {
@@ -120,7 +120,7 @@ public class TokenOverlayRenderer {
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     var side = overlay.getSide();
     // Find the position of the images according to the size and side where they are placed
@@ -273,7 +273,7 @@ public class TokenOverlayRenderer {
 
     Dimension d = bounds.getSize();
     Dimension size = new Dimension((int) topImage.getWidth(), (int) topImage.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     var side = overlay.getSide();
     // Find the position of the images according to the size and side where they are placed
@@ -382,7 +382,7 @@ public class TokenOverlayRenderer {
     var image = zoneCache.getSprite(overlay.getAssetId(), stateTime);
 
     Dimension size = new Dimension((int) image.getWidth(), (int) image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Paint it at the right location
     int width = size.width;

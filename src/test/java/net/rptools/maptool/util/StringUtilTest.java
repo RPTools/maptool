@@ -16,6 +16,7 @@ package net.rptools.maptool.util;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import net.rptools.lib.StringUtil;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 

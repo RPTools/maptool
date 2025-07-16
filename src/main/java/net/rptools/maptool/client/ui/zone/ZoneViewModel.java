@@ -19,6 +19,7 @@ import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
 import java.awt.geom.Point2D;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.ImageObserver;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -26,10 +27,13 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import javax.annotation.Nullable;
+import net.rptools.lib.CollectionUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
@@ -44,10 +48,8 @@ import net.rptools.maptool.model.LightSource;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.player.Player;
-import net.rptools.maptool.util.CollectionUtil;
 import net.rptools.maptool.util.GraphicsUtil;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -274,6 +276,12 @@ public class ZoneViewModel {
       // We're done, until the cache is cleared
       return;
     }
+
+    ImageObserver observer =
+        Objects.requireNonNullElseGet(
+            MapTool.getFrame().getZoneRenderer(this.zone),
+            () -> (ImageObserver) (img, infoflags, x, y, width, height) -> false);
+
     // Get a list of all the assets in the zone
     Set<MD5Key> assetSet = zone.getAllAssetIds();
     assetSet.remove(null); // remove bad data
@@ -293,7 +301,7 @@ public class ZoneViewModel {
       downloadCount++;
 
       // Have we loaded the image into memory yet ?
-      Image image = ImageManager.getImage(asset.getMD5Key());
+      Image image = ImageManager.getImage(asset.getMD5Key(), observer);
       if (image == null || image == ImageManager.TRANSFERING_IMAGE) {
         loaded = false;
         continue;

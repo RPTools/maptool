@@ -37,6 +37,7 @@ import net.rptools.maptool.model.MacroButtonProperties;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.library.LibraryManager;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.function.Function;
 import org.apache.commons.lang3.StringUtils;
@@ -1579,7 +1580,8 @@ public class MapToolLineParser {
     return retval;
   }
 
-  public static final MapToolExpressionParser expressionParser = new MapToolExpressionParser();
+  public static final MapToolExpressionParser expressionParser =
+      new ExpressionParserFactory().createMT();
 
   private String rollString(Collection<String> options, String text) {
     return rollString(options, null, text);

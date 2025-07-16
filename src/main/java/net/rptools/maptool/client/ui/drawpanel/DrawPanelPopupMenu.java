@@ -362,28 +362,35 @@ public class DrawPanelPopupMenu extends JPopupMenu {
 
     public void actionPerformed(ActionEvent e) {
       ColorPicker cp = MapTool.getFrame().getColorPicker();
-      Pen p = elementUnderMouse.getPen();
-      if (cp.getForegroundPaint() != null) {
-        p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
-        p.setForegroundMode(0);
-      } else {
-        p.setPaint(null);
-        p.setForegroundMode(1);
+
+      // Set the properties for each selected drawing
+      List<DrawnElement> drawableList = renderer.getZone().getAllDrawnElements();
+      for (DrawnElement de : drawableList) {
+        if (selectedDrawSet.contains(de.getDrawable().getId())) {
+          Pen p = de.getPen();
+          if (cp.getForegroundPaint() != null) {
+            p.setPaint(DrawablePaint.convertPaint(cp.getForegroundPaint()));
+            p.setForegroundMode(0);
+          } else {
+            p.setPaint(null);
+            p.setForegroundMode(1);
+          }
+          if (cp.getBackgroundPaint() != null) {
+            p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
+            p.setBackgroundMode(0);
+          } else {
+            p.setBackgroundPaint(null);
+            p.setBackgroundMode(1);
+          }
+          p.setThickness(cp.getStrokeWidth());
+          p.setOpacity(cp.getOpacity());
+          p.setThickness(cp.getStrokeWidth());
+          p.setEraser(cp.isEraseSelected());
+          p.setSquareCap(cp.isSquareCapSelected());
+          MapTool.getFrame().updateDrawTree();
+          MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, de);
+        }
       }
-      if (cp.getBackgroundPaint() != null) {
-        p.setBackgroundPaint(DrawablePaint.convertPaint(cp.getBackgroundPaint()));
-        p.setBackgroundMode(0);
-      } else {
-        p.setBackgroundPaint(null);
-        p.setBackgroundMode(1);
-      }
-      p.setThickness(cp.getStrokeWidth());
-      p.setOpacity(cp.getOpacity());
-      p.setThickness(cp.getStrokeWidth());
-      p.setEraser(cp.isEraseSelected());
-      p.setSquareCap(cp.isSquareCapSelected());
-      MapTool.getFrame().updateDrawTree();
-      MapTool.serverCommand().updateDrawing(renderer.getZone().getId(), p, elementUnderMouse);
     }
   }
 

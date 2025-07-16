@@ -26,7 +26,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import net.rptools.maptool.client.swing.SwingUtil;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
@@ -216,7 +216,7 @@ public class TokenVBL {
     // Translate the capture to zero out the x,y to store on the Token
     if (token.isSnapToScale()) {
       Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
-      SwingUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
+      AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
       atArea.scale(token.getWidth() / imgSize.getWidth(), token.getHeight() / imgSize.getHeight());
       atArea.translate(
           -footprintBounds.getX() - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2),

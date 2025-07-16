@@ -45,6 +45,7 @@ import javax.swing.tree.TreeSelectionModel;
 import javax.xml.parsers.ParserConfigurationException;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.OsDetection;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppActions.ClientAction;
 import net.rptools.maptool.client.events.ZoneActivated;
@@ -456,7 +457,7 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     glassPaneComposite.setVisible(true);
 
-    if (!AppUtil.MAC_OS_X) removeWindowsF10();
+    if (!OsDetection.MAC_OS_X) removeWindowsF10();
     else registerForMacOSXEvents();
 
     new MapToolEventBus().getMainEventBus().register(this);
@@ -1860,14 +1861,14 @@ public class MapToolFrame extends DefaultDockableHolder implements WindowListene
 
     // Under mac os x this does not properly hide the menu bar so adjust top and height
     // so menu bar does not overlay screen.
-    if (AppUtil.MAC_OS_X) {
+    if (OsDetection.MAC_OS_X) {
       fullScreenFrame.setBounds(bounds.x, bounds.y + 21, bounds.width, bounds.height - 21);
     } else {
       fullScreenFrame.setBounds(bounds.x, bounds.y, bounds.width, bounds.height);
     }
     fullScreenFrame.setJMenuBar(menuBar);
     // Menu bar is visible anyways on MAC so leave menu items on it
-    if (!AppUtil.MAC_OS_X) menuBar.setVisible(false);
+    if (!OsDetection.MAC_OS_X) menuBar.setVisible(false);
 
     fullScreenFrame.setVisible(true);
     showFullScreenTools();

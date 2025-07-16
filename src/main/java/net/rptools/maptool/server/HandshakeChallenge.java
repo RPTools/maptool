@@ -22,7 +22,7 @@ import javax.crypto.BadPaddingException;
 import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil;
 
 public class HandshakeChallenge {
   private final byte[] challenge;

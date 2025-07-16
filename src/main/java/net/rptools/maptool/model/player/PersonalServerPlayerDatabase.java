@@ -20,8 +20,8 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
 import net.rptools.maptool.model.player.Player.Role;
-import net.rptools.maptool.util.cipher.CipherUtil;
 
 public class PersonalServerPlayerDatabase implements ServerSidePlayerDatabase {
 

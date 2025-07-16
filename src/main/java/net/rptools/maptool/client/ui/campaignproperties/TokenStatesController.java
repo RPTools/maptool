@@ -28,6 +28,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.filechooser.FileFilter;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.AbeillePanel;
@@ -37,7 +38,6 @@ import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.drawing.AbstractTemplate.Quadrant;
-import net.rptools.maptool.util.StringUtil;
 
 /**
  * This controller will handle all of the components on the States panel of the {@link

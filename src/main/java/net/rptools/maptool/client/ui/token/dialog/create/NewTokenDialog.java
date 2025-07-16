@@ -23,9 +23,12 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.Set;
 import javax.swing.*;
+import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.*;
+import net.rptools.maptool.client.swing.AbeillePanel;
+import net.rptools.maptool.client.swing.GenericDialog;
 import net.rptools.maptool.client.ui.sheet.stats.StatSheetComboBoxRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
@@ -307,7 +310,7 @@ public class NewTokenDialog extends AbeillePanel<Token> {
 
     // Need to resize?
     Dimension imgSize = new Dimension(assetImage.getWidth(), assetImage.getHeight());
-    SwingUtil.constrainTo(imgSize, SIZE);
+    AwtUtil.constrainTo(imgSize, SIZE);
     BufferedImage image = new BufferedImage(imgSize.width, imgSize.height, Transparency.BITMASK);
     Graphics2D g = image.createGraphics();
     g.drawImage(

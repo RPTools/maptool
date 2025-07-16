@@ -14,10 +14,10 @@
  */
 package net.rptools.maptool.model.player;
 
+import net.rptools.lib.cipher.CipherUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.server.proto.PlayerDto;
-import net.rptools.maptool.util.cipher.CipherUtil;
 
 /**
  * @author trevor

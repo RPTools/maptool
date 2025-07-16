@@ -17,19 +17,16 @@ package net.rptools.maptool.model;
 import com.google.common.collect.ImmutableList;
 import com.google.protobuf.StringValue;
 import java.awt.geom.Area;
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
-import net.rptools.lib.FileUtil;
 import net.rptools.maptool.server.proto.LightSourceDto;
 import org.apache.commons.lang3.math.NumberUtils;
 
@@ -276,14 +273,6 @@ public final class LightSource implements Comparable<LightSource>, Serializable 
   /* Area for all lights combined */
   public @Nonnull Area getArea(@Nonnull Token token, @Nonnull Zone zone) {
     return getArea(token, zone, 1.0);
-  }
-
-  @SuppressWarnings("unchecked")
-  public static @Nonnull Map<String, List<LightSource>> getDefaultLightSources()
-      throws IOException {
-    Object defaultLights =
-        FileUtil.objFromResource("net/rptools/maptool/model/defaultLightSourcesMap.xml");
-    return (Map<String, List<LightSource>>) defaultLights;
   }
 
   @Override

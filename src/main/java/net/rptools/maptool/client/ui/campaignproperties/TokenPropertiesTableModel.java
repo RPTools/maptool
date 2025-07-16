@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.campaignproperties;
 
+import java.awt.*;
 import java.io.Serial;
 import java.util.Collections;
 import java.util.HashMap;
@@ -85,6 +86,19 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
     };
   }
 
+  public String getColumnTooltipText(int column) {
+    return switch (column) {
+      case 0 -> I18N.getText("campaignPropertiesTable.column.name.description");
+      case 1 -> I18N.getText("campaignPropertiesTable.column.shortName.description");
+      case 2 -> I18N.getText("campaignPropertiesTable.column.displayName.description");
+      case 3 -> I18N.getText("campaignPropertiesTable.column.default.description");
+      case 4 -> I18N.getText("campaignPropertiesTable.column.statSheet.description");
+      case 5 -> I18N.getText("campaignPropertiesTable.column.gm.description");
+      case 6 -> I18N.getText("campaignPropertiesTable.column.owner.description");
+      default -> "";
+    };
+  }
+
   @Override
   public String getColumnName(int column) {
     String cName = "";
@@ -98,7 +112,6 @@ public class TokenPropertiesTableModel extends AbstractTableModel {
       case 5 -> cName = I18N.getText("campaignPropertiesTable.column.gmStatSheet");
       case 6 -> cName = I18N.getText("campaignPropertiesTable.column.ownerStatSheet");
     }
-    ;
     return htmlWrap.replace("###", cName);
   }
 

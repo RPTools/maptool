@@ -24,6 +24,8 @@ import java.util.regex.Pattern;
 import javax.swing.*;
 import javax.swing.border.BevelBorder;
 import javax.swing.plaf.basic.BasicToggleButtonUI;
+import net.rptools.lib.AwtUtil;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.events.ChatMessageAdded;
@@ -43,7 +45,6 @@ import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.tokens.TokenPanelChanged;
 import net.rptools.maptool.model.zones.TokenEdited;
 import net.rptools.maptool.util.ImageManager;
-import net.rptools.maptool.util.StringUtil;
 
 public class CommandPanel extends JPanel {
 
@@ -925,7 +926,7 @@ public class CommandPanel extends JPanel {
         return;
       }
       Dimension imgSize = new Dimension(image.getWidth(null), image.getHeight(null));
-      SwingUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
+      AwtUtil.constrainTo(imgSize, size.width - PADDING * 2, size.height - PADDING * 2);
 
       AppPreferences.renderQuality.get().setShrinkRenderingHints((Graphics2D) g);
       g.drawImage(

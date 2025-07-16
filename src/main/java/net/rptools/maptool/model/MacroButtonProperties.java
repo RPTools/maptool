@@ -20,6 +20,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import javax.annotation.Nonnull;
 import javax.swing.text.JTextComponent;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
@@ -31,11 +32,9 @@ import net.rptools.maptool.client.ui.macrobuttons.buttons.MacroButtonPrefs;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.server.proto.MacroButtonPropertiesDto;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.jetbrains.annotations.NotNull;
 
 /**
  * This (data)class is used by all Macro Buttons, including campaign, global and token macro
@@ -948,7 +947,7 @@ public class MacroButtonProperties implements Comparable<MacroButtonProperties> 
 
   // function to enable sorting of buttons; uses the group first, then sortby field
   // concatenated with the label field. Case Insensitive
-  public int compareTo(@NotNull MacroButtonProperties b2) throws ClassCastException {
+  public int compareTo(@Nonnull MacroButtonProperties b2) throws ClassCastException {
     if (b2 != this) {
       String b1group = getGroup();
       String b1sortby = getSortby();

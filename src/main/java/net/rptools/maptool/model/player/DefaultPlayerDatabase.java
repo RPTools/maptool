@@ -23,7 +23,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import javax.crypto.NoSuchPaddingException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil;
 
 /**
  * This class provides the implementation for the default player database, where any one can connect

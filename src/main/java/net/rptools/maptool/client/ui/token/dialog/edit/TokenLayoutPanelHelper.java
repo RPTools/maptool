@@ -29,7 +29,7 @@ import javax.swing.*;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.MathUtil;
 import net.rptools.lib.image.ImageUtil;
-import net.rptools.maptool.client.AppConstants;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.*;
 import net.rptools.maptool.client.ui.theme.Images;
@@ -37,6 +37,7 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.ImageSupport;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -99,8 +100,8 @@ class TokenLayoutPanelHelper {
     pairControls();
   }
 
-  private final EnumSet<AppConstants.FLIP_DIRECTION> flipDirections =
-      EnumSet.noneOf(AppConstants.FLIP_DIRECTION.class);
+  private final EnumSet<ImageSupport.FlipDirection> flipDirections =
+      EnumSet.noneOf(ImageSupport.FlipDirection.class);
   private static final UIDefaults UI_DEFAULTS = UIManager.getDefaults();
   private static final double DEFAULT_FONT_SIZE = UI_DEFAULTS.getFont("defaultFont").getSize2D();
   protected Grid grid = MapTool.getFrame().getCurrentZoneRenderer().getZone().getGrid();
@@ -224,30 +225,30 @@ class TokenLayoutPanelHelper {
 
   protected void setTokenFlipIso(Boolean b) {
     mirrorToken.setIsFlippedIso(b);
-    if (flipDirections.contains(AppConstants.FLIP_DIRECTION.ISOMETRIC) && !b) {
-      flipDirections.remove(AppConstants.FLIP_DIRECTION.ISOMETRIC);
-    } else if (!flipDirections.contains(AppConstants.FLIP_DIRECTION.ISOMETRIC) && b) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.ISOMETRIC);
+    if (flipDirections.contains(ImageSupport.FlipDirection.ISOMETRIC) && !b) {
+      flipDirections.remove(ImageSupport.FlipDirection.ISOMETRIC);
+    } else if (!flipDirections.contains(ImageSupport.FlipDirection.ISOMETRIC) && b) {
+      flipDirections.add(ImageSupport.FlipDirection.ISOMETRIC);
     }
     flagAsDirty();
   }
 
   protected void setTokenFlipX(Boolean b) {
     mirrorToken.setFlippedX(b);
-    if (flipDirections.contains(AppConstants.FLIP_DIRECTION.HORIZONTAL) && !b) {
-      flipDirections.remove(AppConstants.FLIP_DIRECTION.HORIZONTAL);
-    } else if (!flipDirections.contains(AppConstants.FLIP_DIRECTION.HORIZONTAL) && b) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.HORIZONTAL);
+    if (flipDirections.contains(ImageSupport.FlipDirection.HORIZONTAL) && !b) {
+      flipDirections.remove(ImageSupport.FlipDirection.HORIZONTAL);
+    } else if (!flipDirections.contains(ImageSupport.FlipDirection.HORIZONTAL) && b) {
+      flipDirections.add(ImageSupport.FlipDirection.HORIZONTAL);
     }
     flagAsDirty();
   }
 
   protected void setTokenFlipY(Boolean b) {
     mirrorToken.setFlippedY(b);
-    if (flipDirections.contains(AppConstants.FLIP_DIRECTION.VERTICAL) && !b) {
-      flipDirections.remove(AppConstants.FLIP_DIRECTION.VERTICAL);
-    } else if (!flipDirections.contains(AppConstants.FLIP_DIRECTION.VERTICAL) && b) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.VERTICAL);
+    if (flipDirections.contains(ImageSupport.FlipDirection.VERTICAL) && !b) {
+      flipDirections.remove(ImageSupport.FlipDirection.VERTICAL);
+    } else if (!flipDirections.contains(ImageSupport.FlipDirection.VERTICAL) && b) {
+      flipDirections.add(ImageSupport.FlipDirection.VERTICAL);
     }
     flagAsDirty();
   }
@@ -273,13 +274,13 @@ class TokenLayoutPanelHelper {
 
   private void storeFlipDirections() {
     if (getTokenFlippedIso()) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.ISOMETRIC);
+      flipDirections.add(ImageSupport.FlipDirection.ISOMETRIC);
     }
     if (getTokenFlippedX()) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.HORIZONTAL);
+      flipDirections.add(ImageSupport.FlipDirection.HORIZONTAL);
     }
     if (getTokenFlippedY()) {
-      flipDirections.add(AppConstants.FLIP_DIRECTION.VERTICAL);
+      flipDirections.add(ImageSupport.FlipDirection.VERTICAL);
     }
   }
 
@@ -355,9 +356,9 @@ class TokenLayoutPanelHelper {
   protected void commitChanges(Token tok) {
     tok.setAnchor(getTokenAnchorX(), getTokenAnchorY());
     tok.setSizeScale(getTokenSizeScale());
-    tok.setFlippedX(flipDirections.contains(AppConstants.FLIP_DIRECTION.HORIZONTAL));
-    tok.setFlippedY(flipDirections.contains(AppConstants.FLIP_DIRECTION.VERTICAL));
-    tok.setIsFlippedIso(flipDirections.contains(AppConstants.FLIP_DIRECTION.ISOMETRIC));
+    tok.setFlippedX(flipDirections.contains(ImageSupport.FlipDirection.HORIZONTAL));
+    tok.setFlippedY(flipDirections.contains(ImageSupport.FlipDirection.VERTICAL));
+    tok.setIsFlippedIso(flipDirections.contains(ImageSupport.FlipDirection.ISOMETRIC));
   }
 
   protected void setToken(Token token, boolean useDefaults) {
@@ -725,7 +726,9 @@ class TokenLayoutPanelHelper {
                 BufferedImage.TYPE_4BYTE_ABGR_PRE);
       }
 
-      workImage = ImageUtil.getScaledTokenImage(tokenImage, mirrorToken, grid, zoomFactor);
+      workImage =
+          ImageSupport.getScaledTokenImage(
+              tokenImage, mirrorToken, grid, zoomFactor, AppPreferences.renderQuality.get());
       workImage = getFlippedImage(workImage);
     }
 
@@ -817,16 +820,16 @@ class TokenLayoutPanelHelper {
      */
     private BufferedImage getFlippedImage(BufferedImage bi) {
       log.debug("getFlippedImage - flipStates: " + flipDirections);
-      AppConstants.FLIP_DIRECTION direction =
-          AppConstants.FLIP_DIRECTION.getFlipDirection(
-              flipDirections.contains(AppConstants.FLIP_DIRECTION.HORIZONTAL),
-              flipDirections.contains(AppConstants.FLIP_DIRECTION.VERTICAL),
-              flipDirections.contains(AppConstants.FLIP_DIRECTION.ISOMETRIC));
-      if (!direction.equals(AppConstants.FLIP_DIRECTION.NONE)) {
-        bi = ImageUtil.flipCartesian(bi, direction);
+      ImageSupport.FlipDirection direction =
+          ImageSupport.FlipDirection.getFlipDirection(
+              flipDirections.contains(ImageSupport.FlipDirection.HORIZONTAL),
+              flipDirections.contains(ImageSupport.FlipDirection.VERTICAL),
+              flipDirections.contains(ImageSupport.FlipDirection.ISOMETRIC));
+      if (!direction.equals(ImageSupport.FlipDirection.NONE)) {
+        bi = ImageSupport.flipCartesian(bi, direction);
       }
-      if (AppConstants.FLIP_DIRECTION.isFlippedIso(direction)) {
-        bi = ImageUtil.flipIsometric(bi, true);
+      if (direction.isFlippedIso()) {
+        bi = ImageUtil.flipIsometric(bi, true, AppPreferences.renderQuality.get());
       }
       return bi;
     }

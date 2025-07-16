@@ -16,8 +16,8 @@ package net.rptools.maptool.client.ui.token;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.server.proto.BooleanTokenOverlayDto;
 import net.rptools.maptool.util.ImageManager;
@@ -82,7 +82,7 @@ public class ImageTokenOverlay extends BooleanTokenOverlay {
 
     BufferedImage image = ImageManager.getImageAndWait(assetId);
     Dimension size = new Dimension(image.getWidth(), image.getHeight());
-    SwingUtil.constrainTo(size, d.width, d.height);
+    AwtUtil.constrainTo(size, d.width, d.height);
 
     // Paint it at the right location
     int width = size.width;

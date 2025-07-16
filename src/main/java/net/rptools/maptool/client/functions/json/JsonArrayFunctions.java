@@ -26,8 +26,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 import net.rptools.parser.VariableResolver;
 

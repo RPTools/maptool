@@ -25,8 +25,8 @@ import net.rptools.maptool.language.I18N;
 class BasicPreference<T> implements Preference<T> {
   private final Preferences prefs;
   private final String key;
-  private final String label;
-  private final String tooltip;
+  private String label;
+  private String tooltip;
   private final Supplier<T> defaultValue;
   private final PreferenceType<T> type;
 
@@ -55,7 +55,7 @@ class BasicPreference<T> implements Preference<T> {
     this.prefs = prefs;
     this.key = key;
     this.label = labelKey == null ? key : I18N.getString(labelKey);
-    this.tooltip = tooltipKey == null ? "" : I18N.getString(tooltipKey);
+    this.tooltip = tooltipKey == null ? key : I18N.getString(tooltipKey);
     this.defaultValue = defaultValue;
     this.type = type;
   }
@@ -73,6 +73,18 @@ class BasicPreference<T> implements Preference<T> {
   @Override
   public String getLabel() {
     return label;
+  }
+
+  @Override
+  public Preference<T> setLabel(String labelKey) {
+    this.label = labelKey == null ? key : I18N.getString(labelKey);
+    return this;
+  }
+
+  @Override
+  public Preference<T> setTooltip(String tooltipKey) {
+    this.tooltip = tooltipKey == null ? key : I18N.getString(tooltipKey);
+    return this;
   }
 
   @Override

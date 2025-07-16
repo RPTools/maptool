@@ -19,11 +19,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.ParseException;
 import javax.swing.*;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.util.StringUtil;
 
 /**
  * Manages the zoom level in the main MapTool window's status bar at the bottom of the window. This

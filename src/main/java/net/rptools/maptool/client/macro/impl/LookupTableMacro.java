@@ -15,6 +15,7 @@
 package net.rptools.maptool.client.macro.impl;
 
 import java.util.List;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.MapToolMacroContext;
 import net.rptools.maptool.client.macro.MacroContext;
@@ -24,7 +25,6 @@ import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.LookupTable.LookupEntry;
 import net.rptools.maptool.model.TextMessage;
-import net.rptools.maptool.util.StringUtil;
 import net.rptools.parser.ParserException;
 
 @MacroDefinition(

@@ -16,7 +16,6 @@ package net.rptools.maptool.model;
 
 import com.google.protobuf.StringValue;
 import java.awt.Color;
-import java.io.IOException;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -33,7 +32,6 @@ import java.util.stream.Collectors;
 import javax.annotation.Nonnull;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.AppPreferences;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
 import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
@@ -49,6 +47,7 @@ import net.rptools.maptool.client.ui.token.TwoImageBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.TwoToneBarTokenOverlay;
 import net.rptools.maptool.client.ui.token.XTokenOverlay;
 import net.rptools.maptool.client.ui.token.YieldTokenOverlay;
+import net.rptools.maptool.model.drawing.DrawableColorPaint;
 import net.rptools.maptool.model.sheet.stats.StatSheetLocation;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.model.sheet.stats.StatSheetProperties;
@@ -293,14 +292,55 @@ public class CampaignProperties implements Serializable {
       return;
     }
 
-    try {
-      Map<String, List<LightSource>> map = LightSource.getDefaultLightSources();
-      for (var entry : map.entrySet()) {
-        categorizedLights.addAllToCategory(entry.getKey(), entry.getValue());
-      }
-    } catch (IOException ioe) {
-      MapTool.showError("CampaignProperties.error.initLightSources", ioe);
-    }
+    categorizedLights.addAllToCategory(
+        "D20",
+        List.of(
+            createD20LightSource("Candle", 5),
+            createD20LightSource("Lamp", 15),
+            createD20LightSource("Torch", 20),
+            createD20LightSource("Everburning", 20),
+            createD20LightSource("Lantern, Hooded", 30),
+            createD20LightSource("Sunrod", 30)));
+    categorizedLights.addAllToCategory(
+        "Generic",
+        List.of(
+            createGenericLightSource(5),
+            createGenericLightSource(15),
+            createGenericLightSource(20),
+            createGenericLightSource(30),
+            createGenericLightSource(40),
+            createGenericLightSource(60)));
+  }
+
+  private static LightSource createGenericLightSource(int radius) {
+    return LightSource.createRegular(
+        String.format("%d", radius),
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        false,
+        List.of(new Light(ShapeType.CIRCLE, 0, radius, 0, 360, null, 100, false, false)));
+  }
+
+  private static LightSource createD20LightSource(String name, int radius) {
+    return LightSource.createRegular(
+        String.format("%s - %d", name, radius),
+        new GUID(),
+        LightSource.Type.NORMAL,
+        false,
+        false,
+        List.of(
+            new Light(ShapeType.CIRCLE, 0, radius, 0, 360, null, 100, false, false),
+            new Light(
+                ShapeType.CIRCLE,
+                0,
+                radius * 2,
+                0,
+                360,
+                new DrawableColorPaint(new Color(0, 0, 0, 100)),
+                100,
+                false,
+                false)));
   }
 
   public String getDefaultSightType() {

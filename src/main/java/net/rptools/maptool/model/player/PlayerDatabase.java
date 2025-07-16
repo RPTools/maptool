@@ -21,7 +21,7 @@ import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import net.rptools.lib.MD5Key;
-import net.rptools.maptool.util.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil;
 
 /**
  * This interface is implemented by all classes that provide information about which players are

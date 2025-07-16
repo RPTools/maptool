@@ -317,7 +317,7 @@ public class HTMLWebViewManager {
   }
 
   /**
-   * Upate the contents of the WebView with the HTMLContent.
+   * Update the contents of the WebView with the HTMLContent.
    *
    * @param htmlContent the HTMLContent to display.
    * @param scrollReset true if the scrolling should be reset, false otherwise.
@@ -334,7 +334,7 @@ public class HTMLWebViewManager {
     if (htmlContent.isUrl()) {
       webEngine.load(htmlContent.getUrl().toString());
     } else {
-      webEngine.load(htmlContent.injectJavaBridge().getHtmlStringAsDataUrl());
+      webEngine.loadContent(htmlContent.injectJavaBridge().getHtmlString());
     }
   }
 

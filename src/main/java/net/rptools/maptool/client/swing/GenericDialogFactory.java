@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
+import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
 
@@ -35,6 +36,30 @@ public class GenericDialogFactory {
   }
 
   @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory addButton(
+      AbstractButton b, ActionListener l, Object constraints, int index) {
+    b.addActionListener(l);
+    delegate.addButton(b, constraints, index);
+    return this;
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory addButton(AbstractButton b, ActionListener l, Object constraints) {
+    return addButton(b, l, constraints, -1);
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory addNonButton(Component c, Object constraints, int index) {
+    delegate.addNonButton(c, constraints, index);
+    return this;
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory addNonButton(Component c, Object constraints) {
+    return addNonButton(c, constraints, -1);
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
   public GenericDialogFactory addButton(ButtonKind buttonKind) {
     return addButton(buttonKind, null, null);
   }
@@ -53,6 +78,26 @@ public class GenericDialogFactory {
   public GenericDialogFactory addButton(
       ButtonKind buttonKind, Action action, ActionListener listener) {
     delegate.addButton(buttonKind, action, listener);
+    return this;
+  }
+
+  public String getButtonOrder() {
+    return delegate.getButtonPanel().getButtonOrder();
+  }
+
+  public String getOppositeButtonOrder() {
+    return delegate.getButtonPanel().getOppositeButtonOrder();
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory setButtonOrder(String buttonOrder) {
+    delegate.setButtonOrder(buttonOrder);
+    return this;
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory setOppositeButtonOrder(String buttonOrder) {
+    delegate.setOppositeButtonOrder(buttonOrder);
     return this;
   }
 

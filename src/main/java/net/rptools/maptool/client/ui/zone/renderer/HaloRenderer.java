@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.ui.zone.renderer;
 
+import com.google.common.eventbus.Subscribe;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
@@ -22,71 +23,84 @@ import java.util.HashMap;
 import java.util.Map;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
+import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.rptools.maptool.model.zones.GridChanged;
 
 public class HaloRenderer {
-  private static final Logger log = LogManager.getLogger(HaloRenderer.class);
   private final RenderHelper renderHelper;
-  private static final Map<Grid, Map<TokenFootprint, Shape>> GRID_SHAPE_MAP = new HashMap<>();
-  private Map<TokenFootprint, Shape> shapeMap;
-  private Grid grid;
-  private Shape haloShape;
-  private Shape paintShape;
+  private final Zone zone;
 
-  public HaloRenderer(RenderHelper renderHelper) {
+  // region These fields need to be recalculated whenever the grid changes.
+
+  private final Map<TokenFootprint, Shape> shapeMap = new HashMap<>();
+  private Shape cachedHaloShape;
+
+  // endregion
+
+  public HaloRenderer(RenderHelper renderHelper, Zone zone) {
     this.renderHelper = renderHelper;
+    this.zone = zone;
+
+    new MapToolEventBus().getMainEventBus().register(this);
   }
 
-  public void setRenderer(ZoneRenderer zoneRenderer) {
-    Zone zone = zoneRenderer.getZone();
-    grid = zone.getGrid();
-    if (grid == null) {
+  @Subscribe
+  private void gridChanged(GridChanged event) {
+    if (event.zone() != this.zone) {
       return;
     }
-    shapeMap = GRID_SHAPE_MAP.get(grid);
-    if (shapeMap == null) {
-      shapeMap = new HashMap<>();
-    }
-    if (GridFactory.getGridType(grid).equals(GridFactory.NONE)) {
-      double r = grid.getSize() / 2d;
-      haloShape = new Ellipse2D.Double(-r, -r, 2 * r, 2 * r);
-    } else {
-      haloShape = grid.getCellShape();
-      haloShape =
-          AffineTransform.getTranslateInstance(
-                  -haloShape.getBounds2D().getCenterX(), -haloShape.getBounds2D().getCenterY())
-              .createTransformedShape(haloShape);
+
+    shapeMap.clear();
+    cachedHaloShape = null;
+  }
+
+  private Shape getHaloShape(Grid grid) {
+    if (cachedHaloShape == null) {
+      if (GridFactory.getGridType(grid).equals(GridFactory.NONE)) {
+        double r = grid.getSize() / 2d;
+        cachedHaloShape = new Ellipse2D.Double(-r, -r, 2 * r, 2 * r);
+      } else {
+        cachedHaloShape = grid.getCellShape();
+        cachedHaloShape =
+            AffineTransform.getTranslateInstance(
+                    -cachedHaloShape.getBounds2D().getCenterX(),
+                    -cachedHaloShape.getBounds2D().getCenterY())
+                .createTransformedShape(cachedHaloShape);
+      }
     }
 
-    log.info("HaloRenderer - ZoneRenderer updated - Grid set.");
+    return cachedHaloShape;
   }
 
   // Render Halos
   public void renderHalo(Graphics2D g2d, Token token, ZoneViewModel.TokenPosition position) {
-    if (token.getHaloColor() == null || grid == null) {
+    if (token.getHaloColor() == null) {
       return;
     }
-    // use cache so we don't have to resize halos every time
-    TokenFootprint fp = token.getFootprint(grid);
-    if (shapeMap.containsKey(fp)) {
-      paintShape = shapeMap.get(fp);
-    } else {
-      double maxD =
-          Math.max(
-              position.footprintBounds().getBounds2D().getWidth()
-                  / haloShape.getBounds2D().getWidth(),
-              position.footprintBounds().getBounds2D().getHeight()
-                  / haloShape.getBounds2D().getHeight());
-      paintShape = AffineTransform.getScaleInstance(maxD, maxD).createTransformedShape(haloShape);
 
-      shapeMap.put(fp, paintShape);
-      GRID_SHAPE_MAP.put(grid, shapeMap);
+    var grid = zone.getGrid();
+    if (grid == null) {
+      return;
     }
 
+    var haloShape = getHaloShape(grid);
+    TokenFootprint fp = token.getFootprint(grid);
+
+    // use cache so we don't have to resize halos every time
+    Shape paintShape =
+        shapeMap.computeIfAbsent(
+            fp,
+            fp2 -> {
+              double maxD =
+                  Math.max(
+                      position.footprintBounds().getWidth() / haloShape.getBounds2D().getWidth(),
+                      position.footprintBounds().getHeight() / haloShape.getBounds2D().getHeight());
+              return AffineTransform.getScaleInstance(maxD, maxD).createTransformedShape(haloShape);
+            });
+
     // position the shape we are painting
-    paintShape =
+    var positionedPaintShape =
         AffineTransform.getTranslateInstance(
                 position.transformedBounds().getBounds2D().getCenterX(),
                 position.transformedBounds().getBounds2D().getCenterY())
@@ -96,11 +110,11 @@ public class HaloRenderer {
     renderHelper.render(
         g2d,
         worldG -> {
-          paintLineHalo(worldG, token);
+          paintLineHalo(worldG, token, grid, positionedPaintShape);
         });
   }
 
-  private void paintLineHalo(Graphics2D g2d, Token token) {
+  private void paintLineHalo(Graphics2D g2d, Token token, Grid grid, Shape paintShape) {
     // double width because we will clip the inside half
     g2d.setStroke(
         new BasicStroke(
@@ -115,9 +129,5 @@ public class HaloRenderer {
     g2d.setClip(a);
     g2d.draw(paintShape);
     g2d.setClip(oldClip);
-  }
-
-  public void gridChanged(ZoneRenderer zoneRenderer) {
-    setRenderer(zoneRenderer);
   }
 }

@@ -18,15 +18,14 @@ import com.google.common.base.Stopwatch;
 import java.awt.*;
 import java.awt.geom.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.util.*;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import javax.annotation.Nonnull;
 import javax.swing.Action;
 import javax.swing.KeyStroke;
-import net.rptools.lib.FileUtil;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.DeveloperOptions;
 import net.rptools.maptool.client.MapTool;
@@ -63,15 +62,6 @@ public abstract class Grid implements Cloneable {
 
   private static final Dimension NO_DIM = new Dimension();
   private static final DirectionCalculator calculator = new DirectionCalculator();
-  private static final Map<String, String> FOOTPRINT_XML_PATHS =
-      new HashMap<>(
-          Map.of(
-              GridFactory.HEX_HORI, "net/rptools/maptool/model/hexGridHorizFootprints.xml",
-              GridFactory.HEX_VERT, "net/rptools/maptool/model/hexGridVertFootprints.xml",
-              GridFactory.ISOMETRIC, "net/rptools/maptool/model/squareGridFootprints.xml",
-              GridFactory.ISOMETRIC_HEX, "net/rptools/maptool/model/hexGridHorizFootprints.xml",
-              GridFactory.NONE, "net/rptools/maptool/model/gridlessGridFootprints.xml",
-              GridFactory.SQUARE, "net/rptools/maptool/model/squareGridFootprints.xml"));
   private static final Map<Integer, Area> gridShapeCache = new ConcurrentHashMap<>();
 
   protected transient Map<KeyStroke, Action> movementKeys = null;
@@ -244,18 +234,7 @@ public abstract class Grid implements Cloneable {
     return null;
   }
 
-  protected List<TokenFootprint> loadFootprints(String path, OffsetTranslator... translators)
-      throws IOException {
-    Object obj = FileUtil.objFromResource(path);
-    @SuppressWarnings("unchecked")
-    List<TokenFootprint> footprintList = (List<TokenFootprint>) obj;
-    for (TokenFootprint footprint : footprintList) {
-      for (OffsetTranslator ot : translators) {
-        footprint.addOffsetTranslator(ot);
-      }
-    }
-    return footprintList;
-  }
+  protected abstract List<TokenFootprint> createFootprints();
 
   public TokenFootprint getDefaultFootprint() {
     for (TokenFootprint footprint : getFootprints()) {
@@ -281,17 +260,13 @@ public abstract class Grid implements Cloneable {
 
   public List<TokenFootprint> getFootprints() {
     if (footprintList == null) {
-      String type = GridFactory.getGridType(this);
-      try {
-        String path = FOOTPRINT_XML_PATHS.get(type);
-        OffsetTranslator offsetTranslator = getOffsetTranslator();
-        if (offsetTranslator == null) {
-          footprintList = loadFootprints(path);
-        } else {
-          footprintList = loadFootprints(path, getOffsetTranslator());
+      footprintList = createFootprints();
+
+      OffsetTranslator offsetTranslator = getOffsetTranslator();
+      if (offsetTranslator != null) {
+        for (var footprint : footprintList) {
+          footprint.addOffsetTranslator(offsetTranslator);
         }
-      } catch (IOException ioe) {
-        MapTool.showError("msg.error.footprints.load", ioe, type);
       }
     }
     return footprintList;
@@ -336,6 +311,15 @@ public abstract class Grid implements Cloneable {
    * @return a {@link ZonePoint} within the cell.
    */
   public abstract ZonePoint convert(CellPoint cp);
+
+  public ZonePoint midZonePoint(CellPoint a, CellPoint b) {
+    var centerA = getCellCenter(a);
+    var centerB = getCellCenter(b);
+    var midPoint =
+        new Point2D.Double(
+            (centerA.getX() + centerB.getX()) / 2, (centerA.getY() + centerB.getY()) / 2);
+    return new ZonePoint((int) midPoint.getX(), (int) midPoint.getY());
+  }
 
   public ZonePoint getNearestVertex(ZonePoint point) {
     double gridx = Math.round((point.x - getOffsetX()) / getCellWidth());

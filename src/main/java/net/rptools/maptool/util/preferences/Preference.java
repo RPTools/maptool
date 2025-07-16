@@ -48,10 +48,26 @@ public interface Preference<T> {
   String getLabel();
 
   /**
+   * A builder method for adding the label key using the i18nkey
+   *
+   * @param labelKey the i18n key for fetching the label
+   * @return preference
+   */
+  Preference<T> setLabel(String labelKey);
+
+  /**
    * @return A human-readable description of the preference that can be shown to users in tooltips.
    *     If not available, will return {@link #getKey()}.
    */
   String getTooltip();
+
+  /**
+   * A builder method for adding the tooltip using the i18n key
+   *
+   * @param tooltipKey the i18n key for fetching the label
+   * @return preference
+   */
+  Preference<T> setTooltip(String tooltipKey);
 
   /**
    * @return The default value of the preference when not set in the underlying storage.

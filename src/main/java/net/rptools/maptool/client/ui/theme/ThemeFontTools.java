@@ -63,19 +63,22 @@ public class ThemeFontTools {
   public static final List<String> FONT_STYLE_FAMILIES =
       new ArrayList<>(List.of("defaultFont", "light.font", "semibold.font", "monospaced.font"));
 
+  private static final Path FLATLAF_PROPERTIES_FILE;
+
   static {
+    FLATLAF_PROPERTIES_FILE =
+        AppUtil.getAppHome("config").getAbsoluteFile().toPath().resolve("FlatLaf.properties");
+
     if (AppPreferences.useCustomThemeFontProperties.get()) {
       // create file if it does not exist
-      Path p = Path.of(AppUtil.getAppHome("config").getPath(), "/FlatLaf.properties");
       try {
-        Files.createFile(p);
+        Files.createFile(FLATLAF_PROPERTIES_FILE);
       } catch (FileAlreadyExistsException ignored) {
         // expected result
       } catch (IOException e) {
         log.warn("Unable to create user theme properties file.");
       }
-      try (InputStream is =
-          new FileInputStream(AppUtil.getAppHome("config/FlatLaf.properties").toPath().toFile())) {
+      try (InputStream is = new FileInputStream(FLATLAF_PROPERTIES_FILE.toFile())) {
         USER_FLAT_PROPERTIES.load(is);
         USER_FLAT_PROPERTY_NAMES.addAll(USER_FLAT_PROPERTIES.stringPropertyNames());
       } catch (IOException ignored) {
@@ -239,8 +242,7 @@ public class ThemeFontTools {
     }
     try {
       USER_FLAT_PROPERTIES.store(
-          new FileOutputStream(AppUtil.getAppHome("config/FlatLaf.properties").toPath().toFile()),
-          "User properties");
+          new FileOutputStream(FLATLAF_PROPERTIES_FILE.toFile()), "User properties");
       log.info("User font preferences written to config directory.");
       return true;
     } catch (IOException e) {

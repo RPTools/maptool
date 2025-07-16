@@ -33,6 +33,8 @@ import javax.swing.SwingUtilities;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.clientserver.simple.connection.Connection;
 import net.rptools.lib.MD5Key;
+import net.rptools.lib.cipher.CipherUtil;
+import net.rptools.lib.cipher.CipherUtil.Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
@@ -58,8 +60,6 @@ import net.rptools.maptool.server.proto.RequestPublicKeyMsg;
 import net.rptools.maptool.server.proto.RoleDto;
 import net.rptools.maptool.server.proto.UseAuthTypeMsg;
 import net.rptools.maptool.util.PasswordGenerator;
-import net.rptools.maptool.util.cipher.CipherUtil;
-import net.rptools.maptool.util.cipher.CipherUtil.Key;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 

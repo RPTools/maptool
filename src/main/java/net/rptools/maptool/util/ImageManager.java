@@ -24,6 +24,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.image.ImageUtil;
+import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.ui.theme.Images;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.model.Asset;
@@ -165,19 +166,6 @@ public class ImageManager {
    * @return the image, or BROKEN_IMAGE if assetId null, or TRANSFERING_IMAGE if loading.
    */
   public static BufferedImage getImage(MD5Key assetId, ImageObserver... observers) {
-    return getImage(assetId, null, observers);
-  }
-
-  /**
-   * Return the image corresponding to the assetId.
-   *
-   * @param assetId Load image data from this asset.
-   * @param hints hints used when loading image data, if it isn't in the imageMap already.
-   * @param observers the observers to be notified when the image loads, if it hasn't already.
-   * @return the image, or BROKEN_IMAGE if assetId null, or TRANSFERING_IMAGE if loading.
-   */
-  public static BufferedImage getImage(
-      MD5Key assetId, Map<String, Object> hints, ImageObserver... observers) {
     if (assetId == null) {
       return BROKEN_IMAGE;
     }
@@ -202,7 +190,7 @@ public class ImageManager {
 
       // Force a load of the asset, this will trigger a transfer if the
       // asset is not available locally
-      AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId, hints));
+      AssetManager.getAssetAsynchronously(assetId, new AssetListener(assetId));
       return TRANSFERING_IMAGE;
     }
   }
@@ -319,7 +307,8 @@ public class ImageManager {
       } else if (scaleH <= 0) {
         scaleH = Math.max((int) ((double) scaleW / imageW * imageH), 1);
       }
-      image = ImageUtil.scaleBufferedImage(image, scaleW, scaleH);
+      image =
+          ImageUtil.scaleBufferedImage(image, scaleW, scaleH, AppPreferences.renderQuality.get());
     }
 
     return image;
@@ -367,17 +356,14 @@ public class ImageManager {
    */
   private static class BackgroundImageLoader implements Runnable {
     private final Asset asset;
-    private final Map<String, Object> hints;
 
     /**
      * Create a background image loader to load the asset image using the hints provided.
      *
      * @param asset Asset to load
-     * @param hints Hints to use for image loading
      */
-    public BackgroundImageLoader(Asset asset, Map<String, Object> hints) {
+    public BackgroundImageLoader(Asset asset) {
       this.asset = asset;
-      this.hints = hints;
     }
 
     /** Load the asset raw image data and notify observers that the image is loaded. */
@@ -407,7 +393,7 @@ public class ImageManager {
               : "asset.getImage() for " + asset.toString() + "returns null?!";
           image =
               ImageUtil.createCompatibleImage(
-                  ImageUtil.bytesToImage(asset.getData(), asset.getName()), hints);
+                  ImageUtil.bytesToImage(asset.getData(), asset.getName()));
         } catch (Throwable t) {
           if (!AssetManager.BAD_ASSET_LOCATION_KEY.toString().equals(asset.getMD5Key())) {
             // Don't bother logging cache miss of internal bad location asset
@@ -456,24 +442,21 @@ public class ImageManager {
    * Run a thread to load the asset raw image data in the background using the provided hints.
    *
    * @param asset Load raw image data from this asset
-   * @param hints Hints used when loading image data
    */
-  private static void backgroundLoadImage(Asset asset, Map<String, Object> hints) {
+  private static void backgroundLoadImage(Asset asset) {
     // Use large image loader if the image is larger than 128kb.
     if (asset.getData().length > 128 * 1024) {
-      largeImageLoader.execute(new BackgroundImageLoader(asset, hints));
+      largeImageLoader.execute(new BackgroundImageLoader(asset));
     } else {
-      smallImageLoader.execute(new BackgroundImageLoader(asset, hints));
+      smallImageLoader.execute(new BackgroundImageLoader(asset));
     }
   }
 
   private static class AssetListener implements AssetAvailableListener {
     private final MD5Key id;
-    private final Map<String, Object> hints;
 
-    public AssetListener(MD5Key id, Map<String, Object> hints) {
+    public AssetListener(MD5Key id) {
       this.id = id;
-      this.hints = hints;
     }
 
     public void assetAvailable(MD5Key key) {
@@ -485,7 +468,7 @@ public class ImageManager {
 
       // Image is now available for loading
       log.debug("Asset available: " + id);
-      backgroundLoadImage(AssetManager.getAsset(id), hints);
+      backgroundLoadImage(AssetManager.getAsset(id));
     }
 
     @Override

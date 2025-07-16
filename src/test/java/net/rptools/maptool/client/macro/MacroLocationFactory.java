@@ -67,10 +67,12 @@ class MacroLocationFactoryTest {
 
   @Test
   void testCreateLibTokenLocation() {
-    MacroLocation location = factory.createLibTokenLocation("libMacro", "lib:TokenName");
+    Token mockToken = Mockito.mock(Token.class);
+    Mockito.when(mockToken.getName()).thenReturn("lib:libToken");
+    MacroLocation location = factory.createLibTokenLocation("libMacro", mockToken);
     assertEquals("libMacro", location.getName());
     assertEquals(MacroLocation.MacroSource.library, location.getSource());
-    assertEquals("TokenName", location.getLocation());
+    assertEquals("libToken", location.getLocation());
     assertNull(location.getUri());
   }
 

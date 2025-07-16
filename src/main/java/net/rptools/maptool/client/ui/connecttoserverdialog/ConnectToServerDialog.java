@@ -35,6 +35,7 @@ import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
+import javax.swing.WindowConstants;
 import javax.swing.table.AbstractTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableColumn;
@@ -58,7 +59,9 @@ public class ConnectToServerDialog extends AbeillePanel<ConnectToServerDialogPre
       GenericDialog.getFactory()
           .setDialogTitle(I18N.getText("ConnectToServerDialog.msg.title"))
           .createOkCancelButtons()
-          .setDefaultButton(ButtonKind.OK);
+          .setDefaultButton(ButtonKind.OK)
+          .makeModal(true)
+          .setCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
   private RemoteServerConfig connectionDetails = null;
 
   /** This is the default constructor */

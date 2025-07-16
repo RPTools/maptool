@@ -21,8 +21,6 @@ import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.ThreadContext;
 
 public class LaunchInstructions {
-  private static final Logger log = LogManager.getLogger(LaunchInstructions.class);
-
   private static final String USAGE =
       "<html><body width=\"400\">You are running MapTool with insufficient memory allocated (%dMB).<br><br>"
           + "You may experience odd behavior, especially when connecting to or hosting a server.<br><br>  "
@@ -62,6 +60,10 @@ public class LaunchInstructions {
         AppUpdate.gitHubReleases();
       }
     } catch (Throwable e) {
+      // IMPORTANT: don't move this logger init to class-level because we need AppUtil.initLogging()
+      // to run before any loggers are initialized. Yes, it's brittle, but c'est la vie.
+      Logger log = LogManager.getLogger(LaunchInstructions.class);
+
       log.error("Unhandled error during startup", e);
       // Shows a proper error message if MapTool can't initialize. Fix #1678.
       JOptionPane.showMessageDialog(new JFrame(), e.getMessage());

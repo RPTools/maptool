@@ -25,11 +25,12 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.server.proto.LookupEntryDto;
 import net.rptools.maptool.server.proto.LookupTableDto;
+import net.rptools.maptool.util.ExpressionParserFactory;
 import net.rptools.parser.ParserException;
 
 public class LookupTable {
 
-  private static ExpressionParser expressionParser = new ExpressionParser();
+  private static final ExpressionParser expressionParser = new ExpressionParserFactory().create();
 
   private @Nonnull List<LookupEntry> entryList = new ArrayList<>();
   private @Nullable String name;

@@ -15,6 +15,7 @@
 package net.rptools.maptool.util;
 
 import com.google.protobuf.util.JsonFormat;
+import com.thoughtworks.xstream.XStream;
 import com.thoughtworks.xstream.converters.ConversionException;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
@@ -36,21 +37,24 @@ import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 import javax.imageio.ImageIO;
+import net.rptools.lib.AwtUtil;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.FileUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.ModelVersionManager;
+import net.rptools.lib.StringUtil;
 import net.rptools.lib.image.ImageUtil;
 import net.rptools.lib.io.PackedFile;
 import net.rptools.maptool.client.AppConstants;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.swing.SwingUtil;
 import net.rptools.maptool.client.ui.Scale;
+import net.rptools.maptool.client.ui.token.BarTokenOverlay;
 import net.rptools.maptool.client.ui.zone.PlayerView;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
+import net.rptools.maptool.model.AStarCellPointConverter;
 import net.rptools.maptool.model.Asset;
 import net.rptools.maptool.model.Asset.Type;
 import net.rptools.maptool.model.AssetManager;
@@ -59,9 +63,11 @@ import net.rptools.maptool.model.CampaignProperties;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.model.LookupTable;
 import net.rptools.maptool.model.MacroButtonProperties;
+import net.rptools.maptool.model.ShapeType;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.model.campaign.CampaignManager;
+import net.rptools.maptool.model.converters.WallTopologyConverter;
 import net.rptools.maptool.model.gamedata.DataStoreManager;
 import net.rptools.maptool.model.gamedata.GameDataImporter;
 import net.rptools.maptool.model.gamedata.proto.DataStoreDto;
@@ -249,6 +255,23 @@ public class PersistenceUtil {
     public GUID currentZoneId;
     public Scale currentView;
     public String mapToolVersion;
+  }
+
+  /**
+   * Return an XStream which allows net.rptools.**, java.awt.**, sun.awt.** May be too permissive,
+   * but it Works For Me(tm)
+   *
+   * @return a configured XStream
+   */
+  public static XStream getConfiguredXStream() {
+    XStream xStream = new XStream();
+    XStream.setupDefaultSecurity(xStream);
+    xStream.allowTypesByWildcard(new String[] {"net.rptools.**", "java.awt.**", "sun.awt.**"});
+    xStream.registerConverter(new AStarCellPointConverter());
+    xStream.registerConverter(new WallTopologyConverter(xStream));
+    xStream.addImmutableType(ShapeType.class, true);
+    xStream.addImmutableType(BarTokenOverlay.Side.class, true);
+    return xStream;
   }
 
   /**
@@ -485,7 +508,7 @@ public class PersistenceUtil {
     if (screen == null) return;
 
     Dimension imgSize = new Dimension(screen.getWidth(null), screen.getHeight(null));
-    SwingUtil.constrainTo(imgSize, 200, 200);
+    AwtUtil.constrainTo(imgSize, 200, 200);
 
     BufferedImage thumb =
         new BufferedImage(imgSize.width, imgSize.height, BufferedImage.TYPE_INT_BGR);
@@ -639,7 +662,7 @@ public class PersistenceUtil {
     }
 
     Dimension sz = new Dimension(image.getWidth(), image.getHeight());
-    SwingUtil.constrainTo(sz, 50);
+    AwtUtil.constrainTo(sz, 50);
 
     BufferedImage thumb = new BufferedImage(sz.width, sz.height, BufferedImage.TRANSLUCENT);
     Graphics2D g = thumb.createGraphics();
@@ -997,8 +1020,7 @@ public class PersistenceUtil {
     try {
       props =
           (CampaignProperties)
-              FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
+              getConfiguredXStream().fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.campaignPropertiesVersion", ce);
     }
@@ -1088,8 +1110,7 @@ public class PersistenceUtil {
     try {
       mbProps =
           asMacro(
-              FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
+              getConfiguredXStream().fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macroVersion", ce);
     }
@@ -1181,8 +1202,7 @@ public class PersistenceUtil {
     try {
       macroButtonSet =
           asMacroSet(
-              FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
+              getConfiguredXStream().fromXML(new InputStreamReader(in, StandardCharsets.UTF_8)));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.macrosetVersion", ce);
     }
@@ -1238,8 +1258,7 @@ public class PersistenceUtil {
     try {
       table =
           (LookupTable)
-              FileUtil.getConfiguredXStream()
-                  .fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
+              getConfiguredXStream().fromXML(new InputStreamReader(in, StandardCharsets.UTF_8));
     } catch (ConversionException ce) {
       MapTool.showError("PersistenceUtil.error.tableVersion", ce);
     }

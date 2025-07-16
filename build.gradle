@@ -18,7 +18,6 @@ plugins {
     alias(libs.plugins.git.version)
     alias(libs.plugins.javafx)
     alias(libs.plugins.jpackage.runtime)
-    alias(libs.plugins.protobuf)
     alias(libs.plugins.shadow)
 
     alias(libs.plugins.spotless) apply false
@@ -135,21 +134,6 @@ javafx {
     version = '22'
     // modules = ['javafx.fxml', 'javafx.graphics']
     modules = ['javafx.base', 'javafx.controls', 'javafx.media', 'javafx.swing', 'javafx.web', 'javafx.fxml', 'javafx.graphics']
-}
-
-protobuf {
-    protoc {
-        artifact = libs.protobuf.protoc.get()
-    }
-}
-
-// Inform IDEs like IntelliJ IDEA, Eclipse or NetBeans about the generated code.
-sourceSets {
-    main {
-        java {
-            srcDirs 'build/generated/sources/proto/main/java'
-        }
-    }
 }
 
 run {
@@ -361,7 +345,10 @@ def zipJpackageImage = tasks.register('zipJpackageImage', Zip) {
 
 // In this section you declare the dependencies for your production and test code
 dependencies {
+    implementation project(':common')
+    implementation project(':dicelib')
     implementation project(':clientserver')
+    implementation project(':messages')
 
     implementation(libs.bundles.log4j)
     implementation(libs.slf4j.simple)
@@ -371,7 +358,6 @@ dependencies {
     implementation(libs.servicediscovery)
     implementation(libs.upnplib)
     implementation(libs.okhttp)
-    implementation(libs.protobuf.java)
 
     implementation(libs.bundles.imageio)
     implementation(libs.batik)

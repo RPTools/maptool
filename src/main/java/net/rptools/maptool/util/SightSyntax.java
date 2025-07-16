@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.regex.Pattern;
+import net.rptools.lib.StringUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Light;
