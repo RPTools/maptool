@@ -1240,7 +1240,7 @@ public class MapToolLineParser {
               macro = mloc.getUri().toString();
             }
             case library -> {
-              namespace = mloc.getLocation().replaceFirst("^(?i)lib:", "");
+              namespace = mloc.getLocation();
               macro = mloc.getName();
             }
             case null, default -> {
