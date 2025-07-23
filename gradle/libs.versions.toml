@@ -97,7 +97,7 @@ apache-commons-configuration = { group = "org.apache.commons", name = "commons-c
 # Specialized collections: ReferenceMap, LinkedMap.
 apache-commons-collections = { group = "org.apache.commons", name = "commons-collections4", version = "4.5.0" }
 # Various file utilities
-apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.19.0" }
+apache-commons-io = { group = "commons-io", name = "commons-io", version = "2.20.0" }
 #  ftp client
 apache-commons-net = { group = "commons-net", name = "commons-net", version = "3.11.1" }
 # commandline parsing
