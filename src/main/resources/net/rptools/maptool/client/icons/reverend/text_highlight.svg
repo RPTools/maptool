@@ -1,0 +1,22 @@
+<svg id="svg2" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <g fill="#7f8b91">
+    <path id="path32" d="m5.34 1.49v4.2h1.04v-4.2z"/>
+    <path id="path31" d="m3.13 0.617v3.88h1.21v-3.88z"/>
+    <path id="path20" d="m1.51 1.49v3h6.42v-3z"/>
+    <path id="path19" d="m12.9 5.69v3.81h1.62v-3.81z"/>
+    <path id="path18" d="m1.51 6.5v3h1.62v-3z"/>
+    <path id="path30" d="m13.4 11.1v4h1.11v-4z"/>
+    <path id="path17" d="m9.22 11.1v3.28h4.72v-3.28z"/>
+    <path id="path29" d="m6.38 12.4v2.77h0.951v-2.77z"/>
+    <path id="path28" d="m4.76 10.3v4.09h0.811v-4.09z"/>
+    <path id="path16" d="m1.51 11.1v3.28h6.49v-3.28z"/>
+  </g>
+  <g fill="#eda200">
+    <path id="path26" d="m9.62 6.5v3h1.62v-3z"/>
+    <path id="path25" d="m8.81 5.69v3.81h0.811v-3.81z"/>
+    <path id="path24" d="m6.38 6.5v3h2.49v-3z"/>
+    <path id="path22" d="m4.76 6.5v3h1.62v-3z"/>
+    <path id="path23" d="m12.4 0.617v3.88h1.02v-3.88z"/>
+    <path id="path21" d="m10.2 1.49v3h4.26v-3z"/>
+  </g>
+</svg>
