@@ -1,24 +1,39 @@
+/*
+ * This software Copyright by the RPTools.net development team, and
+ * licensed under the Affero GPL Version 3 or, at your option, any later
+ * version.
+ *
+ * MapTool Source Code is distributed in the hope that it will be
+ * useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+ * of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+ *
+ * You should have received a copy of the GNU Affero General Public
+ * License * along with this source Code.  If not, please visit
+ * <http://www.gnu.org/licenses/> and specifically the Affero license
+ * text at <http://www.gnu.org/licenses/agpl.html>.
+ */
 package net.rptools.maptool.client.ui.preferencesdialog;
 
 import javax.swing.*;
-    /**
-     * The PreferencesDialogView class represents the view for a preferences dialog. It provides methods
-     * for accessing the root component of the dialog.
-     */
-    public class AppConfigDialog {
 
-        /**
-         * The mainPanel variable represents the root component of the preferences dialog view. It is an
-         * instance of JPanel and serves as the main content panel for the dialog.
-         */
-        private JPanel mainPanel;
+/**
+ * The PreferencesDialogView class represents the view for a preferences dialog. It provides methods
+ * for accessing the root component of the dialog.
+ */
+public class AppConfigDialog {
 
-        /**
-         * Returns the root component of the preferences dialog view.
-         *
-         * @return The root component of the preferences dialog view.
-         */
-        public JComponent getRootComponent() {
-            return mainPanel;
-        }
-    }
+  /**
+   * The mainPanel variable represents the root component of the preferences dialog view. It is an
+   * instance of JPanel and serves as the main content panel for the dialog.
+   */
+  private JPanel mainPanel;
+
+  /**
+   * Returns the root component of the preferences dialog view.
+   *
+   * @return The root component of the preferences dialog view.
+   */
+  public JComponent getRootComponent() {
+    return mainPanel;
+  }
+}

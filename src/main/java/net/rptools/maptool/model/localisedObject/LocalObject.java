@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.model.localisedObject;
 
-import org.jetbrains.annotations.NotNull;
-
 /** Stores the localized display name and preference value for list, combo and menu items */
 public interface LocalObject {
 

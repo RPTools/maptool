@@ -14,10 +14,9 @@
  */
 package net.rptools.maptool.model.localisedObject;
 
+import java.util.Arrays;
 import net.rptools.maptool.language.I18N;
 import org.jetbrains.annotations.NotNull;
-
-import java.util.Arrays;
 
 /** Stores the localized display name and preference value for list, combo and menu items */
 public abstract class AbstractLocalObject implements LocalObject {
@@ -32,28 +31,35 @@ public abstract class AbstractLocalObject implements LocalObject {
 
   /**
    * Create a local object without performing the i18n lookup
+   *
    * @param value the value held by the object
    * @param displayName the display name presented to users
    * @param dummy just here to change the signature so no lookup is performed.
    */
-  AbstractLocalObject(@NotNull Object value, String displayName, Object dummy){
+  AbstractLocalObject(@NotNull Object value, String displayName, Object dummy) {
     this.value = value;
     this.displayName = displayName;
   }
+
   /**
    * Create a local object and fetches the localised display name
+   *
    * @param value the value held by the object
    * @param i18nKeyAndArgs varArgs for the i18n key and any optional arguments to pass with it.
    */
-  AbstractLocalObject(@NotNull Object value, String... i18nKeyAndArgs){
+  AbstractLocalObject(@NotNull Object value, String... i18nKeyAndArgs) {
     this.value = value;
     this.i18nKey = i18nKeyAndArgs[0];
-    if(i18nKeyAndArgs.length == 1) {
+    if (i18nKeyAndArgs.length == 1) {
       this.displayName = I18N.getText(this.i18nKey);
     } else {
-      this.displayName = I18N.getText(this.i18nKey, (Object) Arrays.copyOfRange(i18nKeyAndArgs,  1, i18nKeyAndArgs.length -1));
+      this.displayName =
+          I18N.getText(
+              this.i18nKey,
+              (Object) Arrays.copyOfRange(i18nKeyAndArgs, 1, i18nKeyAndArgs.length - 1));
     }
   }
+
   /**
    * @return {@link #value} {@inheritDoc}
    */

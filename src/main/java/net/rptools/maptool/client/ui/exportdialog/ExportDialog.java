@@ -325,7 +325,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       if (this == ExportLayers.LAYER_FOG) {
         ExportLayers.LAYER_FOG.setChecked(zone.hasFog());
       } else if (this == ExportLayers.LAYER_VISIBILITY) {
-        ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
+        ExportLayers.LAYER_VISIBILITY.setChecked(
+            zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
       } else {
         setChecked(true);
       }
@@ -339,7 +340,8 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
       // however, some pseudo-layers do have a state, so set that appropriately
       final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-      ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
+      ExportLayers.LAYER_VISIBILITY.setChecked(
+          zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
       ExportLayers.LAYER_FOG.setChecked(zone.hasFog());
     }
 

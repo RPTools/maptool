@@ -17,7 +17,6 @@ package net.rptools.maptool.client.ui.preferencesdialog;
 import static net.rptools.maptool.util.UserJvmOptions.getLanguages;
 import static net.rptools.maptool.util.UserJvmOptions.setJvmOption;
 
-import com.formdev.flatlaf.extras.FlatSVGIcon;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusAdapter;
@@ -144,7 +143,8 @@ public class PreferencesDialog extends AbeillePanel<Object> {
   private final JComboBox<WalkerMetric> movementMetricCombo = getComboBox("movementMetricCombo");
 
   /** JComboBox variable used to display vision type options. */
-  private final JComboBox<AppPreferenceEnums.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
+  private final JComboBox<AppPreferenceEnums.VisionType> visionTypeCombo =
+      getComboBox("visionTypeCombo");
 
   /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType = getComboBox("mapSortTypeCombo");

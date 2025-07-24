@@ -612,7 +612,7 @@ public class RessourceManager {
   private static void checkMissingIcons(
       HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
     var missing = new TreeSet<Icons>();
-    for(Icons icons: Icons.values()){
+    for (Icons icons : Icons.values()) {
       System.out.println(icons);
     }
     for (var key : classicIcons.keySet()) {

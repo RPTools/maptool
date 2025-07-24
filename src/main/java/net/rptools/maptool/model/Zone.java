@@ -827,7 +827,8 @@ public class Zone {
     if (!hasFog() || view.isGMView()) {
       return true;
     }
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW()
+        && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       Area combined = new Area(exposedArea);
       if (view.isUsingTokenView()) {
         for (Token tok : view.getTokens()) { // only owned and HasSight tokens are returned
@@ -888,7 +889,8 @@ public class Zone {
     Rectangle tokenSize = token.getBounds(this);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW()
+        && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       // Jamz: Lets change the logic a bit looking for ownerships
       if (view.isUsingTokenView()) {
         for (Token tok : view.getTokens()) {
@@ -924,7 +926,8 @@ public class Zone {
     Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW()
+        && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       if (view.isUsingTokenView()) {
         // Should this use FindTokenFunctions.OwnedFilter and zone.getTokenList()?
         for (Token tok : view.getTokens()) {

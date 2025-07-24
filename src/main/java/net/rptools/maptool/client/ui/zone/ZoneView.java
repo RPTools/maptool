@@ -25,7 +25,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
-
 import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;

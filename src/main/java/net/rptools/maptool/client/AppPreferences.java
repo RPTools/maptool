@@ -39,8 +39,8 @@ public class AppPreferences {
   public static final Preference<Boolean> fillSelectionBox =
       store.defineBoolean(
           "fillSelectionBox",
-              "Preferences.label.performance.fillSelection",
-              "Preferences.label.performance.fillSelection.tooltip",
+          "Preferences.label.performance.fillSelection",
+          "Preferences.label.performance.fillSelection.tooltip",
           true);
 
   public static final Preference<Color> chatColor =
@@ -98,8 +98,8 @@ public class AppPreferences {
   public static final Preference<Boolean> mapVisibilityWarning =
       store.defineBoolean(
           "mapVisibilityWarning",
-              "Preferences.label.fog.mapVisibilityWarning",
-              "Preferences.label.fog.mapVisibilityWarning.tooltip",
+          "Preferences.label.fog.mapVisibilityWarning",
+          "Preferences.label.fog.mapVisibilityWarning.tooltip",
           false);
 
   public static final Preference<Boolean> autoRevealVisionOnGMMovement =
@@ -196,8 +196,8 @@ public class AppPreferences {
   public static final Preference<Boolean> suppressToolTipsForMacroLinks =
       store.defineBoolean(
           "suppressToolTipsMacroLinks",
-              "Preferences.label.chat.macroLinks",
-              "Preferences.label.chat.macroLinks.tooltip",
+          "Preferences.label.chat.macroLinks",
+          "Preferences.label.chat.macroLinks.tooltip",
           false);
 
   public static final Preference<Color> chatNotificationColor =
@@ -352,7 +352,10 @@ public class AppPreferences {
 
   public static final Preference<AppPreferenceEnums.VisionType> defaultVisionType =
       store
-          .defineEnum(AppPreferenceEnums.VisionType.class, "defaultVisionType", AppPreferenceEnums.VisionType.OFF)
+          .defineEnum(
+              AppPreferenceEnums.VisionType.class,
+              "defaultVisionType",
+              AppPreferenceEnums.VisionType.OFF)
           .setLabel("Preferences.label.maps.light")
           .setTooltip("Preferences.label.maps.light.tooltip");
 
@@ -583,15 +586,15 @@ public class AppPreferences {
   public static final Preference<Boolean> showStatSheet =
       store.defineBoolean(
           "showStatSheet",
-              "Preferences.label.tokens.statSheet.mouse",
-              "Preferences.label.tokens.statSheet.mouse.tooltip",
+          "Preferences.label.tokens.statSheet.mouse",
+          "Preferences.label.tokens.statSheet.mouse.tooltip",
           true);
 
   public static final Preference<Boolean> showStatSheetRequiresModifierKey =
       store.defineBoolean(
           "showStatSheetModifier",
-              "Preferences.label.tokens.statSheet.shift",
-              "Preferences.label.tokens.statSheet.shift.tooltip",
+          "Preferences.label.tokens.statSheet.shift",
+          "Preferences.label.tokens.statSheet.shift.tooltip",
           false);
 
   public static final Preference<Boolean> showPortrait =
@@ -611,8 +614,8 @@ public class AppPreferences {
   public static final Preference<Boolean> fitGmView =
       store.defineBoolean(
           "fitGMView",
-              "Preferences.label.client.fitView",
-              "Preferences.label.client.fitView.tooltip",
+          "Preferences.label.client.fitView",
+          "Preferences.label.client.fitView.tooltip",
           true);
 
   public static final Preference<String> defaultUserName =
@@ -712,8 +715,8 @@ public class AppPreferences {
   public static final Preference<Boolean> initiativePanelHidesNpcs =
       store.defineBoolean(
           "initHideNpcs",
-              "Preferences.label.initiative.hideNPC",
-              "Preferences.label.initiative.hideNPC.tooltip",
+          "Preferences.label.initiative.hideNPC",
+          "Preferences.label.initiative.hideNPC.tooltip",
           false);
 
   public static final Preference<Boolean> initiativePanelAllowsOwnerPermissions =

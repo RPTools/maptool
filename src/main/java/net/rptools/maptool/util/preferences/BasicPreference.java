@@ -80,6 +80,7 @@ class BasicPreference<T> implements Preference<T> {
     this.label = labelKey == null ? key : I18N.getString(labelKey);
     return this;
   }
+
   @Override
   public Preference<T> setTooltip(String tooltipKey) {
     this.tooltip = tooltipKey == null ? key : I18N.getString(tooltipKey);

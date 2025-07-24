@@ -21,6 +21,7 @@ import javax.swing.*;
 public class LocalListItem extends AbstractLocalObject {
   /**
    * New Local List Item
+   *
    * @param value the value held by the object
    * @param i18nKeys varArgs for the i18n key and any optional arguments to pass with it.
    */
@@ -47,7 +48,7 @@ public class LocalListItem extends AbstractLocalObject {
    * selected item.
    */
   public static ComboBoxModel<LocalListItem> getLocalisedSetComboBoxModel(
-          LocalListItem[] items, String selected) {
+      LocalListItem[] items, String selected) {
     ComboBoxModel<LocalListItem> model = getLocalisedComboBoxModel(items);
 
     try {
@@ -63,7 +64,8 @@ public class LocalListItem extends AbstractLocalObject {
                 .filter(
                     localisedListItem ->
                         localisedListItem
-                            .getValue().toString()
+                            .getValue()
+                            .toString()
                             .replaceAll("[_\\W]", "")
                             .equalsIgnoreCase(selected.replaceAll("[_\\W]", "")))
                 .toList()

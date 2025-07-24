@@ -20,7 +20,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
-
 import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.MapTool;
@@ -406,10 +405,15 @@ public class MapFunctions extends AbstractFunction {
         throw new ParserException(I18N.getText("macro.function.map.none", functionName));
       }
       switch (parameters.get(0).toString().toLowerCase()) {
-        case "off" -> MapTool.serverCommand().setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.OFF);
-        case "day" -> MapTool.serverCommand().setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.DAY);
+        case "off" ->
+            MapTool.serverCommand()
+                .setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.OFF);
+        case "day" ->
+            MapTool.serverCommand()
+                .setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.DAY);
         case "night" ->
-            MapTool.serverCommand().setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.NIGHT);
+            MapTool.serverCommand()
+                .setVisionType(currentZR.getId(), AppPreferenceEnums.VisionType.NIGHT);
         default ->
             throw new ParserException(
                 I18N.getText("macro.function.general.argumentTypeInvalid", functionName));

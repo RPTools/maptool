@@ -20,11 +20,9 @@ import static net.rptools.maptool.client.ui.preferencesdialog.Classify.Section.*
 import java.util.*;
 import java.util.List;
 import java.util.function.Predicate;
-
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.swing.searchable.SearchWords;
 import net.rptools.maptool.language.I18N;
-
 import net.rptools.maptool.model.localisedObject.LocalObject;
 import net.rptools.maptool.util.preferences.Preference;
 import org.apache.commons.lang3.StringUtils;
@@ -84,7 +82,6 @@ class Classify {
     public String getDisplayName() {
       return displayName;
     }
-
 
     @Override
     public @NotNull String toString() {
@@ -310,8 +307,8 @@ class Classify {
         boolean useDefaultControls) {
       this.id = id != null ? id : preference != null ? preference.getKey() : null;
       this.section = section;
-      this.group = group;// == null ? NONE : group;
-//      this.group = group == null ? NONE : group;
+      this.group = group; // == null ? NONE : group;
+      //      this.group = group == null ? NONE : group;
       this.preference = preference;
       this.emphasise = emphasise;
       this.useDefaultControls = useDefaultControls;
@@ -334,7 +331,7 @@ class Classify {
         s = StringUtils.normalizeSpace(s);
         Collections.addAll(stringList, StringUtils.splitByCharacterTypeCamelCase(s));
         s = s.replaceAll("[\\.,-:;/]+", " ");
-//        Collections.addAll(stringList, StringUtils.splitByWholeSeparator(s, "."));
+        //        Collections.addAll(stringList, StringUtils.splitByWholeSeparator(s, "."));
         Collections.addAll(stringList, StringUtils.splitByWholeSeparator(s, null));
       }
       return stringList.stream()

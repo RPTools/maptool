@@ -173,9 +173,15 @@ public class AppMenuBar extends JMenuBar {
   protected JMenu createVisionTypeMenu() {
     JMenu menu = I18N.createMenu("menu.vision");
 
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.OFF), menu));
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.DAY), menu));
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.NIGHT), menu));
+    menu.add(
+        new RPCheckBoxMenuItem(
+            new AppActions.SetVisionType(AppPreferenceEnums.VisionType.OFF), menu));
+    menu.add(
+        new RPCheckBoxMenuItem(
+            new AppActions.SetVisionType(AppPreferenceEnums.VisionType.DAY), menu));
+    menu.add(
+        new RPCheckBoxMenuItem(
+            new AppActions.SetVisionType(AppPreferenceEnums.VisionType.NIGHT), menu));
 
     return menu;
   }

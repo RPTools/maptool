@@ -16,7 +16,6 @@ package net.rptools.maptool.client;
 
 import com.twelvemonkeys.image.ResampleOp;
 import java.awt.*;
-
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.GridFactory;
 import net.rptools.maptool.model.localisedObject.LocalEnumListItem;
@@ -25,7 +24,8 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 public class AppPreferenceEnums {
-  public enum ShowTokenNumbering implements LocalEnumListItem.EnumPreferenceItem<ShowTokenNumbering> {
+  public enum ShowTokenNumbering
+      implements LocalEnumListItem.EnumPreferenceItem<ShowTokenNumbering> {
     NAME("Preferences.combo.tokens.numbering.name"),
     GM("Preferences.combo.tokens.numbering.gm"),
     BOTH("Preferences.combo.tokens.numbering.both");
@@ -101,7 +101,8 @@ public class AppPreferenceEnums {
 
     @Override
     public void updatePreference(Enum<?> newValue) {
-      AppPreferences.uvttLosImportType.set(AppPreferences.UvttLosImportType.valueOf(newValue.name()));
+      AppPreferences.uvttLosImportType.set(
+          AppPreferences.UvttLosImportType.valueOf(newValue.name()));
     }
   }
 
@@ -182,7 +183,8 @@ public class AppPreferenceEnums {
 
     @Override
     public void updatePreference(Enum<?> newValue) {
-      AppPreferences.renderQuality.set(net.rptools.lib.image.RenderQuality.valueOf(newValue.name()));
+      AppPreferences.renderQuality.set(
+          net.rptools.lib.image.RenderQuality.valueOf(newValue.name()));
     }
 
     public void setRenderingHints(Graphics2D g) {
@@ -236,7 +238,8 @@ public class AppPreferenceEnums {
     }
   }
 
-  public enum NumberTokenDuplicateMethod implements LocalEnumListItem.EnumPreferenceItem<NumberTokenDuplicateMethod> {
+  public enum NumberTokenDuplicateMethod
+      implements LocalEnumListItem.EnumPreferenceItem<NumberTokenDuplicateMethod> {
     INCREMENT("Preferences.combo.tokens.duplicate.increment"),
     RANDOM("Preferences.combo.tokens.duplicate.random");
 
@@ -398,7 +401,8 @@ public class AppPreferenceEnums {
 
     @Override
     public void updatePreference(Enum<?> newValue) {
-      AppPreferences.movementMetric.set(net.rptools.maptool.client.walker.WalkerMetric.valueOf(newValue.name()));
+      AppPreferences.movementMetric.set(
+          net.rptools.maptool.client.walker.WalkerMetric.valueOf(newValue.name()));
     }
   }
 
@@ -431,6 +435,7 @@ public class AppPreferenceEnums {
     public @NotNull GridType getValue() {
       return valueOf(name());
     }
+
     /**
      * @return the key to look up the localised display value
      */
@@ -458,7 +463,7 @@ public class AppPreferenceEnums {
       i18nKey = "visionType." + name();
       displayName = I18N.getString(i18nKey);
     }
-    
+
     /**
      * @return the value used by the preference.
      */
@@ -466,7 +471,7 @@ public class AppPreferenceEnums {
     public @NotNull VisionType getValue() {
       return valueOf(name());
     }
-    
+
     /**
      * @return the key to look up the localised display value
      */

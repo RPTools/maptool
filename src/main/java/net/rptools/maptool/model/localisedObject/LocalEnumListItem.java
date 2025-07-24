@@ -18,26 +18,28 @@ import java.awt.*;
 import java.awt.event.ItemEvent;
 import java.util.Map;
 import javax.swing.*;
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.util.preferences.Preference;
-import net.rptools.maptool.client.AppPreferenceEnums;
 import org.jetbrains.annotations.NotNull;
 
 /**
  * Stores the localised display name and preference value String for menu items that don't have a
  * corresponding enum.
  */
-    public class LocalEnumListItem<E extends Enum<?>> extends LocalListItem implements LocalObject {
+public class LocalEnumListItem<E extends Enum<?>> extends LocalListItem implements LocalObject {
   /** Stores the localized display name and preference value for list, combo and menu items */
   public interface EnumPreferenceItem<E extends Enum<E>> extends LocalObject {
-      /**
-       * @return the actual value used by the application.
-       */
-      @Override
-      @NotNull E getValue();
-      void updatePreference(Enum<?> newValue);
+    /**
+     * @return the actual value used by the application.
+     */
+    @Override
+    @NotNull
+    E getValue();
+
+    void updatePreference(Enum<?> newValue);
   }
 
   /**
@@ -53,10 +55,12 @@ import org.jetbrains.annotations.NotNull;
   static Map<AppPreferenceEnums.GridType, Icon> gridIconMap =
       Map.of(
           AppPreferenceEnums.GridType.NONE, RessourceManager.getSmallIcon(Icons.GRID_NONE),
-          AppPreferenceEnums.GridType.HEX_VERT, RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL),
+          AppPreferenceEnums.GridType.HEX_VERT,
+              RessourceManager.getSmallIcon(Icons.GRID_HEX_VERTICAL),
           AppPreferenceEnums.GridType.HEX_HORI,
               RessourceManager.getSmallIcon(Icons.GRID_HEX_HORIZONTAL),
-          AppPreferenceEnums.GridType.ISOMETRIC, RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC),
+          AppPreferenceEnums.GridType.ISOMETRIC,
+              RessourceManager.getSmallIcon(Icons.GRID_ISOMETRIC),
           AppPreferenceEnums.GridType.SQUARE, RessourceManager.getSmallIcon(Icons.GRID_SQUARE));
   private static final ListCellRenderer<?> cellRendererWithGridIcon =
       new DefaultListCellRenderer() {
@@ -72,7 +76,7 @@ import org.jetbrains.annotations.NotNull;
       };
 
   /** Utility method to create and set the selected item for preference enum combo box models. */
-  public static JComboBox<Enum<?>> createComboBox(Preference<?> p){
+  public static JComboBox<Enum<?>> createComboBox(Preference<?> p) {
     JComboBox<Enum<?>> comboBox = new JComboBox<>((Enum<?>[]) p.getValueClass().getEnumConstants());
     if (p.equals(AppPreferences.defaultGridType)) {
       comboBox.setRenderer((ListCellRenderer<? super Enum<?>>) cellRendererWithGridIcon);
@@ -82,9 +86,10 @@ import org.jetbrains.annotations.NotNull;
         e -> {
           if (e.getStateChange() == ItemEvent.SELECTED) {
             try {
-               if(comboBox.getSelectedItem() instanceof LocalEnumListItem.EnumPreferenceItem<?> selected) {
-                   selected.updatePreference(selected.getValue());
-               }
+              if (comboBox.getSelectedItem()
+                  instanceof LocalEnumListItem.EnumPreferenceItem<?> selected) {
+                selected.updatePreference(selected.getValue());
+              }
             } catch (Exception ex) {
               System.out.println("listener error: " + ex);
             }
