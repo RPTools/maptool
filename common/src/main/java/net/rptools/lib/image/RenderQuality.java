@@ -17,6 +17,7 @@ package net.rptools.lib.image;
 import com.twelvemonkeys.image.ResampleOp;
 import java.awt.Graphics2D;
 import java.awt.RenderingHints;
+import java.util.Map;
 
 public enum RenderQuality {
   LOW_SCALING,

@@ -28,7 +28,7 @@ import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.functions.ExecFunction;
 import net.rptools.maptool.client.functions.MacroLinkFunction;
 import net.rptools.maptool.model.*;
-import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.client.AppPreferenceEnums.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;

@@ -324,7 +324,7 @@ public class MapPropertiesDialog extends JDialog {
         StringUtil.parseInteger(
             getDefaultVisionTextField().getText(), zone.getTokenVisionDistance()));
 
-    zone.setVisionType((Zone.VisionType) getVisionTypeCombo().getSelectedItem());
+    zone.setVisionType((AppPreferenceEnums.VisionType) getVisionTypeCombo().getSelectedItem());
     zone.setLightingStyle((Zone.LightingStyle) getLightingStyleCombo().getSelectedItem());
     zone.setAStarRounding(
         (Zone.AStarRoundingOptions) getAStarRoundingOptionsComboBox().getSelectedItem());
@@ -536,8 +536,8 @@ public class MapPropertiesDialog extends JDialog {
   }
 
   private void initVisionTypeCombo() {
-    DefaultComboBoxModel<Zone.VisionType> model = new DefaultComboBoxModel<>();
-    for (Zone.VisionType vt : Zone.VisionType.values()) {
+    DefaultComboBoxModel<AppPreferenceEnums.VisionType> model = new DefaultComboBoxModel<>();
+    for (AppPreferenceEnums.VisionType vt : AppPreferenceEnums.VisionType.values()) {
       model.addElement(vt);
     }
     model.setSelectedItem(AppPreferences.defaultVisionType.get());

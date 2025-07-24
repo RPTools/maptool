@@ -24,6 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import net.rptools.clientserver.simple.MessageHandler;
 import net.rptools.lib.MD5Key;
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.ClientMessageHandler;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ServerCommandClientImpl;
@@ -33,7 +34,6 @@ import net.rptools.maptool.common.MapToolConstants;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.InitiativeList.TokenInitiative;
-import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
 import net.rptools.maptool.model.drawing.Pen;
@@ -438,7 +438,7 @@ public class ServerMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           Zone zone = server.getCampaign().getZone(GUID.valueOf(msg.getZoneGuid()));
-          zone.setVisionType(VisionType.valueOf(msg.getVision().name()));
+          zone.setVisionType(AppPreferenceEnums.VisionType.valueOf(msg.getVision().name()));
         });
   }
 

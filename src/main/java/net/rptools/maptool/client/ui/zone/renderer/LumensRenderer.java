@@ -20,6 +20,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Area;
 import net.rptools.lib.CodeTimer;
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppPreferences;
 import net.rptools.maptool.client.AppState;
 import net.rptools.maptool.client.ui.zone.PlayerView;
@@ -69,7 +70,7 @@ public class LumensRenderer {
     worldG.setComposite(AlphaComposite.Src.derive(overlayOpacity));
     // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
     var backgroundFill =
-        zone.getVisionType() == Zone.VisionType.NIGHT
+        zone.getVisionType() == AppPreferenceEnums.VisionType.NIGHT
             ? new Color(0.f, 0.f, 0.f, 1.f)
             : new Color(0.f, 0.f, 0.f, 0.f);
     worldG.setPaint(backgroundFill);

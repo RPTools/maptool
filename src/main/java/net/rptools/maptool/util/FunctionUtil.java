@@ -92,7 +92,7 @@ public class FunctionUtil {
             String.format(
                 "<img vspace=2 hspace=4 src=\"%s\" height=\"40\" width=\"40\"/>",
                 FunctionUtil.class
-                    .getResource("/net/rptools/maptool/client/image/warning.svg")
+                    .getResource("/net/rptools/maptool/client/icons/reverend/warning.svg")
                     .toURI()
                     .toURL());
       } catch (MalformedURLException | URISyntaxException ignored) {

@@ -14,6 +14,7 @@
  */
 package net.rptools.maptool.client.swing;
 
+import com.jidesoft.dialog.ButtonPanel;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import javax.swing.*;
@@ -138,8 +139,31 @@ public class GenericDialogFactory {
   }
 
   @SuppressWarnings("UnusedReturnValue")
-  public GenericDialogFactory setContent(JComponent content) {
-    delegate.setContent(content);
+  public GenericDialogFactory setToolbar(JComponent toolbarContent) {
+    delegate.setToolbar(toolbarContent);
+    return this;
+  }
+
+  public GenericDialogFactory setHeader(JComponent headerContent) {
+    delegate.setHeader(headerContent);
+    return this;
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory setContent(JComponent mainContent) {
+    delegate.setContent(mainContent);
+    return this;
+  }
+
+  @SuppressWarnings("UnusedReturnValue")
+  public GenericDialogFactory setNavPane(JComponent navContent) {
+    delegate.setNavPane(navContent);
+    return this;
+  }
+
+  @SuppressWarnings({"UnusedReturnValue", "unused"})
+  public GenericDialogFactory setSideBar(JComponent sideBarContent) {
+    delegate.setSideBarPane(sideBarContent);
     return this;
   }
 
@@ -147,6 +171,11 @@ public class GenericDialogFactory {
   public GenericDialogFactory setDialogResult(String string) {
     delegate.setDialogResult(string);
     return this;
+  }
+
+  @SuppressWarnings("unused")
+  public ButtonPanel getButtonPanel() {
+    return delegate.getButtonPanel();
   }
 
   @SuppressWarnings("UnusedReturnValue")
@@ -175,6 +204,21 @@ public class GenericDialogFactory {
     String result = delegate.getDialogResult();
     delegate.closeDialog();
     return result;
+  }
+
+  @SuppressWarnings("unused")
+  public JComponent getSideBarPane() {
+    return delegate.getSideBarPane();
+  }
+
+  @SuppressWarnings("unused")
+  public JComponent getNavPane() {
+    return delegate.getNavPane();
+  }
+
+  @SuppressWarnings("unused")
+  public JScrollPane getScrollPane() {
+    return delegate.getScrollPane();
   }
 
   public JButton getDefaultButton() {

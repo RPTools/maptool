@@ -53,7 +53,7 @@ import net.rptools.maptool.model.Pointer;
 import net.rptools.maptool.model.TextMessage;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
-import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.client.AppPreferenceEnums.VisionType;
 import net.rptools.maptool.model.ZonePoint;
 import net.rptools.maptool.model.drawing.Drawable;
 import net.rptools.maptool.model.drawing.DrawnElement;
@@ -562,7 +562,7 @@ public class ClientMessageHandler implements MessageHandler {
     EventQueue.invokeLater(
         () -> {
           var zoneGUID = GUID.valueOf(msg.getZoneGuid());
-          VisionType visionType = VisionType.valueOf(msg.getVision().name());
+          VisionType visionType = AppPreferenceEnums.VisionType.valueOf(msg.getVision().name());
           var zone = client.getCampaign().getZone(zoneGUID);
           if (zone != null) {
             zone.setVisionType(visionType);

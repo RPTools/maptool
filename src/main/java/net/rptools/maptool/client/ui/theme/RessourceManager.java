@@ -30,6 +30,7 @@ import org.javatuples.Triplet;
 public class RessourceManager {
   private static final String IMAGE_DIR = "net/rptools/maptool/client/image/";
   private static final String ICON_DIR = "net/rptools/maptool/client/icons/";
+  private static final String REV_ICONS = ICON_DIR + "reverend/";
   private static final HashMap<Icons, String> classicIcons =
       new HashMap<>() {
         {
@@ -58,11 +59,15 @@ public class RessourceManager {
           put(Icons.ACTION_PAUSE, IMAGE_DIR + "arrow_hold.png");
           put(Icons.ACTION_PREVIOUS, IMAGE_DIR + "arrow_left.png");
           put(Icons.ACTION_PREVIOUS_TOKEN, IMAGE_DIR + "arrow_left.png");
+          put(Icons.ACTION_RECURSIVE, REV_ICONS + "recursive.svg");
           put(Icons.ACTION_RESET, IMAGE_DIR + "arrow_rotate_clockwise.png");
           put(Icons.ACTION_RESET_TOKEN_SELECTION, IMAGE_DIR + "arrow_rotate_clockwise.png");
           put(Icons.ACTION_SELECT_ALL_TOKENS, IMAGE_DIR + "arrow_out.png");
           put(Icons.ACTION_SELECT_NO_TOKENS, IMAGE_DIR + "arrow_in_red.png");
           put(Icons.ACTION_SETTINGS, IMAGE_DIR + "arrow_menu.png");
+          put(Icons.ACTION_TEXT_CASE, REV_ICONS + "text_case.svg");
+          put(Icons.ACTION_TEXT_HIGHLIGHT, REV_ICONS + "text_highlight.svg");
+          put(Icons.ACTION_TEXT_REGEX, REV_ICONS + "regex.svg");
           put(Icons.ADD_RESSOURCE_LOCAL, IMAGE_DIR + "folder.png");
           put(Icons.ADD_RESSOURCE_RPTOOLS, IMAGE_DIR + "rptools_icon.png");
           put(Icons.ADD_RESSOURCE_WEB, IMAGE_DIR + "download.png");
@@ -220,6 +225,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_VOLUME_ON, IMAGE_DIR + "audio/volume.png");
           put(Icons.TOOLBAR_ZONE, IMAGE_DIR + "tool/btn-world.png");
           put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, IMAGE_DIR + "notvisible.png");
+          put(Icons.WARNING, REV_ICONS + "warning.svg");
           put(Icons.WINDOW_CAMPAIGN_MACROS, IMAGE_DIR + "campaign_panel.png");
           put(Icons.WINDOW_CHAT, IMAGE_DIR + "application.png");
           put(Icons.WINDOW_CONNECTIONS, IMAGE_DIR + "computer.png");
@@ -304,6 +310,7 @@ public class RessourceManager {
           put(Icons.ACTION_PAUSE, ROD_ICONS + "initiative/Toggle Hold Initiative.svg");
           put(Icons.ACTION_PREVIOUS, ROD_ICONS + "initiative/Previous Initiative.svg");
           put(Icons.ACTION_PREVIOUS_TOKEN, ROD_ICONS + "misc/Select Next Token.svg");
+          put(Icons.ACTION_RECURSIVE, REV_ICONS + "recursive.svg");
           put(Icons.ACTION_RESET, ROD_ICONS + "initiative/Reset Round.svg");
           put(
               Icons.ACTION_RESET_TOKEN_SELECTION,
@@ -314,6 +321,9 @@ public class RessourceManager {
           put(Icons.ACTION_TARGET_ADD, ROD_ICONS + "add target.svg");
           put(Icons.ACTION_TARGET_EDIT, ROD_ICONS + "edit target.svg");
           put(Icons.ACTION_TARGET_REMOVE, ROD_ICONS + "remove target.svg");
+          put(Icons.ACTION_TEXT_CASE, REV_ICONS + "text_case.svg");
+          put(Icons.ACTION_TEXT_HIGHLIGHT, REV_ICONS + "text_highlight.svg");
+          put(Icons.ACTION_TEXT_REGEX, REV_ICONS + "regex.svg");
           put(Icons.ADD_RESSOURCE_LOCAL, ROD_ICONS + "folder.svg");
           put(Icons.ASSETPANEL_HEROLABS, ROD_ICONS + "hero-lab-icon.svg");
           put(Icons.ASSETPANEL_HEROLABS_FOLDER, ROD_ICONS + "hero_lab_folder.svg");
@@ -359,7 +369,7 @@ public class RessourceManager {
           put(Icons.GRID_ISOMETRIC, ROD_ICONS + "gridIsometric.svg");
           put(Icons.GRID_NONE, ROD_ICONS + "cross.svg");
           put(Icons.GRID_SQUARE, ROD_ICONS + "gridSquare.svg");
-          put(Icons.MAPTOOL, ROD_ICONS + "maptool_icon.svg");
+          put(Icons.MAPTOOL, REV_ICONS + "maptool_icon.svg");
           put(Icons.MENU_DOCUMENTATION, ROD_ICONS + "menu/Documentation.svg");
           put(Icons.MENU_FORUMS, ROD_ICONS + "menu/Forums.svg");
           put(Icons.MENU_FRAMEWORKS, ROD_ICONS + "menu/Frameworks.svg");
@@ -467,6 +477,7 @@ public class RessourceManager {
           put(Icons.TOOLBAR_VOLUME_ON, ROD_ICONS + "ribbon/Mute - ON.svg");
           put(Icons.TOOLBAR_ZONE, ROD_ICONS + "ribbon/Select Map.svg");
           put(Icons.TOOLBAR_ZONE_NOT_VISIBLE, ROD_ICONS + "notvisible.svg");
+          put(Icons.WARNING, REV_ICONS + "warning.svg");
           put(Icons.WINDOW_CAMPAIGN_MACROS, ROD_ICONS + "windows/Campaign Macros.svg");
           put(Icons.WINDOW_CHAT, ROD_ICONS + "windows/Chat.svg");
           put(Icons.WINDOW_CONNECTIONS, ROD_ICONS + "windows/Connections.svg");
@@ -601,6 +612,9 @@ public class RessourceManager {
   private static void checkMissingIcons(
       HashMap<Icons, String> classicIcons, HashMap<Icons, String> rodIcons) {
     var missing = new TreeSet<Icons>();
+    for(Icons icons: Icons.values()){
+      System.out.println(icons);
+    }
     for (var key : classicIcons.keySet()) {
       if (rodIcons.containsKey(key)) {
         continue;

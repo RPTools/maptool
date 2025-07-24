@@ -28,14 +28,15 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.Shape;
 import java.awt.geom.*;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
+
+import com.formdev.flatlaf.FlatIconColors;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.StringUtil;
+import net.rptools.lib.image.ImageUtil;
 import net.rptools.maptool.client.AppStyle;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImageLabel;
@@ -55,8 +56,33 @@ public class GraphicsUtil {
       new ImageLabel(RessourceManager.getImage(Images.BOX_BLUE), 4, 4);
   public static final ImageLabel DARK_GREY_LABEL =
       new ImageLabel(RessourceManager.getImage(Images.BOX_DARK_GRAY), 4, 4);
+    public  static final Map<Color, Color> INVERTED_ICON_COLOURS = new HashMap<>(){{
+      put(new Color(FlatIconColors.ACTIONS_RED.rgb)            ,new Color(FlatIconColors.ACTIONS_RED_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_RED_DARK.rgb)       ,new Color(FlatIconColors.ACTIONS_RED.rgb));
+      put(new Color(FlatIconColors.ACTIONS_YELLOW.rgb)         ,new Color(FlatIconColors.ACTIONS_YELLOW_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_YELLOW_DARK.rgb)    ,new Color(FlatIconColors.ACTIONS_YELLOW.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREEN.rgb)          ,new Color(FlatIconColors.ACTIONS_GREEN_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREEN_DARK.rgb)     ,new Color(FlatIconColors.ACTIONS_GREEN.rgb));
+      put(new Color(FlatIconColors.ACTIONS_BLUE.rgb)           ,new Color(FlatIconColors.ACTIONS_BLUE_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_BLUE_DARK.rgb)      ,new Color(FlatIconColors.ACTIONS_BLUE.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREY.rgb)           ,new Color(FlatIconColors.ACTIONS_GREY_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREY_DARK.rgb)      ,new Color(FlatIconColors.ACTIONS_GREY.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREYINLINE.rgb)     ,new Color(FlatIconColors.ACTIONS_GREYINLINE_DARK.rgb));
+      put(new Color(FlatIconColors.ACTIONS_GREYINLINE_DARK.rgb),new Color(FlatIconColors.ACTIONS_GREYINLINE.rgb));
+      put(new Color(FlatIconColors.OBJECTS_YELLOW.rgb)         ,new Color(FlatIconColors.OBJECTS_YELLOW_DARK.rgb));
+      put(new Color(FlatIconColors.OBJECTS_YELLOW_DARK.rgb)    ,new Color(FlatIconColors.OBJECTS_YELLOW.rgb));
+      put(new Color(FlatIconColors.OBJECTS_GREY.rgb)           ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_GREY.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_BLUE.rgb)           ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_BLUE.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_GREEN.rgb)          ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_GREEN.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_PURPLE.rgb)         ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_PURPLE.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_PINK.rgb)           ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_PINK.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_RED.rgb)            ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_RED.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_RED_STATUS.rgb)     ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_RED_STATUS.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_GREEN_ANDROID.rgb)  ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_GREEN_ANDROID.rgb)));
+      put(new Color(FlatIconColors.OBJECTS_BLACK_TEXT.rgb)     ,new Color(ImageUtil.negativeColourInt(FlatIconColors.OBJECTS_BLACK_TEXT.rgb)));
+    }};
 
-  /**
+    /**
    * A multiline text wrapping popup.
    *
    * @param g The graphics to draw into

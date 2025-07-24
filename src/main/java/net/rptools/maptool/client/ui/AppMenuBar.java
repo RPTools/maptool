@@ -33,7 +33,6 @@ import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.language.I18N;
-import net.rptools.maptool.model.Zone;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -174,9 +173,9 @@ public class AppMenuBar extends JMenuBar {
   protected JMenu createVisionTypeMenu() {
     JMenu menu = I18N.createMenu("menu.vision");
 
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(Zone.VisionType.OFF), menu));
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(Zone.VisionType.DAY), menu));
-    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(Zone.VisionType.NIGHT), menu));
+    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.OFF), menu));
+    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.DAY), menu));
+    menu.add(new RPCheckBoxMenuItem(new AppActions.SetVisionType(AppPreferenceEnums.VisionType.NIGHT), menu));
 
     return menu;
   }

@@ -117,7 +117,7 @@
         </constraints>
         <properties>
           <font name="SansSerif" size="11" style="2"/>
-          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.blankdefault"/>
+          <text resource-bundle="net/rptools/maptool/language/i18n" key="Label.blankDefault"/>
         </properties>
       </component>
       <component id="a72c8" class="javax.swing.JCheckBox">

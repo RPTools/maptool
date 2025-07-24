@@ -63,6 +63,7 @@ import net.rptools.maptool.client.ui.exportdialog.ExportDialog;
 import net.rptools.maptool.client.ui.htmlframe.HTMLOverlayManager;
 import net.rptools.maptool.client.ui.mappropertiesdialog.MapPropertiesDialog;
 import net.rptools.maptool.client.ui.players.PlayerDatabaseDialog;
+import net.rptools.maptool.client.ui.preferencesdialog.PreferenceDialog;
 import net.rptools.maptool.client.ui.preferencesdialog.PreferencesDialog;
 import net.rptools.maptool.client.ui.startserverdialog.StartServerDialog;
 import net.rptools.maptool.client.ui.startserverdialog.StartServerDialogPreferences;
@@ -75,7 +76,7 @@ import net.rptools.maptool.client.utilities.DungeonDraftImporter;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Zone.Layer;
-import net.rptools.maptool.model.Zone.VisionType;
+import net.rptools.maptool.client.AppPreferenceEnums.VisionType;
 import net.rptools.maptool.model.campaign.CampaignManager;
 import net.rptools.maptool.model.drawing.DrawableTexturePaint;
 import net.rptools.maptool.model.player.*;
@@ -483,7 +484,7 @@ public class AppActions {
         protected void executeAction() {
 
           // Probably don't have to create a new one each time
-          PreferencesDialog dialog = new PreferencesDialog();
+          PreferenceDialog dialog = PreferenceDialog.getInstance();
           dialog.showDialog();
         }
       };

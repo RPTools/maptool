@@ -28,6 +28,7 @@ import javax.swing.*;
 import net.rptools.lib.GeometryUtil;
 import net.rptools.lib.MD5Key;
 import net.rptools.lib.StringUtil;
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.tool.drawing.UndoPerZone;
@@ -84,24 +85,6 @@ import org.apache.logging.log4j.Logger;
 public class Zone {
 
   private static final Logger log = LogManager.getLogger(Zone.class);
-
-  /** The vision type (OFF, DAY, NIGHT). */
-  public enum VisionType {
-    OFF(),
-    DAY(),
-    NIGHT();
-
-    private final String displayName;
-
-    VisionType() {
-      displayName = I18N.getString("visionType." + name());
-    }
-
-    @Override
-    public String toString() {
-      return displayName;
-    }
-  }
 
   /** How lights should be rendered into the zone. */
   public enum LightingStyle {
@@ -413,7 +396,7 @@ public class Zone {
   private boolean isVisible;
 
   /** The VisionType of the zone. OFF, DAY or NIGHT. */
-  private VisionType visionType = VisionType.OFF;
+  private AppPreferenceEnums.VisionType visionType = AppPreferenceEnums.VisionType.OFF;
 
   private LightingStyle lightingStyle = LightingStyle.OVERTOP;
 
@@ -460,11 +443,11 @@ public class Zone {
     return tokenVisionDistance;
   }
 
-  public VisionType getVisionType() {
+  public AppPreferenceEnums.VisionType getVisionType() {
     return visionType;
   }
 
-  public void setVisionType(VisionType visionType) {
+  public void setVisionType(AppPreferenceEnums.VisionType visionType) {
     this.visionType = visionType;
   }
 
@@ -844,7 +827,7 @@ public class Zone {
     if (!hasFog() || view.isGMView()) {
       return true;
     }
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       Area combined = new Area(exposedArea);
       if (view.isUsingTokenView()) {
         for (Token tok : view.getTokens()) { // only owned and HasSight tokens are returned
@@ -905,7 +888,7 @@ public class Zone {
     Rectangle tokenSize = token.getBounds(this);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       // Jamz: Lets change the logic a bit looking for ownerships
       if (view.isUsingTokenView()) {
         for (Token tok : view.getTokens()) {
@@ -941,7 +924,7 @@ public class Zone {
     Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
-    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
+    if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != AppPreferenceEnums.VisionType.OFF) {
       if (view.isUsingTokenView()) {
         // Should this use FindTokenFunctions.OwnedFilter and zone.getTokenList()?
         for (Token tok : view.getTokens()) {
@@ -1189,7 +1172,7 @@ public class Zone {
     if (area == null || area.isEmpty()) {
       return;
     }
-    if (getVisionType() == VisionType.OFF) {
+    if (getVisionType() == AppPreferenceEnums.VisionType.OFF) {
       // Why is this done here and then again below???
       // And just because Vision==Off doesn't mean we aren't doing IF...
       // Jamz: if this exposedArea isn't done then it breaks getExposedTokens when vision is off...
@@ -1270,7 +1253,7 @@ public class Zone {
     if (area == null) {
       return;
     }
-    if (getVisionType() == VisionType.OFF) {
+    if (getVisionType() == AppPreferenceEnums.VisionType.OFF) {
       exposedArea.subtract(area);
     }
     if (selectedToks != null
@@ -2096,12 +2079,12 @@ public class Zone {
     // 1.3b47 -> 1.3b48
     if (visionType == null) {
       if (getTokensFiltered(Token::hasLightSources).size() > 0) {
-        visionType = VisionType.NIGHT;
+        visionType = AppPreferenceEnums.VisionType.NIGHT;
       } else if (topology != null && !topology.isEmpty()) {
-        visionType = VisionType.DAY;
+        visionType = AppPreferenceEnums.VisionType.DAY;
 
       } else {
-        visionType = VisionType.OFF;
+        visionType = AppPreferenceEnums.VisionType.OFF;
       }
     }
     if (lightingStyle == null) {
@@ -2291,7 +2274,7 @@ public class Zone {
     zone.name = dto.getName();
     zone.playerAlias = dto.hasPlayerAlias() ? dto.getPlayerAlias().getValue() : null;
     zone.isVisible = dto.getIsVisible();
-    zone.visionType = VisionType.valueOf(dto.getVisionType().name());
+    zone.visionType = AppPreferenceEnums.VisionType.valueOf(dto.getVisionType().name());
     zone.lightingStyle = LightingStyle.valueOf(dto.getLightingStyle().name());
     zone.tokenSelection = TokenSelection.valueOf(dto.getTokenSelection().name());
     zone.height = dto.getHeight();

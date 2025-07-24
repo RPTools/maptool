@@ -39,6 +39,7 @@ import javax.swing.*;
 import net.rptools.lib.net.FTPLocation;
 import net.rptools.lib.net.LocalLocation;
 import net.rptools.lib.net.Location;
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.AbeillePanel;
 import net.rptools.maptool.client.swing.SwingUtil;
@@ -100,7 +101,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
   // a single ExportDialog to ever be instanced.
 
   // Pseudo-layers
-  private static Zone.VisionType savedVision;
+  private static AppPreferenceEnums.VisionType savedVision;
   private static boolean savedFog;
   private static boolean savedBoard;
   // for ZoneRenderer preservation
@@ -324,7 +325,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       if (this == ExportLayers.LAYER_FOG) {
         ExportLayers.LAYER_FOG.setChecked(zone.hasFog());
       } else if (this == ExportLayers.LAYER_VISIBILITY) {
-        ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != Zone.VisionType.OFF);
+        ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
       } else {
         setChecked(true);
       }
@@ -338,7 +339,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
       }
       // however, some pseudo-layers do have a state, so set that appropriately
       final Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
-      ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != Zone.VisionType.OFF);
+      ExportLayers.LAYER_VISIBILITY.setChecked(zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
       ExportLayers.LAYER_FOG.setChecked(zone.hasFog());
     }
 
@@ -382,7 +383,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
         // only enable fog and visibility check-boxes
         // when the map has those things turned on.
         if (layer == ExportLayers.LAYER_VISIBILITY) {
-          enabled &= (zone.getVisionType() != Zone.VisionType.OFF);
+          enabled &= (zone.getVisionType() != AppPreferenceEnums.VisionType.OFF);
         }
         if (layer == ExportLayers.LAYER_FOG) {
           enabled &= zone.hasFog();
@@ -741,7 +742,7 @@ public class ExportDialog extends JDialog implements IIOWriteProgressListener {
     //
     zone.setHasFog(ExportLayers.LAYER_FOG.isChecked());
     if (!ExportLayers.LAYER_VISIBILITY.isChecked()) {
-      zone.setVisionType(Zone.VisionType.OFF);
+      zone.setVisionType(AppPreferenceEnums.VisionType.OFF);
     }
     zone.setDrawBoard(ExportLayers.LAYER_BOARD.isChecked());
 

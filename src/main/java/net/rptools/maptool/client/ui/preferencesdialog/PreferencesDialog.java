@@ -39,15 +39,12 @@ import javax.swing.event.DocumentListener;
 import net.rptools.lib.StringUtil;
 import net.rptools.lib.cipher.CipherUtil;
 import net.rptools.lib.image.RenderQuality;
-import net.rptools.maptool.client.AppConstants;
-import net.rptools.maptool.client.AppPreferences;
+import net.rptools.maptool.client.*;
 import net.rptools.maptool.client.AppPreferences.UvttLosImportType;
-import net.rptools.maptool.client.AppUtil;
-import net.rptools.maptool.client.DeveloperOptions;
-import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.events.PreferencesChanged;
 import net.rptools.maptool.client.functions.MediaPlayerAdapter;
 import net.rptools.maptool.client.swing.*;
+import net.rptools.maptool.client.ui.theme.Icons;
 import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.theme.ThemeFontPreferences;
 import net.rptools.maptool.client.ui.theme.ThemeSupport;
@@ -70,7 +67,7 @@ import org.apache.logging.log4j.Logger;
  *
  * <p>A dialog box to manage user preferences.
  */
-public class PreferencesDialog extends AbeillePanel {
+public class PreferencesDialog extends AbeillePanel<Object> {
 
   /** Logger instance used for logging messages in the PreferencesDialog class. */
   private static final Logger log = LogManager.getLogger(PreferencesDialog.class);
@@ -147,7 +144,7 @@ public class PreferencesDialog extends AbeillePanel {
   private final JComboBox<WalkerMetric> movementMetricCombo = getComboBox("movementMetricCombo");
 
   /** JComboBox variable used to display vision type options. */
-  private final JComboBox<Zone.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
+  private final JComboBox<AppPreferenceEnums.VisionType> visionTypeCombo = getComboBox("visionTypeCombo");
 
   /** JComboBox variable used to display map sorting options. */
   private final JComboBox<AppPreferences.MapSortType> mapSortType = getComboBox("mapSortTypeCombo");
@@ -644,8 +641,7 @@ public class PreferencesDialog extends AbeillePanel {
     installDirTextField.setText(AppUtil.getInstallDirectory().toString());
 
     JLabel configFileWarningIcon = getLabel("configFileWarningIcon");
-    configFileWarningIcon.setIcon(
-        new FlatSVGIcon("net/rptools/maptool/client/image/warning.svg", 16, 16));
+    configFileWarningIcon.setIcon(RessourceManager.getSmallIcon(Icons.WARNING));
 
     copyCfgFilePathButton.addActionListener(
         e -> {
@@ -1448,12 +1444,12 @@ public class PreferencesDialog extends AbeillePanel {
             AppPreferences.movementMetric.set(
                 (WalkerMetric) movementMetricCombo.getSelectedItem()));
 
-    visionTypeCombo.setModel(new DefaultComboBoxModel<>(Zone.VisionType.values()));
+    visionTypeCombo.setModel(new DefaultComboBoxModel<>(AppPreferenceEnums.VisionType.values()));
     visionTypeCombo.setSelectedItem(AppPreferences.defaultVisionType.get());
     visionTypeCombo.addItemListener(
         e ->
             AppPreferences.defaultVisionType.set(
-                (Zone.VisionType) visionTypeCombo.getSelectedItem()));
+                (AppPreferenceEnums.VisionType) visionTypeCombo.getSelectedItem()));
 
     mapSortType.setModel(new DefaultComboBoxModel<>(AppPreferences.MapSortType.values()));
     mapSortType.setSelectedItem(AppPreferences.mapSortType.get());

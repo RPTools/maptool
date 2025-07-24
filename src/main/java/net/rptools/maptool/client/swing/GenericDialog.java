@@ -23,20 +23,23 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.language.I18N;
 
 public class GenericDialog extends JDialog {
   public static final String AFFIRM = ButtonPanel.AFFIRMATIVE_BUTTON;
   public static final String DENY = ButtonPanel.CANCEL_BUTTON;
-  private Dimension _preferredSize = null;
-  private boolean hasBeenShown;
+  private boolean hasPositionedItself;
   private String _dialogResult = ButtonPanel.CANCEL_BUTTON;
-  protected final Resizable _resizable;
   private final JComponent _contentPane = new JPanel();
-  private JComponent _content = new JPanel();
+  private JComponent _mainContent = new JPanel();
+  private JComponent _header = new JPanel();
+  private JComponent _navPane = new JPanel();
+  private JComponent _sideBarPane = new JPanel();
+  private JComponent _toolbar = new JToolBar();
   private final JScrollPane _scrollPane = new JScrollPane();
-  private ScrollableButtonPanel _buttonPanel;
-  private boolean _usingAbeillePanel = false;
+  private ButtonPanel _buttonPanel;
+  private final List<AbeillePanel<?>> abeillePanelList = new ArrayList<>();
   private ActionListener _onCloseAction;
   private ActionListener _onShowAction;
 
@@ -48,9 +51,7 @@ public class GenericDialog extends JDialog {
   public GenericDialog() {
     super(MapTool.getFrame());
     super.setContentPane(_contentPane);
-    initComponents();
-
-    this._resizable =
+    Resizable _resizable =
         new Resizable(getRootPane()) {
           public void resizing(int resizeDir, int newX, int newY, int newW, int newH) {
             Container container = GenericDialog.this.getContentPane();
@@ -60,13 +61,18 @@ public class GenericDialog extends JDialog {
             }
           }
         };
-    this._resizable.setResizeCornerSize(18);
-    this._resizable.setResizableCorners(Resizable.LOWER_LEFT | Resizable.LOWER_RIGHT);
+    _resizable.setResizeCornerSize(18);
+    _resizable.setResizableCorners(Resizable.LOWER_LEFT | Resizable.LOWER_RIGHT);
     super.setResizable(true);
 
-    this.setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+    setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
 
-    this.addWindowListener(
+    getToolbar().setVisible(false);
+    getNavPane().setVisible(false);
+    getSideBarPane().setVisible(false);
+    getHeader().setVisible(false);
+
+    addWindowListener(
         new WindowAdapter() {
           @Override
           public void windowClosing(WindowEvent e) {
@@ -81,84 +87,106 @@ public class GenericDialog extends JDialog {
 
   public GenericDialog(String title, JComponent panel, boolean modal) {
     this();
-    this.setDialogTitle(title);
-    this.setModal(modal);
-    this.setContent(panel);
+    setDialogTitle(title);
+    setModal(modal);
+    setContent(panel);
   }
 
-  protected void initComponents() {
-    JideBoxLayout layout = new JideBoxLayout(this.getContentPane(), JideBoxLayout.PAGE_AXIS);
-    this.getContentPane().setLayout(layout);
-    this._scrollPane.setViewportView(this.getContent());
-    this.getContentPane().add(this._scrollPane, JideBoxLayout.VARY);
-    this.getContentPane().add(this.getButtonPanel(), JideBoxLayout.FIX);
+  protected void layoutComponents() {
+    getScrollPane().setViewportView(getContentPanel());
+    getContentPane().setLayout(new BorderLayout());
+    getContentPane().add(getToolbar(), BorderLayout.BEFORE_FIRST_LINE);
+    getContentPane().add(getHeader(), BorderLayout.NORTH);
+    getContentPane().add(getNavPane(), BorderLayout.WEST);
+    getContentPane().add(getScrollPane(), BorderLayout.CENTER);
+    getContentPane().add(getSideBarPane(), BorderLayout.EAST);
+    getContentPane().add(getButtonPanel(), BorderLayout.SOUTH);
   }
 
   @Override
   public JComponent getContentPane() {
-    return _contentPane;
+    return this._contentPane;
   }
 
-  public JComponent getContent() {
-    return _content;
+  public JComponent getToolbar() {
+    return this._toolbar;
+  }
+
+  public JComponent getHeader() {
+    return this._header;
+  }
+
+  public JComponent getContentPanel() {
+    return this._mainContent;
+  }
+
+  public JComponent getSideBarPane() {
+    return this._sideBarPane;
+  }
+
+  public JComponent getNavPane() {
+    return this._navPane;
+  }
+
+  public JScrollPane getScrollPane() {
+    return this._scrollPane;
   }
 
   @SuppressWarnings("UnusedReturnValue")
   public ButtonPanel getButtonPanel() {
     if (this._buttonPanel == null) {
-      this._buttonPanel = new ScrollableButtonPanel() {};
+      this._buttonPanel = new ScrollableButtonPanel();
       this._buttonPanel.setSizeConstraint(ButtonPanel.NO_LESS_THAN);
-      this._buttonPanel.setBorder(UIManager.getDefaults().getBorder("DesktopIcon.border"));
+      this._buttonPanel.setBorder(
+          BorderFactory.createCompoundBorder(
+              new PartialLineBorder(
+                  UIManager.getDefaults().getColor("windowBorder"), 1, PartialLineBorder.NORTH),
+              BorderFactory.createEmptyBorder(4, 6, 6, 6)));
     }
     return this._buttonPanel;
   }
 
   @SuppressWarnings("UnusedReturnValue")
   public void setDefaultButton(ButtonKind buttonKind) {
-    JButton button = (JButton) this._buttonPanel.getButtonByName(buttonKind.name);
+    JButton button = (JButton) getButtonPanel().getButtonByName(buttonKind.name);
     if (button == null) {
-      this.addButton(buttonKind);
-      button = (JButton) this._buttonPanel.getButtonByName(buttonKind.name);
+      addButton(buttonKind);
+      button = (JButton) getButtonPanel().getButtonByName(buttonKind.name);
     }
-    this.getRootPane().setDefaultButton(button);
+    getRootPane().setDefaultButton(button);
+  }
+
+  public void setButtonOrder(String buttonOrder) {
+    getButtonPanel().setButtonOrder(buttonOrder);
+  }
+
+  public void setOppositeButtonOrder(String buttonOrder) {
+    getButtonPanel().setOppositeButtonOrder(buttonOrder);
+  }
+
+  public void addNonButton(Component c, Object constraints, int index) {
+    getButtonPanel().add(c, constraints, index);
   }
 
   public void addButton(AbstractButton button, Object constraints, int index) {
-    this._buttonPanel.addButton(button, constraints, index);
-  }
-
-  public void addButton(AbstractButton button, Object constraints) {
-    this.addButton(button, constraints, -1);
-  }
-
-  public void addButton(AbstractButton button, ActionListener l) {
-    this.addButton(button, l, ButtonPanel.AFFIRMATIVE_BUTTON);
-  }
-
-  public void addButton(AbstractButton button, ActionListener l, Object constraints) {
-    button.addActionListener(l);
-    this.addButton(button, constraints, -1);
-  }
-
-  public void addButton(AbstractButton button) {
-    this.addButton(button, ButtonPanel.AFFIRMATIVE_BUTTON);
+    getButtonPanel().addButton(button, constraints, index);
   }
 
   public void addButton(ButtonKind buttonKind) {
-    this.addButton(buttonKind, null, null);
+    addButton(buttonKind, null, null);
   }
 
   public void addButton(ButtonKind buttonKind, Action action) {
-    this.addButton(buttonKind, action, null);
+    addButton(buttonKind, action, null);
   }
 
   public void addButton(ButtonKind buttonKind, ActionListener listener) {
-    this.addButton(buttonKind, null, listener);
+    addButton(buttonKind, null, listener);
   }
 
   public void addButton(ButtonKind buttonKind, Action action, ActionListener listener) {
     // check button exists
-    AbstractButton b = (AbstractButton) _buttonPanel.getButtonByName(buttonKind.name);
+    AbstractButton b = (AbstractButton) getButtonPanel().getButtonByName(buttonKind.name);
     boolean needNewButton = b == null;
     if (needNewButton) {
       b = new JButton(buttonKind.i18nText);
@@ -192,63 +220,128 @@ public class GenericDialog extends JDialog {
       b.addActionListener(listener);
     }
     if (needNewButton) {
-      this._buttonPanel.addButton(b, buttonKind.buttonPanelButtonType);
+      this.getButtonPanel().addButton(b, buttonKind.buttonPanelButtonType);
     }
   }
 
-  public void addNonButton(Component c, Object constraints, int index) {
-    this._buttonPanel.add(c, constraints, index);
-  }
-
   public void createOkCancelButtons() {
-    this.addButton(ButtonKind.OK);
-    this.addButton(ButtonKind.CANCEL);
-  }
-
-  public void setButtonOrder(String buttonOrder) {
-    this._buttonPanel.setButtonOrder(buttonOrder);
-  }
-
-  public void setOppositeButtonOrder(String buttonOrder) {
-    this._buttonPanel.setOppositeButtonOrder(buttonOrder);
+    addButton(ButtonKind.OK);
+    addButton(ButtonKind.CANCEL);
   }
 
   public void onBeforeShow(ActionListener listener) {
-    this._onShowAction = listener;
+    _onShowAction = listener;
   }
 
   public void onBeforeClose(ActionListener listener) {
-    this._onCloseAction = listener;
+    _onCloseAction = listener;
   }
 
   public void setDialogTitle(String title) {
     super.setTitle(title);
   }
 
-  public void setContent(JComponent content) {
-    this._content = content;
-    this._usingAbeillePanel = content instanceof AbeillePanel;
-    this._scrollPane.setViewportView(content);
+  public void setToolbar(JComponent toolbarContent) {
+    if (toolbarContent instanceof JToolBar toolbar) {
+      this._toolbar = toolbar;
+    } else {
+      this._toolbar.add(toolbarContent);
+    }
+    this._toolbar.setVisible(true);
+    this._toolbar.setMinimumSize(
+        new Dimension(this.getPreferredSize().width, RessourceManager.smallIconSize));
+    if (toolbarContent instanceof AbeillePanel<?> panel) {
+      abeillePanelList.add(panel);
+    }
+    this.getContentPane()
+        .setBorder(
+            new PartialLineBorder(
+                UIManager.getDefaults().getColor("windowBorder"), 1, PartialLineBorder.NORTH));
+  }
+
+  public void setHeader(JComponent headerContent) {
+    this._header = headerContent;
+    this._header.setVisible(true);
+    if (headerContent instanceof AbeillePanel<?> panel) {
+      abeillePanelList.add(panel);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public void setNavPane(JComponent navContent) {
+    this._navPane = navContent;
+    this._navPane.setVisible(true);
+    if (navContent instanceof AbeillePanel<?> panel) {
+      abeillePanelList.add(panel);
+    }
+  }
+
+  @SuppressWarnings("unused")
+  public void setSideBarPane(JComponent sideBarContent) {
+    this._sideBarPane = sideBarContent;
+    this._sideBarPane.setVisible(true);
+    if (sideBarContent instanceof AbeillePanel<?> panel) {
+      abeillePanelList.add(panel);
+    }
+  }
+
+  public void setContent(JComponent mainContent) {
+    this._mainContent = mainContent;
+    if (mainContent instanceof AbeillePanel<?> panel) {
+      abeillePanelList.add(panel);
+    }
+    this._scrollPane.setViewportView(mainContent);
+
+    // ESCAPE cancels the window without committing
+    mainContent
+        .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
+        .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "close");
+    mainContent
+        .getActionMap()
+        .put(
+            "close",
+            new AbstractAction() {
+              public void actionPerformed(ActionEvent e) {
+                closeDialog();
+              }
+            });
   }
 
   public AbstractButton getOKButton() {
-    return this.getButton(ButtonKind.OK);
+    return getButton(ButtonKind.OK);
   }
 
   public AbstractButton getCancelButton() {
-    return this.getButton(ButtonKind.CANCEL);
+    return getButton(ButtonKind.CANCEL);
+  }
+
+  public void closeDialog() {
+    if (_onCloseAction != null) {
+      _onCloseAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "close"));
+    }
+    if (!abeillePanelList.isEmpty()) {
+      for (AbeillePanel<?> panel : abeillePanelList) {
+        if (panel.getModel() != null && getDialogResult().equals(AFFIRM)) {
+          panel.commit();
+        }
+        if (getDefaultCloseOperation() == DISPOSE_ON_CLOSE) {
+          panel.unbind();
+        }
+      }
+    }
+    super.setVisible(false);
   }
 
   public AbstractButton getButton(ButtonKind buttonKind) {
-    return (AbstractButton) this._buttonPanel.getButtonByName(buttonKind.name);
+    return (AbstractButton) getButtonPanel().getButtonByName(buttonKind.name);
   }
 
   protected void setDialogResult(String result) {
-    this._dialogResult = result;
+    _dialogResult = result;
   }
 
   public String getDialogResult() {
-    return this._dialogResult;
+    return _dialogResult;
   }
 
   private Dimension getMaxScreenSize() {
@@ -259,49 +352,28 @@ public class GenericDialog extends JDialog {
         bounds.width - insets.left - insets.right, bounds.height - insets.top - insets.bottom);
   }
 
-  private List<Component> getAllComponents(Container c) {
-    List<Component> listOut = new ArrayList<>();
-    Component[] components = c.getComponents();
-    for (Component _c : components) {
-      listOut.add(_c);
-      if (_c instanceof Container c_) {
-        listOut.addAll(getAllComponents(c_));
-      }
-    }
-    return listOut;
-  }
-
   @Override
   public Dimension getPreferredSize() {
-    //    for (Component c : getAllComponents(this)) {
-    //      System.out.println(c.getName() + c.getPreferredSize());
-    //    }
-
     int scrollBarSize = UIManager.getDefaults().getInt("ScrollBar.width");
-    Dimension frameSize = MapTool.getFrame().getSize();
     Dimension superPref = super.getPreferredSize();
     superPref =
         new Dimension(superPref.width + 2 * scrollBarSize, superPref.height + scrollBarSize);
     Dimension screenMax = getMaxScreenSize();
     return new Dimension(
-        Math.min(Math.min(superPref.width, screenMax.width), frameSize.width),
-        Math.min(Math.min(superPref.height, screenMax.height), frameSize.height));
+        Math.min(superPref.width, screenMax.width), Math.min(superPref.height, screenMax.height));
   }
 
   @Override
   public Dimension getMaximumSize() {
     Dimension superMax = super.getMaximumSize();
     Dimension screenMax = getMaxScreenSize();
-    Dimension frameSize = MapTool.getFrame().getSize();
     return new Dimension(
-        Math.min(Math.min(superMax.width, screenMax.width), frameSize.width),
-        Math.min(Math.min(superMax.height, screenMax.height), frameSize.height));
+        Math.min(superMax.width, screenMax.width), Math.min(superMax.height, screenMax.height));
   }
 
   @Override
   public void setMaximumSize(Dimension maximumSize) {
     Dimension screenMax = getMaxScreenSize();
-    // limit size to screen size
     super.setMaximumSize(
         new Dimension(
             Math.min(maximumSize.width, screenMax.width),
@@ -309,68 +381,45 @@ public class GenericDialog extends JDialog {
   }
 
   public String showDialogWithReturnValue() {
-    // have to be modal to return a result
     if (!isModal()) {
-      this.setModal(true);
+      setModal(true);
     }
-    showDialog();
+    setVisible(true);
     return this.getDialogResult();
   }
 
   public void showDialog() {
-    // things to do when first displayed
-    if (!this.hasBeenShown) {
-      this.invalidate();
-      this.pack();
-      // tie escape key to dialogue close
-      this._content
-          .getInputMap(JComponent.WHEN_IN_FOCUSED_WINDOW)
-          .put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
-      this._content
-          .getActionMap()
-          .put(
-              "cancel",
-              new AbstractAction() {
-                public void actionPerformed(ActionEvent e) {
-                  setDialogResult(GenericDialog.DENY);
-                  closeDialog();
-                }
-              });
-      // if not set, and there is only one button, make it the default.
-      if (this.getRootPane().getDefaultButton() == null
-          && _buttonPanel.getComponents().length == 1) {
-        this.getRootPane().setDefaultButton((JButton) _buttonPanel.getComponents()[0]);
-      }
-      // Center the dialogue over its parent
-      SwingUtil.centerOver(this, this.getOwner());
-      this.hasBeenShown = true;
-    }
-    // set off the onShowAction if present
-    if (this._onShowAction != null) {
-      this._onShowAction.actionPerformed(
-          new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "show"));
-    }
-    // let it be seen
-    super.setVisible(true);
+    setVisible(true);
+    _scrollPane.requestFocus();
   }
 
-  public void closeDialog() {
-    if (this._usingAbeillePanel && ((AbeillePanel<?>) this._content).getModel() != null) {
-      // wrap up any AbeillePanel commits and unbinding
-      if (this.getDialogResult().equals(AFFIRM)) {
-        ((AbeillePanel<?>) _content).commit();
+  @Override
+  public void setVisible(boolean visible) {
+    if (visible) {
+      layoutComponents();
+      getRootPane().invalidate();
+      // We want to center over our parent, but only the first time.
+      // If this dialog is reused, we want it to show up where it was last.
+      pack();
+      if (!hasPositionedItself) {
+        positionInitialView();
+        hasPositionedItself = true;
       }
-      ((AbeillePanel<?>) _content).unbind();
+      if (_onShowAction != null) {
+        _onShowAction.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "show"));
+        revalidate();
+      }
+      if (getRootPane().getDefaultButton() == null
+          && getButtonPanel().getComponents().length == 1) {
+        getRootPane().setDefaultButton((JButton) getButtonPanel().getComponents()[0]);
+      }
+      super.setVisible(true);
+    } else {
+      super.setVisible(false);
     }
-    // set off the onCloseAction if present
-    if (this._onCloseAction != null) {
-      this._onCloseAction.actionPerformed(
-          new ActionEvent(this, ActionEvent.ACTION_PERFORMED, "close"));
-    }
-    // hide or dispose as appropriate
-    switch (getDefaultCloseOperation()) {
-      case DISPOSE_ON_CLOSE, EXIT_ON_CLOSE -> this.dispose();
-      case HIDE_ON_CLOSE -> super.setVisible(false);
-    }
+  }
+
+  protected void positionInitialView() {
+    SwingUtil.centerOver(this, getOwner());
   }
 }

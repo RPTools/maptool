@@ -1,0 +1,11 @@
+<svg id="svg2" clip-rule="evenodd" fill-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2" version="1.1" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+  <defs id="defs1">
+    <marker id="CapRibbon1" overflow="visible" markerHeight="1" markerWidth="1.05" orient="auto-start-reverse" preserveAspectRatio="xMidYMid" viewBox="0 0 1.05 1">
+      <path id="path62" transform="scale(.5)" d="m0-1h2l-1 1 1 1h-2l-0.1-1z" fill="context-stroke"/>
+    </marker>
+    <marker id="Triangle" overflow="visible" markerHeight="0.4" markerWidth="0.4" orient="auto-start-reverse" preserveAspectRatio="xMidYMid" viewBox="0 0 1 1">
+      <path id="path135" transform="scale(.5)" d="m5.77 0-8.65 5v-10z" fill="context-stroke" fill-rule="evenodd" stroke="context-stroke" stroke-width="1pt"/>
+    </marker>
+  </defs>
+  <path id="path1" d="m13.2 10.6c-0.863 1.51-1.58 3.54-5.19 3.56-3.31 0.019-6-2.69-6-6s2.69-6 6-6" fill="none" marker-end="url(#CapRibbon1)" marker-start="url(#Triangle)" stroke="#231f20" stroke-dashoffset=".6" stroke-width="2.7"/>
+</svg>

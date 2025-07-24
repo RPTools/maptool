@@ -424,6 +424,7 @@ dependencies {
     implementation(libs.bundles.gdx)
     implementation(variantOf(libs.gdx.platform) { classifier('natives-desktop')})
     implementation(variantOf(libs.gdx.freetype.platform) { classifier('natives-desktop')})
+    implementation("net.java.jinput:jinput-platform:2.0.7")
 }
 
 processResources {

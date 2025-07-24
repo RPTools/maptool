@@ -25,6 +25,8 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.Nonnull;
+
+import net.rptools.maptool.client.AppPreferenceEnums;
 import net.rptools.maptool.client.AppUtil;
 import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.ui.zone.Illumination.LumensLevel;
@@ -229,7 +231,7 @@ public class ZoneView {
    * @return true if the vision of the zone is not of type VisionType.OFF
    */
   public boolean isUsingVision() {
-    return zone.getVisionType() != Zone.VisionType.OFF;
+    return zone.getVisionType() != AppPreferenceEnums.VisionType.OFF;
   }
 
   /**
@@ -454,7 +456,7 @@ public class ZoneView {
       // Get the token's sight.
       final var tokenVisibleArea = getTokenVisibleArea(token);
 
-      if (zone.getVisionType() != Zone.VisionType.NIGHT) {
+      if (zone.getVisionType() != AppPreferenceEnums.VisionType.NIGHT) {
         // Treat the entire visible area like a light source of minimal lumens.
         final var contributedLight = createDaylightContribution(tokenVisibleArea);
         personalLights.add(contributedLight);

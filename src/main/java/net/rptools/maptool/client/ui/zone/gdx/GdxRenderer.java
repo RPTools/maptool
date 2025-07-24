@@ -1191,7 +1191,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
     BlendFunction.SRC_ONLY.applyToBatch(batch);
     // At night, show any uncovered areas as dark. In daylight, show them as light (clear).
-    if (zoneCache.getZone().getVisionType() == Zone.VisionType.NIGHT) {
+    if (zoneCache.getZone().getVisionType() == AppPreferenceEnums.VisionType.NIGHT) {
       ScreenUtils.clear(0, 0, 0, overlayAlpha);
     } else {
       ScreenUtils.clear(Color.CLEAR);

@@ -54,7 +54,6 @@ import net.rptools.maptool.client.ui.zone.renderer.ZoneRenderer;
 import net.rptools.maptool.events.MapToolEventBus;
 import net.rptools.maptool.model.*;
 import net.rptools.maptool.model.Pointer.Type;
-import net.rptools.maptool.model.Zone.VisionType;
 import net.rptools.maptool.model.player.Player.Role;
 import net.rptools.maptool.model.sheet.stats.StatSheetManager;
 import net.rptools.maptool.util.GraphicsUtil;
@@ -1926,7 +1925,7 @@ public class PointerTool extends DefaultTool {
         }
         boolean useTokenExposedArea =
             MapTool.getServerPolicy().isUseIndividualFOW()
-                && zone.getVisionType() != VisionType.OFF;
+                && zone.getVisionType() != AppPreferenceEnums.VisionType.OFF;
         int deltaX = leadTokenNewAnchor.x - this.dragAnchor.x;
         int deltaY = leadTokenNewAnchor.y - this.dragAnchor.y;
         Grid grid = zone.getGrid();
@@ -2016,7 +2015,7 @@ public class PointerTool extends DefaultTool {
               bounds.height = intervalX * (dx + 1) / 3 - intervalX * dx / 3;
 
               if (!MapTool.getServerPolicy().isUseIndividualFOW()
-                  || zone.getVisionType() == VisionType.OFF) {
+                  || zone.getVisionType() == AppPreferenceEnums.VisionType.OFF) {
                 if (fow.contains(bounds)) {
                   counter++;
                 }
