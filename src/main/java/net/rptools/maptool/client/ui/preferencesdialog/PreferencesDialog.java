@@ -109,6 +109,13 @@ public class PreferencesDialog extends AbeillePanel {
   private final JCheckBox hideTokenStackIndicatorCheckBox =
       getCheckBox("hideMousePointerWhileDragging");
 
+  /**
+   * Represents a checkbox indicating whether to align the selection marquee with the token layout
+   * offset.
+   */
+  private final JCheckBox selectionMarqueeAlignToImage =
+      getCheckBox("selectionMarqueeAlignToImage");
+
   /** Represents a checkbox for controlling the visibility of new maps. */
   private final JCheckBox newMapsVisibleCheckBox = getCheckBox("newMapsVisible");
 
@@ -721,7 +728,10 @@ public class PreferencesDialog extends AbeillePanel {
                 ((SpinnerNumberModel) ((JSpinner) e.getSource()).getModel())
                     .getNumber()
                     .doubleValue()));
-
+    selectionMarqueeAlignToImage.addChangeListener(
+        e ->
+            AppPreferences.selectMarqueeAlignToImage.set(
+                selectionMarqueeAlignToImage.isSelected()));
     showLabelBorderCheckBox.addActionListener(
         e -> {
           if (showLabelBorderCheckBox.isSelected()) {
@@ -1561,6 +1571,7 @@ public class PreferencesDialog extends AbeillePanel {
    * method is called during the initialization process.
    */
   private void setInitialState() {
+    selectionMarqueeAlignToImage.setSelected(AppPreferences.selectMarqueeAlignToImage.get());
     showDialogOnNewToken.setSelected(AppPreferences.showDialogOnNewToken.get());
     saveReminderCheckBox.setSelected(AppPreferences.saveReminder.get());
     fillSelectionCheckBox.setSelected(AppPreferences.fillSelectionBox.get());

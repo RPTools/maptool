@@ -398,6 +398,13 @@ public class AppPreferences {
   public static final Preference<Boolean> newBackgroundsVisible =
       store.defineBoolean("newBackgroundsVisible", true);
 
+  public static final Preference<Boolean> selectMarqueeAlignToImage =
+      store.defineBoolean(
+          "selectMarqueeAlignToImage",
+          "Preference.selectionMarquee.alignToImage",
+          "Preference.selectionMarquee.alignToImage.tooltip",
+          true);
+
   public static final Preference<File> saveDirectory =
       store.defineFile("saveDir", () -> new File(File.separator));
 
