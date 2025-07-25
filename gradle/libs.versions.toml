@@ -30,7 +30,7 @@ sentry-log4j = { group = "io.sentry", name = "sentry-log4j2", version.ref = "sen
 # Networking
 # Web RTC
 websocket = { group = "org.java-websocket", name = "Java-WebSocket", version = "1.6.0" }
-webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "0.11.0" }
+webrtc = { group = "dev.onvoid.webrtc", name = "webrtc-java", version = "0.13.0" }
 # compression of messages between client and server
 apache-commons-compress = { group = "org.apache.commons", name = "commons-compress", version = "1.27.1" }
 zstd = { group = "com.github.luben", name = "zstd-jni", version = "1.5.7-4" }
