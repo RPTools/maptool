@@ -62,7 +62,6 @@ public class TokenLayoutRenderPanel extends JPanel {
             calcZoomFactor();
           }
         });
-    log.debug("New TokenLayoutPanel");
   }
 
   private TokenLayoutPanelHelper helper;
@@ -184,17 +183,15 @@ public class TokenLayoutRenderPanel extends JPanel {
             TokenLayoutPanelHelper.MAX_ZOOM);
 
     setZoomFactor(newZoom);
-    log.debug(
-        "calculated ZoomFactor: "
-            + zoomFactor
-            + "\nSize: "
-            + size
-            + "\nFootprint bounds: "
-            + fpBounds);
+  }
+
+  protected void flagAsDirty() {
+    Rectangle panelBounds = getBounds();
+    RepaintManager.currentManager(this) // .markCompletelyDirty(this);
+        .addDirtyRegion(this, panelBounds.x, panelBounds.y, panelBounds.width, panelBounds.height);
   }
 
   private void addRenderPaneListeners() {
-    log.debug("addRenderPaneListeners");
     addMouseListener(
         new MouseAdapter() {
           String old;
@@ -205,7 +202,7 @@ public class TokenLayoutRenderPanel extends JPanel {
             dragStartX = -1;
             dragStartY = -1;
             evtTarget = MouseTarget.NONE;
-            helper.flagAsDirty();
+            flagAsDirty();
           }
 
           @Override
@@ -233,7 +230,7 @@ public class TokenLayoutRenderPanel extends JPanel {
           public void mouseExited(MouseEvent e) {
             if (old != null) MapTool.getFrame().setStatusMessage(old);
             evtTarget = MouseTarget.NONE;
-            helper.flagAsDirty();
+            flagAsDirty();
           }
 
           @Override
@@ -280,7 +277,7 @@ public class TokenLayoutRenderPanel extends JPanel {
             default -> log.debug("Defaulting - invalid mouse event target.");
           }
           evtTarget = MouseTarget.NONE;
-          helper.flagAsDirty();
+          flagAsDirty();
         });
     addMouseMotionListener(
         new MouseMotionAdapter() {
