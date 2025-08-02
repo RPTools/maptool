@@ -62,8 +62,13 @@ public class FacingArrowRenderer {
   private void onGridChanged(GridChanged event) {
     if (event.zone() != null) {
       this.zone = event.zone();
-      isIsometric = this.zone.getGrid().isIsometric();
-      isSquare = GridFactory.getGridType(this.zone.getGrid()).equals(GridFactory.SQUARE);
+      if (zone.getGrid() == null) {
+        isIsometric = false;
+        isSquare = false;
+      } else {
+        isIsometric = this.zone.getGrid().isIsometric();
+        isSquare = GridFactory.getGridType(this.zone.getGrid()).equals(GridFactory.SQUARE);
+      }
     }
   }
 
@@ -76,8 +81,13 @@ public class FacingArrowRenderer {
     for (int i = 89; i >= 0; i--) {
       figureFillColours.add(figureFillColours.get(i));
     }
-    isIsometric = this.zone.getGrid().isIsometric();
-    isSquare = GridFactory.getGridType(this.zone.getGrid()).equals(GridFactory.SQUARE);
+    if (zone.getGrid() == null) {
+      isIsometric = false;
+      isSquare = false;
+    } else {
+      isIsometric = this.zone.getGrid().isIsometric();
+      isSquare = GridFactory.getGridType(this.zone.getGrid()).equals(GridFactory.SQUARE);
+    }
   }
 
   public void paintArrow(Graphics2D g2d, TokenPosition position) {
