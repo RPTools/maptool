@@ -30,6 +30,13 @@ import net.rptools.maptool.model.zones.GridChanged;
 public class HaloRenderer {
   private final RenderHelper renderHelper;
   private final Zone zone;
+  private float opacity = AppPreferences.haloOverlayOpacity.get() / 255f;
+  private float lineWeight = AppPreferences.haloLineWidth.get();
+
+  {
+    AppPreferences.haloOverlayOpacity.onChange(i -> opacity = i / 255f);
+    AppPreferences.haloLineWidth.onChange(i -> lineWeight = i);
+  }
 
   // region These fields need to be recalculated whenever the grid changes.
 
@@ -69,16 +76,15 @@ public class HaloRenderer {
                 .createTransformedShape(cachedHaloShape);
       }
     }
-
     return cachedHaloShape;
   }
 
   // Render Halos
-  public void renderHalo(Graphics2D g2d, Token token, ZoneViewModel.TokenPosition position) {
+  public void renderHalo(Graphics2D g2d, ZoneViewModel.TokenPosition position) {
+    Token token = position.token();
     if (token.getHaloColor() == null) {
       return;
     }
-
     var grid = zone.getGrid();
     if (grid == null) {
       return;
@@ -105,29 +111,32 @@ public class HaloRenderer {
                 position.transformedBounds().getBounds2D().getCenterX(),
                 position.transformedBounds().getBounds2D().getCenterY())
             .createTransformedShape(paintShape);
-
     // this will eventually hold forks for painting different types of halo
     renderHelper.render(
         g2d,
         worldG -> {
-          paintLineHalo(worldG, token, grid, positionedPaintShape);
+          paintLineHalo(worldG, position.token(), grid, positionedPaintShape);
         });
   }
 
   private void paintLineHalo(Graphics2D g2d, Token token, Grid grid, Shape paintShape) {
+    Stroke oldStroke = g2d.getStroke();
+    g2d.setColor(token.getHaloColor());
     // double width because we will clip the inside half
     g2d.setStroke(
         new BasicStroke(
-            (float)
-                (2f
-                    * Math.min(1f, token.getFootprint(grid).getScale())
-                    * AppPreferences.haloLineWidth.get())));
-    g2d.setColor(token.getHaloColor());
+            (float) (2f * lineWeight * Math.min(1f, token.getFootprint(grid).getScale()))));
     Shape oldClip = g2d.getClip();
+    Composite oldComposite = g2d.getComposite();
+    if (opacity < 1f) {
+      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
+    }
     Area a = new Area(g2d.getClipBounds());
     a.subtract(new Area(paintShape));
     g2d.setClip(a);
     g2d.draw(paintShape);
     g2d.setClip(oldClip);
+    g2d.setComposite(oldComposite);
+    g2d.setStroke(oldStroke);
   }
 }

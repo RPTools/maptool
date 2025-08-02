@@ -161,6 +161,10 @@ public class ZoneViewModel {
         viewport.getMinX(), viewport.getMinY(), viewport.getWidth(), viewport.getHeight());
   }
 
+  public boolean isUsingVision() {
+    return zoneView.isUsingVision();
+  }
+
   public Area getVisibleArea() {
     return visibleArea;
   }

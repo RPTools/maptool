@@ -408,7 +408,7 @@ public class GraphicsUtil {
     return new Area(path);
   }
 
-  private static Point2D getPointAtVector(Point2D point, double angle, double length) {
+  public static Point2D getPointAtVector(Point2D point, double angle, double length) {
     double x = point.getX() + length * Math.cos(Math.toRadians(angle));
     double y = point.getY() - length * Math.sin(Math.toRadians(angle));
     return new Point2D.Double(x, y);

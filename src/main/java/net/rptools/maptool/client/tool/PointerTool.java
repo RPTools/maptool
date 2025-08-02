@@ -1831,7 +1831,7 @@ public class PointerTool extends DefaultTool {
       }
 
       // Don't bother if there isn't any movement
-      if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
+      if (renderer.isMoveSelectionSetUnchanged(tokenBeingDragged.getId(), newAnchorPoint)) {
         return;
       }
 

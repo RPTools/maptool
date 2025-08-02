@@ -16,18 +16,34 @@ package net.rptools.maptool.client.ui.zone.renderer;
 
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.*;
+import net.rptools.maptool.client.AppState;
+import net.rptools.maptool.client.MapTool;
 import net.rptools.maptool.client.swing.ImageLabel;
+import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.model.GUID;
 import net.rptools.maptool.util.GraphicsUtil;
 
 /** Represents a delayed label render */
-class LabelRenderer implements ItemRenderer {
+public class LabelRenderer implements ItemRenderer {
+
+  private static final Map<GUID, LabelRenderer> labelCache = new HashMap<>();
+  private static final Map<GUID, BufferedImage> labelImageCache = new HashMap<>();
+
+  public static Map<GUID, LabelRenderer> getLabelCache() {
+    return labelCache;
+  }
+
+  public static Map<GUID, BufferedImage> getLabelImageCache() {
+    return labelImageCache;
+  }
 
   private final ZoneRenderer renderer;
   private final String text;
   private int x;
-  private final int y;
+  private int y;
   private final int align;
   private final Color foreground;
   private final ImageLabel background;
@@ -52,8 +68,8 @@ class LabelRenderer implements ItemRenderer {
     this.foreground = Color.black;
     tokenId = tId;
     if (tokenId != null) {
-      width = renderer.labelRenderingCache.get(tokenId).getWidth();
-      height = renderer.labelRenderingCache.get(tokenId).getHeight();
+      width = labelImageCache.get(tokenId).getWidth();
+      height = labelImageCache.get(tokenId).getHeight();
     }
   }
 
@@ -87,9 +103,20 @@ class LabelRenderer implements ItemRenderer {
     this.background = background;
     tokenId = tId;
     if (tokenId != null) {
-      width = renderer.labelRenderingCache.get(tokenId).getWidth();
-      height = renderer.labelRenderingCache.get(tokenId).getHeight();
+      width = labelImageCache.get(tokenId).getWidth();
+      height = labelImageCache.get(tokenId).getHeight();
     }
+  }
+
+  public static boolean isLabelVisible(
+      ZoneViewModel.TokenPosition position, ZoneViewModel viewModel, boolean hover) {
+    if (!(AppState.isShowTokenNames() || hover)) {
+      return false;
+    }
+    // if policy does not auto-reveal FoW, check if fog covers the token (slow)
+    return viewModel.getPlayerView().isGMView()
+        || (viewModel.isUsingVision() && MapTool.getServerPolicy().isAutoRevealOnMovement())
+        || viewModel.zone.isTokenVisible(position.token());
   }
 
   public void render(Graphics2D g) {
@@ -104,7 +131,7 @@ class LabelRenderer implements ItemRenderer {
         case SwingUtilities.LEFT:
           break;
       }
-      BufferedImage img = renderer.labelRenderingCache.get(tokenId);
+      BufferedImage img = labelImageCache.get(tokenId);
       if (img != null) {
         g.drawImage(img, x, y, width, height, null);
       } else { // Draw as normal
@@ -113,5 +140,21 @@ class LabelRenderer implements ItemRenderer {
     } else { // Draw as normal.
       GraphicsUtil.drawBoxedString(g, text, x, y, align, background, foreground);
     }
+  }
+
+  public void setHeight(int height) {
+    this.height = height;
+  }
+
+  public void setWidth(int width) {
+    this.width = width;
+  }
+
+  public void setX(int x) {
+    this.x = x;
+  }
+
+  public void setY(int y) {
+    this.y = y;
   }
 }

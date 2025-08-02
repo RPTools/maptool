@@ -25,6 +25,7 @@ import javax.swing.*;
 import net.rptools.lib.CodeTimer;
 import net.rptools.lib.MD5Key;
 import net.rptools.maptool.client.MapTool;
+import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel.TokenPosition;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.*;
@@ -46,10 +47,38 @@ public class TokenRenderer {
     this.zone = zone;
   }
 
-  public void renderToken(Token token, TokenPosition position, Graphics2D g2d, float opacity) {
+  public void renderToken(
+      Token token,
+      ZoneViewModel viewModel,
+      TokenPosition position,
+      Graphics2D g2d,
+      boolean isSelected,
+      boolean isMoving) {
+    renderToken(token, viewModel, position, g2d, null, isSelected, isMoving, false);
+  }
+
+  public void renderToken(
+      Token token,
+      ZoneViewModel viewModel,
+      TokenPosition position,
+      Graphics2D g2d,
+      TokenDecorationRenderer decorationRenderer,
+      boolean isSelected,
+      boolean isMoving,
+      boolean isHover) {
     var timer = CodeTimer.get();
+    if (decorationRenderer != null) {
+      decorationRenderer.renderDecorations(
+          true, viewModel, position, g2d, isSelected, isMoving, isHover);
+    }
     timer.increment("TokenRenderer-renderToken");
     timer.start("TokenRenderer-renderToken");
+
+    // Calculate alpha Transparency from token and use opacity to indicate that token is moving
+    float opacity =
+        viewModel.isTokenMoving(token.getId())
+            ? token.getTokenOpacity() / 2f
+            : isSelected && isHover ? 1 : token.getTokenOpacity();
 
     timer.start("TokenRenderer-loadImageTable");
     if (token.getHasImageTable() && !imageTableMap.containsKey(token.getImageTableName())) {
@@ -58,9 +87,14 @@ public class TokenRenderer {
     timer.stop("TokenRenderer-loadImageTable");
 
     timer.start("TokenRenderer-paintTokenImage");
-    renderHelper.render(
-        g2d, worldG -> paintTokenImage(worldG, position, opacity * token.getTokenOpacity()));
+
+    renderHelper.render(g2d, worldG -> paintTokenImage(worldG, position, opacity));
     timer.stop("TokenRenderer-paintTokenImage");
+
+    if (decorationRenderer != null) {
+      decorationRenderer.renderDecorations(
+          false, viewModel, position, g2d, isSelected, isMoving, isHover);
+    }
     timer.stop("TokenRenderer-renderToken");
   }
 

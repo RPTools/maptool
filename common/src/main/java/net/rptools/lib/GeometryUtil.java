@@ -16,29 +16,17 @@ package net.rptools.lib;
 
 import java.awt.Shape;
 import java.awt.geom.Area;
+import java.awt.geom.Line2D;
+import java.awt.geom.PathIterator;
 import java.awt.geom.Point2D;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.algorithm.InteriorPointArea;
 import org.locationtech.jts.algorithm.Orientation;
 import org.locationtech.jts.algorithm.PointLocation;
 import org.locationtech.jts.awt.ShapeReader;
-import org.locationtech.jts.geom.Coordinate;
-import org.locationtech.jts.geom.CoordinateArrays;
-import org.locationtech.jts.geom.Envelope;
-import org.locationtech.jts.geom.Geometry;
-import org.locationtech.jts.geom.GeometryFactory;
-import org.locationtech.jts.geom.LinearRing;
-import org.locationtech.jts.geom.Location;
-import org.locationtech.jts.geom.MultiPolygon;
-import org.locationtech.jts.geom.Polygon;
-import org.locationtech.jts.geom.PrecisionModel;
+import org.locationtech.jts.geom.*;
 import org.locationtech.jts.geom.util.GeometryFixer;
 import org.locationtech.jts.operation.valid.IsValidOp;
 import org.locationtech.jts.precision.GeometryPrecisionReducer;
@@ -91,8 +79,8 @@ public class GeometryUtil {
   }
 
   /**
-   * Like {@link #union(java.util.Collection)}, but will modify the areas and collection for
-   * performance gains.
+   * Like {@link #union(Collection)}, but will modify the areas and collection for performance
+   * gains.
    *
    * @param areas The areas to union.
    * @return The union of {@code areas}
@@ -135,6 +123,62 @@ public class GeometryUtil {
         : "Returned geometry must be valid, but found this error: "
             + new IsValidOp(geometry).getValidationError();
     return geometry;
+  }
+
+  /**
+   * Use for a simple shape that is a closed polygon without holes.
+   *
+   * @param shape a closed polygon
+   * @return LinearRing geometry
+   */
+  public static LinearRing shapeToLinearRing(Shape shape) {
+    List<Coordinate> coordinates = new ArrayList<>();
+    final PathIterator iterator = shape.getPathIterator(null);
+    final double[] pathCoordinate = new double[2];
+    iterator.currentSegment(pathCoordinate);
+    coordinates.add(new CoordinateXY(pathCoordinate[0], pathCoordinate[1]));
+    iterator.next();
+    while (!iterator.isDone()) {
+      iterator.currentSegment(pathCoordinate);
+      coordinates.add(new CoordinateXY(pathCoordinate[0], pathCoordinate[1]));
+      iterator.next();
+    }
+    coordinates.add(coordinates.getFirst()); // close the polygon
+    return getGeometryFactory().createLinearRing(coordinates.toArray(Coordinate[]::new));
+  }
+
+  /**
+   * Converts a line2D to the jts geometry LinearString
+   *
+   * @param line2D line to convert
+   * @return LinearString geometry
+   */
+  public static LineString line2DToLinearString(final Line2D line2D) {
+    return getGeometryFactory()
+        .createLineString(
+            new Coordinate[] {
+              GeometryUtil.point2DToCoordinate(line2D.getP1()),
+              GeometryUtil.point2DToCoordinate(line2D.getP2())
+            });
+  }
+
+  /**
+   * Find the points of intersection between a line and a shape
+   *
+   * @param line the intersecting line
+   * @param shape the shape to intersect
+   * @return Array of intersecting points
+   */
+  public static Point2D[] lineSegmentShapeIntersection(final Line2D line, final Shape shape) {
+    LineString lineString = line2DToLinearString(line);
+    LinearRing linearRing = shapeToLinearRing(shape);
+    Geometry intersection = lineString.intersection(linearRing);
+    if (intersection.getNumPoints() > 0) {
+      return Arrays.stream(intersection.getCoordinates())
+          .map(GeometryUtil::coordinateToPoint2D)
+          .toArray(Point2D[]::new);
+    }
+    return new Point2D.Double[] {};
   }
 
   public static Collection<Polygon> toJtsPolygons(Shape shape) {

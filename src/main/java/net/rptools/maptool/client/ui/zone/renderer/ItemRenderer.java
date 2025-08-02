@@ -16,7 +16,7 @@ package net.rptools.maptool.client.ui.zone.renderer;
 
 import java.awt.*;
 
-interface ItemRenderer {
+public interface ItemRenderer {
 
   public void render(Graphics2D g);
 }

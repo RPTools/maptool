@@ -1206,7 +1206,7 @@ public class StampTool extends DefaultTool implements ZoneOverlay {
 
     private void doDragTo(ZonePoint newAnchorPoint) {
       // Don't bother if there isn't any movement
-      if (!renderer.hasMoveSelectionSetMoved(tokenBeingDragged.getId(), newAnchorPoint)) {
+      if (renderer.isMoveSelectionSetUnchanged(tokenBeingDragged.getId(), newAnchorPoint)) {
         return;
       }
 
