@@ -85,6 +85,7 @@ public class OverlayRenderer {
                 (int) tokenBounds.getY(),
                 (int) tokenBounds.getWidth(),
                 (int) tokenBounds.getHeight());
+    overlayG.setClip(null);
     Rectangle bounds =
         new Rectangle(0, 0, (int) tokenBounds.getWidth(), (int) tokenBounds.getHeight());
 
@@ -99,5 +100,6 @@ public class OverlayRenderer {
       }
       overlay.paintOverlay(overlayG, position.token(), bounds, value);
     }
+    overlayG.dispose();
   }
 }
