@@ -132,6 +132,12 @@ public class ClassPathAddOnLibrary implements BuiltInLibrary {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(
+      String macroPath) {
+    return addOnLibrary.getMTScriptMacroInfoForUriPath(macroPath);
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
     return addOnLibrary.getMTScriptMacroInfo(macroName);
   }

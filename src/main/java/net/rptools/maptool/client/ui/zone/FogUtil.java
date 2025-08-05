@@ -467,7 +467,7 @@ public class FogUtil {
               .getFootprint(grid)
               .getBounds(grid, grid.convert(new ZonePoint(token.getX(), token.getY())));
     } else {
-      bounds = token.getBounds(zone);
+      bounds = token.getFootprintBounds(zone);
     }
 
     x = bounds.x + bounds.width / 2;

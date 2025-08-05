@@ -267,7 +267,7 @@ public class TokenMoveFunctions extends AbstractFunction {
                 .getFootprint(grid)
                 .getBounds(grid, grid.convert(new ZonePoint(entry.get("x"), entry.get("y"))));
       } else {
-        originalArea = tokenInContext.getBounds(zone);
+        originalArea = tokenInContext.getImageBounds(zone);
       }
       Rectangle2D oa = originalArea.getBounds2D();
       if (targetArea.contains(oa) || targetArea.intersects(oa)) {
@@ -300,7 +300,7 @@ public class TokenMoveFunctions extends AbstractFunction {
      * if-else sequence...
      */
     Grid grid = zone.getGrid();
-    Rectangle targetArea = target.getBounds(zone);
+    Rectangle targetArea = target.getImageBounds(zone);
 
     if (pathPoints == null) {
       return returnPoints;
@@ -326,7 +326,7 @@ public class TokenMoveFunctions extends AbstractFunction {
       Map<String, Integer> firstPoint = new HashMap<String, Integer>(),
           secondPoint = new HashMap<String, Integer>();
       for (Map<String, Integer> entry : pathPoints) {
-        Rectangle tokenArea = tokenInContext.getBounds(zone);
+        Rectangle tokenArea = tokenInContext.getImageBounds(zone);
         Point currentPoint = new Point(entry.get("x"), entry.get("y"));
         if (ctr > 0) {
           if (targetArea.intersectsLine(new Line2D.Double(previousPoint, currentPoint))

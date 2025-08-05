@@ -157,6 +157,14 @@ public interface Library {
   /**
    * Returns the information about MapTool Macro Script on this library.
    *
+   * @param macroPath The path to the macro, as used in lib: URIs.
+   * @return the information about the MapTool Macro Script.
+   */
+  CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(String macroPath);
+
+  /**
+   * Returns the information about MapTool Macro Script on this library.
+   *
    * @param macroName The name of the macro.
    * @return the information about the MapTool Macro Script.
    */

@@ -902,7 +902,7 @@ public class Zone {
     }
 
     // Token is visible, and there is fog
-    Rectangle tokenSize = token.getBounds(this);
+    Rectangle tokenSize = token.getFootprintBounds(this);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
     if (MapTool.getServerPolicy().isUseIndividualFOW() && getVisionType() != VisionType.OFF) {
@@ -937,7 +937,7 @@ public class Zone {
       return false;
     }
     // Token is visible, and there is fog
-    Rectangle tokenSize = token.getBounds(this);
+    Rectangle tokenSize = token.getFootprintBounds(this);
     Area tokenFootprint = getGrid().getTokenCellArea(tokenSize);
     Area combined = new Area(exposedArea);
     PlayerView view = MapTool.getFrame().getZoneRenderer(this).getPlayerView();
@@ -1064,7 +1064,7 @@ public class Zone {
           continue;
         }
 
-        var tokenArea = token.getTransformedMaskTopology(type);
+        var tokenArea = token.getTransformedMaskTopology(this, type);
         if (tokenArea != null) {
           topologies.add(tokenArea);
         }
@@ -1970,7 +1970,9 @@ public class Zone {
   private int getFigureZOrder(Token t) {
 
     Rectangle b1 =
-        t.isSnapToScale() ? t.getFootprint(getGrid()).getBounds(getGrid()) : t.getBounds(getZone());
+        t.isSnapToScale()
+            ? t.getFootprint(getGrid()).getBounds(getGrid())
+            : t.getFootprintBounds(getZone());
     /*
      * This is an awful approximation of centre of token footprint. The bounding box (b1 & b2) are
      * usually centred on token x & y So token y + bounding y give you the bottom of the box Then

@@ -68,7 +68,7 @@ public class ZoneViewModel {
    */
   public record TokenPosition(Token token, Rectangle2D footprintBounds, Area transformedBounds) {
     public static TokenPosition fromToken(Token token, Zone zone) {
-      Rectangle2D footprintBounds = token.getBounds(zone);
+      Rectangle2D footprintBounds = token.getFootprintBounds(zone);
 
       final Area transformedBounds = new Area(footprintBounds);
       if (token.hasFacing() && token.getShape() == Token.TokenShape.TOP_DOWN) {

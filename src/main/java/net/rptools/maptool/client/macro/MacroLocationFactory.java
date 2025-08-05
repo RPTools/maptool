@@ -31,7 +31,7 @@ public class MacroLocationFactory {
   private MacroLocationFactory() {}
 
   /** The singleton instance of the factory. */
-  private static MacroLocationFactory instance = new MacroLocationFactory();
+  private static final MacroLocationFactory instance = new MacroLocationFactory();
 
   /**
    * Returns the singleton instance of the factory.
@@ -49,7 +49,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for an unknown location.
    */
   public MacroLocation createUnknownLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.unknown, "");
+    return new MacroLocation(name, MacroSource.unknown, "", "");
   }
 
   /**
@@ -59,7 +59,11 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a global Panel.
    */
   public MacroLocation createGlobalLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.global, MacroSource.global.getSourceName());
+    return new MacroLocation(
+        name,
+        MacroSource.global,
+        MacroSource.global.getSourceName(),
+        MacroSource.global.getSourceName());
   }
 
   /**
@@ -69,7 +73,11 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a campaign Panel.
    */
   public MacroLocation createCampaignLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.campaign, MacroSource.campaign.getSourceName());
+    return new MacroLocation(
+        name,
+        MacroSource.campaign,
+        MacroSource.campaign.getSourceName(),
+        MacroSource.campaign.getSourceName());
   }
 
   /**
@@ -80,7 +88,7 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a token.
    */
   public MacroLocation createTokenLocation(@Nonnull String name, @Nonnull Token token) {
-    return new MacroLocation(name, MacroSource.token, token.getName(), null, token);
+    return new MacroLocation(name, MacroSource.token, token.getName(), "Token:" + token.getName());
   }
 
   /**
@@ -92,7 +100,7 @@ public class MacroLocationFactory {
    */
   public MacroLocation createLibTokenLocation(@Nonnull String name, @Nonnull Token libToken) {
     return new MacroLocation(
-        name, MacroSource.library, libToken.getName().substring(4), null, libToken);
+        name, MacroSource.library, libToken.getName().substring(4), libToken.getName());
   }
 
   /**
@@ -102,18 +110,22 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a GM Panel.
    */
   public MacroLocation createGmLocation(@Nonnull String name) {
-    return new MacroLocation(name, MacroSource.gm, MacroSource.gm.getSourceName());
+    return new MacroLocation(
+        name, MacroSource.gm, MacroSource.gm.getSourceName(), MacroSource.gm.getSourceName());
   }
 
   /**
    * Creates a new {@link MacroLocation} object for a library location.
    *
-   * @param name the name of the macro.
+   * @param functionName the name of the function.
    * @return a new {@link MacroLocation} object for a library location.
    */
   public MacroLocation createExecFunctionLocation(@Nonnull String functionName) {
     return new MacroLocation(
-        MacroSource.execFunction.getSourceName(), MacroSource.execFunction, functionName);
+        MacroSource.execFunction.getSourceName(),
+        MacroSource.execFunction,
+        functionName,
+        functionName);
   }
 
   /**
@@ -126,6 +138,7 @@ public class MacroLocationFactory {
     return new MacroLocation(
         MacroSource.macroLink.getSourceName(),
         MacroSource.macroLink,
+        MacroSource.macroLink.getSourceName(),
         MacroSource.macroLink.getSourceName());
   }
 
@@ -136,13 +149,14 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for an event.
    */
   public MacroLocation createEventLocation(@Nonnull String name) {
-    return new MacroLocation(MacroSource.event.getSourceName(), MacroSource.event, name);
+    return new MacroLocation(MacroSource.event.getSourceName(), MacroSource.event, name, name);
   }
 
   public MacroLocation createSentryIoLoggingLocation() {
     return new MacroLocation(
         MacroSource.sentryIoLogging.getSourceName(),
         MacroSource.sentryIoLogging,
+        MacroSource.sentryIoLogging.getSourceName(),
         MacroSource.sentryIoLogging.getSourceName());
   }
 
@@ -154,29 +168,40 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a URI location.
    */
   public MacroLocation createUriLocation(@Nonnull String name, @Nullable URI calledFrom) {
+    URI uri;
     try {
-      var uri = new URI(name);
-      if (uri.getScheme() == null) {
-        if (calledFrom == null) {
-          return createUnknownLocation(name);
-        }
-        uri = calledFrom.resolve(uri);
-      }
-      return new MacroLocation(uri.getPath(), MacroSource.uri, uri.getHost(), uri, null);
+      uri = new URI(name);
     } catch (URISyntaxException e) {
       return createUnknownLocation(name);
     }
+
+    if (uri.getHost() == null) {
+      if (calledFrom == null) {
+        return createUnknownLocation(name);
+      }
+      uri = calledFrom.resolve(uri);
+    }
+
+    var scheme = uri.getScheme();
+    if (scheme == null || !scheme.equalsIgnoreCase("lib")) {
+      return createUnknownLocation(name);
+    }
+
+    return new MacroLocation(
+        uri.getPath().substring(1), MacroSource.uri, uri.getHost(), uri.getHost(), uri);
   }
 
   /**
    * Creates a new {@link MacroLocation} object for the chat box.
    *
-   * @param token the token associated with the chat box.
    * @return a new {@link MacroLocation} object for a the chat box.
    */
   public MacroLocation createChatLocation() {
     return new MacroLocation(
-        MacroSource.chat.getSourceName(), MacroSource.chat, MacroSource.chat.getSourceName());
+        MacroSource.chat.getSourceName(),
+        MacroSource.chat,
+        MacroSource.chat.getSourceName(),
+        MacroSource.chat.getSourceName());
   }
 
   /**
@@ -186,11 +211,8 @@ public class MacroLocationFactory {
    * @return a new {@link MacroLocation} object for a tooltip.
    */
   public MacroLocation createToolTipLocation(@Nullable Token token) {
+    var location = token != null ? token.getName() : "";
     return new MacroLocation(
-        MacroSource.tooltip.getSourceName(),
-        MacroSource.tooltip,
-        token != null ? token.getName() : "",
-        null,
-        token);
+        MacroSource.tooltip.getSourceName(), MacroSource.tooltip, location, location);
   }
 }
