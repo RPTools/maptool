@@ -14,8 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Dimension;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
@@ -102,11 +100,6 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
         y = d.height - size.height;
     }
 
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
-
     int width =
         (getSide() == Side.TOP || getSide() == Side.BOTTOM)
             ? calcBarSize(images[0].getWidth(), value)
@@ -141,7 +134,6 @@ public class TwoImageBarTokenOverlay extends BarTokenOverlay {
     } else {
       g.drawImage(images[0], x, y, x + screenWidth, y + screenHeight, 0, 0, width, height, null);
     }
-    g.setComposite(tempComposite);
   }
 
   /**
