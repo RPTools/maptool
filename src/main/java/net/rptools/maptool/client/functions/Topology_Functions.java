@@ -595,7 +595,7 @@ public class Topology_Functions extends AbstractFunction {
 
     Zone zone = MapTool.getFrame().getCurrentZoneRenderer().getZone();
     if (topologyFromToken) {
-      var newMapTopology = token.getTransformedMaskTopology(topologyType);
+      var newMapTopology = token.getTransformedMaskTopology(zone, topologyType);
       if (newMapTopology != null) {
         MapTool.serverCommand().updateMaskTopology(zone, newMapTopology, false, topologyType);
       }

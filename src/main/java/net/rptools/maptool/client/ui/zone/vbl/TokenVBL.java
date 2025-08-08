@@ -20,17 +20,18 @@ import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.Area;
+import java.awt.geom.NoninvertibleTransformException;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Stream;
-import net.rptools.lib.AwtUtil;
 import net.rptools.maptool.language.I18N;
 import net.rptools.maptool.model.Token;
 import net.rptools.maptool.model.Zone;
 import net.rptools.maptool.util.ImageManager;
+import net.rptools.maptool.util.TokenUtil;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.locationtech.jts.awt.ShapeReader;
@@ -178,7 +179,7 @@ public class TokenVBL {
   public static Area getTopology_underToken(
       Zone zone, Token token, Zone.TopologyType topologyType) {
     Area topologyOnMap = zone.getMaskTopology(topologyType);
-    Rectangle footprintBounds = token.getBounds(zone);
+    Rectangle footprintBounds = token.getImageBounds(zone);
 
     final AffineTransform captureArea = new AffineTransform();
     final Area topologyUnderToken;
@@ -200,43 +201,21 @@ public class TokenVBL {
   }
 
   public static Area transformTopology_toToken(Zone zone, Token token, Area topologyUnderToken) {
-    Rectangle footprintBounds = token.getBounds(zone);
+    Rectangle footprintBounds = token.getFootprintBounds(zone);
 
     // Reverse all token transformations so we can store a raw untransformed version on the Token.
-    AffineTransform atArea = new AffineTransform();
-    // Let's account for flipped images...
-    if (token.isFlippedX()) {
-      atArea.scale(-1, 1);
-      atArea.translate(-token.getWidth(), 0);
-    }
-    if (token.isFlippedY()) {
-      atArea.scale(1, -1);
-      atArea.translate(0, -token.getHeight());
-    }
-    // Translate the capture to zero out the x,y to store on the Token
-    if (token.isSnapToScale()) {
-      Dimension imgSize = new Dimension(token.getWidth(), token.getHeight());
-      AwtUtil.constrainTo(imgSize, footprintBounds.width, footprintBounds.height);
-      atArea.scale(token.getWidth() / imgSize.getWidth(), token.getHeight() / imgSize.getHeight());
-      atArea.translate(
-          -footprintBounds.getX() - (int) ((footprintBounds.getWidth() - imgSize.getWidth()) / 2),
-          -footprintBounds.getY()
-              - (int) ((footprintBounds.getHeight() - imgSize.getHeight()) / 2));
-    } else {
-      atArea.scale(1 / token.getScaleX(), 1 / token.getScaleY());
-      atArea.translate(-footprintBounds.getX(), -footprintBounds.getY());
+    var transform =
+        TokenUtil.getRenderTransform(
+            zone, token, new Dimension(token.getWidth(), token.getHeight()), footprintBounds);
+    try {
+      transform.invert();
+    } catch (NoninvertibleTransformException e) {
+      // This shouldn't be possible unless something else is broken with the token.
+      log.error("Failed to invert token transform", e);
+      return new Area();
     }
 
-    if (token.getShape() == Token.TokenShape.TOP_DOWN && token.getFacingInDegrees() != 0) {
-      // Get the center of the token bounds
-      double rx = footprintBounds.getCenterX() - token.getAnchor().x;
-      double ry = footprintBounds.getCenterY() - token.getAnchor().y;
-
-      // Rotate the area to match the token facing
-      atArea.rotate(-Math.toRadians(token.getFacingInDegrees()), rx, ry);
-    }
-
-    return new Area(atArea.createTransformedShape(topologyUnderToken));
+    return new Area(transform.createTransformedShape(topologyUnderToken));
   }
 
   /**

@@ -176,6 +176,14 @@ public class EditTokenDialog extends AbeillePanel<Token> {
   }
 
   @SuppressWarnings("unused")
+  public void initStatesAndBarsPanel() {
+    var test = (JScrollPane) getComponent("statesAndBarsScrollPane");
+    // This number is a bit arbitrary, but importantly it is much bigger than the default of 1 pixel
+    // but still likely to be smaller than a single bar's height.
+    test.getVerticalScrollBar().setUnitIncrement(20);
+  }
+
+  @SuppressWarnings("unused")
   public void initTerrainModifierOperationComboBox() {
     getTerrainModifierOperationComboBox()
         .setModel(new DefaultComboBoxModel<>(TerrainModifierOperation.values()));
@@ -1034,7 +1042,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
 
     /* Add sliders to the bar panel */
     var barsPanel = getBarsPanel();
-    barsPanel.setLayout(new MigLayout("wrap 1", "[fill,grow]"));
+    barsPanel.setLayout(new MigLayout("wrap 2,gapx 5%", "[fill,grow][fill,grow]"));
     barsPanel.removeAll();
     if (MapTool.getCampaign().getTokenBarsMap().isEmpty()) {
       barsPanel.setVisible(false);
@@ -1043,20 +1051,22 @@ public class EditTokenDialog extends AbeillePanel<Token> {
       for (BarTokenOverlay bar : MapTool.getCampaign().getTokenBarsMap().values()) {
         JSlider slider = new JSlider(0, 100);
         JCheckBox hide = new JCheckBox(I18N.getString("EditTokenDialog.checkbox.state.hide"));
-        hide.putClientProperty("JSlider", slider);
         hide.addChangeListener(
             e -> {
-              JSlider js = (JSlider) ((JCheckBox) e.getSource()).getClientProperty("JSlider");
-              js.setEnabled(!((JCheckBox) e.getSource()).isSelected());
+              slider.setEnabled(!((JCheckBox) e.getSource()).isSelected());
             });
         slider.setName(bar.getName());
         slider.setPaintLabels(true);
         slider.setPaintTicks(true);
-        slider.setMajorTickSpacing(20);
-        slider.createStandardLabels(20);
-        slider.setMajorTickSpacing(10);
+        slider.setMajorTickSpacing(25);
+        slider.setLabelTable(slider.createStandardLabels(50));
+        slider.setMinorTickSpacing(5);
 
-        JPanel tokenbarPanel = new JPanel(new MigLayout("wrap 2", "[fill,grow][fill,grow]"));
+        // Sliders by default have a fixed preferred size. Overriding it to zero will instead let
+        // MigLayout grow the slider to fill the space.
+        slider.setPreferredSize(new Dimension(0, 0));
+
+        JPanel tokenbarPanel = new JPanel(new MigLayout("wrap 2", "[fill][fill,grow]"));
         tokenbarPanel.add(new JLabel(bar.getName() + ":"));
         tokenbarPanel.add(slider, "span 1 2 align right");
         tokenbarPanel.add(hide);
@@ -1414,7 +1424,11 @@ public class EditTokenDialog extends AbeillePanel<Token> {
                     MapTool.serverCommand()
                         .updateMaskTopology(
                             MapTool.getFrame().getCurrentZoneRenderer().getZone(),
-                            getTokenTopologyPanel().getToken().getTransformedMaskTopology(topology),
+                            getTokenTopologyPanel()
+                                .getToken()
+                                .getTransformedMaskTopology(
+                                    MapTool.getFrame().getCurrentZoneRenderer().getZone(),
+                                    topology),
                             false,
                             type);
                   }
@@ -1964,7 +1978,7 @@ public class EditTokenDialog extends AbeillePanel<Token> {
         log.error("Error while loading multiline property editor theme", e);
       }
       JScrollPane localJScrollPane = new RTextScrollPane(j);
-      localJScrollPane.setVerticalScrollBarPolicy(22);
+      localJScrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_ALWAYS);
       localJScrollPane.setAutoscrolls(true);
       localJScrollPane.setPreferredSize(new Dimension(300, 200));
       setBorder(BorderFactory.createEmptyBorder(10, 5, 5, 5));

@@ -60,7 +60,7 @@ public class DefineMacroFunction extends AbstractFunction {
       if (macro.toLowerCase().endsWith("@this")) {
         macro =
             macro.substring(0, macro.length() - 4)
-                + MapTool.getParser().getMacroSource().getLocation();
+                + MapTool.getParser().getMacroSource().getCallableLocation();
       }
 
       boolean ignoreOutput = false;

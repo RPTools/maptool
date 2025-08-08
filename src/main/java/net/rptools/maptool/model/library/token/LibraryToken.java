@@ -301,20 +301,23 @@ class LibraryToken implements Library {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(
+      String macroPath) {
+    final var prefix = "macro/";
+    if (!macroPath.toLowerCase().startsWith(prefix)) {
+      return CompletableFuture.completedFuture(Optional.empty());
+    }
+
+    return getMTScriptMacroInfo(macroPath.substring(prefix.length()));
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
     return new ThreadExecutionHelper<Optional<MTScriptMacroInfo>>()
         .runOnSwingThread(
             () -> {
-              // Cater for the different ways the macro name can be specified
-              String expectedMacroName = macroName;
-              if (macroName.toLowerCase().startsWith("lib://")) {
-                expectedMacroName = macroName.replaceFirst("(?i)lib:\\/\\/.*\\/macro\\/", "");
-              } else if (macroName.toLowerCase().startsWith("lib:")) {
-                expectedMacroName = macroName.substring(4);
-              }
-
               Token library = findLibrary(id);
-              MacroButtonProperties buttonProps = library.getMacro(expectedMacroName, false);
+              MacroButtonProperties buttonProps = library.getMacro(macroName, false);
               if (buttonProps == null) {
                 // Try the "unknown macro"
                 buttonProps = library.getMacro(UNKNOWN_LIB_MACRO, false);
@@ -325,7 +328,7 @@ class LibraryToken implements Library {
 
               return Optional.of(
                   new MTScriptMacroInfo(
-                      expectedMacroName,
+                      macroName,
                       buttonProps.getCommand(),
                       library.isOwnedByNone() || !buttonProps.getAllowPlayerEdits(),
                       !buttonProps.getAllowPlayerEdits() && buttonProps.getAutoExecute(),

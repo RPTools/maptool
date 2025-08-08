@@ -223,7 +223,7 @@ public class TokenTopologyPanel extends JPanel {
 
     // Gather info
     BufferedImage image = ImageManager.getImage(token.getImageAssetId());
-    java.awt.Rectangle tokenSize = token.getBounds(zone);
+    java.awt.Rectangle tokenSize = token.getFootprintBounds(zone);
     Dimension originalImgSize = new Dimension(image.getWidth(), image.getHeight());
     Dimension imgSize = new Dimension(image.getWidth(), image.getHeight());
 

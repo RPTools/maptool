@@ -1012,7 +1012,7 @@ public class GdxRenderer extends ApplicationAdapter {
         }
 
         // OPTIMIZE: combine this with the code in renderTokens()
-        java.awt.Rectangle footprintBounds = token.getBounds(zoneCache.getZone());
+        java.awt.Rectangle footprintBounds = token.getFootprintBounds(zoneCache.getZone());
 
         // get token image, using image table if present
         Sprite image = zoneCache.getSprite(token.getImageAssetId(), stateTime);
@@ -1098,7 +1098,7 @@ public class GdxRenderer extends ApplicationAdapter {
               if (lastPoint instanceof CellPoint) {
                 tokenRectangle = token.getFootprint(grid).getBounds(grid, (CellPoint) lastPoint);
               } else {
-                java.awt.Rectangle tokBounds = token.getBounds(zoneCache.getZone());
+                java.awt.Rectangle tokBounds = token.getFootprintBounds(zoneCache.getZone());
                 tokenRectangle = new java.awt.Rectangle();
                 tokenRectangle.setBounds(
                     lastPoint.x,
@@ -1420,7 +1420,7 @@ public class GdxRenderer extends ApplicationAdapter {
         timer.stop("tokenlist-1");
       }
 
-      java.awt.Rectangle footprintBounds = token.getBounds(zoneCache.getZone());
+      java.awt.Rectangle footprintBounds = token.getFootprintBounds(zoneCache.getZone());
       java.awt.Rectangle origBounds = (java.awt.Rectangle) footprintBounds.clone();
       Area tokenBounds = new Area(footprintBounds);
 
@@ -1694,7 +1694,7 @@ public class GdxRenderer extends ApplicationAdapter {
 
       // Selection and labels
 
-      var tokenRectangle = token.getBounds(zoneCache.getZone());
+      var tokenRectangle = token.getFootprintBounds(zoneCache.getZone());
       var gdxTokenRectangle =
           new Rectangle(
               tokenRectangle.x,
@@ -1785,7 +1785,7 @@ public class GdxRenderer extends ApplicationAdapter {
       if (tokenStackMap != null
           && !hideTSI) { // FIXME Needed to prevent NPE but how can it be null?
         for (Token token : tokenStackMap.keySet()) {
-          var tokenRectangle = token.getBounds(zoneCache.getZone());
+          var tokenRectangle = token.getFootprintBounds(zoneCache.getZone());
           var stackImage = zoneCache.fetch("stack");
           batch.draw(
               stackImage,
@@ -1817,7 +1817,7 @@ public class GdxRenderer extends ApplicationAdapter {
       image = zoneCache.getIsoSprite(token.getImageAssetId());
       token.setHeight((int) image.getHeight());
       token.setWidth((int) image.getWidth());
-      footprintBounds = token.getBounds(zoneCache.getZone());
+      footprintBounds = token.getFootprintBounds(zoneCache.getZone());
     }
     timer.stop("tokenlist-5a");
 

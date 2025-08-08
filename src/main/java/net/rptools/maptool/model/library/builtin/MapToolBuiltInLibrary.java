@@ -224,6 +224,12 @@ public class MapToolBuiltInLibrary implements BuiltInLibrary {
   }
 
   @Override
+  public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfoForUriPath(
+      String macroPath) {
+    return CompletableFuture.completedFuture(Optional.empty());
+  }
+
+  @Override
   public CompletableFuture<Optional<MTScriptMacroInfo>> getMTScriptMacroInfo(String macroName) {
     return CompletableFuture.completedFuture(Optional.empty());
   }

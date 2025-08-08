@@ -110,7 +110,7 @@ public class TokenSightFunctions extends AbstractFunction {
           target
               .getFootprint(grid)
               .getBounds(grid, grid.convert(new ZonePoint(target.getX(), target.getY())));
-      if (!target.isSnapToGrid()) bounds = target.getBounds(zone);
+      if (!target.isSnapToGrid()) bounds = target.getImageBounds(zone);
 
       int x = (int) bounds.getX();
       int y = (int) bounds.getY();

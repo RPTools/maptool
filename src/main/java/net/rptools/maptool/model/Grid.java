@@ -614,7 +614,7 @@ public abstract class Grid implements Cloneable {
       // Test for gridless maps
       var cellShape = getCellShape();
       if (cellShape == null) {
-        double tokenBoundsWidth = token.getBounds(zone).getWidth() / 2;
+        double tokenBoundsWidth = token.getFootprintBounds(zone).getWidth() / 2;
         visionRange += (footprintWidth > tokenBoundsWidth) ? tokenBoundsWidth : tokenBoundsWidth;
       } else {
         // For grids, this will be the same, but for Hex's we'll use the smaller side depending on
