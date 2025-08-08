@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
@@ -71,13 +69,8 @@ public class ShadedTokenOverlay extends BooleanTokenOverlay {
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
     Color temp = g.getColor();
     g.setColor(color);
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
     g.fill(bounds);
     g.setColor(temp);
-    g.setComposite(tempComposite);
   }
 
   /**

@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
@@ -74,17 +72,12 @@ public class CrossTokenOverlay extends XTokenOverlay {
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();
     g.setStroke(getStroke());
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
     g.draw(
         new Line2D.Double(0, (double) bounds.height / 2, bounds.width, (double) bounds.height / 2));
     g.draw(
         new Line2D.Double((double) bounds.width / 2, 0, (double) bounds.width / 2, bounds.height));
     g.setColor(tempColor);
     g.setStroke(tempStroke);
-    g.setComposite(tempComposite);
   }
 
   public static CrossTokenOverlay fromDto(BooleanTokenOverlayDto dto) {

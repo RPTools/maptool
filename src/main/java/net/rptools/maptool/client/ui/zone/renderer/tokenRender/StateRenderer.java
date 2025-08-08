@@ -87,6 +87,12 @@ public class StateRenderer {
                 (int) tokenBounds.getHeight());
     overlayG.setClip(null);
 
+    Composite oldComposite = g2d.getComposite();
+    float alpha = 1f;
+    if (oldComposite instanceof AlphaComposite alphaComposite) {
+      alpha = alphaComposite.getAlpha();
+    }
+
     // Check each of the set values
     for (String name : overlayNames) {
       AbstractTokenOverlay overlay = isPaintBars ? barMap.get(name) : stateMap.get(name);
@@ -95,6 +101,15 @@ public class StateRenderer {
           || overlay.isMouseover() && hover
           || !overlay.showPlayer(position.token(), MapTool.getPlayer())) {
         continue;
+      }
+      overlayG.setComposite(
+          AlphaComposite.getInstance(
+              AlphaComposite.SRC_OVER, alpha * (float) overlay.getOpacity() / 100));
+
+      if (overlay instanceof TwoToneBarTokenOverlay tt) {
+        overlay =
+            new CircleBarTokenOverlay(
+                tt.getName(), tt.getBarColor(), tt.getBgColor(), tt.getThickness(), tt.getSide());
       }
       overlay.paintOverlay(overlayG, position.token(), bounds, value);
     }

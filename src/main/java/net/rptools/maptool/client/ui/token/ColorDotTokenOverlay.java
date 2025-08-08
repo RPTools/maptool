@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Shape;
@@ -78,7 +76,6 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
   public void paintOverlay(Graphics2D g, Token aToken, Rectangle bounds) {
     Color tempColor = g.getColor();
     Stroke tempStroke = g.getStroke();
-    Composite tempComposite = g.getComposite();
     try {
       g.setColor(getColor());
       g.setStroke(getStroke());
@@ -101,14 +98,10 @@ public class ColorDotTokenOverlay extends XTokenOverlay {
           break;
       } // endswitch
       Shape s = new Ellipse2D.Double(x, y, size, size);
-      if (getOpacity() != 100)
-        g.setComposite(
-            AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
       g.fill(s);
     } finally {
       g.setColor(tempColor);
       g.setStroke(tempStroke);
-      g.setComposite(tempComposite);
     }
   }
 

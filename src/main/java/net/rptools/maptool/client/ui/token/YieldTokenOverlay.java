@@ -14,9 +14,7 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import java.awt.Stroke;
@@ -76,16 +74,11 @@ public class YieldTokenOverlay extends XTokenOverlay {
     g.setColor(getColor());
     Stroke tempStroke = g.getStroke();
     g.setStroke(getStroke());
-    Composite tempComposite = g.getComposite();
-    if (getOpacity() != 100)
-      g.setComposite(
-          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, (float) getOpacity() / 100));
     g.draw(new Line2D.Double(0, vc, bounds.width, vc));
     g.draw(new Line2D.Double(bounds.width, vc, hc, bounds.height));
     g.draw(new Line2D.Double(hc, bounds.height, 0, vc));
     g.setColor(tempColor);
     g.setStroke(tempStroke);
-    g.setComposite(tempComposite);
   }
 
   public static YieldTokenOverlay fromDto(BooleanTokenOverlayDto dto) {
