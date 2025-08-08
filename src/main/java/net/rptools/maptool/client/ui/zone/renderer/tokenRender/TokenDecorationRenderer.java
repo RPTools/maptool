@@ -38,14 +38,14 @@ public class TokenDecorationRenderer {
   private final Zone zone;
   private final FacingArrowRenderer FACING_ARROW_RENDERER;
   private final HaloRenderer HALO_RENDERER;
-  private final OverlayRenderer OVERLAY_RENDERER;
+  private final StateRenderer OVERLAY_RENDERER;
 
   public TokenDecorationRenderer(RenderHelper renderHelper, Zone zone) {
     this.renderHelper = renderHelper;
     this.zone = zone;
     FACING_ARROW_RENDERER = new FacingArrowRenderer(renderHelper, zone);
     HALO_RENDERER = new HaloRenderer(renderHelper, zone);
-    OVERLAY_RENDERER = new OverlayRenderer(renderHelper, zone);
+    OVERLAY_RENDERER = new StateRenderer(renderHelper, zone);
   }
 
   public void renderDecorations(
@@ -57,6 +57,13 @@ public class TokenDecorationRenderer {
       boolean moving,
       boolean hover) {
     var timer = CodeTimer.get();
+    Composite oldComposite = g2d.getComposite();
+    if (hover || selected && !moving) {
+      g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 1f));
+    } else {
+      g2d.setComposite(
+          AlphaComposite.getInstance(AlphaComposite.SRC_OVER, position.token().getTokenOpacity()));
+    }
     timer.increment("TokenDecorationRenderer-render");
     if (under) {
       timer.start("TokenDecorationRenderer-renderUnder");
@@ -66,15 +73,18 @@ public class TokenDecorationRenderer {
       timer.stop("TokenDecorationRenderer-renderUnder");
     } else {
       timer.start("TokenDecorationRenderer-renderOver");
-      // paint STATE
-      OVERLAY_RENDERER.renderStates(viewModel, position, g2d, selected, hover);
-      // paint BAR
-      OVERLAY_RENDERER.renderBars(viewModel, position, g2d, selected, hover);
+      if (!moving) {
+        // paint STATE
+        OVERLAY_RENDERER.renderStates(viewModel, position, g2d, selected, hover);
+        // paint BAR
+        OVERLAY_RENDERER.renderBars(viewModel, position, g2d, selected, hover);
+      }
       // paint FACING
       FACING_ARROW_RENDERER.paintArrow(g2d, position);
       // paint LABEL
       // Not yet implemented;
       timer.stop("TokenDecorationRenderer-renderOver");
     }
+    g2d.setComposite(oldComposite);
   }
 }

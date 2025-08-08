@@ -41,10 +41,12 @@ public class TokenRenderer {
 
   private final RenderHelper renderHelper;
   private final Zone zone;
+  private final TokenDecorationRenderer decorationRenderer;
 
   public TokenRenderer(RenderHelper renderHelper, Zone zone) {
     this.renderHelper = renderHelper;
     this.zone = zone;
+    this.decorationRenderer = new TokenDecorationRenderer(renderHelper, zone);
   }
 
   public void renderToken(
@@ -52,33 +54,21 @@ public class TokenRenderer {
       ZoneViewModel viewModel,
       TokenPosition position,
       Graphics2D g2d,
-      boolean isSelected,
-      boolean isMoving) {
-    renderToken(token, viewModel, position, g2d, null, isSelected, isMoving, false);
-  }
-
-  public void renderToken(
-      Token token,
-      ZoneViewModel viewModel,
-      TokenPosition position,
-      Graphics2D g2d,
-      TokenDecorationRenderer decorationRenderer,
       boolean isSelected,
       boolean isMoving,
       boolean isHover) {
     var timer = CodeTimer.get();
-    if (decorationRenderer != null) {
-      decorationRenderer.renderDecorations(
-          true, viewModel, position, g2d, isSelected, isMoving, isHover);
-    }
+    decorationRenderer.renderDecorations(
+        true, viewModel, position, g2d, isSelected, isMoving, isHover);
+
     timer.increment("TokenRenderer-renderToken");
     timer.start("TokenRenderer-renderToken");
 
     // Calculate alpha Transparency from token and use opacity to indicate that token is moving
     float opacity =
         viewModel.isTokenMoving(token.getId())
-            ? token.getTokenOpacity() / 2f
-            : isSelected && isHover ? 1 : token.getTokenOpacity();
+            ? Math.max(0.5f, token.getTokenOpacity() / 2f)
+            : isSelected || isHover ? 1 : token.getTokenOpacity();
 
     timer.start("TokenRenderer-loadImageTable");
     if (token.getHasImageTable() && !imageTableMap.containsKey(token.getImageTableName())) {
@@ -91,10 +81,9 @@ public class TokenRenderer {
     renderHelper.render(g2d, worldG -> paintTokenImage(worldG, position, opacity));
     timer.stop("TokenRenderer-paintTokenImage");
 
-    if (decorationRenderer != null) {
-      decorationRenderer.renderDecorations(
-          false, viewModel, position, g2d, isSelected, isMoving, isHover);
-    }
+    decorationRenderer.renderDecorations(
+        false, viewModel, position, g2d, isSelected, isMoving, isHover);
+
     timer.stop("TokenRenderer-renderToken");
   }
 

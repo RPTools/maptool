@@ -18,17 +18,15 @@ import java.awt.*;
 import java.awt.geom.Rectangle2D;
 import java.util.*;
 import net.rptools.maptool.client.MapTool;
-import net.rptools.maptool.client.ui.token.AbstractTokenOverlay;
-import net.rptools.maptool.client.ui.token.BarTokenOverlay;
-import net.rptools.maptool.client.ui.token.BooleanTokenOverlay;
+import net.rptools.maptool.client.ui.token.*;
 import net.rptools.maptool.client.ui.zone.ZoneViewModel;
 import net.rptools.maptool.client.ui.zone.renderer.RenderHelper;
 import net.rptools.maptool.model.Zone;
 import org.apache.log4j.LogManager;
 import org.apache.log4j.Logger;
 
-public class OverlayRenderer {
-  private static final Logger log = LogManager.getLogger(OverlayRenderer.class);
+public class StateRenderer {
+  private static final Logger log = LogManager.getLogger(StateRenderer.class);
   private final RenderHelper renderHelper;
   private final Zone zone;
   private final Map<String, BarTokenOverlay> barMap =
@@ -38,7 +36,7 @@ public class OverlayRenderer {
   private Set<String> overlayNames;
   private boolean isPaintBars = false;
 
-  public OverlayRenderer(RenderHelper renderHelper, Zone zone) {
+  public StateRenderer(RenderHelper renderHelper, Zone zone) {
     this.renderHelper = renderHelper;
     this.zone = zone;
   }
@@ -78,6 +76,8 @@ public class OverlayRenderer {
       boolean hover) {
     Rectangle2D tokenBounds =
         viewModel.getZoneScale().toScreenSpace(position.footprintBounds().getBounds2D());
+    Rectangle bounds =
+        new Rectangle(0, 0, (int) tokenBounds.getWidth(), (int) tokenBounds.getHeight());
     Graphics2D overlayG =
         (Graphics2D)
             g2d.create(
@@ -86,8 +86,6 @@ public class OverlayRenderer {
                 (int) tokenBounds.getWidth(),
                 (int) tokenBounds.getHeight());
     overlayG.setClip(null);
-    Rectangle bounds =
-        new Rectangle(0, 0, (int) tokenBounds.getWidth(), (int) tokenBounds.getHeight());
 
     // Check each of the set values
     for (String name : overlayNames) {
@@ -97,6 +95,11 @@ public class OverlayRenderer {
           || overlay.isMouseover() && hover
           || !overlay.showPlayer(position.token(), MapTool.getPlayer())) {
         continue;
+      }
+      if (overlay instanceof TwoToneBarTokenOverlay tt) {
+        overlay =
+            new TwoToneCircleBarTokenOverlay(
+                tt.getName(), tt.getBarColor(), tt.getBgColor(), tt.getThickness(), tt.getSide());
       }
       overlay.paintOverlay(overlayG, position.token(), bounds, value);
     }

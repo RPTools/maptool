@@ -14,7 +14,6 @@
  */
 package net.rptools.maptool.client.ui.token;
 
-import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
 import net.rptools.maptool.model.Token;
@@ -52,11 +51,6 @@ public abstract class BooleanTokenOverlay extends AbstractTokenOverlay {
   @Override
   public void paintOverlay(Graphics2D g, Token token, Rectangle bounds, Object value) {
     if (FunctionUtil.getBooleanValue(value)) {
-      // Apply Alpha Transparency
-      float opacity = token.getTokenOpacity();
-      if (opacity < 1.0f)
-        g.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, opacity));
-
       paintOverlay(g, token, bounds);
     }
   }

@@ -55,7 +55,6 @@ import net.rptools.maptool.client.ui.theme.RessourceManager;
 import net.rptools.maptool.client.ui.token.dialog.create.NewTokenDialog;
 import net.rptools.maptool.client.ui.zone.*;
 import net.rptools.maptool.client.ui.zone.gdx.GdxRenderer;
-import net.rptools.maptool.client.ui.zone.renderer.tokenRender.TokenDecorationRenderer;
 import net.rptools.maptool.client.ui.zone.renderer.tokenRender.TokenRenderer;
 import net.rptools.maptool.client.walker.ZoneWalker;
 import net.rptools.maptool.events.MapToolEventBus;
@@ -133,7 +132,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
   private final EnumSet<Layer> disabledLayers = EnumSet.noneOf(Layer.class);
   private final GridRenderer gridRenderer;
   private final TokenRenderer tokenRenderer;
-  private final TokenDecorationRenderer decorationRenderer;
   private final SelectionRenderer selectionRenderer;
   private final LightsRenderer lightsRenderer;
   private final DarknessRenderer darknessRenderer;
@@ -169,7 +167,6 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
     this.gridRenderer = new GridRenderer(this);
 
     this.tokenRenderer = new TokenRenderer(renderHelper, zone);
-    this.decorationRenderer = new TokenDecorationRenderer(renderHelper, zone);
     this.selectionRenderer = new SelectionRenderer(renderHelper, viewModel, zoneView);
     this.lightsRenderer = new LightsRenderer(renderHelper, zone, zoneView);
     this.darknessRenderer = new DarknessRenderer(renderHelper, zoneView);
@@ -1256,7 +1253,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
         newArea.transform(AffineTransform.getTranslateInstance(set.getOffsetX(), set.getOffsetY()));
         var newPosition = new ZoneViewModel.TokenPosition(token, newBounds, newArea);
 
-        tokenRenderer.renderToken(token, viewModel, newPosition, g, true, true);
+        tokenRenderer.renderToken(token, viewModel, newPosition, g, true, true, false);
 
         // Other details.
         // Only draw these if the token is visible on screen where it is dragged to.
@@ -1775,6 +1772,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       }
       AppPreferences.renderQuality.get().setRenderingHints(tokenG);
 
+      boolean isHover = token == tokenUnderMouse;
+
       // Previous path
       timer.start("renderTokens:ShowPath");
       if (showPathList.contains(token) && token.getLastPath() != null) {
@@ -1784,8 +1783,7 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
 
       timer.start("renderTokens:LabelCheck");
       // Token name and label
-      boolean showCurrentTokenLabel =
-          LabelRenderer.isLabelVisible(position, viewModel, token == tokenUnderMouse);
+      boolean showCurrentTokenLabel = LabelRenderer.isLabelVisible(position, viewModel, isHover);
       timer.stop("renderTokens:LabelCheck");
       if (showCurrentTokenLabel) {
         timer.start("renderTokens:LabelBuild");
@@ -1870,9 +1868,8 @@ public class ZoneRenderer extends JComponent implements DropTargetListener {
       // Clipping is handled in the isTokenInNeedOfClipping() call far above.
       boolean isSelected = selectionModel.isSelected(token.getId());
       boolean isMoving = viewModel.isTokenMoving(token.getId());
-      boolean isHover = token == tokenUnderMouse;
-      tokenRenderer.renderToken(
-          token, viewModel, position, tokenG, decorationRenderer, isSelected, isMoving, isHover);
+
+      tokenRenderer.renderToken(token, viewModel, position, tokenG, isSelected, isMoving, isHover);
       tokenG.dispose();
       timer.stop("token-list-7");
 
