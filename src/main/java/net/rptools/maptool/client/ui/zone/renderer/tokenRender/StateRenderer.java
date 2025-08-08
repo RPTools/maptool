@@ -96,11 +96,6 @@ public class StateRenderer {
           || !overlay.showPlayer(position.token(), MapTool.getPlayer())) {
         continue;
       }
-      if (overlay instanceof TwoToneBarTokenOverlay tt) {
-        overlay =
-            new TwoToneCircleBarTokenOverlay(
-                tt.getName(), tt.getBarColor(), tt.getBgColor(), tt.getThickness(), tt.getSide());
-      }
       overlay.paintOverlay(overlayG, position.token(), bounds, value);
     }
     overlayG.dispose();
