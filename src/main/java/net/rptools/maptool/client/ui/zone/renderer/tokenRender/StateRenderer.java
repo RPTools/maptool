@@ -106,11 +106,6 @@ public class StateRenderer {
           AlphaComposite.getInstance(
               AlphaComposite.SRC_OVER, alpha * (float) overlay.getOpacity() / 100));
 
-      if (overlay instanceof TwoToneBarTokenOverlay tt) {
-        overlay =
-            new CircleBarTokenOverlay(
-                tt.getName(), tt.getBarColor(), tt.getBgColor(), tt.getThickness(), tt.getSide());
-      }
       overlay.paintOverlay(overlayG, position.token(), bounds, value);
     }
     overlayG.dispose();
